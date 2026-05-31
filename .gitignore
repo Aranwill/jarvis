@@ -1,0 +1,15 @@
+backups/
+memory/
+vector_db/
+
+models/
+
+*.db
+*.sqlite3
+*.log
+
+__pycache__/
+*.pyc
+
+.env
+.env.local
