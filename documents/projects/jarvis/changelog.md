@@ -1,13 +1,28 @@
-# Changelog
+## v0.4
 
-## v0.3
+Fecha: 2026-05-31
 
-- Instalación Ollama.
-- Instalación Docker.
-- Instalación Open WebUI.
-- Integración Knowledge Base.
-- Integración RAG.
-- Creación scripts iniciar/cerrar.
-- Instalación Qwen3.5.
-- Instalación DeepSeek-Coder.
-- Instalación Nomic-Embed.
+### Implementado
+
+* Git local
+* Versionado del proyecto
+* Tag v0.4
+* Script backup-jarvis.ps1
+* Integración de backup automático en cerrar-jarvis.ps1
+* Validación completa de Open WebUI
+* Validación de ChromaDB integrado
+* Validación de RAG
+
+### Verificaciones realizadas
+
+* Backup funcional
+* Inicio automático funcional
+* Cierre automático funcional
+* Liberación de GPU funcional
+* Git funcional
+* Tag funcional
+* Recuperación documental funcional
+
+### Estado
+
+Estable

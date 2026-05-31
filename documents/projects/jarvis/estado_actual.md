@@ -610,3 +610,41 @@ Jarvis v0.3 ya cuenta con una base local funcional:
 - Documentación inicial.
 
 El proyecto está listo para pasar de instalación técnica a consolidación documental, memoria avanzada y futuras automatizaciones.
+
+
+# Actualización Estado Actual
+
+## Infraestructura Validada
+
+Fecha: 2026-05-31
+
+### Componentes Operativos
+
+* Ollama
+* Docker Desktop
+* Open WebUI
+* ChromaDB integrado
+* RAG funcional
+
+### Gestión
+
+* Git inicializado
+* Repositorio local operativo
+* Tag v0.4 creado
+* .gitignore configurado
+
+### Automatización
+
+* iniciar-jarvis.ps1
+* cerrar-jarvis.ps1
+* backup-jarvis.ps1
+
+### Backups
+
+* Backup automático ejecutado al cierre
+* Respaldo de vector_db
+* Respaldo de documents
+
+### Estado General
+
+Jarvis v0.4 validado y operativo.
