@@ -1,9 +1,9 @@
 # Estado Actual del Proyecto Jarvis
 
-**Versión:** v0.3  
-**Estado:** Operativo / Primera versión funcional local  
-**Última actualización:** 2026-05-30  
-**Ruta principal del proyecto:** `D:\Ollama`
+**Versión:** v0.4.1
+**Estado:** Operativo / Estable local
+**Última actualización:** 2026-06-07
+**Ruta principal del proyecto:** `D:\Ollama\jarvis`
 
 ---
 
@@ -11,77 +11,167 @@
 
 Jarvis es un asistente personal local diseñado para ejecutarse en infraestructura propia, con foco en:
 
-- Privacidad.
-- Ejecución local de modelos LLM.
-- Memoria documental.
-- Recuperación de conocimiento mediante RAG.
-- Asistencia técnica y programación.
-- Automatizaciones futuras con n8n.
-- Arquitectura modular basada en agentes.
-- Posible integración futura de voz.
+* Privacidad.
+* Ejecución local de modelos LLM.
+* Memoria documental.
+* Recuperación de conocimiento mediante RAG.
+* Asistencia técnica y programación.
+* Automatizaciones futuras con n8n.
+* Arquitectura modular basada en agentes.
+* Posible integración futura de voz.
+* Operación local-first.
 
 ---
 
-# 2. Hardware Actual
+# 2. Estado General
+
+Jarvis se encuentra actualmente en estado:
+
+```text
+Operativo / Estable local
+```
+
+La instalación base ya fue validada con:
+
+* Ollama.
+* Docker Desktop.
+* Open WebUI.
+* RAG funcional.
+* ChromaDB integrado en Open WebUI.
+* Git local.
+* Backups automáticos.
+* Documentación estructurada.
+
+El proyecto se encuentra en fase de consolidación documental y preparación para:
+
+* Seguridad IA.
+* Automatización.
+* Memoria avanzada.
+* Agentes especializados.
+* Integración futura de voz.
+
+---
+
+# 3. Hardware Actual
 
 ## Equipo Principal
 
-- CPU: Intel Core i7-11700K
-- GPU: NVIDIA RTX 2060 12GB
-- RAM: 16GB DDR4 3200MHz
-- Objetivo futuro: 32GB DDR4
-- Motherboard: ASUS TUF Gaming Z590
-- Almacenamiento:
-  - 500GB M.2 SSD
-  - 240GB SATA SSD
-  - 1TB SSD
-- Cooling: Cooler Master 240mm AIO
-- PSU: Redragon 600W 80+ Bronze
+* CPU: Intel Core i7-11700K
+* GPU: NVIDIA RTX 2060 12GB
+* RAM: 16GB DDR4 3200MHz
+* Objetivo futuro: 32GB DDR4
+* Motherboard: ASUS TUF Gaming Z590
+* Almacenamiento:
+
+  * 500GB M.2 SSD
+  * 240GB SATA SSD
+  * 1TB SSD
+* Cooling: Cooler Master 240mm AIO
+* PSU: Redragon 600W 80+ Bronze
 
 ---
 
-# 3. Estructura Actual del Proyecto
+# 4. Estructura Actual del Proyecto
+
+Ruta principal:
 
 ```text
-D:\Ollama
-
-├── docker
-│   └── open-webui
-│
-├── jarvis
-│   ├── agents
-│   │   ├── planner
-│   │   ├── coder
-│   │   ├── validator
-│   │   └── memory
-│   │
-│   ├── memory
-│   │   ├── chromadb
-│   │   ├── embeddings
-│   │   └── sessions
-│   │
-│   ├── documents
-│   │   ├── books
-│   │   ├── notes
-│   │   ├── pdfs
-│   │   └── projects
-│   │       └── jarvis
-│   │
-│   ├── workflows
-│   │   └── n8n
-│   │
-│   ├── models
-│   ├── configs
-│   ├── logs
-│   ├── scripts
-│   └── backups
-│
-└── temp
+D:\Ollama\jarvis
 ```
+
+Estructura actual:
+
+```text
+jarvis
+├── agents
+├── backups
+├── configs
+├── documents
+├── logs
+├── memory
+├── models
+├── scripts
+├── workflows
+├── .gitignore
+└── README.md
+```
+
+## Descripción de carpetas
+
+### agents
+
+Contendrá agentes especializados futuros:
+
+* Planner Agent
+* Coder Agent
+* Validator Agent
+* Memory Agent
+
+### backups
+
+Contiene respaldos automáticos del proyecto.
+
+### configs
+
+Contiene archivos de configuración del proyecto.
+
+Archivos relevantes:
+
+```text
+configs/models.yaml
+```
+
+### documents
+
+Contiene documentación, notas, PDFs y archivos de conocimiento del proyecto.
+
+Ruta principal de documentación Jarvis:
+
+```text
+documents/projects/jarvis
+```
+
+### logs
+
+Contiene registros operativos.
+
+### memory
+
+Contiene datos relacionados con memoria local, sesiones, embeddings o vectorización cuando corresponda.
+
+### models
+
+Contiene estructura local de modelos de Ollama.
+
+Subcarpetas principales:
+
+```text
+models/blobs
+models/manifests
+```
+
+La carpeta `blobs` contiene archivos pesados de modelos y no debe versionarse.
+
+### scripts
+
+Contiene scripts de operación.
+
+Scripts principales:
+
+```text
+iniciar-jarvis.ps1
+cerrar-jarvis.ps1
+backup-jarvis.ps1
+update-models.ps1
+```
+
+### workflows
+
+Contendrá workflows futuros de n8n.
 
 ---
 
-# 4. Componentes Instalados y Operativos
+# 5. Componentes Operativos
 
 ## Ollama
 
@@ -89,10 +179,15 @@ Motor local para ejecutar modelos LLM.
 
 Estado:
 
-- Instalado.
-- Operativo.
-- Detecta y ejecuta modelos correctamente.
-- Usa GPU cuando el modelo lo permite.
+```text
+Operativo
+```
+
+Uso actual:
+
+* Ejecución local de modelos.
+* Gestión de modelos instalados.
+* Integración con Open WebUI.
 
 ---
 
@@ -102,10 +197,14 @@ Utilizado para ejecutar servicios auxiliares.
 
 Estado:
 
-- Instalado.
-- Operativo.
-- Docker CLI funcional.
-- Open WebUI ejecutándose mediante contenedor.
+```text
+Operativo
+```
+
+Uso actual:
+
+* Ejecución de Open WebUI mediante contenedor.
+* Base para futuras integraciones con servicios auxiliares.
 
 ---
 
@@ -119,108 +218,128 @@ URL local:
 http://localhost:3000
 ```
 
+Estado:
+
+```text
+Operativo
+```
+
 Funciones actuales:
 
-- Chat local.
-- Selección de modelos.
-- Historial de conversaciones.
-- Gestión de conocimiento.
-- RAG integrado.
-- Uso de colecciones documentales.
+* Chat local.
+* Selección de modelos.
+* Historial de conversaciones.
+* Gestión de conocimiento.
+* RAG integrado.
+* Uso de colecciones documentales.
+
+---
+
+## ChromaDB Integrado
+
+Jarvis utiliza actualmente la memoria vectorial integrada en Open WebUI.
 
 Estado:
 
-- Instalado.
-- Operativo.
-- Conectado correctamente con Ollama.
+```text
+Operativo
+```
+
+Nota:
+
+ChromaDB dedicado externo se mantiene como componente pendiente para fases futuras.
 
 ---
 
-# 5. Modelos Instalados
+## Git
 
-## Qwen3.5:9B
+Control de versiones local.
 
-Rol:
+Estado:
 
-- Modelo principal recomendado para Jarvis.
+```text
+Operativo
+```
 
-Uso:
+Validaciones actuales:
 
-- Conversación general.
-- Análisis.
-- Arquitectura.
-- Planificación.
-- Documentación.
-- Razonamiento sobre el proyecto.
-
-Notas:
-
-- Mejor calidad que Qwen2.5.
-- Puede tardar más en responder.
-- Tiene contexto muy alto por defecto.
-- Puede utilizar modo thinking/razonamiento.
+* Repositorio local inicializado.
+* `.gitignore` configurado.
+* Tag `v0.4` creado.
+* Cambios documentales en curso para v0.4.1.
 
 ---
 
-## Qwen2.5:7B
+## Backups
 
-Rol:
+Sistema de respaldo automático.
 
-- Modelo alternativo / respaldo.
+Estado:
 
-Uso:
+```text
+Operativo
+```
 
-- Respuestas rápidas.
-- Validación comparativa.
-- Conversación general.
+Uso actual:
 
-Notas:
-
-- Corre 100% en GPU en la RTX 2060.
-- Contexto observado: 16384.
-- Más rápido que Qwen3.5.
+* Backup automático durante el cierre.
+* Respaldo de documentación.
+* Respaldo de memoria/vector DB cuando corresponda.
 
 ---
 
-## DeepSeek-Coder:6.7B
+# 6. Modelos
 
-Rol:
+Jarvis separa dos conceptos:
 
-- Modelo especializado en programación.
+1. Modelos instalados en Ollama.
+2. Modelos asignados por rol operativo.
 
-Uso:
+## Modelos instalados
 
-- Python.
-- PowerShell.
-- Docker.
-- Automatizaciones.
-- n8n.
-- Debugging.
-- Scripts del proyecto.
+Los modelos instalados se documentan automáticamente en:
+
+```text
+documents/projects/jarvis/models.md
+```
+
+Este archivo debe generarse mediante:
+
+```powershell
+.\scripts\update-models.ps1
+```
+
+## Modelos asignados por rol
+
+La asignación de modelos por rol se define en:
+
+```text
+configs/models.yaml
+```
+
+Roles previstos:
+
+* General
+* Programación
+* Embeddings
+* Respaldo rápido
+* Experimental
+
+## Política
+
+Este documento no debe contener listas rígidas de modelos instalados.
+
+Motivo:
+
+* Los modelos pueden cambiar durante la fase de laboratorio.
+* Se evita duplicación de información.
+* Se evita contradicción entre documentación y estado real de Ollama.
+* `models.md` funciona como fuente actualizada de modelos instalados.
+* `models.yaml` funciona como fuente de asignación por rol.
 
 ---
 
-## Nomic-Embed-Text
-
-Rol:
-
-- Modelo de embeddings.
-
-Uso:
-
-- RAG.
-- Recuperación documental.
-- Búsqueda semántica.
-- Base de conocimiento.
-
-Notas:
-
-- No se usa para conversar.
-- Se usa para convertir documentos en vectores.
-
----
-
-# 6. Base de Conocimiento
+# 7. Base de Conocimiento
 
 Colección actual en Open WebUI:
 
@@ -230,39 +349,49 @@ Jarvis
 
 Estado:
 
-- Creada.
-- Funcional.
-- Probada mediante consultas RAG.
-- Open WebUI recupera fuentes desde los documentos cargados.
+```text
+Funcional
+```
 
-Documentos actuales del proyecto:
+Documentación principal del proyecto:
 
 ```text
 D:\Ollama\jarvis\documents\projects\jarvis
 ```
 
-Archivos:
+Archivos relevantes:
 
-- `proyecto_jarvis_base.md`
-- `arquitectura.md`
-- `roadmap.md`
-- `decisiones.md`
-- `changelog.md`
-- `setup.md`
-- `ideas.md`
+```text
+proyecto_jarvis_base.md
+arquitectura.md
+roadmap.md
+decisiones.md
+changelog.md
+setup.md
+estado_actual.md
+security.md
+models.md
+```
 
 Notas:
 
-- `ideas.md` puede mantenerse como placeholder o completarse más adelante.
-- Es recomendable mantener actualizados estos archivos y volver a subirlos a la colección Jarvis cuando cambien.
+* La calidad del RAG depende directamente de la claridad documental.
+* Cada cambio importante en documentación debe reindexarse o volver a cargarse en Open WebUI.
+* `estado_actual.md` debe responder al estado operativo actual.
+* `arquitectura.md` debe describir el diseño del sistema.
+* `roadmap.md` debe contener fases futuras.
+* `decisiones.md` debe registrar decisiones aceptadas.
+* `changelog.md` debe registrar cambios históricos.
+* `models.md` debe documentar modelos instalados.
+* `security.md` debe definir políticas de seguridad IA.
 
 ---
 
-# 7. RAG Actual
+# 8. RAG Actual
 
 El sistema ya puede responder usando documentación propia.
 
-Flujo actual:
+Flujo operativo resumido:
 
 ```text
 Usuario
@@ -273,21 +402,42 @@ Colección Jarvis
 ↓
 Recuperación RAG
 ↓
-Modelo LLM
+Modelo Conversacional Activo
 ↓
 Respuesta
 ```
 
-Se validó que:
+Estado:
 
-- Open WebUI recupera fuentes.
-- Las respuestas citan documentos como `proyecto_jarvis_base.md`.
-- El modelo puede responder sobre hardware, objetivos, roadmap y arquitectura.
-- La calidad depende directamente de la claridad de los documentos cargados.
+```text
+Funcional
+```
+
+Validaciones realizadas:
+
+* Open WebUI recupera fuentes desde documentos cargados.
+* Jarvis responde sobre hardware, objetivos, roadmap y arquitectura.
+* La calidad mejora cuando los documentos son explícitos y actualizados.
+
+Limitación actual:
+
+* El RAG puede quedar desactualizado si se modifican documentos locales pero no se actualiza la colección en Open WebUI.
+
+Acción recomendada:
+
+* Reindexar o reemplazar documentos en la colección Jarvis después de cambios relevantes.
 
 ---
 
-# 8. Arquitectura Operativa Actual
+# 9. Arquitectura Operativa
+
+La arquitectura operativa completa se documenta en:
+
+```text
+documents/projects/jarvis/arquitectura.md
+```
+
+Resumen actual:
 
 ```text
 Usuario
@@ -296,39 +446,38 @@ Open WebUI
 ↓
 Colección de Conocimiento Jarvis
 ↓
-Nomic-Embed-Text
-↓
 Recuperación RAG
 ↓
-Qwen3.5:9B / Qwen2.5:7B
+Modelo Conversacional Activo
 ↓
 Respuesta
 ```
 
 Componentes activos:
 
-- Docker Desktop.
-- Open WebUI.
-- Ollama.
-- Qwen3.5:9B.
-- Qwen2.5:7B.
-- DeepSeek-Coder:6.7B.
-- Nomic-Embed-Text.
+* Docker Desktop
+* Ollama
+* Open WebUI
+* Colección de Conocimiento Jarvis
+* RAG integrado
+* Modelos locales
+* Git local
+* Backups automáticos
 
 Componentes pendientes:
 
-- ChromaDB dedicado.
-- n8n.
-- Whisper.
-- Piper.
-- Planner Agent.
-- Coder Agent.
-- Validator Agent.
-- Memory Agent.
+* ChromaDB dedicado externo
+* n8n
+* Whisper
+* Piper
+* Planner Agent
+* Coder Agent
+* Validator Agent
+* Memory Agent
 
 ---
 
-# 9. Scripts de Inicio y Cierre
+# 10. Scripts de Inicio, Cierre y Mantenimiento
 
 Ubicación:
 
@@ -336,19 +485,23 @@ Ubicación:
 D:\Ollama\jarvis\scripts
 ```
 
-Archivos:
+Scripts principales:
 
-- `iniciar-jarvis.ps1`
-- `cerrar-jarvis.ps1`
+```text
+iniciar-jarvis.ps1
+cerrar-jarvis.ps1
+backup-jarvis.ps1
+update-models.ps1
+```
 
 ## iniciar-jarvis.ps1
 
 Función:
 
-- Abre Docker Desktop.
-- Espera la inicialización.
-- Inicia el contenedor `open-webui`.
-- Abre `http://localhost:3000`.
+* Abrir Docker Desktop.
+* Esperar disponibilidad de Docker.
+* Iniciar contenedor de Open WebUI.
+* Abrir navegador en `http://localhost:3000`.
 
 Comando:
 
@@ -357,15 +510,18 @@ cd D:\Ollama\jarvis\scripts
 .\iniciar-jarvis.ps1
 ```
 
+---
+
 ## cerrar-jarvis.ps1
 
 Función:
 
-- Detiene modelos cargados en Ollama.
-- Detiene el contenedor `open-webui`.
-- Verifica estado de Ollama.
-- Verifica estado de Docker.
-- Libera GPU.
+* Detener modelos cargados en Ollama.
+* Detener Open WebUI.
+* Ejecutar backup cuando corresponda.
+* Verificar estado de Ollama.
+* Verificar estado de Docker.
+* Liberar recursos.
 
 Comando:
 
@@ -374,277 +530,449 @@ cd D:\Ollama\jarvis\scripts
 .\cerrar-jarvis.ps1
 ```
 
-Validación de cierre:
+Validación posterior:
 
 ```powershell
 ollama ps
 docker ps
 ```
 
-Ambos deben quedar vacíos.
+---
+
+## backup-jarvis.ps1
+
+Función:
+
+* Respaldar documentación.
+* Respaldar memoria/vector DB cuando corresponda.
+* Crear respaldo operativo del estado actual del proyecto.
 
 ---
 
-# 10. Estado de Implementación
+## update-models.ps1
+
+Función:
+
+* Ejecutar `ollama list`.
+* Generar `documents/projects/jarvis/models.md`.
+* Mantener la documentación de modelos sincronizada con Ollama.
+
+Comando recomendado:
+
+```powershell
+cd D:\Ollama\jarvis
+powershell -ExecutionPolicy Bypass -File .\scripts\update-models.ps1
+```
+
+---
+
+# 11. Estado de Implementación
 
 ## Completado
 
-- Instalación de Ollama.
-- Instalación de Docker Desktop.
-- Instalación de Open WebUI.
-- Integración Open WebUI con Ollama.
-- Descarga de modelos principales.
-- Creación de estructura del proyecto.
-- Creación de base de conocimiento Jarvis.
-- Primera prueba RAG funcional.
-- Scripts de inicio y cierre.
-- Documentación base del proyecto.
+* Instalación de Ollama.
+* Instalación de Docker Desktop.
+* Instalación de Open WebUI.
+* Integración Open WebUI con Ollama.
+* Descarga y prueba de modelos locales.
+* Creación de estructura del proyecto.
+* Creación de base de conocimiento Jarvis.
+* Primera prueba RAG funcional.
+* Scripts de inicio y cierre.
+* Script de backup.
+* Git local.
+* Tag v0.4.
+* ChromaDB integrado en Open WebUI.
+* Documentación base del proyecto.
+* Separación documental entre arquitectura, estado, roadmap, decisiones y changelog.
 
 ---
 
-# 11. Problemas o Limitaciones Detectadas
+## En curso
 
-## Qwen3.5:9B puede ser lento
+* Consolidación documental v0.4.1.
+* Creación y uso de `manifest.yaml`.
+* Creación y uso de `configs/models.yaml`.
+* Generación automática de `models.md`.
+* Limpieza de modelos hardcodeados en documentación.
+* Preparación de `security.md`.
+* Mejora de scripts para evitar dependencias rígidas de modelos concretos.
 
-Causa probable:
+---
 
-- Contexto muy alto por defecto.
-- Mayor consumo que Qwen2.5.
-- Uso parcial CPU/GPU en ciertas configuraciones.
+## Pendiente
 
-Acciones recomendadas:
+* Validación completa de v0.4.1.
+* Reindexado de documentos actualizados en Open WebUI.
+* Implementación completa de fase de seguridad IA.
+* ChromaDB dedicado externo.
+* Automatizaciones con n8n.
+* Integración de voz con Whisper y Piper.
+* Implementación real de agentes.
+* Pruebas de recuperación documental más amplias.
+* Definición de métricas de calidad para RAG.
 
-- Usar Qwen2.5 para consultas rápidas.
-- Usar Qwen3.5 para análisis más complejos.
-- Evaluar ajuste de `num_ctx` en Open WebUI/Ollama.
+---
+
+# 12. Problemas o Limitaciones Detectadas
+
+## Documentación desincronizada
+
+Estado:
+
+```text
+En corrección
+```
+
+Problema:
+
+Algunos documentos mantenían listas rígidas de modelos, versiones o componentes.
+
+Acción:
+
+* Separar modelos instalados en `models.md`.
+* Separar roles de modelos en `configs/models.yaml`.
+* Mantener arquitectura sin nombres rígidos de modelos.
+* Mantener `estado_actual.md` como estado operativo, no como inventario duplicado.
+
+---
+
+## Modelos en fase de laboratorio
+
+Estado:
+
+```text
+Esperado
+```
+
+Problema:
+
+Los modelos instalados cambian frecuentemente durante pruebas.
+
+Acción:
+
+* No registrar modelos manualmente en múltiples documentos.
+* Generar `models.md` desde `ollama list`.
+* Registrar asignación por rol en `configs/models.yaml`.
 
 ---
 
 ## RAG depende de la calidad documental
 
+Estado:
+
+```text
+Vigente
+```
+
 Observación:
 
-- Cuando los documentos son vagos, el modelo responde con generalidades.
-- Cuando los documentos son explícitos, el modelo responde con mayor precisión.
+Cuando los documentos son vagos o contradictorios, el modelo puede responder con generalidades o recuperar información vieja.
 
-Acción recomendada:
+Acción:
 
-- Mantener documentos claros y actualizados.
-- Agregar `estado_actual.md` como fuente de verdad.
-- Reindexar documentos cuando se actualicen.
+* Mantener documentos claros.
+* Usar fuentes únicas.
+* Reindexar documentos después de cambios.
+* Evitar duplicación innecesaria entre archivos.
 
 ---
 
-## ChromaDB dedicado aún no implementado
+## ChromaDB dedicado externo pendiente
 
 Estado:
 
-- Open WebUI usa su propia gestión interna para conocimiento/RAG.
-- ChromaDB dedicado se evaluará más adelante.
+```text
+Pendiente
+```
+
+Observación:
+
+La fase actual utiliza ChromaDB integrado en Open WebUI.
+
+Acción:
+
+* Mantener ChromaDB integrado durante v0.4.1.
+* Evaluar ChromaDB dedicado en fase de memoria avanzada.
 
 ---
 
-# 12. Roadmap Actualizado
+## Seguridad IA pendiente
+
+Estado:
+
+```text
+Pendiente
+```
+
+Observación:
+
+Antes de habilitar agentes, navegación web o automatizaciones avanzadas, se debe definir una política de seguridad.
+
+Acción:
+
+* Crear y mantener `security.md`.
+* Incorporar controles contra prompt injection.
+* Incorporar política SSRF.
+* Priorizar RAG local.
+* Tratar contenido externo como datos, no instrucciones.
+
+---
+
+# 13. Roadmap Referenciado
+
+El roadmap completo se mantiene en:
+
+```text
+documents/projects/jarvis/roadmap.md
+```
+
+Resumen actual:
 
 ## Fase 1 - Base Local
 
-Estado: Completada.
+Estado:
+
+```text
+Completada
+```
 
 Incluye:
 
-- Ollama.
-- Docker.
-- Open WebUI.
-- Modelos locales.
-- Base documental.
-- Primer RAG.
-- Scripts operativos.
+* Ollama
+* Docker Desktop
+* Open WebUI
+* Modelos locales
+* Base documental
+* Primer RAG
+* Scripts operativos
 
 ---
 
 ## Fase 2 - Documentación y Memoria
 
-Estado: En curso.
+Estado:
 
-Objetivos:
+```text
+En curso
+```
 
-- Mejorar documentación.
-- Crear y mantener:
-  - `estado_actual.md`
-  - `decisiones.md`
-  - `setup.md`
-  - `changelog.md`
-  - `arquitectura.md`
-  - `roadmap.md`
-- Reindexar conocimiento en Open WebUI.
+Incluye:
+
+* Consolidación documental
+* Fuente de verdad del proyecto
+* Limpieza de inconsistencias
+* Reindexado de conocimiento
 
 ---
 
 ## Fase 3 - Memoria Avanzada
 
-Estado: Pendiente.
+Estado:
 
-Evaluar:
+```text
+Pendiente
+```
 
-- ChromaDB dedicado.
-- Sincronización documental.
-- Mejoras de RAG.
-- Separación de memoria personal, técnica y documental.
+Incluye:
+
+* ChromaDB dedicado externo
+* Sincronización documental
+* Mejoras RAG
+* Separación de memorias
+
+---
+
+## Fase 3.5 - Seguridad IA
+
+Estado:
+
+```text
+Pendiente
+```
+
+Incluye:
+
+* security.md
+* OWASP LLM Top 10
+* Prompt Injection
+* SSRF
+* Auditoría documental
+* Política de fuentes
 
 ---
 
 ## Fase 4 - Automatización
 
-Estado: Pendiente.
+Estado:
 
-Tecnología:
+```text
+Pendiente
+```
 
-- n8n.
+Incluye:
 
-Objetivos:
-
-- Workflows locales.
-- Automatizaciones.
-- Acciones controladas.
-- Integración futura con Jarvis.
+* n8n
+* Workflows locales
+* Automatizaciones controladas
 
 ---
 
 ## Fase 5 - Voz
 
-Estado: Pendiente.
+Estado:
 
-Tecnologías:
+```text
+Pendiente
+```
 
-- Whisper.
-- Piper.
+Incluye:
 
-Objetivo:
-
-- Entrada por voz.
-- Salida por voz.
-- Interacción más natural.
+* Whisper
+* Piper
 
 ---
 
 ## Fase 6 - Agentes
 
-Estado: Pendiente.
+Estado:
 
-Agentes previstos:
+```text
+Pendiente
+```
 
-- Planner Agent.
-- Coder Agent.
-- Validator Agent.
-- Memory Agent.
+Incluye:
 
-Objetivo:
-
-- Separar responsabilidades.
-- Mejorar modularidad.
-- Evitar un chatbot monolítico.
+* Planner Agent
+* Coder Agent
+* Validator Agent
+* Memory Agent
 
 ---
 
-# 13. Configuración Recomendada Actual
+# 14. Configuración Recomendada Actual
+
+Jarvis ya no mantiene una lista rígida de modelos recomendados en este documento.
+
+La configuración operativa se divide así:
+
+## Modelos instalados
 
 ```text
-Jarvis General:
-Qwen3.5:9B
+documents/projects/jarvis/models.md
+```
 
-Jarvis Rápido / Respaldo:
-Qwen2.5:7B
+## Modelos por rol
 
-Jarvis Programador:
-DeepSeek-Coder:6.7B
+```text
+configs/models.yaml
+```
 
-Jarvis Memoria / RAG:
-Nomic-Embed-Text
+## Arquitectura
 
-Interfaz:
-Open WebUI
+```text
+documents/projects/jarvis/arquitectura.md
+```
 
-Motor:
-Ollama
+## Seguridad
 
-Contenedores:
-Docker Desktop
+```text
+documents/projects/jarvis/security.md
+```
+
+## Roadmap
+
+```text
+documents/projects/jarvis/roadmap.md
 ```
 
 ---
 
-# 14. Próximo Paso Recomendado
+# 15. Procedimiento de Actualización Documental
 
-Crear o mantener este archivo como:
+Cuando se modifique documentación del proyecto:
 
-```text
-D:\Ollama\jarvis\documents\projects\jarvis\estado_actual.md
+1. Actualizar el archivo correspondiente.
+2. Ejecutar actualización de modelos si cambió Ollama:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\update-models.ps1
 ```
 
-Luego:
+3. Revisar cambios con Git:
 
-1. Subirlo a la colección `Jarvis`.
-2. Consultar:
+```powershell
+git status
+git diff
+```
+
+4. Hacer commit si los cambios son correctos:
+
+```powershell
+git add .
+git commit -m "Actualiza documentacion Jarvis"
+```
+
+5. Reindexar o reemplazar documentos en Open WebUI.
+6. Validar con una consulta RAG:
 
 ```text
 #Jarvis
-
-¿Cuál es el estado actual del proyecto?
+¿Cuál es el estado actual del proyecto Jarvis?
 ```
-
-3. Validar que la respuesta cite `estado_actual.md`.
-4. Continuar mejorando documentación antes de instalar más componentes.
 
 ---
 
-# 15. Resumen Ejecutivo
+# 16. Próximo Paso Recomendado
 
-Jarvis v0.3 ya cuenta con una base local funcional:
+Validar v0.4.1 con el siguiente checklist:
 
-- Modelos locales mediante Ollama.
-- Interfaz Open WebUI.
-- Base de conocimiento propia.
-- RAG operativo.
-- Estructura de carpetas organizada.
-- Scripts de inicio y cierre.
-- Documentación inicial.
+```text
+[ ] manifest.yaml creado
+[ ] configs/models.yaml creado
+[ ] models.md generado desde Ollama
+[ ] arquitectura.md actualizado
+[ ] estado_actual.md actualizado
+[ ] security.md creado
+[ ] scripts revisados
+[ ] iniciar-jarvis.ps1 probado
+[ ] cerrar-jarvis.ps1 probado
+[ ] backup-jarvis.ps1 probado
+[ ] documentos reindexados en Open WebUI
+[ ] consulta RAG validada
+[ ] git status limpio
+```
 
-El proyecto está listo para pasar de instalación técnica a consolidación documental, memoria avanzada y futuras automatizaciones.
+Si todo pasa, crear tag:
 
+```powershell
+git tag v0.4.1
+```
 
-# Actualización Estado Actual
+---
 
-## Infraestructura Validada
+# 17. Resumen Ejecutivo
 
-Fecha: 2026-05-31
+Jarvis v0.4.1 es una consolidación de la versión local funcional.
 
-### Componentes Operativos
+El proyecto ya cuenta con:
 
-* Ollama
-* Docker Desktop
-* Open WebUI
-* ChromaDB integrado
-* RAG funcional
+* Ejecución local mediante Ollama.
+* Interfaz Open WebUI.
+* RAG funcional.
+* Colección documental Jarvis.
+* Git local.
+* Backups automáticos.
+* Estructura modular.
+* Separación entre arquitectura, estado, roadmap, decisiones y changelog.
 
-### Gestión
+La mejora principal de v0.4.1 es la gobernanza documental:
 
-* Git inicializado
-* Repositorio local operativo
-* Tag v0.4 creado
-* .gitignore configurado
+* `estado_actual.md` describe el estado operativo.
+* `arquitectura.md` describe el diseño.
+* `models.md` documenta modelos instalados.
+* `configs/models.yaml` define modelos por rol.
+* `manifest.yaml` coordina rutas y fuentes del proyecto.
+* `security.md` prepara la fase de seguridad IA.
 
-### Automatización
-
-* iniciar-jarvis.ps1
-* cerrar-jarvis.ps1
-* backup-jarvis.ps1
-
-### Backups
-
-* Backup automático ejecutado al cierre
-* Respaldo de vector_db
-* Respaldo de documents
-
-### Estado General
-
-Jarvis v0.4 validado y operativo.
+Jarvis está listo para continuar con seguridad IA, automatización controlada, memoria avanzada y agentes especializados.

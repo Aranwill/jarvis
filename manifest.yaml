@@ -1,0 +1,50 @@
+project: Jarvis
+version: v0.4.1
+status: operativo
+mode: local-first
+root: D:\Ollama\jarvis
+last_updated: 2026-06-07
+
+stack:
+  llm_runtime: Ollama
+  interface: Open WebUI
+  rag: Open WebUI Knowledge / ChromaDB integrado
+  automation_future: n8n
+  voice_future:
+    stt: Whisper
+    tts: Piper
+
+paths:
+  agents: D:\Ollama\jarvis\agents
+  configs: D:\Ollama\jarvis\configs
+  documents: D:\Ollama\jarvis\documents
+  project_docs: D:\Ollama\jarvis\documents\projects\jarvis
+  scripts: D:\Ollama\jarvis\scripts
+  workflows: D:\Ollama\jarvis\workflows
+  backups: D:\Ollama\jarvis\backups
+  logs: D:\Ollama\jarvis\logs
+  memory: D:\Ollama\jarvis\memory
+  models: D:\Ollama\jarvis\models
+
+documentation:
+  estado_actual: documents/projects/jarvis/estado_actual.md
+  arquitectura: documents/projects/jarvis/arquitectura.md
+  roadmap: documents/projects/jarvis/roadmap.md
+  decisiones: documents/projects/jarvis/decisiones.md
+  changelog: documents/projects/jarvis/changelog.md
+  setup: documents/projects/jarvis/setup.md
+  security: documents/projects/jarvis/security.md
+  models: documents/projects/jarvis/models.md
+
+operational_policy:
+  knowledge_priority:
+    - RAG local
+    - documentacion oficial
+    - web externa validada
+  generated_docs:
+    - documents/projects/jarvis/models.md
+  manual_docs:
+    - documents/projects/jarvis/arquitectura.md
+    - documents/projects/jarvis/roadmap.md
+    - documents/projects/jarvis/decisiones.md
+    - documents/projects/jarvis/security.md

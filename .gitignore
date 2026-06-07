@@ -1,15 +1,16 @@
 backups/
 memory/
+logs/
+models/blobs/
+models/manifests/
 vector_db/
-
-models/
+runtime/
 
 *.db
 *.sqlite3
 *.log
 
-__pycache__/
-*.pyc
-
 .env
 .env.local
+__pycache__/
+*.pyc

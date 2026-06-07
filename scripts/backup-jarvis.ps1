@@ -1,19 +1,97 @@
+# ==========================================================
+# Jarvis - Backup
+# ==========================================================
+
+$ErrorActionPreference = "Stop"
+
 $fecha = Get-Date -Format "yyyy-MM-dd_HH-mm"
 
 $destino = "D:\Ollama\jarvis\backups\$fecha"
 
-Write-Host "Creando backup..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host " Backup Jarvis" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
 
-New-Item -ItemType Directory -Force -Path $destino | Out-Null
+try {
 
-Copy-Item `
-"D:\Ollama\docker\open-webui\vector_db" `
-"$destino\vector_db" `
--Recurse
+    New-Item `
+        -ItemType Directory `
+        -Force `
+        -Path $destino | Out-Null
 
-Copy-Item `
-"D:\Ollama\jarvis\documents" `
-"$destino\documents" `
--Recurse
+    Write-Host "Copiando vector_db..." `
+        -ForegroundColor Yellow
 
-Write-Host "Backup completado." -ForegroundColor Green
+    Copy-Item `
+        "D:\Ollama\docker\open-webui\vector_db" `
+        "$destino\vector_db" `
+        -Recurse
+
+    Write-Host "Copiando documents..." `
+        -ForegroundColor Yellow
+
+    Copy-Item `
+        "D:\Ollama\jarvis\documents" `
+        "$destino\documents" `
+        -Recurse
+
+    Write-Host "Copiando configs..." `
+        -ForegroundColor Yellow
+
+    Copy-Item `
+        "D:\Ollama\jarvis\configs" `
+        "$destino\configs" `
+        -Recurse
+
+    Write-Host "Copiando scripts..." `
+        -ForegroundColor Yellow
+
+    Copy-Item `
+        "D:\Ollama\jarvis\scripts" `
+        "$destino\scripts" `
+        -Recurse
+
+    if (Test-Path "D:\Ollama\jarvis\memory") {
+
+        Write-Host "Copiando memory..." `
+            -ForegroundColor Yellow
+
+        Copy-Item `
+            "D:\Ollama\jarvis\memory" `
+            "$destino\memory" `
+            -Recurse
+    }
+
+    $log = @"
+Fecha: $(Get-Date)
+
+Backup completado correctamente.
+
+Contenido:
+- vector_db
+- documents
+- configs
+- scripts
+- memory (si existe)
+"@
+
+    $log | Out-File `
+        "$destino\backup.log" `
+        -Encoding utf8
+
+    Write-Host ""
+    Write-Host "Backup completado correctamente." `
+        -ForegroundColor Green
+
+    Write-Host "Destino: $destino" `
+        -ForegroundColor Green
+}
+catch {
+
+    Write-Host ""
+    Write-Host `
+        ("ERROR: " + $_.Exception.Message) `
+        -ForegroundColor Red
+}

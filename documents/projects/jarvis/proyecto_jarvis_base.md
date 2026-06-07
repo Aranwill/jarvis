@@ -4,7 +4,7 @@
 **Estado:** Operativo
 **Última actualización:** Mayo 2026
 
----
+\---
 
 # Objetivo
 
@@ -18,7 +18,7 @@ Construir un asistente personal local llamado **Jarvis**, ejecutado completament
 * Funcionamiento offline.
 * Evolución modular mediante agentes especializados.
 
----
+\---
 
 # Hardware Actual
 
@@ -28,14 +28,14 @@ Construir un asistente personal local llamado **Jarvis**, ejecutado completament
 * GPU: NVIDIA RTX 2060 12GB
 * RAM: 16GB DDR4
 * Objetivo futuro: 32GB DDR4
-* Almacenamiento principal del proyecto: D:\Ollama
+* Almacenamiento principal del proyecto: D:\\Ollama
 
----
+\---
 
 # Estructura del Proyecto
 
 ```text
-D:\Ollama
+D:\\Ollama
 
 ├── docker
 │   └── open-webui
@@ -72,7 +72,7 @@ D:\Ollama
 └── temp
 ```
 
----
+\---
 
 # Componentes Instalados
 
@@ -85,7 +85,7 @@ Estado:
 * Instalado
 * Operativo
 
----
+\---
 
 ## Docker Desktop
 
@@ -101,7 +101,7 @@ Estado:
 * Instalado
 * Operativo
 
----
+\---
 
 ## Open WebUI
 
@@ -125,82 +125,45 @@ Estado:
 
 * Operativo
 
----
+\---
 
 # Modelos Instalados
 
-## Qwen3.5:9B
+\---
 
-Rol principal:
+\# Modelos
 
-Asistente general de Jarvis.
 
-Funciones:
 
-* Conversación
-* Análisis
-* Arquitectura
-* Documentación
-* Planificación
+Durante la fase de laboratorio, los modelos instalados pueden cambiar
 
-Estado:
+frecuentemente.
 
-* Instalado
-* Recomendado como modelo principal
 
----
 
-## Qwen2.5:7B
+La fuente oficial de modelos instalados es:
 
-Rol:
 
-Modelo alternativo y respaldo.
 
-Estado:
+documents/projects/jarvis/models.md
 
-* Instalado
 
----
 
-## DeepSeek-Coder:6.7B
+La asignación de modelos por rol se define en:
 
-Rol:
 
-Especialista en programación.
 
-Funciones:
+configs/models.yaml
 
-* Python
-* PowerShell
-* Docker
-* Automatizaciones
-* n8n
-* Debugging
 
-Estado:
 
-* Instalado
+Los documentos de arquitectura no deben contener listas rígidas de modelos
 
----
+para evitar inconsistencias con el estado real de Ollama.
 
-## Nomic-Embed-Text
+\---
 
-Rol:
 
-Generación de embeddings.
-
-Funciones:
-
-* RAG
-* Recuperación documental
-* Búsqueda semántica
-* Memoria vectorial
-
-Estado:
-
-* Instalado
-
----
 
 # Base de Conocimiento
 
@@ -212,7 +175,7 @@ Jarvis
 
 Documentos actualmente cargados:
 
-* proyecto_jarvis_base.md
+* proyecto\_jarvis\_base.md
 * arquitectura.md
 * roadmap.md
 
@@ -221,14 +184,14 @@ Estado:
 * Funcional
 * Probado mediante consultas RAG
 
----
+\---
 
 # Scripts de Gestión
 
 Ubicación:
 
 ```text
-D:\Ollama\jarvis\scripts
+D:\\Ollama\\jarvis\\scripts
 ```
 
 Archivos:
@@ -238,7 +201,7 @@ iniciar-jarvis.ps1
 cerrar-jarvis.ps1
 ```
 
----
+\---
 
 ## Inicio
 
@@ -252,10 +215,10 @@ Funcionalidades:
 Comando:
 
 ```powershell
-.\iniciar-jarvis.ps1
+.\\iniciar-jarvis.ps1
 ```
 
----
+\---
 
 ## Cierre
 
@@ -268,10 +231,10 @@ Funcionalidades:
 Comando:
 
 ```powershell
-.\cerrar-jarvis.ps1
+.\\cerrar-jarvis.ps1
 ```
 
----
+\---
 
 # Procedimiento Diario
 
@@ -280,7 +243,7 @@ Comando:
 1. Ejecutar:
 
 ```powershell
-.\iniciar-jarvis.ps1
+.\\iniciar-jarvis.ps1
 ```
 
 2. Acceder a:
@@ -291,14 +254,14 @@ http://localhost:3000
 
 3. Seleccionar modelo.
 
----
+\---
 
 ## Cerrar Jarvis
 
 Ejecutar:
 
 ```powershell
-.\cerrar-jarvis.ps1
+.\\cerrar-jarvis.ps1
 ```
 
 Verificar:
@@ -310,7 +273,7 @@ docker ps
 
 Ambos deben quedar vacíos.
 
----
+\---
 
 # Estado Actual
 
@@ -319,16 +282,16 @@ Ambos deben quedar vacíos.
 * Ollama
 * Docker Desktop
 * Open WebUI
-* Qwen2.5
+* Gpt-oss
 * Qwen3.5
-* DeepSeek Coder
+* DeepSeek Coder v2
 * Nomic Embed
 * Base de conocimiento
 * Primer RAG funcional
 * Scripts de inicio y cierre
 * Estructura del proyecto
 
----
+\---
 
 # Próximas Fases
 
@@ -344,7 +307,7 @@ Archivos a desarrollar:
 * setup.md
 * changelog.md
 
----
+\---
 
 ## Fase 3
 
@@ -356,7 +319,7 @@ Evaluar:
 * Mejoras RAG
 * Sincronización automática
 
----
+\---
 
 ## Fase 4
 
@@ -368,7 +331,7 @@ Integración:
 * Workflows
 * Acciones programadas
 
----
+\---
 
 ## Fase 5
 
@@ -380,7 +343,7 @@ Evaluar:
 * Piper
 * Interacción por voz
 
----
+\---
 
 ## Fase 6
 
@@ -393,7 +356,7 @@ Implementar:
 * Validator Agent
 * Memory Agent
 
----
+\---
 
 # Visión Final
 
@@ -407,16 +370,19 @@ Jarvis deberá evolucionar hacia un asistente local capaz de:
 * Operar sin dependencia de servicios externos.
 * Mantener una arquitectura modular y escalable.
 
----
+\---
 
 # Configuración Recomendada Actual
 
 ```text
+Jarvis Arquitec
+→ Gpt-oss:20B
+
 Jarvis General
 → Qwen3.5:9B
 
 Jarvis Programador
-→ DeepSeek-Coder:6.7B
+→ DeepSeek-Coder-v2:16B
 
 Jarvis Memoria
 → Nomic-Embed-Text
@@ -428,7 +394,7 @@ Motor Local
 → Ollama
 ```
 
-# 16. Seguridad OWASP y Navegación Web
+# 16\. Seguridad OWASP y Navegación Web
 
 ## Estado
 
@@ -436,9 +402,9 @@ Pendiente de implementación.
 
 Se decidió incorporar una fase específica de seguridad antes de avanzar con automatizaciones, agentes y acceso a Internet.
 
----
+\---
 
-# 17. Decisiones de Arquitectura
+# 17\. Decisiones de Arquitectura
 
 ## Acceso a Internet
 
@@ -457,7 +423,7 @@ RAG Local primero.
 Internet después.
 ```
 
----
+\---
 
 ## Prioridad de Conocimiento
 
@@ -489,9 +455,9 @@ Objetivo:
 * Reducir dependencia de Internet.
 * Mantener privacidad documental.
 
----
+\---
 
-# 18. Política de Confianza de Fuentes
+# 18\. Política de Confianza de Fuentes
 
 ## Nivel 1 - Alta Confianza
 
@@ -517,7 +483,7 @@ Uso:
 * Infraestructura.
 * Buenas prácticas.
 
----
+\---
 
 ## Nivel 2 - Confianza Media
 
@@ -528,7 +494,7 @@ Fuentes aceptadas como complemento:
 * Medium
 * Blogs técnicos reconocidos
 
----
+\---
 
 ## Nivel 3 - Baja Confianza
 
@@ -539,13 +505,13 @@ Fuentes a evitar como evidencia principal:
 * Contenido generado automáticamente.
 * Información sin referencias.
 
----
+\---
 
-# 19. Seguridad para IA Generativa
+# 19\. Seguridad para IA Generativa
 
 Además del OWASP Top 10 tradicional, Jarvis deberá incorporar controles específicos para IA.
 
----
+\---
 
 ## Protección contra Prompt Injection
 
@@ -559,17 +525,17 @@ Nunca INSTRUCCIONES.
 
 Todo contenido externo deberá tratarse únicamente como contexto para análisis.
 
----
+\---
 
 ## Protección contra Hallucinations
 
 Toda afirmación técnica relevante deberá estar respaldada por:
 
 * Documentación interna del proyecto.
-  o
+o
 * Fuente externa identificable.
 
----
+\---
 
 ## Citación Obligatoria
 
@@ -589,9 +555,9 @@ Nivel:
 Alta Confianza
 ```
 
----
+\---
 
-# 20. Protección SSRF
+# 20\. Protección SSRF
 
 Cuando se implemente navegación web o agentes autónomos, Jarvis no deberá acceder automáticamente a:
 
@@ -611,9 +577,9 @@ Objetivo:
 * Evitar exposición accidental de servicios locales.
 * Reducir superficie de ataque.
 
----
+\---
 
-# 21. Política de Consumo Web
+# 21\. Política de Consumo Web
 
 Límites iniciales previstos:
 
@@ -629,9 +595,9 @@ Objetivo:
 * Mantener velocidad de respuesta.
 * Evitar búsquedas excesivas.
 
----
+\---
 
-# 22. Nueva Fase del Roadmap
+# 22\. Nueva Fase del Roadmap
 
 ## Fase 3.5 - Seguridad IA y Navegación Web
 
@@ -650,9 +616,9 @@ Objetivos:
 * Citación obligatoria.
 * Integración segura entre RAG e Internet.
 
----
+\---
 
-# 23. Arquitectura Objetivo
+# 23\. Arquitectura Objetivo
 
 ```text
 Usuario
@@ -687,3 +653,4 @@ El conocimiento interno tiene prioridad.
 Internet complementa.
 Nunca reemplaza la documentación propia.
 ```
+
