@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 from uuid import uuid4
 
 
@@ -13,4 +13,6 @@ class Request:
     session_id: str
 
     request_id: str = field(default_factory=lambda: str(uuid4()))
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(
+    default_factory=lambda: datetime.now(UTC)
+)
