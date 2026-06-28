@@ -14,3 +14,8 @@ runtime/
 .env.local
 __pycache__/
 *.pyc
+
+# Python
+.venv/
+.pytest_cache/
+.pytest_cache/**
