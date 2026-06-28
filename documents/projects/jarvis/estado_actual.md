@@ -976,3 +976,50 @@ La mejora principal de v0.4.1 es la gobernanza documental:
 * `security.md` prepara la fase de seguridad IA.
 
 Jarvis está listo para continuar con seguridad IA, automatización controlada, memoria avanzada y agentes especializados.
+
+
+---
+
+# Baseline Arquitectónica
+
+Fecha: 2026-06-28  
+Versión: Jarvis v0.5.0-alpha  
+Sprint: Sprint 1B cerrado / Sprint 2 iniciado  
+Estado: Arquitectura base congelada
+
+## Documentos congelados
+
+- blueprint.md
+- kernel.md
+
+## Regla de cambio
+
+A partir de esta baseline, los documentos `blueprint.md` y `kernel.md` no deberán modificarse directamente para decisiones nuevas de arquitectura.
+
+Todo cambio arquitectónico deberá registrarse primero en `decisiones.md` como ADR.
+
+## Objetivo de la siguiente fase
+
+Iniciar Sprint 2 — Foundation Implementation.
+
+El objetivo será implementar el primer Kernel funcional mínimo:
+
+- arranque del sistema
+- registro de módulos stub
+- healthcheck
+- Event Bus básico
+- Capability mínima
+- respuesta controlada de prueba
+
+## Restricciones
+
+No se implementará todavía:
+
+- IA
+- RAG
+- memoria real
+- ChromaDB
+- SQL Server
+- agentes autónomos
+- automatizaciones externas
+

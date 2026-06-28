@@ -74,3 +74,18 @@ La instalación actual ya proporciona persistencia vectorial suficiente para la 
 
 Estado:
 Aceptada
+
+---
+
+# ADR-001 — Código fuente bajo src
+
+Fecha: 2026-06-28  
+Estado: Aprobado  
+Sprint: Sprint 2 — Foundation Implementation
+
+## Decisión
+
+Todo el código fuente de Jarvis deberá residir dentro de:
+
+```text
+src/

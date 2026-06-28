@@ -68,3 +68,172 @@ Próximos objetivos:
 
 ## Fase 5
 - Agentes
+
+# Jarvis Roadmap
+
+Versión: 0.5.0-alpha
+
+---
+
+# Estado actual
+
+Sprint 1A ✅ Finalizado
+Sprint 1B ✅ Finalizado
+
+Arquitectura base congelada.
+
+---
+
+# Sprint 2 — Foundation Implementation
+
+Estado: En progreso
+
+## Objetivo
+
+Construir el primer Kernel funcional de Jarvis respetando la arquitectura definida.
+
+---
+
+## Hito 1
+
+Crear la estructura definitiva del proyecto.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 2
+
+Implementar el Kernel MVP.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 3
+
+Implementar Module Registry.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 4
+
+Implementar Event Bus.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 5
+
+Implementar Lifecycle Manager.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 6
+
+Implementar Health Manager.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 7
+
+Registrar la primera Capability.
+
+HelloCapability
+
+Estado:
+Pendiente
+
+---
+
+## Hito 8
+
+Procesar la primera Request.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 9
+
+Tests del Kernel.
+
+Estado:
+Pendiente
+
+---
+
+## Hito 10
+
+Baseline Kernel v1.0.
+
+Estado:
+Pendiente
+
+---
+
+# Sprint 3
+
+Memory Layer
+
+Knowledge Layer
+
+RAG
+
+Vector DB
+
+---
+
+# Sprint 4
+
+Planning Engine
+
+Reasoning Engine
+
+---
+
+# Sprint 5
+
+Capabilities reales
+
+Ollama
+
+Open WebUI
+
+FastAPI
+
+---
+
+# Sprint 6
+
+Automatizaciones
+
+IoT
+
+Voice
+
+Vision
+
+OSINT
+
+Workflows
+
+---
+
+# Objetivo final
+
+Jarvis Platform v1.0
