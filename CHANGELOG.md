@@ -68,3 +68,24 @@ El formato está inspirado en Keep a Changelog y Versionado Semántico.
 
 \- Configuración inicial de GitHub.
 
+
+## v0.5.0-alpha-kernel-mvp
+
+### Added
+
+- Python development environment
+- pyproject.toml
+- Virtual environment (.venv)
+- Core Request model
+- Core Response model
+- Minimal Kernel implementation
+- First automated tests
+- Pytest configuration
+
+### Validated
+
+- First executable Kernel
+- 2 automated tests passing
+- Zero warnings
+
+
