@@ -1,5 +1,5 @@
 """
-Jarvis Logger
+Malāk Logger
 
 Centraliza el registro de eventos del sistema.
 

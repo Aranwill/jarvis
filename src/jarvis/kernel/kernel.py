@@ -4,7 +4,7 @@ from jarvis.core.response import Response
 
 class Kernel:
     """
-    Núcleo mínimo gobernante de Jarvis.
+    Núcleo mínimo gobernante de Malāk.
     """
 
     def receive(self, request: Request) -> Response:
