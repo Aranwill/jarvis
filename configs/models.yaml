@@ -1,81 +1,78 @@
-# Jarvis Model Role Configuration
+# Malāk Model Role Configuration
 
-project: Jarvis
-version: v0.4.1
+project: Malāk
+display_name: Malāk
+technical_id: malak
+previous_name: Jarvis
+
+version: v0.6.0-alpha
+blueprint_version: v0.5.0-alpha
 
 roles:
 
-general:
-status: en_evaluacion
-description: |
-Modelo principal para conversación, análisis,
-documentación y planificación.
+  general:
+    status: en_evaluacion
+    description: |
+      Modelo principal para conversación, análisis,
+      documentación y planificación.
 
-```
-candidate_models:
-  - gpt-oss
-  - qwen3.5
-  - gemma3
-  - gemma4:16b
-```
+    candidate_models:
+      - gpt-oss
+      - qwen3.5
+      - gemma3
+      - gemma4:16b
 
-coder:
-status: en_evaluacion
-description: |
-Modelo especializado en programación,
-PowerShell, Docker, Python y debugging.
+  coder:
+    status: en_evaluacion
+    description: |
+      Modelo especializado en programación,
+      PowerShell, Docker, Python y debugging.
 
-```
-candidate_models:
-  - deepseek-coder-v2
-```
+    candidate_models:
+      - deepseek-coder-v2
 
-embeddings:
-status: operativo
-description: |
-Modelo utilizado para embeddings y RAG.
+  embeddings:
+    status: operativo
+    description: |
+      Modelo utilizado para embeddings y RAG.
 
-```
-candidate_models:
-  - nomic-embed-text-v2-moe
-```
+    candidate_models:
+      - nomic-embed-text-v2-moe
 
-backup:
-status: no_definido
+  backup:
+    status: no_definido
 
-experimental:
-status: activo
+  experimental:
+    status: activo
 
-```
-candidate_models:
-  - gemma3
-  - gemma4:16b
-```
+    candidate_models:
+      - gemma3
+      - gemma4:16b
 
 evaluation_criteria:
 
-hallucination_control:
-priority: alta
+  hallucination_control:
+    priority: alta
 
-reasoning_quality:
-priority: alta
+  reasoning_quality:
+    priority: alta
 
-code_quality:
-priority: alta
+  code_quality:
+    priority: alta
 
-response_speed:
-priority: media
+  response_speed:
+    priority: media
 
-gpu_efficiency:
-priority: media
+  gpu_efficiency:
+    priority: media
 
 selection_policy:
 
-current_phase: laboratorio
+  current_phase: laboratorio
 
-objective: |
-Identificar los modelos con mejor equilibrio
-entre calidad, precisión, razonamiento,
-programación y consumo de recursos.
+  objective: |
+    Identificar los modelos con mejor equilibrio
+    entre calidad, precisión, razonamiento,
+    programación y consumo de recursos.
 
-official_models_defined: false
+  official_models_defined: false
