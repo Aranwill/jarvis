@@ -1,15 +1,19 @@
 from malak.core.request import Request
 from malak.core.response import Response
+from malak.kernel.bootstrap import create_registry
 
 
 class Kernel:
     """
-    Núcleo mínimo gobernante de Malāk.
+    Minimal governing Kernel for Malāk.
     """
+
+    def __init__(self) -> None:
+        self._registry = create_registry()
 
     def receive(self, request: Request) -> Response:
         """
-        Punto de entrada del sistema.
+        System entry point.
         """
 
         if not request.content.strip():
@@ -18,7 +22,17 @@ class Kernel:
                 source="kernel",
             )
 
+        capability = self._registry.get("echo")
+
+        if capability is None:
+            return Response(
+                content="Capability 'echo' no encontrada.",
+                source="kernel",
+            )
+
+        result = capability.execute(request.content)
+
         return Response(
-            content=request.content,
-            source="kernel",
+            content=result,
+            source=capability.name,
         )

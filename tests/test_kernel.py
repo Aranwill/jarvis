@@ -14,7 +14,7 @@ def test_kernel_returns_response():
     response = kernel.receive(request)
 
     assert response.content == "Hola Mundo"
-    assert response.source == "kernel"
+    assert response.source == "echo"
 
 def test_kernel_rejects_empty_request():
 
@@ -30,3 +30,16 @@ def test_kernel_rejects_empty_request():
     assert response.content == "La solicitud está vacía."
     assert response.source == "kernel"
 
+def test_kernel_dispatches_echo_capability():
+
+    kernel = Kernel()
+
+    request = Request(
+        content="Malāk",
+        session_id="dispatch-test",
+    )
+
+    response = kernel.receive(request)
+
+    assert response.content == "Malāk"
+    assert response.source == "echo"
