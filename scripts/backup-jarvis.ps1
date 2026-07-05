@@ -1,5 +1,5 @@
 # ==========================================================
-# Jarvis - Backup
+# Malāk - Backup
 # ==========================================================
 
 $ErrorActionPreference = "Stop"
@@ -10,7 +10,7 @@ $destino = "D:\Ollama\jarvis\backups\$fecha"
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host " Backup Jarvis" -ForegroundColor Cyan
+Write-Host " Backup Malāk" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

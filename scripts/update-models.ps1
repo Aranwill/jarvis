@@ -1,5 +1,5 @@
 # ==========================================================
-# Jarvis - Update Models
+# Malāk - Update Models
 # Genera models.md desde ollama list
 # ==========================================================
 
@@ -18,7 +18,7 @@ $Now = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host " Jarvis - Actualizando models.md" -ForegroundColor Cyan
+Write-Host " Malāk - Actualizando models.md" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

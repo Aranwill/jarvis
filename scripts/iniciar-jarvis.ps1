@@ -1,10 +1,10 @@
 # ==========================================================
-# Jarvis - Inicio
+# Malāk - Inicio
 # ==========================================================
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host " Iniciando Jarvis" -ForegroundColor Cyan
+Write-Host " Iniciando Malāk" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -142,7 +142,7 @@ Start-Process `
 # ----------------------------------------------------------
 
 Write-Host ""
-Write-Host "Jarvis iniciado correctamente." `
+Write-Host "Malāk iniciado correctamente." `
     -ForegroundColor Green
 
 Write-Host ""

@@ -1,10 +1,10 @@
 # ==========================================================
-# Jarvis - Cierre
+# Malāk - Cierre
 # ==========================================================
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host " Cerrando Jarvis" -ForegroundColor Cyan
+Write-Host " Cerrando  Malāk" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -89,7 +89,7 @@ Write-Host "Open WebUI detenido." `
 # ----------------------------------------------------------
 
 Write-Host ""
-Write-Host "Cerrando ventana Jarvis..." `
+Write-Host "Cerrando ventana Malāk..." `
     -ForegroundColor Yellow
 
 $edgeProcesses = Get-CimInstance Win32_Process |
@@ -114,13 +114,13 @@ if ($edgeProcesses) {
         }
     }
 
-    Write-Host "Ventana Jarvis cerrada." `
+    Write-Host "Ventana Malāk cerrada." `
         -ForegroundColor Green
 }
 else {
 
     Write-Host `
-        "No se encontro instancia Edge de Jarvis." `
+        "No se encontro instancia Edge de Malāk." `
         -ForegroundColor Yellow
 }
 
@@ -143,7 +143,7 @@ docker ps
 
 Write-Host ""
 
-Write-Host "Jarvis cerrado correctamente." `
+Write-Host "Malāk cerrado correctamente." `
     -ForegroundColor Green
 
 Write-Host "Recursos liberados." `
