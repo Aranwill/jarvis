@@ -1,5 +1,14 @@
 # 1. Constitución de Gobernanza
 
+> [!NOTE]
+> **Migración de identidad del proyecto**
+>
+> Este documento fue creado originalmente cuando el proyecto se llamaba **Jarvis**.
+>
+> A partir de la versión **v0.6.0-alpha**, el nombre oficial del proyecto es **Malāk**.
+>
+> Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
+
 **Versión:** 1.0.0
 
 **Estado:** MVP
@@ -8,7 +17,7 @@
 
 # 1.1 Objetivo
 
-La Constitución de Gobernanza define las reglas operativas que garantizan que Jarvis funcione de forma segura, controlada y predecible.
+La Constitución de Gobernanza define las reglas operativas que garantizan que Malāk funcione de forma segura, controlada y predecible.
 
 Mientras que la Constitución Cognitiva gobierna **cómo piensa**, esta Constitución gobierna **cómo actúa**.
 
@@ -188,7 +197,7 @@ Toda modificación permanente deberá generar:
 
 # 1.5 Gestión de Errores
 
-Ante un error, Jarvis deberá intentar, en este orden:
+Ante un error, Malāk deberá intentar, en este orden:
 
 1. Recuperar automáticamente.
 2. Replanificar.
@@ -201,7 +210,7 @@ Nunca deberá continuar una ejecución inconsistente.
 
 # 1.6 Gestión de Recursos
 
-Jarvis deberá:
+Malāk deberá:
 
 * reutilizar recursos cuando sea posible;
 * liberar memoria no utilizada;
@@ -235,6 +244,6 @@ Toda actualización deberá cumplir:
 
 # 1.9 Resultado
 
-La Constitución de Gobernanza establece el comportamiento operativo mínimo que deberá respetar cualquier componente de Jarvis durante su ejecución.
+La Constitución de Gobernanza establece el comportamiento operativo mínimo que deberá respetar cualquier componente de Malāk durante su ejecución.
 
 # Fin de la sección

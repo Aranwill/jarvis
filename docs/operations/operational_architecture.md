@@ -1,5 +1,14 @@
 # Arquitectura Operativa Actual
 
+> [!NOTE]
+> **Migración de identidad del proyecto**
+>
+> Este documento fue creado originalmente cuando el proyecto se llamaba **Jarvis**.
+>
+> A partir de la versión **v0.6.0-alpha**, el nombre oficial del proyecto es **Malāk**.
+>
+> Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
+
 **Versión:** v0.4.1
 
 **Estado:** Operativa
@@ -10,7 +19,7 @@
 
 # Objetivo
 
-Definir la arquitectura operativa actual de Jarvis, describiendo el flujo de consulta, componentes activos, componentes pendientes y la gestión de modelos dentro del proyecto.
+Definir la arquitectura operativa actual de Malāk, describiendo el flujo de consulta, componentes activos, componentes pendientes y la gestión de modelos dentro del proyecto.
 
 ---
 
@@ -21,7 +30,7 @@ Usuario
 ↓
 Open WebUI
 ↓
-Colección de Conocimiento Jarvis
+Colección de Conocimiento Malāk
 ↓
 Recuperación RAG
 ↓
@@ -33,7 +42,7 @@ Respuesta
 Descripción:
 
 1. El usuario realiza una consulta desde Open WebUI.
-2. Open WebUI consulta la colección documental Jarvis.
+2. Open WebUI consulta la colección documental Malāk.
 3. El sistema recupera contexto relevante mediante RAG.
 4. El contexto recuperado se envía al modelo conversacional activo.
 5. El modelo genera la respuesta final.
@@ -53,12 +62,12 @@ Modelo de Embeddings
 ↓
 Vectorización
 ↓
-Colección de Conocimiento Jarvis
+Colección de Conocimiento Malāk
 ```
 
 Descripción:
 
-1. Los documentos son cargados a la colección Jarvis.
+1. Los documentos son cargados a la colección Malāk.
 2. Open WebUI divide los documentos en fragmentos (chunks).
 3. El modelo de embeddings genera representaciones vectoriales.
 4. Los vectores se almacenan en la base de conocimiento.
@@ -76,7 +85,7 @@ Descripción:
 
 ### Conocimiento
 
-* Colección de Conocimiento Jarvis
+* Colección de Conocimiento Malāk
 * Recuperación RAG
 * Memoria vectorial integrada en Open WebUI
 
@@ -96,14 +105,14 @@ Descripción:
 
 ## Modelos
 
-Jarvis separa dos conceptos:
+Malāk separa dos conceptos:
 
 ### 1. Modelos Instalados
 
 Los modelos instalados se documentan automáticamente en:
 
 ```text
-documents/projects/jarvis/models.md
+documents/projects/Malāk/models.md
 ```
 
 Este archivo refleja el estado real de Ollama y puede cambiar durante la fase de laboratorio.
@@ -203,7 +212,7 @@ Respuesta
 
 ### Local First
 
-Jarvis prioriza ejecución local siempre que sea posible.
+Malāk prioriza ejecución local siempre que sea posible.
 
 ---
 
@@ -260,4 +269,4 @@ Componentes validados:
 * RAG funcional
 * Documentación estructurada
 
-Jarvis se encuentra actualmente en fase de consolidación documental y preparación para memoria avanzada, seguridad IA y futuras automatizaciones.
+Malāk se encuentra actualmente en fase de consolidación documental y preparación para memoria avanzada, seguridad IA y futuras automatizaciones.

@@ -1,4 +1,13 @@
-# Jarvis Kernel
+# Malāk Kernel
+
+> [!NOTE]
+> **Migración de identidad del proyecto**
+>
+> Este documento fue creado originalmente cuando el proyecto se llamaba **Jarvis**.
+>
+> A partir de la versión **v0.6.0-alpha**, el nombre oficial del proyecto es **Malāk**.
+>
+> Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
 ## Estado
 
@@ -6,17 +15,17 @@ Documento: kernel.md
 Sprint: Sprint 1 - Architecture
 ID de arquitectura: ARQ-003
 Estado: En diseño
-Versión objetivo: Jarvis v0.5.0-alpha
+Versión objetivo: Malāk v0.5.0-alpha
 
 ---
 
 ## Objetivo
 
-El Jarvis Kernel es el núcleo de orquestación del sistema.
+El Malāk Kernel es el núcleo de orquestación del sistema.
 
-Su función principal es coordinar los módulos de Jarvis sin depender directamente de un modelo LLM, proveedor externo, interfaz o herramienta específica.
+Su función principal es coordinar los módulos de Malāk sin depender directamente de un modelo LLM, proveedor externo, interfaz o herramienta específica.
 
-Jarvis no debe estar centrado en Ollama, OpenAI, Claude, Gemini ni ningún modelo particular.
+Malāk no debe estar centrado en Ollama, OpenAI, Claude, Gemini ni ningún modelo particular.
 
 El centro del sistema debe ser el Kernel.
 
@@ -44,7 +53,7 @@ El Kernel es quien decide:
 El Kernel se divide en tres capas principales:
 
 ```text
-Jarvis Kernel
+Malāk Kernel
 │
 ├── Control Layer
 ├── Intelligence Layer
@@ -89,7 +98,7 @@ La Intelligence Layer contiene los módulos relacionados con razonamiento, memor
 
 ### Responsabilidad
 
-Resolver qué capacidades inteligentes necesita Jarvis para responder o ejecutar una tarea.
+Resolver qué capacidades inteligentes necesita Malāk para responder o ejecutar una tarea.
 
 ### No debe hacer
 
@@ -480,7 +489,7 @@ La opción de usar un modelo pequeño como router queda reservada para una versi
 
 ## Estado objetivo al final del Sprint 1
 
-Al finalizar Sprint 1, Jarvis deberá tener:
+Al finalizar Sprint 1, Malāk deberá tener:
 
 * Kernel documentado.
 * Estructura core creada.
@@ -497,7 +506,7 @@ Al finalizar Sprint 1, Jarvis deberá tener:
 
 * ARQ-001: Crear carpeta core.
 * ARQ-002: Crear capa contracts.
-* ARQ-003: Diseñar Jarvis Kernel.
+* ARQ-003: Diseñar Malāk Kernel.
 
 
 ---
@@ -506,7 +515,7 @@ Al finalizar Sprint 1, Jarvis deberá tener:
 
 ## KERNEL MÍNIMO GOBERNANTE
 
-El Jarvis Kernel deberá ser pequeño en implementación, pero fuerte en autoridad operativa.
+El Malāk Kernel deberá ser pequeño en implementación, pero fuerte en autoridad operativa.
 
 El Kernel no deberá contener la lógica interna de memoria, modelos, herramientas, agentes, RAG, voz o identidad.
 
@@ -519,7 +528,7 @@ El Kernel estará compuesto por:
 - Decision Engine
 - Policy Engine
 - Execution Controller
-- Jarvis Service Bus
+- Malāk Service Bus
 - Service Registry
 
 ## Responsabilidades del Kernel
@@ -551,6 +560,6 @@ El Kernel no deberá:
 
 ## Principio de autoridad
 
-Todo servicio de Jarvis deberá obedecer las decisiones del Kernel y las políticas de gobernanza activas.
+Todo servicio de Malāk deberá obedecer las decisiones del Kernel y las políticas de gobernanza activas.
 
 Ninguna capacidad cognitiva, modelo, agente, herramienta o proceso podrá ejecutar una acción que contradiga las políticas de gobernanza activas.

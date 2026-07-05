@@ -1,4 +1,4 @@
-\# Jarvis Repository Standard
+\# Malāk Repository Standard
 
 
 
@@ -18,7 +18,7 @@ Sprint: Sprint 2A.1 — Repository Refactoring
 
 
 
-Este documento define la organización física oficial del repositorio Jarvis. La estructura aquí definida implementa la arquitectura lógica establecida por el Blueprint y no la reemplaza.
+Este documento define la organización física oficial del repositorio Malāk. La estructura aquí definida implementa la arquitectura lógica establecida por el Blueprint y no la reemplaza.
 
 
 
@@ -62,7 +62,7 @@ Su propósito es asegurar que la estructura física del proyecto refleje la arqu
 
 ```text
 
-jarvis/
+Malāk/
 
 ├── .github/
 

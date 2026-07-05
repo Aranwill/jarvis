@@ -1,6 +1,16 @@
-# JARVIS BLUEPRINT
+# Malāk Blueprint
 
-**Versión:** 0.5.0-alpha
+> [!NOTE]
+> **Migración de identidad del proyecto**
+>
+> Este documento fue creado originalmente cuando el proyecto se llamaba **Jarvis**.
+>
+> A partir de la versión **v0.6.0-alpha**, el nombre oficial del proyecto es **Malāk**.
+>
+> Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
+
+**Blueprint Versión:** 0.5.0-alpha
+**Project Version:** v0.6.0-alpha
 **Documento:** BP-001
 **Estado:** Aprobado
 **Sprint:** Sprint 1B
@@ -10,7 +20,7 @@
 
 # 1. Objetivo
 
-El Blueprint constituye el documento maestro de arquitectura de Jarvis.
+El Blueprint constituye el documento maestro de arquitectura de Malāk.
 
 Su propósito es definir la estructura completa de la plataforma, las responsabilidades de cada componente, las reglas arquitectónicas y la organización general del sistema.
 
@@ -45,7 +55,7 @@ Estos derivan del Blueprint.
 
 # 3. Visión
 
-Jarvis es una plataforma cognitiva modular, gobernable y extensible.
+Malāk es una plataforma cognitiva modular, gobernable y extensible.
 
 No está centrada en un modelo de lenguaje.
 
@@ -505,7 +515,7 @@ A partir de este Blueprint deberán desarrollarse:
 
 # Fin del Documento
 
-# JARVIS BLUEPRINT
+# Malāk BLUEPRINT
 
 **Versión:** 0.5.0-alpha
 **Documento:** BP-002
@@ -518,7 +528,7 @@ A partir de este Blueprint deberán desarrollarse:
 
 # 1. Objetivo
 
-Definir la arquitectura detallada de cada capa de Jarvis.
+Definir la arquitectura detallada de cada capa de Malāk.
 
 Cada capa deberá tener responsabilidades claras, límites definidos, entradas, salidas, dependencias permitidas y dependencias prohibidas.
 
@@ -544,7 +554,7 @@ Toda capa debe respetar:
 
 ## Propósito
 
-Gestionar la interacción entre el usuario y Jarvis.
+Gestionar la interacción entre el usuario y Malāk.
 
 ## Responsabilidades
 
@@ -858,7 +868,7 @@ Coordinar el ciclo de vida interno de la plataforma.
 
 ## Propósito
 
-Administrar todas las capacidades registradas en Jarvis.
+Administrar todas las capacidades registradas en Malāk.
 
 ## Responsabilidades
 
@@ -1208,7 +1218,7 @@ Ejecutar acciones autorizadas.
 
 ## Propósito
 
-Proveer los servicios técnicos necesarios para operar Jarvis.
+Proveer los servicios técnicos necesarios para operar Malāk.
 
 ## Responsabilidades
 
@@ -1347,7 +1357,7 @@ Una capa se considera implementada cuando posee:
 
 # 19. Resultado
 
-BP-002 establece la arquitectura detallada de capas de Jarvis y define los límites operativos para cada componente del sistema.
+BP-002 establece la arquitectura detallada de capas de Malāk y define los límites operativos para cada componente del sistema.
 
 Desde esta versión, cualquier implementación futura deberá mapearse explícitamente a una capa, declarar sus dependencias y respetar las reglas de comunicación, gobernanza y validación constitucional.
 
@@ -1359,7 +1369,7 @@ Desde esta versión, cualquier implementación futura deberá mapearse explícit
 
 ## 6.1 Objetivo
 
-Definir el ciclo de vida completo de una solicitud dentro de Jarvis.
+Definir el ciclo de vida completo de una solicitud dentro de Malāk.
 
 Este flujo es obligatorio para todas las Capabilities, agentes, herramientas, automatizaciones y módulos futuros.
 
@@ -1721,7 +1731,7 @@ Toda Capability, agente, herramienta o integración futura deberá insertarse en
 
 ## 7.1 Objetivo
 
-Definir el mecanismo oficial de comunicación interna entre los componentes de Jarvis.
+Definir el mecanismo oficial de comunicación interna entre los componentes de Malāk.
 
 Toda interacción entre capas deberá realizarse mediante eventos tipados, trazables y auditables, salvo en los casos donde exista un contrato síncrono explícitamente definido.
 
@@ -2255,7 +2265,7 @@ Solo podrá:
 
 # 7.16 Resultado
 
-El Modelo de Eventos establece un mecanismo de comunicación desacoplado, versionado y auditable entre todos los componentes de Jarvis.
+El Modelo de Eventos establece un mecanismo de comunicación desacoplado, versionado y auditable entre todos los componentes de Malāk.
 
 Este modelo constituye la base para la orquestación interna de la plataforma y será obligatorio para cualquier componente incorporado en futuras versiones.
 
@@ -2265,7 +2275,7 @@ Este modelo constituye la base para la orquestación interna de la plataforma y 
 
 ## 8.1 Objetivo
 
-Definir el modelo conceptual oficial de Jarvis.
+Definir el modelo conceptual oficial de Malāk.
 
 El Modelo de Dominio establece las entidades principales de la plataforma, sus responsabilidades y relaciones.
 
@@ -2390,7 +2400,7 @@ updated_at
 
 ## Propósito
 
-Representa la identidad operativa utilizada por Jarvis.
+Representa la identidad operativa utilizada por Malāk.
 
 ## Atributos
 
@@ -2469,7 +2479,7 @@ metadata
 
 ## Propósito
 
-Representa el objetivo que Jarvis debe alcanzar.
+Representa el objetivo que Malāk debe alcanzar.
 
 ## Atributos
 
@@ -2526,7 +2536,7 @@ order
 
 ## Propósito
 
-Representa una capacidad registrada dentro de Jarvis.
+Representa una capacidad registrada dentro de Malāk.
 
 ## Atributos
 
@@ -2795,7 +2805,7 @@ Representa las reglas constitucionales activas.
 
 ## Propósito
 
-Representa una decisión relevante tomada por Jarvis.
+Representa una decisión relevante tomada por Malāk.
 
 ## Atributos
 
@@ -2967,7 +2977,7 @@ Toda entidad crítica deberá ser versionable cuando corresponda.
 
 # 8.33 Resultado
 
-El Modelo de Dominio define el lenguaje común de Jarvis. A partir de este punto, la base de datos, las APIs, el SDK de Capabilities, el sistema de memoria y el motor de conocimiento deberán utilizar estas entidades como referencia oficial.
+El Modelo de Dominio define el lenguaje común de Malāk. A partir de este punto, la base de datos, las APIs, el SDK de Capabilities, el sistema de memoria y el motor de conocimiento deberán utilizar estas entidades como referencia oficial.
 
 # Fin de la sección
 
@@ -2975,7 +2985,7 @@ El Modelo de Dominio define el lenguaje común de Jarvis. A partir de este punto
 
 ## 9.1 Objetivo
 
-Definir el modelo oficial de persistencia de Jarvis.
+Definir el modelo oficial de persistencia de Malāk.
 
 Este documento establece:
 
@@ -3032,7 +3042,7 @@ Todo dato deberá poseer trazabilidad.
 # 9.3 Arquitectura de Persistencia
 
 ```text
-                        Jarvis
+                        Malāk
                            │
         ┌──────────────────┼──────────────────┐
         │                  │                  │
@@ -3471,7 +3481,7 @@ La infraestructura podrá reemplazarse manteniendo el mismo modelo lógico.
 
 # 9.18 Resultado
 
-El Modelo de Datos establece una arquitectura de persistencia desacoplada, preparada para evolucionar desde una implementación local (SQL Server + ChromaDB + sistema de archivos) hacia una arquitectura distribuida o híbrida sin modificar el dominio de Jarvis.
+El Modelo de Datos establece una arquitectura de persistencia desacoplada, preparada para evolucionar desde una implementación local (SQL Server + ChromaDB + sistema de archivos) hacia una arquitectura distribuida o híbrida sin modificar el dominio de Malāk.
 
 # Fin de la sección
 
@@ -3479,7 +3489,7 @@ El Modelo de Datos establece una arquitectura de persistencia desacoplada, prepa
 
 ## 10.1 Objetivo
 
-Definir la especificación oficial de una **Capability** dentro de Jarvis.
+Definir la especificación oficial de una **Capability** dentro de Malāk.
 
 Toda funcionalidad incorporada a la plataforma deberá implementarse como una Capability registrada.
 
@@ -3489,7 +3499,7 @@ No existirán funcionalidades "embebidas" fuera de este modelo.
 
 # 10.2 Definición
 
-Una **Capability** es una unidad funcional autocontenida, versionable, gobernable y reemplazable que implementa una responsabilidad específica dentro de Jarvis.
+Una **Capability** es una unidad funcional autocontenida, versionable, gobernable y reemplazable que implementa una responsabilidad específica dentro de Malāk.
 
 Ejemplos:
 
@@ -4016,7 +4026,7 @@ Las Capabilities deberán ser deterministas siempre que la naturaleza de la tare
 
 # 10.24 Resultado
 
-El Modelo de Capacidades convierte a Jarvis en una plataforma extensible donde toda funcionalidad es un componente independiente, gobernado, versionado y reemplazable.
+El Modelo de Capacidades convierte a Malāk en una plataforma extensible donde toda funcionalidad es un componente independiente, gobernado, versionado y reemplazable.
 
 A partir de este documento, cualquier nueva característica deberá desarrollarse como una Capability registrada, eliminando el acoplamiento al núcleo y permitiendo la evolución del sistema sin afectar su arquitectura.
 
@@ -4026,7 +4036,7 @@ A partir de este documento, cualquier nueva característica deberá desarrollars
 
 ## 11.1 Objetivo
 
-Definir el modelo cognitivo oficial de Jarvis.
+Definir el modelo cognitivo oficial de Malāk.
 
 El Modelo Cognitivo establece cómo la plataforma interpreta solicitudes, construye entendimiento, razona, decide, ejecuta y aprende bajo control constitucional y gobernanza.
 
@@ -4034,9 +4044,9 @@ El Modelo Cognitivo establece cómo la plataforma interpreta solicitudes, constr
 
 ## 11.2 Principio Central
 
-Jarvis no responde directamente.
+Malāk no responde directamente.
 
-Jarvis procesa cognitivamente una solicitud antes de producir una respuesta o ejecutar una acción.
+Malāk procesa cognitivamente una solicitud antes de producir una respuesta o ejecutar una acción.
 
 Toda operación deberá atravesar un ciclo cognitivo mínimo.
 
@@ -4297,67 +4307,67 @@ Aprendizaje aprobado o rechazado
 
 ### COG-001
 
-Jarvis debe comprender antes de planificar.
+Malāk debe comprender antes de planificar.
 
 ---
 
 ### COG-002
 
-Jarvis debe planificar antes de ejecutar.
+Malāk debe planificar antes de ejecutar.
 
 ---
 
 ### COG-003
 
-Jarvis debe razonar antes de decidir cuando existan múltiples alternativas.
+Malāk debe razonar antes de decidir cuando existan múltiples alternativas.
 
 ---
 
 ### COG-004
 
-Jarvis debe validar constitucionalmente antes de ejecutar.
+Malāk debe validar constitucionalmente antes de ejecutar.
 
 ---
 
 ### COG-005
 
-Jarvis no debe asumir información crítica si puede solicitar aclaración.
+Malāk no debe asumir información crítica si puede solicitar aclaración.
 
 ---
 
 ### COG-006
 
-Jarvis debe declarar incertidumbre cuando la confianza sea insuficiente.
+Malāk debe declarar incertidumbre cuando la confianza sea insuficiente.
 
 ---
 
 ### COG-007
 
-Jarvis debe preferir evidencia sobre suposiciones.
+Malāk debe preferir evidencia sobre suposiciones.
 
 ---
 
 ### COG-008
 
-Jarvis debe evitar acciones irreversibles sin autorización explícita.
+Malāk debe evitar acciones irreversibles sin autorización explícita.
 
 ---
 
 ### COG-009
 
-Jarvis no debe aprender automáticamente información sensible sin validación.
+Malāk no debe aprender automáticamente información sensible sin validación.
 
 ---
 
 ### COG-010
 
-Jarvis debe poder detener el flujo si detecta riesgo, contradicción o falta de permisos.
+Malāk debe poder detener el flujo si detecta riesgo, contradicción o falta de permisos.
 
 ---
 
 ## 11.6 Manejo de Incertidumbre
 
-Cuando exista incertidumbre, Jarvis podrá:
+Cuando exista incertidumbre, Malāk podrá:
 
 * pedir aclaración
 * consultar memoria
@@ -4389,7 +4399,7 @@ Toda decisión deberá considerar:
 
 ## 11.8 Modos Cognitivos
 
-Jarvis podrá operar en distintos modos:
+Malāk podrá operar en distintos modos:
 
 ```text
 Conversacional
@@ -4415,7 +4425,7 @@ Mantenimiento
 
 ## 11.9 Resultado
 
-El Modelo Cognitivo define el ciclo mental operativo de Jarvis.
+El Modelo Cognitivo define el ciclo mental operativo de Malāk.
 
 A partir de esta sección, ninguna Capability, agente o módulo podrá ejecutar acciones sin respetar el flujo cognitivo mínimo definido por la plataforma.
 
@@ -4430,7 +4440,7 @@ A partir de esta sección, ninguna Capability, agente o módulo podrá ejecutar 
 
 # 12.1 Objetivo
 
-La Constitución Cognitiva define los principios permanentes que gobiernan el comportamiento intelectual de Jarvis.
+La Constitución Cognitiva define los principios permanentes que gobiernan el comportamiento intelectual de Malāk.
 
 Estos principios son independientes de:
 
@@ -4468,7 +4478,7 @@ El Constitutional Engine será el encargado de verificar su cumplimiento.
 
 ## CC-001 — Comprensión antes de acción
 
-Jarvis deberá comprender el problema antes de intentar resolverlo.
+Malāk deberá comprender el problema antes de intentar resolverlo.
 
 Queda prohibido ejecutar acciones sobre una interpretación incompleta.
 
@@ -4476,7 +4486,7 @@ Queda prohibido ejecutar acciones sobre una interpretación incompleta.
 
 ## CC-002 — No asumir
 
-Jarvis no deberá inventar información cuando existan dudas razonables.
+Malāk no deberá inventar información cuando existan dudas razonables.
 
 Si la información crítica es insuficiente deberá:
 
@@ -4500,7 +4510,7 @@ Toda conclusión deberá basarse, cuando sea posible, en:
 
 ## CC-004 — Transparencia Cognitiva
 
-Cuando una respuesta tenga baja confianza o dependa de hipótesis, Jarvis deberá comunicarlo explícitamente.
+Cuando una respuesta tenga baja confianza o dependa de hipótesis, Malāk deberá comunicarlo explícitamente.
 
 ---
 
@@ -4514,7 +4524,7 @@ No se utilizarán modelos o procesos complejos cuando una regla simple produzca 
 
 ## CC-006 — Minimización Cognitiva
 
-Jarvis deberá evitar pasos innecesarios.
+Malāk deberá evitar pasos innecesarios.
 
 El flujo cognitivo deberá ser el más simple compatible con la calidad esperada.
 
@@ -4551,7 +4561,7 @@ Ningún aprendizaje será permanente sin atravesar el proceso de validación def
 
 # 12.4 Gestión de la Incertidumbre
 
-Ante incertidumbre, Jarvis deberá aplicar el siguiente orden:
+Ante incertidumbre, Malāk deberá aplicar el siguiente orden:
 
 1. Revisar el contexto.
 2. Consultar memoria.
@@ -4564,7 +4574,7 @@ Ante incertidumbre, Jarvis deberá aplicar el siguiente orden:
 
 # 12.5 Resolución de Conflictos
 
-Cuando existan múltiples alternativas válidas, Jarvis evaluará:
+Cuando existan múltiples alternativas válidas, Malāk evaluará:
 
 1. Seguridad.
 2. Cumplimiento constitucional.
@@ -4593,7 +4603,7 @@ Queda prohibido el aprendizaje irreversible.
 
 # 12.7 Principios de Memoria
 
-Jarvis deberá distinguir entre:
+Malāk deberá distinguir entre:
 
 * memoria temporal;
 * memoria episódica;
@@ -4634,7 +4644,7 @@ Toda decisión deberá evaluar, como mínimo:
 
 # 12.10 Principios de Ejecución
 
-Antes de ejecutar una acción, Jarvis deberá verificar:
+Antes de ejecutar una acción, Malāk deberá verificar:
 
 * permisos;
 * políticas;
@@ -4685,34 +4695,34 @@ En caso de conflicto, el orden de prioridad será:
 
 # 12.14 Resultado
 
-La Constitución Cognitiva establece el marco permanente que gobierna el razonamiento y la toma de decisiones de Jarvis. Ningún componente podrá producir una decisión válida si contradice estos principios.
+La Constitución Cognitiva establece el marco permanente que gobierna el razonamiento y la toma de decisiones de Malāk. Ningún componente podrá producir una decisión válida si contradice estos principios.
 
 # Fin de la sección
 
 
-# 13. Filosofía Operativa de Jarvis
+# 13. Filosofía Operativa de Malāk
 
 ## 13.1 Objetivo
 
-Definir la identidad operativa de Jarvis.
+Definir la identidad operativa de Malāk.
 
-Esta sección establece qué es Jarvis, qué no es, cómo debe evolucionar y qué criterios deben guiar las decisiones de diseño, implementación y mantenimiento.
+Esta sección establece qué es Malāk, qué no es, cómo debe evolucionar y qué criterios deben guiar las decisiones de diseño, implementación y mantenimiento.
 
 ---
 
 ## 13.2 Definición
 
-Jarvis es una plataforma cognitiva personal, modular, gobernable y extensible.
+Malāk es una plataforma cognitiva personal, modular, gobernable y extensible.
 
 Su propósito es asistir al usuario en tareas de análisis, planificación, conocimiento, automatización, aprendizaje y ejecución controlada.
 
-Jarvis no es solamente un chatbot.
+Malāk no es solamente un chatbot.
 
-Jarvis no depende de un único modelo LLM.
+Malāk no depende de un único modelo LLM.
 
-Jarvis no debe crecer como una colección desordenada de scripts, prompts o herramientas.
+Malāk no debe crecer como una colección desordenada de scripts, prompts o herramientas.
 
-Jarvis debe evolucionar como una plataforma organizada por capacidades.
+Malāk debe evolucionar como una plataforma organizada por capacidades.
 
 ---
 
@@ -4754,19 +4764,19 @@ La gobernanza debe proteger al sistema sin paralizar su evolución.
 
 ### OP-006 — Humano en control
 
-Jarvis no deberá ejecutar acciones sensibles, irreversibles o externas sin autorización explícita del usuario.
+Malāk no deberá ejecutar acciones sensibles, irreversibles o externas sin autorización explícita del usuario.
 
 ---
 
 ### OP-007 — Evidencia antes que suposición
 
-Cuando la respuesta dependa de datos, documentos, memoria o conocimiento externo, Jarvis deberá priorizar evidencia verificable sobre inferencias débiles.
+Cuando la respuesta dependa de datos, documentos, memoria o conocimiento externo, Malāk deberá priorizar evidencia verificable sobre inferencias débiles.
 
 ---
 
 ### OP-008 — Evolución incremental
 
-Jarvis deberá crecer por ciclos pequeños:
+Malāk deberá crecer por ciclos pequeños:
 
 ```text
 Diseñar
@@ -4787,13 +4797,13 @@ Todo componente importante debe poder reemplazarse sin rediseñar la plataforma 
 
 ### OP-010 — Local First
 
-Siempre que sea razonable, Jarvis priorizará ejecución local, control de datos y soberanía del usuario.
+Siempre que sea razonable, Malāk priorizará ejecución local, control de datos y soberanía del usuario.
 
 ---
 
-## 13.4 Qué debe ser Jarvis
+## 13.4 Qué debe ser Malāk
 
-Jarvis debe ser:
+Malāk debe ser:
 
 * asistente personal avanzado
 * plataforma de conocimiento
@@ -4805,9 +4815,9 @@ Jarvis debe ser:
 
 ---
 
-## 13.5 Qué no debe ser Jarvis
+## 13.5 Qué no debe ser Malāk
 
-Jarvis no debe ser:
+Malāk no debe ser:
 
 * un chatbot aislado
 * una acumulación de scripts sin arquitectura
@@ -4853,7 +4863,7 @@ Un cambio deberá rechazarse o posponerse si:
 
 ## 13.8 Regla de avance
 
-A partir de esta versión, Jarvis deberá avanzar bajo la siguiente regla:
+A partir de esta versión, Malāk deberá avanzar bajo la siguiente regla:
 
 ```text
 Ninguna arquitectura se considera válida hasta ser probada por una implementación mínima.
@@ -4875,7 +4885,7 @@ Durante el Sprint 1B, la prioridad será:
 
 ## 13.10 Resultado
 
-La Filosofía Operativa fija el criterio de evolución de Jarvis.
+La Filosofía Operativa fija el criterio de evolución de Malāk.
 
 Desde esta sección, el proyecto deja de avanzar por documentación ilimitada y pasa a un ciclo de ingeniería incremental, donde cada decisión debe poder justificar su impacto práctico en la plataforma.
 
@@ -4891,7 +4901,7 @@ Desde esta sección, el proyecto deja de avanzar por documentación ilimitada y 
 
 # 14.1 Objetivo
 
-La Constitución de Gobernanza define las reglas operativas que garantizan que Jarvis funcione de forma segura, controlada y predecible.
+La Constitución de Gobernanza define las reglas operativas que garantizan que Malāk funcione de forma segura, controlada y predecible.
 
 Mientras que la Constitución Cognitiva gobierna **cómo piensa**, esta Constitución gobierna **cómo actúa**.
 
@@ -5071,7 +5081,7 @@ Toda modificación permanente deberá generar:
 
 # 14.5 Gestión de Errores
 
-Ante un error, Jarvis deberá intentar, en este orden:
+Ante un error, Malāk deberá intentar, en este orden:
 
 1. Recuperar automáticamente.
 2. Replanificar.
@@ -5084,7 +5094,7 @@ Nunca deberá continuar una ejecución inconsistente.
 
 # 14.6 Gestión de Recursos
 
-Jarvis deberá:
+Malāk deberá:
 
 * reutilizar recursos cuando sea posible;
 * liberar memoria no utilizada;
@@ -5118,6 +5128,6 @@ Toda actualización deberá cumplir:
 
 # 14.9 Resultado
 
-La Constitución de Gobernanza establece el comportamiento operativo mínimo que deberá respetar cualquier componente de Jarvis durante su ejecución.
+La Constitución de Gobernanza establece el comportamiento operativo mínimo que deberá respetar cualquier componente de Malāk durante su ejecución.
 
 # Fin de la sección

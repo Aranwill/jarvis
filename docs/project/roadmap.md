@@ -1,4 +1,13 @@
-# Roadmap Jarvis
+# Roadmap Malāk
+
+> [!NOTE]
+> **Migración de identidad del proyecto**
+>
+> Este documento fue creado originalmente cuando el proyecto se llamaba **Jarvis**.
+>
+> A partir de la versión **v0.6.0-alpha**, el nombre oficial del proyecto es **Malāk**.
+>
+> Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
 ## Fase 1
 - Ollama
@@ -40,7 +49,7 @@ Completado
 Incluye:
 
 * Documentación estructurada
-* Colección Jarvis
+* Colección Malāk
 * RAG funcional
 
 ---
@@ -69,7 +78,7 @@ Próximos objetivos:
 ## Fase 5
 - Agentes
 
-# Jarvis Roadmap
+# Malāk Roadmap
 
 Versión: 0.5.0-alpha
 
@@ -90,7 +99,7 @@ Estado: En progreso
 
 ## Objetivo
 
-Construir el primer Kernel funcional de Jarvis respetando la arquitectura definida.
+Construir el primer Kernel funcional de Malāk respetando la arquitectura definida.
 
 ---
 
@@ -236,4 +245,4 @@ Workflows
 
 # Objetivo final
 
-Jarvis Platform v1.0
+Malāk Platform v1.0
