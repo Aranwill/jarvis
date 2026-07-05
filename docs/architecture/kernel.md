@@ -1,3 +1,53 @@
+---
+id: DOC-ARQ-KERNEL
+title: Kernel
+
+status: active
+
+version: 0.6.0-alpha
+
+date: 2026-07-05
+
+author: Hector Rodriguez
+
+reviewed_by: []
+
+tags:
+  - architecture
+  - kernel
+  - runtime
+  - governance
+  - cognition
+
+related:
+  blueprint: DOC-ARQ-BLUEPRINT
+  knowledge_model: DOC-ARQ-KNOWLEDGE-MODEL
+  adr:
+    - ADR-001
+
+graph:
+  type: kernel_document
+
+  domain: kernel
+
+  depends_on:
+    - Blueprint
+    - Cognitive Constitution
+    - Governance Constitution
+
+  affects:
+    - Runtime
+    - Capabilities
+    - Memory
+    - Knowledge
+    - Planner
+    - Orchestrator
+
+history:
+  created: 2026-06-27
+  updated: 2026-07-05
+---
+
 # Malāk Kernel
 
 > [!NOTE]

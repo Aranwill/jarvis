@@ -1,3 +1,46 @@
+---
+id: DOC-ARQ-BLUEPRINT
+title: Blueprint
+status: active
+version: 0.6.0-alpha
+date: 2026-07-05
+author: Hector Rodriguez
+reviewed_by: []
+
+tags:
+  - architecture
+  - blueprint
+  - kernel
+  - governance
+  - cognition
+
+related:
+  kernel: DOC-ARQ-KERNEL
+  knowledge_model: DOC-ARQ-KNOWLEDGE-MODEL
+  adr:
+    - ADR-001
+
+graph:
+  type: architecture_document
+
+  domain: architecture
+
+  depends_on:
+    - Cognitive Constitution
+    - Governance Constitution
+
+  affects:
+    - Runtime
+    - Kernel
+    - Capabilities
+    - Memory
+    - Knowledge
+
+history:
+  created: 2026-06-27
+  updated: 2026-07-05
+---
+
 # Malāk Blueprint
 
 > [!NOTE]
