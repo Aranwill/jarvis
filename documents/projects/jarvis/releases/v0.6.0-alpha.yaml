@@ -1,0 +1,53 @@
+release:
+  name: Malāk
+  version: v0.6.0-alpha
+  codename: Identity Migration
+  type: internal
+  status: certified
+
+date:
+  created: 2026-07-05
+
+git:
+  branch: refactor/rename-malak
+  tag: v0.6.0-alpha
+
+identity:
+  previous_name: Jarvis
+  current_name: Malāk
+
+validation:
+  documentation: passed
+  configuration: passed
+  scripts: passed
+  runtime: passed
+  backup: passed
+  open_webui: passed
+  git: passed
+
+architecture:
+  blueprint: v0.5.0-alpha
+  kernel: validated
+  repository: synchronized
+
+completed:
+  - Project identity migration
+  - Documentation update
+  - Configuration update
+  - Runtime messages update
+  - PowerShell scripts update
+  - Git tag creation
+  - GitHub synchronization
+
+next_sprint:
+  name: Structural Migration
+  objective: >
+    Rename the internal Python namespace, package structure,
+    repository paths and project layout from 'jarvis'
+    to 'malak' while preserving runtime compatibility.
+
+notes:
+  - First certified release under the official name Malāk.
+  - Runtime successfully validated.
+  - Backup successfully validated.
+  - GitHub branch and tag published.
