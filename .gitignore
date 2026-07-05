@@ -1,3 +1,7 @@
+# ==========================
+# Project Data
+# ==========================
+
 backups/
 memory/
 logs/
@@ -5,21 +9,57 @@ models/blobs/
 models/manifests/
 vector_db/
 runtime/
+snapshots/
+
+# ==========================
+# Python
+# ==========================
+
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ==========================
+# Databases
+# ==========================
 
 *.db
 *.sqlite3
+
+# ==========================
+# Logs
+# ==========================
+
 *.log
+
+# ==========================
+# Environment
+# ==========================
 
 .env
 .env.local
-__pycache__/
-*.pyc
 
-# Python
-.venv/
-.pytest_cache/
-.pytest_cache/**
+# ==========================
+# IDE
+# ==========================
 
-# Local snapshots
+.vscode/
+.idea/
+
+# ==========================
+# OS
+# ==========================
+
+Thumbs.db
+.DS_Store
+
+# ==========================
+# Archives
+# ==========================
+
 *.zip
-snapshots/

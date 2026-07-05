@@ -62,10 +62,11 @@ history:
 ## Estado
 
 Documento: kernel.md
-Sprint: Sprint 1 - Architecture
+Sprint: Sprint 6.5 — Conversation Runtime
 ID de arquitectura: ARQ-003
-Estado: En diseño
-Versión objetivo: Malāk v0.5.0-alpha
+Estado: Implementado y validado
+Versión objetivo: Malāk v0.6.0-alpha
+Última revisión arquitectónica: 2026-07-05
 
 ---
 
@@ -551,6 +552,36 @@ Al finalizar Sprint 1, Malāk deberá tener:
 * Decision Engine especificado, aunque no completamente implementado.
 
 ---
+
+---
+
+## Estado actual (v0.6.0-alpha)
+
+La arquitectura definida en este documento continúa siendo la referencia oficial para el Kernel de Malāk.
+
+Durante los Sprints 5 y 6 se implementó la primera versión funcional del núcleo respetando las responsabilidades aquí establecidas, sin introducir cambios en sus principios arquitectónicos.
+
+Actualmente se encuentran implementados y validados:
+
+- Bootstrap del Kernel.
+- Planner MVP.
+- Capability Registry.
+- Capability Contract.
+- Conversation Contract.
+- Conversation Service.
+- Conversation Provider Registry.
+- LLM Runtime (abstracción).
+- Mock LLM Runtime.
+
+Todos estos componentes permanecen desacoplados mediante contratos e interfaces, preservando los principios de:
+
+- Kernel First.
+- Capability First.
+- Runtime Independence.
+- Human in Control.
+- Model Agnostic.
+
+La integración con proveedores externos de inferencia (por ejemplo, Ollama) deberá realizarse exclusivamente mediante implementaciones de `LLMRuntime`, sin modificar las responsabilidades del Kernel definidas en este documento.
 
 ## Decisiones relacionadas
 

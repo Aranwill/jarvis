@@ -82,6 +82,8 @@ Ejemplos:
 - supersedes
 - superseded_by
 - references
+- implements
+- implemented_by
 
 Las relaciones representan conocimiento estructurado.
 
@@ -141,3 +143,5 @@ Toda modificación relevante deberá preservar:
 - consistencia del conocimiento
 
 Ninguna implementación futura podrá violar los principios definidos en este documento sin una ADR aprobada.
+
+Las relaciones entre documentos y sus implementaciones deberán preservarse de forma explícita para permitir la evolución futura del Architecture Knowledge System (AKS) hacia un grafo de conocimiento navegable y auditable.

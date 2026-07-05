@@ -25,6 +25,8 @@ Antes de aprobar un cambio validar:
 - [ ] No rompe la arquitectura orientada a eventos.
 - [ ] Respeta Capability First.
 - [ ] Respeta Runtime Independence.
+- [ ] Toda integración externa utiliza contratos públicos.
+- [ ] El Kernel no depende de implementaciones concretas.
 - [ ] Respeta Human in Control.
 
 ---
@@ -34,6 +36,9 @@ Antes de aprobar un cambio validar:
 Validar:
 
 - [ ] El Runtime inicia correctamente.
+- [ ] Todo Runtime implementa el contrato oficial (`LLMRuntime`) cuando corresponda.
+- [ ] Todo Runtime posee una implementación de prueba (Mock) cuando corresponda.
+- [ ] No existen dependencias directas entre Runtime y Kernel.
 - [ ] El Launcher funciona correctamente.
 - [ ] El Logger funciona correctamente.
 - [ ] No existen errores de imports.
@@ -45,6 +50,8 @@ Validar:
 
 Validar:
 
+- [ ] Todo contrato nuevo posee al menos un test asociado.
+- [ ] Toda abstracción posee una implementación de prueba cuando corresponda.
 - [ ] Todos los tests pasan correctamente.
 - [ ] No existen tests desactualizados.
 - [ ] No existen referencias al namespace anterior.
@@ -55,6 +62,8 @@ Validar:
 
 Validar:
 
+- [ ] No existen dependencias circulares.
+- [ ] Los imports respetan la arquitectura definida.
 - [ ] No existen TODO olvidados.
 - [ ] No existen FIXMEs sin documentar.
 - [ ] No existen archivos temporales.
@@ -67,6 +76,9 @@ Validar:
 
 Validar:
 
+- [ ] La documentación refleja el estado real de la implementación.
+- [ ] Las decisiones arquitectónicas significativas fueron registradas (ADR cuando corresponda).
+- [ ] Los metadatos del AKS permanecen consistentes.
 - [ ] Documentación actualizada.
 - [ ] Changelog actualizado cuando corresponda.
 - [ ] Decisiones arquitectónicas documentadas.
@@ -82,6 +94,7 @@ Validar:
 - [ ] Commit realizado.
 - [ ] Push realizado.
 - [ ] Historial preservado.
+- [ ] La rama se encuentra sincronizada con el repositorio remoto.
 
 ---
 

@@ -52,12 +52,13 @@ history:
 >
 > Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
-**Blueprint Versión:** 0.5.0-alpha
+**Blueprint Versión:** 0.6.0-alpha
 **Project Version:** v0.6.0-alpha
 **Documento:** BP-001
-**Estado:** Aprobado
-**Sprint:** Sprint 1B
+**Estado:** Aprobado y validado
+**Sprint:** Sprint 6.5 — Conversation Runtime
 **Clasificación:** Documento Maestro de Arquitectura
+**Última revisión arquitectónica:** 2026-07-05
 
 ---
 
@@ -169,7 +170,11 @@ Everything is Observable
 Everything is Auditable
 
 ---
+## P-011
 
+Runtime Independence
+
+---
 # 5. Arquitectura General
 
 ```text
@@ -511,6 +516,7 @@ Ninguna nueva característica podrá incorporarse sin definir:
 * dependencias
 * versión
 * reglas de gobernanza
+* En v0.6.0-alpha, la interacción con modelos queda desacoplada mediante `Conversation Service`, `Conversation Provider Registry`, `Conversation Provider` y `LLM Runtime`. Ningún modelo o proveedor externo forma parte del Kernel.
 
 ---
 
@@ -531,11 +537,11 @@ Queda prohibido:
 
 Versión actual:
 
-**Blueprint v0.5.0-alpha**
+**Blueprint v0.6.0-alpha**
 
-Estado:
+Estado actual:
 
-**Documento Maestro de Arquitectura**
+**Documento Maestro de Arquitectura aprobado, validado e implementado parcialmente hasta Sprint 6.5**
 
 ---
 
@@ -1052,7 +1058,7 @@ Realizar inferencia, evaluación lógica y selección de alternativas.
 * Kernel
 * Knowledge Layer mediante contrato
 * Memory Layer mediante contrato
-* Model Provider mediante abstracción
+* Model Provider mediante abstracción de Runtime
 
 ## Dependencias prohibidas
 
@@ -1282,7 +1288,7 @@ Proveer los servicios técnicos necesarios para operar Malāk.
 * SQL Server
 * ChromaDB
 * Open WebUI
-* Ollama
+* * Ollama, como runtime externo intercambiable mediante contrato
 * FastAPI
 * File System
 * Backup System
@@ -4914,9 +4920,9 @@ Ninguna arquitectura se considera válida hasta ser probada por una implementaci
 
 ---
 
-## 13.9 Prioridad del Sprint actual
+## 13.9 Prioridad histórica — Sprint 1B
 
-Durante el Sprint 1B, la prioridad será:
+Durante el Sprint 1B, la prioridad fue:
 
 1. cerrar la base mínima de arquitectura;
 2. definir la gobernanza mínima;
@@ -4924,9 +4930,22 @@ Durante el Sprint 1B, la prioridad será:
 4. implementar el primer Kernel funcional;
 5. probar el flujo básico completo.
 
+## 13.10 Prioridad actual — Sprint 6.6
+
+Durante el Sprint 6.6, la prioridad será integrar el primer runtime real mediante `OllamaRuntime`, preservando la independencia del Kernel y respetando la abstracción `LLMRuntime`.
+
+Objetivos principales:
+
+1. implementar `OllamaRuntime`;
+2. agregar health check del runtime;
+3. implementar el primer proveedor conversacional sobre Ollama;
+4. registrar el proveedor sin modificar el Kernel;
+5. validar la primera conversación real con un modelo LLM;
+6. mantener la suite de tests en verde.
+
 ---
 
-## 13.10 Resultado
+## 13.11 Resultado
 
 La Filosofía Operativa fija el criterio de evolución de Malāk.
 
