@@ -1,6 +1,7 @@
 from malak.core.request import Request
 from malak.core.response import Response
 from malak.kernel.bootstrap import create_registry
+from malak.services.planner import Planner
 
 
 class Kernel:
@@ -9,6 +10,7 @@ class Kernel:
     """
 
     def __init__(self) -> None:
+        self._planner = Planner()
         self._registry = create_registry()
 
     def receive(self, request: Request) -> Response:
@@ -22,11 +24,13 @@ class Kernel:
                 source="kernel",
             )
 
-        capability = self._registry.get("echo")
+        capability_name = self._planner.resolve(request)
+
+        capability = self._registry.get(capability_name)
 
         if capability is None:
             return Response(
-                content="Capability 'echo' no encontrada.",
+                content=f"Capability '{capability_name}' no encontrada.",
                 source="kernel",
             )
 
