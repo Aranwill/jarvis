@@ -1,0 +1,74 @@
+schema:
+  version: 1.0.0
+  name: Architecture Knowledge Schema
+
+required:
+
+  id:
+    type: string
+    required: true
+
+  title:
+    type: string
+    required: true
+
+  status:
+    type: string
+    required: true
+
+  version:
+    type: string
+    required: true
+
+  date:
+    type: date
+    required: true
+
+  author:
+    type: string
+    required: true
+
+  reviewed_by:
+    type: list
+    required: false
+
+  tags:
+    type: list
+    required: true
+
+  related:
+    type: object
+    required: false
+
+  graph:
+    type: object
+    required: false
+
+graph:
+
+  node_types:
+    - document
+    - adr
+    - capability
+    - kernel
+    - governance
+    - blueprint
+
+  relationships:
+    - depends_on
+    - implements
+    - references
+    - supersedes
+    - relates_to
+    - affects
+    - owned_by
+
+governance:
+
+  mandatory_metadata: true
+
+  immutable_id: true
+
+  versioning: semantic
+
+  audit_history: required
