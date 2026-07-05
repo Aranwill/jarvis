@@ -1,3 +1,51 @@
+---
+id: DOC-GOV-GOVERNANCE-CONSTITUTION
+
+title: Governance Constitution
+
+status: active
+
+version: 0.6.0-alpha
+
+date: 2026-07-05
+
+author: Hector Rodriguez
+
+reviewed_by: []
+
+tags:
+  - governance
+  - constitution
+  - architecture
+  - compliance
+
+related:
+  blueprint: DOC-ARQ-BLUEPRINT
+  kernel: DOC-ARQ-KERNEL
+  knowledge_model: DOC-ARQ-KNOWLEDGE-MODEL
+  adr:
+    - ADR-001
+
+graph:
+  type: governance_document
+
+  domain: governance
+
+  depends_on:
+    - Blueprint
+
+  affects:
+    - Runtime
+    - Kernel
+    - Capabilities
+    - Development
+    - Operations
+
+history:
+  created: 2026-06-27
+  updated: 2026-07-05
+---
+
 # 1. Constitución de Gobernanza
 
 > [!NOTE]
