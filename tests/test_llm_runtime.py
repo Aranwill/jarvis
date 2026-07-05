@@ -1,13 +1,12 @@
 import pytest
 
 from malak.core.conversation import ConversationRequest
-from malak.core.runtime import ConversationRuntime
-from malak.runtime.mock_runtime import MockConversationRuntime
+from malak.core.llm_runtime import LLMRuntime
+from malak.runtime.mock_llm_runtime import MockLLMRuntime
 
 
 def test_runtime_contract_can_be_implemented():
-
-    runtime = MockConversationRuntime()
+    runtime = MockLLMRuntime()
 
     response = runtime.generate(
         ConversationRequest(prompt="Hello")
@@ -18,8 +17,7 @@ def test_runtime_contract_can_be_implemented():
 
 
 def test_runtime_preserves_model():
-
-    runtime = MockConversationRuntime()
+    runtime = MockLLMRuntime()
 
     response = runtime.generate(
         ConversationRequest(
@@ -32,6 +30,5 @@ def test_runtime_preserves_model():
 
 
 def test_runtime_cannot_be_instantiated():
-
     with pytest.raises(TypeError):
-        ConversationRuntime()
+        LLMRuntime()

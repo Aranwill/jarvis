@@ -3,7 +3,7 @@ from malak.core.conversation import (
     ConversationRequest,
     ConversationResponse,
 )
-from malak.core.runtime import ConversationRuntime
+from malak.core.llm_runtime import LLMRuntime
 
 
 class MockConversationProvider(ConversationProvider):
@@ -11,7 +11,7 @@ class MockConversationProvider(ConversationProvider):
     Mock provider used for development and tests.
     """
 
-    def __init__(self, runtime: ConversationRuntime):
+    def __init__(self, runtime: LLMRuntime):
         self._runtime = runtime
 
     def generate(

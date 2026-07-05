@@ -1,12 +1,18 @@
 from malak.core.conversation import ConversationRequest
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.providers.mock_provider import MockConversationProvider
+from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.services.conversation_service import ConversationService
-from malak.runtime.mock_runtime import MockConversationRuntime
+
 
 def test_conversation_service_delegates_to_registered_provider():
     registry = ConversationProviderRegistry()
-    registry.register("mock", MockConversationProvider(MockConversationRuntime()))
+    registry.register(
+        "mock",
+        MockConversationProvider(
+            MockLLMRuntime()
+        ),
+    )
 
     service = ConversationService(registry)
 
@@ -21,7 +27,12 @@ def test_conversation_service_delegates_to_registered_provider():
 
 def test_conversation_service_preserves_model():
     registry = ConversationProviderRegistry()
-    registry.register("mock", MockConversationProvider(MockConversationRuntime()))
+    registry.register(
+        "mock",
+        MockConversationProvider(
+            MockLLMRuntime()
+        ),
+    )
 
     service = ConversationService(registry)
 

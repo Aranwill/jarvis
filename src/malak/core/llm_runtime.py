@@ -8,13 +8,9 @@ from malak.core.conversation import (
 )
 
 
-class ConversationRuntime(ABC):
+class LLMRuntime(ABC):
     """
-    Abstract runtime capable of executing conversation requests.
-
-    Concrete implementations encapsulate the communication with
-    inference backends such as Ollama, OpenAI, LM Studio, vLLM,
-    llama.cpp or any future runtime.
+    Abstract runtime capable of executing LLM operations.
     """
 
     @abstractmethod

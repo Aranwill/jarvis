@@ -1,11 +1,10 @@
 from malak.core.conversation import ConversationRequest
 from malak.providers.mock_provider import MockConversationProvider
-from malak.runtime.mock_runtime import MockConversationRuntime
+from malak.runtime.mock_llm_runtime import MockLLMRuntime
 
 
 def test_mock_provider_returns_response():
-
-    runtime = MockConversationRuntime()
+    runtime = MockLLMRuntime()
     provider = MockConversationProvider(runtime)
 
     response = provider.generate(
@@ -18,8 +17,7 @@ def test_mock_provider_returns_response():
 
 
 def test_mock_provider_preserves_model():
-
-    runtime = MockConversationRuntime()
+    runtime = MockLLMRuntime()
     provider = MockConversationProvider(runtime)
 
     response = provider.generate(
