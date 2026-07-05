@@ -1,5 +1,5 @@
-from jarvis.core.request import Request
-from jarvis.kernel.kernel import Kernel
+from malak.core.request import Request
+from malak.kernel.kernel import Kernel
 
 
 def test_kernel_returns_response():
@@ -7,13 +7,13 @@ def test_kernel_returns_response():
     kernel = Kernel()
 
     request = Request(
-        content="Hola Jarvis",
+        content="Hola Mundo",
         session_id="test-session",
     )
 
     response = kernel.receive(request)
 
-    assert response.content == "Hola Jarvis"
+    assert response.content == "Hola Mundo"
     assert response.source == "kernel"
 
 def test_kernel_rejects_empty_request():
