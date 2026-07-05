@@ -2,6 +2,7 @@ import pytest
 
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.providers.mock_provider import MockConversationProvider
+from malak.runtime.mock_runtime import MockConversationRuntime
 
 
 def test_register_provider():
@@ -10,7 +11,9 @@ def test_register_provider():
 
     registry.register(
         "mock",
-        MockConversationProvider(),
+        MockConversationProvider(
+        MockConversationRuntime()
+    )
     )
 
     assert registry.get("mock") is not None
@@ -22,7 +25,9 @@ def test_list_registered_providers():
 
     registry.register(
         "mock",
-        MockConversationProvider(),
+        MockConversationProvider(
+        MockConversationRuntime()
+    )
     )
 
     assert registry.list() == ["mock"]

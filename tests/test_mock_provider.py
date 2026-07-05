@@ -1,25 +1,26 @@
 from malak.core.conversation import ConversationRequest
 from malak.providers.mock_provider import MockConversationProvider
+from malak.runtime.mock_runtime import MockConversationRuntime
 
 
 def test_mock_provider_returns_response():
 
-    provider = MockConversationProvider()
+    runtime = MockConversationRuntime()
+    provider = MockConversationProvider(runtime)
 
     response = provider.generate(
-        ConversationRequest(
-            prompt="Hello"
-        )
+        ConversationRequest(prompt="Hello")
     )
 
-    assert response.content == "[MOCK] Hello"
-    assert response.provider == "mock"
-    assert response.model == "mock-model"
+    assert response.content == "[RUNTIME] Hello"
+    assert response.provider == "runtime"
+    assert response.model == "mock-runtime"
 
 
 def test_mock_provider_preserves_model():
 
-    provider = MockConversationProvider()
+    runtime = MockConversationRuntime()
+    provider = MockConversationProvider(runtime)
 
     response = provider.generate(
         ConversationRequest(
