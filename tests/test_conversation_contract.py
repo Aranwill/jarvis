@@ -1,0 +1,57 @@
+import pytest
+
+from malak.core.conversation import (
+    ConversationProvider,
+    ConversationRequest,
+    ConversationResponse,
+)
+
+
+class FakeConversationProvider(ConversationProvider):
+    def generate(self, request: ConversationRequest) -> ConversationResponse:
+        return ConversationResponse(
+            content=f"echo: {request.prompt}",
+            model=request.model,
+            provider="fake",
+        )
+
+
+def test_conversation_request_can_be_created():
+    request = ConversationRequest(
+        prompt="Hello Malak",
+        model="test-model",
+        system_prompt="You are Malak.",
+    )
+
+    assert request.prompt == "Hello Malak"
+    assert request.model == "test-model"
+    assert request.system_prompt == "You are Malak."
+
+
+def test_conversation_response_can_be_created():
+    response = ConversationResponse(
+        content="Hello human",
+        model="test-model",
+        provider="fake",
+    )
+
+    assert response.content == "Hello human"
+    assert response.model == "test-model"
+    assert response.provider == "fake"
+
+
+def test_conversation_provider_contract_can_be_implemented():
+    provider = FakeConversationProvider()
+
+    response = provider.generate(
+        ConversationRequest(prompt="ping", model="fake-model")
+    )
+
+    assert response.content == "echo: ping"
+    assert response.model == "fake-model"
+    assert response.provider == "fake"
+
+
+def test_conversation_provider_cannot_be_instantiated_directly():
+    with pytest.raises(TypeError):
+        ConversationProvider()
