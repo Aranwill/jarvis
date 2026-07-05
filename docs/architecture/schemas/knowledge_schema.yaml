@@ -63,6 +63,20 @@ graph:
     - affects
     - owned_by
 
+history:
+  type: object
+  required: true
+
+  properties:
+
+    created:
+      type: date
+      required: true
+
+    updated:
+      type: date
+      required: true
+
 governance:
 
   mandatory_metadata: true
