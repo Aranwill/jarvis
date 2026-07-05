@@ -13,7 +13,7 @@ from pathlib import Path
 LOG_DIRECTORY = Path("logs")
 LOG_DIRECTORY.mkdir(exist_ok=True)
 
-LOG_FILE = LOG_DIRECTORY / "jarvis.log"
+LOG_FILE = LOG_DIRECTORY / "malak.log"
 
 
 logging.basicConfig(
@@ -26,4 +26,4 @@ logging.basicConfig(
 )
 
 
-logger = logging.getLogger("Jarvis")
+logger = logging.getLogger("Malak")

@@ -1,5 +1,5 @@
-from jarvis.core.request import Request
-from jarvis.core.response import Response
+from malak.core.request import Request
+from malak.core.response import Response
 
 
 class Kernel:
