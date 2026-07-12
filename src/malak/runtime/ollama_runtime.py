@@ -11,6 +11,8 @@ from malak.core.conversation import (
     ConversationResponse,
 )
 from malak.core.llm_runtime import LLMRuntime
+from malak.runtime.runtime_metric_sample import RuntimeMetricSample
+from malak.runtime.runtime_metric_store import InMemoryRuntimeMetricStore
 from malak.runtime.runtime_metrics import RuntimeMetrics
 
 
@@ -28,6 +30,7 @@ class OllamaRuntime(LLMRuntime):
         base_url: str = "http://localhost:11434",
         timeout_seconds: float = 600.0,
         keep_alive: int | str = 0,
+        metric_store: InMemoryRuntimeMetricStore | None = None,
     ) -> None:
         normalized_base_url = base_url.strip().rstrip("/")
 
@@ -40,6 +43,7 @@ class OllamaRuntime(LLMRuntime):
         self._base_url = normalized_base_url
         self._timeout_seconds = timeout_seconds
         self._keep_alive = keep_alive
+        self._metric_store = metric_store
         self._last_metrics: RuntimeMetrics | None = None
 
     @property
@@ -47,7 +51,8 @@ class OllamaRuntime(LLMRuntime):
         """
         Metrics from the most recent successfully decoded Ollama response.
 
-        These metrics are diagnostic and are not persisted by the runtime.
+        These metrics are diagnostic and are not persisted by the runtime
+        unless a metric store was explicitly injected.
         """
 
         return self._last_metrics
@@ -136,10 +141,21 @@ class OllamaRuntime(LLMRuntime):
         if not isinstance(response_model, str) or not response_model:
             response_model = model
 
-        self._last_metrics = RuntimeMetrics.from_ollama_payload(
+        metrics = RuntimeMetrics.from_ollama_payload(
             model=response_model,
             payload=response_payload,
         )
+
+        self._last_metrics = metrics
+
+        if self._metric_store is not None:
+            sample = RuntimeMetricSample.from_runtime_metrics(
+                metrics=metrics,
+                timeout_seconds=self._timeout_seconds,
+                keep_alive=self._keep_alive,
+            )
+
+            self._metric_store.append(sample)
 
         return ConversationResponse(
             content=generated_content,

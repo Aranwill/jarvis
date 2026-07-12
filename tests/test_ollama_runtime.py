@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from malak.runtime.runtime_metric_store import InMemoryRuntimeMetricStore
 from malak.core.conversation import ConversationRequest
 from malak.runtime.ollama_runtime import OllamaRuntime
 
@@ -187,3 +188,59 @@ def test_ollama_runtime_captures_execution_metrics(
     assert metrics.eval_count == 200
     assert metrics.eval_duration_seconds == 10.0
     assert metrics.tokens_per_second == 20.0
+
+def test_ollama_runtime_appends_metric_sample_to_store(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> FakeHTTPResponse:
+        return FakeHTTPResponse(
+            {
+                "model": "qwen3.5:9b",
+                "response": "Respuesta registrada.",
+                "total_duration": 15_000_000_000,
+                "load_duration": 3_000_000_000,
+                "prompt_eval_count": 120,
+                "prompt_eval_duration": 2_000_000_000,
+                "eval_count": 200,
+                "eval_duration": 10_000_000_000,
+            }
+        )
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    store = InMemoryRuntimeMetricStore()
+
+    runtime = OllamaRuntime(
+        timeout_seconds=600.0,
+        keep_alive=0,
+        metric_store=store,
+    )
+
+    runtime.generate(
+        ConversationRequest(
+            prompt="Hola Malak",
+            model="qwen3.5:9b",
+        )
+    )
+
+    samples = store.list_by_model("qwen3.5:9b")
+
+    assert len(samples) == 1
+
+    sample = samples[0]
+
+    assert sample.model == "qwen3.5:9b"
+    assert sample.timeout_seconds == 600.0
+    assert sample.keep_alive == 0
+    assert sample.total_duration_seconds == 15.0
+    assert sample.load_duration_seconds == 3.0
+    assert sample.prompt_eval_count == 120
+    assert sample.eval_count == 200
+    assert sample.tokens_per_second == 20.0
+    assert sample.captured_at.tzinfo is not None
