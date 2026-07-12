@@ -2,14 +2,14 @@
 # Project Data
 # ==========================
 
-backups/
-memory/
-logs/
-models/blobs/
-models/manifests/
-vector_db/
-runtime/
-snapshots/
+/backups/
+/memory/
+/logs/
+/models/blobs/
+/models/manifests/
+/vector_db/
+/runtime/
+/snapshots/
 
 # ==========================
 # Python
