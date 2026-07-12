@@ -180,3 +180,56 @@ def test_runtime_performance_profiler_rejects_mixed_models() -> None:
         assert "model" in str(exc)
     else:
         raise AssertionError("Expected ValueError for mixed models")
+
+def test_runtime_performance_profiler_uses_medium_confidence_from_five_samples() -> None:
+    samples = [
+        _create_sample(total_duration_seconds=30.0)
+        for _ in range(5)
+    ]
+
+    profile = RuntimePerformanceProfiler().build(samples)
+
+    assert profile.confidence_level == "medium"
+
+
+def test_runtime_performance_profiler_uses_high_confidence_from_twenty_samples() -> None:
+    samples = [
+        _create_sample(total_duration_seconds=30.0)
+        for _ in range(20)
+    ]
+
+    profile = RuntimePerformanceProfiler().build(samples)
+
+    assert profile.confidence_level == "high"
+
+
+def test_runtime_performance_profiler_rounds_timeout_up_to_next_step() -> None:
+    samples = [
+        _create_sample(total_duration_seconds=40.1),
+    ]
+
+    profile = RuntimePerformanceProfiler().build(samples)
+
+    assert profile.recommended_timeout_seconds == 90.0
+
+
+def test_runtime_performance_profiler_enforces_minimum_timeout() -> None:
+    samples = [
+        _create_sample(total_duration_seconds=1.0),
+    ]
+
+    profile = RuntimePerformanceProfiler().build(samples)
+
+    assert profile.recommended_timeout_seconds == 30.0
+
+
+def test_runtime_performance_profiler_accepts_iterables() -> None:
+    samples = (
+        _create_sample(total_duration_seconds=value)
+        for value in [30.0, 60.0]
+    )
+
+    profile = RuntimePerformanceProfiler().build(samples)
+
+    assert profile.sample_count == 2
+    assert profile.average_total_duration_seconds == 45.0
