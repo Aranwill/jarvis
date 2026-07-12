@@ -10,6 +10,7 @@
 /vector_db/
 /runtime/
 /snapshots/
+/data/runtime_metrics/
 
 # ==========================
 # Python
