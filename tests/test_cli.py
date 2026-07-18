@@ -6,7 +6,11 @@ from malak.app.cli import (
     build_runtime,
     run_cli,
 )
-from malak.core.conversation import ConversationRequest
+from malak.core.conversation import (
+    ConversationRequest,
+    ConversationResponse,
+)
+from malak.core.llm_runtime import LLMRuntime
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
 
@@ -18,6 +22,23 @@ def make_input(values: list[str]) -> Callable[[str], str]:
         return next(iterator)
 
     return input_fn
+
+
+class RecordingRuntime(LLMRuntime):
+    def __init__(self) -> None:
+        self.last_request: ConversationRequest | None = None
+
+    def generate(
+        self,
+        request: ConversationRequest,
+    ) -> ConversationResponse:
+        self.last_request = request
+
+        return ConversationResponse(
+            content="Respuesta controlada",
+            model=request.model,
+            provider="recording-runtime",
+        )
 
 
 def test_build_conversation_service_uses_mock_provider() -> None:
@@ -74,6 +95,35 @@ def test_build_runtime_rejects_unknown_runtime() -> None:
         assert str(exc) == "Unsupported runtime: unknown"
     else:
         raise AssertionError("Expected ValueError")
+
+
+def test_run_cli_uses_configured_provider_runtime_and_model() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+
+    service = build_conversation_service(
+        runtime=runtime,
+        provider_name="ollama",
+    )
+
+    run_cli(
+        service=service,
+        provider_name="ollama",
+        runtime_name="OllamaRuntime",
+        model="modelo-local",
+        input_fn=make_input(["Hola", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert runtime.last_request is not None
+    assert runtime.last_request.prompt == "Hola"
+    assert runtime.last_request.model == "modelo-local"
+    assert "Runtime activo: OllamaRuntime" in outputs
+    assert (
+        "Estado: operativo | Provider: ollama | "
+        "Runtime: OllamaRuntime"
+    ) not in outputs
+    assert "Malāk> Respuesta controlada" in outputs
 
 
 def test_run_cli_processes_prompt_and_exits() -> None:

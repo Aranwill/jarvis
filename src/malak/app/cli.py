@@ -4,11 +4,11 @@ from collections.abc import Callable
 
 from malak.core.conversation import ConversationRequest
 from malak.core.conversation_registry import ConversationProviderRegistry
+from malak.core.llm_runtime import LLMRuntime
 from malak.providers.mock_provider import MockConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
-from malak.services.conversation_service import ConversationService
-from malak.core.llm_runtime import LLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
+from malak.services.conversation_service import ConversationService
 
 
 DEFAULT_PROVIDER = "mock"
@@ -19,6 +19,7 @@ Comandos disponibles:
   status  Muestra el estado básico de la CLI.
   exit    Finaliza la sesión.
 """.strip()
+
 
 def build_runtime(
     runtime_name: str = DEFAULT_PROVIDER,
@@ -35,6 +36,7 @@ def build_runtime(
         return OllamaRuntime()
 
     raise ValueError(f"Unsupported runtime: {runtime_name}")
+
 
 def build_conversation_service(
     runtime: LLMRuntime | None = None,
@@ -54,16 +56,23 @@ def build_conversation_service(
 
 def run_cli(
     service: ConversationService | None = None,
+    provider_name: str = DEFAULT_PROVIDER,
+    runtime_name: str = "MockLLMRuntime",
+    model: str | None = None,
     input_fn: Callable[[str], str] = input,
     output_fn: Callable[[str], None] = print,
 ) -> None:
     """
     Run the minimal interactive Malāk command-line interface.
     """
-    conversation_service = service or build_conversation_service()
+    conversation_service = (
+        service
+        if service is not None
+        else build_conversation_service(provider_name=provider_name)
+    )
 
     output_fn("Malāk CLI")
-    output_fn("Runtime activo: MockLLMRuntime")
+    output_fn(f"Runtime activo: {runtime_name}")
     output_fn("Escribe 'help' para ver los comandos disponibles.")
 
     while True:
@@ -92,17 +101,20 @@ def run_cli(
 
         if command == "status":
             output_fn(
-                "Estado: operativo | Provider: mock | "
-                "Runtime: MockLLMRuntime"
+                f"Estado: operativo | Provider: {provider_name} | "
+                f"Runtime: {runtime_name}"
             )
             continue
 
         try:
-            request = ConversationRequest(prompt=prompt)
+            request = ConversationRequest(
+                prompt=prompt,
+                model=model,
+            )
 
             response = conversation_service.generate(
                 request=request,
-                provider=DEFAULT_PROVIDER,
+                provider=provider_name,
             )
         except Exception as exc:
             output_fn(f"Error controlado: {exc}")
