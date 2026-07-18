@@ -52,15 +52,17 @@ Las futuras herramientas deberán documentarse aquí antes de incorporarse al pr
 
 ---
 
-# Ejecución del Runtime
+# Ejecución de la CLI de desarrollo
 
-Actualmente:
+La interfaz disponible en el Sprint 7.0 es una CLI técnica de validación del subsistema conversacional.
+
+No representa el pipeline cognitivo completo de Malāk y utiliza actualmente `MockLLMRuntime`.
+
+Desde la raíz del repositorio, con el entorno virtual activado:
 
 ```powershell
-python src/app/main.py
-```
-
-En el futuro el Launcher oficial podrá evolucionar, pero deberá permanecer documentado aquí.
+python -m pip install -e .
+python -m malak.app.cli
 
 ---
 
@@ -69,10 +71,15 @@ En el futuro el Launcher oficial podrá evolucionar, pero deberá permanecer doc
 Desde el entorno virtual:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest
+python -m pytest -v
 ```
 
 Todos los tests deben finalizar exitosamente antes de cerrar un Sprint.
+
+Validación adicional de compilación:
+
+```powershell
+python -m compileall src tests
 
 ---
 
