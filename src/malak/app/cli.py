@@ -8,6 +8,7 @@ from malak.providers.mock_provider import MockConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.services.conversation_service import ConversationService
 from malak.core.llm_runtime import LLMRuntime
+from malak.runtime.ollama_runtime import OllamaRuntime
 
 
 DEFAULT_PROVIDER = "mock"
@@ -19,6 +20,21 @@ Comandos disponibles:
   exit    Finaliza la sesión.
 """.strip()
 
+def build_runtime(
+    runtime_name: str = DEFAULT_PROVIDER,
+) -> LLMRuntime:
+    """
+    Build a supported runtime for the CLI application boundary.
+    """
+    normalized_runtime_name = runtime_name.strip().lower()
+
+    if normalized_runtime_name == "mock":
+        return MockLLMRuntime()
+
+    if normalized_runtime_name == "ollama":
+        return OllamaRuntime()
+
+    raise ValueError(f"Unsupported runtime: {runtime_name}")
 
 def build_conversation_service(
     runtime: LLMRuntime | None = None,

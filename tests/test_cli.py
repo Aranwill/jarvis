@@ -3,10 +3,12 @@ from collections.abc import Callable, Iterator
 from malak.app.cli import (
     HELP_MESSAGE,
     build_conversation_service,
+    build_runtime,
     run_cli,
 )
 from malak.core.conversation import ConversationRequest
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
+from malak.runtime.ollama_runtime import OllamaRuntime
 
 
 def make_input(values: list[str]) -> Callable[[str], str]:
@@ -29,6 +31,7 @@ def test_build_conversation_service_uses_mock_provider() -> None:
     assert response.content == "[RUNTIME] Hola"
     assert response.provider == "runtime"
 
+
 def test_build_conversation_service_accepts_injected_runtime() -> None:
     runtime = MockLLMRuntime()
 
@@ -44,6 +47,34 @@ def test_build_conversation_service_accepts_injected_runtime() -> None:
 
     assert response.content == "[RUNTIME] Hola"
     assert response.provider == "runtime"
+
+
+def test_build_runtime_defaults_to_mock() -> None:
+    runtime = build_runtime()
+
+    assert isinstance(runtime, MockLLMRuntime)
+
+
+def test_build_runtime_selects_mock_explicitly() -> None:
+    runtime = build_runtime(runtime_name="mock")
+
+    assert isinstance(runtime, MockLLMRuntime)
+
+
+def test_build_runtime_selects_ollama() -> None:
+    runtime = build_runtime(runtime_name="ollama")
+
+    assert isinstance(runtime, OllamaRuntime)
+
+
+def test_build_runtime_rejects_unknown_runtime() -> None:
+    try:
+        build_runtime(runtime_name="unknown")
+    except ValueError as exc:
+        assert str(exc) == "Unsupported runtime: unknown"
+    else:
+        raise AssertionError("Expected ValueError")
+
 
 def test_run_cli_processes_prompt_and_exits() -> None:
     outputs: list[str] = []
