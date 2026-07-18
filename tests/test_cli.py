@@ -6,6 +6,7 @@ from malak.app.cli import (
     run_cli,
 )
 from malak.core.conversation import ConversationRequest
+from malak.runtime.mock_llm_runtime import MockLLMRuntime
 
 
 def make_input(values: list[str]) -> Callable[[str], str]:
@@ -28,6 +29,21 @@ def test_build_conversation_service_uses_mock_provider() -> None:
     assert response.content == "[RUNTIME] Hola"
     assert response.provider == "runtime"
 
+def test_build_conversation_service_accepts_injected_runtime() -> None:
+    runtime = MockLLMRuntime()
+
+    service = build_conversation_service(
+        runtime=runtime,
+        provider_name="ollama",
+    )
+
+    response = service.generate(
+        request=ConversationRequest(prompt="Hola"),
+        provider="ollama",
+    )
+
+    assert response.content == "[RUNTIME] Hola"
+    assert response.provider == "runtime"
 
 def test_run_cli_processes_prompt_and_exits() -> None:
     outputs: list[str] = []
