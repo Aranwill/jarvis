@@ -64,3 +64,6 @@ Thumbs.db
 # ==========================
 
 *.zip
+
+# Python package metadata
+*.egg-info/
