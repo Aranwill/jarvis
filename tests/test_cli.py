@@ -5,11 +5,15 @@ from malak.app.cli import (
     build_conversation_service,
     build_runtime,
     run_cli,
+    CLIConfiguration,
+    build_cli_configuration,
 )
+
 from malak.core.conversation import (
     ConversationRequest,
     ConversationResponse,
 )
+
 from malak.core.llm_runtime import LLMRuntime
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
@@ -74,6 +78,51 @@ def test_build_runtime_defaults_to_mock() -> None:
     runtime = build_runtime()
 
     assert isinstance(runtime, MockLLMRuntime)
+
+def test_build_cli_configuration_defaults_to_mock() -> None:
+    configuration = build_cli_configuration({})
+
+    assert configuration == CLIConfiguration(
+        runtime_name="mock",
+        provider_name="mock",
+        runtime_display_name="MockLLMRuntime",
+        model=None,
+        ollama_base_url="http://localhost:11434",
+    )
+
+
+def test_build_cli_configuration_selects_ollama() -> None:
+    configuration = build_cli_configuration(
+        {
+            "MALAK_RUNTIME": "ollama",
+            "MALAK_OLLAMA_MODEL": "qwen3.5:9b",
+            "MALAK_OLLAMA_BASE_URL": "http://localhost:11434",
+        }
+    )
+
+    assert configuration == CLIConfiguration(
+        runtime_name="ollama",
+        provider_name="ollama",
+        runtime_display_name="OllamaRuntime",
+        model="qwen3.5:9b",
+        ollama_base_url="http://localhost:11434",
+    )
+
+
+def test_build_cli_configuration_requires_model_for_ollama() -> None:
+    try:
+        build_cli_configuration(
+            {
+                "MALAK_RUNTIME": "ollama",
+            }
+        )
+    except ValueError as exc:
+        assert str(exc) == (
+            "MALAK_OLLAMA_MODEL is required "
+            "when MALAK_RUNTIME=ollama"
+        )
+    else:
+        raise AssertionError("Expected ValueError")
 
 
 def test_build_runtime_selects_mock_explicitly() -> None:

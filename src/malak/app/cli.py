@@ -1,6 +1,7 @@
 from __future__ import annotations
-
 from collections.abc import Callable
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 
 from malak.core.conversation import ConversationRequest
 from malak.core.conversation_registry import ConversationProviderRegistry
@@ -20,6 +21,53 @@ Comandos disponibles:
   exit    Finaliza la sesión.
 """.strip()
 
+@dataclass(frozen=True, slots=True)
+class CLIConfiguration:
+    runtime_name: str
+    provider_name: str
+    runtime_display_name: str
+    model: str | None
+    ollama_base_url: str
+
+def build_cli_configuration(
+    environment: Mapping[str, str],
+) -> CLIConfiguration:
+    """
+    Build validated CLI configuration from an external environment mapping.
+    """
+    runtime_name = environment.get("MALAK_RUNTIME", "mock").strip().lower()
+    ollama_base_url = environment.get(
+        "MALAK_OLLAMA_BASE_URL",
+        "http://localhost:11434",
+    ).strip()
+
+    if runtime_name == "mock":
+        return CLIConfiguration(
+            runtime_name="mock",
+            provider_name="mock",
+            runtime_display_name="MockLLMRuntime",
+            model=None,
+            ollama_base_url=ollama_base_url,
+        )
+
+    if runtime_name == "ollama":
+        model = environment.get("MALAK_OLLAMA_MODEL", "").strip()
+
+        if not model:
+            raise ValueError(
+                "MALAK_OLLAMA_MODEL is required "
+                "when MALAK_RUNTIME=ollama"
+            )
+
+        return CLIConfiguration(
+            runtime_name="ollama",
+            provider_name="ollama",
+            runtime_display_name="OllamaRuntime",
+            model=model,
+            ollama_base_url=ollama_base_url,
+        )
+
+    raise ValueError(f"Unsupported runtime: {runtime_name}")
 
 def build_runtime(
     runtime_name: str = DEFAULT_PROVIDER,
