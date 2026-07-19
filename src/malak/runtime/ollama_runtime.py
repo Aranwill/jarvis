@@ -12,7 +12,7 @@ from malak.core.conversation import (
 )
 from malak.core.llm_runtime import LLMRuntime
 from malak.runtime.runtime_metric_sample import RuntimeMetricSample
-from malak.runtime.runtime_metric_store import InMemoryRuntimeMetricStore
+from malak.runtime.runtime_metric_sink import RuntimeMetricSink
 from malak.runtime.runtime_metrics import RuntimeMetrics
 
 
@@ -30,7 +30,7 @@ class OllamaRuntime(LLMRuntime):
         base_url: str = "http://localhost:11434",
         timeout_seconds: float = 600.0,
         keep_alive: int | str = 0,
-        metric_store: InMemoryRuntimeMetricStore | None = None,
+        metric_store: RuntimeMetricSink | None = None,
     ) -> None:
         normalized_base_url = base_url.strip().rstrip("/")
 
