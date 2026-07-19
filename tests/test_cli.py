@@ -1,12 +1,14 @@
 from collections.abc import Callable, Iterator
+from malak.services.conversation_service import ConversationService
 
 from malak.app.cli import (
+    CLIConfiguration,
     HELP_MESSAGE,
+    build_cli_configuration,
     build_conversation_service,
     build_runtime,
+    main,
     run_cli,
-    CLIConfiguration,
-    build_cli_configuration,
 )
 
 from malak.core.conversation import (
@@ -236,3 +238,19 @@ def test_run_cli_handles_keyboard_interrupt() -> None:
     )
 
     assert "Sesión finalizada." in outputs
+
+def test_main_composes_mock_runtime_by_default(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run_cli(**kwargs: object) -> None:
+        captured.update(kwargs)
+
+    monkeypatch.setattr("malak.app.cli.run_cli", fake_run_cli)
+    monkeypatch.setattr("malak.app.cli.environ", {})
+
+    main()
+
+    assert captured["provider_name"] == "mock"
+    assert captured["runtime_name"] == "MockLLMRuntime"
+    assert captured["model"] is None
+    assert isinstance(captured["service"], ConversationService)

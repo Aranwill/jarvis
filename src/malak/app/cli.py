@@ -2,6 +2,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from os import environ
 
 from malak.core.conversation import ConversationRequest
 from malak.core.conversation_registry import ConversationProviderRegistry
@@ -71,6 +72,7 @@ def build_cli_configuration(
 
 def build_runtime(
     runtime_name: str = DEFAULT_PROVIDER,
+    ollama_base_url: str = "http://localhost:11434",
 ) -> LLMRuntime:
     """
     Build a supported runtime for the CLI application boundary.
@@ -81,7 +83,7 @@ def build_runtime(
         return MockLLMRuntime()
 
     if normalized_runtime_name == "ollama":
-        return OllamaRuntime()
+        return OllamaRuntime(base_url=ollama_base_url)
 
     raise ValueError(f"Unsupported runtime: {runtime_name}")
 
@@ -172,8 +174,24 @@ def run_cli(
 
 
 def main() -> None:
-    run_cli()
+    configuration = build_cli_configuration(environ)
 
+    runtime = build_runtime(
+        runtime_name=configuration.runtime_name,
+        ollama_base_url=configuration.ollama_base_url,
+    )
+
+    service = build_conversation_service(
+        runtime=runtime,
+        provider_name=configuration.provider_name,
+    )
+
+    run_cli(
+        service=service,
+        provider_name=configuration.provider_name,
+        runtime_name=configuration.runtime_display_name,
+        model=configuration.model,
+    )
 
 if __name__ == "__main__":
     main()
