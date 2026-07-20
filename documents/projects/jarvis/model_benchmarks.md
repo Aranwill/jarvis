@@ -1,66 +1,30 @@
 \# Benchmarks de Modelos
 
-
-
 \*\*Proyecto:\*\* Jarvis
-
-
-
 \*\*Estado:\*\* En evaluación
-
-
-
 \*\*Objetivo:\*\*
 
-
-
 Determinar los modelos más adecuados para cada rol dentro de Jarvis.
-
-
-
 \---
-
-
 
 \# Criterios de Evaluación
 
-
-
 \## Precisión Factual
 
-
-
 Capacidad para responder correctamente sin inventar información.
-
-
-
 Puntaje:
-
-
-
 ```text
 
 0 - 10
 
 ```
-
-
-
 \---
-
-
 
 \## Control de Hallucinations
 
-
-
 Capacidad para reconocer incertidumbre y evitar respuestas incorrectas.
 
-
-
 Puntaje:
-
-
 
 ```text
 
@@ -68,18 +32,11 @@ Puntaje:
 
 ```
 
-
-
 \---
-
-
 
 \## Calidad de Programación
 
-
-
 Capacidad para:
-
 
 
 \* Python
@@ -92,31 +49,18 @@ Capacidad para:
 
 \* Automatización
 
-
-
 Puntaje:
-
-
 
 ```text
 
 0 - 10
 
 ```
-
-
-
 \---
-
-
 
 \## Razonamiento
 
-
-
 Capacidad para:
-
-
 
 \* Analizar problemas
 
@@ -126,11 +70,7 @@ Capacidad para:
 
 \* Explicar decisiones
 
-
-
 Puntaje:
-
-
 
 ```text
 
@@ -138,43 +78,24 @@ Puntaje:
 
 ```
 
-
-
 \---
-
-
 
 \## Velocidad
 
-
-
 Tiempo percibido de respuesta.
 
-
-
 Puntaje:
-
-
 
 ```text
 
 0 - 10
 
 ```
-
-
-
 \---
-
-
 
 \## Uso de Recursos
 
-
-
 Evaluación subjetiva de:
-
-
 
 \* VRAM
 
@@ -182,23 +103,14 @@ Evaluación subjetiva de:
 
 \* CPU
 
-
-
 Puntaje:
-
-
 
 ```text
 
 0 - 10
 
 ```
-
-
-
 \---
-
-
 
 \# Resultados
 
@@ -218,88 +130,45 @@ Puntaje:
 
 | DeepSeek-Coder-v2 |           |                |        |              |           |          |       |
 
-
-
 \---
-
-
 
 \# Observaciones
 
-
-
 \## GPT-OSS
-
-
 
 Pendiente.
 
-
-
 \---
-
-
 
 \## Qwen3.5
 
-
-
 Pendiente.
 
-
-
 \---
-
-
 
 \## Gemma3
 
-
-
 Pendiente.
 
-
-
 \---
-
-
 
 \## Gemma4
 
-
-
 Pendiente.
 
-
-
 \---
-
-
 
 \## DeepSeek-Coder-v2
 
-
-
 Pendiente.
-
-
 
 \---
 
-
-
 \# Decisión Final
-
-
 
 Pendiente.
 
-
-
 Este documento será la base para seleccionar modelos oficiales en:
-
-
-
 ```text
 
 configs/models.yaml

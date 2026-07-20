@@ -26,8 +26,7 @@ Construir un asistente personal local llamado **Jarvis**, ejecutado completament
 
 * CPU: Intel Core i7-11700K
 * GPU: NVIDIA RTX 2060 12GB
-* RAM: 16GB DDR4
-* Objetivo futuro: 32GB DDR4
+* RAM: 32GB DDR4
 * Almacenamiento principal del proyecto: D:\\Ollama
 
 \---

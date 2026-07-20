@@ -308,3 +308,34 @@ Todo cambio completado debe informar:
 El rollback debe limitarse a los archivos modificados y no debe descartar trabajo no relacionado del usuario.
 
 Ningún cambio está completo sólo porque se haya escrito código. Está completo únicamente cuando el alcance, la validación, la documentación y el rollback son claros.
+
+## Justificación y aprobación obligatorias de cada sprint
+
+La existencia de un sprint, una ficha de sprint, una entrada de roadmap, una recomendación técnica o una capacidad prevista no constituye autorización para implementarla.
+
+Todos los sprints pendientes se consideran exclusivamente propuestas o recomendaciones hasta completar, como mínimo, las siguientes etapas:
+
+1. inspección completa del baseline vigente;
+2. lectura del código, pruebas y documentación aplicables;
+3. identificación de una necesidad real y comprobada de Malāk;
+4. justificación de su utilidad cognitiva, arquitectónica, operativa o de gobernanza;
+5. definición explícita del alcance y de lo que queda fuera de alcance;
+6. evaluación de riesgos, dependencias, impacto y rollback;
+7. validación mediante las cuatro preguntas obligatorias;
+8. presentación del plan de ejecución al propietario;
+9. debate y revisión integral del plan;
+10. aprobación explícita e inequívoca del propietario.
+
+Sin la aprobación explícita del propietario no se debe:
+
+- crear una rama;
+- modificar documentación o código;
+- incorporar una dependencia;
+- cambiar contratos;
+- ejecutar una implementación;
+- realizar commits, push, Pull Requests o merges.
+
+La aprobación de un sprint anterior no autoriza automáticamente el siguiente.
+
+El orden, número o título de un sprint en un roadmap no obliga a ejecutarlo. Un sprint puede ser redefinido, diferido, reemplazado o descartado cuando su justificación no sea suficiente o cuando exista una alternativa más coherente con los documentos normativos y el baseline vigente.
+

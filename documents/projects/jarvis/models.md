@@ -31,7 +31,7 @@ nomic-embed-text-v2-moe:latest    ff9c2f10ef5e    957 MB    6 days ago
 
 ## Roles
 
-La asignaciÃ³n de modelos por rol se define en:
+La asignación de modelos por rol se define en:
 
 ```text
 configs/models.yaml
@@ -39,7 +39,7 @@ configs/models.yaml
 
 ## Observaciones
 
-- Documento generado automÃ¡ticamente.
+- Documento generado automáticamente.
 - No editar manualmente.
 - Actualizar mediante scripts/update-models.ps1.
 - Los modelos pueden variar durante la fase de laboratorio.
