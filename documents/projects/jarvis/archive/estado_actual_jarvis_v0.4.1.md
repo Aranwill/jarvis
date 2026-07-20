@@ -1,5 +1,8 @@
 # Estado Actual del Proyecto Jarvis
 
+> **Documento histórico legacy.**
+> Este archivo describe el estado de Jarvis v0.4.1 y no representa el estado actual de Malāk.
+> No posee autoridad normativa, operativa ni de planificación.
 **Versión:** v0.4.1
 **Estado:** Operativo / Estable local
 **Última actualización:** 2026-06-07
