@@ -16,10 +16,14 @@ Estado de desarrollo:
 Foundation Implementation
 ```
 
+Rama permanente:
+
+`main`
+
 Baseline operativo actual:
 
 ```text
-Sprint 7.1 completado
+Sprint 7.2 cerrado - Runtime Metric Sink Contract
 ```
 
 La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional.
@@ -206,10 +210,10 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-Estado validado al cierre del Sprint 7.1:
+Estado validado al cierre del Sprint 7.2:
 
 ```text
-67 passed
+69 passed
 ```
 
 Validar compilación:

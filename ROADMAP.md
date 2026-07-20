@@ -1,114 +1,35 @@
-\# Jarvis Roadmap
+﻿# Roadmap de Malāk
 
-Versión del documento: 1.0
-Estado: Activo
-\---
+## Propósito
 
-\# Visión
+Este archivo funciona como punto de entrada a la planificación del proyecto.
 
-Construir una plataforma cognitiva modular, gobernable y extensible, capaz de evolucionar mediante capacidades independientes bajo un Kernel mínimo y una arquitectura orientada a eventos.
+No define arquitectura, no aprueba implementaciones y no reemplaza las fuentes normativas de Malāk.
 
-\---
+## Planificación preliminar
 
-\# Estado actual
-\## Baseline v0.5.0-alpha
-\- \[x] Blueprint
-\- \[x] Cognitive Constitution
-\- \[x] Governance Constitution
-\- \[x] Kernel Specification
-\- \[x] Filosofía Operativa
-\- \[x] Arquitectura Base
-\- \[x] Repositorio Git
-\- \[x] GitHub
+La hoja de ruta derivada y no normativa se encuentra en:
 
-\---
+`docs/project/implementation_roadmap.md`
 
-\# Sprint 2 — Foundation Implementation
+Las propuestas allí enumeradas son recomendaciones pendientes de revisión.
 
-\## Objetivo
-Construir el primer Kernel funcional.
-\### Pendiente
+La existencia, numeración, posición o ficha de un sprint no constituye autorización para implementarlo.
 
-\- \[ ] Capability Registry
-\- \[ ] Event Bus
-\- \[ ] Configuration Loader
-\- \[ ] Kernel Bootstrap
-\- \[ ] Logging
-\- \[ ] Dependency Injection
+Cada sprint debe:
 
-\---
+1. justificarse contra el baseline vigente;
+2. revisarse integralmente contra el código, las pruebas y la documentación aplicables;
+3. definir alcance, exclusiones, riesgos, dependencias y rollback;
+4. superar las cuatro preguntas obligatorias;
+5. ser debatido y aprobado explícitamente por el propietario antes de crear una rama o modificar archivos.
 
-\# Sprint 3
-\## Memory Layer
+El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualquier propuesta.
 
-\- \[ ] Memory API
-\- \[ ] Memory Providers
-\- \[ ] Session Memory
-\- \[ ] Long Term Memory
+## Estado operativo
 
-\---
+El estado operativo resumido del proyecto se mantiene en:
 
-\# Sprint 4
+`README.md`
 
-\## Knowledge Layer
-
-\- \[ ] Knowledge Registry
-\- \[ ] Document Loader
-\- \[ ] Embedding Pipeline
-\- \[ ] RAG
-\---
-
-\# Sprint 5
-
-\## Capability Ecosystem
-\- \[ ] Capability Loader
-\- \[ ] Capability Lifecycle
-\- \[ ] Capability Manifest
-\- \[ ] Dynamic Registration
-\---
-
-\# Sprint 6
-
-\## Cognitive Engine
-
-\- \[ ] Context Builder
-\- \[ ] Reasoning Pipeline
-\- \[ ] Decision Engine
-\- \[ ] Planning Engine
-
-\---
-\# Sprint 7
-
-\## Interfaces
-
-\- \[ ] CLI
-\- \[ ] REST API
-\- \[ ] Web UI
-\- \[ ] Voice Interface
-\---
-
-\# Sprint 8
-
-\## Observability
-
-\- \[ ] Metrics
-\- \[ ] Tracing
-\- \[ ] Health Checks
-\- \[ ] Monitoring
-\---
-
-\# Sprint 9
-
-\## Security
-
-\- \[ ] Zero Trust Enforcement
-\- \[ ] Capability Sandbox
-\- \[ ] Permission Model
-\- \[ ] Audit Log
-
-\---
-
-\# Release objetivo
-
-v1.0.0
-
+Los registros históricos permanecen preservados en el historial de Git y en las ubicaciones documentales identificadas como históricas.
