@@ -23,7 +23,7 @@ Rama permanente:
 Baseline operativo actual:
 
 ```text
-Sprint 7.2 cerrado - Runtime Metric Sink Contract
+Sprint 7.3 validado - Conversation Provider Boundary Stabilization
 ```
 
 La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional.
@@ -50,7 +50,7 @@ LLMRuntime
 ├── MockLLMRuntime
 └── OllamaRuntime
         ↓
-MockConversationProvider
+RuntimeConversationProvider
         ↓
 ConversationProviderRegistry
         ↓
@@ -210,10 +210,10 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-Estado validado al cierre del Sprint 7.2:
+Estado validado durante el Sprint 7.3:
 
 ```text
-69 passed
+74 passed
 ```
 
 Validar compilación:
@@ -300,6 +300,8 @@ docs/development/development_environment.md
 docs/project/implementation_roadmap.md
 docs/project/sprints/SPRINT-7.0.md
 docs/project/sprints/SPRINT-7.1.md
+docs/project/sprints/SPRINT-7.2.md
+docs/project/sprints/SPRINT-7.3.md
 ```
 
 ## Principios
