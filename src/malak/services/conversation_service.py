@@ -7,14 +7,17 @@ from malak.core.conversation_registry import ConversationProviderRegistry
 
 class ConversationService:
     """
-    Coordinates conversation requests through the provider registry.
+    Delegates conversation requests to a registered provider.
 
-    This service isolates the rest of the system from provider-specific
-    implementations and acts as the future extension point for logging,
-    metrics, retries and provider selection.
+    The service resolves the requested provider and returns its response.
+    It does not select runtimes, models, retries, logging, metrics,
+    persistence, or governance policies.
     """
 
-    def __init__(self, registry: ConversationProviderRegistry):
+    def __init__(
+        self,
+        registry: ConversationProviderRegistry,
+    ) -> None:
         self._registry = registry
 
     def generate(

@@ -6,12 +6,15 @@ from malak.core.conversation import (
 from malak.core.llm_runtime import LLMRuntime
 
 
-class MockConversationProvider(ConversationProvider):
+class RuntimeConversationProvider(ConversationProvider):
     """
-    Mock provider used for development and tests.
+    Adapts conversation requests to an injected LLM runtime.
+
+    The provider preserves the conversation boundary while remaining
+    independent from any concrete runtime implementation.
     """
 
-    def __init__(self, runtime: LLMRuntime):
+    def __init__(self, runtime: LLMRuntime) -> None:
         self._runtime = runtime
 
     def generate(

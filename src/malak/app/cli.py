@@ -7,7 +7,7 @@ from os import environ
 from malak.core.conversation import ConversationRequest
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.llm_runtime import LLMRuntime
-from malak.providers.mock_provider import MockConversationProvider
+from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
 from malak.services.conversation_service import ConversationService
@@ -96,7 +96,7 @@ def build_conversation_service(
     Build the minimal conversation service used by the development CLI.
     """
     selected_runtime = runtime if runtime is not None else MockLLMRuntime()
-    provider = MockConversationProvider(selected_runtime)
+    provider = RuntimeConversationProvider(selected_runtime)
 
     registry = ConversationProviderRegistry()
     registry.register(provider_name, provider)

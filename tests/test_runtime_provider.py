@@ -1,11 +1,11 @@
 from malak.core.conversation import ConversationRequest
-from malak.providers.mock_provider import MockConversationProvider
+from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 
 
-def test_mock_provider_returns_response():
+def test_runtime_provider_returns_response():
     runtime = MockLLMRuntime()
-    provider = MockConversationProvider(runtime)
+    provider = RuntimeConversationProvider(runtime)
 
     response = provider.generate(
         ConversationRequest(prompt="Hello")
@@ -16,15 +16,15 @@ def test_mock_provider_returns_response():
     assert response.model == "mock-runtime"
 
 
-def test_mock_provider_preserves_model():
+def test_runtime_provider_preserves_model():
     runtime = MockLLMRuntime()
-    provider = MockConversationProvider(runtime)
+    provider = RuntimeConversationProvider(runtime)
 
     response = provider.generate(
         ConversationRequest(
             prompt="Hello",
-            model="phi4",
+            model="test-model",
         )
     )
 
-    assert response.model == "phi4"
+    assert response.model == "test-model"
