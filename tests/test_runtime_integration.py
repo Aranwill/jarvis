@@ -1,13 +1,13 @@
 from malak.core.conversation import ConversationRequest
 from malak.core.conversation_registry import ConversationProviderRegistry
-from malak.providers.mock_provider import MockConversationProvider
+from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.services.conversation_service import ConversationService
 
 
 def test_conversation_flow_through_provider_and_runtime() -> None:
     runtime = MockLLMRuntime()
-    provider = MockConversationProvider(runtime)
+    provider = RuntimeConversationProvider(runtime)
 
     registry = ConversationProviderRegistry()
     registry.register("mock", provider)
