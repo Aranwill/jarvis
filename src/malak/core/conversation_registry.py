@@ -59,4 +59,3 @@ class ConversationProviderRegistry:
             )
 
         return normalized_name
-        
