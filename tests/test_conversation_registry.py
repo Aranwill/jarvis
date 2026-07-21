@@ -1,7 +1,7 @@
 import pytest
 
 from malak.core.conversation_registry import ConversationProviderRegistry
-from malak.providers.mock_provider import MockConversationProvider
+from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 
 
@@ -10,7 +10,7 @@ def test_register_provider():
 
     registry.register(
         "mock",
-        MockConversationProvider(
+        RuntimeConversationProvider(
             MockLLMRuntime()
         ),
     )
@@ -23,7 +23,7 @@ def test_list_registered_providers():
 
     registry.register(
         "mock",
-        MockConversationProvider(
+        RuntimeConversationProvider(
             MockLLMRuntime()
         ),
     )
