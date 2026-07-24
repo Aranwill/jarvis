@@ -97,7 +97,7 @@ La rama parte del baseline oficial:
 fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
 ```
 
-El Incremento 1 documental está en progreso. La implementación de código todavía no se ha iniciado.
+El Incremento 1 documental quedó cerrado en el commit `ab586f4`. Se encuentra en curso un anexo documental posterior, sin cambios de código. La implementación del Incremento 2 todavía no se ha iniciado.
 
 ### Separación aprobada
 
@@ -119,6 +119,49 @@ La ficha operativa aprobada y sus incrementos se encuentran en:
 ```text
 docs/project/sprints/SPRINT-7.4.md
 ```
+
+### Registro de ideas y visión futura
+
+El documento:
+
+```text
+documents/projects/jarvis/ideas.md
+```
+
+mantiene un catálogo evolutivo y no normativo de ideas, capacidades e iniciativas futuras de Malāk.
+
+Su incorporación no aprueba automáticamente arquitectura, sprints ni implementación. Cada iniciativa deberá atravesar la revisión de necesidad, alcance, riesgos, dependencias, gobernanza y aprobación humana correspondiente.
+
+Durante el Sprint 7.4 se incorporó para planificación futura la iniciativa:
+
+**Sandbox Containment & Evaluation Evidence Foundation**
+
+Su ubicación lógica será posterior a `Security Control Plane Foundation` y anterior a simulaciones con agentes o al `Controlled Engineering Improvement Loop Foundation`.
+
+La iniciativa deberá abordar, mediante un sprint independiente:
+
+- aislamiento y entornos descartables;
+- control de red, archivos, procesos y herramientas;
+- límites de CPU, RAM, VRAM, disco, tiempo y procesos;
+- manifiestos reproducibles;
+- telemetría externa al agente;
+- registro verificable de operaciones;
+- snapshots y hashes anteriores y posteriores;
+- kill switch, timeout, cuarentena y cierre seguro;
+- artefactos detallados de evaluación en un store separado;
+- trazas experimentales de razonamiento opcionales y no autoritativas;
+- pruebas de contención y revisión humana obligatoria.
+
+Estado:
+
+```text
+Incorporada a la planificación futura.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint asignado.
+```
+
+Esta incorporación deberá reflejarse durante la próxima sincronización gobernada del Malāk Project Vault.
 
 ## Propuestas pendientes de revisión y aprobación
 

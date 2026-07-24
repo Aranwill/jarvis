@@ -335,11 +335,35 @@ Sí. Mantiene separación de responsabilidades, trazabilidad, privacidad, revisi
 
 Sí. El Kernel permanece completamente fuera del alcance y no recibe nuevas dependencias.
 
+## Anexo documental posterior al Incremento 1
+
+Durante la revisión previa al Incremento 2 se formalizó:
+
+```text
+documents/projects/jarvis/ideas.md
+```
+
+como registro evolutivo y no normativo de ideas y visión futura de Malāk.
+
+El documento preserva iniciativas para su evaluación posterior, pero no posee autoridad para aprobar sprints, modificar el roadmap, definir arquitectura implementada ni autorizar cambios de código.
+
+Entre las iniciativas registradas se encuentra `Sandbox Containment & Evaluation Evidence Foundation`, incorporada a la planificación futura para controlar, contener y producir evidencia externa de las ejecuciones realizadas en sandboxes.
+
+Esta incorporación:
+
+- no amplía la implementación técnica del Sprint 7.4;
+- no implementa sandboxes, agentes ni simulaciones;
+- no implementa el futuro ciclo de mejora controlada;
+- no convierte trazas de razonamiento en evidencia autoritativa;
+- no modifica el Kernel ni `ConversationService`;
+- deberá reflejarse en la próxima sincronización gobernada del Vault.
+
 ## Estado actual
 
 ```text
 Sprint aprobado.
 Rama creada desde el baseline oficial.
-Incremento 1 documental en progreso.
-Implementación de código todavía no iniciada.
+Incremento 1 documental cerrado en el commit ab586f4.
+Anexo documental posterior al Incremento 1 en validación.
+Implementación del Incremento 2 todavía no iniciada.
 ```
