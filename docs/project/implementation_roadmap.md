@@ -81,7 +81,7 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 
 | Sprint | Estado | Objetivo |
 |---|---|---|
-| 7.4 | En progreso | Consolidar la frontera entre métricas, logs o eventos operativos y auditoría |
+| 7.4 | En progreso — listo para PR | Consolidar la frontera entre métricas, logs o eventos operativos y auditoría |
 
 El Sprint 7.4 fue aprobado explícitamente por el propietario después de revisar el baseline, comprobar la necesidad, definir el alcance y resolver conceptualmente la separación entre los tres subsistemas.
 
@@ -97,7 +97,28 @@ La rama parte del baseline oficial:
 fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
 ```
 
-El Incremento 1 documental quedó cerrado en el commit `ab586f4`. Se encuentra en curso un anexo documental posterior, sin cambios de código. La implementación del Incremento 2 todavía no se ha iniciado.
+Los Incrementos 1 a 7 fueron completados y validados mediante cambios
+incrementales y revisión humana.
+
+El Incremento 7 concluyó con resultado `APTO` sobre el HEAD:
+
+```text
+5b951918006c464745e1eb1e3816bde619fad8b1
+```
+
+La validación integral confirmó:
+
+- pruebas específicas: 94 passed;
+- suite completa: 121 passed;
+- `compileall`: PASS;
+- `git diff --check`: PASS;
+- ausencia de hallazgos bloqueantes;
+- rama lista para preparar el PR.
+
+El Sprint 7.4 permanece en progreso porque el Incremento 8 sólo puede
+ejecutarse después del merge aprobado en `main`. Ese incremento queda
+limitado a la sincronización gobernada del Vault y no constituye
+implementación operativa dentro de Malāk.
 
 ### Separación aprobada
 
@@ -108,7 +129,9 @@ El Incremento 1 documental quedó cerrado en el commit `ab586f4`. Se encuentra e
 - Solo pueden compartir convenciones mínimas de trazabilidad, como identificadores estables, fechas UTC y nombres de eventos o componentes.
 - `RuntimeMetricSample` y los stores de métricas existentes no se reutilizan para logs ni auditoría.
 - No se crea un envelope universal de observabilidad.
-- Cuando existe una solicitud conversacional, la correlación reutiliza su `request_id`.
+- Para cada intento conversacional válido, la CLI genera exclusivamente
+  el `request_id` utilizado para correlación, sin modificar
+  `ConversationRequest` ni los demás contratos conversacionales.
 - La auditoría de seguridad no se implementa en el Sprint 7.4; su frontera se preserva para el futuro Security Control Plane Foundation.
 - El Kernel y `ConversationService` permanecen fuera del alcance.
 - No se almacenan por defecto prompts completos, respuestas completas, secretos, credenciales ni contenido sensible innecesario.
@@ -214,7 +237,10 @@ Ninguna propuesta futura puede:
 - `docs/project/sprints/SPRINT-7.6.md`
 - `docs/project/sprints/SPRINT-7.7.md`
 
-La ficha del Sprint 7.4 documenta un sprint aprobado y en progreso.
+La ficha del Sprint 7.4 documenta un sprint aprobado, con cierre
+técnico validado y listo para preparar el PR. El sprint permanece en
+progreso únicamente porque la sincronización gobernada del Vault del
+Incremento 8 debe realizarse después del merge aprobado en `main`.
 
 Las demás fichas pendientes son propuestas y no constituyen autorización de implementación.
 

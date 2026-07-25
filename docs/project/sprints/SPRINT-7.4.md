@@ -2,7 +2,7 @@
 title: Sprint 7.4 — Consolidación de logs, métricas y auditoría
 status: en progreso
 authority: operativa del sprint
-as_of_commit: f1452a109142b6e9186fe59de89a641651b38558
+as_of_commit: 5b951918006c464745e1eb1e3816bde619fad8b1
 baseline_commit: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
 branch: feature/sprint-7.4-logs-metrics-audit
 language: es
@@ -468,12 +468,41 @@ Deuda futura no bloqueante, fuera del alcance del Sprint 7.4:
 Estas observaciones no requieren correcciones dentro del Sprint 7.4
 ni amplían su alcance aprobado.
 
-Siguiente paso:
-- preparar el Incremento 7 — Validación y cierre, que permanece
-  pendiente de aprobación y ejecución;
-- el Incremento 8 — Sincronización gobernada del Vault permanece
-  pendiente y sólo corresponde después del merge aprobado en `main`.
+Incremento 7 — Validación y cierre:
+- completado y validado;
+- revisión humana aprobada;
+- conclusión general: APTO;
+- validación integral ejecutada sobre el HEAD:
+  5b951918006c464745e1eb1e3816bde619fad8b1;
+- pruebas específicas: 94 passed;
+- suite completa: 121 passed;
+- compileall: PASS;
+- git diff --check del working tree: PASS;
+- git diff --check main...HEAD: PASS;
+- alcance sometido a validación integral:
+  14 archivos modificados respecto de main,
+  2084 inserciones y 44 eliminaciones;
+- privacidad: PASS;
+- separación arquitectónica: PASS;
+- compatibilidad con los contratos existentes: PASS;
+- rollback simple y trazable: PASS;
+- Kernel, Planner, ConversationService y contratos conversacionales
+  permanecen intactos;
+- no se incorporaron dependencias externas;
+- no se identificaron hallazgos bloqueantes;
+- la deuda futura del Incremento 6 se conserva como no bloqueante y
+  fuera del alcance del Sprint 7.4;
+- rama lista para preparar el PR.
 
-El Sprint 7.4 permanece en progreso. Los Incrementos 7 y 8 continúan
-pendientes.
+Siguiente paso:
+- preparar el PR mediante el flujo gobernado y la aprobación humana
+  correspondiente;
+- después del merge aprobado en `main`, ejecutar el Incremento 8
+  exclusivamente como sincronización gobernada del Vault;
+- el Incremento 8 no constituye implementación operativa dentro de
+  Malāk.
+
+El cierre técnico previo al PR quedó validado. El Sprint 7.4 permanece
+en progreso porque el Incremento 8 continúa pendiente y sólo puede
+ejecutarse después del merge aprobado en `main`.
 ```
