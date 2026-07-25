@@ -43,7 +43,10 @@ Los tres subsistemas podrán compartir convenciones mínimas de trazabilidad, pe
 
 El sprint no implementa una plataforma general de observabilidad ni concede autoridad automática a la telemetría.
 
-## Necesidad verificada
+## Necesidad verificada del baseline inicial
+
+Esta sección se conserva como evidencia histórica del baseline inicial
+del Sprint 7.4. No describe el estado actual de la implementación.
 
 El baseline ya dispone de:
 
@@ -104,9 +107,12 @@ Los subsistemas podrán compartir únicamente convenciones mínimas, como:
 
 No se creará un envelope universal de observabilidad.
 
-Cuando exista una solicitud conversacional se reutilizará su `request_id`.
+Para cada prompt válido que alcanza un intento conversacional, la CLI
+genera exclusivamente un nuevo `request_id`.
 
-Un identificador de ejecución separado solo se incorporará si un proceso no dispone de `request_id` y el incremento correspondiente demuestra su necesidad.
+El identificador se incorpora a los eventos operativos correlacionados,
+pero no a `ConversationRequest` ni a los demás contratos
+conversacionales, que permanecen intactos.
 
 ## Alcance aprobado
 
@@ -120,7 +126,9 @@ Un identificador de ejecución separado solo se incorporará si un proceso no di
 - definir y probar el comportamiento ante fallos de escritura;
 - aplicar una allowlist estricta de campos;
 - excluir contenido sensible;
-- reutilizar `request_id` para correlación conversacional;
+- generar exclusivamente en la CLI el `request_id` utilizado para
+  correlación conversacional, sin modificar los contratos
+  conversacionales;
 - evaluar una integración mínima únicamente en la frontera de aplicación o CLI;
 - documentar la frontera que separa la observabilidad operativa de la auditoría de seguridad;
 - validar privacidad, compatibilidad, reversibilidad y comportamiento ante errores.
@@ -181,7 +189,8 @@ Un identificador de ejecución separado solo se incorporará si un proceso no di
 
 - inspeccionar la frontera de aplicación o CLI;
 - integrar únicamente eventos operativos justificados;
-- reutilizar `request_id`;
+- generar el `request_id` exclusivamente en la CLI sin modificar
+  `ConversationRequest` ni los demás contratos conversacionales;
 - preservar el comportamiento observable existente;
 - mantener intactos el Kernel y `ConversationService`.
 
@@ -250,7 +259,9 @@ limitada a esos dos archivos durante el Incremento 5.
 - la persistencia operativa utiliza un store independiente;
 - los fallos de persistencia tienen comportamiento explícito y probado;
 - no se almacenan prompts, respuestas completas, secretos ni credenciales;
-- la correlación reutiliza `request_id` cuando corresponde;
+- la correlación utiliza el `request_id` generado exclusivamente en la
+  CLI, sin modificar `ConversationRequest` ni los demás contratos
+  conversacionales;
 - el Kernel permanece sin cambios;
 - `ConversationService` permanece sin cambios;
 - no se implementa autorización ni auditoría de seguridad;
@@ -405,7 +416,7 @@ Validaciones del Incremento 5:
 - compileall: PASS;
 - git diff --check: PASS.
 
-Evidencia persistida del sandbox:
+Evidencia preservada de la validación en sandbox:
 - UUID generado por la CLI:
   b2077885-2956-418b-8721-62fd844fb091;
 - primer evento: conversation.started;
@@ -413,7 +424,9 @@ Evidencia persistida del sandbox:
 - ambos eventos contienen exactamente el mismo request_id;
 - request_id validado como UUID;
 - correlación: PASS;
-- sandbox conservado y pendiente de cierre humano.
+- sandbox temporal y JSONL eliminados de forma controlada después de
+  la revisión y aprobación humanas;
+- UUID y resultado de correlación preservados en esta ficha.
 
 El Kernel, el Planner, ConversationService y los contratos
 conversacionales permanecieron intactos.
