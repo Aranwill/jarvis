@@ -1,12 +1,15 @@
 from __future__ import annotations
-from collections.abc import Callable
+import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from os import environ
 
 from malak.core.conversation import ConversationRequest
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.llm_runtime import LLMRuntime
+from malak.observability.operational_event import OperationalEvent
+from malak.observability.operational_event_sink import OperationalEventSink
 from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
@@ -111,6 +114,7 @@ def run_cli(
     model: str | None = None,
     input_fn: Callable[[str], str] = input,
     output_fn: Callable[[str], None] = print,
+    operational_event_sink: OperationalEventSink | None = None,
 ) -> None:
     """
     Run the minimal interactive Malāk command-line interface.
@@ -156,19 +160,74 @@ def run_cli(
             )
             continue
 
-        try:
-            request = ConversationRequest(
-                prompt=prompt,
-                model=model,
-            )
+        request_id = str(uuid.uuid4())
+        request = ConversationRequest(
+            prompt=prompt,
+            model=model,
+        )
 
+        if operational_event_sink is not None:
+            try:
+                operational_event_sink.append(
+                    OperationalEvent(
+                        event_name="conversation.started",
+                        component="cli",
+                        occurred_at=datetime.now(timezone.utc),
+                        outcome="started",
+                        request_id=request_id,
+                        reason_code=None,
+                    )
+                )
+            except Exception as exc:
+                output_fn(
+                    f"Error controlado de observabilidad: {exc}"
+                )
+                continue
+
+        try:
             response = conversation_service.generate(
                 request=request,
                 provider=provider_name,
             )
         except Exception as exc:
             output_fn(f"Error controlado: {exc}")
+
+            if operational_event_sink is not None:
+                try:
+                    operational_event_sink.append(
+                        OperationalEvent(
+                            event_name="conversation.failed",
+                            component="cli",
+                            occurred_at=datetime.now(timezone.utc),
+                            outcome="failed",
+                            request_id=request_id,
+                            reason_code="runtime_error",
+                        )
+                    )
+                except Exception as observability_exc:
+                    output_fn(
+                        "Error controlado de observabilidad: "
+                        f"{observability_exc}"
+                    )
+
             continue
+
+        if operational_event_sink is not None:
+            try:
+                operational_event_sink.append(
+                    OperationalEvent(
+                        event_name="conversation.succeeded",
+                        component="cli",
+                        occurred_at=datetime.now(timezone.utc),
+                        outcome="succeeded",
+                        request_id=request_id,
+                        reason_code=None,
+                    )
+                )
+            except Exception as exc:
+                output_fn(
+                    f"Error controlado de observabilidad: {exc}"
+                )
 
         output_fn(f"Malāk> {response.content}")
 
