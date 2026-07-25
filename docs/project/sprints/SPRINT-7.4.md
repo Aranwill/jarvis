@@ -2,7 +2,7 @@
 title: Sprint 7.4 — Consolidación de logs, métricas y auditoría
 status: en progreso
 authority: operativa del sprint
-as_of_commit: 8f9ab23b01c302dee04e7be03ec6a66bf50df2c5
+as_of_commit: f1452a109142b6e9186fe59de89a641651b38558
 baseline_commit: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
 branch: feature/sprint-7.4-logs-metrics-audit
 language: es
@@ -235,9 +235,11 @@ Cualquier integración con:
 
 ```text
 src/malak/app/cli.py
+tests/test_cli.py
 ```
 
-deberá aprobarse después de inspeccionar su frontera exacta.
+fue aprobada después de inspeccionar su frontera exacta y quedó
+limitada a esos dos archivos durante el Incremento 5.
 
 ## Criterios de aceptación
 
@@ -385,14 +387,41 @@ Incremento 4 — Persistencia JSONL:
 - límite máximo de 4096 bytes por línea;
 - errores de persistencia explícitos y probados.
 
-Suite completa verificada: 114 passed.
-Working tree verificado: limpio.
+Incremento 5 — Integración mínima:
+- implementado y validado;
+- alcance limitado a src/malak/app/cli.py y tests/test_cli.py;
+- commit de implementación:
+  f1452a109142b6e9186fe59de89a641651b38558;
+- generación del request_id exclusivamente en la CLI;
+- emisión correlacionada de conversation.started y
+  conversation.succeeded para el intento exitoso;
+- comportamiento ante fallos del servicio y del sink probado;
+- compatibilidad sin sink preservada;
+- sin persistencia implícita ni creación automática de stores.
+
+Validaciones del Incremento 5:
+- pruebas específicas de CLI: 23 passed;
+- suite completa: 121 passed;
+- compileall: PASS;
+- git diff --check: PASS.
+
+Evidencia persistida del sandbox:
+- UUID generado por la CLI:
+  b2077885-2956-418b-8721-62fd844fb091;
+- primer evento: conversation.started;
+- segundo evento: conversation.succeeded;
+- ambos eventos contienen exactamente el mismo request_id;
+- request_id validado como UUID;
+- correlación: PASS;
+- sandbox conservado y pendiente de cierre humano.
+
+El Kernel, el Planner, ConversationService y los contratos
+conversacionales permanecieron intactos.
 
 Siguiente paso:
-- inspeccionar la frontera exacta de src/malak/app/cli.py;
-- definir el alcance concreto del Incremento 5;
-- solicitar aprobación antes de modificar código.
+- ejecutar el Incremento 6 — Privacidad y revisión arquitectónica,
+  únicamente después de su revisión y aprobación explícita.
 
-Todavía no existe integración del evento operativo con la CLI.
-El Kernel, el Planner y ConversationService permanecen sin cambios.
+El Sprint 7.4 permanece en progreso. Los Incrementos 6, 7 y 8
+continúan pendientes.
 ```
