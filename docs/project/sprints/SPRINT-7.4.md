@@ -431,10 +431,49 @@ Evidencia preservada de la validación en sandbox:
 El Kernel, el Planner, ConversationService y los contratos
 conversacionales permanecieron intactos.
 
-Siguiente paso:
-- ejecutar el Incremento 6 — Privacidad y revisión arquitectónica,
-  únicamente después de su revisión y aprobación explícita.
+Incremento 6 — Privacidad y revisión arquitectónica:
+- completado y validado mediante inspección de solo lectura;
+- revisión ejecutada sobre el HEAD:
+  7ef432d209eaba9d34828ebcbdb25b7d41797488;
+- revisión humana aprobada;
+- resultado general: APTO;
+- no se identificaron hallazgos bloqueantes.
 
-El Sprint 7.4 permanece en progreso. Los Incrementos 6, 7 y 8
-continúan pendientes.
+Resultados del Incremento 6:
+- privacidad de los eventos persistidos: PASS;
+- ausencia de prompts, respuestas del modelo, contenido
+  conversacional, secretos y datos sensibles: PASS;
+- minimización de metadatos: PASS;
+- separación entre métricas, eventos operativos y auditoría: PASS;
+- ausencia de semántica de autorización o seguridad: PASS;
+- degradación controlada ante fallos del sink o del almacenamiento:
+  PASS;
+- compatibilidad con los contratos existentes: PASS;
+- Kernel, Planner, ConversationService y contratos conversacionales
+  permanecen intactos;
+- no se incorporaron dependencias externas;
+- rollback simple y trazable;
+- suite completa: evidencia vigente de 121 passed, no reejecutada
+  durante la inspección del Incremento 6.
+
+Deuda futura no bloqueante, fuera del alcance del Sprint 7.4:
+- validación adicional de identificadores;
+- control de exposición de errores;
+- rotación y límites de crecimiento;
+- retención y eliminación;
+- concurrencia;
+- recuperación ante corrupción parcial;
+- permisos del archivo persistido.
+
+Estas observaciones no requieren correcciones dentro del Sprint 7.4
+ni amplían su alcance aprobado.
+
+Siguiente paso:
+- preparar el Incremento 7 — Validación y cierre, que permanece
+  pendiente de aprobación y ejecución;
+- el Incremento 8 — Sincronización gobernada del Vault permanece
+  pendiente y sólo corresponde después del merge aprobado en `main`.
+
+El Sprint 7.4 permanece en progreso. Los Incrementos 7 y 8 continúan
+pendientes.
 ```
