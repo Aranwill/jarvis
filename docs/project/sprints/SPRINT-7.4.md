@@ -2,7 +2,7 @@
 title: Sprint 7.4 — Consolidación de logs, métricas y auditoría
 status: en progreso
 authority: operativa del sprint
-as_of_commit: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
+as_of_commit: 8f9ab23b01c302dee04e7be03ec6a66bf50df2c5
 baseline_commit: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
 branch: feature/sprint-7.4-logs-metrics-audit
 language: es
@@ -361,9 +361,38 @@ Esta incorporación:
 ## Estado actual
 
 ```text
-Sprint aprobado.
-Rama creada desde el baseline oficial.
-Incremento 1 documental cerrado en el commit ab586f4.
-Anexo documental posterior al Incremento 1 en validación.
-Implementación del Incremento 2 todavía no iniciada.
+Sprint 7.4 aprobado y en progreso.
+Rama: feature/sprint-7.4-logs-metrics-audit.
+Baseline inicial: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627.
+
+Incremento 1 — Activación documental:
+- cerrado en el commit ab586f4.
+
+Incremento 2 — Contrato de evento operativo:
+- cerrado en el commit 9759525;
+- contrato mínimo e inmutable implementado;
+- allowlist y validaciones deterministas incorporadas.
+
+Incremento 3 — Sink y store en memoria:
+- cerrado en el commit 3c0cf90;
+- sink de solo escritura y store en memoria implementados;
+- orden de inserción y copias defensivas validados.
+
+Incremento 4 — Persistencia JSONL:
+- cerrado en el commit 8f9ab23;
+- persistencia append-only separada de las métricas;
+- allowlist de seis campos;
+- límite máximo de 4096 bytes por línea;
+- errores de persistencia explícitos y probados.
+
+Suite completa verificada: 114 passed.
+Working tree verificado: limpio.
+
+Siguiente paso:
+- inspeccionar la frontera exacta de src/malak/app/cli.py;
+- definir el alcance concreto del Incremento 5;
+- solicitar aprobación antes de modificar código.
+
+Todavía no existe integración del evento operativo con la CLI.
+El Kernel, el Planner y ConversationService permanecen sin cambios.
 ```
