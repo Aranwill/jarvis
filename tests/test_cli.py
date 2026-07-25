@@ -1,4 +1,7 @@
 from collections.abc import Callable, Iterator
+from datetime import timedelta, timezone
+from uuid import UUID
+
 from malak.services.conversation_service import ConversationService
 
 from malak.app.cli import (
@@ -17,6 +20,7 @@ from malak.core.conversation import (
 )
 
 from malak.core.llm_runtime import LLMRuntime
+from malak.observability.operational_event import OperationalEvent
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
 
@@ -45,6 +49,50 @@ class RecordingRuntime(LLMRuntime):
             model=request.model,
             provider="recording-runtime",
         )
+
+
+class RecordingOperationalEventSink:
+    def __init__(self) -> None:
+        self.events: list[OperationalEvent] = []
+
+    def append(self, event: OperationalEvent) -> None:
+        self.events.append(event)
+
+
+class FailingOperationalEventSink(RecordingOperationalEventSink):
+    def __init__(
+        self,
+        event_name: str,
+        failures: int | None = None,
+    ) -> None:
+        super().__init__()
+        self.event_name = event_name
+        self.failures = failures
+        self.attempted_event_names: list[str] = []
+
+    def append(self, event: OperationalEvent) -> None:
+        self.attempted_event_names.append(event.event_name)
+
+        if event.event_name == self.event_name:
+            if self.failures is None or self.failures > 0:
+                if self.failures is not None:
+                    self.failures -= 1
+                raise RuntimeError("sink no disponible")
+
+        super().append(event)
+
+
+class FailingConversationService:
+    def __init__(self) -> None:
+        self.call_count = 0
+
+    def generate(
+        self,
+        request: ConversationRequest,
+        provider: str,
+    ) -> ConversationResponse:
+        self.call_count += 1
+        raise RuntimeError("fallo conversacional")
 
 
 def test_build_conversation_service_uses_mock_provider() -> None:
@@ -188,6 +236,180 @@ def test_run_cli_processes_prompt_and_exits() -> None:
     assert "Malāk CLI" in outputs
     assert "Malāk> [RUNTIME] Hola Malāk" in outputs
     assert "Sesión finalizada." in outputs
+
+
+def test_run_cli_emits_correlated_started_and_succeeded_events(
+    monkeypatch,
+) -> None:
+    fixed_uuid = UUID("12345678-1234-5678-1234-567812345678")
+    monkeypatch.setattr(
+        "malak.app.cli.uuid.uuid4",
+        lambda: fixed_uuid,
+    )
+    outputs: list[str] = []
+    sink = RecordingOperationalEventSink()
+
+    run_cli(
+        input_fn=make_input(["Hola Malāk", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert len(sink.events) == 2
+    started, succeeded = sink.events
+    assert started == OperationalEvent(
+        event_name="conversation.started",
+        component="cli",
+        occurred_at=started.occurred_at,
+        outcome="started",
+        request_id=str(fixed_uuid),
+        reason_code=None,
+    )
+    assert succeeded == OperationalEvent(
+        event_name="conversation.succeeded",
+        component="cli",
+        occurred_at=succeeded.occurred_at,
+        outcome="succeeded",
+        request_id=str(fixed_uuid),
+        reason_code=None,
+    )
+    assert started.occurred_at.utcoffset() == timedelta(0)
+    assert succeeded.occurred_at.utcoffset() == timedelta(0)
+    assert started.occurred_at.tzinfo is timezone.utc
+    assert succeeded.occurred_at.tzinfo is timezone.utc
+
+
+def test_run_cli_emits_correlated_started_and_failed_events(
+    monkeypatch,
+) -> None:
+    fixed_uuid = UUID("87654321-4321-8765-4321-876543218765")
+    monkeypatch.setattr(
+        "malak.app.cli.uuid.uuid4",
+        lambda: fixed_uuid,
+    )
+    outputs: list[str] = []
+    sink = RecordingOperationalEventSink()
+    service = FailingConversationService()
+
+    run_cli(
+        service=service,  # type: ignore[arg-type]
+        input_fn=make_input(["Hola Malāk", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert len(sink.events) == 2
+    started, failed = sink.events
+    assert started.event_name == "conversation.started"
+    assert started.request_id == str(fixed_uuid)
+    assert failed == OperationalEvent(
+        event_name="conversation.failed",
+        component="cli",
+        occurred_at=failed.occurred_at,
+        outcome="failed",
+        request_id=str(fixed_uuid),
+        reason_code="runtime_error",
+    )
+    assert "Error controlado: fallo conversacional" in outputs
+
+
+def test_run_cli_without_sink_preserves_existing_behavior() -> None:
+    outputs: list[str] = []
+
+    run_cli(
+        input_fn=make_input(["Hola Malāk", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Malāk> [RUNTIME] Hola Malāk" in outputs
+    assert not any(
+        "observabilidad" in output
+        for output in outputs
+    )
+
+
+def test_run_cli_does_not_emit_events_for_commands_or_empty_input() -> None:
+    outputs: list[str] = []
+    sink = RecordingOperationalEventSink()
+
+    run_cli(
+        input_fn=make_input(["   ", "help", "status", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert sink.events == []
+
+
+def test_run_cli_skips_service_when_started_event_fails_and_continues() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+    sink = FailingOperationalEventSink(
+        event_name="conversation.started",
+        failures=1,
+    )
+
+    run_cli(
+        service=service,
+        input_fn=make_input(["Primero", "Segundo", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert runtime.last_request is not None
+    assert runtime.last_request.prompt == "Segundo"
+    assert sink.attempted_event_names == [
+        "conversation.started",
+        "conversation.started",
+        "conversation.succeeded",
+    ]
+    assert "Error controlado de observabilidad: sink no disponible" in outputs
+    assert "Malāk> Respuesta controlada" in outputs
+
+
+def test_run_cli_preserves_response_when_succeeded_event_fails() -> None:
+    outputs: list[str] = []
+    sink = FailingOperationalEventSink(
+        event_name="conversation.succeeded",
+    )
+
+    run_cli(
+        input_fn=make_input(["Hola Malāk", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert sink.attempted_event_names == [
+        "conversation.started",
+        "conversation.succeeded",
+    ]
+    assert "Malāk> [RUNTIME] Hola Malāk" in outputs
+    assert "Error controlado de observabilidad: sink no disponible" in outputs
+    assert "conversation.failed" not in sink.attempted_event_names
+
+
+def test_run_cli_reports_conversation_and_final_event_failures() -> None:
+    outputs: list[str] = []
+    sink = FailingOperationalEventSink(
+        event_name="conversation.failed",
+    )
+    service = FailingConversationService()
+
+    run_cli(
+        service=service,  # type: ignore[arg-type]
+        input_fn=make_input(["Hola Malāk", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert service.call_count == 1
+    assert sink.attempted_event_names == [
+        "conversation.started",
+        "conversation.failed",
+    ]
+    assert "Error controlado: fallo conversacional" in outputs
+    assert "Error controlado de observabilidad: sink no disponible" in outputs
 
 
 def test_run_cli_rejects_empty_input() -> None:
