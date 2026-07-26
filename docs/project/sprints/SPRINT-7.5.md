@@ -2,9 +2,9 @@
 title: Sprint 7.5 — Base del plano de control de seguridad
 status: en progreso
 authority: operativa del sprint
-as_of_commit: 83ceb96838df0770bb9309172a75e3dc79bff121
+as_of_commit: af64b062aa1395ba7f7bdd59e5c1099ded68b683
 baseline_commit: 7cd7fcc
-branch: agent/sprint-7.5-initial-pep
+branch: main
 language: es
 ---
 
@@ -130,8 +130,9 @@ Validación del primer incremento:
 - decisión y ejecución separadas sin lógica de negocio en el Kernel;
 - bloqueo ante denegación, fallo o decisión incongruente;
 - operación protegida determinista y en memoria;
-- implementación y validación completadas en rama dedicada;
-- revisión e integración pendientes.
+- implementación y validación completadas;
+- completado e integrado mediante la PR #19;
+- merge commit: `af64b062aa1395ba7f7bdd59e5c1099ded68b683`.
 
 ### Incremento 5 — Evidencia de auditoría de autorización
 
@@ -240,8 +241,9 @@ Validación del Incremento 4:
   prevención persistente de replay fuera de alcance.
 
 La implementación permanece aislada y no está conectada a ninguna ruta
-operativa. La revisión humana y la integración continúan pendientes.
-El Incremento 5 no está autorizado.
+operativa. Fue integrada en `main` mediante la PR #19 y el merge commit
+`af64b062aa1395ba7f7bdd59e5c1099ded68b683`. El Incremento 5 no está
+autorizado.
 
 ## Puertas de aceptación
 
@@ -270,8 +272,8 @@ al siguiente.
 ```text
 Sprint 7.5 aprobado y en progreso.
 Baseline inicial: 7cd7fcc.
-Baseline verificado antes del Incremento 4:
-83ceb96838df0770bb9309172a75e3dc79bff121.
+HEAD verificado tras integrar el Incremento 4:
+af64b062aa1395ba7f7bdd59e5c1099ded68b683.
 
 Incremento 1 — Contratos de autorización:
 - completado;
@@ -296,9 +298,11 @@ Incremento 3 — Policy Decision Point mínimo:
 
 Incremento 4 — Policy Enforcement Point inicial:
 - diseño e implementación aprobados;
-- implementación y validación completadas en rama dedicada;
+- implementación y validación completadas;
 - 19 pruebas específicas y 244 pruebas totales aprobadas;
-- revisión e integración pendientes;
+- PR #19 mergeada;
+- merge commit af64b062aa1395ba7f7bdd59e5c1099ded68b683;
+- completado e integrado;
 - sin conexión a rutas operativas reales.
 
 Incrementos 5 y 6:
