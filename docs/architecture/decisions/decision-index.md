@@ -86,14 +86,15 @@ Toda ADR aceptada deberá registrarse aquí.
 | ID | Title | Status | Date | Domain |
 |----|-------|--------|------------|------------|
 | ADR-001 | Identity Migration: Jarvis → Malāk | Accepted | 2026-07-05 | Identity |
+| ADR-002 | Frontera de enforcement entre PDP y operación protegida | Accepted | 2026-07-26 | Security |
 
 ---
 
 ## Statistics
 
-Total ADRs: 1
+Total ADRs: 2
 
-Accepted: 1
+Accepted: 2
 
 Superseded: 0
 
