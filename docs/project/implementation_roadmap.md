@@ -1,5 +1,5 @@
 ---
-title: Hoja de ruta de implementaciÃ³n
+title: Hoja de ruta de implementación
 status: activo
 authority: no normativa
 as_of_date: 2026-07-26
@@ -8,49 +8,49 @@ branch: main
 language: es
 ---
 
-# Hoja de ruta de implementaciÃ³n
+# Hoja de ruta de implementación
 
-## ClasificaciÃ³n y autoridad
+## Clasificación y autoridad
 
 Este documento es derivado, informativo y no normativo.
 
-Organiza propuestas preliminares de implementaciÃ³n, pero:
+Organiza propuestas preliminares de implementación, pero:
 
 - no aprueba arquitectura;
 - no autoriza cambios;
 - no reemplaza las fuentes normativas;
-- no establece automÃ¡ticamente el prÃ³ximo sprint;
-- no convierte una recomendaciÃ³n en una obligaciÃ³n.
+- no establece automáticamente el próximo sprint;
+- no convierte una recomendación en una obligación.
 
 Ante cualquier conflicto prevalecen, en este orden:
 
-1. ConstituciÃ³n Cognitiva;
-2. ConstituciÃ³n de Gobernanza;
+1. Constitución Cognitiva;
+2. Constitución de Gobernanza;
 3. Blueprint;
 4. especificaciones aprobadas;
 5. ADR aceptados;
-6. contratos pÃºblicos vigentes;
-7. documentaciÃ³n operativa aprobada.
+6. contratos públicos vigentes;
+7. documentación operativa aprobada.
 
-## Regla de admisiÃ³n de sprints
+## Regla de admisión de sprints
 
-La existencia, numeraciÃ³n, posiciÃ³n, tÃ­tulo o ficha de un sprint no constituye autorizaciÃ³n para implementarlo.
+La existencia, numeración, posición, título o ficha de un sprint no constituye autorización para implementarlo.
 
-Cada propuesta debe someterse, como mÃ­nimo, a:
+Cada propuesta debe someterse, como mínimo, a:
 
-1. inspecciÃ³n completa del baseline vigente;
-2. revisiÃ³n del cÃ³digo, pruebas y documentaciÃ³n aplicables;
-3. identificaciÃ³n de una necesidad real y comprobada de MalÄk;
-4. justificaciÃ³n de su utilidad cognitiva, arquitectÃ³nica, operativa o de gobernanza;
-5. definiciÃ³n explÃ­cita del alcance y fuera de alcance;
-6. evaluaciÃ³n de riesgos, dependencias, impacto y rollback;
-7. validaciÃ³n mediante las cuatro preguntas obligatorias;
-8. presentaciÃ³n y debate del plan de ejecuciÃ³n;
-9. aprobaciÃ³n explÃ­cita e inequÃ­voca del propietario.
+1. inspección completa del baseline vigente;
+2. revisión del código, pruebas y documentación aplicables;
+3. identificación de una necesidad real y comprobada de Malāk;
+4. justificación de su utilidad cognitiva, arquitectónica, operativa o de gobernanza;
+5. definición explícita del alcance y fuera de alcance;
+6. evaluación de riesgos, dependencias, impacto y rollback;
+7. validación mediante las cuatro preguntas obligatorias;
+8. presentación y debate del plan de ejecución;
+9. aprobación explícita e inequívoca del propietario.
 
-Sin esa aprobaciÃ³n no se debe crear una rama, modificar archivos ni iniciar una implementaciÃ³n.
+Sin esa aprobación no se debe crear una rama, modificar archivos ni iniciar una implementación.
 
-La aprobaciÃ³n de un sprint anterior no autoriza automÃ¡ticamente el siguiente.
+La aprobación de un sprint anterior no autoriza automáticamente el siguiente.
 
 El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualquier propuesta.
 
@@ -62,22 +62,22 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 - Suite validada: 166 pruebas aprobadas.
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
-- Sprint 7.4 cerrado: `ConsolidaciÃ³n de logs, mÃ©tricas y auditorÃ­a`.
+- Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
 - Sprint 7.5 aprobado y en progreso: `Base del plano de control de seguridad`.
 - El Kernel permanece desacoplado de runtimes, proveedores y modelos concretos.
-- La CLI y el pipeline Kernelâ€“Plannerâ€“Capability continÃºan siendo rutas separadas.
-- No existe todavÃ­a una integraciÃ³n formal validada entre `Kernel.receive` y `ConversationService`.
-- `main` es la Ãºnica rama permanente del repositorio.
+- La CLI y el pipeline Kernel–Planner–Capability continúan siendo rutas separadas.
+- No existe todavía una integración formal validada entre `Kernel.receive` y `ConversationService`.
+- `main` es la única rama permanente del repositorio.
 
 ## Sprints cerrados del bloque 7.x
 
 | Sprint | Estado | Resultado |
 |---|---|---|
-| 7.0 | Cerrado | CLI mÃ­nima con `MockLLMRuntime` |
-| 7.1 | Cerrado | ComposiciÃ³n de CLI con `OllamaRuntime` mediante configuraciÃ³n externa |
+| 7.0 | Cerrado | CLI mínima con `MockLLMRuntime` |
+| 7.1 | Cerrado | Composición de CLI con `OllamaRuntime` mediante configuración externa |
 | 7.2 | Cerrado | Contrato estructural `RuntimeMetricSink` de solo escritura |
-| 7.3 | Cerrado | EstabilizaciÃ³n de la frontera de `ConversationProvider` |
-| 7.4 | Cerrado | ConsolidaciÃ³n de logs, mÃ©tricas y auditorÃ­a; sincronizaciÃ³n gobernada del Vault completada |
+| 7.3 | Cerrado | Estabilización de la frontera de `ConversationProvider` |
+| 7.4 | Cerrado | Consolidación de logs, métricas y auditoría; sincronización gobernada del Vault completada |
 
 ## Sprint vigente aprobado
 
@@ -85,12 +85,12 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 |---|---|---|
 | 7.5 | En progreso | Establecer la base determinista del plano de control de seguridad |
 
-El Sprint 7.5 fue aprobado explÃ­citamente por el propietario. Su
-implementaciÃ³n se organiza mediante incrementos pequeÃ±os, revisables y
-reversibles. La aprobaciÃ³n del sprint no autoriza automÃ¡ticamente cada
+El Sprint 7.5 fue aprobado explícitamente por el propietario. Su
+implementación se organiza mediante incrementos pequeños, revisables y
+reversibles. La aprobación del sprint no autoriza automáticamente cada
 incremento pendiente.
 
-El Incremento 1 incorporÃ³ los contratos fundamentales:
+El Incremento 1 incorporó los contratos fundamentales:
 
 - `PermissionScope`;
 - `SecurityContext`;
@@ -103,10 +103,10 @@ La PR #15 fue mergeada en `main` mediante:
 c0a4283b100609daeb4b3422dd28634df9d851b6
 ```
 
-La validaciÃ³n confirmÃ³ 45 pruebas especÃ­ficas, 166 pruebas totales,
+La validación confirmó 45 pruebas específicas, 166 pruebas totales,
 `compileall` correcto y `git diff --check` limpio.
 
-El Incremento 2 â€” ActivaciÃ³n y reconciliaciÃ³n documental â€” estÃ¡
+El Incremento 2 — Activación y reconciliación documental — está
 aprobado y en progreso. Queda limitado a:
 
 - cerrar documentalmente el Sprint 7.4;
@@ -114,44 +114,44 @@ aprobado y en progreso. Queda limitado a:
 - actualizar esta hoja de ruta;
 - mantener `ideas.md` como consulta no normativa y sin modificaciones.
 
-La secuencia restante contempla, sujeta a revisiÃ³n y aprobaciÃ³n por
+La secuencia restante contempla, sujeta a revisión y aprobación por
 incremento:
 
-1. Policy Decision Point mÃ­nimo, determinista y sin LLM;
-2. Policy Enforcement Point inicial fuera de la lÃ³gica del Kernel;
-3. evidencia de auditorÃ­a de autorizaciÃ³n;
-4. revisiÃ³n integral y cierre.
+1. Policy Decision Point mínimo, determinista y sin LLM;
+2. Policy Enforcement Point inicial fuera de la lógica del Kernel;
+3. evidencia de auditoría de autorización;
+4. revisión integral y cierre.
 
-Antes del PDP permanece pendiente resolver la semÃ¡ntica exacta de la
-confirmaciÃ³n humana. No se modificarÃ¡ `AuthorizationDecision` ni se
-introducirÃ¡ un tercer estado por inferencia.
+Antes del PDP permanece pendiente resolver la semántica exacta de la
+confirmación humana. No se modificará `AuthorizationDecision` ni se
+introducirá un tercer estado por inferencia.
 
 ### Cierre verificado del Sprint 7.4
 
 El Sprint 7.4 fue integrado en `main` mediante `7cd7fcc`. Su
-sincronizaciÃ³n gobernada posterior quedÃ³ registrada como
-`VSYNC-20260726-005`, con resultado `completed/pass`, y el Vault quedÃ³
+sincronización gobernada posterior quedó registrada como
+`VSYNC-20260726-005`, con resultado `completed/pass`, y el Vault quedó
 actualizado en `b20482c`.
 
-Se conserva la evidencia tÃ©cnica de cierre: 94 pruebas especÃ­ficas,
+Se conserva la evidencia técnica de cierre: 94 pruebas específicas,
 121 pruebas totales, `compileall` y `git diff --check` aprobados.
 
-La separaciÃ³n arquitectÃ³nica establecida permanece vigente:
+La separación arquitectónica establecida permanece vigente:
 
-- Las mÃ©tricas miden rendimiento y comportamiento cuantificable.
+- Las métricas miden rendimiento y comportamiento cuantificable.
 - Los logs o eventos operativos permiten reconstruir ejecuciones y diagnosticar resultados o fallos.
-- La auditorÃ­a evidencia decisiones, autorizaciones o acciones sensibles.
-- Los tres subsistemas permanecen separados y no comparten contratos, stores, polÃ­ticas de error, retenciÃ³n ni autoridad.
-- Solo pueden compartir convenciones mÃ­nimas de trazabilidad, como identificadores estables, fechas UTC y nombres de eventos o componentes.
-- `RuntimeMetricSample` y los stores de mÃ©tricas existentes no se reutilizan para logs ni auditorÃ­a.
+- La auditoría evidencia decisiones, autorizaciones o acciones sensibles.
+- Los tres subsistemas permanecen separados y no comparten contratos, stores, políticas de error, retención ni autoridad.
+- Solo pueden compartir convenciones mínimas de trazabilidad, como identificadores estables, fechas UTC y nombres de eventos o componentes.
+- `RuntimeMetricSample` y los stores de métricas existentes no se reutilizan para logs ni auditoría.
 - No se crea un envelope universal de observabilidad.
-- Para cada intento conversacional vÃ¡lido, la CLI genera exclusivamente
-  el `request_id` utilizado para correlaciÃ³n, sin modificar
-  `ConversationRequest` ni los demÃ¡s contratos conversacionales.
-- La auditorÃ­a de seguridad no se implementa en el Sprint 7.4; su frontera se preserva para el futuro Security Control Plane Foundation.
+- Para cada intento conversacional válido, la CLI genera exclusivamente
+  el `request_id` utilizado para correlación, sin modificar
+  `ConversationRequest` ni los demás contratos conversacionales.
+- La auditoría de seguridad no se implementa en el Sprint 7.4; su frontera se preserva para el futuro Security Control Plane Foundation.
 - El Kernel y `ConversationService` permanecen fuera del alcance.
 - No se almacenan por defecto prompts completos, respuestas completas, secretos, credenciales ni contenido sensible innecesario.
-- La evidencia producida no concede autoridad para modificar el sistema ni aplicar recomendaciones automÃ¡ticamente.
+- La evidencia producida no concede autoridad para modificar el sistema ni aplicar recomendaciones automáticamente.
 
 La ficha operativa aprobada y sus incrementos se encuentran en:
 
@@ -159,7 +159,7 @@ La ficha operativa aprobada y sus incrementos se encuentran en:
 docs/project/sprints/SPRINT-7.4.md
 ```
 
-### Registro de ideas y visiÃ³n futura
+### Registro de ideas y visión futura
 
 El documento:
 
@@ -167,80 +167,80 @@ El documento:
 documents/projects/jarvis/ideas.md
 ```
 
-mantiene un catÃ¡logo evolutivo y no normativo de ideas, capacidades e iniciativas futuras de MalÄk.
+mantiene un catálogo evolutivo y no normativo de ideas, capacidades e iniciativas futuras de Malāk.
 
-Su incorporaciÃ³n no aprueba automÃ¡ticamente arquitectura, sprints ni implementaciÃ³n. Cada iniciativa deberÃ¡ atravesar la revisiÃ³n de necesidad, alcance, riesgos, dependencias, gobernanza y aprobaciÃ³n humana correspondiente.
+Su incorporación no aprueba automáticamente arquitectura, sprints ni implementación. Cada iniciativa deberá atravesar la revisión de necesidad, alcance, riesgos, dependencias, gobernanza y aprobación humana correspondiente.
 
-Durante el Sprint 7.4 se incorporÃ³ para planificaciÃ³n futura la iniciativa:
+Durante el Sprint 7.4 se incorporó para planificación futura la iniciativa:
 
 **Sandbox Containment & Evaluation Evidence Foundation**
 
-Su ubicaciÃ³n lÃ³gica serÃ¡ posterior a `Security Control Plane Foundation` y anterior a simulaciones con agentes o al `Controlled Engineering Improvement Loop Foundation`.
+Su ubicación lógica será posterior a `Security Control Plane Foundation` y anterior a simulaciones con agentes o al `Controlled Engineering Improvement Loop Foundation`.
 
-La iniciativa deberÃ¡ abordar, mediante un sprint independiente:
+La iniciativa deberá abordar, mediante un sprint independiente:
 
 - aislamiento y entornos descartables;
 - control de red, archivos, procesos y herramientas;
-- lÃ­mites de CPU, RAM, VRAM, disco, tiempo y procesos;
+- límites de CPU, RAM, VRAM, disco, tiempo y procesos;
 - manifiestos reproducibles;
-- telemetrÃ­a externa al agente;
+- telemetría externa al agente;
 - registro verificable de operaciones;
 - snapshots y hashes anteriores y posteriores;
 - kill switch, timeout, cuarentena y cierre seguro;
-- artefactos detallados de evaluaciÃ³n en un store separado;
+- artefactos detallados de evaluación en un store separado;
 - trazas experimentales de razonamiento opcionales y no autoritativas;
-- pruebas de contenciÃ³n y revisiÃ³n humana obligatoria.
+- pruebas de contención y revisión humana obligatoria.
 
 Estado:
 
 ```text
-Incorporada a la planificaciÃ³n futura.
-DiseÃ±o detallado no aprobado.
-ImplementaciÃ³n no aprobada.
-Sin nÃºmero de sprint asignado.
+Incorporada a la planificación futura.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint asignado.
 ```
 
-Esta incorporaciÃ³n fue reflejada durante la sincronizaciÃ³n gobernada
+Esta incorporación fue reflejada durante la sincronización gobernada
 posterior al Sprint 7.4.
 
-## Propuestas pendientes de revisiÃ³n y aprobaciÃ³n
+## Propuestas pendientes de revisión y aprobación
 
-| Propuesta | Estado | ObservaciÃ³n |
+| Propuesta | Estado | Observación |
 |---|---|---|
-| PreparaciÃ³n del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| ValidaciÃ³n de baseline y release interna | No aprobada | Solo corresponde despuÃ©s de cerrar y sincronizar los bloques previos |
+| Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
+| Validación de baseline y release interna | No aprobada | Solo corresponde después de cerrar y sincronizar los bloques previos |
 
 La tabla anterior no establece secuencia obligatoria.
 
-El prÃ³ximo sprint debe seleccionarse Ãºnicamente despuÃ©s de una revisiÃ³n completa del baseline y de la necesidad real de MalÄk.
+El próximo sprint debe seleccionarse únicamente después de una revisión completa del baseline y de la necesidad real de Malāk.
 
-## Regla de admisiÃ³n de Capabilities
+## Regla de admisión de Capabilities
 
-Una Capability solo podrÃ¡ incorporarse cuando aÃ±ada una funcionalidad real, necesaria y permanente para MalÄk.
+Una Capability solo podrá incorporarse cuando añada una funcionalidad real, necesaria y permanente para Malāk.
 
-No se deben crear Capabilities con el Ãºnico propÃ³sito de:
+No se deben crear Capabilities con el único propósito de:
 
 - validar routing;
-- demostrar que el Planner selecciona mÃºltiples entradas;
+- demostrar que el Planner selecciona múltiples entradas;
 - comprobar que el Registry admite varias Capabilities;
 - aumentar cobertura artificialmente;
 - ejercitar infraestructura interna;
 - completar una secuencia prevista;
 - incorporar ejemplos sin utilidad funcional.
 
-La infraestructura interna debe validarse mediante pruebas, dobles, fixtures, contratos e integraciÃ³n controlada.
+La infraestructura interna debe validarse mediante pruebas, dobles, fixtures, contratos e integración controlada.
 
-## RestricciÃ³n estructural
+## Restricción estructural
 
-Antes de introducir agentes, herramientas externas, automatizaciÃ³n del sistema operativo, navegaciÃ³n, mensajerÃ­a externa, memoria sensible o Capabilities de alto riesgo, deben aprobarse e implementarse los fundamentos de seguridad y gobernanza correspondientes.
+Antes de introducir agentes, herramientas externas, automatización del sistema operativo, navegación, mensajería externa, memoria sensible o Capabilities de alto riesgo, deben aprobarse e implementarse los fundamentos de seguridad y gobernanza correspondientes.
 
 Ninguna propuesta futura puede:
 
-- ampliar el Kernel con lÃ³gica de negocio;
+- ampliar el Kernel con lógica de negocio;
 - acoplar el Kernel a un runtime, proveedor, modelo o infraestructura concreta;
 - introducir dependencias no aprobadas;
-- modificar contratos centrales sin revisiÃ³n especÃ­fica;
-- asumir que el hardware actual define la arquitectura permanente de MalÄk.
+- modificar contratos centrales sin revisión específica;
+- asumir que el hardware actual define la arquitectura permanente de Malāk.
 
 ## Fichas relacionadas
 
@@ -258,18 +258,18 @@ sincronizado de forma gobernada.
 
 La ficha del Sprint 7.5 documenta el sprint vigente aprobado y su
 secuencia incremental. Las fichas 7.6 y 7.7 permanecen como propuestas
-y no constituyen autorizaciÃ³n de implementaciÃ³n.
+y no constituyen autorización de implementación.
 
-## Regla de actualizaciÃ³n
+## Regla de actualización
 
 Este documento debe revalidarse cuando ocurra cualquiera de estos eventos:
 
 - cambio material de `HEAD`;
 - cierre de un sprint;
-- modificaciÃ³n de contratos pÃºblicos;
-- aceptaciÃ³n de un ADR relacionado;
+- modificación de contratos públicos;
+- aceptación de un ADR relacionado;
 - cambio de rama permanente;
-- certificaciÃ³n de un nuevo baseline;
-- cambio material de las reglas de gobernanza o ejecuciÃ³n.
+- certificación de un nuevo baseline;
+- cambio material de las reglas de gobernanza o ejecución.
 
-Los snapshots histÃ³ricos y releases certificadas no deben reescribirse para coincidir con este documento.
+Los snapshots históricos y releases certificadas no deben reescribirse para coincidir con este documento.
