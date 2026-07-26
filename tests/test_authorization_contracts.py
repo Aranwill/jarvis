@@ -7,6 +7,7 @@ import pytest
 from malak.security import (
     AuthorizationDecision,
     AuthorizationRequest,
+    HumanConfirmationEvidence,
     PermissionScope,
     SecurityContext,
 )
@@ -253,6 +254,137 @@ def test_authorization_request_does_not_contain_a_decision() -> None:
     assert not hasattr(request, "allowed")
     assert not hasattr(request, "reason")
     assert not hasattr(request.context, "permissions")
+
+
+def test_human_confirmation_evidence_normalizes_required_text() -> None:
+    evidence = HumanConfirmationEvidence(
+        confirmation_id="  confirmation-001  ",
+        original_request_id="  request-original  ",
+        new_request_id="  request-new  ",
+        subject_id="  aranwill  ",
+        permission=PermissionScope(
+            resource="system",
+            action="update",
+        ),
+        confirmed_by="  owner  ",
+        confirmed_at=datetime(2026, 7, 26, tzinfo=timezone.utc),
+    )
+
+    assert evidence.confirmation_id == "confirmation-001"
+    assert evidence.original_request_id == "request-original"
+    assert evidence.new_request_id == "request-new"
+    assert evidence.subject_id == "aranwill"
+    assert evidence.confirmed_by == "owner"
+
+
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "confirmation_id",
+        "original_request_id",
+        "new_request_id",
+        "subject_id",
+        "confirmed_by",
+    ],
+)
+@pytest.mark.parametrize("value", ["", "   "])
+def test_human_confirmation_evidence_rejects_empty_text(
+    field_name: str,
+    value: str,
+) -> None:
+    values = {
+        "confirmation_id": "confirmation-001",
+        "original_request_id": "request-original",
+        "new_request_id": "request-new",
+        "subject_id": "aranwill",
+        "permission": PermissionScope(
+            resource="system",
+            action="update",
+        ),
+        "confirmed_by": "owner",
+        "confirmed_at": datetime(
+            2026,
+            7,
+            26,
+            tzinfo=timezone.utc,
+        ),
+    }
+    values[field_name] = value
+
+    with pytest.raises(ValueError):
+        HumanConfirmationEvidence(**values)
+
+
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "confirmation_id",
+        "original_request_id",
+        "new_request_id",
+        "subject_id",
+        "confirmed_by",
+    ],
+)
+@pytest.mark.parametrize("value", [None, 1, True])
+def test_human_confirmation_evidence_rejects_non_string_text(
+    field_name: str,
+    value: object,
+) -> None:
+    values = {
+        "confirmation_id": "confirmation-001",
+        "original_request_id": "request-original",
+        "new_request_id": "request-new",
+        "subject_id": "aranwill",
+        "permission": PermissionScope(
+            resource="system",
+            action="update",
+        ),
+        "confirmed_by": "owner",
+        "confirmed_at": datetime(
+            2026,
+            7,
+            26,
+            tzinfo=timezone.utc,
+        ),
+    }
+    values[field_name] = value
+
+    with pytest.raises(TypeError):
+        HumanConfirmationEvidence(**values)
+
+
+def test_human_confirmation_evidence_requires_permission_scope() -> None:
+    with pytest.raises(TypeError):
+        HumanConfirmationEvidence(
+            confirmation_id="confirmation-001",
+            original_request_id="request-original",
+            new_request_id="request-new",
+            subject_id="aranwill",
+            permission="system:update",
+            confirmed_by="owner",
+            confirmed_at=datetime(
+                2026,
+                7,
+                26,
+                tzinfo=timezone.utc,
+            ),
+        )
+
+
+def test_human_confirmation_evidence_requires_datetime() -> None:
+    with pytest.raises(TypeError):
+        HumanConfirmationEvidence(
+            confirmation_id="confirmation-001",
+            original_request_id="request-original",
+            new_request_id="request-new",
+            subject_id="aranwill",
+            permission=PermissionScope(
+                resource="system",
+                action="update",
+            ),
+            confirmed_by="owner",
+            confirmed_at="2026-07-26T00:00:00Z",
+        )
 
 
 def test_authorization_decision_normalizes_required_text() -> None:

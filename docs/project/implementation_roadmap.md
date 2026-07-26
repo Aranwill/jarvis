@@ -57,9 +57,10 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 ## Estado de referencia
 
 - Rama permanente: `main`.
-- Commit de referencia: `c0a4283b100609daeb4b3422dd28634df9d851b6`.
+- Commit base del Incremento 3:
+  `4afeed440a3bf2096035d0d458d2ef75c71689fd`.
 - Baseline nominal: `v0.6.0-alpha`.
-- Suite validada: 166 pruebas aprobadas.
+- Suite validada en el Incremento 3: 225 pruebas aprobadas.
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
 - Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
@@ -106,25 +107,35 @@ c0a4283b100609daeb4b3422dd28634df9d851b6
 La validación confirmó 45 pruebas específicas, 166 pruebas totales,
 `compileall` correcto y `git diff --check` limpio.
 
-El Incremento 2 — Activación y reconciliación documental — está
-aprobado y en progreso. Queda limitado a:
+El Incremento 2 — Activación y reconciliación documental — fue
+completado e integrado mediante la PR #16 y el merge commit
+`4afeed440a3bf2096035d0d458d2ef75c71689fd`. Su alcance quedó limitado a:
 
 - cerrar documentalmente el Sprint 7.4;
 - activar y reconciliar la ficha del Sprint 7.5;
 - actualizar esta hoja de ruta;
 - mantener `ideas.md` como consulta no normativa y sin modificaciones.
 
-La secuencia restante contempla, sujeta a revisión y aprobación por
-incremento:
+El Incremento 3 implementa un Policy Decision Point mínimo, determinista
+y sin LLM. Incluye reglas exactas, denegación por defecto, evidencia
+inmutable de confirmación humana y una frontera inyectable de
+verificación. La validación confirmó 104 pruebas específicas, 225 pruebas
+totales, `compileall` correcto y `git diff --check` limpio.
 
-1. Policy Decision Point mínimo, determinista y sin LLM;
-2. Policy Enforcement Point inicial fuera de la lógica del Kernel;
-3. evidencia de auditoría de autorización;
-4. revisión integral y cierre.
+La semántica aprobada deniega la solicitud original cuando requiere
+confirmación humana. Una confirmación verificada habilita únicamente la
+evaluación desde cero de una solicitud nueva; no modifica la decisión
+original, no concede permisos permanentes y no introduce un tercer
+estado.
 
-Antes del PDP permanece pendiente resolver la semántica exacta de la
-confirmación humana. No se modificará `AuthorizationDecision` ni se
-introducirá un tercer estado por inferencia.
+La secuencia restante contempla, sujeta a diseño, revisión y aprobación
+independientes por incremento:
+
+1. Policy Enforcement Point inicial fuera de la lógica del Kernel;
+2. evidencia de auditoría de autorización;
+3. revisión integral y cierre.
+
+El Incremento 3 no habilita ejecución y no autoriza el Incremento 4.
 
 ### Cierre verificado del Sprint 7.4
 

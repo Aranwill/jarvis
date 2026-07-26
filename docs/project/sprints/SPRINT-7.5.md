@@ -2,7 +2,7 @@
 title: Sprint 7.5 — Base del plano de control de seguridad
 status: en progreso
 authority: operativa del sprint
-as_of_commit: c0a4283b100609daeb4b3422dd28634df9d851b6
+as_of_commit: 4afeed440a3bf2096035d0d458d2ef75c71689fd
 baseline_commit: 7cd7fcc
 branch: main
 language: es
@@ -100,20 +100,26 @@ Validación del primer incremento:
 
 ### Incremento 2 — Activación y reconciliación documental
 
-- declarar formalmente el Sprint 7.4 como cerrado;
-- activar el Sprint 7.5 como aprobado y en progreso;
-- reconciliar la hoja de ruta con el baseline vigente;
-- registrar el Incremento 1 y la secuencia restante;
-- mantener `ideas.md` sin cambios y sin autoridad operativa;
-- no modificar código.
+- completado e integrado mediante la PR #16;
+- merge commit: `4afeed440a3bf2096035d0d458d2ef75c71689fd`;
+- Sprint 7.4 declarado formalmente como cerrado;
+- Sprint 7.5 activado como aprobado y en progreso;
+- hoja de ruta reconciliada con el baseline vigente;
+- `ideas.md` mantenido sin cambios y sin autoridad operativa;
+- ningún cambio de código incluido.
 
 ### Incremento 3 — Policy Decision Point mínimo
 
-- definir su contrato y responsabilidad exacta;
-- aplicar denegación por defecto;
-- mantener comportamiento determinista y sin LLM;
-- resolver previamente la semántica de confirmación humana;
-- probar permisos, denegaciones, entradas inválidas y fallos seguros.
+- semántica de confirmación humana aprobada por el propietario;
+- contrato y responsabilidad del PDP definidos;
+- implementación determinista inicial basada en reglas exactas;
+- denegación por defecto y comportamiento fail-closed;
+- ningún LLM participa en la decisión;
+- evidencia de confirmación inmutable y verificador inyectado;
+- pruebas de permisos, denegaciones, entradas inválidas y fallos
+  seguros completadas;
+- Kernel, Planner, CLI y runtimes sin cambios;
+- integración sujeta al flujo de Pull Request y aprobación humana.
 
 ### Incremento 4 — Policy Enforcement Point inicial
 
@@ -138,20 +144,65 @@ Validación del primer incremento:
 - completar la documentación y el flujo gobernado de PR;
 - proponer la sincronización del Vault después del cierre aprobado.
 
-## Decisión pendiente — confirmación humana
+## Decisión aprobada — confirmación humana
 
 `AuthorizationDecision` representa actualmente una decisión binaria
 mediante `allowed=True` o `allowed=False`.
 
-Antes de implementar el PDP debe aprobarse la semántica exacta para las
-operaciones que requieran confirmación humana. No se incorporará un tercer
-estado ni se modificará el contrato por inferencia.
+El propietario aprobó la siguiente semántica para las operaciones que
+requieran confirmación humana:
 
-La recomendación provisional, todavía no aprobada como implementación,
-es tratar la necesidad de confirmación como una denegación segura hasta
-recibir confirmación explícita y emitir una nueva solicitud. Esta opción
-mantiene el comportamiento fail-closed y evita convertir una decisión
-pendiente en autorización implícita.
+1. La solicitud original se deniega de forma segura con
+   `allowed=False` y `reason="human_confirmation_required"`.
+2. La confirmación humana no modifica ni revierte esa decisión.
+3. Después de la confirmación se debe emitir una solicitud nueva, con
+   un `request_id` diferente.
+4. La evidencia debe quedar ligada a la solicitud original, la solicitud
+   nueva, el mismo sujeto y el mismo permiso exacto.
+5. El PDP evalúa nuevamente la solicitud nueva desde cero.
+6. Solo una nueva `AuthorizationDecision(allowed=True)` permite que un
+   futuro PEP continúe.
+
+La confirmación no constituye un permiso permanente, no amplía alcance,
+no habilita elevación implícita y no garantiza por sí sola la
+autorización final. Si la evidencia o su verificador no son confiables,
+el PDP deniega la solicitud.
+
+No se incorpora un tercer estado. Tampoco se incorporan firmas, TTL,
+nonce, sesiones o renovación de contexto, porque pertenecen al futuro
+Secure Context Manager y continúan fuera del alcance del Sprint 7.5.
+
+## Implementación del Incremento 3
+
+El PDP mínimo se implementa en `malak.security` mediante:
+
+- `PolicyDecisionPoint`, contrato estructural de decisión;
+- `StaticPolicyDecisionPoint`, primera implementación determinista;
+- `PolicyRule`, regla exacta por sujeto y permiso;
+- `PolicyEffect`, con efectos internos `ALLOW`, `DENY` y
+  `REQUIRE_HUMAN_CONFIRMATION`;
+- `HumanConfirmationEvidence`, evidencia inmutable;
+- `HumanConfirmationVerifier`, frontera inyectable de verificación.
+
+Los tres efectos son internos al PDP. La salida pública continúa siendo
+exclusivamente `AuthorizationDecision` con resultado binario.
+
+La implementación no admite comodines, herencia implícita, heurísticas,
+interpretación de texto ni participación de LLM. Las reglas ausentes,
+los sujetos no autenticados, la evidencia incongruente, la ausencia del
+verificador y sus fallos producen denegaciones seguras.
+
+Validación del Incremento 3:
+
+- pruebas específicas: 104 passed;
+- suite completa: 225 passed;
+- `compileall`: PASS;
+- `git diff --check`: PASS;
+- Kernel, Planner, CLI y runtimes sin cambios;
+- PEP, ejecución y auditoría de autorización fuera de alcance.
+
+La implementación del PDP no habilita ninguna ejecución. El Incremento 4
+requiere diseño, revisión y aprobación humana independientes.
 
 ## Puertas de aceptación
 
@@ -180,7 +231,8 @@ al siguiente.
 ```text
 Sprint 7.5 aprobado y en progreso.
 Baseline inicial: 7cd7fcc.
-HEAD de referencia: c0a4283b100609daeb4b3422dd28634df9d851b6.
+HEAD base del Incremento 3:
+4afeed440a3bf2096035d0d458d2ef75c71689fd.
 
 Incremento 1 — Contratos de autorización:
 - completado;
@@ -189,16 +241,18 @@ Incremento 1 — Contratos de autorización:
 - 166 pruebas totales aprobadas.
 
 Incremento 2 — Activación y reconciliación documental:
-- aprobado;
-- en progreso;
-- limitado a SPRINT-7.4.md, SPRINT-7.5.md e
-  implementation_roadmap.md;
+- completado;
+- PR #16 mergeada;
+- merge commit 4afeed440a3bf2096035d0d458d2ef75c71689fd;
 - sin cambios de código;
 - ideas.md consultado y mantenido intacto.
 
-Incrementos 3 a 6:
-- pendientes de diseño incremental, revisión y aprobación humana.
+Incremento 3 — Policy Decision Point mínimo:
+- semántica de confirmación humana aprobada;
+- implementación y validación completadas;
+- 104 pruebas específicas y 225 pruebas totales aprobadas;
+- pendiente de revisión e integración mediante Pull Request.
 
-Decisión pendiente antes del PDP:
-- semántica de confirmación humana.
+Incrementos 4 a 6:
+- pendientes de diseño incremental, revisión y aprobación humana.
 ```
