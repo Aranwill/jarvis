@@ -57,10 +57,10 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 ## Estado de referencia
 
 - Rama permanente: `main`.
-- Commit base del Incremento 3:
-  `4afeed440a3bf2096035d0d458d2ef75c71689fd`.
+- Commit base del Incremento 4:
+  `83ceb96838df0770bb9309172a75e3dc79bff121`.
 - Baseline nominal: `v0.6.0-alpha`.
-- Suite validada en el Incremento 3: 225 pruebas aprobadas.
+- Suite validada en el Incremento 4: 244 pruebas aprobadas.
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
 - Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
@@ -128,14 +128,29 @@ evaluación desde cero de una solicitud nueva; no modifica la decisión
 original, no concede permisos permanentes y no introduce un tercer
 estado.
 
+El Incremento 4 incorpora un Policy Enforcement Point inicial,
+determinista y fail-closed. El PEP consulta directamente al PDP
+inyectado, no acepta decisiones aportadas por el llamador y exige la
+asociación exacta entre solicitud y decisión mediante `request_id`.
+
+La operación protegida se ejecuta exactamente una vez solo ante una
+decisión válida y permitida. Las denegaciones, los fallos del PDP, los
+tipos de respuesta inválidos y las decisiones incongruentes bloquean la
+operación. La validación confirmó 19 pruebas específicas y 244 pruebas
+totales.
+
+La ADR-002 formaliza esta frontera. La implementación permanece aislada
+de Kernel, Planner, CLI, runtimes, Capability Registry y operaciones
+reales; su revisión e integración continúan pendientes.
+
 La secuencia restante contempla, sujeta a diseño, revisión y aprobación
 independientes por incremento:
 
-1. Policy Enforcement Point inicial fuera de la lógica del Kernel;
-2. evidencia de auditoría de autorización;
-3. revisión integral y cierre.
+1. evidencia de auditoría de autorización;
+2. revisión integral y cierre.
 
-El Incremento 3 no habilita ejecución y no autoriza el Incremento 4.
+El Incremento 4 no habilita rutas operativas reales y no autoriza el
+Incremento 5.
 
 ### Cierre verificado del Sprint 7.4
 
