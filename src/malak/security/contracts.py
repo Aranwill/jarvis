@@ -82,6 +82,51 @@ class AuthorizationRequest:
 
 
 @dataclass(frozen=True, slots=True)
+class HumanConfirmationEvidence:
+    confirmation_id: str
+    original_request_id: str
+    new_request_id: str
+    subject_id: str
+    permission: PermissionScope
+    confirmed_by: str
+    confirmed_at: datetime
+
+    def __post_init__(self) -> None:
+        for field_name in (
+            "confirmation_id",
+            "original_request_id",
+            "new_request_id",
+            "subject_id",
+            "confirmed_by",
+        ):
+            object.__setattr__(
+                self,
+                field_name,
+                _normalize_required_text(
+                    getattr(self, field_name),
+                    field_name,
+                ),
+            )
+
+        if self.original_request_id == self.new_request_id:
+            raise ValueError(
+                "new_request_id must differ from original_request_id"
+            )
+
+        if not isinstance(self.permission, PermissionScope):
+            raise TypeError("permission must be a PermissionScope")
+
+        if not isinstance(self.confirmed_at, datetime):
+            raise TypeError("confirmed_at must be a datetime")
+
+        if (
+            self.confirmed_at.tzinfo is None
+            or self.confirmed_at.utcoffset() is None
+        ):
+            raise ValueError("confirmed_at must include timezone information")
+
+
+@dataclass(frozen=True, slots=True)
 class AuthorizationDecision:
     request_id: str
     allowed: bool
