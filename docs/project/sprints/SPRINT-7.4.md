@@ -1,10 +1,10 @@
 ---
 title: Sprint 7.4 — Consolidación de logs, métricas y auditoría
-status: en progreso
+status: cerrado
 authority: operativa del sprint
-as_of_commit: 5b951918006c464745e1eb1e3816bde619fad8b1
+as_of_commit: c0a4283b100609daeb4b3422dd28634df9d851b6
 baseline_commit: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
-branch: feature/sprint-7.4-logs-metrics-audit
+branch: main
 language: es
 ---
 
@@ -374,9 +374,10 @@ Esta incorporación:
 ## Estado actual
 
 ```text
-Sprint 7.4 aprobado y en progreso.
-Rama: feature/sprint-7.4-logs-metrics-audit.
+Sprint 7.4 cerrado.
+Rama permanente: main.
 Baseline inicial: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627.
+Merge aprobado en main: 7cd7fcc.
 
 Incremento 1 — Activación documental:
 - cerrado en el commit ab586f4.
@@ -492,17 +493,23 @@ Incremento 7 — Validación y cierre:
 - no se identificaron hallazgos bloqueantes;
 - la deuda futura del Incremento 6 se conserva como no bloqueante y
   fuera del alcance del Sprint 7.4;
-- rama lista para preparar el PR.
+- rama validada y posteriormente integrada mediante el flujo gobernado.
 
-Siguiente paso:
-- preparar el PR mediante el flujo gobernado y la aprobación humana
-  correspondiente;
-- después del merge aprobado en `main`, ejecutar el Incremento 8
-  exclusivamente como sincronización gobernada del Vault;
-- el Incremento 8 no constituye implementación operativa dentro de
-  Malāk.
+Incremento 8 — Sincronización gobernada del Vault:
+- completado después del merge aprobado en `main`;
+- ejecución manual registrada como VSYNC-20260726-005;
+- resultado del agente: completed/pass;
+- Vault actualizado en el commit b20482c;
+- repositorio oficial conservado como fuente de verdad operativa;
+- snapshots históricos preservados;
+- sin modificación automática de Malāk;
+- no constituye implementación operativa dentro de Malāk.
 
-El cierre técnico previo al PR quedó validado. El Sprint 7.4 permanece
-en progreso porque el Incremento 8 continúa pendiente y sólo puede
-ejecutarse después del merge aprobado en `main`.
+Cierre formal:
+- Sprint 7.4 cerrado;
+- baseline integrado en `main` mediante 7cd7fcc;
+- validaciones técnicas preservadas: 94 pruebas específicas,
+  121 pruebas totales, compileall PASS y git diff --check PASS;
+- sincronización gobernada posterior completada;
+- no quedan incrementos pendientes dentro de este sprint.
 ```

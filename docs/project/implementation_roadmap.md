@@ -1,9 +1,9 @@
-﻿---
+---
 title: Hoja de ruta de implementación
-status: borrador
+status: activo
 authority: no normativa
-as_of_date: 2026-07-24
-as_of_commit: fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
+as_of_date: 2026-07-26
+as_of_commit: c0a4283b100609daeb4b3422dd28634df9d851b6
 branch: main
 language: es
 ---
@@ -57,12 +57,13 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 ## Estado de referencia
 
 - Rama permanente: `main`.
-- Commit de referencia: `fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627`.
+- Commit de referencia: `c0a4283b100609daeb4b3422dd28634df9d851b6`.
 - Baseline nominal: `v0.6.0-alpha`.
-- Suite validada: 74 pruebas aprobadas.
+- Suite validada: 166 pruebas aprobadas.
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
-- Sprint 7.3 cerrado: `Conversation Provider Boundary Stabilization`.
+- Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
+- Sprint 7.5 aprobado y en progreso: `Base del plano de control de seguridad`.
 - El Kernel permanece desacoplado de runtimes, proveedores y modelos concretos.
 - La CLI y el pipeline Kernel–Planner–Capability continúan siendo rutas separadas.
 - No existe todavía una integración formal validada entre `Kernel.receive` y `ConversationService`.
@@ -76,51 +77,66 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 | 7.1 | Cerrado | Composición de CLI con `OllamaRuntime` mediante configuración externa |
 | 7.2 | Cerrado | Contrato estructural `RuntimeMetricSink` de solo escritura |
 | 7.3 | Cerrado | Estabilización de la frontera de `ConversationProvider` |
+| 7.4 | Cerrado | Consolidación de logs, métricas y auditoría; sincronización gobernada del Vault completada |
 
 ## Sprint vigente aprobado
 
 | Sprint | Estado | Objetivo |
 |---|---|---|
-| 7.4 | En progreso — listo para PR | Consolidar la frontera entre métricas, logs o eventos operativos y auditoría |
+| 7.5 | En progreso | Establecer la base determinista del plano de control de seguridad |
 
-El Sprint 7.4 fue aprobado explícitamente por el propietario después de revisar el baseline, comprobar la necesidad, definir el alcance y resolver conceptualmente la separación entre los tres subsistemas.
+El Sprint 7.5 fue aprobado explícitamente por el propietario. Su
+implementación se organiza mediante incrementos pequeños, revisables y
+reversibles. La aprobación del sprint no autoriza automáticamente cada
+incremento pendiente.
 
-Su implementación se realiza en:
+El Incremento 1 incorporó los contratos fundamentales:
 
-```text
-feature/sprint-7.4-logs-metrics-audit
-```
+- `PermissionScope`;
+- `SecurityContext`;
+- `AuthorizationRequest`;
+- `AuthorizationDecision`.
 
-La rama parte del baseline oficial:
-
-```text
-fd4da3d371d07b6aa91cc9f1c4d4bac3838ad627
-```
-
-Los Incrementos 1 a 7 fueron completados y validados mediante cambios
-incrementales y revisión humana.
-
-El Incremento 7 concluyó con resultado `APTO` sobre el HEAD:
+La PR #15 fue mergeada en `main` mediante:
 
 ```text
-5b951918006c464745e1eb1e3816bde619fad8b1
+c0a4283b100609daeb4b3422dd28634df9d851b6
 ```
 
-La validación integral confirmó:
+La validación confirmó 45 pruebas específicas, 166 pruebas totales,
+`compileall` correcto y `git diff --check` limpio.
 
-- pruebas específicas: 94 passed;
-- suite completa: 121 passed;
-- `compileall`: PASS;
-- `git diff --check`: PASS;
-- ausencia de hallazgos bloqueantes;
-- rama lista para preparar el PR.
+El Incremento 2 — Activación y reconciliación documental — está
+aprobado y en progreso. Queda limitado a:
 
-El Sprint 7.4 permanece en progreso porque el Incremento 8 sólo puede
-ejecutarse después del merge aprobado en `main`. Ese incremento queda
-limitado a la sincronización gobernada del Vault y no constituye
-implementación operativa dentro de Malāk.
+- cerrar documentalmente el Sprint 7.4;
+- activar y reconciliar la ficha del Sprint 7.5;
+- actualizar esta hoja de ruta;
+- mantener `ideas.md` como consulta no normativa y sin modificaciones.
 
-### Separación aprobada
+La secuencia restante contempla, sujeta a revisión y aprobación por
+incremento:
+
+1. Policy Decision Point mínimo, determinista y sin LLM;
+2. Policy Enforcement Point inicial fuera de la lógica del Kernel;
+3. evidencia de auditoría de autorización;
+4. revisión integral y cierre.
+
+Antes del PDP permanece pendiente resolver la semántica exacta de la
+confirmación humana. No se modificará `AuthorizationDecision` ni se
+introducirá un tercer estado por inferencia.
+
+### Cierre verificado del Sprint 7.4
+
+El Sprint 7.4 fue integrado en `main` mediante `7cd7fcc`. Su
+sincronización gobernada posterior quedó registrada como
+`VSYNC-20260726-005`, con resultado `completed/pass`, y el Vault quedó
+actualizado en `b20482c`.
+
+Se conserva la evidencia técnica de cierre: 94 pruebas específicas,
+121 pruebas totales, `compileall` y `git diff --check` aprobados.
+
+La separación arquitectónica establecida permanece vigente:
 
 - Las métricas miden rendimiento y comportamiento cuantificable.
 - Los logs o eventos operativos permiten reconstruir ejecuciones y diagnosticar resultados o fallos.
@@ -184,13 +200,13 @@ Implementación no aprobada.
 Sin número de sprint asignado.
 ```
 
-Esta incorporación deberá reflejarse durante la próxima sincronización gobernada del Malāk Project Vault.
+Esta incorporación fue reflejada durante la sincronización gobernada
+posterior al Sprint 7.4.
 
 ## Propuestas pendientes de revisión y aprobación
 
 | Propuesta | Estado | Observación |
 |---|---|---|
-| Security Control Plane Foundation | No aprobada | Debe diseñarse y aprobarse antes de capacidades externas o de alto riesgo |
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
 | Validación de baseline y release interna | No aprobada | Solo corresponde después de cerrar y sincronizar los bloques previos |
 
@@ -237,12 +253,12 @@ Ninguna propuesta futura puede:
 - `docs/project/sprints/SPRINT-7.6.md`
 - `docs/project/sprints/SPRINT-7.7.md`
 
-La ficha del Sprint 7.4 documenta un sprint aprobado, con cierre
-técnico validado y listo para preparar el PR. El sprint permanece en
-progreso únicamente porque la sincronización gobernada del Vault del
-Incremento 8 debe realizarse después del merge aprobado en `main`.
+La ficha del Sprint 7.4 documenta un sprint cerrado, integrado y
+sincronizado de forma gobernada.
 
-Las demás fichas pendientes son propuestas y no constituyen autorización de implementación.
+La ficha del Sprint 7.5 documenta el sprint vigente aprobado y su
+secuencia incremental. Las fichas 7.6 y 7.7 permanecen como propuestas
+y no constituyen autorización de implementación.
 
 ## Regla de actualización
 
