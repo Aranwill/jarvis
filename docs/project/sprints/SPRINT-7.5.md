@@ -2,9 +2,9 @@
 title: Sprint 7.5 — Base del plano de control de seguridad
 status: en progreso
 authority: operativa del sprint
-as_of_commit: 78799deabba5009e66c219220349e8202f5464bb
+as_of_commit: 83ceb96838df0770bb9309172a75e3dc79bff121
 baseline_commit: 7cd7fcc
-branch: main
+branch: agent/sprint-7.5-initial-pep
 language: es
 ---
 
@@ -124,11 +124,14 @@ Validación del primer incremento:
 
 ### Incremento 4 — Policy Enforcement Point inicial
 
-- aplicar decisiones sin incorporar lógica de negocio al Kernel;
-- separar decisión y ejecución;
-- impedir bypass y elevación implícita;
-- probar enforcement y comportamiento ante ausencia o invalidez de una
-  decisión.
+- diseño e implementación aprobados por el propietario;
+- frontera PDP–PEP formalizada mediante ADR-002;
+- decisión obtenida internamente desde un PDP inyectado;
+- decisión y ejecución separadas sin lógica de negocio en el Kernel;
+- bloqueo ante denegación, fallo o decisión incongruente;
+- operación protegida determinista y en memoria;
+- implementación y validación completadas en rama dedicada;
+- revisión e integración pendientes.
 
 ### Incremento 5 — Evidencia de auditoría de autorización
 
@@ -203,7 +206,42 @@ Validación del Incremento 3:
 - PEP, ejecución y auditoría de autorización fuera de alcance.
 
 La implementación del PDP no habilita ninguna ejecución. El Incremento 4
-requiere diseño, revisión y aprobación humana independientes.
+fue diseñado y aprobado de forma independiente.
+
+## Implementación del Incremento 4
+
+El PEP inicial se implementa en `malak.security` mediante:
+
+- `PolicyEnforcementPoint`, contrato estructural de enforcement;
+- `StrictPolicyEnforcementPoint`, implementación inicial fail-closed;
+- `ProtectedOperation`, contrato mínimo de una operación protegida;
+- `AuthorizationDeniedError`, denegación explícita emitida por el PDP;
+- `AuthorizationEnforcementError`, fallo o inconsistencia de
+  enforcement.
+
+El PEP no acepta una `AuthorizationDecision` aportada por el llamador.
+Consulta directamente al `PolicyDecisionPoint` inyectado, valida el tipo
+de la decisión y exige la coincidencia exacta de `request_id`. Solo una
+decisión válida con `allowed=True` permite una única ejecución.
+
+Las denegaciones, los fallos del PDP, las respuestas de tipo incorrecto
+y las decisiones asociadas a otra solicitud bloquean la operación. Si la
+operación protegida falla, su excepción se propaga sin reintento
+automático.
+
+Validación del Incremento 4:
+
+- pruebas específicas: 19 passed;
+- suite completa: 244 passed;
+- `compileall`: PASS;
+- `git diff --check`: PASS;
+- Kernel, Planner, CLI, runtimes y Capability Registry sin cambios;
+- operaciones reales, auditoría, sesiones, firmas, TTL, nonce y
+  prevención persistente de replay fuera de alcance.
+
+La implementación permanece aislada y no está conectada a ninguna ruta
+operativa. La revisión humana y la integración continúan pendientes.
+El Incremento 5 no está autorizado.
 
 ## Puertas de aceptación
 
@@ -232,8 +270,8 @@ al siguiente.
 ```text
 Sprint 7.5 aprobado y en progreso.
 Baseline inicial: 7cd7fcc.
-HEAD verificado tras integrar el Incremento 3:
-78799deabba5009e66c219220349e8202f5464bb.
+Baseline verificado antes del Incremento 4:
+83ceb96838df0770bb9309172a75e3dc79bff121.
 
 Incremento 1 — Contratos de autorización:
 - completado;
@@ -256,6 +294,14 @@ Incremento 3 — Policy Decision Point mínimo:
 - merge commit 78799deabba5009e66c219220349e8202f5464bb;
 - completado e integrado.
 
-Incrementos 4 a 6:
-- pendientes de diseño incremental, revisión y aprobación humana.
+Incremento 4 — Policy Enforcement Point inicial:
+- diseño e implementación aprobados;
+- implementación y validación completadas en rama dedicada;
+- 19 pruebas específicas y 244 pruebas totales aprobadas;
+- revisión e integración pendientes;
+- sin conexión a rutas operativas reales.
+
+Incrementos 5 y 6:
+- pendientes de diseño incremental, revisión y aprobación humana;
+- no autorizados.
 ```
