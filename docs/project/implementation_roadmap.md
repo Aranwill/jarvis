@@ -3,7 +3,7 @@ title: Hoja de ruta de implementación
 status: activo
 authority: no normativa
 as_of_date: 2026-07-26
-as_of_commit: c0a4283b100609daeb4b3422dd28634df9d851b6
+as_of_commit: af64b062aa1395ba7f7bdd59e5c1099ded68b683
 branch: main
 language: es
 ---
@@ -57,8 +57,8 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 ## Estado de referencia
 
 - Rama permanente: `main`.
-- Commit base del Incremento 4:
-  `83ceb96838df0770bb9309172a75e3dc79bff121`.
+- HEAD verificado tras integrar el Incremento 4:
+  `af64b062aa1395ba7f7bdd59e5c1099ded68b683`.
 - Baseline nominal: `v0.6.0-alpha`.
 - Suite validada en el Incremento 4: 244 pruebas aprobadas.
 - `compileall` validado sin errores.
@@ -141,7 +141,8 @@ totales.
 
 La ADR-002 formaliza esta frontera. La implementación permanece aislada
 de Kernel, Planner, CLI, runtimes, Capability Registry y operaciones
-reales; su revisión e integración continúan pendientes.
+reales. Fue integrada en `main` mediante la PR #19 y el merge commit
+`af64b062aa1395ba7f7bdd59e5c1099ded68b683`.
 
 La secuencia restante contempla, sujeta a diseño, revisión y aprobación
 independientes por incremento:
