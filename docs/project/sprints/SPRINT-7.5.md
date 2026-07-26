@@ -2,7 +2,7 @@
 title: Sprint 7.5 — Base del plano de control de seguridad
 status: en progreso
 authority: operativa del sprint
-as_of_commit: 4afeed440a3bf2096035d0d458d2ef75c71689fd
+as_of_commit: 78799deabba5009e66c219220349e8202f5464bb
 baseline_commit: 7cd7fcc
 branch: main
 language: es
@@ -119,7 +119,8 @@ Validación del primer incremento:
 - pruebas de permisos, denegaciones, entradas inválidas y fallos
   seguros completadas;
 - Kernel, Planner, CLI y runtimes sin cambios;
-- integración sujeta al flujo de Pull Request y aprobación humana.
+- completado e integrado mediante la PR #17;
+- merge commit: `78799deabba5009e66c219220349e8202f5464bb`.
 
 ### Incremento 4 — Policy Enforcement Point inicial
 
@@ -231,8 +232,8 @@ al siguiente.
 ```text
 Sprint 7.5 aprobado y en progreso.
 Baseline inicial: 7cd7fcc.
-HEAD base del Incremento 3:
-4afeed440a3bf2096035d0d458d2ef75c71689fd.
+HEAD verificado tras integrar el Incremento 3:
+78799deabba5009e66c219220349e8202f5464bb.
 
 Incremento 1 — Contratos de autorización:
 - completado;
@@ -251,7 +252,9 @@ Incremento 3 — Policy Decision Point mínimo:
 - semántica de confirmación humana aprobada;
 - implementación y validación completadas;
 - 104 pruebas específicas y 225 pruebas totales aprobadas;
-- pendiente de revisión e integración mediante Pull Request.
+- PR #17 mergeada;
+- merge commit 78799deabba5009e66c219220349e8202f5464bb;
+- completado e integrado.
 
 Incrementos 4 a 6:
 - pendientes de diseño incremental, revisión y aprobación humana.
