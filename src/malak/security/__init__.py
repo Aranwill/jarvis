@@ -12,16 +12,28 @@ from malak.security.pdp import (
     PolicyRule,
     StaticPolicyDecisionPoint,
 )
+from malak.security.pep import (
+    AuthorizationDeniedError,
+    AuthorizationEnforcementError,
+    PolicyEnforcementPoint,
+    ProtectedOperation,
+    StrictPolicyEnforcementPoint,
+)
 
 __all__ = [
     "AuthorizationDecision",
+    "AuthorizationDeniedError",
+    "AuthorizationEnforcementError",
     "AuthorizationRequest",
     "HumanConfirmationEvidence",
     "HumanConfirmationVerifier",
     "PermissionScope",
     "PolicyDecisionPoint",
     "PolicyEffect",
+    "PolicyEnforcementPoint",
     "PolicyRule",
+    "ProtectedOperation",
     "SecurityContext",
     "StaticPolicyDecisionPoint",
+    "StrictPolicyEnforcementPoint",
 ]
