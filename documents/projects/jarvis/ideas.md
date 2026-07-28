@@ -4,9 +4,9 @@ status: activo
 authority: no normativa
 document_role: anexo de captura y seguimiento
 introduced_in: Sprint 7.4
-as_of_date: 2026-07-24
-as_of_commit: ab586f4
-branch: feature/sprint-7.4-logs-metrics-audit
+as_of_date: 2026-07-28
+as_of_commit: d1c90bf0bf55a7076d68c1f4830e89e0d843661c
+branch: agent/record-high-value-evolution-ideas
 language: es
 ---
 
@@ -517,7 +517,273 @@ Descripción breve del problema o de la visión.
 Acción necesaria para evaluar, promover, diferir o rechazar la idea.
 ```
 
+
+### IDEA-011 — Malāk Validation & Delivery Protocol
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Formalizar un método de diseño, aprobación, implementación, validación y entrega basado en paquetes pequeños, trazables y reversibles, preservando Human in Control y la separación entre repositorio oficial, Vault y agente de sincronización.
+
+**Valor esperado**
+
+- reducir cambios fuera de alcance;
+- permitir aprobaciones seguras desde interfaces móviles para cambios normales;
+- reservar cambios críticos para revisión profunda desde un entorno personal controlado;
+- convertir cada incremento en una unidad verificable con objetivo, alcance, riesgos, pruebas, aceptación y rollback;
+- producir evidencia compacta y legible antes de aprobar una pull request;
+- aplicar validaciones proporcionales durante la semana y una certificación profunda del baseline en sesiones específicas;
+- mantener el merge y la promoción documental bajo autoridad humana.
+
+**Principios iniciales**
+
+- cada sprint se divide en Implementation Packets con una sola responsabilidad;
+- cada paquete declara alcance incluido, alcance excluido, archivos previstos, base arquitectónica, riesgos, validaciones, aceptación y rollback;
+- ningún paquete se implementa sin aprobación explícita e independiente;
+- toda implementación se realiza en rama aislada y mediante pull request en borrador;
+- el diff real debe poder compararse con el alcance autorizado;
+- toda desviación de arquitectura, seguridad, dependencias o alcance detiene la ejecución;
+- los cambios críticos se marcan `DEEP REVIEW REQUIRED`;
+- el merge permanece reservado al propietario;
+- el Vault se actualiza únicamente después del merge mediante una propuesta separada del agente controlado;
+- las validaciones deben ser independientes de una plataforma, lenguaje, proveedor o tecnología concreta;
+- los marcos externos de seguridad se utilizan como referencias de aplicabilidad y no como autoridad superior a los documentos de ley de Malāk.
+
+**Validación de seguridad por aplicabilidad**
+
+El protocolo podrá utilizar matrices de controles basadas en prácticas reconocidas, entre ellas OWASP Top 10, OWASP para aplicaciones LLM y agentic, NIST SSDF, Microsoft SDL y OpenSSF/SLSA.
+
+Su incorporación deberá respetar estas reglas:
+
+- no declarar cumplimiento total cuando solo se evaluó un alcance específico;
+- clasificar cada control como aplicable, parcialmente aplicable, control arquitectónico, no aplicable, diferido o bloqueante;
+- no crear pruebas artificiales para superficies que Malāk todavía no posee;
+- no alterar el Kernel, contratos o documentos normativos para satisfacer una taxonomía externa;
+- conservar evidencia de comandos, resultados, commit evaluado, hallazgos y exclusiones;
+- exigir revisión humana ante controles críticos o evidencia insuficiente.
+
+**Relaciones**
+
+- `Development Tooling Foundation`;
+- `Sandbox Containment & Evaluation Evidence Foundation`;
+- `Constitutional Assurance Foundation`;
+- `Resource Governance Foundation`;
+- flujo gobernado del `malak-vault-sync-agent`.
+
+**Próximo paso gobernado**
+
+Diseñar una plantilla documental mínima de Implementation Packet y aplicarla primero a incrementos expresamente aprobados. No automatizar el protocolo ni modificar CI, branch protection o tooling sin paquetes separados y aprobación específica.
+
+---
+
+### IDEA-012 — Constitutional Assurance Foundation
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Convertir principios arquitectónicos y constitucionales objetivos de Malāk en invariantes verificables, sin reemplazar los documentos de ley ni delegar su interpretación a herramientas automáticas.
+
+**Valor esperado**
+
+- detectar regresiones arquitectónicas antes del merge;
+- impedir acoplamientos accidentales del Kernel;
+- comprobar separación de autoridad, autorización, ejecución y auditoría;
+- preservar independencia de modelos, runtimes, proveedores, lenguajes y plataformas;
+- demostrar que memoria, retrieval, telemetría o evidencia no adquieren autoridad implícita;
+- reforzar el comportamiento fail-closed y Human in Control.
+
+**Alcance conceptual inicial**
+
+- invariantes de dependencias y fronteras;
+- tests de contratos públicos;
+- validaciones de ausencia de importaciones o acoplamientos prohibidos;
+- pruebas de denegación segura;
+- comprobación de que ningún LLM decide autorizaciones;
+- comprobación de que el agente del Vault no puede modificar Malāk, aprobar o fusionar PR;
+- validación de que documentos derivados no reemplazan fuentes normativas;
+- evidencia reproducible asociada al commit evaluado.
+
+**Restricciones**
+
+- los tests no sustituyen la revisión arquitectónica humana;
+- solo deben automatizarse invariantes objetivas y deterministas;
+- no se debe codificar una interpretación ambigua de la Constitución como verdad automática;
+- no se modifica el Kernel para facilitar los tests;
+- no se introduce un motor general de políticas por inferencia;
+- los cambios en documentos de ley continúan requiriendo aprobación expresa y revisión profunda.
+
+**Dependencias**
+
+- documentos de ley vigentes y estables;
+- contratos públicos identificables;
+- baseline verificable;
+- Validation & Delivery Protocol;
+- Development Tooling Foundation cuando se requiera tooling adicional.
+
+**Próximo paso gobernado**
+
+Seleccionar un conjunto pequeño de invariantes ya demostrables en el baseline y evaluar su incorporación durante una futura validación integral. No intentar automatizar toda la gobernanza en un único sprint.
+
+---
+
+### IDEA-013 — Knowledge and Context Efficiency Foundation
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Mejorar la navegación, selección de evidencia y continuidad de contexto mediante proyecciones regenerables y mecanismos gobernados, sin convertir recuperación, memoria o resúmenes en fuentes de autoridad.
+
+**Valor esperado**
+
+- reducir exploración repetida del repositorio;
+- preparar contexto relevante con menor consumo;
+- localizar contratos, tests y documentos gobernantes de forma determinista;
+- detectar información obsoleta, contradictoria o fuera de alcance;
+- crear una base medible para retrieval futuro sin adelantar RAG o GraphRAG;
+- preservar decisiones aprobadas, rechazadas y restricciones durante tareas largas.
+
+**Componentes conceptuales**
+
+- Repository Knowledge Map;
+- mapas de módulos, contratos, tests, dependencias y autoridad documental;
+- índices generados, versionados, hasheados y vinculados a sus fuentes;
+- Context Lifecycle y presupuestos de contexto;
+- checkpoints de contexto con integridad verificable;
+- Retrieval Candidate Pipeline con filtros de autoridad, vigencia, procedencia, aplicabilidad, contradicción y riesgo;
+- selección de evidencia limitada por presupuesto;
+- métricas de precisión, autoridad, obsolescencia y cobertura.
+
+**Propiedades obligatorias de las proyecciones**
+
+```text
+GENERATED
+NON-AUTHORITATIVE
+REBUILDABLE
+HASHED
+VERSIONED
+SOURCE-LINKED
+```
+
+**Restricciones**
+
+- memoria no equivale a conocimiento;
+- conocimiento no equivale a política;
+- recuperación no implica autoridad;
+- índices, grafos, cachés y resúmenes no reemplazan las fuentes oficiales;
+- no integrar motores vectoriales, GraphRAG, bases de datos o frameworks concretos en el Kernel;
+- no introducir adquisición autónoma de contenido externo;
+- no promover observaciones automáticamente a conocimiento gobernado;
+- evitar una implementación conjunta de mapa, contexto, retrieval, caché y memoria.
+
+**Relaciones**
+
+- `AKS preparado para GraphRAG`;
+- `Evidence Acquisition Framework`;
+- `Resource Governance Foundation`;
+- futura memoria tipada y gobernada;
+- futura evaluación de retrieval.
+
+**Próximo paso gobernado**
+
+Evaluar primero un Repository Knowledge Map mínimo como posible salida regenerable de una futura preparación del AKS. Context Lifecycle, retrieval, caché y memoria requieren decisiones y sprints independientes.
+
+---
+
+### IDEA-014 — Complexity Budget Foundation
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Establecer límites explícitos al crecimiento de infraestructura, contratos, estados, configuración y dependencias para evitar que Malāk aumente su complejidad sin beneficio comprobable.
+
+**Valor esperado**
+
+- prevenir generalización prematura;
+- limitar la expansión de contratos públicos;
+- hacer visible el coste cognitivo y operativo de cada paquete;
+- favorecer soluciones pequeñas, reemplazables y reversibles;
+- detectar cuando una propuesta debe dividirse o diferirse;
+- impedir que tooling, frameworks o plataformas dicten la arquitectura.
+
+**Dimensiones iniciales**
+
+Cada Implementation Packet podrá declarar:
+
+- dependencias nuevas;
+- contratos públicos nuevos;
+- estados nuevos;
+- claves de configuración nuevas;
+- módulos o capas nuevas;
+- coste operativo esperado;
+- deuda técnica introducida;
+- complejidad eliminada;
+- alternativa más simple evaluada;
+- necesidad de revisión arquitectónica profunda.
+
+**Restricciones**
+
+- no convertir el presupuesto en una métrica rígida o universal;
+- no impedir cambios necesarios por un límite numérico arbitrario;
+- no crear un subsistema de scoring antes de demostrar necesidad;
+- no imponer un lenguaje, framework, plataforma o herramienta;
+- toda excepción debe estar justificada y aprobada explícitamente.
+
+**Relaciones**
+
+- `Malāk Validation & Delivery Protocol`;
+- `Resource Governance Foundation`;
+- `Development Tooling Foundation`;
+- revisión arquitectónica y certificación de baseline.
+
+**Próximo paso gobernado**
+
+Incorporar inicialmente el Complexity Budget como sección cualitativa de los Implementation Packets. Evaluar automatización únicamente cuando exista evidencia de utilidad y criterios estables.
+
+---
+
+## Ampliaciones propuestas de ideas existentes
+
+### Ampliación conceptual de IDEA-002 — Controlled Engineering Improvement Loop Foundation
+
+Registrar como componentes futuros posibles, sin aprobación de diseño ni implementación:
+
+- Shadow Mode para comparar decisiones candidatas sin efectos;
+- Controlled Experimentation con hipótesis, baseline, métricas, sandbox y rollback;
+- Decision Replay e Incident Replay inicialmente sin efectos;
+- Capability Benchmarking;
+- promoción gobernada de mejoras basada en evidencia reproducible.
+
+Estas capacidades no otorgan autoridad para modificar Malāk, promover conocimiento, cambiar políticas o aplicar resultados automáticamente.
+
+### Ampliación conceptual de IDEA-003 — Resource Governance Foundation
+
+Registrar como componentes futuros posibles:
+
+- presupuestos de ejecución para contexto, tiempo, herramientas, CPU, RAM, VRAM, red y paralelismo;
+- perfiles operativos reemplazables y externos al Kernel;
+- degradación controlada y visible;
+- límites de candidatos de retrieval;
+- métricas de consumo por tarea;
+- cachés reconstruibles con invalidación explícita.
+
+Los presupuestos no deben depender del hardware actual ni transformar restricciones locales en arquitectura permanente.
+
 ## Historial
+
+### 2026-07-28 — Consolidación de ideas de entrega, aseguramiento y eficiencia
+
+- se registra `Malāk Validation & Delivery Protocol`;
+- se registra `Constitutional Assurance Foundation`;
+- se registra `Knowledge and Context Efficiency Foundation`;
+- se registra `Complexity Budget Foundation`;
+- se preserva la separación entre idea, decisión, roadmap e implementación;
+- se incorporan referencias futuras a matrices de aplicabilidad OWASP, NIST y otros marcos sin elevarlas por encima de los documentos de ley;
+- no se aprueba ningún sprint, contrato, herramienta o implementación;
+- no se modifica el Kernel ni el baseline operativo.
 
 ### 2026-07-24 — Activación del registro
 
