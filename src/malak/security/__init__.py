@@ -1,3 +1,9 @@
+from malak.security.audit import (
+    AuthorizationAuditOutcome,
+    AuthorizationAuditRecord,
+    AuthorizationAuditSink,
+    InMemoryAuthorizationAuditStore,
+)
 from malak.security.contracts import (
     AuthorizationDecision,
     AuthorizationRequest,
@@ -21,6 +27,10 @@ from malak.security.pep import (
 )
 
 __all__ = [
+    "AuthorizationAuditOutcome",
+    "AuthorizationAuditRecord",
+    "AuthorizationAuditSink",
+    "InMemoryAuthorizationAuditStore",
     "AuthorizationDecision",
     "AuthorizationDeniedError",
     "AuthorizationEnforcementError",
