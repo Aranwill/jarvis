@@ -1,5 +1,10 @@
 from typing import Generic, Protocol, TypeVar
 
+from malak.security.audit import (
+    AuthorizationAuditOutcome,
+    AuthorizationAuditRecord,
+    AuthorizationAuditSink,
+)
 from malak.security.contracts import (
     AuthorizationDecision,
     AuthorizationRequest,
@@ -43,6 +48,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
         self,
         policy_decision_point: PolicyDecisionPoint,
         protected_operation: ProtectedOperation[ResultT],
+        authorization_audit_sink: AuthorizationAuditSink,
     ) -> None:
         if not callable(
             getattr(policy_decision_point, "decide", None)
@@ -58,8 +64,16 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                 "protected_operation must implement execute"
             )
 
+        if not callable(
+            getattr(authorization_audit_sink, "write", None)
+        ):
+            raise TypeError(
+                "authorization_audit_sink must implement write"
+            )
+
         self._policy_decision_point = policy_decision_point
         self._protected_operation = protected_operation
+        self._authorization_audit_sink = authorization_audit_sink
 
     def execute(
         self,
@@ -77,31 +91,109 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                 confirmation,
             )
         except Exception as error:
+            self._write_audit(
+                request=request,
+                outcome=AuthorizationAuditOutcome.DECISION_FAILED,
+                reason_code="policy_decision_failed",
+                failure_message=(
+                    "authorization audit failed after "
+                    "policy decision failure"
+                ),
+            )
             raise AuthorizationEnforcementError(
                 "policy decision failed"
             ) from error
 
-        self._validate_decision(request, decision)
-
-        if not decision.allowed:
-            raise AuthorizationDeniedError(
-                decision.request_id,
-                decision.reason,
-            )
-
-        return self._protected_operation.execute()
-
-    @staticmethod
-    def _validate_decision(
-        request: AuthorizationRequest,
-        decision: object,
-    ) -> None:
         if not isinstance(decision, AuthorizationDecision):
+            self._write_audit(
+                request=request,
+                outcome=AuthorizationAuditOutcome.INVALID_DECISION,
+                reason_code="invalid_decision_type",
+                failure_message=(
+                    "authorization audit failed after "
+                    "invalid policy decision"
+                ),
+            )
             raise AuthorizationEnforcementError(
                 "policy decision point returned an invalid decision"
             )
 
         if decision.request_id != request.request_id:
+            self._write_audit(
+                request=request,
+                outcome=AuthorizationAuditOutcome.INVALID_DECISION,
+                reason_code="decision_request_mismatch",
+                failure_message=(
+                    "authorization audit failed after "
+                    "decision request mismatch"
+                ),
+            )
             raise AuthorizationEnforcementError(
                 "authorization decision does not match request"
             )
+
+        if not decision.allowed:
+            self._write_audit(
+                request=request,
+                outcome=AuthorizationAuditOutcome.DENIED,
+                reason_code=decision.reason,
+                failure_message=(
+                    "authorization audit failed for denied decision"
+                ),
+            )
+            raise AuthorizationDeniedError(
+                decision.request_id,
+                decision.reason,
+            )
+
+        self._write_audit(
+            request=request,
+            outcome=AuthorizationAuditOutcome.ALLOWED,
+            reason_code=decision.reason,
+            failure_message=(
+                "authorization audit failed before protected operation"
+            ),
+        )
+
+        try:
+            return self._protected_operation.execute()
+        except Exception as operation_error:
+            try:
+                self._write_audit(
+                    request=request,
+                    outcome=AuthorizationAuditOutcome.OPERATION_FAILED,
+                    reason_code="protected_operation_failed",
+                    failure_message=(
+                        "authorization audit failed after "
+                        "protected operation failure"
+                    ),
+                )
+            except AuthorizationEnforcementError as audit_error:
+                secondary_error = audit_error.__cause__ or audit_error
+                raise operation_error from secondary_error
+
+            raise
+
+    def _write_audit(
+        self,
+        *,
+        request: AuthorizationRequest,
+        outcome: AuthorizationAuditOutcome,
+        reason_code: str,
+        failure_message: str,
+    ) -> None:
+        record = AuthorizationAuditRecord(
+            request_id=request.request_id,
+            subject_id=request.context.subject_id,
+            resource=request.permission.resource,
+            action=request.permission.action,
+            outcome=outcome,
+            reason_code=reason_code,
+        )
+
+        try:
+            self._authorization_audit_sink.write(record)
+        except Exception as error:
+            raise AuthorizationEnforcementError(
+                failure_message
+            ) from error
