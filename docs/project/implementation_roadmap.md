@@ -230,6 +230,68 @@ Sin número de sprint asignado.
 Esta incorporación fue reflejada durante la sincronización gobernada
 posterior al Sprint 7.4.
 
+### Fundaciones paraguas incorporadas a planificación futura
+
+Las siguientes líneas quedan incorporadas como planificación futura aprobada, sin diseño detallado, sin número de sprint y sin autorización de implementación.
+
+#### Segmented Domain Governance Foundation
+
+Propósito:
+
+- preservar a Malāk como control plane horizontal;
+- permitir Domain Packs subordinados a los documentos de ley;
+- definir precedencia entre políticas globales, dominio, jurisdicción, organización y workflow;
+- impedir que una capa inferior amplíe autoridad o contamine el Kernel con lógica sectorial.
+
+Estado:
+
+```text
+Planificación futura aprobada.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint asignado.
+```
+
+#### Knowledge Intake & External Evidence Governance
+
+Propósito:
+
+- gobernar libros, papers, informes, webs y fuentes internas;
+- conservar originales, procedencia, autoridad, licencias y vigencia;
+- tratar Markdown, embeddings, índices y grafos como proyecciones reconstruibles;
+- integrar búsqueda externa mediante autorización, sandbox, saneamiento y validación;
+- prevenir autocontaminación y promoción automática de conclusiones.
+
+Estado:
+
+```text
+Planificación futura aprobada.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint asignado.
+```
+
+#### Security Learning, Adversarial Evaluation & Deception
+
+Propósito:
+
+- habilitar laboratorios locales, CTF autorizados y formación asistida;
+- evaluar agentes mediante observación externa;
+- crear en el futuro un gemelo adversarial de Malāk, honeypots y deception defensiva aislada;
+- transformar evidencia validada en pruebas y propuestas defensivas;
+- establecer defensa activa dentro de fronteras propias y respuesta externa únicamente bajo autoridad legal, atribución validada, alcance explícito y supervisión humana.
+
+Estado:
+
+```text
+Planificación futura aprobada.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint asignado.
+```
+
+Estas fundaciones dependen de `Security Control Plane Foundation` y de la futura `Sandbox Containment & Evaluation Evidence Foundation`. No habilitan agentes, navegación, malware, Tor, honeypots públicos, pentesting real, beta pública ni respuesta ofensiva.
+
 ## Propuestas pendientes de revisión y aprobación
 
 | Propuesta | Estado | Observación |

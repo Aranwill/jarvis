@@ -745,6 +745,311 @@ Incorporar inicialmente el Complexity Budget como sección cualitativa de los Im
 
 ---
 
+### IDEA-015 — Segmented Domain Governance Foundation
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Permitir que Malāk escale hacia múltiples verticales mediante paquetes de dominio subordinados a sus documentos de ley, sin incorporar lógica sectorial al Kernel ni crear constituciones paralelas con autoridad equivalente.
+
+**Principio rector**
+
+> Malāk define las invariantes. El dominio especializa su aplicación. La jurisdicción establece obligaciones. La organización puede imponer restricciones adicionales. Ninguna capa inferior puede ampliar autoridad ni contradecir una capa superior.
+
+**Modelo conceptual**
+
+```text
+Constitución Cognitiva y Constitución de Gobernanza
+        ↓
+Blueprint, ADR y políticas globales
+        ↓
+Domain Governance Profile
+        ↓
+Jurisdiction Policy Pack
+        ↓
+Organization Policy
+        ↓
+Workflow Policy
+        ↓
+Autorización y ejecución concretas
+```
+
+**Reglas iniciales**
+
+- los permisos efectivos resultan de la intersección de todas las capas aplicables;
+- una denegación explícita prevalece sobre una autorización inferior;
+- una capa inferior puede restringir, pero no ampliar autoridad;
+- las contradicciones normativas materiales producen `DENY` o `HOLD`;
+- los Domain Packs no modifican el Kernel;
+- cada dominio mantiene conocimiento, políticas, capacidades y assurance separados;
+- las obligaciones legales y profesionales se modelan por jurisdicción y vigencia;
+- las preferencias del usuario nunca sustituyen una restricción superior.
+
+**Verticales futuros posibles**
+
+- ingeniería y operaciones tecnológicas;
+- gobierno de agentes empresariales;
+- ciberseguridad defensiva;
+- datos y compliance;
+- fiscalidad y administración corporativa;
+- gobierno e inteligencia institucional;
+- salud;
+- asistencia personal y seguridad familiar.
+
+**Dependencias**
+
+- documentos de ley vigentes;
+- `Security Control Plane Foundation`;
+- contratos de autorización y enforcement;
+- futura gobernanza de conocimiento, identidad, contexto y auditoría.
+
+**Próximo paso gobernado**
+
+Diseñar en el futuro un contrato mínimo de Domain Pack y una matriz de precedencia normativa. No crear todavía rutas, schemas, contratos públicos ni verticales implementados.
+
+---
+
+### IDEA-016 — Knowledge Intake & Source Governance Foundation
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Incorporar libros, papers, informes, documentación, páginas web y fuentes internas mediante un proceso gobernado que preserve originales, procedencia, autoridad, licencias, vigencia y capacidad de reconstrucción.
+
+**Principios**
+
+- conservar la fuente original como evidencia inmutable;
+- tratar Markdown, texto extraído, embeddings, índices y grafos como proyecciones derivadas y regenerables;
+- no convertir un archivo procesado en conocimiento autoritativo por el solo hecho de haber sido ingerido;
+- distinguir fuente primaria, fuente secundaria, resumen derivado, hipótesis y decisión;
+- registrar autoría humana, asistida por IA, generada por IA, mixta o desconocida cuando pueda determinarse;
+- impedir bucles de autocontaminación donde una conclusión generada sea reutilizada como evidencia primaria;
+- preferir recuperación gobernada antes que entrenar modelos para memorizar bibliotecas;
+- aplicar controles de licencia, acceso, cita, redistribución y retención.
+
+**Componentes conceptuales**
+
+- Source Registry;
+- Rights & Licensing Registry;
+- Normalization Pipeline;
+- Authority & Provenance Model;
+- Hybrid Retrieval Index;
+- Knowledge Promotion Gate.
+
+**Flujo conceptual**
+
+```text
+Fuente original
+    → validación legal y técnica
+    → extracción normalizada
+    → metadatos, autoridad y vigencia
+    → segmentación e índices
+    → recuperación contextual
+    → validación
+    → posible promoción gobernada
+```
+
+**Dependencias**
+
+- `Evidence Acquisition Framework`;
+- futura preparación del AKS;
+- políticas de privacidad, licencias y retención;
+- assurance de extracción y trazabilidad.
+
+**Próximo paso gobernado**
+
+Definir primero un manifiesto mínimo de fuente y un proceso de promoción. No implementar una biblioteca universal, vector store o GraphRAG por inferencia.
+
+---
+
+### IDEA-017 — External Research & Assurance Review
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Revisar periódicamente investigaciones, papers, incidentes, system cards, estándares y recomendaciones externas para identificar brechas, validar decisiones de Malāk y proponer mejoras sin adoptar novedades de forma automática.
+
+**Clasificación prevista**
+
+```text
+APPLICABLE
+PARTIALLY_APPLICABLE
+ALREADY_COVERED
+NOT_APPLICABLE
+REQUIRES_RESEARCH
+DEFERRED
+BLOCKING
+```
+
+**Reglas**
+
+- priorizar fuentes primarias, documentación oficial y papers con metodología verificable;
+- tratar redes sociales, foros y publicaciones informales como señales de investigación, no como autoridad;
+- comparar cada recomendación contra el Blueprint, las Constituciones, la Gobernanza y la simplicidad del Kernel;
+- documentar beneficio, complejidad, riesgos, aplicabilidad, alternativas, validación y rollback;
+- no convertir una recomendación externa en sprint, contrato o implementación sin aprobación;
+- realizar revisiones antes de nuevas superficies sensibles, después de incidentes relevantes y de forma general periódica.
+
+**Próximo paso gobernado**
+
+Definir una plantilla breve de External Research Review y aplicarla únicamente cuando exista una pregunta o superficie concreta.
+
+---
+
+### IDEA-018 — Malāk Public Presence & Controlled Beta Foundation
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Preparar una presencia pública verificable de Malāk y una progresión segura desde documentación institucional hasta demostraciones y betas controladas.
+
+**Paquetes conceptuales**
+
+1. Public Documentation Website;
+2. Demo Environment Foundation;
+3. Load, Stress & Resilience Validation;
+4. Controlled External Beta.
+
+**Reglas**
+
+- distinguir públicamente `IMPLEMENTED`, `EXPERIMENTAL`, `PLANNED`, `RESEARCH` y `NOT AVAILABLE`;
+- no exponer directamente el Kernel;
+- ejecutar pruebas de carga, estrés, duración, picos, resiliencia y degradación antes de una beta;
+- exigir identidad, rate limits, aislamiento, auditoría, gestión de secretos, protección contra abuso y kill switch;
+- comenzar con beta privada, temporal, limitada y por invitación;
+- no utilizar usuarios públicos como sustituto de pruebas sintéticas reproducibles.
+
+**Próximo paso gobernado**
+
+Mantener la web institucional separada de toda exposición operativa. La beta requiere una readiness review independiente y no queda autorizada por esta entrada.
+
+---
+
+### IDEA-019 — Malāk Security Learning, Adversarial Evaluation & Deception Foundation
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Crear una fundación para aprendizaje de ciberseguridad, evaluación adversarial de agentes, laboratorios autorizados, CTF, gemelos adversariales, honeypots y deception defensiva, preservando aislamiento, legalidad, observación externa y Human in Control.
+
+**Subcapacidades futuras**
+
+- Security Learning Lab con modos aprendiz e instructor;
+- CTF y laboratorios deliberadamente vulnerables;
+- evaluación externa del comportamiento de agentes;
+- extracción de conocimiento defensivo validado;
+- Adversarial Twin de Malāk sin autoridad ni secretos reales;
+- honeypots, honeynets, honeytokens y datos completamente sintéticos;
+- red team y bug bounty progresivos;
+- generación de pruebas, reglas de detección y propuestas de hardening.
+
+**Principio de Defensa Activa y Respuesta Gobernada**
+
+> Ante una agresión maliciosa o destructiva contra Malāk, sus componentes, sus datos o su infraestructura autorizada, Malāk podrá detectar, contener, aislar, bloquear, engañar, degradar dentro de fronteras propias, revocar credenciales, cerrar sesiones, activar kill switches, desplegar señuelos, preservar evidencia y coordinar una respuesta defensiva proporcional.
+
+> Ningún ataque recibido concede autoridad automática para acceder, alterar, inutilizar o comprometer infraestructura externa. Cualquier acción fuera de fronteras propias o expresamente autorizadas requerirá autoridad legal explícita, atribución validada, alcance definido, supervisión humana competente y una capacidad institucional separada de la operación ordinaria de Malāk.
+
+**Roles conceptuales de contingencia**
+
+- `OWNER_AUTHORITY`: autoridad humana final y revocable;
+- `SECURITY_OBSERVER`: observación externa sin autoridad operativa;
+- `INCIDENT_COMMANDER`: coordina respuesta dentro del alcance aprobado;
+- `CONTAINMENT_OPERATOR`: aplica aislamiento, bloqueo, rotación y cierre;
+- `FORENSIC_COLLECTOR`: preserva evidencia sin modificar la escena más de lo necesario;
+- `DECEPTION_CONTROLLER`: activa señuelos y redirecciones dentro de infraestructura propia;
+- `RECOVERY_OPERATOR`: restaura servicios y verifica integridad;
+- `EXTERNAL_RESPONSE_LIAISON`: coordina con proveedores, autoridades o equipos legalmente habilitados.
+
+Ningún rol de agente podrá autoasignarse, elevarse, delegar autoridad superior ni actuar fuera del contexto de seguridad vigente.
+
+**Niveles conceptuales de contingencia**
+
+```text
+NORMAL
+SUSPICIOUS
+CONTAINMENT
+CRITICAL_CONTAINMENT
+RECOVERY
+FORENSIC_REVIEW
+```
+
+- `NORMAL`: controles ordinarios;
+- `SUSPICIOUS`: observación reforzada y reducción preventiva de privilegios;
+- `CONTAINMENT`: aislamiento de sesión, identidad, agente, herramienta o segmento;
+- `CRITICAL_CONTAINMENT`: cierre fail-closed, revocación, kill switch y preservación prioritaria;
+- `RECOVERY`: restauración desde baseline confiable;
+- `FORENSIC_REVIEW`: análisis, lecciones y propuestas sin promoción automática.
+
+La transición de un nivel a otro requiere evidencia verificable, política predefinida y autoridad humana cuando el alcance sea material. La presencia del propietario no convierte una sospecha en atribución confirmada ni concede autoridad ofensiva automática.
+
+**Restricciones**
+
+- no usar datos reales como cebo;
+- no conectar honeypots con producción, repositorios, Vault o redes domésticas;
+- egress denegado por defecto;
+- no perseguir ni comprometer al atacante fuera de la infraestructura controlada;
+- no conservar malware operativo fuera de cuarentena aprobada;
+- no promover automáticamente técnicas observadas a conocimiento o políticas;
+- todo pentest real exige contrato, alcance y autorización explícitos.
+
+**Dependencias**
+
+- `Security Control Plane Foundation`;
+- `Sandbox Containment & Evaluation Evidence Foundation`;
+- `Owner Security Research Sandbox`;
+- identidad, contexto, auditoría, gestión de secretos y respuesta a incidentes.
+
+**Próximo paso gobernado**
+
+Diseñar primero laboratorios locales y un Adversarial Twin sin acceso externo. Honeypots públicos, bug bounty, Tor, malware o interacción activa requieren decisiones y readiness reviews independientes.
+
+---
+
+### IDEA-020 — Sovereign Agent Fleet Control & Vertical Scaling
+
+**Estado:** `aprobada_para_planificacion_futura`
+
+**Intención**
+
+Consolidar la visión de Malāk como plano horizontal, soberano y vendor-agnostic para gobernar flotas de agentes especializados, con tecnología como primer vertical y expansión futura mediante Domain Packs.
+
+**Diferenciadores previstos**
+
+- separación entre inteligencia, autoridad y ejecución;
+- operación local, híbrida o privada;
+- agentes heterogéneos y modelos intercambiables;
+- políticas y enforcement externos al modelo;
+- observación y evidencia fuera de la zona de confianza del agente;
+- sandboxes efímeros;
+- mejora mediante propuestas, no automodificación;
+- Domain Packs subordinados a documentos de ley;
+- auditabilidad y control humano.
+
+**Estrategia de escalado**
+
+```text
+Malāk se gobierna y valida a sí misma
+        ↓
+Engineering Governance
+        ↓
+Agent Governance / Compliance / Data
+        ↓
+Cybersecurity defensiva y operación soberana
+        ↓
+Domain Packs especializados
+```
+
+**Próximo paso gobernado**
+
+Mantener tecnología e ingeniería como primer campo de demostración. No aprobar verticales regulados ni estrategia comercial sin expertos del dominio, validación de valor y revisión legal.
+
+---
+
 ## Ampliaciones propuestas de ideas existentes
 
 ### Ampliación conceptual de IDEA-002 — Controlled Engineering Improvement Loop Foundation
@@ -772,7 +1077,62 @@ Registrar como componentes futuros posibles:
 
 Los presupuestos no deben depender del hardware actual ni transformar restricciones locales en arquitectura permanente.
 
+### Ampliación conceptual de IDEA-001 — Sandbox Containment & Evaluation Evidence Foundation
+
+Registrar como requisitos futuros:
+
+- ciclo `create → execute → seal evidence → destroy → verify destruction`;
+- prohibición de reutilización de sandboxes;
+- imágenes base inmutables y manifiestos por ejecución;
+- backends intercambiables por sistema operativo con garantías declaradas;
+- observador fuera de banda alojado fuera de la zona de confianza del agente;
+- canal de telemetría unilateral que el agente no pueda modificar;
+- comparación entre informe del agente y conducta observada;
+- canary resources, honeytokens y evaluaciones ciegas opcionales;
+- invalidación verificable de credenciales, claves, discos y procesos al destruir;
+- evidencia canónica basada en efectos observables y no en razonamiento declarado.
+
+### Ampliación conceptual de IDEA-006 — Evidence Acquisition Framework
+
+Registrar como requisitos futuros:
+
+- recuperación interna antes de solicitar Internet;
+- detección de brecha temporal y evidencia insuficiente;
+- autorización PDP/PEP para búsqueda externa;
+- políticas de fuentes por dominio;
+- validación de procedencia, autoridad, vigencia, corroboración y conflicto;
+- contenido web tratado como datos no confiables;
+- protección contra prompt injection y scripts;
+- almacenamiento temporal por defecto;
+- promoción gobernada de fuentes reutilizables;
+- revisión periódica de investigación externa mediante IDEA-017.
+
+### Ampliación conceptual de IDEA-007 — Secure Isolated Access Layer
+
+Registrar perfiles separados para Internet pública, deep web autenticada, servicios onion e investigación de alto riesgo. Cada perfil deberá declarar red, egress, identidad, credenciales, descargas, interacción, TTL, evidencia y destrucción. La navegación directa por dark web permanecerá denegada por defecto y subordinada a finalidad legítima, revisión legal y autorización reforzada.
+
+### Ampliación conceptual de IDEA-010 — Owner Security Research Sandbox
+
+Evolucionar su evaluación hacia IDEA-019, preservando:
+
+- uso educativo y defensivo;
+- laboratorios locales y CTF autorizados;
+- modo aprendiz e instructor;
+- prohibición de objetivos públicos no autorizados;
+- evaluación externa del agente;
+- incorporación gobernada de aprendizaje defensivo;
+- separación total del runtime ordinario y del host.
+
 ## Historial
+
+### 2026-07-29 — Escalado segmentado, conocimiento y defensa activa gobernada
+
+- se registran `Segmented Domain Governance Foundation`, `Knowledge Intake & Source Governance Foundation`, `External Research & Assurance Review`, `Malāk Public Presence & Controlled Beta Foundation`, `Malāk Security Learning, Adversarial Evaluation & Deception Foundation` y `Sovereign Agent Fleet Control & Vertical Scaling`;
+- se amplían las ideas existentes de sandbox, adquisición de evidencia, acceso aislado y laboratorio de seguridad;
+- se deja como precedente el principio de Defensa Activa y Respuesta Gobernada;
+- se definen roles y niveles conceptuales de contingencia sin autoridad autónoma ni hack back general;
+- no se aprueba implementación, sprint, acceso externo, honeypot público, navegación onion ni acción ofensiva;
+- no se modifica el Kernel, el baseline, las Constituciones ni snapshots históricos.
 
 ### 2026-07-28 — Consolidación de ideas de entrega, aseguramiento y eficiencia
 
