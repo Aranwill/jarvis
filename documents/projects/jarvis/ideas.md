@@ -1075,6 +1075,8 @@ Registrar como componentes futuros posibles:
 - métricas de consumo por tarea;
 - cachés reconstruibles con invalidación explícita.
 
+Ningún agente podrá autoasignarse recursos, ampliar cuotas, evadir límites mediante procesos hijos, paralelismo, colas o reintentos, ni mantener persistencia fuera del alcance aprobado. Toda elevación de presupuesto requerirá política aplicable, evidencia verificable y autorización. El agotamiento de recursos deberá producir degradación segura o cierre fail-closed, con medición y enforcement externos a la zona de confianza del agente.
+
 Los presupuestos no deben depender del hardware actual ni transformar restricciones locales en arquitectura permanente.
 
 ### Ampliación conceptual de IDEA-001 — Sandbox Containment & Evaluation Evidence Foundation
