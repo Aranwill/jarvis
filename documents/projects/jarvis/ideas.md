@@ -950,7 +950,7 @@ Crear una fundación para aprendizaje de ciberseguridad, evaluación adversarial
 
 **Principio de Defensa Activa y Respuesta Gobernada**
 
-> Ante una agresión maliciosa o destructiva contra Malāk, sus componentes, sus datos o su infraestructura autorizada, Malāk podrá detectar, contener, aislar, bloquear, engañar, degradar dentro de fronteras propias, revocar credenciales, cerrar sesiones, activar kill switches, desplegar señuelos, preservar evidencia y coordinar una respuesta defensiva proporcional.
+> Ante una agresión maliciosa o destructiva contra Malāk, sus componentes, sus datos o su infraestructura autorizada, Malāk podrá detectar, contener, aislar, bloquear, engañar, degradar dentro de fronteras propias, revocar credenciales, cerrar sesiones, activar kill switches, desplegar señuelos, preservar evidencia y coordinar una respuesta defensiva proporcional exclusivamente dentro de infraestructura propia o expresamente autorizada.
 
 > Ningún ataque recibido concede autoridad automática para acceder, alterar, inutilizar o comprometer infraestructura externa. Cualquier acción fuera de fronteras propias o expresamente autorizadas requerirá autoridad legal explícita, atribución validada, alcance definido, supervisión humana competente y una capacidad institucional separada de la operación ordinaria de Malāk.
 
@@ -1006,7 +1006,7 @@ La transición de un nivel a otro requiere evidencia verificable, política pred
 
 **Próximo paso gobernado**
 
-Diseñar primero laboratorios locales y un Adversarial Twin sin acceso externo. Honeypots públicos, bug bounty, Tor, malware o interacción activa requieren decisiones y readiness reviews independientes.
+Diseñar primero laboratorios locales y un Adversarial Twin sin acceso externo. Honeypots públicos, bug bounty, Tor, malware o interacción activa con actores externos o sistemas fuera del entorno controlado requieren decisiones y readiness reviews independientes.
 
 ---
 
