@@ -1033,7 +1033,7 @@ Consolidar la visión de Malāk como plano horizontal, soberano y vendor-agnosti
 **Estrategia de escalado**
 
 ```text
-Malāk se gobierna y valida a sí misma
+Malāk valida su propio comportamiento bajo gobernanza y autoridad humana
         ↓
 Engineering Governance
         ↓
