@@ -272,8 +272,9 @@ Posteriormente, el Incremento 5 incorporó los contratos de auditoría y su
 integración fail-closed con el PEP mediante las PR #22 y #23. Ese trabajo
 permanece igualmente aislado de rutas operativas reales.
 
-El Incremento 5 queda cerrado después de su reconciliación documental.
-El Incremento 6 continúa pendiente y no está autorizado por este cierre.
+El Incremento 5 quedó cerrado después de su reconciliación documental.
+Posteriormente, el Incremento 6 completó la revisión integral y el cierre
+del Sprint 7.5 sin ampliar su alcance ni autorizar ningún sprint posterior.
 
 ## Puertas de aceptación
 
