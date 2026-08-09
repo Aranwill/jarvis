@@ -2,8 +2,8 @@
 title: Hoja de ruta de implementación
 status: activo
 authority: no normativa
-as_of_date: 2026-07-26
-as_of_commit: af64b062aa1395ba7f7bdd59e5c1099ded68b683
+as_of_date: 2026-08-09
+as_of_commit: b4d1d512fe953d593608391390f82ab500fdc9d6
 branch: main
 language: es
 ---
@@ -57,10 +57,10 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 ## Estado de referencia
 
 - Rama permanente: `main`.
-- HEAD verificado tras integrar el Incremento 4:
-  `af64b062aa1395ba7f7bdd59e5c1099ded68b683`.
+- HEAD verificado antes de iniciar la reconciliación del Incremento 5:
+  `b4d1d512fe953d593608391390f82ab500fdc9d6`.
 - Baseline nominal: `v0.6.0-alpha`.
-- Suite validada en el Incremento 4: 244 pruebas aprobadas.
+- Suite completa validada antes de la reconciliación: 304 pruebas aprobadas.
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
 - Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
@@ -144,14 +144,22 @@ de Kernel, Planner, CLI, runtimes, Capability Registry y operaciones
 reales. Fue integrada en `main` mediante la PR #19 y el merge commit
 `af64b062aa1395ba7f7bdd59e5c1099ded68b683`.
 
-La secuencia restante contempla, sujeta a diseño, revisión y aprobación
-independientes por incremento:
+El Incremento 5 incorporó posteriormente la evidencia de auditoría de
+autorización mediante dos paquetes independientes:
 
-1. evidencia de auditoría de autorización;
-2. revisión integral y cierre.
+1. Packet 5.1 — contratos mínimos de auditoría, integrado mediante la
+   PR #22 y el merge commit
+   `418358cc5b543c59cf4b113f42e762f6c78eec59`;
+2. Packet 5.2 — integración fail-closed con el PEP, integrado mediante
+   la PR #23 y el merge commit
+   `38b0917c5b8dba5c5a4ef4db157e78ac428ab4bc`.
 
-El Incremento 4 no habilita rutas operativas reales y no autoriza el
-Incremento 5.
+La reconciliación documental posterior cierra el Incremento 5 sin
+habilitar rutas operativas reales ni ampliar autoridad.
+
+La única unidad restante dentro del Sprint 7.5 es el Incremento 6 —
+revisión integral y cierre. Su existencia en la secuencia no constituye
+autorización para implementarlo.
 
 ### Cierre verificado del Sprint 7.4
 
