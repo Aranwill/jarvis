@@ -210,10 +210,10 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-Estado validado durante el Sprint 7.3:
+Estado validado antes del cierre documental del Incremento 5:
 
 ```text
-74 passed
+304 passed
 ```
 
 Validar compilación:
