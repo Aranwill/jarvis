@@ -2,7 +2,7 @@
 title: Sprint 7.5 — Base del plano de control de seguridad
 status: en progreso
 authority: operativa del sprint
-as_of_commit: af64b062aa1395ba7f7bdd59e5c1099ded68b683
+as_of_commit: b4d1d512fe953d593608391390f82ab500fdc9d6
 baseline_commit: 7cd7fcc
 branch: main
 language: es
@@ -136,10 +136,27 @@ Validación del primer incremento:
 
 ### Incremento 5 — Evidencia de auditoría de autorización
 
-- registrar evidencia mínima, estructurada y segura;
-- excluir secretos y contenido sensible;
-- preservar la separación respecto de métricas y eventos operativos;
-- definir comportamiento ante fallos de auditoría.
+- completado mediante paquetes pequeños, revisables y reversibles;
+- Packet 5.1 integrado mediante la PR #22 y el merge commit `418358cc5b543c59cf4b113f42e762f6c78eec59`;
+- Packet 5.2 integrado mediante la PR #23 y el merge commit `38b0917c5b8dba5c5a4ef4db157e78ac428ab4bc`;
+- incorpora evidencia mínima, estructurada, inmutable y segura;
+- excluye secretos, prompts, outputs y contenido sensible innecesario;
+- mantiene auditoría separada de métricas y eventos operativos;
+- el `AuthorizationAuditSink` es obligatorio para el PEP inicial;
+- un fallo de auditoría antes de una operación permitida bloquea la ejecución de forma fail-closed;
+- ninguna evidencia de auditoría concede autoridad ni modifica una decisión de autorización;
+- Kernel, Planner, CLI, runtimes y Capability Registry permanecen sin cambios;
+- la integración continúa aislada de rutas operativas reales;
+- reconciliación y cierre documental realizados en el Incremento 5.3.
+
+Validación previa al cierre documental del Incremento 5:
+
+- suite completa: 304 passed;
+- `compileall`: PASS;
+- `git diff --check`: PASS;
+- working tree limpio antes de iniciar la reconciliación.
+
+El cierre del Incremento 5 no autoriza el Incremento 6 ni habilita persistencia de auditoría, Secure Context Manager, rutas operativas reales o capacidades adicionales.
 
 ### Incremento 6 — Revisión integral y cierre
 
@@ -240,10 +257,16 @@ Validación del Incremento 4:
 - operaciones reales, auditoría, sesiones, firmas, TTL, nonce y
   prevención persistente de replay fuera de alcance.
 
-La implementación permanece aislada y no está conectada a ninguna ruta
-operativa. Fue integrada en `main` mediante la PR #19 y el merge commit
-`af64b062aa1395ba7f7bdd59e5c1099ded68b683`. El Incremento 5 no está
-autorizado.
+La implementación del Incremento 4 permanece aislada de rutas operativas
+reales. Fue integrada en `main` mediante la PR #19 y el merge commit
+`af64b062aa1395ba7f7bdd59e5c1099ded68b683`.
+
+Posteriormente, el Incremento 5 incorporó los contratos de auditoría y su
+integración fail-closed con el PEP mediante las PR #22 y #23. Ese trabajo
+permanece igualmente aislado de rutas operativas reales.
+
+El Incremento 5 queda cerrado después de su reconciliación documental.
+El Incremento 6 continúa pendiente y no está autorizado por este cierre.
 
 ## Puertas de aceptación
 
