@@ -64,7 +64,7 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
 - Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
-- Sprint 7.5 aprobado y en progreso: `Base del plano de control de seguridad`.
+- Sprint 7.5 cerrado: `Security Control Plane Foundation`.
 - El Kernel permanece desacoplado de runtimes, proveedores y modelos concretos.
 - La CLI y el pipeline Kernel–Planner–Capability continúan siendo rutas separadas.
 - No existe todavía una integración formal validada entre `Kernel.receive` y `ConversationService`.
@@ -176,9 +176,9 @@ autorización mediante dos paquetes independientes:
 La reconciliación documental posterior cierra el Incremento 5 sin
 habilitar rutas operativas reales ni ampliar autoridad.
 
-La única unidad restante dentro del Sprint 7.5 es el Incremento 6 —
-revisión integral y cierre. Su existencia en la secuencia no constituye
-autorización para implementarlo.
+El Incremento 6 — revisión integral y cierre — fue completado y validado
+durante el cierre del Sprint 7.5. Su finalización no autoriza ningún
+sprint posterior ni amplía el alcance operativo de Malāk.
 
 ### Cierre verificado del Sprint 7.4
 
