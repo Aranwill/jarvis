@@ -3,7 +3,7 @@ title: Hoja de ruta de implementación
 status: activo
 authority: no normativa
 as_of_date: 2026-08-09
-as_of_commit: b4d1d512fe953d593608391390f82ab500fdc9d6
+as_of_commit: 62bdc11c3ce16cb2cb54bb61bddfab4e39d689a8
 branch: main
 language: es
 ---
@@ -57,10 +57,10 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 ## Estado de referencia
 
 - Rama permanente: `main`.
-- HEAD verificado antes de iniciar la reconciliación del Incremento 5:
+- HEAD verificado antes de iniciar la revisión integral y cierre del Sprint 7.5:
   `b4d1d512fe953d593608391390f82ab500fdc9d6`.
 - Baseline nominal: `v0.6.0-alpha`.
-- Suite completa validada antes de la reconciliación: 304 pruebas aprobadas.
+- Suite completa validada durante el cierre: 304 pruebas aprobadas.
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
 - Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
@@ -79,17 +79,36 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 | 7.2 | Cerrado | Contrato estructural `RuntimeMetricSink` de solo escritura |
 | 7.3 | Cerrado | Estabilización de la frontera de `ConversationProvider` |
 | 7.4 | Cerrado | Consolidación de logs, métricas y auditoría; sincronización gobernada del Vault completada |
+| 7.5 | Cerrado | Security Control Plane Foundation; autorización, PDP, PEP, auditoría y revisión integral completados |
 
-## Sprint vigente aprobado
+## Estado de autorización de nuevos sprints
 
-| Sprint | Estado | Objetivo |
-|---|---|---|
-| 7.5 | En progreso | Establecer la base determinista del plano de control de seguridad |
+No existe un sprint posterior autorizado automáticamente por el cierre del Sprint 7.5.
 
-El Sprint 7.5 fue aprobado explícitamente por el propietario. Su
-implementación se organiza mediante incrementos pequeños, revisables y
-reversibles. La aprobación del sprint no autoriza automáticamente cada
-incremento pendiente.
+Cualquier nueva unidad deberá ser inspeccionada, propuesta y aprobada explícitamente por el propietario antes de su implementación.
+
+El Sprint 7.5 fue aprobado explícitamente por el propietario y quedó
+cerrado después de completar seis incrementos pequeños, revisables y
+reversibles.
+
+El cierre integral confirmó:
+
+- contratos de autorización estables;
+- Policy Decision Point mínimo, determinista y fail-closed;
+- Policy Enforcement Point separado de la lógica de negocio del Kernel;
+- evidencia de auditoría estructurada e integrada de forma fail-closed;
+- separación entre decisión, enforcement, auditoría y operación protegida;
+- control humano y denegación por defecto preservados;
+- ausencia de rutas operativas reales habilitadas por este sprint;
+- 183 pruebas específicas de seguridad aprobadas;
+- 304 pruebas totales aprobadas;
+- `compileall` y `git diff --check` validados sin errores;
+- ningún defecto bloqueante detectado durante la revisión integral.
+
+El cierre del Sprint 7.5 no autoriza automáticamente ningún sprint
+posterior ni habilita Secure Context Manager, persistencia de auditoría,
+identidad criptográfica, TTL, nonce, prevención persistente de replay,
+agentes, navegación o rutas operativas reales.
 
 El Incremento 1 incorporó los contratos fundamentales:
 

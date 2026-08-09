@@ -1,8 +1,8 @@
 ---
 title: Sprint 7.5 — Base del plano de control de seguridad
-status: en progreso
+status: cerrado
 authority: operativa del sprint
-as_of_commit: b4d1d512fe953d593608391390f82ab500fdc9d6
+as_of_commit: 62bdc11c3ce16cb2cb54bb61bddfab4e39d689a8
 baseline_commit: 7cd7fcc
 branch: main
 language: es
@@ -14,8 +14,8 @@ language: es
 
 Este documento define el alcance operativo aprobado del Sprint 7.5.
 
-El sprint fue aprobado explícitamente por el propietario y se encuentra
-en progreso. Cada incremento requiere revisión y aprobación humana antes
+El sprint fue aprobado explícitamente por el propietario y quedó
+cerrado después de completar sus incrementos y validaciones. Cada incremento requirió revisión y aprobación humana antes
 de implementarse. La aprobación del sprint no autoriza por sí sola los
 incrementos pendientes ni amplía su alcance.
 
@@ -160,11 +160,18 @@ El cierre del Incremento 5 no autoriza el Incremento 6 ni habilita persistencia 
 
 ### Incremento 6 — Revisión integral y cierre
 
-- revisar amenazas, privacidad, compatibilidad y rollback;
-- ejecutar pruebas específicas y suite completa;
-- validar `compileall` y `git diff --check`;
-- completar la documentación y el flujo gobernado de PR;
-- proponer la sincronización del Vault después del cierre aprobado.
+- revisión integral de contratos, PDP, PEP y auditoría completada;
+- amenazas, privacidad, compatibilidad, comportamiento ante fallos y rollback revisados;
+- separación entre decisión, enforcement, auditoría y operación protegida verificada;
+- comportamiento fail-closed y pruebas negativas revisados;
+- no se identificaron defectos bloqueantes ni necesidad de cambios de código;
+- pruebas específicas de seguridad: 183 passed;
+- suite completa: 304 passed;
+- `compileall`: PASS;
+- `git diff --check`: PASS;
+- Kernel, Planner, CLI, runtimes y Capability Registry sin cambios;
+- documentación final reconciliada mediante flujo gobernado de PR;
+- el cierre del sprint no autoriza automáticamente ningún sprint posterior.
 
 ## Decisión aprobada — confirmación humana
 
@@ -293,42 +300,26 @@ al siguiente.
 ## Estado actual
 
 ```text
-Sprint 7.5 aprobado y en progreso.
+Sprint 7.5 cerrado — Security Control Plane Foundation.
 Baseline inicial: 7cd7fcc.
-HEAD verificado tras integrar el Incremento 4:
-af64b062aa1395ba7f7bdd59e5c1099ded68b683.
+Baseline previo al Incremento 6:
+62bdc11c3ce16cb2cb54bb61bddfab4e39d689a8.
 
-Incremento 1 — Contratos de autorización:
-- completado;
-- PR #15 mergeada;
-- 45 pruebas específicas aprobadas;
-- 166 pruebas totales aprobadas.
+Incremento 1 — Contratos de autorización: completado.
+Incremento 2 — Activación y reconciliación documental: completado.
+Incremento 3 — Policy Decision Point mínimo: completado.
+Incremento 4 — Policy Enforcement Point inicial: completado.
+Incremento 5 — Evidencia de auditoría de autorización: completado.
+Incremento 6 — Revisión integral y cierre: completado.
 
-Incremento 2 — Activación y reconciliación documental:
-- completado;
-- PR #16 mergeada;
-- merge commit 4afeed440a3bf2096035d0d458d2ef75c71689fd;
-- sin cambios de código;
-- ideas.md consultado y mantenido intacto.
+Validación final del cierre:
+- 183 pruebas específicas de seguridad aprobadas;
+- 304 pruebas totales aprobadas;
+- compileall: PASS;
+- git diff --check: PASS;
+- sin defectos bloqueantes detectados;
+- sin cambios funcionales requeridos durante el Incremento 6;
+- Kernel, Planner, CLI, runtimes y Capability Registry intactos.
 
-Incremento 3 — Policy Decision Point mínimo:
-- semántica de confirmación humana aprobada;
-- implementación y validación completadas;
-- 104 pruebas específicas y 225 pruebas totales aprobadas;
-- PR #17 mergeada;
-- merge commit 78799deabba5009e66c219220349e8202f5464bb;
-- completado e integrado.
-
-Incremento 4 — Policy Enforcement Point inicial:
-- diseño e implementación aprobados;
-- implementación y validación completadas;
-- 19 pruebas específicas y 244 pruebas totales aprobadas;
-- PR #19 mergeada;
-- merge commit af64b062aa1395ba7f7bdd59e5c1099ded68b683;
-- completado e integrado;
-- sin conexión a rutas operativas reales.
-
-Incrementos 5 y 6:
-- pendientes de diseño incremental, revisión y aprobación humana;
-- no autorizados.
+El cierre del Sprint 7.5 no autoriza automáticamente ningún sprint posterior.
 ```

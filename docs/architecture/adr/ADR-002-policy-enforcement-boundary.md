@@ -106,6 +106,11 @@ fundamentos adicionales del futuro Secure Context Manager.
 - No existe todavía integración con operaciones reales.
 - La auditoría de autorización permanece pendiente.
 
+Nota de evolución: esta última limitación describía correctamente el estado
+al aprobar ADR-002. Posteriormente, el Sprint 7.5 incorporó contratos de
+auditoría mediante la PR #22 y su integración fail-closed con el PEP
+mediante la PR #23. La frontera PDP–PEP definida por esta ADR no cambió.
+
 ### Riesgos
 
 - Una composición futura podría inyectar un PDP no confiable.
@@ -164,3 +169,4 @@ estado persistente ni integración operativa que deba migrarse.
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1.0.0 | 2026-07-26 | Decisión inicial para la frontera PDP–PEP. |
+| 1.1.0 | 2026-08-09 | Reconciliación histórica: auditoría incorporada posteriormente por PR #22 y PR #23 sin cambiar la frontera PDP–PEP. |
