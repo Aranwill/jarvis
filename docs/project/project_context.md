@@ -2,9 +2,9 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-07-14
-as_of_commit: 71d13fc0ee431b9574fcfb5dbc52baf8cb6e4c4c
-branch: refactor/rename-malak
+as_of_date: 2026-08-11
+as_of_commit: 09c6057f7ae1eaa4bbf9388df8554a44995e9e40
+branch: main
 baseline: v0.6.0-alpha
 ---
 
@@ -14,7 +14,7 @@ baseline: v0.6.0-alpha
 
 Este documento proporciona una visión consolidada del estado observado del repositorio de Malāk.
 
-Es un documento derivado, informativo y no normativo, destinado a ayudar a desarrolladores y asistentes automatizados a recuperar eficientemente el contexto del proyecto.
+Es un documento derivado, informativo y no normativo, destinado a ayudar a desarrolladores y asistentes automatizados a recuperar eficientemente el contexto operativo actual del proyecto.
 
 No reemplaza, modifica ni reinterpreta:
 
@@ -25,9 +25,13 @@ No reemplaza, modifica ni reinterpreta:
 - los ADR aceptados;
 - los contratos centrales;
 - la política de seguridad;
-- los registros de release.
+- los registros de release;
+- las fichas de sprint aprobadas;
+- el historial Git.
 
-Si este documento entra en conflicto con una fuente normativa o histórica, prevalece la fuente con autoridad.
+Si este documento entra en conflicto con una fuente normativa, histórica o con evidencia más reciente del repositorio oficial, prevalece la fuente con mayor autoridad.
+
+---
 
 ## Regla persistente de idioma
 
@@ -40,19 +44,20 @@ La comunicación y la documentación futura de Malāk deben aplicar estas reglas
 - No se deben traducir identificadores técnicos ni nombres existentes cuando hacerlo afecte la consistencia del código o del repositorio.
 - Cuando una fuente esté en inglés, su contenido debe explicarse en español.
 
+---
+
 ## Límites de la evidencia
 
-Este contexto fue elaborado a partir de:
+Este contexto fue reconciliado a partir de:
 
-- inspección del repositorio;
-- metadatos locales de Git;
-- código fuente rastreado;
-- documentación rastreada del proyecto;
-- entorno oficial de Python;
-- ejecución controlada de la suite completa de tests;
-- `repository_analysis.md`, aceptado como evidencia informativa.
-
-No se ejecutó `git fetch` contra el remoto. Por lo tanto, las afirmaciones sobre la rama remota se refieren únicamente a la referencia de seguimiento remoto almacenada localmente.
+- inspección del repositorio oficial `Aranwill/jarvis`;
+- rama permanente `main`;
+- historial Git y commits integrados;
+- documentación oficial y derivada vigente;
+- fichas de sprint;
+- arquitectura implementada documentada;
+- resultados de validación registrados durante el cierre del Sprint 7.5;
+- estado sincronizado del Malāk Project Vault.
 
 El documento:
 
@@ -60,7 +65,9 @@ El documento:
 PROJECT - MANIFIESTO MALAK (1).docx
 ```
 
-está rechazado y no fue utilizado como fuente. No debe influir en Malāk.
+permanece rechazado y no debe utilizarse como fuente de autoridad ni influir en decisiones de Malāk.
+
+---
 
 ## Clasificación documental
 
@@ -96,32 +103,36 @@ Las fuentes derivadas incluyen:
 
 - `repository_analysis.md`;
 - este `project_context.md`;
-- futuros resúmenes de estado marcados explícitamente como no normativos.
+- resúmenes de estado marcados explícitamente como no normativos;
+- artefactos derivados del Malāk Project Vault.
 
 Los documentos derivados pueden informar evidencia y contexto de planificación, pero no pueden aprobar arquitectura, alcance de sprint ni implementación.
+
+---
 
 ## Snapshot validado del repositorio
 
 ```text
-Raíz Git efectiva:  D:\Ollama\jarvis
-Rama activa:        refactor/rename-malak
-HEAD inspeccionado: 71d13fc0ee431b9574fcfb5dbc52baf8cb6e4c4c
-Baseline nominal:   v0.6.0-alpha
-Distancia del tag:  32 commits
-Último PR integrado: PR #5 — feature/runtime-performance-profile
+Repositorio oficial:   Aranwill/jarvis
+Raíz Git local:        D:\Ollama\jarvis
+Rama permanente:       main
+HEAD observado:        09c6057f7ae1eaa4bbf9388df8554a44995e9e40
+Baseline nominal:      v0.6.0-alpha
+Último sprint cerrado: Sprint 7.5 — Security Control Plane Foundation
+Próximo sprint:        ninguno autorizado
 ```
 
-El árbol de trabajo estaba limpio antes de crear `repository_analysis.md`.
-
-`repository_analysis.md` es un informe creado intencionalmente que estaba untracked cuando se propuso este contexto. Su presencia no debe confundirse con una modificación del código de producción.
-
-La rama local estaba alineada con la referencia almacenada localmente:
+Último cambio observado en `main`:
 
 ```text
-origin/refactor/rename-malak
+09c6057f Merge pull request #31 from Aranwill/agent/reconcile-ideas-security-expansion
 ```
 
-La sincronización remota no se verificó a través de la red.
+La rama `main` es la única rama permanente y debe tratarse como fuente del baseline operativo actual.
+
+Las ramas temporales de documentación, feature, corrección o sprint no constituyen baseline hasta su integración y validación.
+
+---
 
 ## Estructura relevante del repositorio
 
@@ -151,6 +162,7 @@ jarvis/
 │       ├── kernel/
 │       ├── providers/
 │       ├── runtime/
+│       ├── security/
 │       ├── services/
 │       └── shared/
 ├── tests/
@@ -163,13 +175,19 @@ jarvis/
 └── pyproject.toml
 ```
 
-`D:\Ollama` es el espacio de trabajo contenedor y no la raíz Git. Los comandos del repositorio deben ejecutarse desde `D:\Ollama\jarvis`.
+`D:\Ollama` es el espacio de trabajo contenedor y no la raíz Git. Los comandos del repositorio deben ejecutarse desde:
+
+```text
+D:\Ollama\jarvis
+```
+
+---
 
 ## Arquitectura implementada actual
 
-### Flujo observado del Kernel
+### Flujo Kernel–Planner–Capability
 
-El flujo observado orientado al Kernel es:
+El flujo orientado al Kernel permanece:
 
 ```text
 Interface Layer
@@ -180,263 +198,468 @@ Interface Layer
 → Response
 ```
 
-La ruta de código implementada comienza en `Kernel.receive`. Interface Layer es el límite arquitectónico de entrada definido para la interacción con el usuario; todavía no se ha implementado una integración formal de CLI.
+La ruta de código implementada comienza en `Kernel.receive`.
 
-El registry predeterminado contiene `EchoCapability`. El Planner MVP actual resuelve las solicitudes hacia esa Capability.
+El Kernel:
 
-El Kernel coordina el flujo y no depende directamente de Ollama ni de otro LLM runtime concreto.
+- coordina el flujo;
+- permanece independiente de proveedores concretos;
+- permanece independiente de runtimes concretos;
+- no depende directamente de Ollama;
+- no contiene lógica de configuración de infraestructura;
+- no incorpora autoridad autónoma;
+- no accede directamente a Internet;
+- no debe convertirse en orquestador de infraestructura.
 
-### Stack conversacional observado
+El registry predeterminado contiene `EchoCapability`, utilizada como Capability mínima y determinista para validar el flujo Kernel–Planner–Capability.
 
-El repositorio contiene:
+### Stack conversacional
+
+El stack conversacional implementado contiene:
 
 - `ConversationRequest`;
 - `ConversationResponse`;
 - `ConversationProvider`;
+- `RuntimeConversationProvider`;
 - `ConversationProviderRegistry`;
-- `ConversationService`.
+- `ConversationProviderNotFoundError`;
+- `ConversationService`;
+- `LLMRuntime`;
+- `MockLLMRuntime`;
+- `OllamaRuntime`.
 
-El stack conversacional observado es:
-
-```text
-ConversationService
-→ Provider Registry
-→ Provider
-→ LLMRuntime
-```
-
-El servicio conversacional resuelve proveedores mediante `ConversationProviderRegistry`, preservando la separación respecto de implementaciones concretas.
-
-### Límite de integración aún no resuelto
-
-No existe una integración formal y validada entre `Kernel.receive` y `ConversationService` en el baseline inspeccionado.
-
-Por lo tanto, el flujo observado del Kernel y el stack conversacional deben tratarse como rutas separadas hasta que una decisión de diseño aprobada defina su integración.
-
-Sprint 7.0 permanece condicionado a una decisión de diseño previa sobre la ruta de integración. Este documento no resuelve esa decisión ni autoriza cambios en el Kernel o los contratos centrales.
-
-La siguiente ruta sólo puede evaluarse como un posible harness limitado de Interface Layer:
+Ruta técnica vigente:
 
 ```text
 CLI
 → ConversationService
-→ Provider Registry
-→ Provider
+→ ConversationProviderRegistry
+→ RuntimeConversationProvider
 → LLMRuntime
 ```
 
-Un harness de este tipo:
+La CLI permite composición externa del runtime mediante configuración, sin modificar el Kernel.
 
-- requiere aprobación humana explícita antes de su implementación;
-- debe documentarse como infraestructura limitada de validación;
-- no debe describirse como la arquitectura definitiva;
-- no debe presentarse como el pipeline completo de solicitudes de Malāk;
-- no debe utilizarse para puentear o redefinir silenciosamente el flujo del Kernel.
+### Límite de integración Kernel–ConversationService
 
-### Abstracción de runtime
+No existe una integración formal y validada entre:
 
-`LLMRuntime` es la abstracción observada para los LLM runtimes.
+```text
+Kernel.receive
+```
 
-Los runtimes implementados incluyen:
+y:
+
+```text
+ConversationService
+```
+
+Por lo tanto:
+
+- el pipeline Kernel–Planner–Capability y el stack conversacional continúan siendo rutas separadas;
+- la CLI técnica no representa por sí sola el pipeline cognitivo completo de Malāk;
+- no debe introducirse un puente entre ambas rutas sin necesidad funcional concreta, contrato explícito y aprobación humana.
+
+---
+
+## Abstracción de runtime
+
+`LLMRuntime` permanece como el único punto de abstracción para integraciones de runtime LLM.
+
+Runtimes implementados:
 
 - `MockLLMRuntime`;
 - `OllamaRuntime`.
 
-`MockLLMRuntime` permite desarrollo y testing deterministas.
+### MockLLMRuntime
 
-`OllamaRuntime` implementa comunicación HTTP local con Ollama y gestiona validación de entrada, errores HTTP, errores de conexión, timeouts y payloads inválidos. No es una dependencia directa del Kernel.
+Uso:
 
-### Métricas de runtime
+- desarrollo;
+- pruebas deterministas;
+- validaciones reproducibles;
+- ejecución sin servicio externo.
+
+### OllamaRuntime
+
+Estado:
+
+```text
+implementado
+```
+
+Características:
+
+- integración local con Ollama;
+- composición externa al Kernel;
+- configuración mediante variables de entorno;
+- validación de entrada;
+- manejo de errores HTTP;
+- manejo de errores de conexión;
+- manejo de timeout;
+- validación de payloads;
+- soporte para métricas mediante interfaces desacopladas.
+
+La integración real fue validada anteriormente con un modelo local, sin convertir Ollama en dependencia del Kernel.
+
+---
+
+## Métricas, eventos operativos y auditoría
+
+Los tres subsistemas permanecen separados.
+
+### Métricas
+
+Se utilizan para medir rendimiento y comportamiento cuantificable.
 
 El repositorio contiene:
 
-- métricas de respuesta del runtime;
 - muestras normalizadas de métricas;
-- almacenamiento de métricas en memoria;
-- almacenamiento persistente JSONL de métricas;
-- perfiles inmutables de rendimiento del runtime;
-- generación de perfiles estadísticos de rendimiento del runtime.
+- almacenamiento en memoria;
+- almacenamiento JSONL;
+- perfiles de rendimiento;
+- generación de perfiles estadísticos.
 
-El profiler es descriptivo. No cambia automáticamente el timeout ni la configuración del runtime.
+### Eventos operativos
 
-### Punto de entrada de la aplicación
+Sprint 7.4 incorporó:
 
-`src/app/main.py` es el punto de entrada actual del launcher.
+- `OperationalEvent`;
+- `OperationalEventSink`;
+- stores operativos separados;
+- correlación mediante `request_id`;
+- integración opcional desde la CLI.
 
-En el commit inspeccionado inicializa el logging e informa el inicio de la aplicación. Todavía no implementa un bucle conversacional interactivo de línea de comandos.
+### Auditoría de seguridad
 
-Por lo tanto, Sprint 7.0 no está implementado.
+Sprint 7.5 incorporó evidencia estructurada de autorización separada de métricas y eventos operativos.
 
-## Entorno de desarrollo
+No existe un envelope universal entre métricas, eventos y auditoría.
 
-Entorno oficial del proyecto:
+No comparten:
 
-```text
-Entorno virtual: .venv
-Python:          3.12.10
-pip:             26.1.2
-pytest:          9.1.1
-```
+- contratos;
+- stores;
+- políticas de error;
+- políticas de retención;
+- autoridad.
 
-`pyproject.toml` declara:
+Pueden compartir únicamente convenciones mínimas de trazabilidad.
 
-```toml
-[project]
-name = "malak"
-version = "0.6.0-alpha"
-requires-python = ">=3.12"
-dependencies = []
+---
 
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]
-```
+## Security Control Plane Foundation
 
-Actualmente no hay dependencias de producción declaradas.
+El Sprint 7.5 está cerrado.
 
-Actualmente el repositorio no define configuración oficial para:
-
-- Ruff;
-- mypy;
-- pytest-cov;
-- Poetry.
-
-`uv` estaba disponible globalmente durante la inspección, pero no es una herramienta oficial del proyecto en la documentación de desarrollo rastreada.
-
-## Validación
-
-Comando oficial para la suite completa:
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest
-```
-
-Script alternativo del proyecto:
-
-```powershell
-.\scripts\test.ps1
-```
-
-Resultado validado en el commit inspeccionado:
+La fundación implementada establece separación entre:
 
 ```text
-51 passed in 0.15s
+solicitar
+→ decidir
+→ aplicar
+→ auditar
+→ ejecutar operación protegida
 ```
 
-Una ejecución inicial aislada produjo:
+Componentes fundamentales:
 
-```text
-45 passed
-6 setup errors
-```
+- `PermissionScope`;
+- `SecurityContext`;
+- `AuthorizationRequest`;
+- `AuthorizationDecision`;
+- Policy Decision Point mínimo;
+- Policy Enforcement Point inicial;
+- contratos de auditoría de autorización;
+- integración fail-closed de la evidencia de auditoría.
 
-Los seis errores ocurrieron antes de ejecutar los tests porque pytest no pudo acceder a su directorio temporal de Windows. Al volver a ejecutar la misma suite con acceso autorizado al directorio temporal, los 51 tests pasaron correctamente.
+### Policy Decision Point
 
-No fue necesaria ninguna modificación del código de producción.
+Propiedades:
 
-La validación confirma el éxito de los tests, pero no establece un porcentaje de cobertura porque no hay herramientas de cobertura configuradas.
+- determinista;
+- sin LLM;
+- denegación por defecto;
+- fail-closed;
+- confirmación humana explícita cuando corresponde;
+- ninguna confirmación modifica retroactivamente una decisión anterior.
 
-## Evolución reciente del repositorio
+### Policy Enforcement Point
 
-El trabajo integrado relevante después del baseline nominal incluye:
+Propiedades:
 
-```text
-PR #3 — Ollama Runtime
-PR #4 — Runtime Metrics Profile
-PR #5 — Runtime Performance Profile
-```
+- consulta directamente al PDP inyectado;
+- no acepta decisiones aportadas por el llamador;
+- exige asociación consistente entre solicitud y decisión;
+- ejecuta la operación protegida únicamente ante una decisión válida y permitida;
+- bloquea ante errores, incongruencias o respuestas inválidas;
+- permanece separado del Kernel y del Planner.
 
-HEAD está 32 commits después del tag `v0.6.0-alpha`. La versión del paquete continúa siendo `0.6.0-alpha`.
+### Auditoría de autorización
 
-El tag es el baseline nominal certificado; HEAD es el estado de desarrollo posterior.
+La evidencia de autorización:
 
-## Divergencias documentales conocidas
+- es estructurada;
+- permanece separada de métricas y eventos operativos;
+- forma parte del comportamiento fail-closed;
+- no concede autoridad;
+- no reemplaza la decisión de autorización.
 
-Se observaron las siguientes diferencias:
+---
 
-1. El snapshot certificado del release `v0.6.0-alpha` registra 21 tests, mientras que HEAD contiene 51 tests en verde.
-2. El snapshot del release presenta OllamaRuntime como pendiente, aunque está implementado en HEAD.
-3. Las secciones de estado del Blueprint y del Kernel todavía se refieren a Sprint 6.5 o Sprint 6.6.
-4. Los roadmaps de la raíz y del proyecto contienen fases que la implementación ya ha superado.
-5. `PROJECT.md` conserva elementos del checklist de migración que ya no coinciden con `src/malak`.
-6. `SECURITY.md` todavía utiliza Jarvis en redacción activa.
-7. Los scripts y las rutas históricas de almacenamiento conservan la identidad anterior de Jarvis.
-8. `docs/architecture/documentation_architecture.md` está en estado Draft e incompleto.
-9. Sprint 7.0 no está formalizado en la documentación rastreada del proyecto.
-10. Sprint 7.5 no está formalizado en la documentación rastreada del proyecto.
+## Estado de sprints
 
-Estas divergencias se registran para su clasificación futura. No autorizan ediciones de documentos normativos ni de snapshots históricos.
+Estado del bloque 7.x:
 
-## Contexto actual de planificación
-
-El siguiente contexto de planificación fue proporcionado y confirmado por el propietario del proyecto. Se registra aquí como contexto no normativo y no como autorización de implementación.
+| Sprint | Estado | Resultado |
+|---|---|---|
+| 7.0 | Cerrado | CLI mínima con `MockLLMRuntime` |
+| 7.1 | Cerrado | Composición de CLI con `OllamaRuntime` |
+| 7.2 | Cerrado | `RuntimeMetricSink` |
+| 7.3 | Cerrado | Conversation Provider Boundary Stabilization |
+| 7.4 | Cerrado | Logs, métricas, eventos operativos y sincronización gobernada |
+| 7.5 | Cerrado | Security Control Plane Foundation |
+| 7.6 | No autorizado | Existe una ficha preliminar no normativa |
+| 7.7 | No autorizado | Existe una ficha preliminar no normativa |
 
 ### Sprint 7.0
 
-Próximo sprint previsto:
+Estado:
 
 ```text
-Sprint 7.0 — CLI mínima con MockLLMRuntime
+cerrado
 ```
 
-Estado observado:
+Resultado:
 
-- no implementado;
-- no definido formalmente en la documentación rastreada de sprints;
-- condicionado a una decisión de diseño aprobada sobre la ruta de integración entre Interface Layer, `Kernel.receive` y `ConversationService`;
-- este documento no autoriza ninguna implementación.
+- CLI técnica mínima;
+- soporte para `MockLLMRuntime`;
+- comandos básicos;
+- control de errores;
+- sin integración formal con `Kernel.receive`.
 
-Antes de su implementación, Sprint 7.0 requiere:
+### Sprint 7.1
 
-- una rama dedicada;
-- alcance explícito;
-- revisión de arquitectura y gobernanza;
-- criterios de validación;
-- un Pull Request;
-- un punto claro de rollback.
+Estado:
+
+```text
+cerrado
+```
+
+Resultado:
+
+- soporte para `OllamaRuntime`;
+- configuración externa;
+- Runtime Independence preservada;
+- Kernel sin modificación.
+
+### Sprint 7.2
+
+Estado:
+
+```text
+cerrado
+```
+
+Resultado:
+
+- `RuntimeMetricSink`;
+- contrato estructural de solo escritura;
+- separación respecto de stores concretos.
+
+### Sprint 7.3
+
+Estado:
+
+```text
+cerrado
+```
+
+Resultado:
+
+- estabilización del límite entre `ConversationService`, provider y runtime;
+- incorporación de `RuntimeConversationProvider`;
+- fortalecimiento de `ConversationProviderRegistry`;
+- manejo explícito de provider inexistente;
+- Kernel y Planner intactos.
+
+### Sprint 7.4
+
+Estado:
+
+```text
+cerrado
+```
+
+Resultado:
+
+- consolidación de eventos operativos;
+- correlación desde CLI;
+- separación entre métricas, eventos y auditoría;
+- sincronización gobernada del Vault.
 
 ### Sprint 7.5
 
-Fundamento de seguridad previsto:
+Estado:
 
 ```text
-Sprint 7.5 — Security Control Plane Foundation
+cerrado
 ```
 
-Estado observado:
+Resultado:
 
-- no implementado;
-- no definido formalmente en la documentación rastreada del repositorio;
-- debe someterse a gobernanza y delimitación de alcance antes de su implementación.
+- contratos fundamentales de autorización;
+- PDP mínimo determinista;
+- PEP inicial;
+- auditoría de autorización;
+- revisión integral y cierre;
+- sin habilitar rutas operativas reales de alto riesgo.
 
-La restricción de secuencia prevista establece que debe preceder a:
+El cierre del Sprint 7.5 no autoriza automáticamente ningún sprint posterior.
 
+---
+
+## Validación
+
+Última validación integral documentada del cierre del Sprint 7.5:
+
+```text
+183 security-specific passed
+304 total passed
+compileall: PASS
+git diff --check: PASS
+```
+
+La revisión integral no registró defectos bloqueantes.
+
+El Incremento 6 del Sprint 7.5 no requirió cambios funcionales.
+
+Kernel, Planner, CLI, runtimes y Capability Registry permanecieron intactos durante el cierre integral.
+
+Antes de iniciar cualquier nueva implementación debe revalidarse localmente:
+
+- rama actual;
+- sincronización con `origin/main`;
+- working tree;
+- versión de Python;
+- dependencias;
+- suite completa;
+- `compileall`;
+- `git diff --check`.
+
+---
+
+## Estado del baseline
+
+Baseline nominal:
+
+```text
+v0.6.0-alpha
+```
+
+El tag nominal no debe confundirse con el HEAD de desarrollo actual.
+
+El estado operativo vigente está definido por:
+
+```text
+main
+HEAD 09c6057f7ae1eaa4bbf9388df8554a44995e9e40
+Sprint 7.5 cerrado
+ningún sprint posterior autorizado
+```
+
+No debe certificarse una nueva release ni crearse un nuevo tag sin un proceso específico de validación y aprobación.
+
+---
+
+## Malāk Project Vault
+
+Repositorio derivado:
+
+```text
+Aranwill/malak-project-vault
+```
+
+Rama:
+
+```text
+main
+```
+
+El Vault:
+
+- permanece separado del repositorio oficial;
+- es derivado;
+- no tiene autoridad operativa;
+- no puede modificar Malāk automáticamente;
+- utiliza Obsidian únicamente como interfaz humana;
+- conserva snapshots históricos inmutables;
+- puede proyectar cambios detectados en el repositorio oficial;
+- requiere revisión humana para reconciliaciones gobernadas.
+
+El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad para:
+
+- código;
+- tests;
+- documentación oficial;
+- contratos;
+- arquitectura;
+- sprints;
+- historial Git.
+
+---
+
+## Propuestas posteriores al Sprint 7.5
+
+No existe actualmente un sprint posterior autorizado.
+
+Existen propuestas documentales preliminares para:
+
+- preparación del AKS para futura representación como grafo;
+- validación de baseline y release interna.
+
+Su existencia, numeración o posición no constituye autorización.
+
+Tampoco se consideran autorizadas por defecto:
+
+- Secure Context Manager;
+- identidad criptográfica completa;
+- TTL y nonce operativos;
+- prevención persistente de replay;
+- persistencia avanzada de auditoría;
 - agentes;
-- herramientas externas;
-- automatización del sistema operativo;
 - navegación;
-- mensajería externa;
+- herramientas externas;
 - memoria sensible;
-- otras ejecuciones autónomas de alto impacto.
+- automatización del sistema operativo;
+- Evidence Acquisition Foundation;
+- Sandbox Containment;
+- GraphRAG;
+- capacidades ofensivas o autónomas.
 
-Esta declaración de secuencia no define la arquitectura ni el alcance detallado de Sprint 7.5. Su formalización requiere el proceso de gobernanza y arquitectura aplicable.
+Cada iniciativa debe atravesar gobernanza, alcance, riesgos, dependencias, rollback y aprobación humana.
+
+---
 
 ## Capacidades explícitamente postergadas
 
-Hasta que un sprint aprobado las autorice y existan los fundamentos de seguridad requeridos, no se deben introducir:
+Hasta que un sprint aprobado las autorice, no se deben introducir:
 
 - agentes autónomos;
-- ejecución de herramientas externas;
-- control del sistema operativo;
-- navegación web;
-- comunicaciones externas;
-- memoria persistente sensible;
+- ejecución libre de herramientas externas;
+- control autónomo del sistema operativo;
+- navegación externa;
+- comunicaciones externas automáticas;
+- memoria persistente sensible sin controles aprobados;
 - elevación automática de privilegios;
 - acciones destructivas;
 - integraciones externas ocultas;
-- cambios automáticos en la seguridad del runtime o en la política de timeout.
+- modificación automática de políticas;
+- modificación automática del Kernel;
+- autoaprobación de decisiones;
+- cambios autónomos sobre Blueprint, Constituciones o Gobernanza.
 
-Las referencias a estas capacidades en la visión arquitectónica o en roadmaps históricos no constituyen autorización.
+---
 
 ## Restricciones permanentes de trabajo
 
@@ -445,79 +668,110 @@ Todo trabajo futuro debe preservar:
 - Kernel First;
 - Capability First;
 - Runtime Independence;
+- Vendor Independence;
 - Human in Control;
-- Zero Trust internally;
+- Zero Trust interno;
+- Defense in Depth;
 - denegación por defecto para acciones sensibles;
 - mínimo privilegio;
 - autorización explícita;
-- contratos públicos;
-- cambios pequeños y reversibles;
-- trazabilidad.
+- contratos públicos estables;
+- cambios pequeños, trazables y reversibles;
+- separación entre autoridad cognitiva y autoridad de seguridad;
+- trazabilidad completa.
 
-Antes de cualquier cambio, responde:
+Antes de cualquier modificación importante se deben responder las cuatro preguntas obligatorias:
 
 1. ¿Respeta el Blueprint?
 2. ¿Respeta la Constitución Cognitiva?
 3. ¿Respeta la Gobernanza?
 4. ¿Hace al Kernel más simple o más complejo?
 
-Si alguna respuesta es negativa o dudosa, detente antes de editar.
+Si alguna respuesta es negativa o dudosa, la implementación debe detenerse y rediseñarse antes de escribir código.
+
+---
 
 ## Artefactos protegidos
 
-No modifiques sin autorización explícita:
+No modificar sin autorización explícita y proceso de gobernanza aplicable:
 
-- el Kernel;
-- los contratos centrales;
+- Kernel;
+- contratos centrales;
 - Blueprint;
 - Constitución Cognitiva;
 - Constitución de Gobernanza;
-- reglas de gobernanza;
+- políticas de seguridad;
 - ADR aceptados;
 - fundamentos de seguridad;
-- snapshots históricos de release;
+- snapshots históricos;
 - metadatos de release.
 
-No realices commit, push, merge, creación de PR ni eliminación de archivos sin autorización explícita.
+Ningún agente, runtime, capability o herramienta puede modificar estos artefactos durante operación normal.
+
+---
 
 ## Disciplina de sprints
 
-El ciclo de desarrollo obligatorio es:
+La metodología vigente es:
 
 ```text
-Un sprint
-→ una rama
-→ un alcance aprobado
-→ una validación completa
-→ un Pull Request
-→ un punto claro de rollback
+necesidad real
+→ análisis arquitectónico
+→ alcance aprobado
+→ rama temporal
+→ implementación pequeña
+→ pruebas
+→ validación
+→ documentación
+→ Pull Request
+→ revisión
+→ merge
+→ baseline estable
 ```
 
-No se puede añadir de forma oportunista ninguna capacidad ajena al sprint aprobado.
+Una fase no se considera cerrada hasta que:
+
+- código;
+- tests;
+- documentación;
+- telemetría relevante;
+- estado del repositorio
+
+estén sincronizados.
+
+No se debe iniciar el siguiente sprint hasta aceptar explícitamente el nuevo baseline.
+
+---
 
 ## Política de actualización
 
-Este documento está vinculado a:
+Este documento está vinculado al estado observado:
 
 ```text
-71d13fc0ee431b9574fcfb5dbc52baf8cb6e4c4c
+09c6057f7ae1eaa4bbf9388df8554a44995e9e40
 ```
 
 Debe volver a validarse cuando:
 
-- HEAD cambie de manera material;
-- un sprint se formalice o complete;
-- se certifique un nuevo release;
-- cambie la arquitectura o la gobernanza;
-- cambien los resultados de los tests;
-- cambie la raíz del repositorio o el entorno de desarrollo.
+- `HEAD` cambie de manera material;
+- un sprint se formalice, active o cierre;
+- se certifique una nueva release;
+- cambie arquitectura o gobernanza;
+- cambien resultados de tests;
+- cambie la raíz del repositorio;
+- cambie el entorno de desarrollo;
+- se incorpore una nueva frontera de seguridad;
+- se modifique el estado operativo del Vault.
 
-Las actualizaciones de este documento deben preservar los hechos históricos y distinguir claramente entre:
+Las actualizaciones deben distinguir claramente entre:
 
 - evidencia verificada del repositorio;
 - registros históricos;
-- contexto de planificación proporcionado por el propietario;
+- estado derivado;
+- contexto de planificación;
 - decisiones normativas aprobadas.
+
+---
 
 ## Declaración de ausencia de autoridad normativa
 
@@ -525,12 +779,14 @@ Este documento no puede:
 
 - aprobar un sprint;
 - autorizar una implementación;
-- modificar la arquitectura;
-- cambiar la gobernanza;
+- modificar arquitectura;
+- cambiar gobernanza;
 - redefinir el Kernel;
 - modificar contratos;
-- certificar un release;
+- certificar una release;
 - anular un ADR;
-- convertir contexto de planificación en alcance normativo.
+- convertir una propuesta en alcance aprobado;
+- conceder permisos;
+- ampliar autoridad operativa.
 
-Su único propósito es proporcionar un snapshot de contexto trazable, actual y conveniente.
+Su único propósito es proporcionar un snapshot de contexto trazable, actualizado y conveniente.
