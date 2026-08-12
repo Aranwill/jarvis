@@ -4,9 +4,9 @@ status: activo
 authority: no normativa
 document_role: anexo de captura y seguimiento
 introduced_in: Sprint 7.4
-as_of_date: 2026-08-11
-as_of_commit: 2a28dcfd459a2bf1af19b3a6fee5cddefaac7f75
-branch: agent/reconcile-ideas-security-expansion
+as_of_date: 2026-08-12
+as_of_commit: 48d6ea2de9d7bd60495208b77d81175415bc3350
+branch: main
 language: es
 ---
 
