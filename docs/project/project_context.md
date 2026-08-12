@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-08-11
-as_of_commit: 09c6057f7ae1eaa4bbf9388df8554a44995e9e40
+as_of_date: 2026-08-12
+as_of_commit: 48d6ea2de9d7bd60495208b77d81175415bc3350
 branch: main
 baseline: v0.6.0-alpha
 ---
@@ -116,7 +116,7 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 Repositorio oficial:   Aranwill/jarvis
 Raíz Git local:        D:\Ollama\jarvis
 Rama permanente:       main
-HEAD observado:        09c6057f7ae1eaa4bbf9388df8554a44995e9e40
+HEAD observado:        48d6ea2de9d7bd60495208b77d81175415bc3350
 Baseline nominal:      v0.6.0-alpha
 Último sprint cerrado: Sprint 7.5 — Security Control Plane Foundation
 Próximo sprint:        ninguno autorizado
@@ -125,8 +125,11 @@ Próximo sprint:        ninguno autorizado
 Último cambio observado en `main`:
 
 ```text
-09c6057f Merge pull request #31 from Aranwill/agent/reconcile-ideas-security-expansion
+48d6ea2 Merge pull request #33 from Aranwill/docs/add-governed-mission-orchestration-idea
 ```
+
+
+El cambio documental más reciente incorporó `IDEA-024 — Governed Agent Composition & Mission Orchestration Foundation` con estado `capturada` dentro del registro no normativo de ideas. Esta incorporación no modifica el Blueprint, las Constituciones, la Gobernanza, el roadmap ni autoriza un nuevo sprint.
 
 La rama `main` es la única rama permanente y debe tratarse como fuente del baseline operativo actual.
 
@@ -563,7 +566,7 @@ El estado operativo vigente está definido por:
 
 ```text
 main
-HEAD 09c6057f7ae1eaa4bbf9388df8554a44995e9e40
+HEAD 48d6ea2de9d7bd60495208b77d81175415bc3350
 Sprint 7.5 cerrado
 ningún sprint posterior autorizado
 ```
@@ -748,7 +751,7 @@ No se debe iniciar el siguiente sprint hasta aceptar explícitamente el nuevo ba
 Este documento está vinculado al estado observado:
 
 ```text
-09c6057f7ae1eaa4bbf9388df8554a44995e9e40
+48d6ea2de9d7bd60495208b77d81175415bc3350
 ```
 
 Debe volver a validarse cuando:
