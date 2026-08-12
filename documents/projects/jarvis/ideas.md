@@ -1886,6 +1886,465 @@ Mantener la iniciativa como planificación futura. Cuando Malāk disponga de un 
 La decisión sobre número de sprint, alcance exacto y contratos se realizará únicamente tras inspeccionar el baseline vigente y demostrar una necesidad operacional concreta.
 
 
+### IDEA-024 — Governed Agent Composition & Mission Orchestration Foundation
+
+**Estado:** `capturada`
+
+**Intención**
+
+Diseñar una fundación futura para componer agentes temporales especializados y coordinar misiones complejas mediante responsabilidades, competencias, capacidades, contratos, evidencia y límites de autoridad explícitos.
+
+La iniciativa busca evitar que un agente sea únicamente un prompt o personalidad generada libremente por un LLM. La composición de un agente deberá derivarse de conocimiento gobernado, capacidades disponibles, contexto autorizado, herramientas permitidas, criterios verificables y evidencia operacional.
+
+**Principios rectores**
+
+> Un agente no es un prompt. El prompt es solamente una representación temporal de una definición de agente gobernada.
+
+> Competencia no implica autoridad.
+
+> Los agentes pueden proponer, construir, revisar y corregir; la evidencia valida, la política autoriza y la orquestación coordina.
+
+> Compartir infraestructura no implica compartir confianza.
+
+> El Kernel gobierna el sistema; la orquestación de misión coordina únicamente una misión acotada.
+
+**Valor esperado**
+
+- permitir especialización sin crear agentes permanentes innecesarios;
+- componer agentes según las necesidades reales de cada tarea;
+- coordinar trabajos complejos mediante subtareas y dependencias explícitas;
+- separar construcción, revisión, ejecución y validación;
+- reducir prompts monolíticos y conversaciones multiagente no estructuradas;
+- mejorar trazabilidad y reproducibilidad;
+- reutilizar las fundaciones existentes de seguridad, modelos, conocimiento, recursos, sandbox y validación;
+- permitir misiones complejas sin introducir lógica agentic dentro del Kernel.
+
+**Modelo conceptual de composición**
+
+```text
+Task / Mission
+      ↓
+Required competencies
+      ↓
+Required skills
+      ↓
+Profession / specialization
+      ↓
+Capabilities
+      ↓
+Tools
+      ↓
+Security scope
+      ↓
+Model selection
+      ↓
+Context compilation
+      ↓
+Temporary Agent Instance
+```
+
+`Skill`, `Profession` y estructuras equivalentes deberán derivarse de Knowledge Artifacts gobernados y no constituir una fuente de autoridad paralela al AKS.
+
+Una profesión describe competencia y responsabilidad. Los permisos efectivos deberán continuar derivándose exclusivamente de identidad, contexto de seguridad, políticas y autorización.
+
+**Mission Orchestration**
+
+Evaluar una futura capacidad de `Mission Orchestration` para coordinar misiones que justifiquen más de un agente o etapa especializada.
+
+Flujo conceptual:
+
+```text
+Kernel / Planning
+        ↓
+Mission Orchestration Capability
+        ↓
+Mission Controller
+        ↓
+Mission Graph
+   ┌────┼────┐
+   ↓    ↓    ↓
+Agent A Agent B Agent C
+   └────┼────┘
+        ↓
+Execution Requests
+        ↓
+Security Control Plane
+        ↓
+Workers / Sandbox
+        ↓
+Evidence
+        ↓
+Independent Validation
+```
+
+Un futuro `Mission Controller` podrá administrar únicamente el lifecycle de una misión ya admitida y autorizada.
+
+Podrá coordinar:
+
+- subtareas;
+- dependencias;
+- estados;
+- agentes temporales;
+- artefactos;
+- solicitudes de revisión;
+- criterios de finalización;
+- límites de iteración;
+- repair loops acotados;
+- bloqueos y necesidad de intervención humana.
+
+No podrá:
+
+- sustituir al Kernel;
+- sustituir al Planning Engine global;
+- concederse permisos;
+- conceder permisos a agentes;
+- modificar políticas;
+- decidir autorizaciones;
+- ejecutar directamente operaciones protegidas;
+- alterar documentos fundacionales;
+- ampliar presupuestos de recursos;
+- aprobar sus propias excepciones;
+- declarar éxito sin evidencia suficiente.
+
+**Task, Output & Completion Contracts**
+
+Las misiones futuras podrán utilizar contratos explícitos que definan, según corresponda:
+
+- objetivo;
+- alcance;
+- inputs;
+- outputs;
+- artefactos afectados;
+- restricciones;
+- dependencias;
+- herramientas permitidas;
+- riesgos;
+- criterios de calidad;
+- evidencia requerida;
+- criterios de finalización;
+- límites de tiempo, recursos e iteraciones.
+
+Principio:
+
+> Una misión no termina porque un agente declare que terminó; termina cuando sus criterios de finalización pueden demostrarse mediante evidencia autorizada.
+
+**Structured Agent Communication**
+
+La comunicación entre agentes deberá ser preferentemente estructurada, limitada y auditable.
+
+Ejemplos conceptuales de mensajes futuros:
+
+```text
+task_assignment
+artifact_ready
+review_request
+review_result
+finding
+repair_request
+validation_result
+blocked
+needs_owner_decision
+```
+
+Las conversaciones libres entre agentes no deberán convertirse en mecanismo principal de coordinación cuando contratos, eventos o artefactos estructurados resulten suficientes.
+
+**Structured Deliberation**
+
+Cuando una decisión realmente justifique múltiples perspectivas, podrá evaluarse deliberación estructurada mediante funciones como:
+
+```text
+Proposal
+   ↓
+Critique
+   ↓
+Evidence
+   ↓
+Revision
+   ↓
+Independent Validation
+```
+
+Deberán existir límites explícitos de rondas, recursos y criterios de parada.
+
+Principio:
+
+> Debate < Evidence.
+
+El consenso entre agentes no constituye prueba de corrección.
+
+Siempre que produzca calidad equivalente deberá preferirse:
+
+```text
+deterministic check
+        >
+small specialized evaluator
+        >
+multi-agent deliberation
+```
+
+**Builder / Reviewer Separation**
+
+Cuando el riesgo o impacto lo justifique, el productor de un artefacto no deberá ser su único evaluador.
+
+Patrón conceptual:
+
+```text
+Builder
+   ↓
+Reviewer
+   ↓
+Security Review when applicable
+   ↓
+QA / Test Worker
+   ↓
+Independent Validation
+```
+
+Los roles podrán compartir conocimiento o infraestructura según política, pero no deberán compartir autoridad automáticamente.
+
+**Artifact Workspace**
+
+Las misiones podrán utilizar un workspace controlado para intercambiar artefactos sin transportar grandes volúmenes de código, documentos o evidencia mediante contexto LLM.
+
+Los artefactos deberán poder conservar, cuando corresponda:
+
+- identidad;
+- versión;
+- productor;
+- consumidores;
+- provenance;
+- hashes;
+- estado de validación;
+- relación con la misión.
+
+El acceso deberá permanecer limitado por identidad, scope, operación y política.
+
+**Repair Loop**
+
+Podrán existir ciclos acotados de:
+
+```text
+Build
+  ↓
+Execute
+  ↓
+Test
+  ↓
+Findings
+  ↓
+Repair
+  ↓
+Regression
+  ↓
+Validation
+```
+
+Todo repair loop deberá establecer límites de iteraciones, tiempo, recursos, errores repetidos, desviaciones arquitectónicas y condiciones de intervención humana.
+
+Una misión deberá poder finalizar en estados equivalentes a:
+
+```text
+completed
+failed
+blocked
+needs_owner_decision
+```
+
+en lugar de continuar indefinidamente.
+
+**Fronteras de responsabilidad**
+
+IDEA-024 coordina y consume capacidades existentes o futuras; no adquiere propiedad sobre ellas.
+
+```text
+Agent lifecycle / coordination
+    → Agent Manager y diseño agentic aprobado
+
+Authorization / enforcement
+    → Security Control Plane
+
+Sandbox guarantees
+    → IDEA-001
+
+Controlled improvement
+    → IDEA-002
+
+Resource budgets
+    → IDEA-003
+
+Model governance / assessment
+    → IDEA-004
+
+Security contexts
+    → IDEA-005
+
+External evidence
+    → IDEA-006
+
+Knowledge authority
+    → AKS / Knowledge Governance
+
+Context efficiency
+    → IDEA-013
+
+Engineering collaboration
+    → IDEA-023
+```
+
+Cuando una responsabilidad ya posea dueño arquitectónico, Mission Orchestration deberá consumirla mediante contratos y no reimplementarla.
+
+**Seguridad y autoridad**
+
+Toda futura ejecución agentic deberá preservar:
+
+- Human in Control;
+- Zero Trust interno;
+- Defense in Depth;
+- deny by default;
+- least privilege;
+- identidad independiente cuando corresponda;
+- separación entre solicitud, autorización, enforcement, ejecución y validación;
+- auditoría;
+- scopes limitados;
+- contextos de seguridad de vida limitada cuando existan;
+- protección de evidencia;
+- ausencia de autoelevación;
+- ausencia de modificación autónoma de políticas;
+- ausencia de modificación autónoma de documentos fundacionales.
+
+Ruta conceptual obligatoria para operaciones protegidas:
+
+```text
+Agent / Mission Controller
+        ↓
+AuthorizationRequest
+        ↓
+Security Control Plane
+        ↓
+PDP
+        ↓
+PEP
+        ↓
+Protected Operation
+        ↓
+Worker / Sandbox
+        ↓
+Evidence
+```
+
+La profesión, skill, modelo o rol de un agente nunca constituirá autorización.
+
+**Resource Governance**
+
+La composición multiagente deberá respetar proporcionalidad y eficiencia.
+
+Se deberá preferir:
+
+- agentes temporales;
+- modelos cargados bajo demanda;
+- un solo modelo generativo pesado en VRAM por defecto cuando sea viable;
+- ejecución secuencial antes que paralela salvo evidencia de beneficio;
+- contextos mínimos;
+- intercambio mediante artefactos;
+- límites de iteración y herramientas;
+- liberación explícita de recursos;
+- degradación controlada.
+
+No deberá crearse un equipo de agentes cuando un procedimiento determinista, una herramienta o un único agente pueda resolver la tarea con calidad equivalente.
+
+**Relaciones principales**
+
+- IDEA-001 — Sandbox Containment & Evaluation Evidence Foundation;
+- IDEA-002 — Controlled Engineering Improvement Loop Foundation;
+- IDEA-003 — Resource Governance Foundation;
+- IDEA-004 — Model Governance & AI Preservation Foundation;
+- IDEA-005 — Secure Context Manager;
+- IDEA-006 — Evidence Acquisition Framework;
+- IDEA-011 — Malāk Validation & Delivery Protocol;
+- IDEA-012 — Constitutional Assurance Foundation;
+- IDEA-013 — Knowledge and Context Efficiency Foundation;
+- IDEA-014 — Complexity Budget Foundation;
+- IDEA-020 — Sovereign Agent Fleet Control & Vertical Scaling;
+- IDEA-023 — Governed Engineering Collaboration & Voice Interface Foundation;
+- Capability Registry;
+- Agent Manager;
+- AKS;
+- Security Control Plane Foundation.
+
+Relación conceptual principal:
+
+```text
+IDEA-020
+    WHAT:
+    visión de agentes y flota soberana
+
+IDEA-024
+    HOW:
+    composición y coordinación gobernada
+    de misiones concretas
+```
+
+IDEA-024 no reemplaza ni absorbe IDEA-020.
+
+**Restricciones contra sobreingeniería**
+
+Esta idea no autoriza:
+
+- implementar agentes ahora;
+- crear agentes permanentes;
+- crear un segundo Kernel;
+- crear un segundo Planner;
+- crear un sistema alternativo de autorización;
+- implementar un Mission Controller inmediatamente;
+- implementar Skill Registry o Profession Registry inmediatamente;
+- crear un router de modelos exclusivo para agentes;
+- crear un sandbox propio independiente de IDEA-001;
+- implementar deliberación multiagente por defecto;
+- crear nuevos contratos públicos sin necesidad demostrada;
+- introducir GraphRAG;
+- incorporar modelos frontier;
+- permitir acceso libre a Internet;
+- modificar Blueprint, Constituciones o Gobernanza;
+- modificar el roadmap;
+- aprobar un nuevo sprint.
+
+La coordinación puede conectar responsabilidades sin convertirse en propietaria de todas ellas.
+
+**Dependencias**
+
+Antes de diseñar esta fundación en detalle deberán existir suficiente madurez y evidencia en:
+
+- Security Control Plane;
+- sandbox y evidencia;
+- Resource Governance;
+- Model Governance;
+- AKS / Knowledge Governance;
+- validación independiente;
+- métricas operacionales;
+- contratos básicos de capabilities y ejecución.
+
+**Próximo paso gobernado**
+
+Conservar IDEA-024 como propuesta no normativa.
+
+Cuando las fundaciones previas estén suficientemente maduras, realizar una evaluación arquitectónica específica que:
+
+1. inspeccione el baseline vigente;
+2. determine qué responsabilidades existentes pueden reutilizarse;
+3. contraste el diseño con Blueprint, Constitución Cognitiva y Constitución de Gobernanza;
+4. delimite Agent Manager, Planning y Mission Controller;
+5. identifique los contratos mínimos realmente necesarios;
+6. evalúe amenazas derivadas de composición y comunicación multiagente;
+7. mida el coste frente a alternativas más simples;
+8. diseñe, solo si existe necesidad demostrada, un vertical slice pequeño y reversible;
+9. defina evidencia de éxito y rollback;
+10. requiera aprobación independiente antes de cualquier promoción al roadmap.
+
+No asumir que todas las capacidades descritas deban implementarse juntas.
+
+---
+
+
 ### Ampliacion conceptual de IDEA-019 — Incident Evidence, Attack Path Reconstruction & Security Regression Learning
 
 Registrar como requisitos futuros de `Malak Security Learning, Adversarial Evaluation & Deception Foundation`, sin aprobar diseno detallado ni implementacion:
