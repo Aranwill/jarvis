@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
 from typing import Protocol
+from malak.security.context_validator import SecurityContextValidator
 
 from malak.security.contracts import (
     AuthorizationDecision,
@@ -73,6 +74,8 @@ class StaticPolicyDecisionPoint:
     def __init__(
         self,
         rules: Iterable[PolicyRule],
+        *,
+        context_validator: SecurityContextValidator,
         confirmation_verifier: HumanConfirmationVerifier | None = None,
     ) -> None:
         rules_by_key: dict[
@@ -105,6 +108,7 @@ class StaticPolicyDecisionPoint:
 
         self._rules = MappingProxyType(rules_by_key)
         self._confirmation_verifier = confirmation_verifier
+        self._context_validator = context_validator
 
     def decide(
         self,
@@ -116,6 +120,9 @@ class StaticPolicyDecisionPoint:
 
         if not request.context.authenticated:
             return self._deny(request, "unauthenticated_subject")
+
+        if not self._context_validator.is_valid(request.context):
+            return self._deny(request, "expired_security_context")
 
         rule = self._rules.get(
             (request.context.subject_id, request.permission)

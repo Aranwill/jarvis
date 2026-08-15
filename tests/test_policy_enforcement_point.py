@@ -1,5 +1,6 @@
-
 from datetime import datetime, timezone
+from malak.security.clock import Clock
+from malak.security.context_validator import SecurityContextValidator
 
 import pytest
 
@@ -105,6 +106,21 @@ class AcceptingConfirmationVerifier:
         evidence: HumanConfirmationEvidence,
     ) -> bool:
         return True
+
+class FixedClock:
+    def __init__(self, current_time: datetime) -> None:
+        self._current_time = current_time
+
+    def now(self) -> datetime:
+        return self._current_time
+
+
+def make_context_validator() -> SecurityContextValidator:
+    return SecurityContextValidator(
+        FixedClock(
+            datetime(2026, 8, 15, 18, 15, tzinfo=timezone.utc)
+        )
+    )
 
 
 def make_request(
@@ -227,6 +243,7 @@ def test_confirmation_is_forwarded_to_policy_decision_point() -> None:
                 effect=PolicyEffect.REQUIRE_HUMAN_CONFIRMATION,
             )
         ],
+        context_validator=make_context_validator(),
         confirmation_verifier=AcceptingConfirmationVerifier(),
     )
     operation = RecordingOperation()
@@ -246,6 +263,7 @@ def test_missing_confirmation_blocks_operation() -> None:
                 effect=PolicyEffect.REQUIRE_HUMAN_CONFIRMATION,
             )
         ],
+        context_validator=make_context_validator(),
         confirmation_verifier=AcceptingConfirmationVerifier(),
     )
     operation = RecordingOperation()
