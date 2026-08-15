@@ -49,8 +49,12 @@ def make_request(
 ) -> AuthorizationRequest:
     return AuthorizationRequest(
         context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id=subject_id,
             authenticated=authenticated,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         ),
         permission=PermissionScope(
             resource=resource,

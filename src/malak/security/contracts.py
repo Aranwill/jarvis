@@ -35,10 +35,25 @@ class PermissionScope:
 
 @dataclass(frozen=True, slots=True)
 class SecurityContext:
+    context_id: str
+    session_id: str
     subject_id: str
     authenticated: bool
+    issued_at: datetime
+    expires_at: datetime
+    parent_context_id: str | None = None
 
     def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "context_id",
+            _normalize_required_text(self.context_id, "context_id"),
+        )
+        object.__setattr__(
+            self,
+            "session_id",
+            _normalize_required_text(self.session_id, "session_id"),
+        )
         object.__setattr__(
             self,
             "subject_id",
@@ -47,6 +62,31 @@ class SecurityContext:
 
         if type(self.authenticated) is not bool:
             raise TypeError("authenticated must be a bool")
+
+        if not isinstance(self.issued_at, datetime):
+            raise TypeError("issued_at must be a datetime")
+
+        if not isinstance(self.expires_at, datetime):
+            raise TypeError("expires_at must be a datetime")
+
+        if self.issued_at.tzinfo is None or self.issued_at.utcoffset() is None:
+            raise ValueError("issued_at must include timezone information")
+
+        if self.expires_at.tzinfo is None or self.expires_at.utcoffset() is None:
+            raise ValueError("expires_at must include timezone information")
+
+        if self.expires_at <= self.issued_at:
+            raise ValueError("expires_at must be after issued_at")
+
+        if self.parent_context_id is not None:
+            object.__setattr__(
+                self,
+                "parent_context_id",
+                _normalize_required_text(
+                    self.parent_context_id,
+                    "parent_context_id",
+                ),
+            )
 
 
 @dataclass(frozen=True, slots=True)
