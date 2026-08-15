@@ -70,8 +70,12 @@ def test_permission_scope_has_structural_equality() -> None:
 
 def test_security_context_normalizes_subject_id() -> None:
     context = SecurityContext(
+        context_id="context-001",
+        session_id="session-001",
         subject_id="  aranwill  ",
         authenticated=True,
+        issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+        expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
     )
 
     assert context.subject_id == "aranwill"
@@ -84,8 +88,12 @@ def test_security_context_rejects_empty_subject_id(
 ) -> None:
     with pytest.raises(ValueError):
         SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id=subject_id,
             authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         )
 
 
@@ -95,8 +103,12 @@ def test_security_context_rejects_non_string_subject_id(
 ) -> None:
     with pytest.raises(TypeError):
         SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id=subject_id,
             authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         )
 
 
@@ -106,16 +118,24 @@ def test_security_context_requires_strict_boolean_authentication(
 ) -> None:
     with pytest.raises(TypeError):
         SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id="aranwill",
             authenticated=authenticated,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         )
 
 
 def test_authorization_request_generates_traceable_defaults() -> None:
     request = AuthorizationRequest(
         context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id="aranwill",
             authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         ),
         permission=PermissionScope(
             resource="conversation",
@@ -131,8 +151,12 @@ def test_authorization_request_generates_traceable_defaults() -> None:
 def test_authorization_request_normalizes_explicit_request_id() -> None:
     request = AuthorizationRequest(
         context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id="aranwill",
             authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         ),
         permission=PermissionScope(
             resource="conversation",
@@ -151,8 +175,12 @@ def test_authorization_request_rejects_empty_request_id(
     with pytest.raises(ValueError):
         AuthorizationRequest(
             context=SecurityContext(
+                context_id="context-001",
+                session_id="session-001",
                 subject_id="aranwill",
                 authenticated=True,
+                issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+                expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
             ),
             permission=PermissionScope(
                 resource="conversation",
@@ -177,8 +205,12 @@ def test_authorization_request_requires_permission_scope() -> None:
     with pytest.raises(TypeError):
         AuthorizationRequest(
             context=SecurityContext(
+                context_id="context-001",
+                session_id="session-001",
                 subject_id="aranwill",
                 authenticated=True,
+                issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+                expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
             ),
             permission="conversation:read",
         )
@@ -188,8 +220,12 @@ def test_authorization_request_requires_datetime_created_at() -> None:
     with pytest.raises(TypeError):
         AuthorizationRequest(
             context=SecurityContext(
+                context_id="context-001",
+                session_id="session-001",
                 subject_id="aranwill",
                 authenticated=True,
+                issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+                expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
             ),
             permission=PermissionScope(
                 resource="conversation",
@@ -203,8 +239,12 @@ def test_authorization_request_rejects_naive_datetime() -> None:
     with pytest.raises(ValueError):
         AuthorizationRequest(
             context=SecurityContext(
+                context_id="context-001",
+                session_id="session-001",
                 subject_id="aranwill",
                 authenticated=True,
+                issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+                expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
             ),
             permission=PermissionScope(
                 resource="conversation",
@@ -226,8 +266,12 @@ def test_authorization_request_accepts_timezone_aware_datetime() -> None:
 
     request = AuthorizationRequest(
         context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id="aranwill",
             authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         ),
         permission=PermissionScope(
             resource="conversation",
@@ -242,8 +286,12 @@ def test_authorization_request_accepts_timezone_aware_datetime() -> None:
 def test_authorization_request_does_not_contain_a_decision() -> None:
     request = AuthorizationRequest(
         context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
             subject_id="aranwill",
             authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         ),
         permission=PermissionScope(
             resource="conversation",
@@ -448,8 +496,12 @@ def test_authorization_decision_rejects_empty_reason(
         ),
         (
             SecurityContext(
+                context_id="context-001",
+                session_id="session-001",
                 subject_id="aranwill",
                 authenticated=True,
+                issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+                expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
             ),
             "authenticated",
             False,
@@ -457,8 +509,12 @@ def test_authorization_decision_rejects_empty_reason(
         (
             AuthorizationRequest(
                 context=SecurityContext(
+                    context_id="context-001",
+                    session_id="session-001",
                     subject_id="aranwill",
                     authenticated=True,
+                    issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+                    expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
                 ),
                 permission=PermissionScope(
                     resource="conversation",
@@ -486,3 +542,119 @@ def test_authorization_contracts_are_immutable(
 ) -> None:
     with pytest.raises(FrozenInstanceError):
         setattr(instance, field_name, replacement)
+
+
+def test_security_context_accepts_required_lifecycle_fields() -> None:
+    issued_at = datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc)
+    expires_at = datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc)
+
+    context = SecurityContext(
+        context_id="context-001",
+        session_id="session-001",
+        subject_id="aranwill",
+        authenticated=True,
+        issued_at=issued_at,
+        expires_at=expires_at,
+    )
+
+    assert context.context_id == "context-001"
+    assert context.session_id == "session-001"
+    assert context.subject_id == "aranwill"
+    assert context.authenticated is True
+    assert context.issued_at == issued_at
+    assert context.expires_at == expires_at
+    assert context.parent_context_id is None
+
+
+@pytest.mark.parametrize("context_id", ["", "   "])
+def test_security_context_rejects_empty_context_id(context_id: str) -> None:
+    with pytest.raises(ValueError):
+        SecurityContext(
+            context_id=context_id,
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+        )
+
+
+@pytest.mark.parametrize("session_id", ["", "   "])
+def test_security_context_rejects_empty_session_id(session_id: str) -> None:
+    with pytest.raises(ValueError):
+        SecurityContext(
+            context_id="context-001",
+            session_id=session_id,
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+        )
+
+
+def test_security_context_rejects_naive_issued_at() -> None:
+    with pytest.raises(ValueError):
+        SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+        )
+
+
+def test_security_context_rejects_naive_expires_at() -> None:
+    with pytest.raises(ValueError):
+        SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30),
+        )
+
+
+@pytest.mark.parametrize(
+    ("issued_at", "expires_at"),
+    [
+        (
+            datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+        ),
+        (
+            datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+            datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+        ),
+    ],
+)
+def test_security_context_requires_expiration_after_issue(
+    issued_at: datetime,
+    expires_at: datetime,
+) -> None:
+    with pytest.raises(ValueError):
+        SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=issued_at,
+            expires_at=expires_at,
+        )
+
+
+@pytest.mark.parametrize("parent_context_id", ["", "   "])
+def test_security_context_rejects_empty_parent_context_id(
+    parent_context_id: str,
+) -> None:
+    with pytest.raises(ValueError):
+        SecurityContext(
+            context_id="context-002",
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 19, 0, tzinfo=timezone.utc),
+            parent_context_id=parent_context_id,
+        )
