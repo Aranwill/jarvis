@@ -1,5 +1,7 @@
 from dataclasses import FrozenInstanceError
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from malak.security.clock import Clock
+from malak.security.context_validator import SecurityContextValidator
 
 import pytest
 
@@ -38,6 +40,29 @@ class RecordingVerifier:
 
         return self.result
 
+class FixedClock:
+    def __init__(self, current_time: datetime) -> None:
+        self._current_time = current_time
+
+    def now(self) -> datetime:
+        return self._current_time
+
+
+def make_validator(current_time: datetime) -> SecurityContextValidator:
+    return SecurityContextValidator(FixedClock(current_time))
+
+def make_pdp(
+    rules: list[PolicyRule] | list[object],
+    *,
+    confirmation_verifier: RecordingVerifier | None = None,
+) -> StaticPolicyDecisionPoint:
+    return StaticPolicyDecisionPoint(
+        rules,
+        context_validator=make_validator(
+            datetime(2026, 8, 15, 18, 15, tzinfo=timezone.utc)
+        ),
+        confirmation_verifier=confirmation_verifier,
+    )
 
 def make_request(
     *,
@@ -105,7 +130,7 @@ def make_confirmation(
 
 def test_exact_allow_rule_authorizes_request() -> None:
     request = make_request()
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.ALLOW)]
     )
 
@@ -127,7 +152,7 @@ def test_exact_allow_rule_authorizes_request() -> None:
 def test_policy_matching_is_exact(
     authorization_request: AuthorizationRequest,
 ) -> None:
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.ALLOW)]
     )
 
@@ -139,7 +164,7 @@ def test_policy_matching_is_exact(
 
 def test_unauthenticated_subject_is_denied_before_policy() -> None:
     request = make_request(authenticated=False)
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.ALLOW)]
     )
 
@@ -151,7 +176,7 @@ def test_unauthenticated_subject_is_denied_before_policy() -> None:
 
 def test_explicit_deny_rule_denies_request() -> None:
     request = make_request()
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.DENY)]
     )
 
@@ -164,7 +189,7 @@ def test_explicit_deny_rule_denies_request() -> None:
 def test_confirmation_rule_denies_original_request() -> None:
     request = make_request(request_id="request-original")
     verifier = RecordingVerifier()
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
         confirmation_verifier=verifier,
     )
@@ -180,7 +205,7 @@ def test_verified_confirmation_authorizes_only_new_request() -> None:
     request = make_request()
     confirmation = make_confirmation()
     verifier = RecordingVerifier()
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
         confirmation_verifier=verifier,
     )
@@ -206,7 +231,7 @@ def test_incongruent_confirmation_is_denied_before_verification(
 ) -> None:
     request = make_request()
     verifier = RecordingVerifier()
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
         confirmation_verifier=verifier,
     )
@@ -219,7 +244,7 @@ def test_incongruent_confirmation_is_denied_before_verification(
 
 
 def test_confirmation_without_verifier_is_denied() -> None:
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)]
     )
 
@@ -236,7 +261,7 @@ def test_confirmation_without_verifier_is_denied() -> None:
 def test_unverified_confirmation_is_denied(
     verifier_result: object,
 ) -> None:
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
         confirmation_verifier=RecordingVerifier(verifier_result),
     )
@@ -248,7 +273,7 @@ def test_unverified_confirmation_is_denied(
 
 
 def test_verifier_failure_is_denied_safely() -> None:
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
         confirmation_verifier=RecordingVerifier(
             error=RuntimeError("verification unavailable")
@@ -265,7 +290,7 @@ def test_verifier_failure_is_denied_safely() -> None:
 
 
 def test_invalid_confirmation_type_is_denied() -> None:
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
         confirmation_verifier=RecordingVerifier(),
     )
@@ -277,7 +302,7 @@ def test_invalid_confirmation_type_is_denied() -> None:
 
 
 def test_invalid_request_type_raises_type_error() -> None:
-    pdp = StaticPolicyDecisionPoint([])
+    pdp = make_pdp([])
 
     with pytest.raises(TypeError):
         pdp.decide("request")
@@ -285,7 +310,7 @@ def test_invalid_request_type_raises_type_error() -> None:
 
 def test_duplicate_policy_rule_is_rejected() -> None:
     with pytest.raises(ValueError):
-        StaticPolicyDecisionPoint(
+        make_pdp(
             [
                 make_rule(PolicyEffect.ALLOW),
                 make_rule(PolicyEffect.DENY),
@@ -338,12 +363,12 @@ def test_rule_requires_policy_effect() -> None:
 
 def test_rules_must_contain_only_policy_rules() -> None:
     with pytest.raises(TypeError):
-        StaticPolicyDecisionPoint(["allow"])
+        make_pdp(["allow"])
 
 
 def test_verifier_must_implement_verify() -> None:
     with pytest.raises(TypeError):
-        StaticPolicyDecisionPoint(
+        make_pdp(
             [],
             confirmation_verifier=object(),
         )
@@ -375,7 +400,7 @@ def test_confirmation_requires_timezone_aware_timestamp() -> None:
 
 def test_policy_decisions_are_deterministic() -> None:
     request = make_request()
-    pdp = StaticPolicyDecisionPoint(
+    pdp = make_pdp(
         [make_rule(PolicyEffect.ALLOW)]
     )
 
@@ -407,3 +432,78 @@ def test_pdp_value_objects_are_immutable(
 ) -> None:
     with pytest.raises(FrozenInstanceError):
         setattr(instance, field_name, replacement)
+
+def test_pdp_denies_expired_security_context() -> None:
+    expires_at = datetime(2026, 8, 15, 23, 30, tzinfo=timezone.utc)
+
+    pdp = StaticPolicyDecisionPoint(
+        [
+            PolicyRule(
+                subject_id="aranwill",
+                permission=PermissionScope(
+                    resource="conversation",
+                    action="read",
+                ),
+                effect=PolicyEffect.ALLOW,
+            )
+        ],
+        context_validator=make_validator(expires_at),
+    )
+
+    request = AuthorizationRequest(
+        context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=expires_at - timedelta(minutes=30),
+            expires_at=expires_at,
+        ),
+        permission=PermissionScope(
+            resource="conversation",
+            action="read",
+        ),
+    )
+
+    decision = pdp.decide(request)
+
+    assert decision.allowed is False
+    assert decision.reason == "expired_security_context"
+
+
+def test_pdp_allows_valid_security_context_to_reach_policy() -> None:
+    now = datetime(2026, 8, 15, 23, 20, tzinfo=timezone.utc)
+
+    pdp = StaticPolicyDecisionPoint(
+        [
+            PolicyRule(
+                subject_id="aranwill",
+                permission=PermissionScope(
+                    resource="conversation",
+                    action="read",
+                ),
+                effect=PolicyEffect.ALLOW,
+            )
+        ],
+        context_validator=make_validator(now),
+    )
+
+    request = AuthorizationRequest(
+        context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=now - timedelta(minutes=10),
+            expires_at=now + timedelta(minutes=10),
+        ),
+        permission=PermissionScope(
+            resource="conversation",
+            action="read",
+        ),
+    )
+
+    decision = pdp.decide(request)
+
+    assert decision.allowed is True
+    assert decision.reason == "policy_allowed"
