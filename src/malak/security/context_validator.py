@@ -7,4 +7,5 @@ class SecurityContextValidator:
         self._clock = clock
 
     def is_valid(self, context: SecurityContext) -> bool:
-        return self._clock.now() < context.expires_at
+        current_time = self._clock.now()
+        return context.issued_at <= current_time < context.expires_at
