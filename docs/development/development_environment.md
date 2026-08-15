@@ -309,6 +309,32 @@ La selección del runtime no debe trasladarse al Kernel ni a los contratos conve
 
 ---
 
+# Metodología de ingeniería
+
+La metodología oficial de ingeniería aplicable al desarrollo de Malāk se define en:
+
+```text
+docs/development/engineering_method.md
+```
+
+Esta metodología incorpora, según el alcance y el riesgo del cambio:
+
+- Specification-Driven Development (SDD).
+- Test-Driven Development (TDD).
+- revisión proporcional al riesgo mediante los lentes 4R.
+- Bounded Correction y Correction Budget.
+- validación independiente de correcciones.
+- evidencia verificable ligada al candidato cuando corresponda.
+
+Estas prácticas no modifican el Runtime ni el Kernel y no constituyen una fuente de autoridad superior a la arquitectura o gobernanza del proyecto.
+
+OpenSpec, Gentle AI y otras herramientas externas relacionadas con SDD, TDD, 4R o Receipt-Driven Development no forman parte del baseline oficial mientras no sean evaluadas, aprobadas y documentadas explícitamente.
+
+Receipt-Driven Development permanece en observación como línea prometedora para futuras capacidades multiagente, especialmente en relación con candidate identity, receipts, revisión independiente y trazabilidad verificable.
+
+
+---
+
 # Mantenimiento
 
 Toda modificación del entorno deberá actualizar este documento antes de incorporarse al proyecto.
