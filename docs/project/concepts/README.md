@@ -94,5 +94,7 @@ El repositorio oficial conserva estos documentos como referencia conceptual.
 El Project Vault podrá mantener índices y proyecciones derivadas para facilitar
 navegación, recuperación y continuidad.
 
+Estas proyecciones son derivadas y no alteran la autoridad del repositorio oficial.
+
 El Vault no deberá convertirse en una segunda fuente de autoridad para estos
 documentos.
