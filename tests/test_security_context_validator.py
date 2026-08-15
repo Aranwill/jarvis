@@ -83,3 +83,31 @@ def test_validator_uses_injected_clock() -> None:
     )
 
     assert _validate(FixedClock(fixed_now), context) is True
+
+
+def test_context_is_invalid_before_issued_at() -> None:
+    issued_at = datetime(2026, 8, 15, 22, 30, tzinfo=timezone.utc)
+
+    context = _make_context(
+        issued_at=issued_at,
+        expires_at=issued_at + timedelta(minutes=30),
+    )
+
+    assert (
+        _validate(
+            FixedClock(issued_at - timedelta(seconds=1)),
+            context,
+        )
+        is False
+    )
+
+
+def test_context_is_valid_exactly_at_issued_at() -> None:
+    issued_at = datetime(2026, 8, 15, 22, 30, tzinfo=timezone.utc)
+
+    context = _make_context(
+        issued_at=issued_at,
+        expires_at=issued_at + timedelta(minutes=30),
+    )
+
+    assert _validate(FixedClock(issued_at), context) is True
