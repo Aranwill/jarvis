@@ -19,6 +19,7 @@ related:
   knowledge_model: DOC-ARQ-KNOWLEDGE-MODEL
   adr:
     - ADR-001
+    - ADR-003
 
 graph:
   type: architecture_document
@@ -38,7 +39,7 @@ graph:
 
 history:
   created: 2026-06-27
-  updated: 2026-07-05
+  updated: 2026-08-15
 ---
 
 # Malāk Blueprint
@@ -58,7 +59,7 @@ history:
 **Estado:** Aprobado y validado
 **Sprint:** Sprint 6.5 — Conversation Runtime
 **Clasificación:** Documento Maestro de Arquitectura
-**Última revisión arquitectónica:** 2026-07-05
+**Última revisión arquitectónica:** 2026-08-15
 
 ---
 
@@ -486,6 +487,50 @@ Toda implementación debe respetar la Constitución Cognitiva.
 ## R-016
 
 Toda implementación debe respetar la Constitución de Gobernanza.
+
+---
+
+## R-017 — Flujo descendente de control y autoridad
+
+El flujo de control, autoridad y solicitudes operativas es descendente: una capa o componente upstream puede solicitar trabajo a un componente downstream únicamente mediante contratos públicos, requests o comandos tipados, o mecanismos de orquestación autorizados.
+
+Los eventos pueden registrar o propagar que una solicitud, resultado o cambio de estado ocurrió, pero no constituyen por sí mismos una transferencia de autoridad ni una orden de control.
+
+---
+
+## R-018 — Prohibición de control ascendente
+
+Una capa o componente downstream no puede iniciar control, autorización, elevación de privilegios, modificación de política ni establecer una dependencia de control ascendente sobre un componente upstream.
+
+Las consultas, validaciones o servicios autorizados por contrato no transfieren control ni autoridad al componente solicitante.
+
+---
+
+## R-019 — Retorno ascendente de resultados y evidencia
+
+Los resultados, estados, errores, métricas, eventos y evidencia pueden propagarse desde capas inferiores hacia capas superiores únicamente como retorno de una solicitud previa o mediante eventos tipados y contratos definidos.
+
+Este retorno no constituye control ascendente.
+
+---
+
+## R-020 — Autoridad no transferible por retorno
+
+La propagación ascendente de resultados o evidencia no concede autoridad al emisor inferior sobre el receptor superior.
+
+La autoridad permanece en la capa o componente que la posee según Blueprint, Gobernanza y contratos aplicables.
+
+---
+
+## R-021 — Prohibición de bypass y ciclos de control
+
+Queda prohibido:
+
+* iniciar invocaciones directas ascendentes de control;
+* utilizar eventos como órdenes encubiertas hacia capas superiores;
+* saltar capas de autoridad o validación;
+* crear ciclos de dependencia o de control;
+* reinterpretar un resultado, evento o receipt como autorización.
 
 ---
 
@@ -1333,6 +1378,18 @@ Proveer los servicios técnicos necesarios para operar Malāk.
 
 # 16. Reglas Globales de Dependencia
 
+## Interpretación de dependencias
+
+Las secciones históricas denominadas **Dependencias permitidas** describen relaciones contractuales o servicios autorizados entre componentes.
+
+No deben interpretarse como autorización para invertir el flujo de control.
+
+Cuando una capa inferior necesite validación, política, contexto o información perteneciente a una capa superior, no inicia control sobre ella: utiliza el contrato, request o comando tipado, broker u orquestación previstos por la arquitectura.
+
+Los eventos pueden propagar hechos, resultados o evidencia, pero no transfieren control ni autoridad.
+
+La dirección de control y autoridad permanece siempre descendente.
+
 ## D-001
 
 Las capas superiores pueden solicitar servicios a capas inferiores solo mediante contratos.
@@ -1372,6 +1429,40 @@ Reasoning Engine evalúa; no ejecuta.
 ## D-010
 
 Capability Manager registra y habilita; no ejecuta lógica de negocio por sí mismo.
+
+---
+
+## D-011 — Dirección del control
+
+Las solicitudes de control y trabajo fluyen desde componentes superiores hacia componentes inferiores.
+
+---
+
+## D-012 — Dirección de resultados
+
+Los componentes inferiores pueden devolver resultados, errores, estados, métricas y evidencia hacia el componente superior que originó el trabajo o hacia consumidores autorizados mediante contratos o eventos.
+
+---
+
+## D-013 — No invocación ascendente
+
+Un componente inferior no puede invocar directamente a un componente superior para ordenarle trabajo, modificar su estado de autoridad, concederse permisos o alterar su política.
+
+---
+
+## D-014 — Eventos sin autoridad implícita
+
+Un evento emitido desde una capa inferior hacia una superior representa un hecho, resultado o evidencia.
+
+No representa una orden, autorización ni transferencia de autoridad.
+
+---
+
+## D-015 — No circularidad operacional
+
+Quedan prohibidos los ciclos de control, dependencia operacional o autorización entre capas.
+
+La existencia de un canal de retorno no convierte la relación en una dependencia circular.
 
 ---
 
@@ -1474,6 +1565,8 @@ Interface Layer
     ▼
 Usuario
 ```
+
+> **Regla de interpretación del retorno:** el tramo `Execution Layer → Kernel → Interface Layer` representa propagación ascendente de resultado, estado y evidencia hacia el orquestador y la interfaz. No representa una nueva invocación ascendente de control ni una dependencia operacional inversa.
 
 ---
 
@@ -2202,6 +2295,22 @@ Todo evento deberá poder auditarse.
 ## EV-007
 
 Los eventos nunca modificarán directamente el estado del sistema.
+
+---
+
+## EV-008 — Eventos ascendentes como evidencia
+
+Un evento emitido desde una capa inferior hacia una capa superior puede transportar resultado, estado, error, métrica o evidencia.
+
+No puede utilizarse para iniciar autoridad, conceder permisos, ordenar trabajo al componente superior ni alterar políticas.
+
+---
+
+## EV-009 — Respeto de jerarquía
+
+El campo `target` de un evento no autoriza bypass de capas, inversión del flujo de control ni invocación ascendente directa.
+
+Toda acción derivada del evento debe ser decidida por el componente que posea la autoridad correspondiente.
 
 ---
 
