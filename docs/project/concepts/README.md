@@ -92,4 +92,6 @@ El repositorio oficial conserva estos documentos como referencia conceptual.
 
 navegación, recuperación y continuidad.
 
+Estas proyecciones son derivadas y no alteran la autoridad del repositorio oficial.
+
 documentos.
