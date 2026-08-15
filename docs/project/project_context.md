@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-08-12
-as_of_commit: 48d6ea2de9d7bd60495208b77d81175415bc3350
+as_of_date: 2026-08-15
+as_of_commit: 821497485f1b861cafa97cc5720616c3314b35bf
 branch: main
 baseline: v0.6.0-alpha
 ---
@@ -56,7 +56,7 @@ Este contexto fue reconciliado a partir de:
 - documentación oficial y derivada vigente;
 - fichas de sprint;
 - arquitectura implementada documentada;
-- resultados de validación registrados durante el cierre del Sprint 7.5;
+- resultados de validación registrados durante el cierre del Sprint 7.6;
 - estado sincronizado del Malāk Project Vault.
 
 El documento:
@@ -116,20 +116,20 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 Repositorio oficial:   Aranwill/jarvis
 Raíz Git local:        D:\Ollama\jarvis
 Rama permanente:       main
-HEAD observado:        48d6ea2de9d7bd60495208b77d81175415bc3350
+HEAD observado:        821497485f1b861cafa97cc5720616c3314b35bf
 Baseline nominal:      v0.6.0-alpha
-Último sprint cerrado: Sprint 7.5 — Security Control Plane Foundation
+Último sprint cerrado: Sprint 7.6 — Secure Context Lifecycle Foundation
 Próximo sprint:        ninguno autorizado
 ```
 
 Último cambio observado en `main`:
 
 ```text
-48d6ea2 Merge pull request #33 from Aranwill/docs/add-governed-mission-orchestration-idea
+8214974 Merge pull request #42 from Aranwill/sprint/7.6-h-context-propagation-contract
 ```
 
 
-El cambio documental más reciente incorporó `IDEA-024 — Governed Agent Composition & Mission Orchestration Foundation` con estado `capturada` dentro del registro no normativo de ideas. Esta incorporación no modifica el Blueprint, las Constituciones, la Gobernanza, el roadmap ni autoriza un nuevo sprint.
+El cambio funcional más reciente integrado en `main` cerró el alcance técnico del Sprint 7.6 mediante la PR #42, incorporando el contrato de propagación contextual sobre el lifecycle ya validado. Esta integración no autoriza Sprint 7.7 ni ninguna implementación posterior.
 
 La rama `main` es la única rama permanente y debe tratarse como fuente del baseline operativo actual.
 
@@ -410,6 +410,52 @@ La evidencia de autorización:
 
 ---
 
+## Secure Context Lifecycle Foundation
+
+El Sprint 7.6 está cerrado.
+
+La fundación implementada establece un lifecycle temporal explícito para
+`SecurityContext`, sin ampliar autoridad ni introducir todavía identidad
+criptográfica o transporte seguro entre procesos.
+
+Componentes incorporados o consolidados:
+
+- `SecurityContext` con `context_id`, `session_id`, `subject_id`,
+  `authenticated`, `issued_at`, `expires_at` y `parent_context_id`;
+- frontera temporal `Clock` / `SystemClock`;
+- `SecurityContextValidator`;
+- `SecurityContextIssuer`;
+- `SecurityContextRenewer`;
+- enforcement temporal en `StaticPolicyDecisionPoint`;
+- semántica de validez `issued_at <= now < expires_at`;
+- `SecurityContextEnvelope` para propagación inmutable en memoria.
+
+Propiedades relevantes:
+
+- contextos futuros son inválidos antes de `issued_at`;
+- contextos expiran exactamente en `expires_at`;
+- la renovación exige que el contexto anterior continúe vigente;
+- la renovación preserva sesión, sujeto y estado de autenticación;
+- cada renovación genera un nuevo `context_id` y conserva lineage mediante
+  `parent_context_id`;
+- el PDP valida lifecycle antes de evaluar políticas;
+- la propagación conserva el mismo `SecurityContext` sin reconstruirlo;
+- Validator, Issuer, Renewer y Envelope no conceden permisos;
+- Kernel, Planner y runtimes permanecieron fuera del alcance.
+
+Permanecen fuera de alcance:
+
+- nonce y replay protection;
+- identidad y firmas criptográficas;
+- MFA;
+- Secure Context Manager criptográfico completo;
+- Secure Message Bus;
+- IPC seguro;
+- receipts / RDD;
+- agentes, navegación y rutas operativas reales de alto riesgo.
+
+---
+
 ## Estado de sprints
 
 Estado del bloque 7.x:
@@ -422,7 +468,7 @@ Estado del bloque 7.x:
 | 7.3 | Cerrado | Conversation Provider Boundary Stabilization |
 | 7.4 | Cerrado | Logs, métricas, eventos operativos y sincronización gobernada |
 | 7.5 | Cerrado | Security Control Plane Foundation |
-| 7.6 | No autorizado | Existe una ficha preliminar no normativa |
+| 7.6 | Cerrado | Secure Context Lifecycle Foundation |
 | 7.7 | No autorizado | Existe una ficha preliminar no normativa |
 
 ### Sprint 7.0
@@ -520,24 +566,48 @@ Resultado:
 
 El cierre del Sprint 7.5 no autoriza automáticamente ningún sprint posterior.
 
+### Sprint 7.6
+
+Estado:
+
+```text
+cerrado
+```
+
+Resultado:
+
+- lifecycle temporal explícito para `SecurityContext`;
+- frontera `Clock`;
+- validación temporal determinista;
+- emisión y renovación con lineage;
+- enforcement fail-closed en PDP;
+- semántica `issued_at <= now < expires_at`;
+- propagación inmutable en memoria mediante `SecurityContextEnvelope`;
+- Kernel, Planner y runtimes sin cambios;
+- sin identidad criptográfica, replay protection ni Secure Message Bus.
+
+El cierre del Sprint 7.6 no autoriza automáticamente Sprint 7.7 ni ninguna
+implementación posterior.
+
 ---
 
 ## Validación
 
-Última validación integral documentada del cierre del Sprint 7.5:
+Última validación integral documentada del cierre del Sprint 7.6:
 
 ```text
-183 security-specific passed
-304 total passed
+339 total passed
 compileall: PASS
 git diff --check: PASS
+working tree: clean
 ```
 
 La revisión integral no registró defectos bloqueantes.
 
-El Incremento 6 del Sprint 7.5 no requirió cambios funcionales.
+Todos los incrementos 7.6-A a 7.6-H fueron revisados mediante 4R y aceptados
+humanamente antes de consolidar el cierre.
 
-Kernel, Planner, CLI, runtimes y Capability Registry permanecieron intactos durante el cierre integral.
+Kernel, Planner y runtimes permanecieron intactos durante el Sprint 7.6.
 
 Antes de iniciar cualquier nueva implementación debe revalidarse localmente:
 
@@ -566,8 +636,8 @@ El estado operativo vigente está definido por:
 
 ```text
 main
-HEAD 48d6ea2de9d7bd60495208b77d81175415bc3350
-Sprint 7.5 cerrado
+HEAD 821497485f1b861cafa97cc5720616c3314b35bf
+Sprint 7.6 cerrado
 ningún sprint posterior autorizado
 ```
 
@@ -612,7 +682,7 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ---
 
-## Propuestas posteriores al Sprint 7.5
+## Propuestas posteriores al Sprint 7.6
 
 No existe actualmente un sprint posterior autorizado.
 
@@ -625,9 +695,9 @@ Su existencia, numeración o posición no constituye autorización.
 
 Tampoco se consideran autorizadas por defecto:
 
-- Secure Context Manager;
+- Secure Context Manager criptográfico completo;
 - identidad criptográfica completa;
-- TTL y nonce operativos;
+- nonce y replay protection;
 - prevención persistente de replay;
 - persistencia avanzada de auditoría;
 - agentes;
@@ -751,7 +821,7 @@ No se debe iniciar el siguiente sprint hasta aceptar explícitamente el nuevo ba
 Este documento está vinculado al estado observado:
 
 ```text
-48d6ea2de9d7bd60495208b77d81175415bc3350
+821497485f1b861cafa97cc5720616c3314b35bf
 ```
 
 Debe volver a validarse cuando:

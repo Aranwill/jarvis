@@ -2,8 +2,8 @@
 title: Hoja de ruta de implementación
 status: activo
 authority: no normativa
-as_of_date: 2026-08-09
-as_of_commit: 62bdc11c3ce16cb2cb54bb61bddfab4e39d689a8
+as_of_date: 2026-08-15
+as_of_commit: 821497485f1b861cafa97cc5720616c3314b35bf
 branch: main
 language: es
 ---
@@ -57,14 +57,15 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 ## Estado de referencia
 
 - Rama permanente: `main`.
-- HEAD verificado antes de iniciar la revisión integral y cierre del Sprint 7.5:
-  `b4d1d512fe953d593608391390f82ab500fdc9d6`.
+- HEAD verificado después de la integración y revalidación del Sprint 7.6:
+  `821497485f1b861cafa97cc5720616c3314b35bf`.
 - Baseline nominal: `v0.6.0-alpha`.
-- Suite completa validada durante el cierre: 304 pruebas aprobadas.
+- Suite completa validada después del cierre técnico del Sprint 7.6: 339 pruebas aprobadas.
 - `compileall` validado sin errores.
 - `git diff --check` validado sin errores.
 - Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
 - Sprint 7.5 cerrado: `Security Control Plane Foundation`.
+- Sprint 7.6 cerrado: `Secure Context Lifecycle Foundation`.
 - El Kernel permanece desacoplado de runtimes, proveedores y modelos concretos.
 - La CLI y el pipeline Kernel–Planner–Capability continúan siendo rutas separadas.
 - No existe todavía una integración formal validada entre `Kernel.receive` y `ConversationService`.
@@ -80,35 +81,49 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 | 7.3 | Cerrado | Estabilización de la frontera de `ConversationProvider` |
 | 7.4 | Cerrado | Consolidación de logs, métricas y auditoría; sincronización gobernada del Vault completada |
 | 7.5 | Cerrado | Security Control Plane Foundation; autorización, PDP, PEP, auditoría y revisión integral completados |
+| 7.6 | Cerrado | Secure Context Lifecycle Foundation; ciclo de vida temporal, emisión, renovación, validación, enforcement en PDP y propagación contextual completados |
 
 ## Estado de autorización de nuevos sprints
 
-No existe un sprint posterior autorizado automáticamente por el cierre del Sprint 7.5.
+No existe un sprint posterior autorizado automáticamente por el cierre del Sprint 7.6.
 
 Cualquier nueva unidad deberá ser inspeccionada, propuesta y aprobada explícitamente por el propietario antes de su implementación.
 
-El Sprint 7.5 fue aprobado explícitamente por el propietario y quedó
-cerrado después de completar seis incrementos pequeños, revisables y
-reversibles.
+El Sprint 7.6 fue aprobado explícitamente por el propietario y quedó cerrado después de completar ocho incrementos pequeños, revisables y reversibles.
 
 El cierre integral confirmó:
 
-- contratos de autorización estables;
-- Policy Decision Point mínimo, determinista y fail-closed;
-- Policy Enforcement Point separado de la lógica de negocio del Kernel;
-- evidencia de auditoría estructurada e integrada de forma fail-closed;
-- separación entre decisión, enforcement, auditoría y operación protegida;
-- control humano y denegación por defecto preservados;
-- ausencia de rutas operativas reales habilitadas por este sprint;
-- 183 pruebas específicas de seguridad aprobadas;
-- 304 pruebas totales aprobadas;
+- contrato ampliado de `SecurityContext`;
+- frontera temporal `Clock`;
+- `SecurityContextValidator`;
+- `SecurityContextIssuer`;
+- `SecurityContextRenewer`;
+- enforcement del lifecycle en el Policy Decision Point;
+- semántica temporal `issued_at <= now < expires_at`;
+- contrato inmutable de propagación mediante `SecurityContextEnvelope`;
+- preservación de denegación por defecto y comportamiento fail-closed;
+- ausencia de nueva autoridad en lifecycle o propagación;
+- Kernel, Planner y runtimes sin cambios;
+- 339 pruebas totales aprobadas;
 - `compileall` y `git diff --check` validados sin errores;
 - ningún defecto bloqueante detectado durante la revisión integral.
 
-El cierre del Sprint 7.5 no autoriza automáticamente ningún sprint
-posterior ni habilita Secure Context Manager, persistencia de auditoría,
-identidad criptográfica, TTL, nonce, prevención persistente de replay,
-agentes, navegación o rutas operativas reales.
+El cierre del Sprint 7.6 no autoriza automáticamente Sprint 7.7 ni ninguna implementación posterior.
+
+Permanecen fuera de alcance y requieren diseño y aprobación independientes:
+
+- nonce y replay protection;
+- identidad criptográfica;
+- MFA;
+- Secure Context Manager criptográfico completo;
+- Secure Message Bus;
+- IPC seguro;
+- receipts / RDD;
+- agentes;
+- navegación;
+- rutas operativas reales de alto riesgo.
+
+### Registro histórico del Sprint 7.5
 
 El Incremento 1 incorporó los contratos fundamentales:
 
@@ -372,9 +387,9 @@ Ninguna propuesta futura puede:
 La ficha del Sprint 7.4 documenta un sprint cerrado, integrado y
 sincronizado de forma gobernada.
 
-La ficha del Sprint 7.5 documenta el sprint vigente aprobado y su
-secuencia incremental. Las fichas 7.6 y 7.7 permanecen como propuestas
-y no constituyen autorización de implementación.
+La ficha del Sprint 7.5 documenta un sprint cerrado.
+La ficha del Sprint 7.6 documenta el Secure Context Lifecycle Foundation cerrado e integrado.
+La ficha 7.7 permanece como propuesta y no constituye autorización de implementación.
 
 ## Regla de actualización
 
