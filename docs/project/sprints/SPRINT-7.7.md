@@ -231,3 +231,124 @@ Completar las validaciones no implica automáticamente:
 - crear un tag;
 - actualizar `main`;
 - iniciar el siguiente sprint.
+
+## 7.7-A — Baseline Inventory & Evidence Freeze
+
+### Estado
+
+```text
+COMPLETADO
+```
+
+### Objeto técnico congelado
+
+La certificación evalúa exclusivamente el estado técnico contenido en:
+
+```text
+repository: Aranwill/jarvis
+branch: main
+commit: 089255e23bd2b686436140ca569edf09c08819a7
+date: 2026-08-15
+```
+
+El commit documental utilizado para activar Sprint 7.7 no forma parte del
+objeto técnico bajo certificación.
+
+### Inventario básico
+
+```text
+tracked files: 152
+nominal version: v0.6.0-alpha
+python requirement: >=3.12
+runtime dependencies declared in pyproject.toml: none
+tag at certified commit: none
+```
+
+Estado técnico reproducido antes de iniciar la certificación:
+
+```text
+339 passed
+compileall: PASS
+git diff --check: PASS
+working tree: clean
+HEAD == origin/main
+Python 3.12.10
+```
+
+### Fuentes de autoridad y arquitectura identificadas
+
+- `docs/governance/cognitive_constitution.md`
+- `docs/governance/governance_constitution.md`
+- `docs/architecture/blueprint.md`
+- `docs/architecture/kernel.md`
+- `docs/architecture/architecture_quality_gates.md`
+- `docs/architecture/adr/ADR-001-identity-migration-jarvis-to-malak.md`
+- `docs/architecture/adr/ADR-002-policy-enforcement-boundary.md`
+- `docs/architecture/adr/ADR-003-directional-communication-and-authority-flow.md`
+- `SECURITY.md`
+
+### Hallazgos
+
+#### 7.7-A-001 — Referencia obsoleta a manifest.yaml
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: LOW
+blocking: NO
+```
+
+Evidencia:
+
+- `manifest.yaml` existió históricamente;
+- fue actualizado para Malāk durante la migración de identidad;
+- fue eliminado explícitamente el 2026-07-20 mediante el commit
+  `99adccef66703ddb147ee7a837c4af9bb4e86d5c`;
+- el baseline certificado no contiene `manifest.yaml`;
+- `docs/project/project_context.md` todavía lo enumera dentro de la estructura
+  relevante del repositorio.
+
+Decisión:
+
+No restaurar `manifest.yaml`.
+
+La referencia documental deberá evaluarse y reconciliarse durante
+`7.7-C — Architecture & Documentation Reconciliation`.
+
+#### 7.7-A-002 — Migration Status desactualizado en PROJECT.md
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: LOW
+blocking: NO
+```
+
+Evidencia:
+
+`PROJECT.md` mantiene sin marcar, entre otros:
+
+```text
+[ ] Source code updated
+[ ] Namespaces migrated
+```
+
+Sin embargo, `ADR-001 — Identity Migration: Jarvis to Malāk` está aceptado y
+documenta que la migración del runtime desde `src/jarvis` hacia `src/malak`
+fue completada durante Sprint 5.1 y validada posteriormente.
+
+Decisión:
+
+No modificar `PROJECT.md` durante 7.7-A.
+
+La semántica y vigencia de la checklist deberán reconciliarse durante
+`7.7-C — Architecture & Documentation Reconciliation`.
+
+### Resultado de 7.7-A
+
+El objeto técnico de certificación quedó identificado e inmutable por commit.
+
+No se detectaron blockers que impidan continuar con la validación técnica.
+
+Las divergencias encontradas son documentales, de severidad baja y quedan
+registradas para tratamiento explícito posterior.
+
+El cierre de 7.7-A no certifica todavía el baseline.
