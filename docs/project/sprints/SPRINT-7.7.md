@@ -526,7 +526,7 @@ El cierre de 7.7-B no certifica todavía el baseline completo.
 ### Estado
 
 ```text
-EN VALIDACIÓN
+COMPLETADO
 ```
 
 ### Aprobación
@@ -638,3 +638,71 @@ La aplicación de este corrective packet no certifica el baseline ni autoriza:
 
 Primero debe revisarse el diff, ejecutar las validaciones aplicables y cerrar
 formalmente 7.7-C-C1.
+
+### Validación de 7.7-C-C1
+
+El corrective packet fue aplicado y revisado sobre el commit:
+
+```text
+1c787deba94a13128232a20924642ffb8c0f73e8
+```
+
+Resultado:
+
+```text
+git diff --check: PASS
+git show --check: PASS
+working tree: clean
+scope: 4 archivos documentales autorizados
+```
+
+No se modificaron documentos normativos, contratos, código ni tests.
+
+### Resolución de hallazgos
+
+```text
+7.7-A-001: RESOLVED
+7.7-A-002: RESOLVED
+7.7-C-001: RESOLVED
+7.7-C-002: RESOLVED
+7.7-C-003: ACCEPTED_HISTORICAL / NO_CHANGE
+```
+
+### Resultado de 7.7-C
+
+La reconciliación de arquitectura y documentación se considera completada.
+
+Se revisaron las fuentes normativas y operativas aplicables, incluyendo
+Constitución Cognitiva, Constitución de Gobernanza, Blueprint, especificación
+del Kernel, Architecture Quality Gates, ADR aceptados, Development Checklist,
+PROJECT.md, project_context.md y las hojas de ruta aplicables.
+
+No se detectó una divergencia arquitectónica bloqueante entre la
+implementación evaluada y las fuentes normativas revisadas.
+
+La documentación derivada desactualizada fue reconciliada mediante
+`7.7-C-C1 — Derived Documentation Reconciliation`.
+
+`docs/project/roadmap.md` se preserva sin cambios como artefacto legacy/histórico
+y no se considera fuente operativa vigente.
+
+Permanecieron sin cambios:
+
+- Kernel;
+- contratos públicos;
+- Constitución Cognitiva;
+- Constitución de Gobernanza;
+- Blueprint;
+- ADR aceptados;
+- `SECURITY.md`;
+- código;
+- tests.
+
+El cierre de 7.7-C no certifica todavía el baseline completo ni autoriza merge,
+push, tag, promoción de release o inicio del siguiente sprint.
+
+El candidate queda habilitado para continuar con:
+
+```text
+7.7-D — Security Assurance Review
+```
