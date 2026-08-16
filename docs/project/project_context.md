@@ -2,9 +2,12 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-08-15
-as_of_commit: 821497485f1b861cafa97cc5720616c3314b35bf
+as_of_date: 2026-08-16
+as_of_commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
 branch: main
+certification_branch: sprint/7.7-baseline-certification
+candidate_commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+certification_status: sprint_7_7_active
 baseline: v0.6.0-alpha
 ---
 
@@ -116,7 +119,7 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 Repositorio oficial:   Aranwill/jarvis
 Raíz Git local:        D:\Ollama\jarvis
 Rama permanente:       main
-HEAD observado:        821497485f1b861cafa97cc5720616c3314b35bf
+HEAD observado:        34c711c7ecd73fb4187d675e1be6efbeee8c8b3
 Baseline nominal:      v0.6.0-alpha
 Último sprint cerrado: Sprint 7.6 — Secure Context Lifecycle Foundation
 Próximo sprint:        ninguno autorizado
@@ -174,7 +177,6 @@ jarvis/
 ├── README.md
 ├── ROADMAP.md
 ├── SECURITY.md
-├── manifest.yaml
 └── pyproject.toml
 ```
 
@@ -469,7 +471,7 @@ Estado del bloque 7.x:
 | 7.4 | Cerrado | Logs, métricas, eventos operativos y sincronización gobernada |
 | 7.5 | Cerrado | Security Control Plane Foundation |
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
-| 7.7 | No autorizado | Existe una ficha preliminar no normativa |
+| 7.7 | Activo | Certificación de baseline; 7.7-A y 7.7-B completados; 7.7-C en curso |
 
 ### Sprint 7.0
 
@@ -632,13 +634,20 @@ v0.6.0-alpha
 
 El tag nominal no debe confundirse con el HEAD de desarrollo actual.
 
-El estado operativo vigente está definido por:
+El baseline integrado vigente en `main` continúa siendo la referencia operativa
+estable previa a la certificación.
+
+El proceso de certificación actual evalúa un candidate baseline separado:
 
 ```text
-main
-HEAD 821497485f1b861cafa97cc5720616c3314b35bf
-Sprint 7.6 cerrado
-ningún sprint posterior autorizado
+baseline integrado previo: main
+candidate técnico: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+rama de certificación: sprint/7.7-baseline-certification
+Sprint 7.7: activo
+7.7-A: completado
+7.7-B: completado
+7.7-C: en curso
+release promovida: no
 ```
 
 No debe certificarse una nueva release ni crearse un nuevo tag sin un proceso específico de validación y aprobación.
@@ -684,12 +693,11 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ## Propuestas posteriores al Sprint 7.6
 
-No existe actualmente un sprint posterior autorizado.
+Sprint 7.7 está autorizado y activo como proceso formal de certificación de baseline y release interna.
 
 Existen propuestas documentales preliminares para:
 
 - preparación del AKS para futura representación como grafo;
-- validación de baseline y release interna.
 
 Su existencia, numeración o posición no constituye autorización.
 
@@ -821,7 +829,7 @@ No se debe iniciar el siguiente sprint hasta aceptar explícitamente el nuevo ba
 Este documento está vinculado al estado observado:
 
 ```text
-821497485f1b861cafa97cc5720616c3314b35bf
+34c711c7ecd73fb4187d675e1be6efbeee8c8b3
 ```
 
 Debe volver a validarse cuando:

@@ -19,7 +19,7 @@ Malāk is a modular, governable, model-agnostic cognitive platform designed to e
 | Display Name | Malāk |
 | Technical Identifier | malak |
 | Repository (temporary) | jarvis |
-| Namespace (temporary) | jarvis |
+| Namespace | malak |
 
 ## Historical Note
 
@@ -33,7 +33,7 @@ The previous name may remain in historical documents, commit history, and migrat
 
 - [x] Official name defined
 - [ ] Documentation updated
-- [ ] Source code updated
+- [x] Source code updated
 - [ ] Scripts updated
 - [ ] Repository renamed
-- [ ] Namespaces migrated
+- [x] Namespaces migrated

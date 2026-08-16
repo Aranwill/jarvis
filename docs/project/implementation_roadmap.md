@@ -2,9 +2,12 @@
 title: Hoja de ruta de implementación
 status: activo
 authority: no normativa
-as_of_date: 2026-08-15
-as_of_commit: 821497485f1b861cafa97cc5720616c3314b35bf
+as_of_date: 2026-08-16
+as_of_commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
 branch: main
+certification_branch: sprint/7.7-baseline-certification
+candidate_commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+certification_status: sprint_7_7_active
 language: es
 ---
 
@@ -71,6 +74,26 @@ El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualqui
 - No existe todavía una integración formal validada entre `Kernel.receive` y `ConversationService`.
 - `main` es la única rama permanente del repositorio.
 
+## Estado de certificación actual
+
+Sprint 7.7 fue aprobado explícitamente por el propietario y se encuentra activo.
+
+Estado observado de la certificación:
+
+```text
+candidate técnico: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+rama: sprint/7.7-baseline-certification
+7.7-A — Baseline Inventory & Evidence Freeze: completado
+7.7-B — Technical Validation: completado
+7.7-C — Architecture & Documentation Reconciliation: en curso
+release promovida: no
+tag nuevo: no
+```
+
+Este estado no convierte esta hoja de ruta en fuente normativa ni certifica por
+sí mismo un nuevo baseline. La promoción final continúa requiriendo validación
+completa y aprobación humana explícita.
+
 ## Sprints cerrados del bloque 7.x
 
 | Sprint | Estado | Resultado |
@@ -108,7 +131,7 @@ El cierre integral confirmó:
 - `compileall` y `git diff --check` validados sin errores;
 - ningún defecto bloqueante detectado durante la revisión integral.
 
-El cierre del Sprint 7.6 no autoriza automáticamente Sprint 7.7 ni ninguna implementación posterior.
+El cierre del Sprint 7.6 no autorizó automáticamente Sprint 7.7. La autorización de Sprint 7.7 fue otorgada posteriormente de forma explícita por el propietario.
 
 Permanecen fuera de alcance y requieren diseño y aprobación independientes:
 
@@ -339,7 +362,7 @@ Estas fundaciones dependen de `Security Control Plane Foundation` y de la futura
 | Propuesta | Estado | Observación |
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Validación de baseline y release interna | No aprobada | Solo corresponde después de cerrar y sincronizar los bloques previos |
+| Validación de baseline y release interna | En curso | Sprint 7.7 activo; 7.7-A y 7.7-B completados; 7.7-C en curso |
 
 La tabla anterior no establece secuencia obligatoria.
 
@@ -389,7 +412,7 @@ sincronizado de forma gobernada.
 
 La ficha del Sprint 7.5 documenta un sprint cerrado.
 La ficha del Sprint 7.6 documenta el Secure Context Lifecycle Foundation cerrado e integrado.
-La ficha 7.7 permanece como propuesta y no constituye autorización de implementación.
+La ficha 7.7 documenta un sprint activo de certificación. Su existencia no certifica por sí sola un baseline ni autoriza promoción, merge, tag o release.
 
 ## Regla de actualización
 
