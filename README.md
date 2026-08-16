@@ -23,7 +23,7 @@ Rama permanente:
 Baseline operativo actual:
 
 ```text
-Sprint 7.5 cerrado — Security Control Plane Foundation
+Sprint 7.7 cerrado — Validación de baseline y release interna
 ```
 
 La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional.
@@ -210,11 +210,10 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-Estado validado durante la revisión integral y cierre del Sprint 7.5:
+Estado validado durante la certificación y cierre del Sprint 7.7:
 
 ```text
-183 security-specific passed
-304 total passed
+339 total passed
 ```
 
 Validar compilación:
