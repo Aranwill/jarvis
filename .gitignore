@@ -67,3 +67,4 @@ Thumbs.db
 
 # Python package metadata
 *.egg-info/
+/build/
