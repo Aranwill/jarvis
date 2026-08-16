@@ -352,3 +352,171 @@ Las divergencias encontradas son documentales, de severidad baja y quedan
 registradas para tratamiento explícito posterior.
 
 El cierre de 7.7-A no certifica todavía el baseline.
+
+## 7.7-B — Technical Validation
+
+### Estado
+
+```text
+COMPLETADO
+```
+
+### Candidate baseline validado
+
+Tras la aplicación del corrective packet `7.7-B-C1 — Packaging Boundary & Build Hygiene`,
+la validación técnica final se ejecutó sobre:
+
+```text
+commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+branch: sprint/7.7-baseline-certification
+```
+
+Este commit incorpora únicamente:
+
+- restricción explícita del package discovery a `malak*`;
+- exclusión de `/build/` como artefacto generado.
+
+### Evidencia técnica final
+
+```text
+Python: 3.12.10
+pytest: 339 passed
+compileall: PASS
+pip check: PASS
+isolated wheel build: PASS
+wheel package boundary: PASS
+unexpected wheel entries: []
+build directory ignored: PASS
+git diff --check: PASS
+working tree: clean
+```
+
+### Packaging
+
+El build aislado mediante PEP 517 completó correctamente y produjo un wheel
+`malak-0.6.0a0-py3-none-any.whl`.
+
+La validación del contenido confirmó que el artefacto final contiene únicamente:
+
+- `malak/...`
+- metadata `malak-*.dist-info/...`
+
+No se detectaron paquetes top-level inesperados.
+
+### Hallazgos investigados
+
+#### 7.7-B-001 — Normalización de versión
+
+```text
+classification: NOT_APPLICABLE
+blocking: NO
+```
+
+`0.6.0-alpha` es normalizado por la metadata Python como `0.6.0a0`.
+
+No requiere corrección.
+
+#### 7.7-B-002 — Backend setuptools ausente en la venv activa
+
+```text
+classification: NOT_APPLICABLE
+blocking: NO
+```
+
+La ausencia de `setuptools` en la venv activa no impide el flujo de build soportado.
+
+El build aislado PEP 517 aprovisionó correctamente el backend declarado por
+`pyproject.toml` y produjo el wheel esperado.
+
+#### 7.7-B-003 — Comportamiento de ayuda de la CLI
+
+```text
+classification: NOT_APPLICABLE
+blocking: NO
+```
+
+La CLI es interactiva por diseño. `help` es un comando interno de la sesión y
+no un flag `--help`.
+
+No se detectó contradicción con la documentación operativa vigente.
+
+#### 7.7-B-004 — Package discovery demasiado amplio
+
+```text
+classification: CORRECTIVE_PACKET_REQUIRED
+severity: MEDIUM
+blocking_release: YES
+status: RESOLVED
+```
+
+Durante el build inicial, setuptools incluía `app/main.py` como package top-level
+adicional debido al descubrimiento amplio bajo `src/`.
+
+Corrección aplicada mediante `7.7-B-C1`:
+
+```toml
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["malak*"]
+```
+
+Revalidación:
+
+```text
+unexpected wheel entries: []
+```
+
+#### 7.7-B-005 — Artefacto build/ no ignorado
+
+```text
+classification: CORRECTIVE_PACKET_REQUIRED
+severity: LOW
+blocking_release: YES
+status: RESOLVED
+```
+
+El build oficial generaba `/build/` como contenido untracked.
+
+Corrección aplicada mediante `7.7-B-C1`:
+
+```text
+/build/
+```
+
+Revalidación:
+
+```text
+git check-ignore: PASS
+working tree after build: clean
+```
+
+### Corrective Packet 7.7-B-C1
+
+```text
+name: Packaging Boundary & Build Hygiene
+status: COMPLETED
+commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+files:
+  - pyproject.toml
+  - .gitignore
+```
+
+El corrective packet no modificó:
+
+- Kernel;
+- runtime behavior;
+- Security Control Plane;
+- tests funcionales;
+- dependencias runtime;
+- `src/app/main.py`.
+
+### Resultado de 7.7-B
+
+La validación técnica se considera completada.
+
+No quedan blockers técnicos conocidos dentro del alcance de 7.7-B.
+
+El candidate baseline `34c711c7ecd73fb4187d675e1be6efbeee8c8b3` queda habilitado para continuar
+con `7.7-C — Architecture & Documentation Reconciliation`.
+
+El cierre de 7.7-B no certifica todavía el baseline completo.
