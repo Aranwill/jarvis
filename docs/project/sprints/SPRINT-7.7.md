@@ -1076,3 +1076,125 @@ El candidate queda habilitado para continuar con:
 ```text
 7.7-F — Final Certification Review
 ```
+
+## Cierre de 7.7-F — Final Certification Review
+
+### Estado
+
+```text
+COMPLETADO
+```
+
+### Candidate final revisado
+
+```text
+commit: 13e2c7888c342c070ad44c16f74e0df6597bd083
+branch: sprint/7.7-baseline-certification
+baseline previo en main:
+  089255e23bd2b686436140ca569edf09c08819a7
+```
+
+### Consolidación de evidencia
+
+```text
+F-01 Technical validation          PASS
+F-02 Architecture compliance       PASS
+F-03 Documentation coherence       PASS
+F-04 Security assurance            PASS_WITH_ACCEPTED_RESIDUAL_RISK
+F-05 Release readiness             PASS
+F-06 Rollback readiness            PASS
+F-07 Residual risk review          PASS
+F-08 Traceability                  PASS
+F-09 Repository cleanliness        PASS
+F-10 Promotion recommendation      RECOMMENDED_WITH_ACCEPTED_RESIDUAL_RISK
+```
+
+### Evidencia técnica final
+
+```text
+pytest: 339 passed
+compileall: PASS
+pip check: PASS
+git diff --check main..HEAD: PASS
+working tree: clean
+tag at candidate: none
+```
+
+La rama `main` permaneció sin modificaciones durante la certificación.
+
+### Resultado consolidado de paquetes
+
+```text
+7.7-A: PASS
+7.7-B: PASS
+7.7-C: PASS
+7.7-D: PASS_WITH_ACCEPTED_RESIDUAL_RISK
+7.7-E: PASS
+7.7-F: COMPLETE
+```
+
+No se detectó una divergencia arquitectónica bloqueante restante.
+
+### Riesgo residual consolidado
+
+#### 7.7-D-001 — Provenance fuerte del SecurityContext
+
+```text
+classification: ACCEPTED_RESIDUAL_RISK
+severity: MEDIUM
+blocking_release: NO
+```
+
+El baseline actual no proporciona todavía una raíz criptográfica fuerte de
+identidad/provenance para `SecurityContext`.
+
+Permanecen fuera del alcance certificado:
+
+- nonce;
+- replay protection;
+- PKI;
+- identidad criptográfica;
+- Secure Message Bus;
+- MFA;
+- Secure Context Manager criptográfico completo.
+
+### Blockers finales
+
+```text
+blocking_findings: 0
+corrective_packets_pending: 0
+unresolved_failures: 0
+unresolved_inconclusive_findings: 0
+accepted_residual_risks: 1
+```
+
+### Recomendación final
+
+```text
+CERTIFICATION RECOMMENDED WITH ACCEPTED RESIDUAL RISK
+```
+
+La evidencia reunida durante Sprint 7.7 es suficiente para recomendar que el
+candidate:
+
+```text
+13e2c7888c342c070ad44c16f74e0df6597bd083
+```
+
+sea propuesto como nuevo baseline interno de Malāk.
+
+Esta recomendación no constituye autorización para mergear en `main`, crear o
+mover tags, cambiar la versión, publicar una release, hacer push de una
+promoción o iniciar el siguiente sprint.
+
+### Human in Control — decisión pendiente
+
+```text
+certification_review: COMPLETE
+certification_recommendation: RECOMMENDED_WITH_ACCEPTED_RESIDUAL_RISK
+promotion_authorization: PENDING_EXPLICIT_OWNER_APPROVAL
+```
+
+La promoción requiere una decisión humana explícita e inequívoca del
+propietario. Hasta entonces, el candidate permanece en la rama temporal de
+certificación y `main` continúa como baseline integrado vigente.
