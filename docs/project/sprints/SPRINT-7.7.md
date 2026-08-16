@@ -520,3 +520,121 @@ El candidate baseline `34c711c7ecd73fb4187d675e1be6efbeee8c8b3` queda habilitado
 con `7.7-C — Architecture & Documentation Reconciliation`.
 
 El cierre de 7.7-B no certifica todavía el baseline completo.
+
+## 7.7-C-C1 — Derived Documentation Reconciliation
+
+### Estado
+
+```text
+EN VALIDACIÓN
+```
+
+### Aprobación
+
+El corrective packet fue aprobado explícitamente por el propietario el 2026-08-16.
+
+### Objetivo
+
+Reconciliar documentación derivada y metadata operativa con el estado real
+observado durante Sprint 7.7, sin modificar arquitectura normativa ni código.
+
+### Alcance autorizado
+
+Archivos modificables:
+
+- `docs/project/project_context.md`
+- `docs/project/implementation_roadmap.md`
+- `PROJECT.md`
+- `docs/project/sprints/SPRINT-7.7.md`
+
+Fuera de alcance:
+
+- `docs/project/roadmap.md`
+- `ROADMAP.md`
+- Blueprint
+- Kernel
+- Constitución Cognitiva
+- Constitución de Gobernanza
+- ADR aceptados
+- `SECURITY.md`
+- código
+- tests
+
+### Hallazgos tratados
+
+#### 7.7-A-001 — Referencia obsoleta a manifest.yaml
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: LOW
+target_resolution: 7.7-C-C1
+```
+
+Se elimina `manifest.yaml` de la estructura vigente descrita por
+`project_context.md`. El archivo histórico no se restaura.
+
+#### 7.7-A-002 — Migration Status desactualizado
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: LOW
+target_resolution: 7.7-C-C1
+```
+
+`PROJECT.md` se reconcilia con ADR-001 únicamente en los estados demostrados:
+migración del source code y del namespace hacia Malāk.
+
+No se marca `Repository renamed`, porque el repositorio continúa identificado
+como `Aranwill/jarvis`.
+
+#### 7.7-C-001 — project_context.md describe Sprint 7.7 como no autorizado
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: MEDIUM
+target_resolution: 7.7-C-C1
+```
+
+El contexto derivado se actualiza para distinguir:
+
+- baseline integrado previo;
+- candidate técnico bajo certificación;
+- rama temporal de certificación;
+- Sprint 7.7 activo;
+- ausencia de promoción final de release.
+
+#### 7.7-C-002 — implementation_roadmap.md anclado al estado previo de Sprint 7.6
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: MEDIUM
+target_resolution: 7.7-C-C1
+```
+
+La hoja de ruta derivada registra el estado actual de certificación sin adquirir
+autoridad normativa ni aprobar por sí sola una release.
+
+#### 7.7-C-003 — docs/project/roadmap.md legacy
+
+```text
+classification: HISTORICAL_DIVERGENCE
+severity: LOW
+blocking_release: NO
+decision: PRESERVE
+```
+
+No se modifica. No posee referencias operativas vigentes y se preserva como
+artefacto legacy/histórico.
+
+### Restricción de promoción
+
+La aplicación de este corrective packet no certifica el baseline ni autoriza:
+
+- merge;
+- push;
+- tag;
+- cambio de versión;
+- inicio del siguiente sprint.
+
+Primero debe revisarse el diff, ejecutar las validaciones aplicables y cerrar
+formalmente 7.7-C-C1.
