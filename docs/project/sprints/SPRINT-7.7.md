@@ -835,3 +835,244 @@ El candidate queda habilitado para continuar con:
 ```text
 7.7-E — Release Readiness & Rollback Evidence
 ```
+
+## 7.7-E — Release Readiness & Rollback Evidence
+
+### Estado
+
+```text
+EN VALIDACIÓN
+```
+
+### Candidate inspeccionado
+
+La revisión inicial de release readiness se realizó sobre:
+
+```text
+commit: ce6b89e591189fb0ad89cd256295666f41a156b2f
+branch: sprint/7.7-baseline-certification
+date: 2026-08-16
+```
+
+No existe un tag apuntando al candidate.
+
+### Evidencia de versión
+
+La versión nominal observada permanece consistente como:
+
+```text
+v0.6.0-alpha
+```
+
+`pyproject.toml` declara:
+
+```text
+0.6.0-alpha
+```
+
+La normalización de metadata Python a `0.6.0a0` ya fue clasificada en 7.7-B
+como comportamiento esperado y no requiere corrección.
+
+No se autoriza un cambio de versión dentro de este corrective packet.
+
+### Evidencia de rollback
+
+La rama permanente `main` continúa apuntando al baseline integrado previo:
+
+```text
+089255e23bd2b686436140ca569edf09c08819a7
+```
+
+La revisión comprobó:
+
+```text
+merge-base HEAD main:
+089255e23bd2b686436140ca569edf09c08819a7
+
+candidate branch isolated: YES
+main unchanged: YES
+candidate commits traceable: YES
+working tree before corrective packet: clean
+tag at candidate: none
+```
+
+La relación de ancestry permite identificar sin ambigüedad el punto de retorno
+al baseline integrado previo.
+
+Esta evidencia demuestra reversibilidad estructural; no autoriza por sí sola
+reset, merge, tag, push ni modificación de `main`.
+
+### Hallazgos
+
+#### 7.7-E-001 — CHANGELOG.md no representa el candidate actual
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: MEDIUM
+blocking_release: YES
+corrective_packet_required: YES
+target_resolution: 7.7-E-C1
+```
+
+Evidencia:
+
+- la sección `v0.6.0-alpha` documentaba principalmente la migración inicial de
+  identidad;
+- no representaba de forma suficiente los cambios materiales incorporados
+  posteriormente al bloque 7.x;
+- el changelog no reflejaba adecuadamente runtime, observabilidad, Security
+  Control Plane, Secure Context Lifecycle, packaging ni la certificación 7.7.
+
+Decisión:
+
+Reconciliar `CHANGELOG.md` sin cambiar la versión nominal ni crear un tag.
+
+#### 7.7-E-002 — Formato histórico escapado dentro de CHANGELOG.md
+
+```text
+classification: DOCUMENTATION_DIVERGENCE
+severity: LOW
+blocking_release: NO
+corrective_packet_required: YES
+target_resolution: 7.7-E-C1
+```
+
+Evidencia:
+
+El archivo contenía un bloque histórico con encabezados y listas Markdown
+escapados literalmente (`\#`, `\##`, `\-`), reduciendo su legibilidad como
+artefacto de release.
+
+Decisión:
+
+Normalizar exclusivamente la presentación del historial ya existente, sin
+alterar su significado histórico.
+
+### Corrective Packet 7.7-E-C1 — Release Metadata & Changelog Reconciliation
+
+#### Estado
+
+```text
+COMPLETADO
+```
+
+#### Aprobación y propósito
+
+El corrective packet se limita a reconciliar metadata documental de release
+antes de la certificación final.
+
+#### Alcance autorizado
+
+Archivos modificables:
+
+- `CHANGELOG.md`;
+- `docs/project/sprints/SPRINT-7.7.md`.
+
+Fuera de alcance:
+
+- `pyproject.toml`;
+- `PROJECT.md`;
+- código;
+- tests;
+- Blueprint;
+- Kernel;
+- Constituciones;
+- ADR;
+- cambio de versión;
+- creación de tags;
+- merge;
+- push;
+- modificación de `main`.
+
+#### Cambios aplicados
+
+`CHANGELOG.md` fue reorganizado para:
+
+- conservar la historia previa;
+- representar materialmente el contenido de `v0.6.0-alpha`;
+- registrar validaciones relevantes del candidate;
+- mantener visible el riesgo residual aceptado de seguridad;
+- normalizar el bloque histórico que estaba escapado;
+- declarar explícitamente que el changelog no promueve por sí mismo una
+  release.
+
+No se modificó la versión nominal.
+
+### Estado provisional de 7.7-E
+
+```text
+version consistency: PASS
+candidate identification: PASS
+tag safety: PASS
+rollback ancestry: PASS
+rollback target identification: PASS
+changelog readiness: PASS
+blocking findings: 0
+corrective packets pending: 0
+```
+
+### Validación de 7.7-E-C1
+
+El corrective packet fue revisado con alcance limitado a:
+
+- `CHANGELOG.md`;
+- `docs/project/sprints/SPRINT-7.7.md`.
+
+Resultado de la validación:
+
+```text
+CHANGELOG version consistency: PASS
+material candidate coverage: PASS
+legacy escape normalization: PASS
+rollback evidence preserved: PASS
+version files unchanged: PASS
+git diff --check: PASS
+scope validation: PASS
+```
+
+### Resolución de hallazgos
+
+```text
+7.7-E-001: RESOLVED
+7.7-E-002: RESOLVED
+```
+
+No se modificaron:
+
+- versión nominal;
+- `pyproject.toml`;
+- `PROJECT.md`;
+- código;
+- tests;
+- Blueprint;
+- Kernel;
+- Constituciones;
+- ADR;
+- tags;
+- `main`.
+
+### Resultado de 7.7-E
+
+```text
+RESULT: PASS
+blocking_findings: 0
+corrective_packets_pending: 0
+rollback_target:
+  089255e23bd2b686436140ca569edf09c08819a7
+```
+
+La revisión de Release Readiness & Rollback Evidence se considera completada.
+
+El candidate permanece identificado y aislado en
+`sprint/7.7-baseline-certification`, sin tag de promoción y con un punto de
+rollback inequívoco hacia el baseline integrado previo de `main`.
+
+El cierre de 7.7-E no certifica todavía el baseline completo ni autoriza merge,
+push, tag, promoción de release, modificación de `main` o inicio del siguiente
+sprint.
+
+El candidate queda habilitado para continuar con:
+
+```text
+7.7-F — Final Certification Review
+```
