@@ -1,10 +1,10 @@
 ﻿---
 title: Sprint 7.7 — Validación de baseline y release interna
-status: activo
+status: completado
 authority: documentación operativa derivada
 as_of_date: 2026-08-16
-as_of_commit: 089255e23bd2b686436140ca569edf09c08819a7
-branch: sprint/7.7-baseline-certification
+as_of_commit: 2cdbeabf722aeae7258e28255d9dc25dbfd5fa94
+branch: main
 language: es
 ---
 
@@ -13,7 +13,7 @@ language: es
 ## Estado
 
 ```text
-ACTIVO
+COMPLETADO
 ```
 
 El Sprint 7.7 fue aprobado explícitamente por el propietario el 2026-08-16.
@@ -841,7 +841,7 @@ El candidate queda habilitado para continuar con:
 ### Estado
 
 ```text
-EN VALIDACIÓN
+COMPLETADO
 ```
 
 ### Candidate inspeccionado
@@ -1198,3 +1198,172 @@ promotion_authorization: PENDING_EXPLICIT_OWNER_APPROVAL
 La promoción requiere una decisión humana explícita e inequívoca del
 propietario. Hasta entonces, el candidate permanece en la rama temporal de
 certificación y `main` continúa como baseline integrado vigente.
+
+## Promotion Record & Sprint Closure
+
+### Estado
+
+```text
+SPRINT 7.7: COMPLETADO
+CERTIFICATION: APPROVED
+PROMOTION: COMPLETED
+```
+
+### Aprobación humana
+
+El propietario aprobó explícitamente la promoción el 2026-08-16 después del
+cierre de `7.7-F — Final Certification Review`.
+
+La aprobación preservó el principio `Human in Control`: ninguna promoción fue
+ejecutada antes de esa decisión explícita.
+
+### Candidate promovido
+
+El candidate finalmente promovido fue:
+
+```text
+commit: 2cdbeabf722aeae7258e28255d9dc25dbfd5fa94
+source branch: sprint/7.7-baseline-certification
+target branch: main
+remote target: origin/main
+promotion method: fast-forward only
+```
+
+El commit `2cdbeabf722aeae7258e28255d9dc25dbfd5fa94` corresponde al cierre
+documental de `7.7-F` y conserva íntegramente la cadena de commits previamente
+certificada.
+
+### Baseline previo
+
+```text
+089255e23bd2b686436140ca569edf09c08819a7
+```
+
+Ese commit permanece identificado como punto de rollback histórico del baseline
+integrado anterior.
+
+### Evidencia de promoción
+
+Antes de modificar `main` se comprobó:
+
+```text
+working tree: clean
+local main == origin/main:
+  089255e23bd2b686436140ca569edf09c08819a7
+merge-base main candidate:
+  089255e23bd2b686436140ca569edf09c08819a7
+```
+
+La promoción local se ejecutó mediante:
+
+```text
+git merge --ff-only sprint/7.7-baseline-certification
+```
+
+Resultado:
+
+```text
+Fast-forward
+main:
+  089255e23bd2b686436140ca569edf09c08819a7
+  ->
+  2cdbeabf722aeae7258e28255d9dc25dbfd5fa94
+```
+
+No se creó merge commit, squash ni rebase.
+
+### Revalidación post-promoción local
+
+Sobre `main` ya promovido se reprodujo:
+
+```text
+pytest: 339 passed
+compileall: PASS
+pip check: PASS
+git diff --check: PASS
+ancestry check: PASS
+working tree: clean
+HEAD == sprint/7.7-baseline-certification:
+  2cdbeabf722aeae7258e28255d9dc25dbfd5fa94
+```
+
+### Promoción remota
+
+La promoción fue publicada explícitamente mediante push de `main`.
+
+Verificación posterior:
+
+```text
+HEAD:
+  2cdbeabf722aeae7258e28255d9dc25dbfd5fa94
+
+origin/main:
+  2cdbeabf722aeae7258e28255d9dc25dbfd5fa94
+
+branch:
+  main
+
+working tree:
+  clean
+```
+
+Por tanto, el candidate certificado fue promovido a `origin/main` sin
+alteraciones posteriores a la revalidación.
+
+### Riesgo residual aceptado
+
+Permanece vigente el riesgo ya registrado como:
+
+```text
+7.7-D-001 — Provenance fuerte del SecurityContext
+classification: ACCEPTED_RESIDUAL_RISK
+severity: MEDIUM
+blocking_release: NO
+```
+
+La promoción no cambia su clasificación ni implica que nonce, replay
+protection, PKI, identidad criptográfica, Secure Message Bus, MFA o un Secure
+Context Manager criptográfico completo hayan sido implementados.
+
+### Estado de tags y versión
+
+La promoción de Sprint 7.7 no modifica automáticamente la versión nominal ni
+autoriza mover tags históricos.
+
+```text
+nominal version: v0.6.0-alpha
+tag creation during promotion: NO
+tag movement during promotion: NO
+```
+
+La eventual creación de un tag de baseline deberá evaluarse como una decisión
+separada, preservando trazabilidad y evitando reutilizar o mover tags históricos
+sin una decisión explícita.
+
+### Resultado final
+
+```text
+Sprint 7.7: COMPLETED
+certification result:
+  CERTIFICATION RECOMMENDED WITH ACCEPTED RESIDUAL RISK
+owner certification approval:
+  APPROVED
+promotion:
+  COMPLETED
+promoted commit:
+  2cdbeabf722aeae7258e28255d9dc25dbfd5fa94
+main == origin/main:
+  YES
+blocking findings:
+  0
+corrective packets pending:
+  0
+accepted residual risks:
+  1
+```
+
+Sprint 7.7 queda administrativamente cerrado.
+
+Este cierre registra un hecho ya ejecutado y validado. No autoriza por sí mismo
+el siguiente sprint, un cambio de versión, una release pública ni la creación o
+movimiento de tags.
