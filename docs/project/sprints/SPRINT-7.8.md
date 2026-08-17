@@ -1,7 +1,7 @@
 ---
 
 title: Sprint 7.8 — Cognitive Conversation Execution Path Foundation
-status: activo
+status: completado
 authority: documentación operativa derivada
 as_of_date: 2026-08-16
 as_of_commit: 6c179730e6d4220bbba22a8282f978a7a1aa9155
