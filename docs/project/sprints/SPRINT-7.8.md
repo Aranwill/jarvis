@@ -1164,7 +1164,18 @@ EVIDENCE:
 - no production code changes required in this package
 
 7.8-H — Real Runtime Validation & Final Review
-STATUS: NOT STARTED
+STATUS: COMPLETED
+EVIDENCE:
+- real runtime: OllamaRuntime
+- real model: qwen3.5:9b
+- Ollama endpoint: http://localhost:11434
+- CLI import validation: PASS
+- real end-to-end inference: PASS
+- expected probe: MALAK-7.8-OK
+- observed response: MALAK-7.8-OK
+- CLI remained operational after inference
+- clean working tree preserved after runtime validation
+- no production code changes required in this package
 ```
 
 ---
