@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from os import environ
 
-from malak.core.conversation import ConversationRequest
+from malak.app.composition import build_conversation_kernel
+from malak.core.request import Request
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.llm_runtime import LLMRuntime
 from malak.observability.operational_event import OperationalEvent
@@ -125,6 +126,12 @@ def run_cli(
         else build_conversation_service(provider_name=provider_name)
     )
 
+    kernel = build_conversation_kernel(
+        service=conversation_service,
+        provider_name=provider_name,
+        model=model,
+    )
+
     output_fn("Malāk CLI")
     output_fn(f"Runtime activo: {runtime_name}")
     output_fn("Escribe 'help' para ver los comandos disponibles.")
@@ -161,9 +168,10 @@ def run_cli(
             continue
 
         request_id = str(uuid.uuid4())
-        request = ConversationRequest(
-            prompt=prompt,
-            model=model,
+        request = Request(
+            content=prompt,
+            session_id="cli",
+            request_id=request_id,
         )
 
         if operational_event_sink is not None:
@@ -185,10 +193,7 @@ def run_cli(
                 continue
 
         try:
-            response = conversation_service.generate(
-                request=request,
-                provider=provider_name,
-            )
+            response = kernel.receive(request)
         except Exception as exc:
             output_fn(f"Error controlado: {exc}")
 

@@ -1,5 +1,6 @@
 from collections.abc import Callable, Iterator
 from datetime import timedelta, timezone
+from malak.core.response import Response
 from uuid import UUID
 
 from malak.services.conversation_service import ConversationService
@@ -57,6 +58,19 @@ class RecordingOperationalEventSink:
 
     def append(self, event: OperationalEvent) -> None:
         self.events.append(event)
+
+
+class RecordingKernel:
+    def __init__(self) -> None:
+        self.requests = []
+
+    def receive(self, request):
+        self.requests.append(request)
+
+        return Response(
+            content="Respuesta desde Kernel",
+            source="conversation",
+        )
 
 
 class FailingOperationalEventSink(RecordingOperationalEventSink):
@@ -476,3 +490,26 @@ def test_main_composes_mock_runtime_by_default(monkeypatch) -> None:
     assert captured["runtime_name"] == "MockLLMRuntime"
     assert captured["model"] is None
     assert isinstance(captured["service"], ConversationService)
+
+def test_run_cli_routes_prompt_through_kernel(monkeypatch) -> None:
+    outputs: list[str] = []
+    kernel = RecordingKernel()
+
+    def fake_build_conversation_kernel(**kwargs):
+        return kernel
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        fake_build_conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        input_fn=make_input(["Hola", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert len(kernel.requests) == 1
+    assert kernel.requests[0].content == "Hola"
+    assert kernel.requests[0].session_id == "cli"
+    assert "Malāk> Respuesta desde Kernel" in outputs
