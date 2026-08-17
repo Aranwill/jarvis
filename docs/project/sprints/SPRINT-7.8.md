@@ -421,6 +421,15 @@ Este paquete no modificará la CLI.
 
 El objetivo es únicamente desacoplar la construcción interna rígida del Kernel sin alterar su lógica de ejecución.
 
+EVIDENCE:
+- kernel tests: 4 passed
+- full suite: 340 passed
+- compileall: PASS
+- git diff --check: PASS
+- Kernel() backwards compatibility preserved
+- injected Planner and CapabilityRegistry validated
+- no Conversation, provider, runtime or CLI dependency introduced into Kernel
+
 ---
 
 ### 7.8-C — Conversation Capability Adapter
@@ -1086,7 +1095,7 @@ No se acumularán múltiples paquetes funcionales sin validación intermedia.
 STATUS: COMPLETED
 
 7.8-B — Kernel Composition Seam
-STATUS: NOT STARTED
+STATUS: COMPLETED
 
 7.8-C — Conversation Capability Adapter
 STATUS: NOT STARTED
