@@ -1,6 +1,7 @@
 from malak.core.request import Request
 from malak.core.response import Response
 from malak.kernel.bootstrap import create_registry
+from malak.kernel.registry import CapabilityRegistry
 from malak.services.planner import Planner
 
 
@@ -9,9 +10,13 @@ class Kernel:
     Minimal governing Kernel for Malāk.
     """
 
-    def __init__(self) -> None:
-        self._planner = Planner()
-        self._registry = create_registry()
+    def __init__(
+        self,
+        planner: Planner | None = None,
+        registry: CapabilityRegistry | None = None,
+    ) -> None:
+        self._planner = planner if planner is not None else Planner()
+        self._registry = registry if registry is not None else create_registry()
 
     def receive(self, request: Request) -> Response:
         """
