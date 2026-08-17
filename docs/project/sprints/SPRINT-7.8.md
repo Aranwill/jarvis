@@ -1137,10 +1137,31 @@ EVIDENCE:
 - no CLI migration introduced in this package
 
 7.8-F — CLI Migration
-STATUS: NOT STARTED
+STATUS: COMPLETED
+EVIDENCE:
+- kernel-routing CLI test: 1 passed
+- full CLI suite: 24 passed
+- full suite: 346 passed
+- compileall: PASS
+- git diff --check: PASS
+- ordinary prompts routed through Kernel.receive()
+- Kernel Request preserves CLI-generated request_id
+- help, status, exit and empty-input handling remain at CLI boundary
+- operational event behavior preserved
+- injected ConversationService compatibility preserved
+- no Kernel, Planner, ConversationCapability or runtime contract changes introduced
 
 7.8-G — End-to-End Validation
-STATUS: NOT STARTED
+STATUS: COMPLETED
+EVIDENCE:
+- end-to-end conversation path tests: 2 passed
+- full suite: 348 passed
+- compileall: PASS
+- git diff --check: PASS
+- Request -> Kernel -> Planner -> ConversationCapability -> ConversationService -> RuntimeConversationProvider -> MockLLMRuntime validated
+- response source preserved as conversation
+- empty-request Kernel guard preserved
+- no production code changes required in this package
 
 7.8-H — Real Runtime Validation & Final Review
 STATUS: NOT STARTED
