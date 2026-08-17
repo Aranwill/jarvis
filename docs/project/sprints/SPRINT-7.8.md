@@ -1124,7 +1124,17 @@ EVIDENCE:
 - no Kernel, runtime, provider or CLI changes introduced
 
 7.8-E — Kernel-driven Application Composition
-STATUS: NOT STARTED
+STATUS: COMPLETED
+EVIDENCE:
+- application composition tests: 2 passed
+- full suite: 345 passed
+- compileall: PASS
+- git diff --check: PASS
+- build_conversation_kernel() returns Kernel
+- conversation path through Kernel validated with MockLLMRuntime
+- composition root located under malak.app
+- Kernel remains independent from runtime selection and environment
+- no CLI migration introduced in this package
 
 7.8-F — CLI Migration
 STATUS: NOT STARTED
