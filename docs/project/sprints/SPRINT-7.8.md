@@ -1098,7 +1098,17 @@ STATUS: COMPLETED
 STATUS: COMPLETED
 
 7.8-C — Conversation Capability Adapter
-STATUS: NOT STARTED
+STATUS: COMPLETED
+EVIDENCE:
+- conversation capability tests: 2 passed
+- full suite: 342 passed
+- compileall: PASS
+- git diff --check: PASS
+- stable capability name: conversation
+- ConversationRequest adaptation validated
+- configured provider, model and system prompt propagation validated
+- ConversationResponse content returned through Capability boundary
+- no Kernel, Planner, runtime, provider construction or CLI changes introduced
 
 7.8-D — Conversation Routing
 STATUS: NOT STARTED
