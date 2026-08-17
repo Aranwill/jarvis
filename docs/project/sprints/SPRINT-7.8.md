@@ -1111,7 +1111,17 @@ EVIDENCE:
 - no Kernel, Planner, runtime, provider construction or CLI changes introduced
 
 7.8-D — Conversation Routing
-STATUS: NOT STARTED
+STATUS: COMPLETED
+EVIDENCE:
+- planner tests: 2 passed
+- full suite: 343 passed
+- compileall: PASS
+- git diff --check: PASS
+- Planner() default routing to echo preserved
+- explicit deterministic routing to conversation validated
+- Request contract unchanged
+- no prompt heuristics or LLM-based routing introduced
+- no Kernel, runtime, provider or CLI changes introduced
 
 7.8-E — Kernel-driven Application Composition
 STATUS: NOT STARTED

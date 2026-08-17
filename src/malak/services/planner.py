@@ -9,13 +9,15 @@ class Planner:
     should handle an incoming request.
     """
 
+    def __init__(
+        self,
+        capability_name: str = "echo",
+    ) -> None:
+        self._capability_name = capability_name
+
     def resolve(self, request: Request) -> str:
         """
         Resolve the capability name.
-
-        MVP:
-        Always returns the Echo capability.
         """
 
-        return "echo"
-        
+        return self._capability_name
