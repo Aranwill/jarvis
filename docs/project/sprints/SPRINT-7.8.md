@@ -14,7 +14,7 @@ language: es
 ## Estado
 
 ```text
-ACTIVO
+COMPLETADO
 ```
 
 El Sprint 7.8 fue aprobado explícitamente por el propietario el 2026-08-16.
@@ -1178,7 +1178,16 @@ EVIDENCE:
 - no production code changes required in this package
 ```
 
+
 ---
+
+## Certificación final de Sprint 7.8
+
+### Resultado
+
+```text
+COMPLETADO
+```
 
 ## Cierre
 
