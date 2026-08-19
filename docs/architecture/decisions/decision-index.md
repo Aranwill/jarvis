@@ -47,6 +47,8 @@ Todas las ADR deberán:
 | ADR | Estado | Fecha | Título | Impacto |
 |------|--------|--------|--------|---------|
 | ADR-003 | Accepted | 2026-08-15 | Directional Communication and Authority Flow | Architecture / Communication |
+| ADR-004 | Accepted | 2026-08-19 | Specification and Verification First | Architecture / Engineering Method |
+
 
 ---
 
@@ -88,14 +90,16 @@ Toda ADR aceptada deberá registrarse aquí.
 | ADR-001 | Identity Migration: Jarvis → Malāk | Accepted | 2026-07-05 | Identity |
 | ADR-002 | Frontera de enforcement entre PDP y operación protegida | Accepted | 2026-07-26 | Security |
 | ADR-003 | Directional Communication and Authority Flow | Accepted | 2026-08-15 | Architecture |
+| ADR-004 | Specification and Verification First | Accepted | 2026-08-19 | Architecture |
+
 
 ---
 
 ## Statistics
 
-Total ADRs: 3
+Total ADRs: 4
 
-Accepted: 3
+Accepted: 4
 
 Superseded: 0
 
