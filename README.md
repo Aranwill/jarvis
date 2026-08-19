@@ -23,10 +23,10 @@ Rama permanente:
 Baseline operativo actual:
 
 ```text
-Sprint 7.7 cerrado — Validación de baseline y release interna
+Sprint 7.8 completado — Cognitive Conversation Execution Path Foundation
 ```
 
-La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional.
+La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional y la primera ruta cognitiva conversacional integrada de Malāk.
 
 La CLI puede utilizar:
 
@@ -35,7 +35,9 @@ La CLI puede utilizar:
 
 La selección del runtime se realiza mediante configuración externa en la frontera de aplicación.
 
-La CLI no representa todavía el pipeline cognitivo completo de Malāk y no establece una integración formal entre `Kernel.receive` y `ConversationService`.
+Las solicitudes conversacionales ordinarias ingresan actualmente mediante la frontera cognitiva `Kernel.receive()`.
+
+La conversación se encuentra integrada detrás de la abstracción `Capability`, preservando la independencia del Kernel respecto de servicios, providers, runtimes y modelos concretos.
 
 ## Arquitectura actual de la CLI
 
@@ -44,22 +46,32 @@ Variables de entorno
         ↓
 CLIConfiguration
         ↓
-build_runtime()
+Application Composition
+        ↓
+Kernel.receive()
+        ↓
+Planner
+        ↓
+CapabilityRegistry
+        ↓
+ConversationCapability
+        ↓
+ConversationService
+        ↓
+ConversationProviderRegistry
+        ↓
+RuntimeConversationProvider
         ↓
 LLMRuntime
 ├── MockLLMRuntime
 └── OllamaRuntime
         ↓
-RuntimeConversationProvider
-        ↓
-ConversationProviderRegistry
-        ↓
-ConversationService
-        ↓
-run_cli()
+Response
 ```
 
-Esta composición no modifica el Kernel ni acopla los contratos centrales a un runtime concreto.
+La construcción de runtimes, providers y servicios permanece en la frontera de aplicación.
+
+El Kernel continúa desacoplado de implementaciones concretas de runtime y modelo.
 
 ## Requisitos
 
@@ -202,6 +214,8 @@ La CLI también controla:
 - finalización mediante EOF;
 - errores del runtime presentados como errores controlados.
 
+Los comandos propios de la CLI permanecen en la frontera de aplicación y no se convierten artificialmente en capabilities.
+
 ## Validación automatizada
 
 Ejecutar la suite completa:
@@ -210,10 +224,10 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-Estado validado durante la certificación y cierre del Sprint 7.7:
+Última suite completa documentada durante la validación y cierre del Sprint 7.8:
 
 ```text
-339 total passed
+348 total passed
 ```
 
 Validar compilación:
@@ -258,25 +272,52 @@ La integración real fue validada con:
 qwen3.5:9b
 ```
 
+La validación real del Sprint 7.8 confirmó la misma ruta arquitectónica utilizando `OllamaRuntime`, sin introducir dependencias de Ollama dentro del Kernel.
+
 ## Alcance actual
 
 La CLI permite:
 
 - ingresar mensajes por terminal;
-- construir un `ConversationRequest`;
-- seleccionar el runtime mediante configuración externa;
-- delegar solicitudes mediante `ConversationService`;
+- generar la solicitud de entrada hacia el Kernel;
+- enrutar solicitudes conversacionales ordinarias mediante `Kernel.receive()`;
+- resolver la capability `conversation` mediante `Planner` y `CapabilityRegistry`;
+- adaptar la solicitud mediante `ConversationCapability`;
+- delegar la generación mediante `ConversationService`;
 - resolver el provider mediante `ConversationProviderRegistry`;
 - utilizar `MockLLMRuntime` u `OllamaRuntime`;
-- mostrar el contenido de un `ConversationResponse`;
+- retornar la respuesta a través de la frontera cognitiva;
 - gestionar comandos básicos y errores controlados.
+
+La ruta conversacional actual es:
+
+```text
+Request
+  ↓
+Kernel.receive()
+  ↓
+Planner
+  ↓
+CapabilityRegistry
+  ↓
+ConversationCapability
+  ↓
+ConversationService
+  ↓
+ConversationProviderRegistry
+  ↓
+RuntimeConversationProvider
+  ↓
+LLMRuntime
+  ↓
+Response
+```
 
 ## Fuera de alcance actual
 
 Todavía no forman parte de esta CLI:
 
-- integración formal con el pipeline del Kernel;
-- memoria conversacional;
+- memoria conversacional persistente;
 - historial persistente de conversaciones;
 - agentes;
 - herramientas externas;
@@ -302,6 +343,11 @@ docs/project/sprints/SPRINT-7.0.md
 docs/project/sprints/SPRINT-7.1.md
 docs/project/sprints/SPRINT-7.2.md
 docs/project/sprints/SPRINT-7.3.md
+docs/project/sprints/SPRINT-7.4.md
+docs/project/sprints/SPRINT-7.5.md
+docs/project/sprints/SPRINT-7.6.md
+docs/project/sprints/SPRINT-7.7.md
+docs/project/sprints/SPRINT-7.8.md
 ```
 
 ## Principios
