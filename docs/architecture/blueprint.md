@@ -2,7 +2,7 @@
 id: DOC-ARQ-BLUEPRINT
 title: Blueprint
 status: active
-version: 0.6.0-alpha
+version: 0.6.1-alpha
 date: 2026-07-05
 author: Hector Rodriguez
 reviewed_by: []
@@ -39,7 +39,7 @@ graph:
 
 history:
   created: 2026-06-27
-  updated: 2026-08-15
+  updated: 2026-08-19
 ---
 
 # Malāk Blueprint
@@ -53,13 +53,13 @@ history:
 >
 > Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
-**Blueprint Versión:** 0.6.0-alpha
+**Blueprint Versión:** 0.6.1-alpha
 **Project Version:** v0.6.0-alpha
 **Documento:** BP-001
 **Estado:** Aprobado y validado
 **Sprint:** Sprint 6.5 — Conversation Runtime
 **Clasificación:** Documento Maestro de Arquitectura
-**Última revisión arquitectónica:** 2026-08-15
+**Última revisión arquitectónica:** 2026-08-19
 
 ---
 
@@ -176,6 +176,21 @@ Everything is Auditable
 Runtime Independence
 
 ---
+
+## P-012
+
+Specification & Verification First
+
+Toda modificación significativa de Malāk deberá definir su comportamiento esperado y criterios de aceptación verificables antes de ser aceptada en el baseline.
+
+La implementación deberá respaldarse mediante pruebas y evidencia objetiva proporcionales al riesgo.
+
+Las reglas metodológicas detalladas se definen en `docs/development/engineering_method.md`.
+
+La especificación, las pruebas y la evidencia no conceden autoridad ni pueden modificar por sí mismas arquitectura, gobernanza o documentos de ley.
+
+---
+
 # 5. Arquitectura General
 
 ```text
