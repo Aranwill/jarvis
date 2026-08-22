@@ -399,7 +399,6 @@ No realices ninguna de las siguientes acciones sin autorización explícita:
 - crear tags;
 - realizar stash;
 - crear un Pull Request;
-- promover un Pull Request de `Draft` a `Ready for Review`;
 - actualizar materialmente un Pull Request;
 - eliminar archivos;
 - reescribir el historial.
@@ -427,48 +426,90 @@ push
    ↓
 Draft Pull Request
    ↓
-diff / scope / evidence review
+assistant / agent presents scope, diff and evidence
    ↓
-explicit human authorization
+Owner performs visual review in GitHub
    ↓
-Ready for Review
+Owner decides whether changes are acceptable
    ↓
-final review
+Owner manually promotes to Ready for Review
+   ↓
+final human review
    ↓
 explicit merge authorization
 ```
 
-La creación del Pull Request, su promoción a `Ready for Review` y su merge son
-acciones distintas y requieren autorización independiente.
+La creación del Pull Request y su merge son acciones distintas y requieren
+autorización humana independiente.
 
-Reglas:
+La transición de Draft a Ready for Review no es una acción delegable al
+asistente, agente o automatización.
 
-- nunca crear un Pull Request directamente como `Ready for Review`;
-- todo Pull Request deberá nacer como `Draft`;
-- un `Draft` representa una propuesta pendiente de revisión, no una aprobación;
-- pasar de `Draft` a `Ready for Review` requiere autorización humana explícita;
-- tests en verde no autorizan automáticamente la promoción;
-- ausencia de findings no constituye autorización;
-- el autor, agente o asistente que prepara un PR no puede promoverlo por inferencia;
-- un PR no deberá mergearse mientras permanezca en `Draft`;
-- el merge requiere una autorización humana explícita separada;
-- cambios materiales introducidos después de una revisión deberán volver a
-  evaluarse antes de `Ready for Review` o merge;
-- si la herramienta utilizada no permite crear el PR como `Draft`, detenerse
-  antes de crear el PR y solicitar instrucciones.
+Promoción a Ready for Review exclusivamente humana
 
-Cuando se utilice GitHub CLI:
+Antes de promover un Pull Request, el Owner deberá realizar una revisión visual
+desde GitHub que incluya, como mínimo:
 
-```powershell
+archivos modificados;
+diff completo;
+alcance declarado;
+evidencia de validación;
+cambios inesperados o fuera de alcance.
+
+El Owner podrá entonces:
+
+REQUEST CHANGES
+DEFER
+CLOSE
+READY FOR REVIEW
+
+Los asistentes, agentes y automatizaciones:
+
+- pueden preparar cambios;
+- pueden validar cambios;
+- pueden realizar commit y push cuando estén explícitamente autorizados;
+- pueden crear el Pull Request únicamente como Draft;
+- pueden presentar evidencia y findings;
+- pueden indicar que el Draft está listo para revisión humana;
+- no pueden promover un Pull Request a `Ready for Review`;
+- no pueden utilizar CLI, API, connector ni automatización para realizar esa transición;
+- no pueden interpretar una expresión de conformidad como permiso para promoverlo;
+- no pueden sustituir la revisión visual del Owner.
+
+Incluso si el Owner expresa verbalmente que el contenido parece correcto, la
+promoción deberá ser realizada manualmente por el Owner desde la interfaz de
+GitHub.
+
+Un PR en Draft:
+
+representa una propuesta pendiente de revisión;
+no implica aprobación;
+no se convierte automáticamente en Ready for Review por tener tests en verde;
+no se convierte automáticamente en Ready for Review por ausencia de findings;
+no deberá mergearse mientras permanezca en Draft.
+
+Los cambios materiales introducidos después de una revisión deberán volver a
+evaluarse visualmente antes de que el Owner decida promover o mergear el PR.
+
+Cuando se utilice GitHub CLI para crear un Pull Request:
+
 gh pr create --draft ...
-```
 
 Cuando se utilice una API o herramienta equivalente, deberá establecerse
-explícitamente el estado `Draft` durante la creación.
+explícitamente el estado Draft durante la creación.
 
-Principio:
+Ninguna herramienta utilizada por asistentes o agentes deberá ejecutar la
+operación equivalente a:
 
-> **Crear una propuesta no equivale a presentarla como lista para aceptación.**
+Draft
+→ Ready for Review
+
+Principios:
+
+El productor prepara la propuesta; el humano decide cuándo está lista para
+ser considerada formalmente.
+
+Author != Reviewer != Authority.
 
 Esta regla aplica también a cambios documentales, salvo que una política futura
 aprobada establezca explícitamente una excepción.
