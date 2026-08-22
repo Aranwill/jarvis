@@ -172,6 +172,18 @@ Controlled Engineering Improvement Loop Foundation
 
 Incorporar la iniciativa al roadmap futuro sin asignar automáticamente un número de sprint. Su diseño detallado y su implementación requerirán inspección del baseline, alcance propio, evaluación de riesgos, rollback y aprobación explícita.
 
+**Referencia conceptual relacionada**
+
+La ejecución agentic efímera, el principio de `Least Context`, la observación
+externa, el lifecycle de recursos y la evaluación de candidatos se preservan
+con mayor detalle en:
+
+`docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md`
+
+Esta relación no modifica el alcance ni el estado de IDEA-001. La evidencia
+canónica de una ejecución agentic deberá permanecer independiente de la
+explicación producida por el propio agente.
+
 ### IDEA-002 — Controlled Engineering Improvement Loop Foundation
 
 **Estado:** `aprobada_para_planificacion_futura`
@@ -240,6 +252,21 @@ Gobernar el consumo de RAM, VRAM, CPU, almacenamiento, contexto, modelos, herram
 **Próximo paso gobernado**
 
 Evaluar su ubicación después de que la telemetría y las métricas puedan aportar evidencia suficiente. Requiere diseño y aprobación propios.
+
+**Referencia conceptual relacionada**
+
+El lifecycle de recursos asociado a ejecuciones agentic efímeras se preserva
+con mayor detalle en:
+
+`docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md`
+
+Cuando una responsabilidad agentic temporal finalice, los modelos, contextos,
+permisos y recursos asociados deberán liberarse explícitamente cuando no exista
+una razón aprobada para conservarlos activos.
+
+Esta referencia no redefine Resource Governance ni aprueba una política concreta
+de unload. La política definitiva deberá diseñarse y validarse dentro de la
+fundación correspondiente.
 
 ### IDEA-004 — Model Governance & AI Preservation Foundation
 
@@ -1125,6 +1152,43 @@ Evolucionar su evaluación hacia IDEA-019, preservando:
 - incorporación gobernada de aprendizaje defensivo;
 - separación total del runtime ordinario y del host.
 
+**Referencia conceptual relacionada**
+
+La ejecución de agentes temporales deberá mantenerse compatible con la referencia:
+
+`docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md`
+
+Cuando una misión requiera agentes especializados, cada ejecución deberá poder
+recibir únicamente el contexto, herramientas, permisos y recursos necesarios
+para su responsabilidad autorizada.
+
+Principios preservados:
+
+```text
+temporary agent
++
+isolated execution
++
+Least Context
++
+Least Privilege
++
+bounded resources
++
+external evidence
++
+explicit termination
+```
+
+La existencia de una flota o de múltiples modelos no implica que deban
+ejecutarse simultáneamente ni que compartan contexto, autoridad o estado.
+
+La política deberá preferir agentes temporales, ejecución secuencial y recursos
+cargados bajo demanda salvo que evidencia operacional justifique una estrategia
+más compleja.
+
+Esta referencia no autoriza una flota permanente, paralelismo multiagente,
+creación libre de agentes ni escalado automático.
 
 ### IDEA-021 — Malāk Administrative & Operational CLI Foundation
 
@@ -2101,6 +2165,238 @@ Independent Validation
 ```
 
 Los roles podrán compartir conocimiento o infraestructura según política, pero no deberán compartir autoridad automáticamente.
+
+**Evaluación gobernada de candidatos**
+
+Cuando una misión produzca uno o más resultados candidatos, la composición
+agentic no deberá convertirlos directamente en una propuesta final mediante
+score, consenso o mayoría.
+
+La evaluación deberá distinguir entre:
+
+```text
+Candidate
+   ↓
+Law / Policy Validation
+   ↓
+Architecture Validation
+   ↓
+Security Validation
+   ↓
+Specification Validation
+   ↓
+Empirical Validation
+   ↓
+Evidence Sufficiency
+   ↓
+VALID / INVALID / INCONCLUSIVE
+```
+
+Solo los candidatos VALID podrán ingresar a una etapa posterior de comparación
+o ranking.
+
+Reglas preservadas:
+
+Hard law violation
+→ INVALID
+
+Security FAIL
+→ INVALID
+
+Insufficient evidence
+→ INCONCLUSIVE
+
+Tests PASS
+→ evidence, not absolute proof
+
+High score
+→ cannot convert INVALID into VALID
+
+El score podrá utilizarse únicamente como mecanismo comparativo entre candidatos
+válidos.
+
+Principios:
+
+Score != Truth
+Score != Safety
+Score != Evidence
+Score != Authority
+Score != Governance
+
+Una puntuación alta no podrá compensar:
+
+una violación de Gobernanza;
+una violación constitucional;
+una violación arquitectónica crítica;
+un fallo de seguridad;
+evidencia insuficiente;
+una contradicción no resuelta;
+una desviación material respecto de la specification;
+ausencia de evidencia reproducible cuando ésta sea requerida.
+
+La comparación de candidatos deberá considerar, cuando corresponda:
+
+cumplimiento de specification;
+arquitectura;
+seguridad;
+evidencia disponible;
+resultados de tests;
+comportamiento empírico;
+consumo de recursos;
+complejidad;
+mantenibilidad;
+reversibilidad;
+findings abiertos;
+incertidumbre residual.
+
+El ranking deberá producir una preferencia entre candidatos válidos, no una
+declaración automática de verdad.
+
+Ejemplo conceptual:
+
+Candidate A
+Architecture: PASS
+Security: PASS
+Evidence: SUFFICIENT
+Status: VALID
+Score: 87
+
+Candidate B
+Architecture: PASS
+Security: FAIL
+Evidence: SUFFICIENT
+Status: INVALID
+Raw score: 96
+
+Candidate C
+Architecture: PASS
+Security: PASS
+Evidence: SUFFICIENT
+Status: VALID
+Score: 91
+
+Resultado:
+
+Candidate B
+→ excluded from ranking
+
+Candidate C
+→ ranked #1
+
+Candidate A
+→ ranked #2
+
+No:
+
+Candidate B wins because 96 > 91
+
+Cuando la evidencia sea insuficiente o existan contradicciones relevantes que no
+puedan resolverse, el sistema deberá poder conservar un estado equivalente a:
+
+INCONCLUSIVE
+
+sin forzar una selección.
+
+La existencia de múltiples candidatos tampoco obliga a elegir uno.
+
+Una misión podrá finalizar solicitando:
+
+more evidence
+additional validation
+new experiment
+owner decision
+
+cuando la evidencia disponible no justifique una recomendación suficientemente
+fundada.
+
+El resultado del ranking deberá permanecer en estado de candidato o propuesta.
+
+No podrá autorizar por sí mismo:
+
+ejecución protegida;
+modificación de código;
+modificación de documentos normativos;
+merge;
+deploy;
+modificación del baseline;
+ampliación de permisos;
+modificación de políticas;
+modificación de Gobernanza;
+creación de autoridad permanente.
+
+Flujo conceptual:
+
+Candidates
+    ↓
+Independent Validation
+    ↓
+Candidate Validity
+    ↓
+VALID candidates only
+    ↓
+Score / Ranking
+    ↓
+Recommended Candidate
+    ↓
+Proposal
+    ↓
+Human / Applicable Governance
+
+El mecanismo de evaluación deberá preservar separación entre:
+
+Author
+!=
+Observer
+!=
+Reviewer
+!=
+Validator
+!=
+Authority
+
+La evidencia utilizada para validar o comparar candidatos no deberá depender
+exclusivamente de la explicación generada por los agentes productores.
+
+Cuando corresponda deberá provenir de fuentes como:
+
+tests;
+análisis estático;
+arquitectura;
+Security Control Plane;
+sandbox;
+telemetría;
+benchmarks;
+hashes;
+logs;
+observadores externos;
+evaluadores independientes;
+evidencia reproducible.
+
+Principio:
+
+**El agente produce un candidato; la evidencia determina si puede considerarse
+válido; el ranking compara únicamente candidatos válidos; la Gobernanza decide
+qué puede convertirse en acción.**
+
+La evaluación deberá mantenerse compatible con la referencia conceptual:
+
+`docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md`
+
+Esta referencia no aprueba actualmente:
+
+algoritmo de scoring;
+fórmula de ponderación;
+thresholds;
+cantidad de candidatos;
+cantidad de agentes;
+sistema de votación;
+majority voting;
+selección automática irreversible;
+modelo específico como evaluator;
+ejecución paralela por defecto.
+
+Estos mecanismos deberán diseñarse posteriormente a partir de evidencia,
+restricciones reales y el baseline vigente.
 
 **Artifact Workspace**
 

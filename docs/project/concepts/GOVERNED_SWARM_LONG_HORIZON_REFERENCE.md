@@ -7,6 +7,7 @@ language: es
 created: 2026-08-14
 related:
   - documents/projects/jarvis/ideas.md
+  - docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md
   - IDEA-024
 purpose: >
   Preservar la evaluación y el mapeo conceptual del anexo sobre enjambre
@@ -580,7 +581,55 @@ look for problems to justify it
 
 ---
 
-## 22. Estado
+## 22. Relación con Ephemeral Agent Execution & Evidence
+
+La ejecución concreta, contención y evaluación de agentes temporales se conserva
+con mayor detalle en:
+
+`GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md`
+
+La separación conceptual es:
+
+```text
+Governed Swarm and Long-Horizon
+    ↓
+composición de agentes
+orquestación de misiones
+Completion Contracts
+Task State
+trabajo de horizonte largo
+
+Governed Ephemeral Agent Execution
+    ↓
+sandbox efímero
+Least Context
+observación externa
+evidencia de ejecución
+lifecycle de recursos
+validez de candidatos
+score y ranking
+```
+
+Ambas referencias son complementarias.
+
+La existencia de esta relación:
+
+- no autoriza agentes;
+- no autoriza composición multiagente;
+- no autoriza sandboxes;
+- no aprueba scoring;
+- no crea nuevos componentes;
+- no modifica autoridad ni Gobernanza.
+
+Principio:
+
+> **La orquestación determina qué trabajo debe realizarse; la ejecución efímera
+> determina cómo una ejecución agentic concreta debe ser contenida, observada,
+> validada y finalizada.**
+
+---
+
+## 23. Estado
 
 ```text
 Documento: referencia conceptual
