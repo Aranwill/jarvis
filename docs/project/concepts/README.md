@@ -87,6 +87,42 @@ Antes de utilizar cualquiera de estos documentos para proponer implementación:
 9. proponer un alcance pequeño;
 10. esperar autorización explícita del Owner.
 
+### Governed Ephemeral Agent Execution, Evidence and Candidate Evaluation Reference
+
+Archivo:
+
+`GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md`
+
+Preserva la referencia conceptual relacionada con:
+
+- ejecución efímera y aislada de agentes;
+- `Least Context`;
+- observación externa de la ejecución;
+- evidencia independiente del agente;
+- lifecycle y liberación explícita de recursos;
+- validación de candidatos antes del ranking;
+- score como mecanismo comparativo sin autoridad;
+- separación entre productor, observador, reviewer, validator y autoridad.
+
+Complementa a `GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md` sin reemplazarlo.
+
+Separación principal:
+
+```text
+Governed Swarm
+→ composición, coordinación y trabajo de horizonte largo
+
+Ephemeral Agent Execution
+→ sandbox, contexto, evidencia, lifecycle y evaluación de candidatos.
+```
+
+La implementación agentic continúa subordinada a las iniciativas existentes,
+principalmente `IDEA-001`, `IDEA-003`, `IDEA-020` e `IDEA-024`.
+
+Estado:
+
+`concept / non_normative / conceptual_reference`
+
 ## Relación con el Project Vault
 
 El repositorio oficial conserva estos documentos como referencia conceptual.
