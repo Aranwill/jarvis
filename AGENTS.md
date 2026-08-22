@@ -66,6 +66,211 @@ Los documentos derivados pueden resumir evidencia, pero no pueden establecer arq
 
 Los snapshots históricos de release describen el estado certificado en su fecha original. No deben reescribirse silenciosamente para coincidir con un HEAD posterior.
 
+## Revisión integral del proyecto y detección de drift
+
+Cuando la tarea solicite revisar el estado de Malāk, validar el baseline, analizar
+arquitectura, determinar próximos pasos, contrastar roadmap, detectar
+inconsistencias o reconciliar los repositorios relacionados, la revisión deberá
+ser transversal y basada en evidencia.
+
+Una revisión no deberá declararse completa por haber inspeccionado únicamente
+`README.md`, el roadmap, el código o el último sprint.
+
+### Minimum Review Set
+
+Salvo que el alcance solicitado sea explícitamente más pequeño, una revisión
+integral deberá considerar, como mínimo y según aplicabilidad:
+
+```text
+Malāk — source of truth
+├── AGENTS.md
+├── Constituciones aplicables
+├── Blueprint
+├── Architecture Quality Gates
+├── especificaciones y contratos aplicables
+├── baseline vigente
+├── sprint vigente o último baseline cerrado
+├── implementation roadmap
+├── ADR aceptados
+├── Decision Index y decisiones relevantes
+├── documents/projects/jarvis/ideas.md
+├── docs/project/concepts/**          ← lectura recursiva obligatoria
+├── código afectado
+└── tests y evidencia aplicables
+
+Project Vault — proyección derivada
+├── CURRENT_BASELINE.md
+├── CURRENT_COMPONENTS_MAP.md
+├── IMPLEMENTATION_ROADMAP.md
+├── PENDING_DECISIONS.md
+├── MALAK_SESSION_CONTEXT.md
+├── CONCEPTUAL_FOUNDATIONS.md
+└── KNOWLEDGE_INDEX.md
+
+Vault Sync Agent — mecanismo de reconciliación
+├── baseline / HEAD vigente
+├── reglas de candidate mapping
+├── cobertura de rutas fuente
+├── rutas no mapeadas
+├── estado de sincronización
+├── propuestas pendientes
+└── evidencia de reconciliación
+```
+
+La profundidad de lectura deberá ser proporcional a la pregunta. No es necesario
+leer cada archivo completo cuando una búsqueda o sección concreta permita
+resolver la cuestión con evidencia suficiente, pero ninguna fuente relevante
+deberá omitirse silenciosamente.
+
+### Lectura obligatoria de referencias conceptuales
+
+`docs/project/concepts/**` y todas sus subcarpetas forman parte del contexto
+obligatorio cuando una revisión trate, entre otros temas:
+
+- arquitectura futura;
+- agentes;
+- sandbox;
+- cognición;
+- modelos;
+- conocimiento;
+- memoria;
+- seguridad;
+- ingeniería;
+- evidencia;
+- evaluación;
+- resource governance;
+- self-development;
+- capacidades todavía no promovidas al roadmap.
+
+Los documentos de `docs/project/concepts/**` continúan siendo referencias
+conceptuales no normativas.
+
+Su lectura obligatoria:
+
+```text
+NO aumenta su autoridad
+NO modifica la precedencia documental
+NO autoriza implementación
+NO autoriza sprint
+NO convierte una idea en baseline
+```
+
+En caso de conflicto, deberán prevalecer las fuentes normativas y las decisiones
+aprobadas según la jerarquía documental de este archivo.
+
+### Revisión transversal entre repositorios
+
+Cuando la tarea implique estado global del proyecto, reconciliación o detección
+de inconsistencias, deberá contrastarse, cuando estén accesibles:
+
+```text
+Aranwill/jarvis
+        ↓
+source of truth
+
+Aranwill/malak-project-vault
+        ↓
+proyección derivada
+
+Aranwill/malak-vault-sync-agent
+        ↓
+mecanismo determinista de detección y propuesta
+```
+
+Cuando existan instrucciones locales (`AGENTS.md`) en cualquiera de los tres
+repositorios, deberán leerse y aplicarse para el trabajo realizado dentro de ese
+repositorio. Las reglas locales no pueden elevar la autoridad del Vault ni del
+Sync Agent sobre Malāk.
+
+El Vault y el Sync Agent no pueden corregir, reinterpretar ni superar la
+autoridad documental del repositorio oficial de Malāk.
+
+Una coincidencia entre documentos derivados tampoco convierte una afirmación en
+verdad si contradice la fuente oficial.
+
+### Taxonomía mínima de drift
+
+Las inconsistencias detectadas deberán identificarse explícitamente en lugar de
+describirse de forma genérica.
+
+Utiliza, cuando corresponda, categorías como:
+
+```text
+BASELINE_DRIFT
+ARCHITECTURE_DRIFT
+DOCUMENTATION_DRIFT
+CONCEPTUAL_DRIFT
+PROJECTION_DRIFT
+SYNC_DRIFT
+COVERAGE_DRIFT
+ENCODING_DRIFT
+```
+
+Ejemplos:
+
+```text
+BASELINE_DRIFT
+→ Vault describe un HEAD anterior al baseline oficial.
+
+CONCEPTUAL_DRIFT
+→ una referencia conceptual importante existe en Malāk pero no está proyectada
+  o relacionada correctamente en el índice conceptual derivado.
+
+PROJECTION_DRIFT
+→ el Vault resume de forma incompleta o contradictoria una fuente oficial.
+
+SYNC_DRIFT
+→ el Sync Agent no refleja correctamente un cambio que su mapping debería
+  detectar.
+
+COVERAGE_DRIFT
+→ aparece una ruta fuente relevante que no está cubierta por las reglas de
+  sincronización.
+
+ENCODING_DRIFT
+→ el contenido persistido presenta corrupción o transformación de caracteres.
+```
+
+Todo finding de drift deberá, cuando sea posible, indicar:
+
+```text
+tipo
+fuente de verdad
+artefacto divergente
+evidencia
+impacto
+acción recomendada
+```
+
+Detectar drift no concede autorización para corregirlo.
+
+La corrección deberá respetar alcance, riesgo, revisión humana y disciplina Git.
+
+### Cobertura de nuevas rutas
+
+Cuando aparezca una nueva carpeta o familia documental relevante en Malāk,
+deberá verificarse si el Sync Agent la reconoce.
+
+Una ruta nueva no deberá considerarse correctamente integrada únicamente porque
+exista en Git.
+
+Cuando corresponda deberá comprobarse:
+
+```text
+source path
+    ↓
+mapping rule
+    ↓
+Vault candidate
+    ↓
+human review / reconciliation
+```
+
+Si una ruta relevante no está cubierta por ninguna regla y no está
+explícitamente ignorada, deberá reportarse como `COVERAGE_DRIFT`.
+
+No se deberá ampliar automáticamente el mapping para silenciar el finding.
+
 ## Fuente rechazada
 
 El siguiente documento está rechazado y nunca debe utilizarse como fuente, referencia, autoridad o inspiración para Malāk:
@@ -175,7 +380,10 @@ Un sprint
 → una rama dedicada
 → un alcance explícitamente aprobado
 → una validación completa
-→ un Pull Request
+→ un Pull Request en Draft
+→ revisión explícita
+→ Ready for Review con autorización humana
+→ merge con autorización humana separada
 → un punto claro de rollback
 ```
 
@@ -190,13 +398,80 @@ No realices ninguna de las siguientes acciones sin autorización explícita:
 - realizar reset;
 - crear tags;
 - realizar stash;
-- crear o actualizar un Pull Request;
+- crear un Pull Request;
+- promover un Pull Request de `Draft` a `Ready for Review`;
+- actualizar materialmente un Pull Request;
 - eliminar archivos;
 - reescribir el historial.
 
 Nunca utilices operaciones destructivas de Git para descartar cambios del usuario.
 
 Conserva las modificaciones preexistentes y los archivos untracked no relacionados. Si se superponen con el trabajo solicitado, detente e informa el conflicto.
+
+### Pull Requests siempre en Draft
+
+Todo Pull Request nuevo deberá crearse inicialmente en estado `Draft`.
+
+Flujo obligatorio:
+
+```text
+branch
+   ↓
+changes
+   ↓
+local validation
+   ↓
+commit
+   ↓
+push
+   ↓
+Draft Pull Request
+   ↓
+diff / scope / evidence review
+   ↓
+explicit human authorization
+   ↓
+Ready for Review
+   ↓
+final review
+   ↓
+explicit merge authorization
+```
+
+La creación del Pull Request, su promoción a `Ready for Review` y su merge son
+acciones distintas y requieren autorización independiente.
+
+Reglas:
+
+- nunca crear un Pull Request directamente como `Ready for Review`;
+- todo Pull Request deberá nacer como `Draft`;
+- un `Draft` representa una propuesta pendiente de revisión, no una aprobación;
+- pasar de `Draft` a `Ready for Review` requiere autorización humana explícita;
+- tests en verde no autorizan automáticamente la promoción;
+- ausencia de findings no constituye autorización;
+- el autor, agente o asistente que prepara un PR no puede promoverlo por inferencia;
+- un PR no deberá mergearse mientras permanezca en `Draft`;
+- el merge requiere una autorización humana explícita separada;
+- cambios materiales introducidos después de una revisión deberán volver a
+  evaluarse antes de `Ready for Review` o merge;
+- si la herramienta utilizada no permite crear el PR como `Draft`, detenerse
+  antes de crear el PR y solicitar instrucciones.
+
+Cuando se utilice GitHub CLI:
+
+```powershell
+gh pr create --draft ...
+```
+
+Cuando se utilice una API o herramienta equivalente, deberá establecerse
+explícitamente el estado `Draft` durante la creación.
+
+Principio:
+
+> **Crear una propuesta no equivale a presentarla como lista para aceptación.**
+
+Esta regla aplica también a cambios documentales, salvo que una política futura
+aprobada establezca explícitamente una excepción.
 
 ## Operaciones sensibles y externas
 
@@ -262,12 +537,95 @@ Comprobaciones útiles de Git en modo de solo lectura:
 git status --short --branch
 git diff --check
 git diff --stat
+git diff --cached --check
 git diff --cached --stat
+git diff --name-only
+git diff --cached --name-only
 ```
 
 La validación debe ser proporcional al riesgo. Un sprint o release no puede considerarse completo hasta que supere el checklist de desarrollo aplicable.
 
 Si un test no puede ejecutarse debido a restricciones del entorno, distingue un fallo de preparación ambiental de un fallo del producto e informa ambos con precisión.
+
+## Disciplina de encoding y caracteres especiales
+
+Todos los archivos de texto creados o modificados deberán conservar encoding
+UTF-8 y caracteres especiales correctos, incluidos acentos, `ñ`, `ā` y símbolos
+utilizados por la documentación del proyecto.
+
+Esta validación es obligatoria:
+
+1. inmediatamente después de crear o modificar un archivo de texto;
+2. antes de realizar staging;
+3. después del staging, verificando que working tree e index contienen el mismo
+   contenido;
+4. nuevamente antes de cualquier `push` que publique esos cambios.
+
+### Validación UTF-8 en PowerShell
+
+Para inspeccionar un archivo textual utiliza lectura UTF-8 explícita:
+
+```powershell
+Get-Content <archivo> -Raw -Encoding UTF8
+```
+
+Para detectar indicadores comunes de mojibake sin introducir esos mismos
+caracteres dentro de la regla de validación:
+
+```powershell
+$mojibakePattern = '{0}|{1}|{2}' -f [char]0x00C3, [char]0x00C2, [char]0xFFFD
+
+Get-Content <archivo> -Raw -Encoding UTF8 |
+    Select-String -Pattern $mojibakePattern
+```
+
+La salida esperada es vacía.
+
+No utilices `git show | Select-String` como prueba de integridad Unicode.
+La combinación de Git y PowerShell puede representar incorrectamente caracteres
+aunque el blob persistido sea válido.
+
+`git diff --check` continúa siendo obligatorio cuando corresponda, pero valida
+problemas del diff y whitespace; no demuestra por sí mismo que el encoding sea
+correcto.
+
+### Verificación working tree ↔ staged blob
+
+Después de `git add`, los archivos staged deberán compararse con el contenido
+validado del working tree.
+
+Ejemplo conceptual en PowerShell:
+
+```powershell
+$working = git hash-object -- <archivo>
+$staged = (git ls-files -s -- <archivo>).Split()[1]
+$working -eq $staged
+```
+
+El resultado esperado es:
+
+```text
+True
+```
+
+Si el hash difiere:
+
+- detener el flujo;
+- no realizar commit;
+- identificar qué cambió entre working tree e index;
+- volver a validar contenido y encoding antes de continuar.
+
+### Validación previa al push
+
+Antes de todo `push` con archivos de texto modificados:
+
+- repetir el control UTF-8 sobre los archivos afectados;
+- ejecutar `git diff --check` o `git diff --cached --check` según corresponda;
+- confirmar que el commit o index contiene únicamente el alcance aprobado;
+- no inferir integridad Unicode a partir de cómo una terminal renderiza `git show`.
+
+Si se detecta corrupción o transformación de caracteres, clasificarla como
+`ENCODING_DRIFT` y detener la publicación hasta resolverla y revalidarla.
 
 ## Clasificación documental
 
@@ -338,4 +696,3 @@ Sin la aprobación explícita del propietario no se debe:
 La aprobación de un sprint anterior no autoriza automáticamente el siguiente.
 
 El orden, número o título de un sprint en un roadmap no obliga a ejecutarlo. Un sprint puede ser redefinido, diferido, reemplazado o descartado cuando su justificación no sea suficiente o cuando exista una alternativa más coherente con los documentos normativos y el baseline vigente.
-
