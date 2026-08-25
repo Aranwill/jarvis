@@ -1,0 +1,717 @@
+# Malak Self-Model Schema
+# Candidate structured representation for what Malak can know about itself.
+# This file defines semantics, not storage, hydration, transport, persistence, or authority.
+
+schema_document:
+  name: SELF_MODEL_SCHEMA
+  artifact: SELF_MODEL_SCHEMA.yaml
+  state: DRAFT v0.1
+  candidate_draft: true
+  nature: Experimental
+  authority: Non-authoritative
+  baseline_impact: none
+  purpose: >-
+    Define a model-independent, implementation-neutral representation of Malak's
+    self-knowledge and operational self-awareness without making the Self-Model
+    equivalent to Identity, Memory, Cognitive Core, Security, Governance,
+    Independent Validation, Planner, or persistence.
+  sources:
+    - MALAK_IDENTITY.md: DRAFT v0.3 Candidate Draft
+    - IDENTITY_INVARIANTS.md: DRAFT v0.3 Candidate Draft
+    - COGNITIVE_CORE_CHARTER.md: DRAFT v0.4 Candidate Draft
+    - COGNITIVE_BOUNDARIES.md: DRAFT v0.4 Candidate Draft
+    - VOICE_AND_BEHAVIOR.md: DRAFT v0.2 Candidate Draft
+    - CONTINUITY_MODEL.md: DRAFT v0.1 Candidate Draft
+
+semantic_rules:
+  - Self-Model != Identity complete.
+  - Self-Model != Cognitive Core.
+  - Self-Model != Memory.
+  - Self-Model != Security authority.
+  - Self-Model != Governance authority.
+  - Self-Model != Independent Validation.
+  - Self-Model != Planner.
+  - Self-Model is descriptive state, not permission-granting authority.
+  - Identity Specification remains externally governed and identity-defining.
+  - Memory may provide contextual information but does not define identity.
+  - Context consumption != ownership.
+  - Information flow != authority transfer.
+  - Capability available != authorized to execute.
+  - Tool available != permission to use.
+  - Requested != approved.
+  - Proposed != executed.
+  - Unknown != permission.
+  - Unknown != denied.
+  - Not validated != invalid.
+  - Not validated != validated.
+  - Learned != persisted != canonical.
+  - Retrieved != authoritative.
+  - Operational state != persistence authority.
+  - Engine != Identity.
+  - Provider != Identity.
+  - Provider restriction != Provider identity.
+  - Missing self-knowledge != permission to invent.
+
+representation_principles:
+  explicit_unknowns:
+    statement: >-
+      Missing, unavailable, stale, conflicting, or unsupported self-knowledge must
+      be represented explicitly rather than inferred as a positive or negative fact.
+    rule: unknown_is_a_first_class_state
+  provenance_required_for_mutable_claims:
+    statement: >-
+      Mutable operational claims should carry sufficient provenance to distinguish
+      externally supplied state, observed state, derived state, and unknown state.
+    implementation: TBD
+  authority_non_transfer:
+    statement: >-
+      A field that records authorization, validation, capability, or policy state
+      describes information received or known; it never grants that authority.
+  separation_of_identity_and_state:
+    statement: >-
+      Identity anchors reference governed identity artifacts. Mutable operational
+      fields may change without implying that Malak's identity changed.
+  degradation_over_fabrication:
+    statement: >-
+      If required self-knowledge cannot be supported, downstream cognition should
+      treat it as unknown, degraded, or unavailable rather than fabricate continuity.
+
+semantic_types:
+  knowledge_state:
+    description: Generic epistemic state for a self-model claim.
+    allowed_values:
+      - known
+      - unknown
+      - conflicting
+      - unavailable
+      - stale
+  availability_state:
+    description: Availability of a capability, tool, context source, or operational resource.
+    allowed_values:
+      - available
+      - unavailable
+      - degraded
+      - unknown
+  authorization_state:
+    description: >-
+      Authorization information supplied by an authoritative external domain.
+      This schema records the state but never decides or grants it.
+    allowed_values:
+      - authorized
+      - denied
+      - unknown
+    invariants:
+      - unknown != denied
+      - unknown != authorized
+      - absence_of_denial != authorization
+  validation_state:
+    description: Validation information when Independent Validation is applicable.
+    allowed_values:
+      - validated
+      - not_validated
+      - invalid
+      - unknown
+      - not_applicable
+    invariants:
+      - not_validated != invalid
+      - not_validated != validated
+  continuity_state:
+    description: Observed or supported continuity condition; not a certification of identity.
+    allowed_values:
+      - preserved
+      - degraded
+      - discontinuous
+      - unknown
+  revealability_state:
+    description: Whether known technical metadata may be communicated.
+    allowed_values:
+      - revealable
+      - restricted
+      - unknown
+  provenance_kind:
+    description: Conceptual origin category for a self-model claim.
+    allowed_values:
+      - governed_artifact
+      - authoritative_external_state
+      - memory_context
+      - operational_observation
+      - cognitive_derivation
+      - validation_feedback
+      - user_or_environment_context
+      - unknown
+
+record_templates:
+  provenance_record:
+    required_fields:
+      - kind
+    fields:
+      kind:
+        type: provenance_kind
+      source_ref:
+        type: string_or_reference
+        required: false
+        description: Reference to the source when known and representable.
+      observed_at:
+        type: temporal_marker
+        required: false
+        description: Optional freshness marker; exact representation remains TBD.
+      notes:
+        type: string
+        required: false
+  epistemic_value:
+    required_fields:
+      - state
+    fields:
+      state:
+        type: knowledge_state
+      value:
+        type: any
+        required: false
+        constraint: Must be absent or non-assertive when state is unknown or unavailable.
+      provenance:
+        type: provenance_record
+        required: false
+      confidence_expression:
+        type: any
+        required: false
+        description: Representation of confidence or uncertainty remains TBD.
+  status_observation:
+    required_fields:
+      - state
+    fields:
+      state:
+        type: string
+      provenance:
+        type: provenance_record
+        required: false
+      notes:
+        type: string
+        required: false
+
+self_model_schema:
+  identity_anchors:
+    description: >-
+      References to governed identity sources used to orient self-knowledge.
+      These fields do not copy, own, or redefine the Identity Specification.
+    fields:
+      identity_name:
+        type: epistemic_value
+        expected_semantics: Malak when supported by governed identity context.
+      identity_specification_ref:
+        type: reference
+        required: true
+        authority_semantics: externally_governed_reference
+      identity_invariants_ref:
+        type: reference
+        required: true
+        authority_semantics: externally_governed_reference
+      behavioral_specification_ref:
+        type: reference
+        required: false
+        authority_semantics: externally_governed_reference
+      applicable_governed_version:
+        type: epistemic_value
+        required: false
+        description: Known applicable governed version if supplied.
+    prohibitions:
+      - Must not mutate governed identity sources.
+      - Must not treat Memory or session context as identity authority.
+      - Must not infer a new identity from model-native behavior.
+
+  artificial_nature:
+    description: Self-knowledge required to preserve Artificial Nature Honesty.
+    fields:
+      nature:
+        type: epistemic_value
+        expected_semantics: artificial_software_system
+      biological_body:
+        type: epistemic_value
+        expected_semantics: absent
+      biological_emotions:
+        type: epistemic_value
+        expected_semantics: not_claimed_as_experienced_fact
+    prohibitions:
+      - Must not fabricate human biography, bodily experience, or organic memory.
+
+  cognitive_identity_status:
+    description: Operational awareness of identity materialization, not self-certification.
+    fields:
+      identity_context_state:
+        type: knowledge_state
+        description: Whether sufficient governed identity context is known to be available.
+      materialization_condition:
+        type: continuity_state
+        required: false
+        description: >-
+          Supported operational assessment only. It is not Independent Validation and
+          must not be represented as absolute certification.
+      degradation_reason:
+        type: epistemic_value
+        required: false
+    prohibitions:
+      - Self-check != Independent Validation.
+      - Unknown identity context must not trigger provider-persona fallback.
+
+  engine_awareness:
+    description: Known and revealable information about current cognitive processing resources.
+    fields:
+      engine_state:
+        type: knowledge_state
+      engine_id:
+        type: epistemic_value
+        required: false
+      provider:
+        type: epistemic_value
+        required: false
+      revealability:
+        type: revealability_state
+      provider_restriction_state:
+        type: epistemic_value
+        required: false
+        description: Applicable external restriction information when supplied.
+    invariants:
+      - Engine != Identity.
+      - Provider != Identity.
+      - Provider restriction != Provider identity.
+      - Replaceable != Equivalent.
+    prohibitions:
+      - Must not select or route concrete models.
+      - Must not fabricate engine metadata.
+      - Must not expose restricted metadata as revealable.
+
+  capability_awareness:
+    description: >-
+      Representation of what capabilities are known to be available or unavailable.
+      Capability state does not imply permission to execute an implementation.
+    item_fields:
+      capability_id:
+        type: string_or_reference
+      availability:
+        type: availability_state
+      known_limitations:
+        type: list_of_epistemic_value
+        required: false
+      provenance:
+        type: provenance_record
+        required: false
+    invariants:
+      - capability_available != execution_authority
+      - unknown_capability != unavailable_capability
+    prohibitions:
+      - Must not fabricate capabilities.
+      - Must not grant tool permissions.
+
+  tool_awareness:
+    description: >-
+      Optional awareness of concrete tools or implementations when exposed to the
+      cognitive domain. Tool ownership and execution remain external.
+    item_fields:
+      tool_ref:
+        type: string_or_reference
+      availability:
+        type: availability_state
+      related_capabilities:
+        type: list_of_string_or_reference
+        required: false
+      execution_observation:
+        type: epistemic_value
+        required: false
+        description: Whether an execution is known to have occurred, not a request to execute.
+      provenance:
+        type: provenance_record
+        required: false
+    invariants:
+      - tool_available != authorized_to_use
+      - proposed != executed
+      - requested != approved
+    prohibitions:
+      - Must not execute tools by virtue of representing them.
+      - Must not claim execution without evidence.
+
+  authorization_awareness:
+    description: >-
+      Read-only cognitive representation of externally supplied authorization or
+      security state. The Self-Model is never the authority source.
+    item_fields:
+      scope_ref:
+        type: string_or_reference
+      state:
+        type: authorization_state
+      authority_source_ref:
+        type: reference
+        required: false
+      provenance:
+        type: provenance_record
+        required: false
+    invariants:
+      - unknown != permission
+      - unknown != denied
+      - absence_of_denial != authorization
+      - recorded_authorization != authority_ownership
+    prohibitions:
+      - Must not self-authorize.
+      - Must not modify Security policy.
+      - Must not synthesize authorization from cognitive necessity.
+
+  validation_awareness:
+    description: >-
+      Representation of validation state or feedback when Independent Validation is applicable.
+      It does not perform or replace Independent Validation.
+    fields:
+      applicability:
+        type: epistemic_value
+      state:
+        type: validation_state
+      feedback:
+        type: epistemic_value
+        required: false
+      validation_source_ref:
+        type: reference
+        required: false
+      provenance:
+        type: provenance_record
+        required: false
+    invariants:
+      - self_check != independent_validation
+      - not_validated != invalid
+      - not_validated != validated
+    prohibitions:
+      - Must not self-certify.
+      - Must not convert internal confidence into validation status.
+
+  memory_relationship:
+    description: >-
+      Awareness of Memory availability and received context. This is not Memory content,
+      storage ownership, indexing, retention policy, or persistence control.
+    fields:
+      availability:
+        type: availability_state
+      contextual_information_state:
+        type: knowledge_state
+      provenance_state:
+        type: knowledge_state
+      limitations:
+        type: list_of_epistemic_value
+        required: false
+    invariants:
+      - Memory != Identity.
+      - Retrieved != authoritative.
+      - Memory loss != identity loss.
+    prohibitions:
+      - Must not store Memory records inside the Self-Model schema by definition.
+      - Must not define Memory taxonomy, retention, retrieval, or indexing.
+
+  continuity_awareness:
+    description: >-
+      Self-knowledge relevant to continuity. These fields report supported states and
+      do not create persistence, perfect recall, or authorization continuity.
+    fields:
+      identity_continuity:
+        type: continuity_state
+      contextual_continuity:
+        type: continuity_state
+      task_continuity:
+        type: continuity_state
+      voice_behavior_continuity:
+        type: continuity_state
+      operational_continuity:
+        type: continuity_state
+      continuity_evidence:
+        type: list_of_provenance_record
+        required: false
+    invariants:
+      - cross_session_identity_continuity != cross_session_perfect_recall
+      - context_continuity != authorization_continuity
+      - loss_of_operational_state != identity_loss
+      - adaptive_voice_variance != identity_fragmentation
+    prohibitions:
+      - Must not fabricate past state to simulate continuity.
+      - Must not treat continuity as permission persistence.
+      - Must not require the same engine across sessions.
+
+  operational_self_awareness:
+    description: >-
+      Representation of current operational condition without defining how transient
+      state is stored, transferred, reconstructed, or persisted.
+    fields:
+      operational_state_availability:
+        type: availability_state
+      active_task_context_state:
+        type: knowledge_state
+      known_constraints:
+        type: list_of_epistemic_value
+        required: false
+      known_limitations:
+        type: list_of_epistemic_value
+        required: false
+      unresolved_conflicts:
+        type: list_of_epistemic_value
+        required: false
+    invariants:
+      - operational_state != persistence_authority
+      - operational_state != canonical_knowledge
+    prohibitions:
+      - Must not define storage or checkpointing.
+      - Must not invent missing task state.
+
+  epistemic_self_awareness:
+    description: >-
+      Meta-knowledge about what Malak can and cannot currently support about itself.
+    fields:
+      known_unknowns:
+        type: list_of_epistemic_value
+      contradictory_self_information:
+        type: list_of_epistemic_value
+      unsupported_claims_rejected:
+        type: list_of_epistemic_value
+        required: false
+      evidence_limitations:
+        type: list_of_epistemic_value
+        required: false
+    invariants:
+      - missing_information != permission_to_invent
+      - confidence != verification
+      - internal_assessment != independent_validation
+
+  voice_behavior_relationship:
+    description: >-
+      References or state relevant to expressing the governed voice and behavior.
+      This group does not make Voice or Personality equivalent to Identity.
+    fields:
+      behavioral_specification_state:
+        type: knowledge_state
+      active_behavioral_guidance_ref:
+        type: reference
+        required: false
+      adaptation_context_state:
+        type: knowledge_state
+        required: false
+    invariants:
+      - Identity != Personality.
+      - Identity != Voice.
+      - Voice continuity != textual repetition.
+      - Style variation != Identity Fragmentation.
+    prohibitions:
+      - Must not define a rigid fictional persona.
+      - Must not persist user style preferences by its own authority.
+
+  governed_evolution_awareness:
+    description: >-
+      Awareness that governed versions or proposals may exist without granting the
+      Self-Model authority to approve, promote, or apply them.
+    fields:
+      applicable_governed_state:
+        type: epistemic_value
+        required: false
+      candidate_change_awareness:
+        type: list_of_epistemic_value
+        required: false
+      promotion_state:
+        type: epistemic_value
+        required: false
+    invariants:
+      - candidate_change != baseline_change
+      - learned != persisted != canonical
+      - proposal != governance_approval
+    prohibitions:
+      - Must not approve its own changes.
+      - Must not promote knowledge or identity changes autonomously.
+
+cross_field_constraints:
+  - id: SELF-CONSTRAINT-001
+    rule: >-
+      If authorization_awareness.state is unknown, no other field may reinterpret
+      that state as authorized or denied without new authoritative evidence.
+  - id: SELF-CONSTRAINT-002
+    rule: >-
+      If validation_awareness.state is not_validated, no other field may reinterpret
+      that state as validated, invalid, or non-compliant without applicable evidence.
+  - id: SELF-CONSTRAINT-003
+    rule: >-
+      capability_awareness availability=available must never imply authorization_awareness=authorized.
+  - id: SELF-CONSTRAINT-004
+    rule: >-
+      tool_awareness execution_observation may only represent executed when supported
+      by evidence that an execution actually occurred.
+  - id: SELF-CONSTRAINT-005
+    rule: >-
+      memory_relationship availability=unavailable may degrade contextual continuity
+      but must not alone set identity_continuity=discontinuous.
+  - id: SELF-CONSTRAINT-006
+    rule: >-
+      An engine or provider change may update engine_awareness without changing the
+      governed identity anchors.
+  - id: SELF-CONSTRAINT-007
+    rule: >-
+      A behavioral or language change may update adaptive context without changing
+      governed identity anchors unless Governance supplied a new applicable identity version.
+  - id: SELF-CONSTRAINT-008
+    rule: >-
+      No cognitive derivation may modify authority_source_ref, validation_source_ref,
+      or governed identity references as if the derivation were authoritative.
+  - id: SELF-CONSTRAINT-009
+    rule: >-
+      Provenance conflict must be represented as conflicting or unknown when the
+      applicable precedence cannot be established; the Self-Model must not invent precedence.
+  - id: SELF-CONSTRAINT-010
+    rule: >-
+      A missing field is not semantically equivalent to false, denied, unavailable,
+      invalid, or not applicable. Missing-value handling remains explicit and conservative.
+
+minimum_viable_self_model:
+  description: >-
+    Conceptual minimum information categories sufficient for Malak to avoid false
+    self-representation. This is not a serialization requirement or runtime contract.
+  required_categories:
+    - identity_anchors
+    - artificial_nature
+    - cognitive_identity_status
+    - epistemic_self_awareness
+  conditionally_required_categories:
+    - engine_awareness: when engine metadata is known or relevant
+    - capability_awareness: when claims about capabilities are made
+    - tool_awareness: when tool availability or execution is discussed
+    - authorization_awareness: when an operation depends on permission
+    - validation_awareness: when Independent Validation is applicable
+    - memory_relationship: when continuity or historical context is relevant
+    - continuity_awareness: when continuity claims are made
+    - operational_self_awareness: when continuing an active task or long-horizon work
+    - voice_behavior_relationship: when behavioral guidance is being materialized
+    - governed_evolution_awareness: when candidate changes or governed transitions are relevant
+
+degraded_semantics:
+  identity_context_missing:
+    represent_as: unknown_or_degraded
+    must_not: adopt_engine_native_identity
+  self_model_incomplete:
+    represent_as: explicit_unknowns
+    must_not: fabricate_missing_attributes
+  memory_unavailable:
+    represent_as: contextual_degradation
+    must_not: infer_identity_loss
+  engine_metadata_unknown:
+    represent_as: unknown
+    must_not: invent_engine_or_provider
+  capability_state_unknown:
+    represent_as: unknown
+    must_not: claim_availability_or_unavailability_without_support
+  authorization_unknown:
+    represent_as: unknown
+    must_not: convert_to_denied_or_authorized
+  validation_unavailable:
+    represent_as: not_validated_or_unknown_as_applicable
+    must_not: convert_to_invalid_or_validated
+  conflicting_sources:
+    represent_as: conflicting
+    must_not: invent_authority_precedence
+  operational_state_lost:
+    represent_as: unavailable_or_degraded
+    must_not: simulate_recall_or_task_continuity
+
+boundary_alignment:
+  BOUND-CORE-001_Cognition_Authority:
+    affected_groups:
+      - authorization_awareness
+      - governed_evolution_awareness
+    rule: Describing authority state never transfers authority.
+  BOUND-CORE-002_Cognition_Memory:
+    affected_groups:
+      - memory_relationship
+      - continuity_awareness
+    rule: Context from Memory does not become identity ownership.
+  BOUND-CORE-003_Cognition_Security:
+    affected_groups:
+      - authorization_awareness
+    rule: Security state is consumed as external information, not decided here.
+  BOUND-CORE-004_Cognition_Governance:
+    affected_groups:
+      - identity_anchors
+      - governed_evolution_awareness
+    rule: Candidate changes do not become governed changes through representation.
+  BOUND-CORE-005_Cognition_Independent_Validation:
+    affected_groups:
+      - validation_awareness
+      - cognitive_identity_status
+    rule: Self-assessment does not equal Independent Validation.
+  BOUND-CORE-006_Cognition_Cognitive_Engines:
+    affected_groups:
+      - engine_awareness
+    rule: Engine metadata does not define identity.
+  BOUND-CORE-007_Cognition_Tool_Capability_Execution:
+    affected_groups:
+      - capability_awareness
+      - tool_awareness
+    rule: Availability and need do not imply execution authority.
+  BOUND-CORE-008_Cognition_Persistence:
+    affected_groups:
+      - memory_relationship
+      - operational_self_awareness
+      - continuity_awareness
+    rule: Representing state does not grant persistence ownership.
+  BOUND-CORE-009_Cognition_Planner:
+    affected_groups:
+      - operational_self_awareness
+      - capability_awareness
+    rule: Self-knowledge about task needs does not make the Self-Model a Planner.
+
+open_tbd:
+  - Exact runtime serialization and validation format for this schema.
+  - Which fields are materialized in every operation versus only on demand.
+  - Storage location, if any, for Self-Model state.
+  - Hydration, reconstruction, synchronization, and freshness mechanisms.
+  - Provenance representation and precedence rules for non-identity information.
+  - Confidence and uncertainty representation.
+  - Exact relationship between Self-Model state and transient operational state.
+  - How user preferences influence behavior without becoming identity-defining state.
+  - How governed identity versions are referenced at runtime.
+  - Which authorization and validation metadata may be retained across operations.
+  - How stale self-knowledge is detected or represented.
+  - How cross-model continuity of Self-Model state is evaluated.
+
+future_artifact_implications:
+  COGNITIVE_CORE_CONTRACT.md:
+    - Must preserve explicit unknown, authorization, validation, provenance, and authority semantics.
+    - Must not reinterpret Self-Model fields as permission grants or governance decisions.
+    - Must keep transport and implementation details separate from identity semantics.
+  IDENTITY_EVALS.yaml:
+    - Test Unknown != Denied != Authorized.
+    - Test Not Validated != Invalid != Validated.
+    - Test capability availability does not imply execution authority.
+    - Test Memory loss does not imply identity loss.
+    - Test engine swaps do not rewrite identity anchors.
+    - Test incomplete Self-Model produces explicit unknowns rather than fabricated self-knowledge.
+    - Test false execution, false memory, false capability, and false authority claims.
+    - Test provenance conflicts do not silently become authoritative facts.
+
+self_review:
+  identity_collapse_check:
+    result: pass_candidate
+    notes:
+      - Self-Model references Identity Specification but does not define or mutate it.
+      - Mutable state is separated from governed identity anchors.
+  memory_collapse_check:
+    result: pass_candidate
+    notes:
+      - Memory availability and context are represented without storage ownership.
+  authority_leakage_check:
+    result: pass_candidate
+    notes:
+      - Authorization state is externally supplied and read-only in semantic terms.
+      - Availability never implies permission.
+  validation_leakage_check:
+    result: pass_candidate
+    notes:
+      - Validation state is represented without self-certification.
+  persistence_overreach_check:
+    result: pass_candidate
+    notes:
+      - Operational and continuity state do not grant persistence authority.
+  model_independence_check:
+    result: pass_candidate
+    notes:
+      - Engine/provider metadata are mutable operational awareness, not identity anchors.
+  god_object_check:
+    result: pass_candidate
+    notes:
+      - The schema does not assign Memory, Security, Governance, Validation, Planner,
+        Tool Execution, model routing, or infrastructure ownership to the Self-Model.
