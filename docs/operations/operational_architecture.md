@@ -1,19 +1,27 @@
-# Arquitectura Operativa Actual
+# Arquitectura Operativa Legacy — v0.4.1
 
-> [!NOTE]
-> **Migración de identidad del proyecto**
+> [!WARNING]
+> **Documento histórico / legacy**
 >
-> Este documento fue creado originalmente cuando el proyecto se llamaba **Jarvis**.
+> Este archivo preserva la arquitectura operativa utilizada durante la etapa
+> v0.4.1 basada en Open WebUI, RAG y tooling asociado.
 >
-> A partir de la versión **v0.6.0-alpha**, el nombre oficial del proyecto es **Malāk**.
+> **No representa la arquitectura operativa actual de Malāk.**
 >
-> Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
+> Para el estado vigente consultar:
+>
+> - `README.md`
+> - `docs/project/project_context.md`
+> - `docs/development/development_environment.md`
+>
+> Su contenido histórico se conserva deliberadamente para trazabilidad y no
+> debe utilizarse para determinar el próximo sprint ni el baseline actual.
 
-**Versión:** v0.4.1
+**Versión histórica:** v0.4.1
 
-**Estado:** Operativa
+**Estado:** Legacy / histórico
 
-**Última actualización:** 2026-06-07
+**Última actualización histórica:** 2026-06-07
 
 ---
 
