@@ -739,9 +739,6 @@ La aprobación de un sprint anterior no autoriza automáticamente el siguiente.
 El orden, número o título de un sprint en un roadmap no obliga a ejecutarlo. Un sprint puede ser redefinido, diferido, reemplazado o descartado cuando su justificación no sea suficiente o cuando exista una alternativa más coherente con los documentos normativos y el baseline vigente.
 
 ## Prevención de drift y cierre de revisiones
-    ├── ### State-Bearing Document Registry
-    ├── ### Review Closure Gate
-    └── ### Auditoría completa vs revisión incremental
 
 ### State-Bearing Document Registry
 
