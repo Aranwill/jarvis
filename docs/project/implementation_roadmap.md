@@ -3,12 +3,12 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-08-19
-as_of_commit: 67590ba2ffe7c4938122a5ad2771266c45a21057
+as_of_date: 2026-09-02
+as_of_commit: d1419dd84e8d8bbb0904945008943f4559d4c69a
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: 67590ba2ffe7c4938122a5ad2771266c45a21057
+candidate_commit: d1419dd84e8d8bbb0904945008943f4559d4c69a
 certification_status: sprint_7_8_completed
 legacy_planning_source:
   - docs/project/roadmap.md
@@ -227,11 +227,16 @@ No deben actuar como segundo roadmap.
 
 - Repositorio: `Aranwill/jarvis`.
 - Rama permanente: `main`.
-- HEAD verificado después de la integración y reconciliación documental del Sprint 7.8:
+- Commit material de referencia utilizado para la planificación posterior al Sprint 7.8:
 
 ```text
-67590ba2ffe7c4938122a5ad2771266c45a21057
+d1419dd84e8d8bbb0904945008943f4559d4c69a
 ```
+
+Este commit identifica el baseline material evaluado por este roadmap.
+No constituye una obligación de reescribir el documento después de commits
+puramente documentales, mecánicos o de sincronización que no alteren la
+planificación descrita.
 
 - Baseline nominal:
 
@@ -326,7 +331,7 @@ aprobado
 Estado observado después del cierre:
 
 ```text
-baseline verificado: 67590ba2ffe7c4938122a5ad2771266c45a21057
+baseline material de referencia: d1419dd84e8d8bbb0904945008943f4559d4c69a
 rama permanente: main
 
 Sprint 7.7: cerrado
@@ -1015,7 +1020,7 @@ Este roadmap deberá referenciar el Concept aplicable cuando sea necesario.
 
 ---
 
-# 23. Disposición futura de `docs/project/roadmap.md`
+# 23. Disposición de `docs/project/roadmap.md`
 
 El archivo:
 
@@ -1023,26 +1028,26 @@ El archivo:
 docs/project/roadmap.md
 ```
 
-permanece temporalmente sin modificaciones como fuente legacy original.
+se conserva como fuente de planificación legacy original.
 
-No deberá eliminarse ni archivarse hasta verificar que:
-
-- todas sus intenciones relevantes estén representadas en este registro;
-- las tecnologías históricas hayan sido clasificadas;
-- los elementos `requiere_revision` hayan sido identificados;
-- no exista información de planificación única no migrada.
-
-Una vez verificada la migración completa podrá proponerse, mediante un fix
-documental independiente:
+Debe identificarse explícitamente como documentación legacy y dirigir hacia:
 
 ```text
-docs/project/roadmap.md
-→ archive
+docs/project/implementation_roadmap.md
 ```
 
-o reemplazarlo por un stub de redirección.
+como fuente derivada canónica de planificación vigente.
 
-Ese cambio no está autorizado por este documento.
+Los estados, fases, numeraciones y tecnologías preservados en el roadmap legacy
+pertenecen a su contexto histórico y no deben reinterpretarse como estado
+operativo, baseline vigente ni autorización de implementación.
+
+El corrective packet documental actual no elimina ni archiva ese archivo.
+Su contenido histórico se preserva y únicamente se clarifica su clasificación.
+
+Cualquier propuesta futura para archivarlo, sustituirlo por un stub o eliminarlo
+requerirá una evaluación independiente que confirme que no existe información
+histórica o de planificación única que deba conservarse.
 
 ---
 
@@ -1076,7 +1081,7 @@ con referencias entre artefactos.
 
 Este documento debe revalidarse cuando ocurra cualquiera de estos eventos:
 
-- cambio material de `HEAD`;
+- cambio material del baseline o de `HEAD` que afecte la planificación descrita;
 - cierre de un sprint;
 - apertura formal de un nuevo sprint;
 - modificación material de contratos públicos;
@@ -1086,6 +1091,10 @@ Este documento debe revalidarse cuando ocurra cualquiera de estos eventos:
 - promoción de una idea al roadmap;
 - rechazo o supersedencia de una iniciativa;
 - cambio material de las reglas de gobernanza o ejecución.
+
+Los commits puramente documentales, mecánicos o de sincronización que no alteren
+la planificación descrita no obligan por sí solos a reemplazar `as_of_commit` ni
+el commit material de referencia.
 
 Los registros históricos no deben reescribirse silenciosamente para coincidir
 con el presente.
@@ -1097,8 +1106,8 @@ Las diferencias históricas deben conservar contexto temporal.
 # 26. Estado actual de planificación
 
 ```text
-CURRENT BASELINE
-67590ba2ffe7c4938122a5ad2771266c45a21057
+MATERIAL BASELINE REFERENCE
+d1419dd84e8d8bbb0904945008943f4559d4c69a
 
 CURRENT BRANCH
 main

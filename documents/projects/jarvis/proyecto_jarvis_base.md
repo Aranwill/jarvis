@@ -1,3 +1,19 @@
+> [!WARNING]
+> **Snapshot histórico / legacy**
+>
+> Este documento describe una etapa temprana del proyecto Jarvis v0.4.
+>
+> No representa el estado actual, arquitectura vigente ni planificación
+> autorizada de Malāk.
+>
+> Fuentes vigentes:
+>
+> - `README.md`
+> - `docs/project/project_context.md`
+> - `docs/project/implementation_roadmap.md`
+>
+> El contenido restante se conserva sin reinterpretación para trazabilidad.
+
 # Proyecto Jarvis
 
 **Versión:** v0.4
