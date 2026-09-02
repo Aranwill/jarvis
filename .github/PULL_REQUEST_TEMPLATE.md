@@ -84,6 +84,11 @@ Describa brevemente el objetivo de este Pull Request.
 
 \- \[ ] No requiere cambios en la documentación.
 
+\- \[ ] Revisé impacto sobre documentos `CURRENT_STATE` definidos en `AGENTS.md`.
+
+\- \[ ] Las referencias históricas/legacy no fueron reinterpretadas como estado vigente.
+
+
 
 
 \---
