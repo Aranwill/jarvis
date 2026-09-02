@@ -2,12 +2,12 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-08-16
-as_of_commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+as_of_date: 2026-09-02
+as_of_commit: e3c28131f491b740c352da79537cd9233d7f4979
 branch: main
-certification_branch: sprint/7.7-baseline-certification
-candidate_commit: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
-certification_status: sprint_7_7_active
+certification_branch: null
+candidate_commit: e3c28131f491b740c352da79537cd9233d7f4979
+certification_status: sprint_7_8_completed
 baseline: v0.6.0-alpha
 ---
 
@@ -59,7 +59,7 @@ Este contexto fue reconciliado a partir de:
 - documentación oficial y derivada vigente;
 - fichas de sprint;
 - arquitectura implementada documentada;
-- resultados de validación registrados durante el cierre del Sprint 7.6;
+- resultados de validación registrados durante el cierre del Sprint 7.8;
 - estado sincronizado del Malāk Project Vault.
 
 El documento:
@@ -104,7 +104,6 @@ Los snapshots históricos describen el estado certificado en su fecha. Una difer
 
 Las fuentes derivadas incluyen:
 
-- `repository_analysis.md`;
 - este `project_context.md`;
 - resúmenes de estado marcados explícitamente como no normativos;
 - artefactos derivados del Malāk Project Vault.
@@ -116,27 +115,31 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 ## Snapshot validado del repositorio
 
 ```text
-Repositorio oficial:   Aranwill/jarvis
-Raíz Git local:        D:\Ollama\jarvis
-Rama permanente:       main
-HEAD observado:        34c711c7ecd73fb4187d675e1be6efbeee8c8b3
-Baseline nominal:      v0.6.0-alpha
-Último sprint cerrado: Sprint 7.6 — Secure Context Lifecycle Foundation
-Próximo sprint:        ninguno autorizado
+Repositorio oficial:      Aranwill/jarvis
+Raíz Git local:           D:\Ollama\jarvis
+Rama permanente:          main
+Commit reconciliado:      e3c28131f491b740c352da79537cd9233d7f4979
+Baseline nominal:         v0.6.0-alpha
+Último sprint funcional:  Sprint 7.8 — Cognitive Conversation Execution Path Foundation
+Próximo sprint:           ninguno autorizado
 ```
 
-Último cambio observado en `main`:
+El commit de referencia reconciliado en `main` es:
 
 ```text
-8214974 Merge pull request #42 from Aranwill/sprint/7.6-h-context-propagation-contract
+e3c28131 Merge pull request #50 from Aranwill/docs/human-only-pr-promotion
 ```
 
+Sprint 7.8 permanece como el último sprint funcional completado. Los cambios
+posteriores a su cierre que ya forman parte de `main` son cambios documentales,
+de gobernanza o de disciplina de ingeniería y no autorizan automáticamente una
+nueva unidad de implementación.
 
-El cambio funcional más reciente integrado en `main` cerró el alcance técnico del Sprint 7.6 mediante la PR #42, incorporando el contrato de propagación contextual sobre el lifecycle ya validado. Esta integración no autoriza Sprint 7.7 ni ninguna implementación posterior.
+La rama `main` es la única rama permanente y debe tratarse como fuente del
+baseline operativo actual.
 
-La rama `main` es la única rama permanente y debe tratarse como fuente del baseline operativo actual.
-
-Las ramas temporales de documentación, feature, corrección o sprint no constituyen baseline hasta su integración y validación.
+Las ramas temporales de documentación, feature, corrección o sprint no
+constituyen baseline hasta su integración y validación.
 
 ---
 
@@ -159,6 +162,7 @@ jarvis/
 ├── src/
 │   ├── app/
 │   └── malak/
+│       ├── app/
 │       ├── capabilities/
 │       ├── contracts/
 │       ├── core/
@@ -166,6 +170,7 @@ jarvis/
 │       ├── identity/
 │       ├── infrastructure/
 │       ├── kernel/
+│       ├── observability/
 │       ├── providers/
 │       ├── runtime/
 │       ├── security/
@@ -192,36 +197,43 @@ D:\Ollama\jarvis
 
 ### Flujo Kernel–Planner–Capability
 
-El flujo orientado al Kernel permanece:
+La frontera cognitiva oficial permanece orientada al Kernel:
 
 ```text
 Interface Layer
-→ Kernel
+→ Application Composition
+→ Kernel.receive()
 → Planner
-→ Capability Registry
+→ CapabilityRegistry
 → Capability
 → Response
 ```
 
-La ruta de código implementada comienza en `Kernel.receive`.
-
 El Kernel:
 
 - coordina el flujo;
-- permanece independiente de proveedores concretos;
+- permanece independiente de providers concretos;
 - permanece independiente de runtimes concretos;
+- permanece independiente de modelos concretos;
 - no depende directamente de Ollama;
 - no contiene lógica de configuración de infraestructura;
 - no incorpora autoridad autónoma;
 - no accede directamente a Internet;
 - no debe convertirse en orquestador de infraestructura.
 
-El registry predeterminado contiene `EchoCapability`, utilizada como Capability mínima y determinista para validar el flujo Kernel–Planner–Capability.
+El bootstrap mínimo del Kernel conserva `EchoCapability` como Capability
+determinista para validaciones estructurales.
+
+La composición conversacional vigente es distinta: se construye en la frontera
+de aplicación, registra `ConversationCapability` y configura el `Planner` para
+resolver esa capability sin introducir `ConversationService`, providers,
+runtimes o modelos dentro del Kernel.
 
 ### Stack conversacional
 
 El stack conversacional implementado contiene:
 
+- `ConversationCapability`;
 - `ConversationRequest`;
 - `ConversationResponse`;
 - `ConversationProvider`;
@@ -233,37 +245,51 @@ El stack conversacional implementado contiene:
 - `MockLLMRuntime`;
 - `OllamaRuntime`.
 
-Ruta técnica vigente:
+Ruta cognitiva conversacional vigente:
 
 ```text
 CLI
+→ CLIConfiguration
+→ Application Composition
+→ Kernel.receive()
+→ Planner
+→ CapabilityRegistry
+→ ConversationCapability
 → ConversationService
 → ConversationProviderRegistry
 → RuntimeConversationProvider
 → LLMRuntime
+→ Response
 ```
 
-La CLI permite composición externa del runtime mediante configuración, sin modificar el Kernel.
+La selección y construcción del runtime, provider y servicios se realiza en la
+frontera de aplicación mediante configuración externa.
 
-### Límite de integración Kernel–ConversationService
+### Integración Kernel–ConversationService
 
-No existe una integración formal y validada entre:
+Sprint 7.8 estableció y validó formalmente la integración entre el pipeline
+cognitivo y el subsistema conversacional mediante `ConversationCapability`.
+
+La frontera preservada es:
 
 ```text
-Kernel.receive
+Kernel
+→ Capability
 ```
 
-y:
-
-```text
-ConversationService
-```
+`ConversationCapability` adapta la solicitud del pipeline cognitivo al contrato
+de `ConversationService` y transforma su resultado para devolverlo por la
+frontera de Capability.
 
 Por lo tanto:
 
-- el pipeline Kernel–Planner–Capability y el stack conversacional continúan siendo rutas separadas;
-- la CLI técnica no representa por sí sola el pipeline cognitivo completo de Malāk;
-- no debe introducirse un puente entre ambas rutas sin necesidad funcional concreta, contrato explícito y aprobación humana.
+- `Kernel.receive()` y `ConversationService` ya forman parte de una misma ruta
+  cognitiva conversacional validada;
+- el Kernel no conoce `ConversationService`;
+- el Kernel no conoce providers concretos;
+- el Kernel no conoce runtimes concretos;
+- el Kernel no conoce modelos concretos;
+- la evidencia de ejecución no concede autoridad ni altera el flujo de control.
 
 ---
 
@@ -305,7 +331,7 @@ Características:
 - validación de payloads;
 - soporte para métricas mediante interfaces desacopladas.
 
-La integración real fue validada anteriormente con un modelo local, sin convertir Ollama en dependencia del Kernel.
+La integración real fue validada durante Sprint 7.8 con `OllamaRuntime` y un modelo local, sin convertir Ollama en dependencia del Kernel.
 
 ---
 
@@ -458,6 +484,35 @@ Permanecen fuera de alcance:
 
 ---
 
+## Riesgo de seguridad residual
+
+Permanece registrado el finding:
+
+```text
+7.7-D-001 — Strong SecurityContext Provenance
+classification: ACCEPTED_RESIDUAL_RISK
+severity: MEDIUM
+blocking_release: NO
+```
+
+La foundation actual todavía no incorpora de forma completa:
+
+- PKI;
+- nonce;
+- replay protection;
+- identidad criptográfica fuerte;
+- MFA;
+- Secure Message Bus;
+- Secure Context Manager criptográfico completo.
+
+Este riesgo no bloquea el baseline actual, pero debe permanecer visible antes de
+incorporar agentes, tools, red, mensajería externa, automatización o rutas
+operativas de mayor riesgo.
+
+Su existencia no autoriza por sí sola una implementación de seguridad adicional.
+
+---
+
 ## Estado de sprints
 
 Estado del bloque 7.x:
@@ -471,7 +526,8 @@ Estado del bloque 7.x:
 | 7.4 | Cerrado | Logs, métricas, eventos operativos y sincronización gobernada |
 | 7.5 | Cerrado | Security Control Plane Foundation |
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
-| 7.7 | Activo | Certificación de baseline; 7.7-A y 7.7-B completados; 7.7-C en curso |
+| 7.7 | Cerrado | Validación de baseline y release interna |
+| 7.8 | Completado | Cognitive Conversation Execution Path Foundation |
 
 ### Sprint 7.0
 
@@ -591,25 +647,65 @@ Resultado:
 El cierre del Sprint 7.6 no autoriza automáticamente Sprint 7.7 ni ninguna
 implementación posterior.
 
+### Sprint 7.7
+
+Estado:
+
+```text
+cerrado
+```
+
+Resultado:
+
+- validación integral y certificación interna del baseline;
+- reconciliación de arquitectura y documentación;
+- cierre del proceso de certificación;
+- preservación de `7.7-D-001` como riesgo residual aceptado, MEDIUM y no bloqueante.
+
+### Sprint 7.8
+
+Estado:
+
+```text
+completado
+```
+
+Resultado:
+
+- primera ruta cognitiva conversacional end-to-end;
+- incorporación de `ConversationCapability` como adapter detrás de la frontera de Capability;
+- integración `Kernel.receive()` → `Planner` → `CapabilityRegistry` → `ConversationCapability`;
+- preservación de Runtime Independence;
+- validación determinista con `MockLLMRuntime`;
+- validación real con `OllamaRuntime`;
+- 348 pruebas totales aprobadas durante el cierre documentado.
+
+El cierre de Sprint 7.8 no autoriza automáticamente Sprint 7.9 ni ninguna otra
+unidad de implementación.
+
 ---
 
 ## Validación
 
-Última validación integral documentada del cierre del Sprint 7.6:
+Última validación integral documentada durante el cierre de Sprint 7.8:
 
 ```text
-339 total passed
+348 total passed
 compileall: PASS
 git diff --check: PASS
-working tree: clean
 ```
 
-La revisión integral no registró defectos bloqueantes.
+La ruta cognitiva conversacional fue validada tanto con runtime determinista como
+con `OllamaRuntime`, preservando el desacoplamiento del Kernel.
 
-Todos los incrementos 7.6-A a 7.6-H fueron revisados mediante 4R y aceptados
-humanamente antes de consolidar el cierre.
+Antes de abrir el corrective packet documental actual se revalidó el baseline de
+referencia:
 
-Kernel, Planner y runtimes permanecieron intactos durante el Sprint 7.6.
+```text
+main == origin/main
+commit reconciliado: e3c28131f491b740c352da79537cd9233d7f4979
+working tree: clean
+```
 
 Antes de iniciar cualquier nueva implementación debe revalidarse localmente:
 
@@ -622,6 +718,9 @@ Antes de iniciar cualquier nueva implementación debe revalidarse localmente:
 - `compileall`;
 - `git diff --check`.
 
+La corrección de este documento no sustituye una validación funcional ni
+autoriza el siguiente sprint.
+
 ---
 
 ## Estado del baseline
@@ -632,25 +731,28 @@ Baseline nominal:
 v0.6.0-alpha
 ```
 
-El tag nominal no debe confundirse con el HEAD de desarrollo actual.
+El baseline nominal no debe confundirse con el commit de desarrollo utilizado
+como referencia de reconciliación.
 
-El baseline integrado vigente en `main` continúa siendo la referencia operativa
-estable previa a la certificación.
-
-El proceso de certificación actual evalúa un candidate baseline separado:
+Estado reconciliado:
 
 ```text
-baseline integrado previo: main
-candidate técnico: 34c711c7ecd73fb4187d675e1be6efbeee8c8b3
-rama de certificación: sprint/7.7-baseline-certification
-Sprint 7.7: activo
-7.7-A: completado
-7.7-B: completado
-7.7-C: en curso
-release promovida: no
+rama permanente: main
+commit de referencia: e3c28131f491b740c352da79537cd9233d7f4979
+Sprint 7.7: cerrado
+Sprint 7.8: completado
+certification branch activa: no
+release promovida adicional: no
+próximo sprint autorizado: ninguno
 ```
 
-No debe certificarse una nueva release ni crearse un nuevo tag sin un proceso específico de validación y aprobación.
+El commit `e3c28131f491b740c352da79537cd9233d7f4979` es el estado de `main`
+contra el cual se realiza esta reconciliación documental. Un commit documental
+posterior que contenga esta corrección no altera por sí mismo el último baseline
+funcional ni autoriza una nueva implementación.
+
+No debe certificarse una nueva release, crear o mover un tag, abrir un sprint o
+ampliar autoridad sin un proceso específico de evaluación y aprobación.
 
 ---
 
@@ -691,34 +793,44 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ---
 
-## Propuestas posteriores al Sprint 7.6
+## Planificación posterior al Sprint 7.8
 
-Sprint 7.7 está autorizado y activo como proceso formal de certificación de baseline y release interna.
+Sprint 7.8 está completado.
 
-Existen propuestas documentales preliminares para:
+Actualmente:
 
-- preparación del AKS para futura representación como grafo;
+```text
+NEXT SPRINT
+NONE AUTHORIZED
+```
 
-Su existencia, numeración o posición no constituye autorización.
+La fuente derivada canónica para planificación es:
 
-Tampoco se consideran autorizadas por defecto:
+```text
+docs/project/implementation_roadmap.md
+```
 
-- Secure Context Manager criptográfico completo;
-- identidad criptográfica completa;
-- nonce y replay protection;
-- prevención persistente de replay;
-- persistencia avanzada de auditoría;
-- agentes;
-- navegación;
-- herramientas externas;
-- memoria sensible;
-- automatización del sistema operativo;
-- Evidence Acquisition Foundation;
-- Sandbox Containment;
-- GraphRAG;
-- capacidades ofensivas o autónomas.
+Las ideas registradas en `documents/projects/jarvis/ideas.md`, las referencias
+de `docs/project/concepts/` y las iniciativas reconocidas para planificación
+futura pueden alimentar una evaluación posterior, pero:
 
-Cada iniciativa debe atravesar gobernanza, alcance, riesgos, dependencias, rollback y aprobación humana.
+```text
+idea != roadmap
+roadmap != aprobación
+evidencia != autoridad
+```
+
+`project_context.md` no debe duplicar el roadmap ni establecer por sí mismo la
+secuencia del trabajo futuro.
+
+Antes de seleccionar la próxima unidad deberán compararse las necesidades reales
+del baseline, riesgos, dependencias, arquitectura, seguridad, complejidad del
+Kernel y evidencia disponible.
+
+En particular, agentes, tools, red, navegación, mensajería externa,
+automatización y otras rutas operativas de mayor riesgo no deben adelantarse
+mientras sus foundations de seguridad, gobernanza, contención y evidencia no
+estén suficientemente justificadas y aprobadas.
 
 ---
 
@@ -761,14 +873,42 @@ Todo trabajo futuro debe preservar:
 - separación entre autoridad cognitiva y autoridad de seguridad;
 - trazabilidad completa.
 
-Antes de cualquier modificación importante se deben responder las cuatro preguntas obligatorias:
+La metodología vigente combina:
+
+```text
+SDD
++ TDD
++ 4R
++ Bounded Correction
++ Independent Validation
+```
+
+ADR-003 preserva la dirección de autoridad:
+
+```text
+CONTROL / AUTHORITY
+Upstream → Downstream
+
+RESULTS / EVENTS / EVIDENCE
+Downstream → Upstream
+```
+
+La evidencia puede informar una decisión, pero nunca concede autoridad.
+
+ADR-004 establece `Specification & Verification First`: todo cambio
+significativo debe definir comportamiento esperado y criterios verificables antes
+de ser aceptado en el baseline.
+
+Antes de cualquier modificación importante se deben responder las cuatro
+preguntas obligatorias:
 
 1. ¿Respeta el Blueprint?
 2. ¿Respeta la Constitución Cognitiva?
 3. ¿Respeta la Gobernanza?
-4. ¿Hace al Kernel más simple o más complejo?
+4. ¿Preserva o reduce la complejidad del Kernel?
 
-Si alguna respuesta es negativa o dudosa, la implementación debe detenerse y rediseñarse antes de escribir código.
+Si alguna respuesta es negativa, dudosa o carece de evidencia suficiente, el
+trabajo debe detenerse antes de editar.
 
 ---
 
@@ -793,56 +933,70 @@ Ningún agente, runtime, capability o herramienta puede modificar estos artefact
 
 ## Disciplina de sprints
 
-La metodología vigente es:
+La evolución de Malāk debe mantener una cadena explícita de promoción:
 
 ```text
-necesidad real
-→ análisis arquitectónico
+idea o necesidad real
+→ evaluación
+→ roadmap cuando corresponda
+→ specification
+→ ADR cuando corresponda
 → alcance aprobado
 → rama temporal
-→ implementación pequeña
-→ pruebas
-→ validación
-→ documentación
-→ Pull Request
-→ revisión
-→ merge
-→ baseline estable
+→ TDD / implementación
+→ 4R
+→ Bounded Correction cuando sea necesaria
+→ Independent Validation
+→ evidencia
+→ Draft Pull Request
+→ revisión visual humana
+→ promoción humana a Ready for Review
+→ autorización humana de merge
+→ baseline
 ```
+
+No todos los cambios requieren un sprint funcional. Una corrección documental
+acotada puede ejecutarse como corrective packet independiente cuando el alcance,
+la evidencia y la autoridad estén explícitamente delimitados.
 
 Una fase no se considera cerrada hasta que:
 
-- código;
-- tests;
+- código, cuando aplique;
+- tests, cuando apliquen;
 - documentación;
-- telemetría relevante;
+- evidencia relevante;
 - estado del repositorio
 
-estén sincronizados.
+estén reconciliados.
 
-No se debe iniciar el siguiente sprint hasta aceptar explícitamente el nuevo baseline.
+No se debe iniciar el siguiente sprint hasta evaluar el baseline resultante y
+obtener aprobación explícita.
 
 ---
 
 ## Política de actualización
 
-Este documento está vinculado al estado observado:
+Este documento fue reconciliado contra el estado observado:
 
 ```text
-34c711c7ecd73fb4187d675e1be6efbeee8c8b3
+main@e3c28131f491b740c352da79537cd9233d7f4979
 ```
+
+`as_of_commit` identifica el commit de referencia utilizado para reconstruir el
+contexto, no una obligación de reescribir el documento ante cada commit
+puramente mecánico o documental.
 
 Debe volver a validarse cuando:
 
-- `HEAD` cambie de manera material;
+- `HEAD` cambie de manera material para el contexto descrito;
 - un sprint se formalice, active o cierre;
 - se certifique una nueva release;
 - cambie arquitectura o gobernanza;
-- cambien resultados de tests;
+- cambien resultados de tests relevantes;
 - cambie la raíz del repositorio;
-- cambie el entorno de desarrollo;
+- cambie el entorno de desarrollo de forma material;
 - se incorpore una nueva frontera de seguridad;
-- se modifique el estado operativo del Vault.
+- se modifique de forma material el estado operativo del Vault.
 
 Las actualizaciones deben distinguir claramente entre:
 
@@ -851,6 +1005,9 @@ Las actualizaciones deben distinguir claramente entre:
 - estado derivado;
 - contexto de planificación;
 - decisiones normativas aprobadas.
+
+Los registros históricos no deben reescribirse para aparentar que describen el
+presente.
 
 ---
 
