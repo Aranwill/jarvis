@@ -1,3 +1,15 @@
+> [!WARNING]
+> **Planificación legacy**
+>
+> Este documento preserva la planificación temprana de Malāk/Jarvis.
+>
+> No representa el roadmap vigente y no autoriza implementación.
+>
+> La fuente derivada canónica de planificación actual es:
+>
+> `docs/project/implementation_roadmap.md`
+>
+> Los estados, fases y numeraciones conservados debajo son históricos.
 # Roadmap Malāk
 
 > [!NOTE]

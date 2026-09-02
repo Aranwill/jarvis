@@ -737,3 +737,103 @@ Sin la aprobación explícita del propietario no se debe:
 La aprobación de un sprint anterior no autoriza automáticamente el siguiente.
 
 El orden, número o título de un sprint en un roadmap no obliga a ejecutarlo. Un sprint puede ser redefinido, diferido, reemplazado o descartado cuando su justificación no sea suficiente o cuando exista una alternativa más coherente con los documentos normativos y el baseline vigente.
+
+## Prevención de drift y cierre de revisiones
+
+### State-Bearing Document Registry
+
+Para evitar que documentación histórica o conceptual sea interpretada como
+estado vigente, las fuentes documentales deberán clasificarse por función.
+
+#### CURRENT_STATE_CORE
+
+Estas fuentes pueden representar estado operativo o de planificación vigente:
+
+- `README.md`
+- `docs/project/project_context.md`
+- `docs/project/implementation_roadmap.md`
+
+Deben permanecer semánticamente compatibles con el baseline material vigente.
+
+Un commit puramente documental, de merge o de sincronización no obliga por sí
+solo a reemplazar todos sus `as_of_commit`. Cada documento deberá declarar qué
+representa su commit de referencia.
+
+#### DOMAIN_CURRENT_STATE
+
+Representan estado vigente únicamente dentro de su dominio:
+
+- `PROJECT.md` — identidad y migración del proyecto;
+- `docs/development/development_environment.md` — entorno oficial de desarrollo;
+- `documents/projects/jarvis/models.md` — inventario local de modelos cuando
+  corresponda validarlo.
+
+No deben utilizarse como sustituto del estado arquitectónico o de planificación.
+
+#### NORMATIVE_PROTECTED
+
+Incluye Constituciones, Blueprint, Kernel specification, Architecture Quality
+Gates, ADR aceptados, contratos públicos y `SECURITY.md`.
+
+Su metadata histórica o de certificación no debe reinterpretarse
+automáticamente como estado operativo corriente.
+
+#### HISTORICAL
+
+Incluye fichas de sprint cerradas, snapshots y evidencia de release.
+
+Los commits, resultados de tests y estados registrados allí pertenecen al
+momento histórico que documentan y no constituyen drift por ser anteriores al
+HEAD actual.
+
+#### LEGACY
+
+Documentación preservada por trazabilidad que ya no representa el estado
+corriente.
+
+Debe incluir una advertencia explícita que identifique su carácter legacy y
+dirija hacia la fuente vigente correspondiente.
+
+#### CONCEPTUAL
+
+Incluye `docs/project/concepts/**` y registros de ideas.
+
+Describe posibilidades y referencias, no baseline ni autorización.
+
+### Review Closure Gate
+
+Una revisión integral no podrá declararse completa hasta que:
+
+1. se identifiquen las fuentes CURRENT_STATE aplicables;
+2. se contrasten entre sí y contra código/tests cuando corresponda;
+3. las referencias antiguas encontradas sean clasificadas explícitamente como
+   estado vigente, histórico, legacy o drift;
+4. se contrasten Project Vault y Sync Agent cuando el alcance sea global;
+5. se registren findings pendientes, si existen;
+6. se cierre primero el inventario de drift antes de iniciar correcciones.
+
+No se utilizará el patrón:
+
+detectar → corregir → continuar buscando → detectar nuevamente.
+
+El patrón requerido será:
+
+inventario → clasificación → corrective packet → validación → cierre.
+
+### Auditoría completa vs revisión incremental
+
+Una auditoría transversal completa se realizará cuando exista un trigger
+concreto, entre ellos:
+
+- cierre o promoción material de baseline;
+- cambio de arquitectura o gobernanza;
+- nueva familia documental relevante;
+- cambio de mapping del Sync Agent;
+- evidencia de drift sistémico;
+- solicitud explícita del propietario.
+
+Fuera de esos triggers se utilizará revisión incremental y proporcional al
+cambio.
+
+Una vez cerrado un inventario de drift no deberá iniciarse otra búsqueda global
+sin un nuevo trigger verificable.
