@@ -66,12 +66,44 @@ Los documentos derivados pueden resumir evidencia, pero no pueden establecer arq
 
 Los snapshots históricos de release describen el estado certificado en su fecha original. No deben reescribirse silenciosamente para coincidir con un HEAD posterior.
 
+
+Para consultas ordinarias de contexto, continuidad, estado general, roadmap,
+decisiones, arquitectura conocida o referencias conceptuales de Malāk, utiliza
+
+Secuencia predeterminada:
+
+```text
+08-session-context/MALAK_SESSION_CONTEXT.md
+        ↓
+        ↓
+respuesta basada en contexto derivado vigente
+```
+
+La fuente de autoridad y la fuente de recuperación de contexto son conceptos
+es la fuente derivada preferida para recuperar contexto de forma eficiente.
+
+
+Escala a las fuentes oficiales de Malāk cuando:
+
+- la tarea vaya a modificar código o documentación oficial de Malāk;
+- se requiera evidencia exacta de implementación, tests o estado operativo;
+- se requiera autoridad normativa, arquitectónica, de seguridad o gobernanza;
+- se solicite una auditoría, certificación o revisión independiente desde fuente;
+- el propietario solicite explícitamente revisar directamente el repositorio.
+
+mapping, cobertura, reconciliación, propuestas de sync o un fallo reportado por
+ese mecanismo.
+
+El `Minimum Review Set` transversal definido a continuación aplica a revisiones
+integrales, auditorías, reconciliaciones y detección de drift; no constituye el
+procedimiento predeterminado para recuperación ordinaria de contexto.
+
 ## Revisión integral del proyecto y detección de drift
 
-Cuando la tarea solicite revisar el estado de Malāk, validar el baseline, analizar
-arquitectura, determinar próximos pasos, contrastar roadmap, detectar
-inconsistencias o reconciliar los repositorios relacionados, la revisión deberá
-ser transversal y basada en evidencia.
+Cuando la tarea solicite una revisión integral del estado de Malāk, validar el
+baseline, analizar arquitectura, determinar próximos pasos, contrastar roadmap,
+detectar inconsistencias o reconciliar los repositorios relacionados, la revisión
+deberá ser transversal y basada en evidencia.
 
 Una revisión no deberá declararse completa por haber inspeccionado únicamente
 `README.md`, el roadmap, el código o el último sprint.
