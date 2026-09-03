@@ -2,12 +2,12 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-02
-as_of_commit: e3c28131f491b740c352da79537cd9233d7f4979
+as_of_date: 2026-09-03
+as_of_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
 branch: main
 certification_branch: null
-candidate_commit: e3c28131f491b740c352da79537cd9233d7f4979
-certification_status: sprint_7_8_completed
+candidate_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
+certification_status: sprint_7_9_in_execution
 baseline: v0.6.0-alpha
 ---
 
@@ -60,6 +60,7 @@ Este contexto fue reconciliado a partir de:
 - fichas de sprint;
 - arquitectura implementada documentada;
 - resultados de validación registrados durante el cierre del Sprint 7.8;
+- revalidación local del baseline previa a la activación del Sprint 7.9;
 - estado sincronizado del Malāk Project Vault.
 
 El documento:
@@ -115,31 +116,35 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 ## Snapshot validado del repositorio
 
 ```text
-Repositorio oficial:      Aranwill/jarvis
-Raíz Git local:           D:\Ollama\jarvis
-Rama permanente:          main
-Commit reconciliado:      e3c28131f491b740c352da79537cd9233d7f4979
-Baseline nominal:         v0.6.0-alpha
-Último sprint funcional:  Sprint 7.8 — Cognitive Conversation Execution Path Foundation
-Próximo sprint:           ninguno autorizado
+Repositorio oficial:          Aranwill/jarvis
+Raíz Git local:               D:\Ollama\jarvis
+Rama permanente:              main
+Commit reconciliado:          2864435401353e5abcfcb51fc276361a0225c2b7
+Baseline nominal:             v0.6.0-alpha
+Último sprint completado:     Sprint 7.8 — Cognitive Conversation Execution Path Foundation
+Sprint activo autorizado:     Sprint 7.9 — Conversation Continuity Foundation
+Rama temporal activa:         sprint/7.9-conversation-continuity
+Sprint posterior autorizado:  ninguno
 ```
 
 El commit de referencia reconciliado en `main` es:
 
 ```text
-e3c28131 Merge pull request #50 from Aranwill/docs/human-only-pr-promotion
+28644354 Merge pull request #55 from Aranwill/docs/vault-first-context-retrieval
 ```
 
-Sprint 7.8 permanece como el último sprint funcional completado. Los cambios
-posteriores a su cierre que ya forman parte de `main` son cambios documentales,
-de gobernanza o de disciplina de ingeniería y no autorizan automáticamente una
-nueva unidad de implementación.
+Sprint 7.8 permanece como el último sprint funcional completado.
 
-La rama `main` es la única rama permanente y debe tratarse como fuente del
-baseline operativo actual.
+Sprint 7.9 fue evaluado, debatido y aprobado explícitamente por el propietario
+el 2026-09-03. Su implementación se realiza en la rama temporal
+`sprint/7.9-conversation-continuity` y permanece limitada al alcance definido en
+`docs/project/sprints/SPRINT-7.9.md`.
 
-Las ramas temporales de documentación, feature, corrección o sprint no
-constituyen baseline hasta su integración y validación.
+La rama `main` continúa siendo la única rama permanente y la fuente del baseline
+operativo actual.
+
+La rama temporal de Sprint 7.9 no constituye baseline hasta su revisión,
+integración y validación.
 
 ---
 
@@ -528,6 +533,7 @@ Estado del bloque 7.x:
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
 | 7.7 | Cerrado | Validación de baseline y release interna |
 | 7.8 | Completado | Cognitive Conversation Execution Path Foundation |
+| 7.9 | En ejecución | Conversation Continuity Foundation |
 
 ### Sprint 7.0
 
@@ -680,8 +686,51 @@ Resultado:
 - validación real con `OllamaRuntime`;
 - 348 pruebas totales aprobadas durante el cierre documentado.
 
-El cierre de Sprint 7.8 no autoriza automáticamente Sprint 7.9 ni ninguna otra
+El cierre de Sprint 7.8 no autorizó automáticamente Sprint 7.9 ni ninguna otra
 unidad de implementación.
+
+Sprint 7.9 fue autorizado posteriormente mediante un proceso independiente de
+inspección, definición, evaluación, debate y aprobación explícita.
+
+### Sprint 7.9
+
+Estado:
+
+```text
+en ejecución
+```
+
+Objetivo autorizado:
+
+- continuidad conversacional efímera durante una conversación activa;
+- historial estructurado y limitado en memoria;
+- limpieza explícita del contexto conversacional;
+- integración aditiva y reversible;
+- preservación de Kernel, Planner, Capability contract y SecurityContext.
+
+Baseline de activación:
+
+```text
+2864435401353e5abcfcb51fc276361a0225c2b7
+```
+
+Rama temporal:
+
+```text
+sprint/7.9-conversation-continuity
+```
+
+Estado del Gate 7.9-A:
+
+```text
+Sprint Activation & Architecture Freeze
+documentación en reconciliación
+código funcional sin cambios
+```
+
+Sprint 7.9 no autoriza Memory persistente, agentes, tools, Sandbox, navegación,
+Internet, RAG, GraphRAG, cambios del Kernel, generalización del contrato
+Capability ni ampliación de autoridad.
 
 ---
 
@@ -698,28 +747,23 @@ git diff --check: PASS
 La ruta cognitiva conversacional fue validada tanto con runtime determinista como
 con `OllamaRuntime`, preservando el desacoplamiento del Kernel.
 
-Antes de abrir el corrective packet documental actual se revalidó el baseline de
-referencia:
+Antes de activar Sprint 7.9 se revalidó localmente el baseline de referencia:
 
 ```text
 main == origin/main
-commit reconciliado: e3c28131f491b740c352da79537cd9233d7f4979
+commit reconciliado: 2864435401353e5abcfcb51fc276361a0225c2b7
 working tree: clean
+Python: 3.12.10
+virtual environment: .venv
+pytest: 348 passed
+compileall: PASS
+git diff --check: PASS
 ```
 
-Antes de iniciar cualquier nueva implementación debe revalidarse localmente:
+La validación anterior certifica el punto de partida técnico del sprint.
 
-- rama actual;
-- sincronización con `origin/main`;
-- working tree;
-- versión de Python;
-- dependencias;
-- suite completa;
-- `compileall`;
-- `git diff --check`.
-
-La corrección de este documento no sustituye una validación funcional ni
-autoriza el siguiente sprint.
+La actualización de este documento registra una autorización humana ya emitida;
+no crea autoridad por sí misma ni autoriza ningún sprint posterior.
 
 ---
 
@@ -738,21 +782,26 @@ Estado reconciliado:
 
 ```text
 rama permanente: main
-commit de referencia: e3c28131f491b740c352da79537cd9233d7f4979
+commit de referencia: 2864435401353e5abcfcb51fc276361a0225c2b7
 Sprint 7.7: cerrado
 Sprint 7.8: completado
+Sprint 7.9: en ejecución
+rama temporal activa: sprint/7.9-conversation-continuity
 certification branch activa: no
 release promovida adicional: no
-próximo sprint autorizado: ninguno
+sprint actualmente autorizado: 7.9 — Conversation Continuity Foundation
+sprint posterior autorizado: ninguno
 ```
 
-El commit `e3c28131f491b740c352da79537cd9233d7f4979` es el estado de `main`
-contra el cual se realiza esta reconciliación documental. Un commit documental
-posterior que contenga esta corrección no altera por sí mismo el último baseline
-funcional ni autoriza una nueva implementación.
+El commit `2864435401353e5abcfcb51fc276361a0225c2b7` es el estado de `main`
+contra el cual fue activado Sprint 7.9.
 
-No debe certificarse una nueva release, crear o mover un tag, abrir un sprint o
-ampliar autoridad sin un proceso específico de evaluación y aprobación.
+Los commits producidos dentro de la rama temporal no alteran por sí mismos el
+baseline permanente hasta ser revisados e integrados.
+
+No debe certificarse una nueva release, crear o mover un tag, abrir un sprint
+posterior a 7.9 o ampliar autoridad sin un proceso específico de evaluación y
+aprobación.
 
 ---
 
@@ -793,14 +842,22 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ---
 
-## Planificación posterior al Sprint 7.8
+## Planificación vigente — Sprint 7.9
 
 Sprint 7.8 está completado.
+
+Sprint 7.9 se encuentra autorizado y en ejecución.
 
 Actualmente:
 
 ```text
-NEXT SPRINT
+LAST COMPLETED SPRINT
+Sprint 7.8 — Cognitive Conversation Execution Path Foundation
+
+ACTIVE AUTHORIZED SPRINT
+Sprint 7.9 — Conversation Continuity Foundation
+
+SUBSEQUENT SPRINT
 NONE AUTHORIZED
 ```
 
@@ -810,9 +867,18 @@ La fuente derivada canónica para planificación es:
 docs/project/implementation_roadmap.md
 ```
 
+La ficha operativa que delimita Sprint 7.9 es:
+
+```text
+docs/project/sprints/SPRINT-7.9.md
+```
+
 Las ideas registradas en `documents/projects/jarvis/ideas.md`, las referencias
 de `docs/project/concepts/` y las iniciativas reconocidas para planificación
-futura pueden alimentar una evaluación posterior, pero:
+futura pueden informar la implementación únicamente dentro del alcance
+autorizado.
+
+Se mantiene:
 
 ```text
 idea != roadmap
@@ -820,17 +886,11 @@ roadmap != aprobación
 evidencia != autoridad
 ```
 
-`project_context.md` no debe duplicar el roadmap ni establecer por sí mismo la
-secuencia del trabajo futuro.
+`project_context.md` no duplica el roadmap ni concede autoridad.
 
-Antes de seleccionar la próxima unidad deberán compararse las necesidades reales
-del baseline, riesgos, dependencias, arquitectura, seguridad, complejidad del
-Kernel y evidencia disponible.
-
-En particular, agentes, tools, red, navegación, mensajería externa,
-automatización y otras rutas operativas de mayor riesgo no deben adelantarse
-mientras sus foundations de seguridad, gobernanza, contención y evidencia no
-estén suficientemente justificadas y aprobadas.
+Agentes, tools, red, navegación, mensajería externa, automatización y otras
+rutas operativas de mayor riesgo continúan postergadas salvo autorización
+independiente y foundations suficientes.
 
 ---
 
@@ -976,10 +1036,12 @@ obtener aprobación explícita.
 
 ## Política de actualización
 
-Este documento fue reconciliado contra el estado observado:
+Este documento fue reconciliado contra el estado observado utilizado para
+activar Sprint 7.9:
 
 ```text
-main@e3c28131f491b740c352da79537cd9233d7f4979
+main@2864435401353e5abcfcb51fc276361a0225c2b7
+active_work_branch@sprint/7.9-conversation-continuity
 ```
 
 `as_of_commit` identifica el commit de referencia utilizado para reconstruir el
