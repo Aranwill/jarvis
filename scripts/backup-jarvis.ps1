@@ -2,6 +2,15 @@
 # Malāk - Backup
 # ==========================================================
 
+# LEGACY OPERATIONAL TOOLING
+#
+# Este script conserva el esquema de backup utilizado durante la etapa basada
+# en Open WebUI y su vector_db.
+#
+# No constituye la estrategia oficial actual de persistencia o backup de Malak.
+# Se conserva exclusivamente por trazabilidad y recuperación de infraestructura
+# histórica.
+
 $ErrorActionPreference = "Stop"
 
 $fecha = Get-Date -Format "yyyy-MM-dd_HH-mm"
