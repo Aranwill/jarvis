@@ -1,6 +1,7 @@
 import pytest
 
 from malak.core.conversation import (
+    ConversationMessage,
     ConversationProvider,
     ConversationRequest,
     ConversationResponse,
@@ -27,6 +28,42 @@ def test_conversation_request_can_be_created():
     assert request.model == "test-model"
     assert request.system_prompt == "You are Malak."
 
+def test_conversation_message_can_be_created():
+    message = ConversationMessage(
+        role="user",
+        content="Hello Malak",
+    )
+
+    assert message.role == "user"
+    assert message.content == "Hello Malak"
+
+
+def test_conversation_request_defaults_to_empty_history():
+    request = ConversationRequest(
+        prompt="Hello Malak",
+    )
+
+    assert request.history == ()
+
+
+def test_conversation_request_can_receive_history():
+    history = (
+        ConversationMessage(
+            role="user",
+            content="My name is Aranwill.",
+        ),
+        ConversationMessage(
+            role="assistant",
+            content="Understood.",
+        ),
+    )
+
+    request = ConversationRequest(
+        prompt="What is my name?",
+        history=history,
+    )
+
+    assert request.history == history
 
 def test_conversation_response_can_be_created():
     response = ConversationResponse(
