@@ -6,10 +6,17 @@ from typing import Protocol
 
 
 @dataclass(frozen=True)
+class ConversationMessage:
+    role: str
+    content: str
+
+
+@dataclass(frozen=True)
 class ConversationRequest:
     prompt: str
     model: str | None = None
     system_prompt: str | None = None
+    history: tuple[ConversationMessage, ...] = ()
 
 
 @dataclass(frozen=True)
