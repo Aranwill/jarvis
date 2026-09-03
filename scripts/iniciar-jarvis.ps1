@@ -8,6 +8,19 @@ Write-Host " Iniciando Malāk" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
+# LEGACY OPERATIONAL TOOLING
+#
+# Este script conserva el launcher utilizado durante la etapa basada en
+# Docker + Open WebUI.
+#
+# No constituye el mecanismo oficial actual de inicio de Malak.
+# El entrypoint cognitivo vigente se documenta en README.md y utiliza:
+#
+#     python -m malak.app.cli
+#
+# Se conserva exclusivamente por trazabilidad y compatibilidad con la
+# infraestructura histórica.
+
 # ----------------------------------------------------------
 # Docker Desktop
 # ----------------------------------------------------------
