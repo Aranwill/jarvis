@@ -11,6 +11,11 @@ class ConversationMessage:
     content: str
 
 
+    def __post_init__(self) -> None:
+        if self.role not in {"user", "assistant"}:
+            raise ValueError("role must be 'user' or 'assistant'")
+
+
 @dataclass(frozen=True)
 class ConversationRequest:
     prompt: str

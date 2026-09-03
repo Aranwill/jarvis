@@ -37,6 +37,15 @@ def test_conversation_message_can_be_created():
     assert message.role == "user"
     assert message.content == "Hello Malak"
 
+def test_conversation_message_rejects_system_role():
+    with pytest.raises(
+        ValueError,
+        match="role",
+    ):
+        ConversationMessage(
+            role="system",
+            content="You are Malak.",
+        )
 
 def test_conversation_request_defaults_to_empty_history():
     request = ConversationRequest(
