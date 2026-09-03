@@ -1,3 +1,24 @@
+> [!WARNING]
+> **Registro histórico / legacy**
+>
+> Este archivo conserva decisiones tomadas durante etapas tempranas del proyecto
+> Jarvis y se mantiene exclusivamente por trazabilidad histórica.
+>
+> No representa el registro vigente de decisiones arquitectónicas de Malāk y no
+> debe utilizarse como fuente normativa, operativa ni de planificación actual.
+>
+> Los ADR aceptados vigentes se encuentran en:
+>
+> `docs/architecture/adr/`
+>
+> El índice vigente de decisiones arquitectónicas se encuentra en:
+>
+> `docs/architecture/decisions/decision-index.md`
+>
+> Las referencias históricas contenidas aquí, incluyendo nombres de ADR,
+> tecnologías, modelos o componentes, no sustituyen ni modifican las decisiones
+> canónicas actuales.
+
 # Decisiones Arquitectónicas
 
 ## 2026-05-30
