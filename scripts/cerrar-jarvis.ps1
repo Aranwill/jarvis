@@ -2,6 +2,15 @@
 # Malāk - Cierre
 # ==========================================================
 
+# LEGACY OPERATIONAL TOOLING
+#
+# Este script conserva el procedimiento de cierre utilizado durante la etapa
+# basada en Docker + Open WebUI.
+#
+# No representa el lifecycle operativo actual de Malak.
+# Se conserva exclusivamente por trazabilidad y compatibilidad con la
+# infraestructura histórica.
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host " Cerrando  Malāk" -ForegroundColor Cyan

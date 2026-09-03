@@ -11,7 +11,7 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 
 ### Notes
 
-- Sprint 7.7 se encuentra en proceso de certificación interna del baseline.
+- Sprint 7.8 permanece como el último sprint funcional completado del baseline actual.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
   únicamente por esta sección.
 
