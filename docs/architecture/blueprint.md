@@ -595,13 +595,15 @@ Queda prohibido:
 
 # 13. Estado del Blueprint
 
-Versión actual:
+Versión del Blueprint:
 
-**Blueprint v0.6.0-alpha**
+**Blueprint v0.6.1-alpha**
 
-Estado actual:
+Estado normativo:
 
-**Documento Maestro de Arquitectura aprobado, validado e implementado parcialmente hasta Sprint 6.5**
+**Documento Maestro de Arquitectura aprobado y validado.**
+
+La cobertura de implementación y el sprint operativo vigente se determinan mediante la documentación `CURRENT_STATE` del proyecto y no forman parte del estado normativo de este Blueprint.
 
 ---
 
