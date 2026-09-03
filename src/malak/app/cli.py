@@ -14,6 +14,7 @@ from malak.observability.operational_event_sink import OperationalEventSink
 from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
+from malak.services.conversation_context import InMemoryConversationContext
 from malak.services.conversation_service import ConversationService
 
 
@@ -105,7 +106,12 @@ def build_conversation_service(
     registry = ConversationProviderRegistry()
     registry.register(provider_name, provider)
 
-    return ConversationService(registry)
+    context = InMemoryConversationContext()
+
+    return ConversationService(
+        registry,
+        context=context,
+    )
 
 
 def run_cli(
@@ -165,6 +171,11 @@ def run_cli(
                 f"Estado: operativo | Provider: {provider_name} | "
                 f"Runtime: {runtime_name}"
             )
+            continue
+
+        if command == "new":
+            conversation_service.reset_context()
+            output_fn("Nueva conversación iniciada.")
             continue
 
         request_id = str(uuid.uuid4())
