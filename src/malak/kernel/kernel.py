@@ -39,7 +39,7 @@ class Kernel:
                 source="kernel",
             )
 
-        result = capability.execute(request.content)
+        result = capability.execute(request)
 
         return Response(
             content=result,

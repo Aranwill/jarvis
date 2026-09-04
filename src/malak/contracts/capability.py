@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from malak.core.request import Request
+
 
 class Capability(ABC):
     """
@@ -17,7 +19,7 @@ class Capability(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def execute(self, request):
+    def execute(self, request: Request):
         """
         Execute the capability.
         """
