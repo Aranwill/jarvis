@@ -446,7 +446,7 @@ def test_run_cli_displays_help() -> None:
     )
 
     assert HELP_MESSAGE in outputs
-
+    assert "new     Inicia una nueva conversación." in HELP_MESSAGE
 
 def test_run_cli_displays_status() -> None:
     outputs: list[str] = []
@@ -513,3 +513,44 @@ def test_run_cli_routes_prompt_through_kernel(monkeypatch) -> None:
     assert kernel.requests[0].content == "Hola"
     assert kernel.requests[0].session_id == "cli"
     assert "Malāk> Respuesta desde Kernel" in outputs
+
+def test_run_cli_preserves_history_between_prompts() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    run_cli(
+        service=service,
+        input_fn=make_input(["Primero", "Segundo", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert runtime.last_request is not None
+    assert runtime.last_request.prompt == "Segundo"
+    assert [
+        (message.role, message.content)
+        for message in runtime.last_request.history
+    ] == [
+        ("user", "Primero"),
+        ("assistant", "Respuesta controlada"),
+    ]
+
+
+def test_run_cli_new_resets_history_without_generating() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    run_cli(
+        service=service,
+        input_fn=make_input(
+            ["Primero", "new", "Segundo", "exit"]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert runtime.last_request is not None
+    assert runtime.last_request.prompt == "Segundo"
+    assert runtime.last_request.history == ()
+    assert outputs.count("Malāk> Respuesta controlada") == 2
+    assert "Nueva conversación iniciada." in outputs

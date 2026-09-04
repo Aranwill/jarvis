@@ -3,6 +3,7 @@ import json
 import pytest
 
 from malak.runtime.runtime_metric_store import InMemoryRuntimeMetricStore
+from malak.core.conversation import ConversationMessage
 from malak.core.conversation import ConversationRequest
 from malak.runtime.ollama_runtime import OllamaRuntime
 
@@ -36,7 +37,10 @@ def test_ollama_runtime_generates_conversation_response(
         return FakeHTTPResponse(
             {
                 "model": "qwen3.5:9b",
-                "response": "Respuesta generada por Ollama.",
+                "message": {
+                    "role": "assistant",
+                    "content": "Respuesta generada por Ollama.",
+                },
             }
         )
 
@@ -56,20 +60,46 @@ def test_ollama_runtime_generates_conversation_response(
             prompt="Hola Malak",
             model="qwen3.5:9b",
             system_prompt="Responde de forma breve.",
+            history=(
+                ConversationMessage(
+                    role="user",
+                    content="Pregunta anterior",
+                ),
+                ConversationMessage(
+                    role="assistant",
+                    content="Respuesta anterior",
+                ),
+            ),
         )
     )
 
     http_request = captured["request"]
     request_payload = json.loads(http_request.data.decode("utf-8"))
 
-    assert http_request.full_url == "http://localhost:11434/api/generate"
+    assert http_request.full_url == "http://localhost:11434/api/chat"
     assert http_request.get_method() == "POST"
     assert captured["timeout"] == 30.0
 
     assert request_payload == {
         "model": "qwen3.5:9b",
-        "prompt": "Hola Malak",
-        "system": "Responde de forma breve.",
+        "messages": [
+            {
+                "role": "system",
+                "content": "Responde de forma breve.",
+            },
+            {
+                "role": "user",
+                "content": "Pregunta anterior",
+            },
+            {
+                "role": "assistant",
+                "content": "Respuesta anterior",
+            },
+            {
+                "role": "user",
+                "content": "Hola Malak",
+            },
+        ],
         "stream": False,
         "keep_alive": 0,
     }
@@ -119,6 +149,9 @@ def test_ollama_runtime_rejects_response_without_content(
         return FakeHTTPResponse(
             {
                 "model": "qwen3.5:9b",
+                "message": {
+                    "role": "assistant",
+                },
             }
         )
 
@@ -133,7 +166,7 @@ def test_ollama_runtime_rejects_response_without_content(
 
     with pytest.raises(
         RuntimeError,
-        match="response",
+        match="message",
     ):
         runtime.generate(
             ConversationRequest(
@@ -152,7 +185,10 @@ def test_ollama_runtime_captures_execution_metrics(
         return FakeHTTPResponse(
             {
                 "model": "qwen3.5:9b",
-                "response": "Respuesta con telemetría.",
+                "message": {
+                    "role": "assistant",
+                    "content": "Respuesta con telemetría.",
+                },
                 "total_duration": 15_000_000_000,
                 "load_duration": 3_000_000_000,
                 "prompt_eval_count": 120,
@@ -199,7 +235,10 @@ def test_ollama_runtime_appends_metric_sample_to_store(
         return FakeHTTPResponse(
             {
                 "model": "qwen3.5:9b",
-                "response": "Respuesta registrada.",
+                "message": {
+                    "role": "assistant",
+                    "content": "Respuesta registrada.",
+                },
                 "total_duration": 15_000_000_000,
                 "load_duration": 3_000_000_000,
                 "prompt_eval_count": 120,
