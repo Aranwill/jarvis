@@ -72,20 +72,42 @@ class OllamaRuntime(LLMRuntime):
 
         self._last_metrics = None
 
+        messages: list[dict[str, str]] = []
+
+        if request.system_prompt is not None:
+            messages.append(
+                {
+                    "role": "system",
+                    "content": request.system_prompt,
+                }
+            )
+
+        for message in request.history:
+            messages.append(
+                {
+                    "role": message.role,
+                    "content": message.content,
+                }
+            )
+
+        messages.append(
+            {
+                "role": "user",
+                "content": request.prompt,
+            }
+        )
+
         payload: dict[str, Any] = {
             "model": model,
-            "prompt": request.prompt,
+            "messages": messages,
             "stream": False,
             "keep_alive": self._keep_alive,
         }
 
-        if request.system_prompt is not None:
-            payload["system"] = request.system_prompt
-
         encoded_payload = json.dumps(payload).encode("utf-8")
 
         http_request = Request(
-            url=f"{self._base_url}/api/generate",
+            url=f"{self._base_url}/api/chat",
             data=encoded_payload,
             headers={
                 "Content-Type": "application/json",
@@ -129,11 +151,18 @@ class OllamaRuntime(LLMRuntime):
                 "Ollama returned an invalid response payload"
             )
 
-        generated_content = response_payload.get("response")
+        message_payload = response_payload.get("message")
+
+        if not isinstance(message_payload, dict):
+            raise RuntimeError(
+                "Ollama response does not contain a valid message field"
+            )
+
+        generated_content = message_payload.get("content")
 
         if not isinstance(generated_content, str):
             raise RuntimeError(
-                "Ollama response does not contain a valid response field"
+                "Ollama response does not contain a valid message content field"
             )
 
         response_model = response_payload.get("model")

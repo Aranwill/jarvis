@@ -3,13 +3,13 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-02
-as_of_commit: d1419dd84e8d8bbb0904945008943f4559d4c69a
+as_of_date: 2026-09-03
+as_of_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: d1419dd84e8d8bbb0904945008943f4559d4c69a
-certification_status: sprint_7_8_completed
+candidate_commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+certification_status: sprint_7_9_completed
 legacy_planning_source:
   - docs/project/roadmap.md
 language: es
@@ -227,16 +227,23 @@ No deben actuar como segundo roadmap.
 
 - Repositorio: `Aranwill/jarvis`.
 - Rama permanente: `main`.
-- Commit material de referencia utilizado para la planificación posterior al Sprint 7.8:
+- Commit material de referencia revalidado para la activación de Sprint 7.9:
+
+```text
+2864435401353e5abcfcb51fc276361a0225c2b7
+```
+
+Este commit identifica el baseline material evaluado y reproducido antes de
+abrir la rama temporal de Sprint 7.9.
+
+El commit anterior de referencia de planificación post-Sprint 7.8:
 
 ```text
 d1419dd84e8d8bbb0904945008943f4559d4c69a
 ```
 
-Este commit identifica el baseline material evaluado por este roadmap.
-No constituye una obligación de reescribir el documento después de commits
-puramente documentales, mecánicos o de sincronización que no alteren la
-planificación descrita.
+se conserva como referencia histórica de planificación y no como baseline
+operativo vigente para la ejecución de Sprint 7.9.
 
 - Baseline nominal:
 
@@ -244,20 +251,26 @@ planificación descrita.
 v0.6.0-alpha
 ```
 
-- Última suite completa documentada durante el cierre técnico del Sprint 7.8:
+- Suite completa reproducida durante la activación de Sprint 7.9:
 
 ```text
 348 passed
 ```
 
-- `compileall`: PASS durante Sprint 7.8.
-- `git diff --check`: PASS durante Sprint 7.8.
+- `compileall`: PASS durante la activación de Sprint 7.9.
+- `git diff --check`: PASS durante la activación de Sprint 7.9.
 - Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
 - Sprint 7.5 cerrado: `Security Control Plane Foundation`.
 - Sprint 7.6 cerrado: `Secure Context Lifecycle Foundation`.
 - Sprint 7.7 cerrado: `Validación de baseline y release interna`.
 - Sprint 7.8 completado: `Cognitive Conversation Execution Path Foundation`.
+- Sprint 7.9 completado: `Conversation Continuity Foundation`.
+- Candidato funcional validado de Sprint 7.9: `d58b8ec98d48f5e2eac115d1d54b193e1df617fd`.
+- Validación final del candidato: `365 passed`, `compileall: PASS`,
+  `git diff --check: PASS`, runtime real: PASS, revisión final 4R: PASS.
+- Cierre de Sprint 7.9: aprobado por el propietario el 2026-09-03.
 - `main` es la única rama permanente.
+- Rama temporal de cierre: `sprint/7.9-conversation-continuity`.
 
 ---
 
@@ -308,6 +321,10 @@ configuration
 
 permanece fuera del Kernel.
 
+Sprint 7.9 añadió continuidad conversacional efímera mediante historial
+estructurado, `InMemoryConversationContext` y limpieza explícita con `new`,
+sin introducir estado conversacional en el Kernel ni en `SecurityContext`.
+
 La finalización de este pipeline no autoriza nuevas capabilities ni ampliación
 de autoridad.
 
@@ -328,18 +345,22 @@ aprobado
 → cerrado
 ```
 
-Estado observado después del cierre:
+Estado revalidado antes de abrir Sprint 7.9:
 
 ```text
-baseline material de referencia: d1419dd84e8d8bbb0904945008943f4559d4c69a
+baseline material de referencia: 2864435401353e5abcfcb51fc276361a0225c2b7
 rama permanente: main
+rama temporal activa: sprint/7.9-conversation-continuity
 
 Sprint 7.7: cerrado
 Sprint 7.8: completado
+Sprint 7.9: en ejecución
 
-suite completa documentada: 348 passed
+suite completa reproducida: 348 passed
 compileall: PASS
 git diff --check: PASS
+working tree inicial: clean
+HEAD inicial == origin/main
 
 ruta cognitiva conversacional: validada
 runtime determinista: MockLLMRuntime
@@ -360,7 +381,7 @@ La finalización de Sprint 7.8 no autoriza automáticamente:
 
 ---
 
-# 8. Sprints cerrados del bloque 7.x
+# 8. Estado de sprints del bloque 7.x
 
 | Sprint | Estado | Resultado |
 |---|---|---|
@@ -373,29 +394,53 @@ La finalización de Sprint 7.8 no autoriza automáticamente:
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
 | 7.7 | Cerrado | Validación integral y certificación interna del baseline |
 | 7.8 | Completado | Primera ruta cognitiva conversacional integrada |
+| 7.9 | Completado | Conversation Continuity Foundation; cierre aprobado por el propietario |
 
 ---
 
 # 9. Estado de autorización de nuevos sprints
 
 ```text
-NO HAY UN SPRINT POSTERIOR AUTORIZADO AUTOMÁTICAMENTE
+SPRINT 7.9 COMPLETADO — CIERRE APROBADO
 ```
 
-El cierre de Sprint 7.8 no constituye aprobación del siguiente sprint.
-
-Cualquier nueva unidad deberá ser:
+Sprint 7.9 — `Conversation Continuity Foundation` fue:
 
 ```text
-inspeccionada
-→ justificada
-→ definida
-→ evaluada
-→ debatida
-→ aprobada explícitamente
+inspeccionado
+→ justificado
+→ definido
+→ evaluado
+→ debatido
+→ aprobado explícitamente por el propietario
 ```
 
-antes de su implementación.
+el 2026-09-03.
+
+La implementación y validación del alcance autorizado están completas.
+El propietario aprobó explícitamente el cierre del Sprint 7.9 el 2026-09-03.
+
+La autorización se limita exclusivamente al alcance definido en:
+
+```text
+docs/project/sprints/SPRINT-7.9.md
+```
+
+La autorización de Sprint 7.9 no autoriza automáticamente:
+
+- Sprint 7.10;
+- ninguna unidad posterior;
+- ampliaciones de alcance no definidas;
+- nuevas capabilities;
+- Memory persistente;
+- agentes;
+- tools;
+- Sandbox;
+- navegación;
+- ampliación de autoridad.
+
+Cualquier unidad posterior deberá atravesar nuevamente el proceso completo de
+admisión y aprobación.
 
 ---
 
@@ -879,7 +924,7 @@ Toda selección futura deberá justificarse contra:
 | Propuesta | Estado | Observación |
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Próxima unidad de implementación | No aprobada | Debe definirse después de revisar el baseline vigente |
+| Unidad posterior a Sprint 7.9 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de Sprint 7.9 |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
@@ -959,6 +1004,7 @@ docs/project/sprints/SPRINT-7.5.md
 docs/project/sprints/SPRINT-7.6.md
 docs/project/sprints/SPRINT-7.7.md
 docs/project/sprints/SPRINT-7.8.md
+docs/project/sprints/SPRINT-7.9.md
 ```
 
 Interpretación:
@@ -1107,18 +1153,24 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 MATERIAL BASELINE REFERENCE
-d1419dd84e8d8bbb0904945008943f4559d4c69a
+2864435401353e5abcfcb51fc276361a0225c2b7
 
-CURRENT BRANCH
+PERMANENT BRANCH
 main
+
+ACTIVE SPRINT BRANCH
+sprint/7.9-conversation-continuity
 
 NOMINAL VERSION
 v0.6.0-alpha
 
 LAST COMPLETED SPRINT
-Sprint 7.8 — Cognitive Conversation Execution Path Foundation
+Sprint 7.9 — Conversation Continuity Foundation
 
-NEXT SPRINT
+ACTIVE SPRINT
+NONE
+
+SPRINT AFTER 7.9
 NONE AUTHORIZED
 
 LEGACY ROADMAP
