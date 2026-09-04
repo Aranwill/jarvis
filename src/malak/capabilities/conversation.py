@@ -35,6 +35,7 @@ class ConversationCapability(Capability):
         response = self._service.generate(
             request=conversation_request,
             provider=self._provider_name,
+            session_id=request.session_id,
         )
 
         return response.content

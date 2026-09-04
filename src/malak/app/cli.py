@@ -139,6 +139,8 @@ def run_cli(
         model=model,
     )
 
+    session_id = str(uuid.uuid4())
+
     output_fn("Malāk CLI")
     output_fn(f"Runtime activo: {runtime_name}")
     output_fn("Escribe 'help' para ver los comandos disponibles.")
@@ -175,14 +177,15 @@ def run_cli(
             continue
 
         if command == "new":
-            conversation_service.reset_context()
+            conversation_service.reset_context(session_id)
+            session_id = str(uuid.uuid4())
             output_fn("Nueva conversación iniciada.")
             continue
 
         request_id = str(uuid.uuid4())
         request = Request(
             content=prompt,
-            session_id="cli",
+            session_id=session_id,
             request_id=request_id,
         )
 
