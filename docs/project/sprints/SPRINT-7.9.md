@@ -3,7 +3,7 @@ title: Sprint 7.9 — Conversation Continuity Foundation
 status: en_ejecucion
 authority: documentación operativa derivada
 as_of_date: 2026-09-03
-as_of_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
+as_of_commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
 branch: sprint/7.9-conversation-continuity
 language: es
 ---
@@ -993,6 +993,204 @@ Sprint branch
 El Project Vault continúa siendo una proyección derivada.
 
 No sustituye la autoridad del repositorio oficial.
+
+---
+
+## Evidencia de implementación y validación
+
+### Candidato final evaluado
+
+```text
+commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+branch: sprint/7.9-conversation-continuity
+```
+
+El candidato final fue validado con working tree limpio.
+
+### Gates implementados
+
+```text
+7.9-A — Sprint Activation & Architecture Freeze              PASS
+7.9-B — Conversation Contract Extension                     PASS
+7.9-C — Bounded In-Memory Conversation Context              PASS
+7.9-D — ConversationService Integration                     PASS
+7.9-E — Structured Runtime Conversation Adapter             PASS
+7.9-F — CLI Conversation Continuity                         PASS
+7.9-G — Cognitive End-to-End Validation                     PASS
+7.9-H — Real Runtime Validation & Final Review              PASS
+```
+
+### Findings de revisión
+
+Durante la validación se identificaron dos findings acotados.
+
+#### G-R01 — Supported history roles
+
+Finding:
+
+```text
+ConversationMessage permitía roles fuera del conjunto
+inicial autorizado para historial:
+user | assistant
+```
+
+Corrección:
+
+```text
+ConversationMessage rechaza roles no soportados.
+```
+
+Resultado:
+
+```text
+Correction Budget: PASS
+Fix rounds: 1/1
+Validation: PASS
+```
+
+Commit:
+
+```text
+3ed0d09af5e4a64ba87742116c6c2ff4b033cf6
+```
+
+#### H-R01 — CLI help consistency
+
+Finding:
+
+```text
+el comando `new` estaba implementado y probado,
+pero no aparecía en HELP_MESSAGE.
+```
+
+Corrección:
+
+```text
+HELP_MESSAGE documenta el comando `new`
+sin modificar su comportamiento.
+```
+
+Resultado:
+
+```text
+Correction Budget: PASS
+Fix rounds: 1/1
+Validation: PASS
+```
+
+Commit:
+
+```text
+d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+```
+
+### Validación automatizada final
+
+Sobre el candidato final:
+
+```text
+python -m pytest -q
+365 passed
+
+python -m compileall src tests
+PASS
+
+git diff --check baseline..candidate
+PASS
+
+working tree
+clean
+```
+
+### Invariantes arquitectónicos
+
+Comparados contra el baseline inicial del Sprint 7.9:
+
+```text
+Kernel: unchanged
+Planner: unchanged
+Capability contract: unchanged
+ConversationCapability: unchanged
+Security: unchanged
+```
+
+No se introdujo:
+
+```text
+Memory persistente
+persistencia en disco
+Knowledge
+RAG
+GraphRAG
+agentes
+tools
+Sandbox
+navegación
+Internet
+nueva autoridad
+estado conversacional en Kernel
+historial en SecurityContext
+```
+
+### Validación con runtime real
+
+Runtime utilizado:
+
+```text
+OllamaRuntime
+model: qwen3.5:9b
+base URL: http://localhost:11434
+```
+
+Se ejecutó el escenario manual definido para Sprint 7.9-H.
+
+Resultado:
+
+```text
+continuidad entre turnos: PASS
+uso del contexto en un turno posterior: PASS
+comando `new`: PASS
+eliminación del contexto anterior tras `new`: PASS
+```
+
+La evaluación validó transporte y eliminación del contexto,
+no una formulación textual exacta del modelo.
+
+No se persistió el contenido conversacional utilizado durante la prueba.
+
+```text
+Real Runtime Validation: PASS
+```
+
+### Revisión final 4R
+
+```text
+Risk:         PASS
+Readability:  PASS
+Reliability:  PASS
+Resilience:   PASS
+
+Overall:      PASS
+```
+
+No quedaron findings técnicos abiertos derivados de la revisión final.
+
+### Estado previo al cierre
+
+```text
+implementación: completa
+validación automatizada: completa
+validación runtime real: completa
+revisión arquitectónica: completa
+revisión 4R: PASS
+documentación de cierre: en preparación
+aprobación final del propietario: pendiente
+```
+
+El candidato está técnicamente preparado para cierre, PR y revisión.
+
+Este estado no constituye por sí mismo autorización para iniciar Sprint 7.10
+ni ninguna otra unidad posterior.
 
 ---
 
