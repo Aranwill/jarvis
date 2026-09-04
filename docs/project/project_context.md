@@ -2,12 +2,12 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-03
-as_of_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
+as_of_date: 2026-09-04
+as_of_commit: 43041f920a1b8063491e6d5cabcb1fd887bdc7a8
 branch: main
 certification_branch: null
-candidate_commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
-certification_status: sprint_7_9_completed
+candidate_commit: 0735223
+certification_status: sprint_7_10_in_closure
 baseline: v0.6.0-alpha
 ---
 
@@ -119,34 +119,55 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 Repositorio oficial:          Aranwill/jarvis
 Raíz Git local:               D:\Ollama\jarvis
 Rama permanente:              main
-Commit reconciliado:          2864435401353e5abcfcb51fc276361a0225c2b7
+Commit reconciliado:          43041f920a1b8063491e6d5cabcb1fd887bdc7a8
 Baseline nominal:             v0.6.0-alpha
-Último sprint completado:     Sprint 7.9 — Conversation Continuity Foundation
-Sprint activo autorizado:     ninguno
-Rama temporal de cierre:      sprint/7.9-conversation-continuity
-Candidato funcional validado: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
-Estado de Sprint 7.9:         completado; integración a main pendiente
+Último sprint integrado:      Sprint 7.9 — Conversation Continuity Foundation
+Sprint activo autorizado:     Sprint 7.10 — Conversation Session Isolation Foundation
+Rama temporal activa:         feat/sprint-7.10-session-isolation
+Candidato funcional validado: 0735223
+Estado Sprint 7.10:           implementación funcional completa; cierre documental en curso
 Sprint posterior autorizado:  ninguno
 ```
 
 El commit de referencia reconciliado en `main` es:
 
 ```text
-28644354 Merge pull request #55 from Aranwill/docs/vault-first-context-retrieval
+43041f92 Merge pull request #57 from Aranwill/docs/agents-engineering-method-reference
 ```
 
-Sprint 7.9 es el último sprint funcional completado.
+Sprint 7.9 es el último sprint integrado en `main`.
 
-Sprint 7.9 fue evaluado, debatido y aprobado explícitamente por el propietario
-el 2026-09-03. Su implementación se realizó en la rama temporal
-`sprint/7.9-conversation-continuity` y quedó limitada al alcance definido en
-`docs/project/sprints/SPRINT-7.9.md`.
+Sprint 7.10 — `Conversation Session Isolation Foundation` fue evaluado,
+debatido y aprobado explícitamente por el propietario el 2026-09-04.
 
-La rama `main` continúa siendo la única rama permanente y la fuente del baseline
-operativo actual.
+Su implementación funcional se realiza en:
 
-La rama temporal de Sprint 7.9 no constituye baseline hasta su revisión,
-integración y validación.
+```text
+feat/sprint-7.10-session-isolation
+```
+
+y quedó limitada al alcance definido en:
+
+```text
+docs/project/sprints/SPRINT-7.10.md
+```
+
+El candidato funcional validado es:
+
+```text
+0735223
+```
+
+con:
+
+```text
+372 passed
+compileall: PASS
+git diff --check: PASS
+```
+
+Sprint 7.10 permanece en cierre documental y todavía no constituye baseline
+integrado hasta completar revisión, PR y merge a `main`.
 
 ---
 
@@ -277,6 +298,14 @@ frontera de aplicación mediante configuración externa.
 Sprint 7.9 añadió continuidad conversacional efímera mediante
 `InMemoryConversationContext`, integrada opcionalmente en `ConversationService`
 y mantenida fuera del Kernel y de `SecurityContext`.
+
+Sprint 7.10 añade aislamiento explícito de sesiones conversacionales.
+`Request.session_id` se preserva a través de la frontera de Capability,
+`ConversationService` selecciona el contexto mediante esa identidad y
+`InMemoryConversationContext` mantiene ventanas independientes por sesión.
+
+La evolución no introduce persistencia, Memory ni estado conversacional
+dentro del Kernel o de `SecurityContext`.
 
 ### Integración Kernel–ConversationService
 

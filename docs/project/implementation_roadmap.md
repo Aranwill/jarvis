@@ -3,13 +3,13 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-03
-as_of_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
+as_of_date: 2026-09-04
+as_of_commit: 43041f920a1b8063491e6d5cabcb1fd887bdc7a8
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
-certification_status: sprint_7_9_completed
+candidate_commit: 0735223
+certification_status: sprint_7_10_in_closure
 legacy_planning_source:
   - docs/project/roadmap.md
 language: es
@@ -227,23 +227,11 @@ No deben actuar como segundo roadmap.
 
 - Repositorio: `Aranwill/jarvis`.
 - Rama permanente: `main`.
-- Commit material de referencia revalidado para la activación de Sprint 7.9:
+- Baseline integrado de referencia:
 
 ```text
-2864435401353e5abcfcb51fc276361a0225c2b7
+43041f920a1b8063491e6d5cabcb1fd887bdc7a8
 ```
-
-Este commit identifica el baseline material evaluado y reproducido antes de
-abrir la rama temporal de Sprint 7.9.
-
-El commit anterior de referencia de planificación post-Sprint 7.8:
-
-```text
-d1419dd84e8d8bbb0904945008943f4559d4c69a
-```
-
-se conserva como referencia histórica de planificación y no como baseline
-operativo vigente para la ejecución de Sprint 7.9.
 
 - Baseline nominal:
 
@@ -251,26 +239,57 @@ operativo vigente para la ejecución de Sprint 7.9.
 v0.6.0-alpha
 ```
 
-- Suite completa reproducida durante la activación de Sprint 7.9:
+- Último sprint integrado:
 
 ```text
-348 passed
+Sprint 7.9 — Conversation Continuity Foundation
 ```
 
-- `compileall`: PASS durante la activación de Sprint 7.9.
-- `git diff --check`: PASS durante la activación de Sprint 7.9.
-- Sprint 7.4 cerrado: `Consolidación de logs, métricas y auditoría`.
-- Sprint 7.5 cerrado: `Security Control Plane Foundation`.
-- Sprint 7.6 cerrado: `Secure Context Lifecycle Foundation`.
-- Sprint 7.7 cerrado: `Validación de baseline y release interna`.
-- Sprint 7.8 completado: `Cognitive Conversation Execution Path Foundation`.
-- Sprint 7.9 completado: `Conversation Continuity Foundation`.
-- Candidato funcional validado de Sprint 7.9: `d58b8ec98d48f5e2eac115d1d54b193e1df617fd`.
-- Validación final del candidato: `365 passed`, `compileall: PASS`,
-  `git diff --check: PASS`, runtime real: PASS, revisión final 4R: PASS.
-- Cierre de Sprint 7.9: aprobado por el propietario el 2026-09-03.
-- `main` es la única rama permanente.
-- Rama temporal de cierre: `sprint/7.9-conversation-continuity`.
+- Sprint autorizado actualmente:
+
+```text
+Sprint 7.10 — Conversation Session Isolation Foundation
+```
+
+- Rama temporal:
+
+```text
+feat/sprint-7.10-session-isolation
+```
+
+- Candidato funcional validado:
+
+```text
+0735223
+```
+
+- Evidencia funcional del candidato:
+
+```text
+372 passed
+compileall: PASS
+git diff --check: PASS
+```
+
+- `main` continúa siendo la única rama permanente.
+- Sprint 7.10 permanece en cierre documental.
+- Ningún Sprint 7.11 está autorizado.
+
+Como referencia histórica, Sprint 7.9 cerró con candidato funcional:
+
+```text
+d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+```
+
+y validación final:
+
+```text
+365 passed
+compileall: PASS
+git diff --check: PASS
+runtime real: PASS
+revisión final 4R: PASS
+```
 
 ---
 
@@ -325,6 +344,14 @@ Sprint 7.9 añadió continuidad conversacional efímera mediante historial
 estructurado, `InMemoryConversationContext` y limpieza explícita con `new`,
 sin introducir estado conversacional en el Kernel ni en `SecurityContext`.
 
+Sprint 7.10 añade aislamiento conversacional por `session_id`.
+La frontera `Capability.execute(...)` preserva el `Request` existente,
+`ConversationService` selecciona historial por sesión y la CLI rota la
+identidad de sesión mediante `new`.
+
+La implementación permanece efímera y no introduce persistencia, Memory,
+RAG, agentes, Sandbox ni ampliación de autoridad.
+
 La finalización de este pipeline no autoriza nuevas capabilities ni ampliación
 de autoridad.
 
@@ -332,52 +359,56 @@ de autoridad.
 
 # 7. Estado del baseline actual
 
-Sprint 7.7 completó la certificación del baseline anterior.
-
-Sprint 7.8 fue posteriormente:
+Estado observado al cierre funcional de Sprint 7.10:
 
 ```text
-aprobado
-→ implementado
-→ probado
-→ validado
-→ revisado
-→ cerrado
+baseline integrado de referencia:
+43041f920a1b8063491e6d5cabcb1fd887bdc7a8
+
+rama permanente:
+main
+
+rama temporal activa:
+feat/sprint-7.10-session-isolation
+
+Sprint 7.9:
+integrado y completado
+
+Sprint 7.10:
+implementación funcional completa
+cierre documental en curso
+
+candidato funcional:
+0735223
+
+suite completa:
+372 passed
+
+compileall:
+PASS
+
+git diff --check:
+PASS
+
+working tree tras commits funcionales:
+clean
 ```
 
-Estado revalidado antes de abrir Sprint 7.9:
+`main` continúa siendo la única rama permanente.
+
+El candidato de Sprint 7.10 no constituye baseline integrado hasta completar:
 
 ```text
-baseline material de referencia: 2864435401353e5abcfcb51fc276361a0225c2b7
-rama permanente: main
-rama temporal activa: sprint/7.9-conversation-continuity
-
-Sprint 7.7: cerrado
-Sprint 7.8: completado
-Sprint 7.9: en ejecución
-
-suite completa reproducida: 348 passed
-compileall: PASS
-git diff --check: PASS
-working tree inicial: clean
-HEAD inicial == origin/main
-
-ruta cognitiva conversacional: validada
-runtime determinista: MockLLMRuntime
-runtime real: OllamaRuntime
-modelo real validado: qwen3.5:9b
+cierre documental
+→ push
+→ PR
+→ revisión
+→ merge
+→ verificación de main
 ```
 
-La finalización de Sprint 7.8 no autoriza automáticamente:
-
-- un nuevo sprint;
-- promoción de release;
-- creación o movimiento de tags;
-- ampliación de autoridad;
-- incorporación de agentes;
-- incorporación de tools;
-- navegación;
-- ejecución autónoma.
+La implementación de Sprint 7.10 no autoriza automáticamente ninguna unidad
+posterior, Memory persistente, agentes, tools, Sandbox o ampliación de autoridad.
 
 ---
 
@@ -394,53 +425,65 @@ La finalización de Sprint 7.8 no autoriza automáticamente:
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
 | 7.7 | Cerrado | Validación integral y certificación interna del baseline |
 | 7.8 | Completado | Primera ruta cognitiva conversacional integrada |
-| 7.9 | Completado | Conversation Continuity Foundation; cierre aprobado por el propietario |
+| 7.9 | Completado | Conversation Continuity Foundation; integrado en `main` |
+| 7.10 | En cierre | Conversation Session Isolation Foundation; implementación funcional validada |
 
 ---
 
 # 9. Estado de autorización de nuevos sprints
 
 ```text
-SPRINT 7.9 COMPLETADO — CIERRE APROBADO
+SPRINT 7.10 AUTORIZADO
+IMPLEMENTACIÓN FUNCIONAL COMPLETA
+CIERRE DOCUMENTAL EN CURSO
 ```
 
-Sprint 7.9 — `Conversation Continuity Foundation` fue:
+Sprint 7.10 — `Conversation Session Isolation Foundation` fue:
 
 ```text
 inspeccionado
 → justificado
 → definido
-→ evaluado
 → debatido
 → aprobado explícitamente por el propietario
+→ implementado
+→ validado funcionalmente
 ```
 
-el 2026-09-03.
-
-La implementación y validación del alcance autorizado están completas.
-El propietario aprobó explícitamente el cierre del Sprint 7.9 el 2026-09-03.
+el 2026-09-04.
 
 La autorización se limita exclusivamente al alcance definido en:
 
 ```text
-docs/project/sprints/SPRINT-7.9.md
+docs/project/sprints/SPRINT-7.10.md
 ```
 
-La autorización de Sprint 7.9 no autoriza automáticamente:
+La evidencia funcional actual registra:
 
-- Sprint 7.10;
+```text
+candidate: 0735223
+pytest: 372 passed
+compileall: PASS
+git diff --check: PASS
+```
+
+El cierre todavía requiere reconciliación documental, PR, revisión,
+integración a `main` y reconciliación posterior del Vault.
+
+La autorización de Sprint 7.10 no autoriza automáticamente:
+
+- Sprint 7.11;
 - ninguna unidad posterior;
-- ampliaciones de alcance no definidas;
-- nuevas capabilities;
 - Memory persistente;
+- nuevas capabilities;
 - agentes;
 - tools;
 - Sandbox;
 - navegación;
 - ampliación de autoridad.
 
-Cualquier unidad posterior deberá atravesar nuevamente el proceso completo de
-admisión y aprobación.
+Cualquier unidad posterior deberá atravesar nuevamente el proceso completo
+de admisión y aprobación.
 
 ---
 
