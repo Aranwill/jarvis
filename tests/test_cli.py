@@ -104,6 +104,7 @@ class FailingConversationService:
         self,
         request: ConversationRequest,
         provider: str,
+        session_id: str | None = None,
     ) -> ConversationResponse:
         self.call_count += 1
         raise RuntimeError("fallo conversacional")
@@ -115,6 +116,7 @@ def test_build_conversation_service_uses_mock_provider() -> None:
     response = service.generate(
         request=ConversationRequest(prompt="Hola"),
         provider="mock",
+        session_id="build-mock-test",
     )
 
     assert response.content == "[RUNTIME] Hola"
@@ -132,6 +134,7 @@ def test_build_conversation_service_accepts_injected_runtime() -> None:
     response = service.generate(
         request=ConversationRequest(prompt="Hola"),
         provider="ollama",
+        session_id="build-runtime-test",
     )
 
     assert response.content == "[RUNTIME] Hola"
@@ -511,7 +514,10 @@ def test_run_cli_routes_prompt_through_kernel(monkeypatch) -> None:
 
     assert len(kernel.requests) == 1
     assert kernel.requests[0].content == "Hola"
-    assert kernel.requests[0].session_id == "cli"
+    assert (
+        str(UUID(kernel.requests[0].session_id))
+        == kernel.requests[0].session_id
+    )
     assert "Malāk> Respuesta desde Kernel" in outputs
 
 def test_run_cli_preserves_history_between_prompts() -> None:
@@ -554,3 +560,51 @@ def test_run_cli_new_resets_history_without_generating() -> None:
     assert runtime.last_request.history == ()
     assert outputs.count("Malāk> Respuesta controlada") == 2
     assert "Nueva conversación iniciada." in outputs
+
+def test_run_cli_new_rotates_session_id(monkeypatch) -> None:
+    outputs: list[str] = []
+    kernel = RecordingKernel()
+
+    generated_uuids = iter(
+        [
+            UUID("11111111-1111-1111-1111-111111111111"),
+            UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+            UUID("22222222-2222-2222-2222-222222222222"),
+            UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+        ]
+    )
+
+    monkeypatch.setattr(
+        "malak.app.cli.uuid.uuid4",
+        lambda: next(generated_uuids),
+    )
+
+    def fake_build_conversation_kernel(**kwargs):
+        return kernel
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        fake_build_conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        input_fn=make_input(
+            ["Primero", "new", "Segundo", "exit"]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert len(kernel.requests) == 2
+    assert (
+        kernel.requests[0].session_id
+        == "11111111-1111-1111-1111-111111111111"
+    )
+    assert (
+        kernel.requests[1].session_id
+        == "22222222-2222-2222-2222-222222222222"
+    )
+    assert (
+        kernel.requests[0].session_id
+        != kernel.requests[1].session_id
+    )
