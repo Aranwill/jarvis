@@ -24,6 +24,7 @@ HELP_MESSAGE = """
 Comandos disponibles:
   help    Muestra esta ayuda.
   status  Muestra el estado básico de la CLI.
+  new     Inicia una nueva conversación.
   exit    Finaliza la sesión.
 """.strip()
 
