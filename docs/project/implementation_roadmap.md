@@ -4,12 +4,12 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-04
-as_of_commit: 43041f920a1b8063491e6d5cabcb1fd887bdc7a8
+as_of_commit: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
 candidate_commit: 0735223
-certification_status: sprint_7_10_in_closure
+certification_status: sprint_7_10_completed
 legacy_planning_source:
   - docs/project/roadmap.md
 language: es
@@ -227,10 +227,10 @@ No deben actuar como segundo roadmap.
 
 - Repositorio: `Aranwill/jarvis`.
 - Rama permanente: `main`.
-- Baseline integrado de referencia:
+- Commit de integración de Sprint 7.10:
 
 ```text
-43041f920a1b8063491e6d5cabcb1fd887bdc7a8
+270e39b599a7bb3e7e6611e34dd644d0b7004d88
 ```
 
 - Baseline nominal:
@@ -242,38 +242,41 @@ v0.6.0-alpha
 - Último sprint integrado:
 
 ```text
-Sprint 7.9 — Conversation Continuity Foundation
+Sprint 7.10 — Conversation Session Isolation Foundation
 ```
 
 - Sprint autorizado actualmente:
 
 ```text
-Sprint 7.10 — Conversation Session Isolation Foundation
+ninguno
 ```
 
-- Rama temporal:
+- Rama de implementación activa:
 
 ```text
-feat/sprint-7.10-session-isolation
+ninguna
 ```
 
-- Candidato funcional validado:
+- Candidato funcional histórico de Sprint 7.10:
 
 ```text
 0735223
 ```
 
-- Evidencia funcional del candidato:
+- Evidencia post-merge:
 
 ```text
 372 passed
 compileall: PASS
 git diff --check: PASS
+working tree: clean
 ```
 
 - `main` continúa siendo la única rama permanente.
-- Sprint 7.10 permanece en cierre documental.
+- Sprint 7.10 está completado e integrado.
 - Ningún Sprint 7.11 está autorizado.
+- La sincronización del Vault es una operación derivada downstream y no
+  constituye autorización de nuevas unidades.
 
 Como referencia histórica, Sprint 7.9 cerró con candidato funcional:
 
@@ -290,7 +293,6 @@ git diff --check: PASS
 runtime real: PASS
 revisión final 4R: PASS
 ```
-
 ---
 
 # 6. Arquitectura implementada relevante para planificación
@@ -359,29 +361,25 @@ de autoridad.
 
 # 7. Estado del baseline actual
 
-Estado observado al cierre funcional de Sprint 7.10:
+Estado verificado después de integrar Sprint 7.10:
 
 ```text
-baseline integrado de referencia:
-43041f920a1b8063491e6d5cabcb1fd887bdc7a8
+commit de integración Sprint 7.10:
+270e39b599a7bb3e7e6611e34dd644d0b7004d88
 
 rama permanente:
 main
 
-rama temporal activa:
-feat/sprint-7.10-session-isolation
-
-Sprint 7.9:
-integrado y completado
-
 Sprint 7.10:
-implementación funcional completa
-cierre documental en curso
+completado e integrado
 
-candidato funcional:
+sprint activo autorizado:
+ninguno
+
+candidato funcional histórico:
 0735223
 
-suite completa:
+suite post-merge:
 372 passed
 
 compileall:
@@ -390,26 +388,17 @@ PASS
 git diff --check:
 PASS
 
-working tree tras commits funcionales:
+working tree post-merge:
 clean
 ```
 
 `main` continúa siendo la única rama permanente.
 
-El candidato de Sprint 7.10 no constituye baseline integrado hasta completar:
-
-```text
-cierre documental
-→ push
-→ PR
-→ revisión
-→ merge
-→ verificación de main
-```
-
 La implementación de Sprint 7.10 no autoriza automáticamente ninguna unidad
 posterior, Memory persistente, agentes, tools, Sandbox o ampliación de autoridad.
 
+La reconciliación del Malāk Project Vault representa este baseline de forma
+derivada y no altera la autoridad del repositorio oficial.
 ---
 
 # 8. Estado de sprints del bloque 7.x
@@ -426,51 +415,54 @@ posterior, Memory persistente, agentes, tools, Sandbox o ampliación de autorida
 | 7.7 | Cerrado | Validación integral y certificación interna del baseline |
 | 7.8 | Completado | Primera ruta cognitiva conversacional integrada |
 | 7.9 | Completado | Conversation Continuity Foundation; integrado en `main` |
-| 7.10 | En cierre | Conversation Session Isolation Foundation; implementación funcional validada |
+| 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
 
 ---
 
 # 9. Estado de autorización de nuevos sprints
 
 ```text
-SPRINT 7.10 AUTORIZADO
-IMPLEMENTACIÓN FUNCIONAL COMPLETA
-CIERRE DOCUMENTAL EN CURSO
+SPRINT 7.10 COMPLETADO E INTEGRADO
+NINGÚN SPRINT POSTERIOR AUTORIZADO
 ```
 
-Sprint 7.10 — `Conversation Session Isolation Foundation` fue:
+Sprint 7.10 — `Conversation Session Isolation Foundation` completó:
 
 ```text
-inspeccionado
-→ justificado
-→ definido
-→ debatido
-→ aprobado explícitamente por el propietario
-→ implementado
-→ validado funcionalmente
+inspección
+→ justificación
+→ definición
+→ debate
+→ aprobación explícita del propietario
+→ implementación
+→ validación funcional
+→ documentación de cierre
+→ PR #58
+→ revisión humana
+→ merge a main
+→ validación post-merge
 ```
 
-el 2026-09-04.
-
-La autorización se limita exclusivamente al alcance definido en:
+Evidencia de integración:
 
 ```text
-docs/project/sprints/SPRINT-7.10.md
+merge commit:
+270e39b599a7bb3e7e6611e34dd644d0b7004d88
+
+candidate:
+0735223
+
+pytest:
+372 passed
+
+compileall:
+PASS
+
+git diff --check:
+PASS
 ```
 
-La evidencia funcional actual registra:
-
-```text
-candidate: 0735223
-pytest: 372 passed
-compileall: PASS
-git diff --check: PASS
-```
-
-El cierre todavía requiere reconciliación documental, PR, revisión,
-integración a `main` y reconciliación posterior del Vault.
-
-La autorización de Sprint 7.10 no autoriza automáticamente:
+No está autorizado:
 
 - Sprint 7.11;
 - ninguna unidad posterior;
@@ -482,9 +474,11 @@ La autorización de Sprint 7.10 no autoriza automáticamente:
 - navegación;
 - ampliación de autoridad.
 
+La sincronización del Vault puede continuar como reconciliación derivada del
+baseline integrado, pero no constituye un nuevo sprint ni una autorización.
+
 Cualquier unidad posterior deberá atravesar nuevamente el proceso completo
 de admisión y aprobación.
-
 ---
 
 # 10. Secure Context Lifecycle Foundation — estado preservado

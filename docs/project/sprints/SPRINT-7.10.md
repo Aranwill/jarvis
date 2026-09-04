@@ -1,11 +1,13 @@
 ---
 title: Sprint 7.10 — Conversation Session Isolation Foundation
-status: en_cierre
+status: completado
 authority: documentación operativa derivada
 as_of_date: 2026-09-04
 baseline_commit: 43041f920a1b8063491e6d5cabcb1fd887bdc7a8
 branch: feat/sprint-7.10-session-isolation
 implementation_head: 0735223
+integrated_commit: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
+integration_pr: 58
 language: es
 ---
 
@@ -14,14 +16,34 @@ language: es
 ## Estado
 
 ```text
-IMPLEMENTACIÓN FUNCIONAL COMPLETA
-CIERRE DOCUMENTAL EN CURSO
+COMPLETADO
+INTEGRADO EN MAIN
+VALIDACIÓN POST-MERGE APROBADA
 ```
 
 Sprint 7.10 fue debatido y aprobado explícitamente por el propietario
 el 2026-09-04.
 
-La implementación funcional quedó validada antes del cierre documental.
+La implementación funcional quedó validada, integrada mediante PR #58 y
+verificada nuevamente sobre `main`.
+
+Commit de integración:
+
+```text
+270e39b599a7bb3e7e6611e34dd644d0b7004d88
+```
+
+Validación post-merge:
+
+```text
+pytest: 372 passed
+compileall: PASS
+git diff --check: PASS
+working tree: clean
+```
+
+La sincronización posterior del Malāk Project Vault es una proyección derivada
+downstream y no condiciona el cierre del sprint en la fuente oficial.
 
 Este sprint no autoriza automáticamente ninguna unidad posterior.
 
@@ -520,22 +542,39 @@ No representa recuerdo persistente, conocimiento recuperable ni autoridad.
 
 ---
 
-## Cierre pendiente
+## Cierre integrado
 
-Antes de considerar integrado el sprint:
+La secuencia de integración quedó completada:
 
 ```text
-reconciliar project_context.md
-→ reconciliar implementation_roadmap.md
-→ ejecutar gates documentales
-→ commit de cierre
+implementación funcional
+→ documentación de cierre
 → push de rama
-→ PR
-→ revisión
+→ PR #58
+→ revisión humana
 → merge a main
-→ verificar main
-→ reconciliar Vault contra SHA integrado
+→ verificación post-merge
 ```
+
+Resultado oficial:
+
+```text
+merge commit:
+270e39b599a7bb3e7e6611e34dd644d0b7004d88
+
+pytest:
+372 passed
+
+compileall:
+PASS
+
+git diff --check:
+PASS
+```
+
+La reconciliación del Malāk Project Vault se ejecuta después del cierre como
+proyección derivada del repositorio oficial. Un fallo o rechazo de esa proyección
+no reabre automáticamente el sprint ni modifica la autoridad de `main`.
 
 No se autoriza automáticamente ningún Sprint 7.11.
 

@@ -3,11 +3,11 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-09-04
-as_of_commit: 43041f920a1b8063491e6d5cabcb1fd887bdc7a8
+as_of_commit: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
 branch: main
 certification_branch: null
 candidate_commit: 0735223
-certification_status: sprint_7_10_in_closure
+certification_status: sprint_7_10_completed
 baseline: v0.6.0-alpha
 ---
 
@@ -119,55 +119,45 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 Repositorio oficial:          Aranwill/jarvis
 Raíz Git local:               D:\Ollama\jarvis
 Rama permanente:              main
-Commit reconciliado:          43041f920a1b8063491e6d5cabcb1fd887bdc7a8
+Commit integración Sprint 7.10: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
 Baseline nominal:             v0.6.0-alpha
-Último sprint integrado:      Sprint 7.9 — Conversation Continuity Foundation
-Sprint activo autorizado:     Sprint 7.10 — Conversation Session Isolation Foundation
-Rama temporal activa:         feat/sprint-7.10-session-isolation
+Último sprint integrado:      Sprint 7.10 — Conversation Session Isolation Foundation
+Sprint activo autorizado:     ninguno
+Rama de implementación activa: ninguna
 Candidato funcional validado: 0735223
-Estado Sprint 7.10:           implementación funcional completa; cierre documental en curso
+Estado Sprint 7.10:           completado e integrado
 Sprint posterior autorizado:  ninguno
 ```
-
-El commit de referencia reconciliado en `main` es:
-
-```text
-43041f92 Merge pull request #57 from Aranwill/docs/agents-engineering-method-reference
-```
-
-Sprint 7.9 es el último sprint integrado en `main`.
 
 Sprint 7.10 — `Conversation Session Isolation Foundation` fue evaluado,
 debatido y aprobado explícitamente por el propietario el 2026-09-04.
 
-Su implementación funcional se realiza en:
-
-```text
-feat/sprint-7.10-session-isolation
-```
-
-y quedó limitada al alcance definido en:
-
-```text
-docs/project/sprints/SPRINT-7.10.md
-```
-
-El candidato funcional validado es:
+El candidato funcional validado fue:
 
 ```text
 0735223
 ```
 
-con:
+La integración se realizó mediante PR #58 con merge commit:
+
+```text
+270e39b599a7bb3e7e6611e34dd644d0b7004d88
+```
+
+Validación post-merge sobre `main`:
 
 ```text
 372 passed
 compileall: PASS
 git diff --check: PASS
+working tree: clean
 ```
 
-Sprint 7.10 permanece en cierre documental y todavía no constituye baseline
-integrado hasta completar revisión, PR y merge a `main`.
+No existe un Sprint 7.11 autorizado.
+
+La sincronización del Malāk Project Vault es una proyección derivada posterior.
+Su estado no modifica el cierre oficial del sprint ni concede autoridad sobre
+`Aranwill/jarvis/main`.
 
 ---
 
