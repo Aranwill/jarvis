@@ -129,6 +129,7 @@ Malāk — source of truth
 ├── Constituciones aplicables
 ├── Blueprint
 ├── Architecture Quality Gates
+├── docs/development/engineering_method.md
 ├── especificaciones y contratos aplicables
 ├── baseline vigente
 ├── sprint vigente o último baseline cerrado
@@ -163,6 +164,95 @@ La profundidad de lectura deberá ser proporcional a la pregunta. No es necesari
 leer cada archivo completo cuando una búsqueda o sección concreta permita
 resolver la cuestión con evidencia suficiente, pero ninguna fuente relevante
 deberá omitirse silenciosamente.
+
+### Conjunto obligatorio para planificar la próxima implementación
+
+Cuando la tarea consista en determinar el próximo cambio, admitir un sprint,
+preparar un plan de implementación o decidir qué trabajo debe realizarse a
+continuación, la revisión deberá contrastar explícitamente, según aplicabilidad:
+
+```text
+docs/project/implementation_roadmap.md
+        ↓
+planificación derivada vigente
+
+documents/projects/jarvis/ideas.md
+        ↓
+ideas, visión e iniciativas todavía no necesariamente promovidas
+
+docs/project/concepts/**
+        ↓
+referencias conceptuales no normativas; lectura recursiva cuando el tema aplique
+
+docs/development/engineering_method.md
+        ↓
+método de ingeniería, revisión, bounded correction y validación
+```
+
+También deberán revisarse el baseline vigente, la última ficha de sprint
+integrada y las fuentes normativas o técnicas afectadas.
+
+La revisión debe distinguir explícitamente:
+
+```text
+roadmap        != autorización
+idea           != roadmap
+concepto       != baseline
+método         != autoridad arquitectónica
+evidencia      != permiso para ampliar alcance
+```
+
+No se debe proponer una implementación basándose únicamente en el roadmap ni
+únicamente en una idea o referencia conceptual.
+
+### Planificación por gates cortos, deterministas y reversibles
+
+Todo plan de implementación material deberá dividirse en gates pequeños y
+verificables. Cada gate debe declarar, cuando corresponda:
+
+```text
+objetivo exacto
+precondición
+archivos autorizados
+cambio mínimo esperado
+fuera de alcance
+validación focalizada
+resultado esperado
+condición de STOP
+checkpoint / rollback
+```
+
+Reglas operativas:
+
+- un gate debe resolver una preocupación principal;
+- preferir cambios acotados, deterministas y observables;
+- no mezclar refactors, limpieza o mejoras laterales no requeridas;
+- comenzar con tests focalizados y ampliar validación de forma proporcional;
+- no avanzar al gate siguiente si el gate actual no está verde;
+- un fallo no autoriza ampliar automáticamente archivos, arquitectura o scope;
+- el checkpoint debe permitir identificar con claridad el último estado verde;
+- repetir una validación solo cuando cambió el artefacto o nueva evidencia la
+  invalida;
+- la suite completa y la validación de integración corresponden al cierre o a
+  puntos de riesgo que realmente lo justifiquen.
+
+Formato conceptual recomendado:
+
+```text
+Gate N
+├── objetivo
+├── scope exacto
+├── archivos
+├── modificación
+├── test / check
+├── expected result
+├── STOP si falla
+└── rollback al último checkpoint verde
+```
+
+Esta disciplina operacional complementa
+`docs/development/engineering_method.md`; no la reemplaza ni eleva la autoridad
+de `AGENTS.md` sobre las fuentes normativas.
 
 ### Lectura obligatoria de referencias conceptuales
 
