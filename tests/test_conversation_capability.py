@@ -5,6 +5,7 @@ from malak.core.conversation import (
     ConversationResponse,
 )
 from malak.core.conversation_registry import ConversationProviderRegistry
+from malak.core.request import Request
 from malak.services.conversation_service import ConversationService
 
 
@@ -50,7 +51,12 @@ def test_conversation_capability_delegates_to_conversation_service():
         system_prompt="You are Malak.",
     )
 
-    result = capability.execute("Hola")
+    request = Request(
+        content="Hola",
+        session_id="conversation-capability-test",
+    )
+
+    result = capability.execute(request)
 
     assert result == "reply:Hola"
 
