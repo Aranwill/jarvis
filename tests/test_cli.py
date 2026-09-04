@@ -446,7 +446,7 @@ def test_run_cli_displays_help() -> None:
     )
 
     assert HELP_MESSAGE in outputs
-
+    assert "new     Inicia una nueva conversación." in HELP_MESSAGE
 
 def test_run_cli_displays_status() -> None:
     outputs: list[str] = []
