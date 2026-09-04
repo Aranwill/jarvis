@@ -6,7 +6,7 @@ as_of_date: 2026-09-03
 as_of_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
 branch: main
 certification_branch: null
-candidate_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
+candidate_commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
 certification_status: sprint_7_9_in_execution
 baseline: v0.6.0-alpha
 ---
@@ -124,6 +124,8 @@ Baseline nominal:             v0.6.0-alpha
 Último sprint completado:     Sprint 7.8 — Cognitive Conversation Execution Path Foundation
 Sprint activo autorizado:     Sprint 7.9 — Conversation Continuity Foundation
 Rama temporal activa:         sprint/7.9-conversation-continuity
+Candidato funcional validado: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+Estado de Sprint 7.9:         implementación y validación completas; cierre pendiente
 Sprint posterior autorizado:  ninguno
 ```
 
@@ -239,6 +241,7 @@ runtimes o modelos dentro del Kernel.
 El stack conversacional implementado contiene:
 
 - `ConversationCapability`;
+- `ConversationMessage`;
 - `ConversationRequest`;
 - `ConversationResponse`;
 - `ConversationProvider`;
@@ -246,6 +249,7 @@ El stack conversacional implementado contiene:
 - `ConversationProviderRegistry`;
 - `ConversationProviderNotFoundError`;
 - `ConversationService`;
+- `InMemoryConversationContext`;
 - `LLMRuntime`;
 - `MockLLMRuntime`;
 - `OllamaRuntime`.
@@ -269,6 +273,10 @@ CLI
 
 La selección y construcción del runtime, provider y servicios se realiza en la
 frontera de aplicación mediante configuración externa.
+
+Sprint 7.9 añadió continuidad conversacional efímera mediante
+`InMemoryConversationContext`, integrada opcionalmente en `ConversationService`
+y mantenida fuera del Kernel y de `SecurityContext`.
 
 ### Integración Kernel–ConversationService
 
@@ -533,7 +541,7 @@ Estado del bloque 7.x:
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
 | 7.7 | Cerrado | Validación de baseline y release interna |
 | 7.8 | Completado | Cognitive Conversation Execution Path Foundation |
-| 7.9 | En ejecución | Conversation Continuity Foundation |
+| 7.9 | En ejecución | Implementación y validación completas; cierre pendiente del propietario |
 
 ### Sprint 7.0
 
@@ -720,12 +728,15 @@ Rama temporal:
 sprint/7.9-conversation-continuity
 ```
 
-Estado del Gate 7.9-A:
+Estado de ejecución:
 
 ```text
-Sprint Activation & Architecture Freeze
-documentación en reconciliación
-código funcional sin cambios
+gates 7.9-A → 7.9-H: PASS
+candidato funcional validado: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+suite final: 365 passed
+runtime real: PASS
+revisión final 4R: PASS
+cierre del sprint: pendiente de aprobación final del propietario
 ```
 
 Sprint 7.9 no autoriza Memory persistente, agentes, tools, Sandbox, navegación,
@@ -762,8 +773,22 @@ git diff --check: PASS
 
 La validación anterior certifica el punto de partida técnico del sprint.
 
-La actualización de este documento registra una autorización humana ya emitida;
-no crea autoridad por sí misma ni autoriza ningún sprint posterior.
+El candidato funcional de Sprint 7.9 fue validado posteriormente:
+
+```text
+candidate: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+pytest: 365 passed
+compileall: PASS
+git diff --check baseline..candidate: PASS
+runtime real: PASS
+revisión final 4R: PASS
+```
+
+La implementación y validación están completas. El cierre formal permanece
+pendiente de aprobación final del propietario.
+
+La actualización de este documento registra evidencia y una autorización humana
+ya emitida; no crea autoridad por sí misma ni autoriza ningún sprint posterior.
 
 ---
 
@@ -785,8 +810,10 @@ rama permanente: main
 commit de referencia: 2864435401353e5abcfcb51fc276361a0225c2b7
 Sprint 7.7: cerrado
 Sprint 7.8: completado
-Sprint 7.9: en ejecución
+Sprint 7.9: en ejecución; implementación y validación completas
 rama temporal activa: sprint/7.9-conversation-continuity
+candidato funcional validado: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
+cierre final del propietario: pendiente
 certification branch activa: no
 release promovida adicional: no
 sprint actualmente autorizado: 7.9 — Conversation Continuity Foundation
@@ -846,7 +873,9 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 Sprint 7.8 está completado.
 
-Sprint 7.9 se encuentra autorizado y en ejecución.
+Sprint 7.9 se encuentra autorizado y en ejecución; su implementación y
+validación están completas y el cierre final permanece pendiente de aprobación
+del propietario.
 
 Actualmente:
 

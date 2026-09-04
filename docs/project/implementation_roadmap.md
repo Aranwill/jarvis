@@ -8,7 +8,7 @@ as_of_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: 2864435401353e5abcfcb51fc276361a0225c2b7
+candidate_commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
 certification_status: sprint_7_9_in_execution
 legacy_planning_source:
   - docs/project/roadmap.md
@@ -265,6 +265,10 @@ v0.6.0-alpha
 - Sprint 7.7 cerrado: `Validación de baseline y release interna`.
 - Sprint 7.8 completado: `Cognitive Conversation Execution Path Foundation`.
 - Sprint 7.9 en ejecución: `Conversation Continuity Foundation`.
+- Candidato funcional validado de Sprint 7.9: `d58b8ec98d48f5e2eac115d1d54b193e1df617fd`.
+- Validación final del candidato: `365 passed`, `compileall: PASS`,
+  `git diff --check: PASS`, runtime real: PASS, revisión final 4R: PASS.
+- Cierre formal de Sprint 7.9: pendiente de aprobación final del propietario.
 - `main` es la única rama permanente.
 - Rama temporal activa de trabajo: `sprint/7.9-conversation-continuity`.
 
@@ -316,6 +320,10 @@ configuration
 ```
 
 permanece fuera del Kernel.
+
+Sprint 7.9 añadió continuidad conversacional efímera mediante historial
+estructurado, `InMemoryConversationContext` y limpieza explícita con `new`,
+sin introducir estado conversacional en el Kernel ni en `SecurityContext`.
 
 La finalización de este pipeline no autoriza nuevas capabilities ni ampliación
 de autoridad.
@@ -386,7 +394,7 @@ La finalización de Sprint 7.8 no autoriza automáticamente:
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
 | 7.7 | Cerrado | Validación integral y certificación interna del baseline |
 | 7.8 | Completado | Primera ruta cognitiva conversacional integrada |
-| 7.9 | En ejecución | Conversation Continuity Foundation |
+| 7.9 | En ejecución | Implementación y validación completas; cierre pendiente del propietario |
 
 ---
 
@@ -408,6 +416,9 @@ inspeccionado
 ```
 
 el 2026-09-03.
+
+La implementación y validación del alcance autorizado están completas.
+El cierre formal del sprint permanece pendiente de aprobación final del propietario.
 
 La autorización se limita exclusivamente al alcance definido en:
 
@@ -1158,6 +1169,8 @@ Sprint 7.8 — Cognitive Conversation Execution Path Foundation
 
 ACTIVE SPRINT
 Sprint 7.9 — Conversation Continuity Foundation
+implementación y validación: completas
+cierre final del propietario: pendiente
 
 SPRINT AFTER 7.9
 NONE AUTHORIZED
