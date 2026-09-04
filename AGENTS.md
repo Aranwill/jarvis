@@ -59,6 +59,7 @@ Las fuentes principales incluyen:
 - `docs/architecture/blueprint.md`
 - `docs/architecture/kernel.md`
 - `docs/architecture/architecture_quality_gates.md`
+- `docs/development/engineering_method.md`
 - `docs/development/development_checklist.md`
 - `SECURITY.md`
 
