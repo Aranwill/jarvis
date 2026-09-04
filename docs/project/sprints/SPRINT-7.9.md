@@ -1,6 +1,6 @@
 ---
 title: Sprint 7.9 — Conversation Continuity Foundation
-status: en_ejecucion
+status: completado
 authority: documentación operativa derivada
 as_of_date: 2026-09-03
 as_of_commit: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
@@ -13,7 +13,7 @@ language: es
 ## Estado
 
 ```text
-EN EJECUCIÓN
+COMPLETADO
 ```
 
 El Sprint 7.9 fue debatido y aprobado explícitamente por el propietario
@@ -1175,7 +1175,7 @@ Overall:      PASS
 
 No quedaron findings técnicos abiertos derivados de la revisión final.
 
-### Estado previo al cierre
+### Estado de cierre
 
 ```text
 implementación: completa
@@ -1183,11 +1183,14 @@ validación automatizada: completa
 validación runtime real: completa
 revisión arquitectónica: completa
 revisión 4R: PASS
-documentación de cierre: en preparación
-aprobación final del propietario: pendiente
+documentación de cierre: completa
+aprobación final del propietario: aprobada el 2026-09-03
 ```
 
-El candidato está técnicamente preparado para cierre, PR y revisión.
+El propietario aprobó explícitamente el cierre del Sprint 7.9 el 2026-09-03.
+
+El sprint queda completado en la rama de trabajo y preparado para PR, revisión e
+integración en `main`.
 
 Este estado no constituye por sí mismo autorización para iniciar Sprint 7.10
 ni ninguna otra unidad posterior.
