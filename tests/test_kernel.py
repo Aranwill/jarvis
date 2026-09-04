@@ -18,8 +18,8 @@ class CustomCapability(Capability):
     def name(self) -> str:
         return "custom"
 
-    def execute(self, request):
-        return f"custom:{request}"
+    def execute(self, request: Request):
+        return f"custom:{request.content}:{request.session_id}"
 
 
 def test_kernel_returns_response():
@@ -80,5 +80,5 @@ def test_kernel_accepts_injected_planner_and_registry():
 
     response = kernel.receive(request)
 
-    assert response.content == "custom:Hola"
+    assert response.content == "custom:Hola:composition-test"
     assert response.source == "custom"
