@@ -961,7 +961,7 @@ Toda selección futura deberá justificarse contra:
 | Propuesta | Estado | Observación |
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Unidad posterior a Sprint 7.9 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de Sprint 7.9 |
+| Unidad posterior a Sprint 7.10 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de Sprint 7.10 |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
@@ -1042,6 +1042,7 @@ docs/project/sprints/SPRINT-7.6.md
 docs/project/sprints/SPRINT-7.7.md
 docs/project/sprints/SPRINT-7.8.md
 docs/project/sprints/SPRINT-7.9.md
+docs/project/sprints/SPRINT-7.10.md
 ```
 
 Interpretación:
@@ -1190,24 +1191,24 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 MATERIAL BASELINE REFERENCE
-2864435401353e5abcfcb51fc276361a0225c2b7
+270e39b599a7bb3e7e6611e34dd644d0b7004d88
 
 PERMANENT BRANCH
 main
 
 ACTIVE SPRINT BRANCH
-sprint/7.9-conversation-continuity
+NONE
 
 NOMINAL VERSION
 v0.6.0-alpha
 
 LAST COMPLETED SPRINT
-Sprint 7.9 — Conversation Continuity Foundation
+Sprint 7.10 — Conversation Session Isolation Foundation
 
 ACTIVE SPRINT
 NONE
 
-SPRINT AFTER 7.9
+SPRINT AFTER 7.10
 NONE AUTHORIZED
 
 LEGACY ROADMAP
