@@ -888,18 +888,21 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ---
 
-## Planificación vigente — Sprint 7.9
+## Planificación vigente — post-Sprint 7.10
 
 Sprint 7.8 está completado.
 
 Sprint 7.9 fue completado y su cierre fue aprobado explícitamente por el
-propietario el 2026-09-03. No existe un sprint posterior autorizado.
+propietario el 2026-09-03.
+
+Sprint 7.10 fue completado e integrado y su cierre fue aprobado explícitamente por el propietario el 2026-09-04.
+No existe un sprint posterior autorizado.
 
 Actualmente:
 
 ```text
 LAST COMPLETED SPRINT
-Sprint 7.9 — Conversation Continuity Foundation
+Sprint 7.10 — Conversation Session Isolation Foundation
 
 ACTIVE AUTHORIZED SPRINT
 NONE
@@ -914,10 +917,10 @@ La fuente derivada canónica para planificación es:
 docs/project/implementation_roadmap.md
 ```
 
-La ficha operativa que delimita Sprint 7.9 es:
+La ficha operativa del último sprint integrado es:
 
 ```text
-docs/project/sprints/SPRINT-7.9.md
+docs/project/sprints/SPRINT-7.10.md
 ```
 
 Las ideas registradas en `documents/projects/jarvis/ideas.md`, las referencias
