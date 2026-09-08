@@ -67,10 +67,25 @@ No deben instalarse dependencias del proyecto de forma improvisada en el intérp
 
 # Instalación editable
 
-Desde la raíz del repositorio y con el entorno virtual activado:
+Para ejecutar únicamente el paquete:
 
 ```powershell
 python -m pip install -e .
+```
+
+Para desarrollo y validación automatizada:
+
+```powershell
+python -m pip install -e ".[dev]"
+```
+
+El extra `dev` declara herramientas de desarrollo sin convertirlas en dependencias de runtime.
+
+Estado vigente:
+
+```text
+runtime dependencies = 0
+dev dependency = pytest>=9,<10
 ```
 
 La instalación editable permite ejecutar el paquete sin configurar `PYTHONPATH`.
@@ -84,9 +99,12 @@ Actualmente:
 - Python
 - pip
 - pytest
+- GitHub Actions para validación reproducible de candidatos
 - Ollama, requerido únicamente para validaciones reales con `OllamaRuntime`
 
 Las futuras herramientas deberán documentarse aquí antes de incorporarse al baseline del proyecto.
+
+GitHub Actions produce evidencia técnica. No aprueba cambios, no concede autoridad y no ejecuta merges.
 
 ---
 
@@ -236,7 +254,7 @@ Un runtime desconocido debe ser rechazado de forma controlada.
 
 # Ejecución de Tests
 
-Desde el entorno virtual:
+Desde el entorno virtual con el extra de desarrollo instalado:
 
 ```powershell
 python -m pytest -q
@@ -251,13 +269,72 @@ La conexión real con Ollama se valida mediante una prueba manual separada y doc
 Validación adicional de compilación:
 
 ```powershell
-python -m compileall src tests
+python -m compileall -q src tests scripts
 ```
 
-Validación del diff:
+Validación del diff de un candidato:
 
 ```powershell
-git diff --check
+git diff --check <baseline-or-base>..<candidate>
+```
+
+Cuando se valida un PR se admite la semántica de merge-base:
+
+```powershell
+git diff --check <base>...<candidate>
+```
+
+Un `git diff --check` sin rango sobre un checkout limpio no constituye evidencia suficiente de que el delta del candidato fue inspeccionado.
+
+---
+
+# Pipeline reproducible de validación
+
+El workflow oficial vive en:
+
+```text
+.github/workflows/validation.yml
+```
+
+Triggers permitidos:
+
+```text
+pull_request
+push a main
+```
+
+Propiedades obligatorias:
+
+```text
+candidate SHA exacto
+contents: read
+persist-credentials: false
+fetch-depth: 0
+Windows runner
+Python 3.12
+pytest
+compileall
+diff-check sobre rango explícito
+```
+
+Queda prohibido utilizar la pipeline para:
+
+```text
+pull_request_target
+secrets
+write permissions
+auto-fix
+auto-approval
+auto-merge
+auto-deploy
+release automation
+```
+
+La evidencia de GitHub Actions permanece subordinada a la gobernanza:
+
+```text
+Evidence != Validation != Decision != Authority
+merge decision + execution = HUMAN-ONLY
 ```
 
 ---
@@ -330,8 +407,7 @@ Estas prácticas no modifican el Runtime ni el Kernel y no constituyen una fuent
 
 OpenSpec, Gentle AI y otras herramientas externas relacionadas con SDD, TDD, 4R o Receipt-Driven Development no forman parte del baseline oficial mientras no sean evaluadas, aprobadas y documentadas explícitamente.
 
-Receipt-Driven Development permanece en observación como línea prometedora para futuras capacidades multiagente, especialmente en relación con candidate identity, receipts, revisión independiente y trazabilidad verificable.
-
+Malāk adoptó RDD Stage 1 para evidencia estructurada candidate-bound. RDD Stage 2 y etapas posteriores permanecen no autorizadas hasta una admisión independiente.
 
 ---
 
