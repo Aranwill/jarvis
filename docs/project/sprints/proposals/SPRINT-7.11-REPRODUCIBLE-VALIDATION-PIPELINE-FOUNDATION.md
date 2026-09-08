@@ -1,14 +1,15 @@
 ---
 title: Sprint 7.11 — Reproducible Validation Pipeline Foundation
-status: g0_pass_awaiting_implementation_authorization
-authority: documentación operativa de admisión
+status: implementation_authorized
+authority: documentación operativa de admisión y ejecución
 as_of_date: 2026-09-08
 baseline_commit: deb759ee9855737a24b169e03bde2028c7db7f33
 branch: feat/sprint-7.11-reproducible-validation-pipeline
 unit_id: SPRINT-7.11
 risk_class: 3
 g0_result: PASS
-implementation_authorized: false
+g1_result: PASS
+implementation_authorized: true
 rdd_stage_1: adopted
 rdd_stage_2_authorized: false
 merge_authority: human_only
@@ -17,50 +18,22 @@ language: es
 
 # Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
-## Estado de autoridad
+## Autoridad y estado
 
-El propietario autorizó la admisión formal de Sprint 7.11 sobre:
-
-```text
-deb759ee9855737a24b169e03bde2028c7db7f33
-```
-
-G0 cerró `PASS`. La implementación funcional sigue sin autorización hasta que el
-propietario revise y apruebe el contrato mínimo resultante de la admisión.
-
-Separaciones permanentes:
+El propietario aprobó explícitamente la implementación después de revisar G0 y
+el contrato mínimo resultante.
 
 ```text
-admission
-!= implementation
-!= validation
-!= approval
-!= merge
+baseline                       deb759ee9855737a24b169e03bde2028c7db7f33
+G0 admission                   PASS
+G1 validation/threat contract  PASS
+implementation                 AUTHORIZED
+RDD Stage 2                    NOT AUTHORIZED
+merge decision + execution     HUMAN-ONLY
 ```
 
-```text
-merge decision + merge execution = HUMAN-ONLY
-```
-
-RDD Stage 2 permanece no autorizado.
-
----
-
-## Baseline
-
-```text
-repository: Aranwill/jarvis
-branch: main
-baseline_commit: deb759ee9855737a24b169e03bde2028c7db7f33
-baseline_tree: 061ce062dba149f9e455137a54ffbeedf777566d
-nominal_version: v0.6.0-alpha
-latest_completed_functional_sprint: Sprint 7.10
-RDD Stage 1: integrated
-```
-
-El Project Vault reconciliado observa el mismo HEAD oficial y el Sync Agent local
-fue reconciliado mediante `accept-proposal` después del merge humano de la PR
-#60.
+La autorización cubre únicamente G1–G6 dentro del scope de esta ficha. Un STOP
+requiere nueva autoridad humana; ningún actor puede ampliar su propio scope.
 
 ---
 
@@ -71,11 +44,11 @@ RDD-M1 demostró un cuello de botella real:
 ```text
 candidate frozen
 → deterministic validation required
-→ no CI existed in Aranwill/jarvis
+→ no CI in Aranwill/jarvis
 → independent execution required manual/external coordination
 ```
 
-Malāk ya posee los checks locales:
+Malāk ya usa localmente:
 
 ```text
 python -m pytest -q
@@ -83,10 +56,15 @@ python -m compileall src tests
 git diff --check
 ```
 
-pero `.github/` solo contiene el template de PR.
+Sprint 7.11 automatiza esos controles sobre el candidato exacto. No introduce
+nuevos controles de calidad por inercia.
 
-La necesidad es ejecutar esos controles de manera reproducible y ligada al
-candidate exacto. No es incorporar tooling por moda.
+File Coverage Ledger de admisión:
+
+```text
+docs/project/sprints/proposals/SPRINT-7.11-G0-COVERAGE-LEDGER.md
+170 discovered / 170 classified / 0 silently omitted / 0 blockers
+```
 
 ---
 
@@ -96,60 +74,15 @@ candidate exacto. No es incorporar tooling por moda.
 IDEA-009 Development Tooling Foundation       ADAPT
 IDEA-011 Validation & Delivery Protocol        ADOPT parcialmente
 IDEA-003 Resource Governance Foundation        OBSERVE
-Memory / agents / Sandbox / cognitive dataset OBSERVE
+Memory / agents / Sandbox                      OBSERVE
 RDD Stage 2                                    REJECT for this sprint
 ```
 
-Se reutiliza únicamente lo necesario para validación reproducible y evidencia.
-
 ---
 
-## G0 — resultado
+## Scope autorizado
 
-File Coverage Ledger:
-
-```text
-docs/project/sprints/proposals/SPRINT-7.11-G0-COVERAGE-LEDGER.md
-```
-
-Resultado:
-
-```text
-tracked files discovered = 170
-tracked files classified = 170
-silently omitted files   = 0
-blocking findings         = 0
-G0                        = PASS
-```
-
-Hallazgos principales:
-
-1. `git diff --check` sin rango explícito puede ser un no-op en checkout limpio;
-2. no debe copiarse la matriz Ubuntu/Windows ni cache del Sync Agent sin necesidad;
-3. `.github/**` ya está mapeado downstream por `operational-tooling-change`;
-4. GitHub Actions debe producir evidencia, nunca autoridad.
-
----
-
-# Contrato mínimo propuesto para implementación
-
-## Objetivo
-
-```text
-pull request / main integration
-        ↓
-read-only GitHub Actions validation
-        ↓
-exact candidate identity
-        ↓
-pytest + compileall + candidate diff check
-        ↓
-technical evidence
-        ↓
-human review / human merge
-```
-
-## Archivos funcionales máximos esperados
+Máximo funcional:
 
 ```text
 .github/workflows/validation.yml
@@ -157,16 +90,24 @@ docs/development/development_environment.md
 pyproject.toml
 ```
 
-No se crea nuevo script ni test module salvo que un fallo reproducible demuestre
-que es necesario.
+Documentación/evidencia del sprint puede actualizar esta ficha y el PR.
 
-La documentación/evidencia del sprint permanece en la ficha y ledger existentes.
+No se crea nuevo script ni test module salvo finding reproducible que lo haga
+necesario y permanezca dentro del objetivo aprobado.
+
+Guardrails:
+
+```text
+src/malak/** delta = 0
+Kernel delta       = 0
+runtime delta      = 0
+authority delta    = 0
+runtime deps added = 0
+```
 
 ---
 
-## G1 — Validation Contract & Threat Boundary
-
-Diseño propuesto:
+## G1 — Validation Contract & Threat Boundary — PASS
 
 ### Triggers
 
@@ -175,35 +116,31 @@ pull_request
 push: main
 ```
 
-`pull_request_target` queda prohibido.
+`pull_request_target` está prohibido.
 
 ### Candidate identity
 
-Para PR:
+PR:
 
 ```text
 candidate = github.event.pull_request.head.sha
 ```
 
-El checkout debe usar explícitamente ese SHA, no confiar en el merge ref
-sintético como identidad del candidato.
-
-Para `push` a `main`:
+Push a main:
 
 ```text
 candidate = github.sha
 ```
 
-Cada ejecución debe registrar el SHA evaluado y comprobar:
+El checkout debe usar explícitamente el candidate SHA y verificar:
 
 ```text
 git rev-parse HEAD == expected candidate
 ```
 
-Un nuevo commit produce una nueva ejecución; evidencia anterior no certifica el
-nuevo candidate.
+Un commit nuevo implica candidato nuevo y nueva validación.
 
-### Permissions
+### Permissions / supply boundary
 
 ```yaml
 permissions:
@@ -217,213 +154,114 @@ persist-credentials: false
 fetch-depth: 0
 ```
 
-Prohibido:
-
-```text
-secrets
-write permissions
-PR comments automáticos
-branch mutation
-auto-fix
-auto-approval
-auto-merge
-auto-deploy
-release
-```
-
-### Runner
-
-Una única plataforma inicial:
-
-```text
-windows-latest
-Python 3.12
-```
-
-Justificación: coincide con el entorno oficial actual de desarrollo y evita una
-matriz multi-OS prematura.
-
-### Bootstrap CI
-
-Dependencias externas de workflow mínimas y explícitas:
+Bootstrap permitido:
 
 ```text
 actions/checkout@v4
 actions/setup-python@v5
 ```
 
-Son bootstrap de GitHub Actions, no dependencias de runtime ni autoridad.
-No se incorporan acciones de terceros adicionales.
+No se admiten acciones de terceros adicionales, secretos ni permisos de
+escritura.
 
-### Pytest reproducible
+### Runner
 
-`pytest` ya es una herramienta oficial del entorno de Malāk, pero actualmente no
-está declarado como dependencia instalable en `pyproject.toml`.
+```text
+windows-latest
+Python 3.12
+```
 
-Propuesta mínima:
+Una sola plataforma para evitar matriz prematura.
+
+### Dev bootstrap
+
+`pytest` ya es herramienta oficial de Malāk. Se autoriza declararlo solo como
+extra de desarrollo:
 
 ```toml
 [project.optional-dependencies]
 dev = ["pytest>=9,<10"]
 ```
 
-Esto no modifica:
+`[project].dependencies` debe permanecer vacío.
 
-```text
-[project].dependencies = []
-```
-
-por lo que el runtime continúa sin dependencias Python externas.
-
-El workflow podrá instalar:
-
-```text
-python -m pip install -e ".[dev]"
-```
-
-No se añaden Ruff, mypy, coverage ni lockfile en este sprint.
-
-### Checks
+### Checks requeridos
 
 ```text
 python -m pytest -q
 python -m compileall -q src tests scripts
 ```
 
-Whitespace/diff validation debe inspeccionar un rango real.
-
-Para PR:
+El diff check debe inspeccionar un rango real:
 
 ```text
-git diff --check <base_sha>...<candidate_sha>
+PR   → git diff --check <base_sha>...<candidate_sha>
+push → git diff --check <before_sha>..<candidate_sha>
 ```
 
-Para push a `main`:
+Nunca se acepta `git diff --check` sin rango como evidencia suficiente sobre un
+checkout limpio.
+
+### Resultado
 
 ```text
-git diff --check <before_sha>..<candidate_sha>
+command failure              → FAIL evidence
+runner/setup/environment gap → INCONCLUSIVE Stage 1 evidence
+all required checks pass     → PASS evidence
 ```
 
-Los SHA deben provenir del evento y quedar visibles en la ejecución.
-
-### Semántica de resultado
-
-```text
-validation command fails      → FAIL evidence
-setup / runner / timeout issue → INCONCLUSIVE for Stage 1 evidence
-all required checks pass       → PASS evidence
-```
-
-El estado nativo de GitHub Actions no reemplaza el enum del Evidence Manifest;
-la interpretación Stage 1 permanece externa y ligada al candidate exacto.
-
-### Independencia
-
-La ejecución en runner externo aporta validación determinista independiente del
-entorno del Writer.
-
-No sustituye:
-
-```text
-Reviewer
-FULL 4R
-human Authority
-```
+GitHub Actions produce evidencia técnica. No produce aprobación, autorización ni
+merge authority.
 
 ---
 
-## Gates de implementación propuestos
+## Gates autorizados
 
 ```text
-G1 — Validation Contract & Threat Boundary
-     cierre documental del contrato anterior
-
 G2 — Reproducible Dev Bootstrap
-     declarar pytest dev extra + reconciliar development_environment
+     pytest dev extra + development_environment
 
 G3 — Minimal Read-Only Workflow
-     un workflow, un runner, permisos read-only, exact candidate checkout
+     exact candidate checkout + read-only permissions + required checks
 
 G4 — Candidate-Bound / Negative Validation
-     verificar identity mismatch, diff real, permisos y failure behavior
+     identity, diff range, permissions, failure semantics
 
 G5 — Dogfood
-     ejecutar la propia pipeline sobre el candidate exacto de Sprint 7.11
-     emitir MALAK-EVIDENCE-MANIFEST/v1 activo fuera del candidate
+     ejecutar pipeline sobre candidate exacto
+     manifest Stage 1 activo fuera del candidate
 
 G6 — Closure
-     FULL 4R independiente + utility/overhead review + human governance
+     FULL 4R + independent validation + utility/overhead review
 ```
 
-No se avanza con `FAIL` o `INCONCLUSIVE` bloqueante.
+No se avanza ante `FAIL` o `INCONCLUSIVE` bloqueante.
 
 ---
 
-## Métricas de cierre
-
-```text
-changed functional files
-test count / result
-compileall result
-diff-check result
-candidate identity match
-workflow permissions
-runtime dependencies added
-Kernel delta
-runtime delta
-authority delta
-workflow duration
-findings
-correction rounds
-RDD evidence overhead
-```
-
-Objetivos:
-
-```text
-runtime dependencies added = 0
-Kernel delta               = 0
-runtime delta              = 0
-authority delta            = 0
-new third-party actions    = 0
-```
-
----
-
-## Cuatro preguntas de ley
-
-```text
-Blueprint                 PASS
-Cognitive Constitution    PASS
-Governance                PASS
-Kernel simplicity         PASS
-```
-
-Condición de conservación:
-
-```text
-src/malak/** delta = 0
-Kernel delta       = 0
-runtime delta      = 0
-authority delta    = 0
-```
-
----
-
-## Riesgo
+## Riesgo y cierre
 
 ```text
 LEVEL 3 / HIGH
-FULL 4R required at closure
+FULL 4R required
+Writer != Reviewer != Validator != Authority
 ```
 
-La pipeline ejecuta código del candidato en infraestructura externa. Por eso:
+Métricas mínimas:
 
-- no recibe secretos;
-- no recibe write permissions;
-- no usa `pull_request_target`;
-- no persiste credenciales de checkout;
-- el resultado es evidencia, no autoridad.
+```text
+candidate identity match
+pytest result
+compileall result
+diff-check result
+workflow permissions
+workflow duration
+changed functional files
+runtime dependencies added
+Kernel/runtime/authority delta
+findings + correction rounds
+RDD evidence overhead
+```
 
 ---
 
@@ -435,48 +273,43 @@ requires Kernel/runtime/security authority change
 requires secret exposure
 requires write permission
 requires pull_request_target
-requires third-party action beyond approved bootstrap
-requires new runtime dependency
+requires unapproved third-party action
+requires runtime dependency
 requires Ruff/mypy/coverage/multi-OS expansion
 requires branch protection/delivery enforcement
 requires RDD Stage 2
 requires auto-fix/approval/merge/deploy/release
 cannot prove candidate identity
-cannot prove diff actually inspected candidate delta
+cannot prove candidate delta was inspected
 scope exceeds admitted files
 ```
 
 Ante STOP:
 
 ```text
-stop → preserve evidence → request human authority
+STOP → preserve evidence → request human authority
 ```
 
 ---
 
 ## Rollback
 
-Rollback absoluto:
-
 ```text
 deb759ee9855737a24b169e03bde2028c7db7f33
 ```
 
-El workflow y dev metadata son aditivos y pueden revertirse sin migración de
-datos, Kernel, runtime o Security Control Plane.
+El cambio es exterior al runtime y reversible sin migración de datos.
 
 ---
 
-## Estado actual
+## Invariante permanente
 
 ```text
-admission authorization       YES
-baseline frozen                YES
-G0                             PASS
-implementation authorization   PENDING
-implementation code            NOT STARTED
-PR                             Draft
-RDD Stage 1                    ADOPTED
-RDD Stage 2                    NOT AUTHORIZED
-merge                          HUMAN-ONLY
+Evidence != Receipt != Validation != Decision != Authority
+
+validation PASS
+→ evidence only
+→ human reviews
+→ human decides
+→ human executes merge
 ```
