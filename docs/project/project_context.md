@@ -159,7 +159,7 @@ post-merge Validation: success
 ```
 
 Sprint 7.10 permanece como la última unidad funcional de producto/runtime.
-No existe un sprint ni unidad posterior a Sprint 7.11 autorizada.
+No existe un sprint ni una unidad posterior a Sprint 7.11 autorizados.
 
 La sincronización del Malāk Project Vault es una proyección derivada posterior.
 Su estado no modifica el cierre oficial del sprint ni concede autoridad sobre
