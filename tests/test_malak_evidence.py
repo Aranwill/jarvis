@@ -107,10 +107,25 @@ def test_valid_manifest_passes(tmp_path):
     code, output = run_validator(repo, manifest(commit))
 
     assert code == 0
-    assert output["status"] == "PASS"
+    assert output["validator_result"] == "PASS"
+    assert "status" not in output
     assert output["code"] == "VALID"
     assert output["candidate_commit"] == commit
     assert output["authority_effect"] == "none"
+
+
+def test_valid_failure_manifest_keeps_validator_and_manifest_results_separate(tmp_path):
+    repo, commit = make_repo(tmp_path)
+    payload = manifest(commit)
+    payload["validations"][0]["result"] = "FAIL"
+    payload["result"] = "FAIL"
+
+    code, output = run_validator(repo, payload)
+
+    assert code == 0
+    assert output["validator_result"] == "PASS"
+    assert output["manifest_result"] == "FAIL"
+    assert "status" not in output
 
 
 def test_authority_effect_cannot_change(tmp_path):
@@ -121,6 +136,7 @@ def test_authority_effect_cannot_change(tmp_path):
     code, output = run_validator(repo, payload)
 
     assert code == 1
+    assert output["validator_result"] == "FAIL"
     assert output["code"] == "AUTHORITY_EFFECT_INVALID"
 
 
@@ -213,13 +229,14 @@ def test_require_current_passes_for_clean_current_candidate(tmp_path):
 def test_require_current_detects_stale_candidate(tmp_path):
     repo, first = make_repo(tmp_path)
     payload = manifest(first)
-    second_commit(repo)
+    second = second_commit(repo)
 
     code, output = run_validator(repo, payload, "--require-current")
 
     assert code == 1
     assert output["code"] == "STALE_CANDIDATE"
     assert output["candidate_commit"] == first
+    assert output["expected_candidate"] == second
 
 
 def test_require_current_rejects_dirty_worktree(tmp_path):
@@ -231,6 +248,7 @@ def test_require_current_rejects_dirty_worktree(tmp_path):
 
     assert code == 1
     assert output["code"] == "DIRTY_WORKTREE"
+    assert output["expected_candidate"] == commit
 
 
 def test_expected_candidate_detects_mismatch(tmp_path):
@@ -247,6 +265,7 @@ def test_expected_candidate_detects_mismatch(tmp_path):
 
     assert code == 1
     assert output["code"] == "STALE_CANDIDATE"
+    assert output["expected_candidate"] == second
 
 
 def test_unknown_commit_is_fail_closed(tmp_path):
