@@ -3,13 +3,13 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-04
-as_of_commit: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
+as_of_date: 2026-09-08
+as_of_commit: 3413e8ccb348440aea757d1feccde25c65be011f
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: 0735223
-certification_status: sprint_7_10_completed
+candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+certification_status: sprint_7_11_completed
 legacy_planning_source:
   - docs/project/roadmap.md
 language: es
@@ -30,7 +30,7 @@ Centraliza:
 - iniciativas incorporadas a planificación futura;
 - propuestas pendientes;
 - disposición de planificación legacy;
-- relaciones entre ideas, planificación y fichas de sprint.
+- relaciones entre ideas, concepts y fichas de sprint.
 
 Este documento es deliberadamente **derivado y no normativo**.
 
@@ -41,261 +41,154 @@ gobernanza o contrato aprobado.
 
 # 1. Clasificación y autoridad
 
-Este documento:
+Este roadmap:
 
 - no aprueba arquitectura;
 - no modifica arquitectura;
-- no autoriza cambios;
+- no autoriza implementación;
 - no reemplaza fuentes normativas;
 - no establece automáticamente el próximo sprint;
 - no convierte una recomendación en obligación;
 - no concede autoridad a ningún componente;
-- no puede ser utilizado para modificar documentos protegidos;
-- no puede ser interpretado como permiso de implementación.
+- no puede utilizarse para modificar documentos protegidos.
 
-Ante cualquier conflicto prevalecen las fuentes de mayor autoridad definidas por
-Malāk.
+Ante conflicto prevalece la jerarquía documental oficial de Malāk.
 
-La planificación se subordina siempre a esas fuentes.
-
----
-
-# 2. Regla de acceso y autoridad
-
-La existencia de información de planificación no altera el modelo de autoridad
-de Malāk.
-
-La planificación puede describir o proponer trabajo downstream.
-
-No puede conceder autoridad upstream.
-
-Ningún componente, capability, runtime, modelo, agente, worker, tool o mecanismo
-de automatización puede utilizar este roadmap para:
-
-- modificar Constitución Cognitiva;
-- modificar Constitución de Gobernanza;
-- modificar Blueprint;
-- modificar Kernel;
-- modificar políticas;
-- elevar privilegios;
-- concederse permisos;
-- ampliar su propio alcance;
-- reinterpretar una propuesta como autorización.
-
-Los resultados y evidencia producidos durante una implementación pueden regresar
-hacia componentes upstream para evaluación.
-
-Ese retorno constituye información.
-
-No constituye autoridad.
+```text
+roadmap != autorización
+idea != roadmap
+concept != baseline
+evidence != authority
+```
 
 ---
 
-# 3. Regla de admisión de sprints
+# 2. Regla de admisión de nuevas unidades
 
 La existencia, numeración, posición, título o ficha de un sprint no constituye
 autorización para implementarlo.
 
-Cada propuesta debe someterse, como mínimo, a:
+Toda nueva unidad debe someterse, como mínimo, a:
 
-1. inspección completa del baseline vigente;
-2. revisión del código, pruebas y documentación aplicables;
-3. identificación de una necesidad real y comprobada de Malāk;
-4. justificación de su utilidad cognitiva, arquitectónica, operativa o de gobernanza;
-5. definición explícita del alcance y fuera de alcance;
-6. evaluación de riesgos, dependencias, impacto y rollback;
-7. validación mediante las cuatro preguntas obligatorias;
-8. presentación y debate del plan de ejecución;
-9. aprobación explícita e inequívoca del propietario.
+1. verificación de `main` y del HEAD exacto;
+2. inspección del baseline vigente;
+3. inventario y clasificación de fuentes aplicables;
+4. revisión de código, pruebas y documentación relevantes;
+5. identificación de una necesidad real y comprobada;
+6. contraste con roadmap, `ideas.md` y `concepts/**`;
+7. clasificación ADOPT / ADAPT / OBSERVE / REJECT cuando aplique;
+8. definición de alcance y fuera de alcance;
+9. evaluación de riesgos, dependencias y rollback;
+10. validación mediante las cuatro preguntas obligatorias;
+11. especificación verificable;
+12. aprobación explícita e inequívoca del propietario.
 
-Sin esa aprobación no se debe iniciar una implementación.
-
-La aprobación de un sprint anterior no autoriza automáticamente el siguiente.
-
-El propietario puede:
-
-- aprobar;
-- redefinir;
-- diferir;
-- reemplazar;
-- rechazar;
-- archivar
-
-cualquier propuesta.
+La aprobación de una unidad anterior no autoriza automáticamente la siguiente.
 
 ---
 
-# 4. Modelo documental del roadmap
-
-Para reducir duplicación y drift, la planificación deberá seguir esta estructura:
+# 3. Modelo documental de planificación
 
 ```text
 ROADMAP.md
    │
-   │ punto de entrada
    ▼
 docs/project/implementation_roadmap.md
    │
-   │ fuente derivada canónica de planificación
-   │
-   ├── references → ideas.md
-   ├── references → concepts/
-   └── references → sprints/
+   ├── references → documents/projects/jarvis/ideas.md
+   ├── references → docs/project/concepts/**
+   └── references → docs/project/sprints/SPRINT-*.md
 ```
 
-## 4.1 `ROADMAP.md`
+## `ROADMAP.md`
 
-Función:
+Punto de entrada pequeño. No debe duplicar estado detallado.
 
-```text
-entry point
-```
+## `implementation_roadmap.md`
 
-Debe permanecer pequeño.
+Fuente derivada canónica para planificación vigente.
 
-No debe replicar estado detallado.
+## `ideas.md`
 
-Debe dirigir a este documento.
+Registro de ideas, visión e iniciativas. Una idea no se convierte
+automáticamente en roadmap.
 
-## 4.2 `implementation_roadmap.md`
+## `concepts/**`
 
-Función:
+Referencias conceptuales no normativas. Informan evaluación, pero no autorizan
+implementación.
 
-```text
-planning source
-```
+## `sprints/`
 
-Es la ubicación normal para consultar:
-
-- baseline de planificación;
-- estado de sprints;
-- iniciativas futuras aceptadas para planificación;
-- propuestas pendientes;
-- disposición legacy.
-
-## 4.3 `ideas.md`
-
-Función:
-
-```text
-idea registry
-```
-
-Debe conservar ideas, visión e iniciativas antes o después de su promoción.
-
-Una idea no se convierte automáticamente en roadmap.
-
-Cuando una idea sea promovida, deberá referenciarse desde este documento sin
-duplicar innecesariamente todo su contenido.
-
-## 4.4 `concepts/`
-
-Función:
-
-```text
-conceptual references
-```
-
-Los conceptos pueden proporcionar diseño preliminar, análisis o contexto.
-
-No constituyen planificación autorizada.
-
-Se consultan únicamente cuando una entrada de roadmap o una evaluación concreta
-los haga relevantes.
-
-## 4.5 `sprints/`
-
-Función:
-
-```text
-execution evidence
-```
-
-Las fichas de sprint documentan:
-
-- alcance aprobado;
-- ejecución;
-- validaciones;
-- evidencia;
-- cierre.
-
-No deben actuar como segundo roadmap.
+Evidencia de ejecución, validación y cierre de unidades concretas. No debe actuar
+como segundo roadmap.
 
 ---
 
-# 5. Estado de referencia
-
-- Repositorio: `Aranwill/jarvis`.
-- Rama permanente: `main`.
-- Commit de integración de Sprint 7.10:
+# 4. Estado de referencia
 
 ```text
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
-```
+REPOSITORY
+Aranwill/jarvis
 
-- Baseline nominal:
+PERMANENT BRANCH
+main
 
-```text
+SOURCE HEAD
+3413e8ccb348440aea757d1feccde25c65be011f
+
+NOMINAL BASELINE
 v0.6.0-alpha
-```
 
-- Último sprint integrado:
+LAST INTEGRATED SPRINT
+Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
-```text
+LAST PRODUCT/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
+
+ACTIVE AUTHORIZED SPRINT
+NONE
+
+ACTIVE IMPLEMENTATION BRANCH
+NONE
+
+RDD STAGE 1
+ADOPTED
+
+RDD STAGE 2
+NOT AUTHORIZED
 ```
 
-- Sprint autorizado actualmente:
+Sprint 7.11 fue integrado mediante PR #65.
 
 ```text
-ninguno
+baseline:
+deb759ee9855737a24b169e03bde2028c7db7f33
+
+candidate:
+59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+
+merge commit:
+3413e8ccb348440aea757d1feccde25c65be011f
 ```
 
-- Rama de implementación activa:
+Evidencia del candidato final:
 
 ```text
-ninguna
+pytest:                 388 passed
+compileall:             PASS
+diff-check:             PASS
+FULL 4R:                PASS
+independent validation: PASS
+G0–G6:                  PASS
 ```
 
-- Candidato funcional histórico de Sprint 7.10:
+La validación post-merge de GitHub Actions sobre el HEAD integrado concluyó con
+`success`.
 
-```text
-0735223
-```
-
-- Evidencia post-merge:
-
-```text
-372 passed
-compileall: PASS
-git diff --check: PASS
-working tree: clean
-```
-
-- `main` continúa siendo la única rama permanente.
-- Sprint 7.10 está completado e integrado.
-- Ningún Sprint 7.11 está autorizado.
-- La sincronización del Vault es una operación derivada downstream y no
-  constituye autorización de nuevas unidades.
-
-Como referencia histórica, Sprint 7.9 cerró con candidato funcional:
-
-```text
-d58b8ec98d48f5e2eac115d1d54b193e1df617fd
-```
-
-y validación final:
-
-```text
-365 passed
-compileall: PASS
-git diff --check: PASS
-runtime real: PASS
-revisión final 4R: PASS
-```
 ---
 
-# 6. Arquitectura implementada relevante para planificación
+# 5. Arquitectura implementada relevante para planificación
 
 El Kernel permanece desacoplado de:
 
@@ -304,7 +197,7 @@ El Kernel permanece desacoplado de:
 - modelos concretos;
 - configuración externa de runtime.
 
-Sprint 7.8 estableció la primera ruta cognitiva conversacional integrada:
+Ruta cognitiva conversacional implementada:
 
 ```text
 Request
@@ -318,6 +211,8 @@ CapabilityRegistry
 ConversationCapability
   ↓
 ConversationService
+  ↕
+InMemoryConversationContext
   ↓
 ConversationProviderRegistry
   ↓
@@ -328,77 +223,117 @@ LLMRuntime
 Response
 ```
 
-`ConversationCapability` actúa como frontera entre el pipeline cognitivo y el
-subsistema conversacional.
+Sprint 7.9 añadió continuidad conversacional efímera.
 
-La construcción de:
+Sprint 7.10 añadió aislamiento por `session_id` sin introducir persistencia ni
+Memory.
+
+Separación vigente:
 
 ```text
-providers
-runtimes
-services
-configuration
+Conversation History != Memory != Knowledge
 ```
 
-permanece fuera del Kernel.
+La construcción de providers, runtimes, servicios y configuración permanece
+fuera del Kernel.
 
-Sprint 7.9 añadió continuidad conversacional efímera mediante historial
-estructurado, `InMemoryConversationContext` y limpieza explícita con `new`,
-sin introducir estado conversacional en el Kernel ni en `SecurityContext`.
-
-Sprint 7.10 añade aislamiento conversacional por `session_id`.
-La frontera `Capability.execute(...)` preserva el `Request` existente,
-`ConversationService` selecciona historial por sesión y la CLI rota la
-identidad de sesión mediante `new`.
-
-La implementación permanece efímera y no introduce persistencia, Memory,
-RAG, agentes, Sandbox ni ampliación de autoridad.
-
-La finalización de este pipeline no autoriza nuevas capabilities ni ampliación
-de autoridad.
+La finalización de esta ruta no autoriza nuevas capabilities ni ampliación de
+autoridad.
 
 ---
 
-# 7. Estado del baseline actual
+# 6. Security foundations implementadas
 
-Estado verificado después de integrar Sprint 7.10:
+Sprint 7.5 estableció Security Control Plane Foundation:
 
 ```text
-commit de integración Sprint 7.10:
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
-
-rama permanente:
-main
-
-Sprint 7.10:
-completado e integrado
-
-sprint activo autorizado:
-ninguno
-
-candidato funcional histórico:
-0735223
-
-suite post-merge:
-372 passed
-
-compileall:
-PASS
-
-git diff --check:
-PASS
-
-working tree post-merge:
-clean
+solicitar
+→ decidir
+→ aplicar
+→ auditar
+→ ejecutar operación protegida
 ```
 
-`main` continúa siendo la única rama permanente.
+Incluye:
 
-La implementación de Sprint 7.10 no autoriza automáticamente ninguna unidad
-posterior, Memory persistente, agentes, tools, Sandbox o ampliación de autoridad.
+- contratos de autorización;
+- PDP determinista;
+- PEP fail-closed;
+- auditoría de autorización;
+- default-deny;
+- Human in Control.
 
-La reconciliación del Malāk Project Vault representa este baseline de forma
-derivada y no altera la autoridad del repositorio oficial.
+Sprint 7.6 estableció Secure Context Lifecycle Foundation:
+
+- `SecurityContext` temporal;
+- `Clock` / `SystemClock`;
+- `SecurityContextValidator`;
+- `SecurityContextIssuer`;
+- `SecurityContextRenewer`;
+- lineage;
+- `SecurityContextEnvelope`;
+- enforcement temporal en PDP.
+
+Riesgo residual preservado:
+
+```text
+7.7-D-001 — Strong SecurityContext Provenance
+classification: ACCEPTED_RESIDUAL_RISK
+severity: MEDIUM
+blocking_release: NO
+```
+
+Continúan fuera del baseline actual:
+
+- nonce y replay protection;
+- identidad criptográfica fuerte;
+- MFA;
+- Secure Message Bus;
+- Secure Context Manager criptográfico completo.
+
+---
+
+# 7. Validation Foundation — Sprint 7.11
+
+Sprint 7.11 incorporó una pipeline mínima y reproducible:
+
+```text
+candidate / PR
+    ↓
+read-only GitHub Actions
+    ↓
+exact candidate identity
+    ↓
+pytest
+compileall
+candidate-bound diff-check
+    ↓
+technical evidence
+```
+
+Propiedades:
+
+- `pull_request` y `push` a `main`;
+- `permissions: contents: read`;
+- sin `pull_request_target`;
+- sin write permissions;
+- sin secrets de entrega;
+- `persist-credentials: false`;
+- `fetch-depth: 0`;
+- Windows + Python 3.12;
+- `actions/checkout@v6`;
+- `actions/setup-python@v6`;
+- `pytest>=9,<10` solo como dependencia de desarrollo;
+- `[project].dependencies = []` preservado.
+
+Invariante:
+
+```text
+Evidence != Receipt != Validation != Decision != Authority
+```
+
+La pipeline no posee delivery authority.
+
 ---
 
 # 8. Estado de sprints del bloque 7.x
@@ -406,630 +341,19 @@ derivada y no altera la autoridad del repositorio oficial.
 | Sprint | Estado | Resultado |
 |---|---|---|
 | 7.0 | Cerrado | CLI mínima con `MockLLMRuntime` |
-| 7.1 | Cerrado | Composición de CLI con `OllamaRuntime` mediante configuración externa |
-| 7.2 | Cerrado | Contrato estructural `RuntimeMetricSink` de solo escritura |
-| 7.3 | Cerrado | Estabilización de la frontera de `ConversationProvider` |
-| 7.4 | Cerrado | Consolidación de logs, métricas y auditoría; sincronización gobernada del Vault |
-| 7.5 | Cerrado | Security Control Plane Foundation; autorización, PDP, PEP y auditoría |
+| 7.1 | Cerrado | Composición con `OllamaRuntime` mediante configuración externa |
+| 7.2 | Cerrado | `RuntimeMetricSink` de solo escritura |
+| 7.3 | Cerrado | Conversation Provider Boundary Stabilization |
+| 7.4 | Cerrado | Observabilidad y sincronización gobernada del Vault |
+| 7.5 | Cerrado | Security Control Plane Foundation |
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
-| 7.7 | Cerrado | Validación integral y certificación interna del baseline |
-| 7.8 | Completado | Primera ruta cognitiva conversacional integrada |
-| 7.9 | Completado | Conversation Continuity Foundation; integrado en `main` |
-| 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
-
----
-
-# 9. Estado de autorización de nuevos sprints
-
-```text
-SPRINT 7.10 COMPLETADO E INTEGRADO
-NINGÚN SPRINT POSTERIOR AUTORIZADO
-```
-
-Sprint 7.10 — `Conversation Session Isolation Foundation` completó:
-
-```text
-inspección
-→ justificación
-→ definición
-→ debate
-→ aprobación explícita del propietario
-→ implementación
-→ validación funcional
-→ documentación de cierre
-→ PR #58
-→ revisión humana
-→ merge a main
-→ validación post-merge
-```
-
-Evidencia de integración:
-
-```text
-merge commit:
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
-
-candidate:
-0735223
-
-pytest:
-372 passed
-
-compileall:
-PASS
-
-git diff --check:
-PASS
-```
-
-No está autorizado:
-
-- Sprint 7.11;
-- ninguna unidad posterior;
-- Memory persistente;
-- nuevas capabilities;
-- agentes;
-- tools;
-- Sandbox;
-- navegación;
-- ampliación de autoridad.
-
-La sincronización del Vault puede continuar como reconciliación derivada del
-baseline integrado, pero no constituye un nuevo sprint ni una autorización.
-
-Cualquier unidad posterior deberá atravesar nuevamente el proceso completo
-de admisión y aprobación.
----
-
-# 10. Secure Context Lifecycle Foundation — estado preservado
-
-Sprint 7.6 estableció:
-
-- contrato ampliado de `SecurityContext`;
-- frontera temporal `Clock`;
-- `SecurityContextValidator`;
-- `SecurityContextIssuer`;
-- `SecurityContextRenewer`;
-- enforcement del lifecycle en el Policy Decision Point;
-- semántica temporal `issued_at <= now < expires_at`;
-- propagación mediante `SecurityContextEnvelope`;
-- denegación por defecto;
-- comportamiento fail-closed.
-
-La evidencia de cierre registró:
-
-```text
-339 pruebas aprobadas
-compileall: PASS
-git diff --check: PASS
-```
-
-Ese valor es histórico del Sprint 7.6 y no sustituye la evidencia posterior del
-Sprint 7.8.
-
-Permanecen fuera de alcance y requieren diseño y aprobación independientes:
-
-- nonce y replay protection;
-- identidad criptográfica;
-- MFA;
-- Secure Context Manager criptográfico completo;
-- Secure Message Bus;
-- IPC seguro;
-- receipts / RDD;
-- agentes;
-- navegación;
-- rutas operativas reales de alto riesgo.
-
----
-
-# 11. Registro histórico del Sprint 7.5
-
-El Incremento 1 incorporó:
-
-- `PermissionScope`;
-- `SecurityContext`;
-- `AuthorizationRequest`;
-- `AuthorizationDecision`.
-
-La PR #15 fue integrada mediante:
-
-```text
-c0a4283b100609daeb4b3422dd28634df9d851b6
-```
-
-La validación confirmó:
-
-```text
-45 pruebas específicas
-166 pruebas totales
-compileall: PASS
-git diff --check: PASS
-```
-
-El Incremento 2 — Activación y reconciliación documental — fue completado
-mediante PR #16 y merge:
-
-```text
-4afeed440a3bf2096035d0d458d2ef75c71689fd
-```
-
-El Incremento 3 implementó un Policy Decision Point mínimo:
-
-- determinista;
-- sin LLM;
-- denegación por defecto;
-- evidencia inmutable de confirmación humana;
-- frontera inyectable de verificación.
-
-La validación registró:
-
-```text
-104 pruebas específicas
-225 pruebas totales
-```
-
-El Incremento 4 incorporó un Policy Enforcement Point inicial:
-
-- determinista;
-- fail-closed;
-- consulta directa al PDP;
-- asociación mediante `request_id`;
-- ejecución única ante decisión válida.
-
-La validación registró:
-
-```text
-19 pruebas específicas
-244 pruebas totales
-```
-
-La ADR-002 formalizó esta frontera.
-
-Fue integrada mediante PR #19:
-
-```text
-af64b062aa1395ba7f7bdd59e5c1099ded68b683
-```
-
-El Incremento 5 incorporó evidencia de auditoría mediante:
-
-```text
-PR #22
-418358cc5b543c59cf4b113f42e762f6c78eec59
-
-PR #23
-38b0917c5b8dba5c5a4ef4db157e78ac428ab4bc
-```
-
-El Incremento 6 completó la revisión integral y cierre.
-
-Este registro se conserva exclusivamente por trazabilidad.
-
----
-
-# 12. Cierre verificado del Sprint 7.4
-
-Sprint 7.4 fue integrado en `main` mediante:
-
-```text
-7cd7fcc
-```
-
-Su sincronización gobernada posterior quedó registrada como:
-
-```text
-VSYNC-20260726-005
-```
-
-con resultado:
-
-```text
-completed/pass
-```
-
-La evidencia técnica registró:
-
-```text
-94 pruebas específicas
-121 pruebas totales
-compileall: PASS
-git diff --check: PASS
-```
-
-La separación arquitectónica establecida permanece válida:
-
-- métricas miden rendimiento cuantificable;
-- eventos operativos reconstruyen ejecuciones;
-- auditoría evidencia decisiones y acciones sensibles;
-- métricas, eventos y auditoría permanecen separados;
-- no existe un envelope universal de observabilidad;
-- la evidencia no concede autoridad.
-
-Durante Sprint 7.4, Kernel y `ConversationService` permanecieron fuera del
-alcance específico de ese sprint.
-
-Esta afirmación es histórica y no describe el estado posterior a Sprint 7.8.
-
----
-
-# 13. Iniciativas incorporadas a planificación futura
-
-Las siguientes iniciativas se encuentran reconocidas para planificación futura.
-
-Su presencia aquí:
-
-```text
-NO autoriza diseño detallado
-NO autoriza implementación
-NO asigna sprint
-```
-
-## 13.1 Sandbox Containment & Evaluation Evidence Foundation
-
-Propósito:
-
-- aislamiento;
-- entornos descartables;
-- control de red;
-- control de archivos;
-- control de procesos;
-- límites de CPU/RAM/VRAM/disco/tiempo;
-- telemetría externa al agente;
-- evidencia reproducible;
-- snapshots y hashes;
-- kill switch;
-- timeout;
-- cuarentena;
-- pruebas de contención;
-- revisión humana.
-
-Estado:
-
-```text
-Planificación futura reconocida.
-Diseño detallado no aprobado.
-Implementación no aprobada.
-Sin número de sprint.
-```
-
-## 13.2 Segmented Domain Governance Foundation
-
-Propósito:
-
-- preservar a Malāk como control plane horizontal;
-- permitir Domain Packs subordinados;
-- definir precedencia de políticas;
-- impedir ampliación de autoridad desde capas inferiores;
-- impedir contaminación del Kernel con lógica sectorial.
-
-Estado:
-
-```text
-Planificación futura reconocida.
-Diseño detallado no aprobado.
-Implementación no aprobada.
-Sin número de sprint.
-```
-
-## 13.3 Knowledge Intake & External Evidence Governance
-
-Propósito:
-
-- gobernar fuentes externas;
-- conservar originales y procedencia;
-- registrar autoridad, licencia y vigencia;
-- tratar índices y grafos como proyecciones reconstruibles;
-- incorporar saneamiento y validación;
-- prevenir autocontaminación.
-
-Estado:
-
-```text
-Planificación futura reconocida.
-Diseño detallado no aprobado.
-Implementación no aprobada.
-Sin número de sprint.
-```
-
-## 13.4 Security Learning, Adversarial Evaluation & Deception
-
-Propósito:
-
-- laboratorios locales;
-- CTF autorizados;
-- aprendizaje defensivo;
-- evaluación externa de agentes;
-- deception defensiva aislada;
-- transformación de evidencia en propuestas defensivas.
-
-Estado:
-
-```text
-Planificación futura reconocida.
-Diseño detallado no aprobado.
-Implementación no aprobada.
-Sin número de sprint.
-```
-
-Estas iniciativas no habilitan:
-
-- agentes autónomos;
-- navegación;
-- malware;
-- Tor;
-- honeypots públicos;
-- pentesting no autorizado;
-- respuesta ofensiva.
-
----
-
-# 14. Legacy Planning & Disposition Registry
-
-## 14.1 Propósito
-
-El archivo:
-
-```text
-docs/project/roadmap.md
-```
-
-contiene planificación temprana que precede a la arquitectura documental actual.
-
-Ese documento conserva valor histórico y varias intenciones de largo plazo.
-
-Por ese motivo:
-
-```text
-legacy != vigente
-```
-
-pero también:
-
-```text
-legacy != descartado
-```
-
-Ningún elemento contenido allí debe considerarse eliminado únicamente porque la
-planificación haya evolucionado.
-
-Esta sección centraliza su disposición actual para evitar que sea necesario
-consultar ambos roadmaps durante decisiones ordinarias.
-
----
-
-## 14.2 Estados de disposición
-
-| Estado | Significado |
-|---|---|
-| `materializado` | La intención posee una implementación o equivalente verificable. |
-| `parcialmente_materializado` | Parte de la intención existe, pero el alcance original era mayor. |
-| `preservado` | Continúa siendo una intención futura válida. |
-| `evolucionado` | Fue reformulada mediante una arquitectura o concepto posterior. |
-| `candidato_tecnologico` | Tecnología candidata sin compromiso arquitectónico. |
-| `requiere_revision` | No existe evidencia suficiente para clasificarla definitivamente. |
-| `hito_historico` | Pertenece principalmente a una etapa anterior y se preserva por trazabilidad. |
-
-Los estados anteriores son informativos.
-
-No constituyen autorización.
-
----
-
-## 14.3 Disposición de elementos legacy
-
-| Elemento legacy | Disposición | Interpretación actual |
-|---|---|---|
-| Ollama | `materializado` | Existe `OllamaRuntime`; permanece detrás de `LLMRuntime`. |
-| Open WebUI | `candidato_tecnologico`, `hito_historico` | Tecnología utilizada en etapas iniciales; no componente obligatorio. |
-| Qwen2.5 | `candidato_tecnologico` | Modelo histórico/candidato; Malāk permanece Model Agnostic. |
-| DeepSeek | `candidato_tecnologico` | Modelo histórico/candidato; no dependencia permanente. |
-| Validación RAG | `preservado` | RAG continúa como capacidad futura. |
-| Optimización embeddings | `preservado` | Relevante para futuras capacidades de recuperación. |
-| Base documental | `evolucionado` | Evolucionó hacia Knowledge, AKS y futuras capacidades de retrieval. |
-| n8n | `candidato_tecnologico` | Automatización permanece; n8n no es requisito arquitectónico. |
-| Automatizaciones | `preservado` | Capacidad futura gobernada. |
-| ChromaDB | `hito_historico`, `candidato_tecnologico` | Validación temprana; una base vectorial futura debe permanecer sustituible. |
-| Memoria Documental | `evolucionado` | Evolucionó hacia separación Memory / Knowledge / AKS. |
-| Seguridad IA | `evolucionado` | Evolucionó hacia las fundaciones de seguridad actuales. |
-| OWASP LLM Top 10 | `preservado` | Referencia futura de seguridad. |
-| Prompt Injection | `preservado` | Amenaza relevante para contenido externo, tools y evidence acquisition. |
-| SSRF | `preservado` | Amenaza relevante para futuras capacidades de red. |
-| Auditoría documental | `evolucionado` | Relacionada actualmente con AKS, trazabilidad y gobernanza documental. |
-| Voice | `preservado` | Capacidad futura. |
-| Whisper | `candidato_tecnologico` | Posible tecnología futura de Voice. |
-| Piper | `candidato_tecnologico` | Posible tecnología futura de Voice. |
-| Agentes | `preservado` | Capacidad futura sujeta a seguridad y gobernanza. |
-| Module Registry | `requiere_revision` | Responsabilidad legacy todavía no clasificada definitivamente. |
-| Event Bus | `preservado` | Concepto arquitectónico vigente sujeto a verificación del baseline. |
-| Lifecycle Manager | `requiere_revision` | Existen mecanismos posteriores de lifecycle, pero no se asume equivalencia exacta. |
-| Health Manager | `preservado`, `requiere_revision` | Health sigue siendo preocupación válida; responsabilidad exacta pendiente de revisión. |
-| HelloCapability | `hito_historico` | Hito mínimo posteriormente reemplazado por capabilities funcionales reales. |
-| Procesamiento de Request | `materializado` | Existe flujo de Request mediante Kernel. |
-| Tests del Kernel | `materializado` | Existe validación automatizada del Kernel. |
-| Baseline Kernel v1.0 | `hito_historico` | Nomenclatura histórica; no representa la versión nominal actual. |
-| Memory Layer | `preservado` | Capacidad futura separada de Knowledge. |
-| Knowledge Layer | `preservado` | Capacidad futura relacionada con AKS y retrieval. |
-| RAG | `preservado` | Capacidad futura. |
-| Vector DB | `candidato_tecnologico` | Infraestructura futura sustituible y reconstruible. |
-| Planning Engine | `parcialmente_materializado` | Existe Planner mínimo; planificación avanzada requiere diseño independiente. |
-| Reasoning Engine | `preservado`, `requiere_revision` | Intención cognitiva futura; arquitectura no definida por el roadmap legacy. |
-| Capabilities reales | `parcialmente_materializado` | Ya existen capabilities funcionales; futuras siguen Capability First. |
-| FastAPI | `candidato_tecnologico` | Tecnología candidata, no compromiso arquitectónico. |
-| IoT | `preservado` | Capacidad futura. |
-| Vision | `preservado` | Capacidad futura. |
-| OSINT | `evolucionado` | Parte de su intención evolucionó hacia Evidence Acquisition Foundation. |
-| Workflows | `preservado` | Capacidad futura relacionada con automatización y orquestación. |
-| Malāk Platform v1.0 | `preservado` | Visión de largo plazo; no release plan aprobado. |
-
----
-
-# 15. Regla de promoción de planificación legacy
-
-Un elemento legacy puede evolucionar mediante:
-
-```text
-legacy
-  ↓
-idea
-  ↓
-evaluación
-  ↓
-roadmap
-  ↓
-specification
-  ↓
-ADR cuando corresponda
-  ↓
-sprint aprobado
-  ↓
-implementation
-  ↓
-evidence
-  ↓
-baseline
-```
-
-No todos los elementos necesitan recorrer todos los estados.
-
-También pueden evolucionar explícitamente a:
-
-```text
-legacy
-→ rechazada
-```
-
-o:
-
-```text
-legacy
-→ superseded
-```
-
-pero esa transición debe quedar registrada.
-
-Reglas:
-
-```text
-ausencia de implementación != rechazo
-
-antigüedad != descarte
-
-idea != roadmap
-
-roadmap != aprobación
-
-aprobación != ejecución
-
-evidencia != autoridad
-```
-
----
-
-# 16. Tecnologías legacy
-
-Las tecnologías nombradas históricamente representan contexto o candidatos:
-
-```text
-Ollama
-Open WebUI
-Qwen2.5
-DeepSeek
-n8n
-ChromaDB
-Whisper
-Piper
-FastAPI
-```
-
-Su aparición en documentación legacy no las convierte en dependencias.
-
-Toda selección futura deberá justificarse contra:
-
-- requisitos;
-- arquitectura vigente;
-- Runtime Independence;
-- Vendor Independence;
-- seguridad;
-- mantenibilidad;
-- recursos;
-- evidencia técnica.
-
----
-
-# 17. Propuestas pendientes de revisión y aprobación
-
-| Propuesta | Estado | Observación |
-|---|---|---|
-| Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Unidad posterior a Sprint 7.10 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de Sprint 7.10 |
-| Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
-| Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
-| Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
-
-La tabla no establece secuencia obligatoria.
-
----
-
-# 18. Regla de admisión de Capabilities
-
-Una Capability solo podrá incorporarse cuando añada una funcionalidad:
-
-```text
-real
-necesaria
-permanente
-```
-
-para Malāk.
-
-No deben crearse Capabilities exclusivamente para:
-
-- validar routing;
-- demostrar múltiples entradas;
-- probar Registry;
-- aumentar cobertura artificialmente;
-- completar una secuencia histórica;
-- incorporar ejemplos sin utilidad funcional.
-
-La infraestructura interna debe validarse mediante:
-
-- tests;
-- doubles;
-- fixtures;
-- contratos;
-- integración controlada.
-
----
-
-# 19. Restricción estructural
-
-Antes de introducir:
-
-- agentes;
-- herramientas externas;
-- automatización del sistema operativo;
-- navegación;
-- mensajería externa;
-- memoria sensible;
-- Capabilities de alto riesgo;
-
-deben existir las fundaciones requeridas de seguridad y gobernanza.
-
-Ninguna propuesta futura puede:
-
-- ampliar el Kernel con lógica de negocio;
-- acoplar el Kernel a un runtime;
-- acoplar el Kernel a un proveedor;
-- acoplar el Kernel a un modelo;
-- introducir dependencias no aprobadas;
-- modificar contratos centrales sin revisión;
-- asumir que el hardware actual define la arquitectura permanente.
-
----
-
-# 20. Fichas relacionadas
-
-Evidencia detallada de ejecución:
+| 7.7 | Cerrado | Validación integral y certificación interna |
+| 7.8 | Completado | Cognitive Conversation Execution Path Foundation |
+| 7.9 | Completado | Conversation Continuity Foundation |
+| 7.10 | Completado | Conversation Session Isolation Foundation |
+| 7.11 | Completado | Reproducible Validation Pipeline Foundation |
+
+Fichas canónicas:
 
 ```text
 docs/project/sprints/SPRINT-7.0.md
@@ -1043,68 +367,142 @@ docs/project/sprints/SPRINT-7.7.md
 docs/project/sprints/SPRINT-7.8.md
 docs/project/sprints/SPRINT-7.9.md
 docs/project/sprints/SPRINT-7.10.md
+docs/project/sprints/SPRINT-7.11.md
 ```
 
-Interpretación:
-
-```text
-Sprint file
-= evidencia detallada de una unidad concreta
-
-Sprint file
-!= autorización de un sprint posterior
-
-Sprint file
-!= roadmap general
-```
+Los artefactos bajo `sprints/proposals/` preservan admisión, diseños o evidencia
+intermedia y no deben reemplazar la ficha final de un sprint integrado.
 
 ---
 
-# 21. Relación con ideas
-
-Registro de ideas:
+# 9. Estado de autorización
 
 ```text
-documents/projects/jarvis/ideas.md
+SPRINT 7.11 COMPLETADO E INTEGRADO
+NINGUNA UNIDAD POSTERIOR AUTORIZADA
 ```
 
-Una idea registrada allí:
+No está autorizado automáticamente:
 
-```text
-no aprueba arquitectura
-no autoriza implementación
-no establece sprint
-```
+- Sprint 7.12;
+- cualquier otra unidad posterior;
+- RDD Stage 2;
+- Memory persistente;
+- nuevas capabilities;
+- agentes;
+- tools;
+- Sandbox;
+- navegación;
+- GraphRAG;
+- ampliación de autoridad.
 
-Cuando una idea sea aceptada para planificación deberá incorporarse a este
-roadmap mediante una referencia identificable.
-
-No debe duplicarse innecesariamente todo su análisis.
+Toda unidad posterior deberá atravesar un proceso independiente de admisión y
+aprobación.
 
 ---
 
-# 22. Relación con Concepts
+# 10. Iniciativas reconocidas para planificación futura
 
-Referencias conceptuales:
+Las siguientes iniciativas ya estaban incorporadas a planificación futura antes
+de esta consolidación.
+
+Su presencia aquí:
 
 ```text
-docs/project/concepts/
+NO autoriza diseño detallado
+NO autoriza implementación
+NO asigna sprint
 ```
 
-Los Concepts:
+## 10.1 Sandbox Containment & Evaluation Evidence Foundation
 
-- preservan análisis;
-- preservan alternativas;
-- preservan referencias;
-- pueden alimentar evaluación futura;
-- no autorizan implementación;
-- no forman parte del roadmap hasta promoción explícita.
+Propósito:
 
-Este roadmap deberá referenciar el Concept aplicable cuando sea necesario.
+- aislamiento;
+- entornos descartables;
+- control de red, archivos y procesos;
+- límites de recursos;
+- telemetría externa al agente;
+- evidencia reproducible;
+- kill switch, timeout y cuarentena;
+- pruebas de contención;
+- revisión humana.
+
+Estado:
+
+```text
+Planificación futura reconocida.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint.
+```
+
+## 10.2 Segmented Domain Governance Foundation
+
+Propósito:
+
+- preservar Malāk como control plane horizontal;
+- permitir Domain Packs subordinados;
+- impedir ampliación de autoridad desde capas inferiores;
+- evitar contaminación del Kernel con lógica sectorial.
+
+Estado:
+
+```text
+Planificación futura reconocida.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint.
+```
+
+## 10.3 Knowledge Intake & External Evidence Governance
+
+Propósito:
+
+- gobernar fuentes externas;
+- conservar procedencia, autoridad, licencia y vigencia;
+- tratar índices y grafos como proyecciones reconstruibles;
+- incorporar saneamiento y validación;
+- prevenir autocontaminación.
+
+Estado:
+
+```text
+Planificación futura reconocida.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint.
+```
+
+## 10.4 Security Learning, Adversarial Evaluation & Deception
+
+Propósito:
+
+- laboratorios locales;
+- CTF autorizados;
+- aprendizaje defensivo;
+- evaluación externa de agentes;
+- deception defensiva aislada;
+- transformar evidencia en propuestas defensivas.
+
+Estado:
+
+```text
+Planificación futura reconocida.
+Diseño detallado no aprobado.
+Implementación no aprobada.
+Sin número de sprint.
+```
+
+Estas iniciativas no habilitan agentes autónomos, navegación, malware,
+honeypots públicos, pentesting no autorizado ni respuesta ofensiva.
+
+Otras ideas preservadas en `ideas.md` continúan con el estado declarado allí y
+no se promueven al roadmap por esta consolidación.
 
 ---
 
-# 23. Disposición de `docs/project/roadmap.md`
+# 11. Legacy Planning & Disposition Registry
 
 El archivo:
 
@@ -1112,86 +510,254 @@ El archivo:
 docs/project/roadmap.md
 ```
 
-se conserva como fuente de planificación legacy original.
-
-Debe identificarse explícitamente como documentación legacy y dirigir hacia:
+contiene planificación temprana anterior a la arquitectura documental vigente.
 
 ```text
-docs/project/implementation_roadmap.md
+legacy != vigente
+legacy != descartado
 ```
 
-como fuente derivada canónica de planificación vigente.
+La consolidación preserva su valor histórico sin convertirlo en planificación
+operativa.
 
-Los estados, fases, numeraciones y tecnologías preservados en el roadmap legacy
-pertenecen a su contexto histórico y no deben reinterpretarse como estado
-operativo, baseline vigente ni autorización de implementación.
+## Estados de disposición
 
-El corrective packet documental actual no elimina ni archiva ese archivo.
-Su contenido histórico se preserva y únicamente se clarifica su clasificación.
+| Estado | Significado |
+|---|---|
+| `materializado` | Existe implementación o equivalente verificable |
+| `parcialmente_materializado` | Parte de la intención existe |
+| `preservado` | Intención futura todavía válida |
+| `evolucionado` | Reformulada por arquitectura o concepto posterior |
+| `candidato_tecnologico` | Tecnología candidata sin compromiso |
+| `requiere_revision` | Falta evidencia para clasificar definitivamente |
+| `hito_historico` | Se conserva principalmente por trazabilidad |
 
-Cualquier propuesta futura para archivarlo, sustituirlo por un stub o eliminarlo
-requerirá una evaluación independiente que confirme que no existe información
-histórica o de planificación única que deba conservarse.
+## Disposición principal
+
+| Elemento legacy | Disposición | Interpretación actual |
+|---|---|---|
+| Ollama | `materializado` | Existe `OllamaRuntime` detrás de `LLMRuntime` |
+| Open WebUI | `candidato_tecnologico`, `hito_historico` | No es componente obligatorio |
+| Qwen2.5 | `candidato_tecnologico` | Modelo histórico/candidato |
+| DeepSeek | `candidato_tecnologico` | Modelo histórico/candidato |
+| Validación RAG | `preservado` | RAG continúa como capacidad futura |
+| Optimización embeddings | `preservado` | Relevante para recuperación futura |
+| Base documental | `evolucionado` | Evolucionó hacia Knowledge / AKS / retrieval |
+| n8n | `candidato_tecnologico` | No es requisito arquitectónico |
+| Automatizaciones | `preservado` | Capacidad futura gobernada |
+| ChromaDB | `hito_historico`, `candidato_tecnologico` | Vector store futuro debe ser sustituible |
+| Memoria Documental | `evolucionado` | Evolucionó hacia separación Memory / Knowledge / AKS |
+| Seguridad IA | `evolucionado` | Evolucionó hacia foundations de seguridad actuales |
+| OWASP LLM Top 10 | `preservado` | Referencia futura de seguridad |
+| Prompt Injection | `preservado` | Amenaza para evidence intake y tools |
+| SSRF | `preservado` | Amenaza para futuras capacidades de red |
+| Auditoría documental | `evolucionado` | AKS, trazabilidad y gobernanza documental |
+| Voice | `preservado` | Capacidad futura |
+| Whisper | `candidato_tecnologico` | Posible tecnología de Voice |
+| Piper | `candidato_tecnologico` | Posible tecnología de Voice |
+| Agentes | `preservado` | Sujetos a seguridad y gobernanza |
+| Module Registry | `requiere_revision` | Responsabilidad todavía no clasificada |
+| Event Bus | `preservado` | Concepto arquitectónico sujeto a baseline |
+| Lifecycle Manager | `requiere_revision` | Comparar con mecanismos actuales |
+| Health Manager | `preservado`, `requiere_revision` | Responsabilidad exacta pendiente |
+| HelloCapability | `hito_historico` | Hito mínimo superseded por capabilities reales |
+| Procesamiento de Request | `materializado` | Existe flujo mediante Kernel |
+| Tests del Kernel | `materializado` | Existe validación automatizada |
+| Baseline Kernel v1.0 | `hito_historico` | Nomenclatura histórica |
+| Memory Layer | `preservado` | Capacidad futura separada de Knowledge |
+| Knowledge Layer | `preservado` | Capacidad futura relacionada con AKS y retrieval |
+| RAG | `preservado` | Capacidad futura |
+| Vector DB | `candidato_tecnologico` | Infraestructura futura reconstruible |
+| Planning Engine | `parcialmente_materializado` | Existe Planner mínimo |
+| Reasoning Engine | `preservado`, `requiere_revision` | Intención cognitiva futura |
+| Capabilities reales | `parcialmente_materializado` | Futuras capabilities siguen Capability First |
+| FastAPI | `candidato_tecnologico` | Sin compromiso arquitectónico |
+| IoT | `preservado` | Capacidad futura |
+| Vision | `preservado` | Capacidad futura |
+| OSINT | `evolucionado` | Parte evolucionó hacia Evidence Acquisition |
+| Workflows | `preservado` | Relacionados con automatización/orquestación |
+| Malāk Platform v1.0 | `preservado` | Visión de largo plazo, no release plan aprobado |
 
 ---
 
-# 24. Regla de no duplicación
+# 12. Regla de promoción
 
-A partir de esta consolidación:
-
-`project_context.md` no debería mantener una copia extensa del roadmap.
-
-`README.md` no debería mantener más que un resumen operativo mínimo.
-
-`ROADMAP.md` raíz no debería duplicar planificación.
-
-`ideas.md` no debería duplicar planes detallados.
-
-`concepts/` no debería mantener estados operativos de sprint.
-
-`sprints/` no deberían convertirse en roadmap.
-
-La regla objetivo es:
+La secuencia conceptual es:
 
 ```text
-un concepto → una ubicación responsable
+legacy / idea / necesidad
+        ↓
+evaluación contra baseline
+        ↓
+roadmap cuando corresponda
+        ↓
+specification
+        ↓
+ADR cuando corresponda
+        ↓
+unidad aprobada
+        ↓
+implementation
+        ↓
+evidence
+        ↓
+human governance
+        ↓
+baseline
 ```
 
-con referencias entre artefactos.
+También puede terminar explícitamente en `REJECT` o `superseded`.
 
 ---
 
-# 25. Regla de actualización
+# 13. Propuestas pendientes de revisión
+
+| Propuesta | Estado | Observación |
+|---|---|---|
+| Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
+| Unidad posterior a Sprint 7.11 | No autorizada | Debe surgir de necesidad demostrada del baseline `3413e8c…` |
+| RDD Stage 2 | No autorizada | Requiere utilidad demostrada y aprobación separada |
+| Module Registry legacy | Requiere revisión | Determinar si la responsabilidad sigue siendo necesaria |
+| Lifecycle Manager legacy | Requiere revisión | Comparar intención con lifecycle actual |
+| Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de proponer |
+
+La tabla no establece secuencia obligatoria.
+
+La existencia de IDEA-012 — Constitutional Assurance Foundation y otras ideas
+`aprobada_para_planificacion_futura` no equivale a selección del siguiente
+sprint ni a promoción automática a esta tabla.
+
+---
+
+# 14. Restricciones estructurales
+
+Antes de introducir agentes, herramientas externas, navegación, automatización
+del sistema operativo, memoria sensible o capabilities de alto riesgo deben
+existir las foundations requeridas y autorización independiente.
+
+Ninguna propuesta puede:
+
+- ampliar el Kernel con lógica de negocio;
+- acoplar el Kernel a runtime, provider o modelo concreto;
+- introducir dependencias no aprobadas;
+- modificar contratos centrales sin revisión;
+- reinterpretar evidencia como autoridad;
+- asumir que el hardware actual define la arquitectura permanente.
+
+---
+
+# 15. Relación con ideas y concepts
+
+Registro de ideas:
+
+```text
+documents/projects/jarvis/ideas.md
+```
+
+Referencias conceptuales:
+
+```text
+docs/project/concepts/**
+```
+
+Reglas:
+
+```text
+idea puede informar evaluación
+concept puede informar diseño
+ninguno autoriza implementación
+ninguno modifica baseline
+```
+
+Antes de diseñar una capacidad futura desde cero se debe verificar si su
+intención ya está preservada allí.
+
+---
+
+# 16. Reconciliación downstream
+
+Después de integrar un cambio material en `Aranwill/jarvis/main` debe evaluarse
+la reconciliación del Project Vault mediante el Vault Sync Agent.
+
+```text
+Malāk main
+   ↓
+source of truth
+
+Sync Agent
+   ↓
+observa / propone
+
+Project Vault
+   ↓
+proyección derivada
+```
+
+La reconciliación:
+
+- no reabre un sprint cerrado;
+- no modifica autoridad;
+- no convierte el Vault en source of truth;
+- no autoriza una nueva unidad.
+
+El merge de Sprint 7.11 expuso un `STATE_DRIFT` porque la evidencia final estaba
+solo bajo `sprints/proposals/`, mientras el extractor downstream resolvía fichas
+canónicas `docs/project/sprints/SPRINT-*.md`.
+
+La creación de `docs/project/sprints/SPRINT-7.11.md` corrige esa fuente
+estructural. La proyección del Vault debe verificarse nuevamente después de
+integrar este corrective packet.
+
+---
+
+# 17. Regla de no duplicación
+
+```text
+project_context.md
+→ snapshot operativo compacto
+
+implementation_roadmap.md
+→ planificación derivada
+
+SPRINT-*.md
+→ evidencia detallada de ejecución
+
+ideas.md
+→ ideas y visión
+
+concepts/**
+→ referencias no normativas
+```
+
+Un concepto debe tener una ubicación responsable y referencias explícitas, no
+copias divergentes.
+
+---
+
+# 18. Regla de actualización
 
 Este documento debe revalidarse cuando ocurra cualquiera de estos eventos:
 
-- cambio material del baseline o de `HEAD` que afecte la planificación descrita;
+- cambio material del baseline o `HEAD` que afecte planificación;
 - cierre de un sprint;
-- apertura formal de un nuevo sprint;
+- apertura formal de una nueva unidad;
 - modificación material de contratos públicos;
-- aceptación de una decisión arquitectónica que afecte planificación;
-- cambio de rama permanente;
-- certificación de un nuevo baseline;
+- decisión arquitectónica que afecte planificación;
 - promoción de una idea al roadmap;
 - rechazo o supersedencia de una iniciativa;
-- cambio material de las reglas de gobernanza o ejecución.
-
-Los commits puramente documentales, mecánicos o de sincronización que no alteren
-la planificación descrita no obligan por sí solos a reemplazar `as_of_commit` ni
-el commit material de referencia.
+- cambio material de gobernanza;
+- drift downstream relevante.
 
 Los registros históricos no deben reescribirse silenciosamente para coincidir
 con el presente.
 
-Las diferencias históricas deben conservar contexto temporal.
-
 ---
 
-# 26. Estado actual de planificación
+# 19. Estado actual de planificación
 
 ```text
 MATERIAL BASELINE REFERENCE
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
+3413e8ccb348440aea757d1feccde25c65be011f
 
 PERMANENT BRANCH
 main
@@ -1202,17 +768,20 @@ NONE
 NOMINAL VERSION
 v0.6.0-alpha
 
-LAST COMPLETED SPRINT
+LAST INTEGRATED SPRINT
+Sprint 7.11 — Reproducible Validation Pipeline Foundation
+
+LAST PRODUCT/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
 
 ACTIVE SPRINT
 NONE
 
-SPRINT AFTER 7.10
+SUBSEQUENT UNIT
 NONE AUTHORIZED
 
-LEGACY ROADMAP
-DISPOSITION REGISTERED
+RDD STAGE 2
+NOT AUTHORIZED
 
 LAW DOCUMENTS
 OUT OF SCOPE
@@ -1223,7 +792,7 @@ NONE
 
 ---
 
-# 27. Principio de cierre
+# 20. Principio de cierre
 
 La planificación de Malāk debe permanecer:
 
@@ -1241,6 +810,5 @@ No crea autoridad.
 
 La evidencia puede producir una propuesta.
 
-La propuesta puede producir una decisión humana.
-
-Solo una decisión autorizada puede producir implementación.
+Solo una decisión humana autorizada puede convertir una propuesta en trabajo
+admitido y, posteriormente, en baseline.
