@@ -2,12 +2,12 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-04
-as_of_commit: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
+as_of_date: 2026-09-08
+as_of_commit: 3413e8ccb348440aea757d1feccde25c65be011f
 branch: main
 certification_branch: null
-candidate_commit: 0735223
-certification_status: sprint_7_10_completed
+candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+certification_status: sprint_7_11_completed
 baseline: v0.6.0-alpha
 ---
 
@@ -61,6 +61,7 @@ Este contexto fue reconciliado a partir de:
 - arquitectura implementada documentada;
 - resultados de validación registrados durante el cierre del Sprint 7.8;
 - revalidación local del baseline previa a la activación del Sprint 7.9;
+- evidencia candidate-bound, cierre y validación post-merge de Sprint 7.11;
 - estado sincronizado del Malāk Project Vault.
 
 El documento:
@@ -116,44 +117,49 @@ Los documentos derivados pueden informar evidencia y contexto de planificación,
 ## Snapshot validado del repositorio
 
 ```text
-Repositorio oficial:          Aranwill/jarvis
-Raíz Git local:               D:\Ollama\jarvis
-Rama permanente:              main
-Commit integración Sprint 7.10: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
-Baseline nominal:             v0.6.0-alpha
-Último sprint integrado:      Sprint 7.10 — Conversation Session Isolation Foundation
-Sprint activo autorizado:     ninguno
-Rama de implementación activa: ninguna
-Candidato funcional validado: 0735223
-Estado Sprint 7.10:           completado e integrado
-Sprint posterior autorizado:  ninguno
+Repositorio oficial:             Aranwill/jarvis
+Raíz Git local:                  D:\Ollama\jarvis
+Rama permanente:                 main
+Commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
+Baseline nominal:                v0.6.0-alpha
+Último sprint integrado:         Sprint 7.11 — Reproducible Validation Pipeline Foundation
+Último sprint funcional:         Sprint 7.10 — Conversation Session Isolation Foundation
+Sprint activo autorizado:        ninguno
+Rama de implementación activa:   ninguna
+Candidato Sprint 7.11:           59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+Estado Sprint 7.11:              completado e integrado
+Sprint posterior autorizado:     ninguno
+RDD Stage 2:                     no autorizado
 ```
 
-Sprint 7.10 — `Conversation Session Isolation Foundation` fue evaluado,
-debatido y aprobado explícitamente por el propietario el 2026-09-04.
+Sprint 7.11 — `Reproducible Validation Pipeline Foundation` fue admitido,
+autorizado, implementado, validado e integrado mediante PR #65.
 
-El candidato funcional validado fue:
+El candidato final validado fue:
 
 ```text
-0735223
+59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 ```
 
-La integración se realizó mediante PR #58 con merge commit:
+La integración se realizó mediante PR #65 con merge commit:
 
 ```text
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
+3413e8ccb348440aea757d1feccde25c65be011f
 ```
 
-Validación post-merge sobre `main`:
+Evidencia del candidato y validación post-merge:
 
 ```text
-372 passed
+388 passed
 compileall: PASS
 git diff --check: PASS
-working tree: clean
+FULL 4R: PASS
+independent validation: PASS
+post-merge Validation: success
 ```
 
-No existe un Sprint 7.11 autorizado.
+Sprint 7.10 permanece como la última unidad funcional de producto/runtime.
+No existe un sprint ni unidad posterior a Sprint 7.11 autorizada.
 
 La sincronización del Malāk Project Vault es una proyección derivada posterior.
 Su estado no modifica el cierre oficial del sprint ni concede autoridad sobre
@@ -561,6 +567,8 @@ Estado del bloque 7.x:
 | 7.7 | Cerrado | Validación de baseline y release interna |
 | 7.8 | Completado | Cognitive Conversation Execution Path Foundation |
 | 7.9 | Completado | Conversation Continuity Foundation; cierre aprobado por el propietario |
+| 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
+| 7.11 | Completado | Reproducible Validation Pipeline Foundation; integrado y validado post-merge |
 
 ### Sprint 7.0
 
@@ -826,27 +834,29 @@ Estado reconciliado:
 
 ```text
 rama permanente: main
-commit de referencia: 2864435401353e5abcfcb51fc276361a0225c2b7
+commit de referencia: 3413e8ccb348440aea757d1feccde25c65be011f
 Sprint 7.7: cerrado
 Sprint 7.8: completado
 Sprint 7.9: completado
-rama temporal de cierre: sprint/7.9-conversation-continuity
-candidato funcional validado: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
-cierre final del propietario: aprobado el 2026-09-03
+Sprint 7.10: completado
+Sprint 7.11: completado e integrado
+última unidad funcional de producto/runtime: Sprint 7.10
+candidato final Sprint 7.11: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 certification branch activa: no
 release promovida adicional: no
 sprint actualmente autorizado: ninguno
 sprint posterior autorizado: ninguno
+RDD Stage 2: no autorizado
 ```
 
-El commit `2864435401353e5abcfcb51fc276361a0225c2b7` es el estado de `main`
-contra el cual fue activado Sprint 7.9.
+El commit `3413e8ccb348440aea757d1feccde25c65be011f` es el estado de `main`
+resultante de integrar Sprint 7.11.
 
-Los commits producidos dentro de la rama temporal no alteran por sí mismos el
-baseline permanente hasta ser revisados e integrados.
+Sprint 7.11 no modificó el producto/runtime; Sprint 7.10 permanece como la última
+unidad funcional de producto/runtime integrada.
 
 No debe certificarse una nueva release, crear o mover un tag, abrir un sprint
-posterior a 7.9 o ampliar autoridad sin un proceso específico de evaluación y
+posterior a 7.11 o ampliar autoridad sin un proceso específico de evaluación y
 aprobación.
 
 ---
@@ -888,7 +898,7 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ---
 
-## Planificación vigente — post-Sprint 7.10
+## Planificación vigente — post-Sprint 7.11
 
 Sprint 7.8 está completado.
 
@@ -896,12 +906,17 @@ Sprint 7.9 fue completado y su cierre fue aprobado explícitamente por el
 propietario el 2026-09-03.
 
 Sprint 7.10 fue completado e integrado y su cierre fue aprobado explícitamente por el propietario el 2026-09-04.
+
+Sprint 7.11 fue completado, integrado mediante PR #65 y validado nuevamente sobre `main`.
 No existe un sprint posterior autorizado.
 
 Actualmente:
 
 ```text
 LAST COMPLETED SPRINT
+Sprint 7.11 — Reproducible Validation Pipeline Foundation
+
+LAST PRODUCT/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
 
 ACTIVE AUTHORIZED SPRINT
@@ -909,6 +924,9 @@ NONE
 
 SUBSEQUENT SPRINT
 NONE AUTHORIZED
+
+RDD STAGE 2
+NOT AUTHORIZED
 ```
 
 La fuente derivada canónica para planificación es:
@@ -920,7 +938,7 @@ docs/project/implementation_roadmap.md
 La ficha operativa del último sprint integrado es:
 
 ```text
-docs/project/sprints/SPRINT-7.10.md
+docs/project/sprints/SPRINT-7.11.md
 ```
 
 Las ideas registradas en `documents/projects/jarvis/ideas.md`, las referencias
@@ -1086,12 +1104,11 @@ obtener aprobación explícita.
 
 ## Política de actualización
 
-Este documento fue reconciliado contra el estado observado utilizado para
-activar Sprint 7.9:
+Este documento fue reconciliado contra el estado observado después de integrar Sprint 7.11:
 
 ```text
-main@2864435401353e5abcfcb51fc276361a0225c2b7
-active_work_branch@sprint/7.9-conversation-continuity
+main@3413e8ccb348440aea757d1feccde25c65be011f
+active_work_branch@NONE
 ```
 
 `as_of_commit` identifica el commit de referencia utilizado para reconstruir el
