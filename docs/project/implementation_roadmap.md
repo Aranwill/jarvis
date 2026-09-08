@@ -644,6 +644,35 @@ Ninguna propuesta puede:
 - reinterpretar evidencia como autoridad;
 - asumir que el hardware actual define la arquitectura permanente.
 
+## 14.1 Regla de admisión de Capabilities
+
+Una Capability solo podrá incorporarse cuando añada una funcionalidad:
+
+```text
+real
+necesaria
+permanente
+```
+
+para Malāk.
+
+No deben crearse Capabilities exclusivamente para:
+
+- validar routing;
+- demostrar múltiples entradas;
+- probar Registry;
+- aumentar cobertura artificialmente;
+- completar una secuencia histórica;
+- incorporar ejemplos sin utilidad funcional.
+
+La infraestructura interna debe validarse mediante:
+
+- tests;
+- doubles;
+- fixtures;
+- contratos;
+- integración controlada.
+
 ---
 
 # 15. Relación con ideas y concepts
