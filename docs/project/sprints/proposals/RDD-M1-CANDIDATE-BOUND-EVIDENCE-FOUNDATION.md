@@ -14,310 +14,146 @@ language: es
 
 # RDD-M1 — Candidate-Bound Evidence Foundation
 
-## Estado
+## Estado y autorización
 
 ```text
-UNIDAD RDD-M1 AUTORIZADA PARA STAGE 1
-GATES G0–G6 AUTORIZADOS
-STAGE 2 NO AUTORIZADO
+Stage 0 → Stage 1
+G0–G6 autorizados
+Stage 2 NO autorizado
 ```
 
-El propietario aprobó explícitamente el 2026-09-08 avanzar con la incorporación
-nativa de la lógica madura de Receipt-Driven Development al método de construcción
-de Malāk, bajo las reglas, arquitectura y gobernanza propias de Malāk.
+El propietario autorizó el 2026-09-08 incorporar la lógica madura de RDD al
+método propio de Malāk sin copiar infraestructura externa.
 
-Esta autorización no constituye adopción de código, tooling, stores, runtimes,
-provider bindings, lifecycle engines ni autoridad de delivery provenientes de
-Gentle-AI u otra implementación externa.
-
-La intención aprobada es:
+La intención es:
 
 ```text
-adoptar la lógica útil
-→ expresarla mediante contratos propios de Malāk
-→ reutilizar mecanismos ya existentes
-→ introducir únicamente el mínimo tooling determinista faltante
-→ medir utilidad real antes de promover infraestructura adicional
+reutilizar método existente
+→ estructurar evidencia candidate-bound
+→ validar de forma determinista
+→ medir utilidad
+→ decidir después si Stage 2 merece admisión
 ```
-
-La promoción posterior a Stage 2 — Candidate-Bound Validation Receipt requiere
-una admission review y autorización separadas.
 
 ---
 
-# 1. Necesidad comprobada
+## Necesidad comprobada
 
-Malāk ya posee de forma explícita en su Engineering Method y Construction Protocol:
+Malāk ya define:
 
 - Candidate Identity;
-- clasificación de riesgo;
-- revisión proporcional 4R;
-- separación Writer / Reviewer / Validator / Authority;
-- Bounded Correction;
-- Correction Budget;
+- riesgo 0–4 y 4R proporcional;
+- `Writer != Reviewer != Validator != Authority`;
+- Bounded Correction y Correction Budget;
 - validación independiente;
-- resultados PASS / FAIL / INCONCLUSIVE;
-- evidencia de findings;
-- gates de implementación;
-- trazabilidad de especificación, tests, implementación y validación.
+- `PASS | FAIL | INCONCLUSIVE`;
+- gates, findings y trazabilidad.
 
-El gap actual no es metodológico.
-
-El gap es de representación verificable:
+El gap es únicamente de representación:
 
 ```text
-la evidencia existe
+evidencia existente
 +
-la identidad de candidato existe conceptualmente
+candidate identity existente
 
-pero
-
-no existe todavía un artefacto estructurado mínimo
-que ligue de forma determinista la evidencia
-al candidato exacto evaluado
+→ falta un artefacto estructurado mínimo
+  que demuestre a qué candidato corresponde la evidencia
 ```
 
-RDD-M1 cubre exclusivamente ese gap.
+RDD-M1 cubre solo ese gap mediante `MALAK-EVIDENCE-MANIFEST/v1` y tooling de
+desarrollo read-only.
 
 ---
 
-# 2. Objetivo
+## Invariantes no negociables
 
-Promover el perfil RDD progresivo de Malāk desde:
-
-```text
-Stage 0 — Candidate Identity + evidencia actual
-```
-
-hacia:
-
-```text
-Stage 1 — Structured Evidence Manifest
-```
-
-mediante un contrato mínimo `MALAK-EVIDENCE-MANIFEST/v1` y tooling determinista
-de desarrollo que permita comprobar candidate binding, trazabilidad y resultados
-de validación sin modificar el runtime cognitivo ni el modelo de autoridad.
-
----
-
-# 3. Invariantes no negociables
-
-RDD-M1 queda gobernado por las siguientes invariantes.
-
-## I1 — Authority flows downward only
+### I1 — Authority flows downward only
 
 ```text
 CONTROL / AUTHORITY / PERMISSIONS / COMMANDS
                     ↓
-                    ↓
-                    ↓
 ```
 
-El control, la autoridad, las políticas, los permisos y las solicitudes operativas
-fluyen exclusivamente desde componentes upstream con autoridad hacia componentes
-downstream dentro de contratos autorizados.
+La autoridad solo fluye desde upstream hacia downstream por contratos y permisos
+previamente concedidos.
 
-## I2 — Prohibición absoluta de autoescalamiento
+### I2 — No self-escalation
 
-Ningún componente, helper, script, validator, reviewer, manifest, receipt futuro,
-agente o proceso downstream puede:
-
-- elevar sus propios permisos;
-- modificar sus propios permisos;
-- renovar unilateralmente su autoridad;
-- ampliar su scope;
-- reinterpretar una autorización;
-- alterar Governance;
-- modificar Constitución;
-- modificar Blueprint;
-- modificar Kernel;
-- convertir un resultado de validación en autorización.
-
-Si cualquier diseño permite alguno de estos comportamientos:
+Ningún helper, validator, reviewer, manifest, agente o componente downstream
+puede elevar, modificar, renovar, reinterpretar o ampliar su propia autoridad o
+scope.
 
 ```text
-DESIGN INVALID
+self-escalation possible
+→ DESIGN INVALID
 → STOP
 ```
 
-## I3 — Upward information carries zero authority
-
-Los resultados pueden retornar como información:
+### I3 — Upward information carries zero authority
 
 ```text
 RESULTS / FINDINGS / METRICS / EVIDENCE
                     ↑
-                    ↑
-                    ↑
 ```
 
-La dirección ascendente representa exclusivamente información observada.
-
-Se preserva:
+El retorno ascendente es información, nunca poder de decisión.
 
 ```text
-Evidence
-!= Receipt
-!= Validation
-!= Decision
-!= Authority
+Evidence != Receipt != Validation != Decision != Authority
 ```
 
-Un `PASS` no aprueba.
-Un `FAIL` no concede autoridad de corrección.
-Un finding no amplía scope.
-Un manifest no mergea.
-Un futuro receipt no autoriza delivery.
-
-## I4 — Candidate-bound traceability
-
-Toda evidencia material debe poder asociarse al candidato exacto que fue evaluado.
+### I4 — Candidate-bound traceability
 
 ```text
 candidate changes
-→ candidate identity changes
-→ previous candidate-bound evidence does not certify the new candidate
+→ identity changes
+→ previous evidence does not certify the new candidate
 → affected evidence must be revalidated
 ```
 
-## I5 — External auditability
+### I5 — External auditability
 
-Un auditor independiente debe poder reconstruir, utilizando artefactos preservados
-y referencias reproducibles:
+Un auditor independiente debe poder reconstruir desde artefactos preservados:
 
 ```text
 baseline
-→ scope autorizado
-→ candidato
-→ validaciones ejecutadas
-→ resultados
-→ 4R aplicable
+→ scope
+→ candidate
+→ validations / 4R
 → findings
-→ bounded correction cuando exista
-→ nuevo candidato cuando exista
-→ revalidación
-→ resultado terminal
-→ decisión humana separada
+→ correction cuando exista
+→ new candidate cuando exista
+→ terminal result
+→ human decision separada
 ```
 
-La auditoría no debe depender de:
+La reconstrucción no puede depender de memoria conversacional, chain-of-thought,
+la misma terminal, modelo o proveedor.
 
-- memoria conversacional del agente;
-- explicación posterior del Writer;
-- confianza en una afirmación del modelo;
-- permanencia de la misma terminal, sesión o context window;
-- acceso al mismo proveedor o modelo que produjo el cambio.
+### I6 — Auditability != premature infrastructure
 
-Cuando una validación sea técnicamente reproducible, un auditor externo debe poder
-repetirla y llegar a la misma conclusión observable dentro de las condiciones
-documentadas.
-
-## I6 — Auditability must not justify premature infrastructure
-
-La exigencia de trazabilidad no autoriza por sí sola introducir:
-
-- PKI;
-- firmas criptográficas;
-- Merkle trees;
-- hash chaining;
-- database de receipts;
-- distributed ledger;
-- hardware attestation;
-- CAS authority store;
-- immutable remote store;
-- lifecycle engine.
-
-Esas capacidades permanecen fuera de alcance hasta demostrar una necesidad real y
-obtener autorización independiente.
+Auditabilidad no autoriza PKI, firmas, Merkle, hash chaining, databases, stores de
+autoridad, attestation ni lifecycle engines.
 
 ---
 
-# 4. Cuatro preguntas obligatorias de Malāk
+## Cuatro preguntas obligatorias
 
-## 4.1 ¿Respeta el Blueprint?
-
-Sí, condicionado al alcance definido en este documento.
-
-RDD-M1 es tooling de construcción y evidencia. No crea dependencias nuevas dentro
-del runtime ni invierte el flujo de control. Los resultados y evidencia pueden
-retornar upstream únicamente como información conforme a ADR-003.
-
-## 4.2 ¿Respeta la Constitución Cognitiva?
-
-Sí.
-
-RDD-M1 no participa en:
-
-- razonamiento;
-- planificación cognitiva;
-- conversación;
-- Memory;
-- Knowledge;
-- contexto conversacional;
-- selección de modelo;
-- inferencia.
-
-## 4.3 ¿Respeta la Constitución de Gobernanza?
-
-Sí.
-
-La autoridad final permanece separada del Writer, Reviewer, Validator y de los
-artefactos de evidencia.
-
-Los únicos resultados de validación admitidos son:
-
-```text
-PASS
-FAIL
-INCONCLUSIVE
-```
-
-Quedan prohibidos como estados de receipt o manifest:
-
-```text
-APPROVED
-AUTHORIZED
-MERGED
-PROMOTED
-RELEASED
-```
-
-## 4.4 ¿Mantiene el Kernel simple?
-
-Sí, como condición obligatoria:
-
-```text
-Kernel delta = 0
-```
-
-El Kernel no debe importar, conocer, consultar ni depender del tooling RDD-M1.
+| Pregunta | Resultado | Condición |
+|---|---|---|
+| ¿Respeta el Blueprint? | PASS | tooling fuera del runtime; ADR-003 preservada |
+| ¿Respeta la Constitución Cognitiva? | PASS | no participa en cognición, Memory ni Knowledge |
+| ¿Respeta Gobernanza? | PASS | evidencia sin autoridad; mínimo privilegio y separación |
+| ¿Mantiene simple el Kernel? | PASS | `Kernel delta = 0` |
 
 ---
 
-# 5. Reutilización obligatoria
+## Reutilización y componentes
 
-RDD-M1 no crea un nuevo sistema de review.
+RDD-M1 reutiliza los mecanismos ya definidos por Malāk; no crea otro sistema de
+review, autorización o corrección.
 
-Debe reutilizar los mecanismos ya definidos por Malāk:
-
-```text
-Candidate Identity
-Risk Classification
-4R
-Writer / Reviewer / Validator / Authority
-Bounded Correction
-Correction Budget
-Fix Validator
-PASS / FAIL / INCONCLUSIVE
-Development Gates
-Development Checklist
-Git commit identity
-```
-
-Queda expresamente prohibido duplicarlos bajo nuevos nombres o capas.
-
-No se justifican y por lo tanto no deben crearse:
+No se justifican y no deben aparecer:
 
 ```text
 RDDService
@@ -331,266 +167,111 @@ AuthorityStore
 ReviewOrchestrator
 ```
 
----
-
-# 6. Componentes y artefactos nuevos justificados
-
-Stage 1 puede introducir únicamente:
-
-1. un contrato estructurado mínimo:
+Stage 1 puede añadir únicamente:
 
 ```text
-MALAK-EVIDENCE-MANIFEST/v1
+1 contrato de desarrollo
+1 helper determinista read-only
+1 módulo de tests focalizados
+1 manifest piloto histórico
 ```
 
-2. tooling determinista auxiliar mínimo para crear y/o verificar ese contrato;
-
-3. tests del contrato y del candidate binding;
-
-4. evidencia piloto generada por el propio mecanismo.
-
-Estos elementos están justificados porque cubren una capacidad inexistente:
-convertir evidencia hoy principalmente documental en evidencia estructurada,
-reproducible y ligada a un candidato exacto.
-
-El tooling no se considera un componente arquitectónico del runtime de Malāk.
-
----
-
-# 7. Regla de simplicidad
-
-RDD-M1 debe preferir la forma mínima que satisfaga el requisito.
-
-Para Stage 1 la identidad primaria del candidato será inicialmente:
+Objetivos permanentes:
 
 ```text
-repository
-baseline_commit
-candidate_commit
-```
-
-No se incorporarán anticipadamente:
-
-```text
-candidate tree hashing adicional
-changed-path hashing obligatorio
-stable payload cryptographic chaining
-receipt lineage engines
-stores de autoridad
-```
-
-Si Git commit identity resulta insuficiente, la insuficiencia deberá demostrarse
-mediante evidencia antes de ampliar el contrato.
-
-Dependencias nuevas objetivo:
-
-```text
-0
+new architectural components = 0
+new runtime components = 0
+new dependencies = 0
+Kernel delta = 0
+runtime delta = 0
+authority effects = 0
 ```
 
 ---
 
-# 8. Alcance autorizado
+## Alcance autorizado
 
-## IN SCOPE
+### IN SCOPE
 
-- contrato `MALAK-EVIDENCE-MANIFEST/v1`;
-- candidate binding basado inicialmente en Git commit;
-- validación estructural del manifest;
-- detección de evidencia ligada a candidato distinto;
-- referencias a scope/specification/gate;
-- riesgo;
-- validaciones ejecutadas;
-- resultados 4R cuando correspondan;
-- findings;
-- correction round;
-- provenance mínima de producer/validator;
+- `MALAK-EVIDENCE-MANIFEST/v1`;
+- binding por Git commit;
+- baseline/candidate existence y ancestry;
+- validación estructural estricta;
 - `PASS | FAIL | INCONCLUSIVE`;
-- referencias de evidencia;
-- auditabilidad externa reproducible cuando sea técnicamente viable;
-- tests automatizados;
-- dogfood sobre un candidato real;
-- medición de utilidad y overhead.
+- 4R proporcional;
+- finding references y correction round;
+- provenance mínima de producer/validator;
+- stale candidate detection;
+- external reconstruction;
+- tests y dogfood;
+- medición de overhead.
 
-## OUT OF SCOPE
-
-- Kernel;
-- Planner;
-- CapabilityRegistry;
-- ConversationService;
-- ConversationContext;
-- Memory;
-- Knowledge;
-- Security Control Plane;
-- PDP / PEP;
-- runtimes;
-- providers;
-- agentes;
-- autonomous review;
-- autonomous correction;
-- auto-merge;
-- delivery governance;
-- branch protection;
-- database;
-- authority store;
-- lifecycle engine;
-- provider transport bindings;
-- PKI;
-- firmas criptográficas;
-- Merkle trees;
-- hash chaining;
-- remote immutable storage;
-- distributed ledger;
-- hardware-backed attestation;
-- Stage 2 receipts estables.
-
----
-
-# 9. Manifest mínimo candidato
-
-La forma exacta se cerrará en Gate 1, pero el contrato debe permanecer cercano a:
-
-```yaml
-schema: MALAK-EVIDENCE-MANIFEST/v1
-
-repository:
-baseline_commit:
-candidate_commit:
-
-unit:
-specification:
-gate:
-risk_class:
-scope_reference:
-
-validations:
-four_r:
-findings:
-correction_round:
-
-producer:
-validator:
-
-result: PASS | FAIL | INCONCLUSIVE
-generated_at:
-evidence_references:
-
-authority_effect: none
-```
-
-`producer` y `validator` representan provenance, no privilegios ni autoridad.
-
----
-
-# 10. Cadena de auditoría requerida
-
-La evidencia debe permitir contestar como mínimo:
+### OUT OF SCOPE
 
 ```text
-qué se hizo
-quién o qué produjo el cambio o evidencia
-sobre qué candidato
-contra qué baseline
-bajo qué alcance
-con qué permisos previamente concedidos
-qué validación se ejecutó
-qué resultado produjo
-qué findings existieron
-qué correcciones fueron autorizadas
-qué cambió después
-quién validó
-quién conservó la autoridad final
+Kernel / Planner / capabilities
+Conversation / Memory / Knowledge
+Security Control Plane / PDP / PEP
+runtimes / providers
+agents / autonomous review / autonomous correction
+database / registry / receipt store / authority store
+PKI / signatures / Merkle / hash chaining / CAS
+provider bindings / lifecycle engine
+auto-merge / delivery enforcement / branch protection
+Stage 2 receipts
 ```
-
-Cuando exista una secuencia:
-
-```text
-candidate A
-→ FAIL
-→ finding F-001
-→ correction autorizada
-→ candidate B
-→ PASS
-```
-
-la evidencia de A debe preservarse como historia y no reescribirse para aparentar
-que certificó B.
 
 ---
 
-# 11. Gates autorizados
+## Ubicaciones aprobadas
 
-## G0 — Admission & Baseline Review
+No se crea una nueva familia `docs/project/evidence/**`.
 
-Objetivo:
+```text
+contract
+  docs/development/evidence_manifest.md
 
-- verificar baseline exacto;
-- completar inventario y cobertura exigidos por el Construction Protocol;
-- confirmar necesidad, scope, riesgos y rollback;
-- comprobar ausencia de drift bloqueante.
+helper
+  scripts/malak_evidence.py
 
-STOP si el inventario revela conflicto normativo, solución ya existente suficiente,
-drift crítico no resuelto o necesidad de ampliar el alcance autorizado.
+tests
+  tests/test_malak_evidence.py
 
-## G1 — Evidence Contract v1
+pilot manifest
+  docs/project/sprints/proposals/RDD-M1-EVIDENCE-MANIFEST.json
+```
 
-Definir el contrato mínimo sin implementar infraestructura adicional.
-
-STOP si el contrato necesita expresar autoridad o delivery state.
-
-## G2 — Candidate Identity Binding
-
-Implementar la comprobación mínima basada en Git commit.
-
-STOP si requiere modificar runtime, Kernel, seguridad o contratos cognitivos.
-
-## G3 — Manifest Validation Tooling
-
-Crear tooling determinista mínimo y tests.
-
-STOP ante cualquier dependencia externa no autorizada o expansión hacia lifecycle,
-stores o agentes.
-
-## G4 — Existing-Method Binding
-
-Representar en el manifest resultados provenientes del método existente:
-4R, findings y bounded correction, sin recrear esos mecanismos.
-
-STOP ante duplicación de responsabilidades existentes.
-
-## G5 — Dogfood Pilot
-
-Aplicar el mecanismo al candidato real de RDD-M1 y demostrar candidate binding,
-stale evidence detection y auditabilidad.
-
-## G6 — Closure & Utility Review
-
-Validar suite completa, review proporcional, evidencia y overhead.
-
-Decidir si Stage 1 queda adoptado, adaptado, observado o rechazado.
-
-Stage 2 no se habilita automáticamente.
+Estas familias ya son observadas por el Sync Agent, por lo que RDD-M1 no requiere
+modificar mappings downstream.
 
 ---
 
-# 12. Métricas mínimas
-
-RDD-M1 deberá medir al menos:
+## Gates
 
 ```text
-candidate_binding_detection
-stale_evidence_detection
-manifest_validation_failures
-manual_steps_required
-new_dependencies
-runtime_delta
-kernel_delta
-authority_effects
-review_overhead
-external_reconstruction_feasibility
+G0 Admission & Baseline Review
+   ↓
+G1 Evidence Contract v1
+   ↓
+G2 Candidate Identity Binding
+   ↓
+G3 Manifest Validation Tooling
+   ↓
+G4 Existing-Method Binding / review
+   ↓
+G5 Dogfood Candidate
+   ↓
+G6 Closure & Utility Review
 ```
 
-Objetivos obligatorios:
+Cada gate debe declarar `PASS`, `FAIL` o `INCONCLUSIVE` cuando corresponda. Un
+`FAIL` bloqueante o `INCONCLUSIVE` no resuelto impide promoción.
+
+Stage 2 requiere una nueva admission review y autorización explícita.
+
+---
+
+## Métricas mínimas
 
 ```text
 candidate_binding_detection = 100%
@@ -599,32 +280,29 @@ new_dependencies = 0
 runtime_delta = 0
 kernel_delta = 0
 authority_effects = 0
-false authority states = 0
+false_authority_states = 0
 ```
+
+Además se registrará cualitativamente:
+
+- pasos manuales;
+- overhead de review;
+- facilidad de reconstrucción externa.
 
 ---
 
-# 13. Stop conditions globales
+## Stop conditions
 
-Detener y escalar si cualquier gate requiere:
+Detener y escalar si la unidad requiere:
 
-```text
-modificar Kernel
-modificar Governance
-modificar Blueprint
-modificar Security authority
-crear una Capability
-introducir una database
-introducir dependencia externa no autorizada
-convertir evidencia en autoridad
-permitir autoescalamiento
-permitir self-authorization
-bloquear delivery mediante un receipt
-hacer auto-fix fuera de Correction Budget
-hacer auto-merge
-ocultar o reescribir evidencia histórica de FAIL
-ampliar scope de implementación desde un finding
-```
+- modificar Kernel, Blueprint, Governance o Security authority;
+- crear una Capability o dependencia externa;
+- permitir self-authorization/self-escalation;
+- convertir evidencia en autoridad;
+- ocultar o reescribir evidencia histórica;
+- auto-fix fuera del Correction Budget;
+- auto-merge o delivery enforcement;
+- ampliar scope desde un finding.
 
 Ante evidencia insuficiente:
 
@@ -632,96 +310,39 @@ Ante evidencia insuficiente:
 INCONCLUSIVE
 ```
 
-Nunca PASS por defecto.
+Nunca `PASS` por defecto.
 
 ---
 
-# 14. Rollback
+## Rollback
 
-RDD-M1 debe ser reversible sin migración del runtime.
-
-El rollback puede retirar:
-
-- contrato del manifest;
-- tooling auxiliar;
-- tests específicos;
-- integración documental asociada.
-
-Debe dejar sin cambios funcionales:
-
-- Kernel;
-- runtime cognitivo;
-- seguridad;
-- conversación;
-- Memory;
-- Knowledge;
-- estado del usuario.
-
-La evidencia histórica ya producida puede conservarse como registro documental.
+El rollback elimina contrato, helper, tests y artefactos de Stage 1 sin migrar
+runtime ni datos de usuario. Los manifests históricos ya emitidos pueden
+preservarse como evidencia de sus candidatos originales.
 
 ---
 
-# 15. Definition of Done
-
-RDD-M1 Stage 1 solo puede declararse completado cuando exista evidencia verificable
-de que:
+## Definition of Done — RDD-M1
 
 ```text
-[ ] las cuatro preguntas obligatorias continúan en PASS
-[ ] el Kernel no fue modificado
-[ ] el runtime cognitivo no fue modificado
-[ ] no se introdujeron dependencias externas
-[ ] existe MALAK-EVIDENCE-MANIFEST/v1
-[ ] el manifest está ligado a un candidato exacto
-[ ] un candidato diferente invalida la suficiencia de evidencia previa
-[ ] PASS / FAIL / INCONCLUSIVE son los únicos resultados terminales
-[ ] la evidencia no expresa autoridad
-[ ] ningún componente puede modificar o elevar sus propios permisos
-[ ] los resultados ascendentes son exclusivamente información
-[ ] findings y correcciones permanecen trazables
-[ ] la historia de FAIL no se reescribe ni oculta
-[ ] Writer / Reviewer / Validator / Authority permanecen separados
-[ ] un auditor externo puede reconstruir la cadena de validación
-[ ] las validaciones reproducibles pueden repetirse cuando corresponde
-[ ] candidate_binding_detection = 100%
-[ ] stale_evidence_detection = 100%
-[ ] authority_effects = 0
-[ ] suite aplicable = PASS
-[ ] compileall = PASS
-[ ] git diff --check = PASS
-[ ] utilidad y overhead fueron medidos
-[ ] cierre y promoción posterior requieren decisión humana explícita
+[ ] candidate binding exacto y reproducible
+[ ] stale evidence detection
+[ ] baseline ancestry validada
+[ ] manifest v1 estricto
+[ ] FULL 4R representable cuando aplica
+[ ] bounded correction conserva historia
+[ ] evidence carries zero authority
+[ ] external reconstruction viable
+[ ] new dependencies = 0
+[ ] Kernel/runtime/security delta = 0
+[ ] targeted tests PASS
+[ ] full suite PASS
+[ ] compileall PASS
+[ ] git diff --check PASS
+[ ] independent validation completed
+[ ] human governance completed
+[ ] downstream reconciliation evaluated
 ```
 
----
-
-# 16. Frontera de autorización
-
-La autorización vigente cubre únicamente:
-
-```text
-Stage 0
-→
-Stage 1
-
-G0 → G6
-```
-
-No cubre:
-
-```text
-Stage 1
-→
-Stage 2
-```
-
-Ni autoriza:
-
-- Candidate-Bound Validation Receipt estable;
-- Candidate Evidence Package;
-- Integrity Hardening;
-- agent-produced candidates;
-- governed multi-agent evaluation.
-
-Cada promoción futura requiere necesidad demostrada, admission review y aprobación
-explícita e independiente del propietario.
+Hasta satisfacer esta lista, RDD-M1 permanece candidato y el PR debe continuar
+en Draft.
