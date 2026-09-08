@@ -60,19 +60,23 @@ Su propósito es asegurar que la estructura física del proyecto refleje la arqu
 
 
 
+La siguiente estructura representa las rutas raíz trackeadas del baseline vigente. La ausencia de una ruta en este árbol significa que no forma parte de la estructura física actual; su incorporación futura deberá tratarse como un cambio explícito del repositorio.
+
+
+
 ```text
 
 Malāk/
 
 ├── .github/
 
-├── config/
-
-├── data/
-
-├── docker/
+├── configs/
 
 ├── docs/
+
+├── documents/
+
+├── examples/
 
 ├── scripts/
 
@@ -80,7 +84,15 @@ Malāk/
 
 ├── tests/
 
+├── .gitignore
+
+├── AGENTS.md
+
 ├── CHANGELOG.md
+
+├── PROJECT.md
+
+├── pyproject.toml
 
 ├── README.md
 
@@ -88,3 +100,8 @@ Malāk/
 
 └── SECURITY.md
 
+```
+
+
+
+`data/` y `docker/` no forman parte del baseline trackeado vigente. Su aparición en versiones históricas de este estándar no constituye una reserva ni una autorización para introducirlas sin una necesidad y revisión explícitas.

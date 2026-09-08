@@ -668,13 +668,13 @@ Receipt-Driven Development como metodología completa y cualquier implementació
 
 ## 15.2 Candidate-Bound Receipt
 
-Como evolución prevista, una validación aprobada podrá producir un receipt ligado al candidato.
+Como evolución prevista, una validación con resultado `PASS` podrá producir un receipt ligado al candidato.
 
 Ejemplo conceptual:
 
 ```yaml
 receipt_id: RCP-7F19
-status: approved
+result: PASS
 
 candidate:
   id: CANDIDATE-004
