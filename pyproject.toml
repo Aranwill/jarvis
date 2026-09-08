@@ -9,6 +9,9 @@ description = "Personal Cognitive Platform"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["pytest>=9,<10"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["malak*"]

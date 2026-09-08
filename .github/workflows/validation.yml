@@ -1,0 +1,79 @@
+name: Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-validation:
+    name: Candidate validation
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify candidate identity
+        shell: pwsh
+        run: |
+          $actual = (git rev-parse HEAD).Trim()
+          Write-Host "candidate_sha=$actual"
+          Write-Host "base_sha=$env:BASE_SHA"
+
+          if ($actual -ne $env:CANDIDATE_SHA) {
+            throw "Candidate identity mismatch: expected $env:CANDIDATE_SHA, got $actual"
+          }
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Compile Python sources
+        run: python -m compileall -q src tests scripts
+
+      - name: Validate candidate diff
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:BASE_SHA)) {
+            throw "Missing base SHA for candidate diff validation."
+          }
+
+          if ($env:GITHUB_EVENT_NAME -eq "pull_request") {
+            git diff --check --no-renames "$env:BASE_SHA...$env:CANDIDATE_SHA"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            exit 0
+          }
+
+          if ($env:GITHUB_EVENT_NAME -eq "push") {
+            if ($env:BASE_SHA -match '^0+$') {
+              git show --check --format= --no-renames $env:CANDIDATE_SHA
+            }
+            else {
+              git diff --check --no-renames "$env:BASE_SHA..$env:CANDIDATE_SHA"
+            }
+
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            exit 0
+          }
+
+          throw "Unsupported workflow event: $env:GITHUB_EVENT_NAME"
