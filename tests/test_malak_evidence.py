@@ -32,7 +32,7 @@ def make_repo(tmp_path: Path) -> tuple[Path, str]:
     return repo, git(repo, "rev-parse", "HEAD")
 
 
-def manifest(commit: str) -> dict:
+def manifest(commit: str, *, baseline_commit: str | None = None) -> dict:
     lens = {
         "result": "PASS",
         "finding_refs": [],
@@ -41,7 +41,7 @@ def manifest(commit: str) -> dict:
     return {
         "schema": "MALAK-EVIDENCE-MANIFEST/v1",
         "repository": "Aranwill/jarvis",
-        "baseline_commit": commit,
+        "baseline_commit": baseline_commit or commit,
         "candidate_commit": commit,
         "unit_id": "RDD-M1",
         "specification_reference": "spec.md",
@@ -133,6 +133,17 @@ def test_authority_or_delivery_field_cannot_be_added(tmp_path):
 
     assert code == 1
     assert output["code"] == "INVALID_KEYS"
+
+
+def test_result_must_be_string_enum(tmp_path):
+    repo, commit = make_repo(tmp_path)
+    payload = manifest(commit)
+    payload["result"] = {"status": "PASS"}
+
+    code, output = run_validator(repo, payload)
+
+    assert code == 1
+    assert output["code"] == "INVALID_RESULT"
 
 
 def test_result_cannot_hide_failed_validation(tmp_path):
@@ -247,3 +258,14 @@ def test_unknown_commit_is_fail_closed(tmp_path):
 
     assert code == 1
     assert output["code"] == "GIT_OBJECT_NOT_FOUND"
+
+
+def test_baseline_must_be_ancestor_of_candidate(tmp_path):
+    repo, first = make_repo(tmp_path)
+    second = second_commit(repo)
+    payload = manifest(first, baseline_commit=second)
+
+    code, output = run_validator(repo, payload)
+
+    assert code == 1
+    assert output["code"] == "BASELINE_NOT_ANCESTOR"
