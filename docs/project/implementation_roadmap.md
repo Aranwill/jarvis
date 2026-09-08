@@ -3,13 +3,13 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-04
-as_of_commit: 270e39b599a7bb3e7e6611e34dd644d0b7004d88
+as_of_date: 2026-09-08
+as_of_commit: 3413e8ccb348440aea757d1feccde25c65be011f
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: 0735223
-certification_status: sprint_7_10_completed
+candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+certification_status: sprint_7_11_completed
 legacy_planning_source:
   - docs/project/roadmap.md
 language: es
@@ -227,10 +227,10 @@ No deben actuar como segundo roadmap.
 
 - Repositorio: `Aranwill/jarvis`.
 - Rama permanente: `main`.
-- Commit de integración de Sprint 7.10:
+- Commit de integración de Sprint 7.11:
 
 ```text
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
+3413e8ccb348440aea757d1feccde25c65be011f
 ```
 
 - Baseline nominal:
@@ -240,6 +240,12 @@ v0.6.0-alpha
 ```
 
 - Último sprint integrado:
+
+```text
+Sprint 7.11 — Reproducible Validation Pipeline Foundation
+```
+
+- Última unidad funcional de producto/runtime:
 
 ```text
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -257,24 +263,27 @@ ninguno
 ninguna
 ```
 
-- Candidato funcional histórico de Sprint 7.10:
+- Candidato final de Sprint 7.11:
 
 ```text
-0735223
+59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 ```
 
-- Evidencia post-merge:
+- Evidencia del candidato final:
 
 ```text
-372 passed
+388 passed
 compileall: PASS
 git diff --check: PASS
-working tree: clean
+FULL 4R: PASS
+independent validation: PASS
 ```
 
+- Validación post-merge sobre `main`: `success`.
 - `main` continúa siendo la única rama permanente.
-- Sprint 7.10 está completado e integrado.
-- Ningún Sprint 7.11 está autorizado.
+- Sprint 7.11 está completado e integrado.
+- Ningún Sprint 7.12 ni unidad posterior está autorizado.
+- RDD Stage 1 está adoptado; RDD Stage 2 no está autorizado.
 - La sincronización del Vault es una operación derivada downstream y no
   constituye autorización de nuevas unidades.
 
@@ -361,26 +370,29 @@ de autoridad.
 
 # 7. Estado del baseline actual
 
-Estado verificado después de integrar Sprint 7.10:
+Estado verificado después de integrar Sprint 7.11:
 
 ```text
-commit de integración Sprint 7.10:
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
+commit de integración Sprint 7.11:
+3413e8ccb348440aea757d1feccde25c65be011f
 
 rama permanente:
 main
 
-Sprint 7.10:
+Sprint 7.11:
 completado e integrado
+
+última unidad funcional de producto/runtime:
+Sprint 7.10 — Conversation Session Isolation Foundation
 
 sprint activo autorizado:
 ninguno
 
-candidato funcional histórico:
-0735223
+candidato final Sprint 7.11:
+59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 
-suite post-merge:
-372 passed
+suite del candidato:
+388 passed
 
 compileall:
 PASS
@@ -388,14 +400,15 @@ PASS
 git diff --check:
 PASS
 
-working tree post-merge:
-clean
+validación post-merge sobre main:
+success
 ```
 
 `main` continúa siendo la única rama permanente.
 
-La implementación de Sprint 7.10 no autoriza automáticamente ninguna unidad
-posterior, Memory persistente, agentes, tools, Sandbox o ampliación de autoridad.
+La integración de Sprint 7.11 no autoriza automáticamente ninguna unidad
+posterior, RDD Stage 2, Memory persistente, agentes, tools, Sandbox o ampliación
+de autoridad.
 
 La reconciliación del Malāk Project Vault representa este baseline de forma
 derivada y no altera la autoridad del repositorio oficial.
@@ -416,17 +429,19 @@ derivada y no altera la autoridad del repositorio oficial.
 | 7.8 | Completado | Primera ruta cognitiva conversacional integrada |
 | 7.9 | Completado | Conversation Continuity Foundation; integrado en `main` |
 | 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
+| 7.11 | Completado | Reproducible Validation Pipeline Foundation; integrado y validado post-merge |
 
 ---
 
 # 9. Estado de autorización de nuevos sprints
 
 ```text
-SPRINT 7.10 COMPLETADO E INTEGRADO
+SPRINT 7.11 COMPLETADO E INTEGRADO
 NINGÚN SPRINT POSTERIOR AUTORIZADO
+RDD STAGE 2 NO AUTORIZADO
 ```
 
-Sprint 7.10 — `Conversation Session Isolation Foundation` completó:
+Sprint 7.11 — `Reproducible Validation Pipeline Foundation` completó:
 
 ```text
 inspección
@@ -435,9 +450,10 @@ inspección
 → debate
 → aprobación explícita del propietario
 → implementación
-→ validación funcional
-→ documentación de cierre
-→ PR #58
+→ validación candidate-bound
+→ FULL 4R
+→ validación independiente
+→ PR #65
 → revisión humana
 → merge a main
 → validación post-merge
@@ -447,25 +463,29 @@ Evidencia de integración:
 
 ```text
 merge commit:
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
+3413e8ccb348440aea757d1feccde25c65be011f
 
 candidate:
-0735223
+59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 
 pytest:
-372 passed
+388 passed
 
 compileall:
 PASS
 
 git diff --check:
 PASS
+
+post-merge Validation:
+success
 ```
 
 No está autorizado:
 
-- Sprint 7.11;
+- Sprint 7.12;
 - ninguna unidad posterior;
+- RDD Stage 2;
 - Memory persistente;
 - nuevas capabilities;
 - agentes;
@@ -961,7 +981,7 @@ Toda selección futura deberá justificarse contra:
 | Propuesta | Estado | Observación |
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Unidad posterior a Sprint 7.10 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de Sprint 7.10 |
+| Unidad posterior a Sprint 7.11 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de Sprint 7.11 |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
@@ -1043,6 +1063,7 @@ docs/project/sprints/SPRINT-7.7.md
 docs/project/sprints/SPRINT-7.8.md
 docs/project/sprints/SPRINT-7.9.md
 docs/project/sprints/SPRINT-7.10.md
+docs/project/sprints/SPRINT-7.11.md
 ```
 
 Interpretación:
@@ -1191,7 +1212,7 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 MATERIAL BASELINE REFERENCE
-270e39b599a7bb3e7e6611e34dd644d0b7004d88
+3413e8ccb348440aea757d1feccde25c65be011f
 
 PERMANENT BRANCH
 main
@@ -1203,13 +1224,19 @@ NOMINAL VERSION
 v0.6.0-alpha
 
 LAST COMPLETED SPRINT
+Sprint 7.11 — Reproducible Validation Pipeline Foundation
+
+LAST PRODUCT/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
 
 ACTIVE SPRINT
 NONE
 
-SPRINT AFTER 7.10
+SPRINT AFTER 7.11
 NONE AUTHORIZED
+
+RDD STAGE 2
+NOT AUTHORIZED
 
 LEGACY ROADMAP
 DISPOSITION REGISTERED
