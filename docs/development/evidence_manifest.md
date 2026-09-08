@@ -287,10 +287,34 @@ STALE_CANDIDATE
 `STALE_CANDIDATE`, `DIRTY_WORKTREE` y otros códigos son diagnósticos del helper,
 no nuevos estados del manifest.
 
-Para dogfood sobre un candidate activo, el manifest que se usa con
-`--require-current` debe generarse fuera del candidate worktree. No se crean
-excepciones que ignoren archivos dirty. Después puede preservarse una copia
-histórica en `docs/project/sprints/proposals/**` ligada al commit evaluado.
+### Regla anti-recursión de identidad
+
+El manifest activo que certifica un candidato debe existir **fuera del candidate
+worktree** mientras se ejecuta la validación. Esto aplica especialmente a
+`--require-current`: no se crean excepciones que ignoren archivos dirty.
+
+```text
+validate candidate A
+→ manifest activo bound to A permanece externo
+→ candidate A no cambia por producir su evidencia
+```
+
+Si después se preserva una copia dentro del repositorio, esa copia es únicamente
+**evidencia histórica del candidato A**. El commit que incorpora esa copia es un
+candidato distinto B y la copia **no certifica B ni el commit que la contiene**.
+Nunca debe reinterpretarse una copia histórica como evidencia candidate-bound del
+HEAD posterior.
+
+```text
+A validated
+→ historical copy committed
+→ HEAD becomes B
+→ historical copy still describes A only
+```
+
+Cualquier certificación de B requiere evidencia ligada explícitamente a B según
+las reglas normales de Candidate Identity. Stage 1 no introduce un store externo
+ni infraestructura adicional para resolver esta propiedad.
 
 ---
 
@@ -366,10 +390,13 @@ upstream hacia ellos.
 contract:       docs/development/evidence_manifest.md
 helper:         scripts/malak_evidence.py
 tests:          tests/test_malak_evidence.py
-pilot manifest: docs/project/sprints/proposals/RDD-M1-EVIDENCE-MANIFEST.json
+pilot manifest: externo al candidate durante validación;
+                copia histórica opcional en docs/project/sprints/proposals/**
 ```
 
-No se crea `docs/project/evidence/**` ni se modifica el Sync Agent.
+Una copia histórica in-repo conserva provenance del candidato que describe y no
+certifica el commit que la contiene. No se crea `docs/project/evidence/**` ni se
+modifica el Sync Agent.
 
 ---
 
