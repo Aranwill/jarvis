@@ -163,6 +163,8 @@ Validar:
 - [ ] Changelog actualizado cuando corresponda.
 - [ ] Decisiones arquitectónicas documentadas.
 - [ ] Nuevos componentes documentados.
+- [ ] Al cerrar un Sprint, `README.md` fue revisado y reconciliado con el baseline integrado; cuando corresponda refleja el último Sprint completado, el estado operativo, la evidencia de validación y las capacidades disponibles.
+- [ ] Al cerrar un Sprint, las fuentes `CURRENT_STATE` aplicables fueron revisadas y reconciliadas después del merge, o se documentó explícitamente que no requerían cambios.
 
 ---
 
@@ -189,6 +191,7 @@ Antes de cerrar el Sprint confirmar:
 - [ ] Los criterios de aceptación aplicables están satisfechos por evidencia verificable.
 - [ ] La aceptación humana requerida fue obtenida antes de promover el cambio al baseline.
 - [ ] No permanece un `FAIL` o `INCONCLUSIVE` crítico sin resolución o aceptación explícita de riesgo.
+- [ ] La reconciliación documental post-merge fue completada antes de declarar cerrado el Sprint.
 
 ---
 
