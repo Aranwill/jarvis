@@ -31,11 +31,19 @@ LENS_KEYS = {"result", "finding_refs", "evidence_reference"}
 
 
 class CheckError(Exception):
-    def __init__(self, code: str, message: str, *, inconclusive: bool = False):
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        *,
+        inconclusive: bool = False,
+        expected_candidate: str | None = None,
+    ):
         super().__init__(message)
         self.code = code
         self.message = message
         self.inconclusive = inconclusive
+        self.expected_candidate = expected_candidate
 
 
 def fail(code: str, message: str) -> None:
@@ -223,12 +231,17 @@ def validate_git(
     if require_current:
         expected = git(repo, "rev-parse", "HEAD")
         if git(repo, "status", "--porcelain"):
-            raise CheckError("DIRTY_WORKTREE", "current worktree differs from committed HEAD")
+            raise CheckError(
+                "DIRTY_WORKTREE",
+                "current worktree differs from committed HEAD",
+                expected_candidate=expected,
+            )
 
     if expected is not None and manifest["candidate_commit"] != expected:
         raise CheckError(
             "STALE_CANDIDATE",
             f"candidate {manifest['candidate_commit']} != expected {expected}",
+            expected_candidate=expected,
         )
     return expected
 
@@ -245,7 +258,7 @@ def load(path: Path) -> Any:
 
 
 def report(
-    status: str, code: str, message: str, *,
+    validator_result: str, code: str, message: str, *,
     manifest_result: str | None = None,
     candidate_commit: str | None = None,
     expected_candidate: str | None = None,
@@ -253,7 +266,7 @@ def report(
     return json.dumps(
         {
             "validator": VALIDATOR,
-            "status": status,
+            "validator_result": validator_result,
             "code": code,
             "message": message,
             "manifest_result": manifest_result,
@@ -288,14 +301,15 @@ def main(argv: list[str] | None = None) -> int:
             require_current=args.require_current,
         )
     except CheckError as exc:
-        status = "INCONCLUSIVE" if exc.inconclusive else "FAIL"
+        validator_result = "INCONCLUSIVE" if exc.inconclusive else "FAIL"
+        expected_for_report = exc.expected_candidate or expected
         print(report(
-            status,
+            validator_result,
             exc.code,
             exc.message,
             manifest_result=manifest["result"] if manifest else None,
             candidate_commit=manifest["candidate_commit"] if manifest else None,
-            expected_candidate=expected,
+            expected_candidate=expected_for_report,
         ))
         return 2 if exc.inconclusive else 1
 
