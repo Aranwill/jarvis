@@ -299,25 +299,25 @@ validate candidate A
 → candidate A no cambia por producir su evidencia
 ```
 
-Si después se preserva una copia dentro del repositorio, esa copia es únicamente
-**evidencia histórica del candidato A**. El commit que incorpora esa copia es un
-candidato distinto B y la copia **no certifica B ni el commit que la contiene**.
-Nunca debe reinterpretarse una copia histórica como evidencia candidate-bound del
-HEAD posterior.
+Una copia posterior dentro del repositorio, si se conserva, es solo **evidencia
+histórica del candidato A**. El commit que incorpora esa copia es un candidato
+distinto B y la copia **no certifica B ni el commit que la contiene**.
 
 ```text
 A validated
-→ historical copy committed
+→ optional historical copy committed
 → HEAD becomes B
 → historical copy still describes A only
 ```
 
 Cualquier certificación de B requiere evidencia ligada explícitamente a B según
-las reglas normales de Candidate Identity. Stage 1 no introduce un store externo
-ni infraestructura adicional para resolver esta propiedad. Un PR comment,
-artefacto de una herramienta de validación o soporte equivalente puede preservar
-el manifest activo siempre que sea accesible, auditable y esté ligado al SHA
-exacto; su ubicación no le concede autoridad.
+las reglas normales de Candidate Identity. Stage 1 no introduce store, registry,
+PKI ni otra infraestructura para resolver esta propiedad.
+
+El manifest activo puede preservarse en un soporte externo al candidate que sea
+auditable y estable —por ejemplo, la conversación del PR o un artefacto de una
+herramienta de validación— siempre ligado al SHA exacto. Su ubicación no le
+concede autoridad.
 
 ---
 
@@ -393,8 +393,8 @@ upstream hacia ellos.
 contract:       docs/development/evidence_manifest.md
 helper:         scripts/malak_evidence.py
 tests:          tests/test_malak_evidence.py
-pilot manifest: externo al candidate durante validación;
-                copia histórica opcional en docs/project/sprints/proposals/**
+active manifest: externo al candidate durante validación
+historical copy: opcional en docs/project/sprints/proposals/**
 ```
 
 Una copia histórica in-repo conserva provenance del candidato que describe y no
