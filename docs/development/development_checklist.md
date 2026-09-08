@@ -14,6 +14,8 @@ Todo cambio deberá superar este checklist antes de considerarse finalizado.
 
 La metodología de ingeniería aplicable se define en `docs/development/engineering_method.md`.
 
+La disciplina transversal de revisión, incorporación progresiva de capacidades, gates, métricas, RDD experimental y reconciliación derivada se define en `docs/development/malak_construction_protocol.md`.
+
 ---
 
 # Arquitectura
@@ -33,6 +35,34 @@ Antes de aprobar un cambio validar:
 
 ---
 
+# Cobertura de revisión integral
+
+Cuando el trabajo sea una revisión integral, auditoría, certificación, reconciliación o admission review, validar:
+
+- [ ] Se levantó un inventario recursivo de todos los archivos trackeados de cada repositorio incluido en el alcance.
+- [ ] Cada archivo inventariado recibió una clasificación o disposición explícita; archivos omitidos silenciosamente: `0`.
+- [ ] La profundidad de lectura fue proporcional al rol del artefacto y al problema, sin utilizar búsquedas textuales como sustituto del inventario.
+- [ ] Los archivos protegidos o expresamente prohibidos fueron identificados sin abrirse ni procesarse y quedaron clasificados con la razón correspondiente.
+- [ ] Cuando el alcance fue global, se contrastaron `Aranwill/jarvis`, `Aranwill/malak-project-vault` y `Aranwill/malak-vault-sync-agent` según disponibilidad y autoridad.
+- [ ] Los findings distinguen fuente oficial, proyección derivada y mecanismo de sincronización.
+
+---
+
+# Incorporación progresiva de capacidades futuras
+
+Antes de admitir una nueva unidad funcional o diseñar una capability futura, validar:
+
+- [ ] La necesidad fue demostrada desde el baseline actual y no únicamente desde una secuencia histórica del roadmap.
+- [ ] Se consultó `docs/project/implementation_roadmap.md`.
+- [ ] Se consultó `documents/projects/jarvis/ideas.md`.
+- [ ] Se revisó recursivamente `docs/project/concepts/**` para las referencias relacionadas con la necesidad.
+- [ ] Las ideas o conceptos candidatos fueron revalidados contra Blueprint, Constituciones, Gobernanza, ADR, código, tests, riesgos y dependencias vigentes.
+- [ ] Cada propuesta reutilizada fue clasificada explícitamente como `ADOPT`, `ADAPT`, `OBSERVE` o `REJECT`.
+- [ ] Ninguna idea, concepto o referencia futura fue interpretada como autorización automática de implementación o sprint.
+- [ ] No se rediseñó desde cero una capacidad sin comprobar primero si su intención ya estaba preservada en `ideas.md` o `docs/project/concepts/**`.
+
+---
+
 # Especificación y método de desarrollo
 
 Cuando corresponda al alcance y riesgo del cambio, validar:
@@ -49,12 +79,26 @@ Cuando corresponda al alcance y riesgo del cambio, validar:
 
 ---
 
+# Planificación y ejecución por gates
+
+Cuando el cambio sea material, validar:
+
+- [ ] El plan fue dividido en gates pequeños, verificables y reversibles.
+- [ ] Cada gate declaró objetivo, precondiciones, alcance, fuera de alcance, validación, STOP condition y rollback cuando correspondía.
+- [ ] Se registró la identidad del candidato evaluado cuando correspondía.
+- [ ] No se avanzó al gate siguiente con un `FAIL` bloqueante o un `INCONCLUSIVE` no resuelto.
+- [ ] Un fallo local no fue utilizado para ampliar automáticamente archivos, componentes, arquitectura o dependencias.
+- [ ] Las métricas aplicables del gate fueron registradas o marcadas explícitamente como `N/A`.
+
+---
+
 # Revisión proporcional al riesgo
 
 Cuando corresponda, validar:
 
 - [ ] El cambio posee una clasificación de riesgo proporcional a su impacto.
 - [ ] La revisión utilizó los lentes 4R necesarios: Risk, Readability, Reliability y Resilience.
+- [ ] Cuando correspondió FULL 4R, cada lente produjo estado, preguntas evaluadas, findings y evidencia propios en lugar de una única etiqueta `4R PASS`.
 - [ ] Los cambios triviales no fueron sometidos a controles desproporcionados sin evidencia que justificara el escalamiento.
 - [ ] Los cambios de riesgo alto o crítico fueron sometidos a FULL 4R.
 - [ ] Un finding que reveló mayor riesgo produjo escalamiento de revisión cuando correspondía.
@@ -151,6 +195,20 @@ Cuando forme parte del alcance del cambio, validar:
 
 ---
 
+# Perfil RDD progresivo
+
+Cuando se utilicen receipts o evidencia estructurada inspirada en Receipt-Driven Development, validar:
+
+- [ ] Se preservó `Evidence != Receipt != Validation != Decision != Authority`.
+- [ ] El receipt o manifest está ligado a una identidad exacta de candidato.
+- [ ] Un cambio de candidato invalidó o provocó revalidación de la evidencia candidate-bound afectada.
+- [ ] Los únicos estados de validación utilizados por el receipt fueron `PASS`, `FAIL` o `INCONCLUSIVE`.
+- [ ] Un receipt no produjo estados de autoridad como `APPROVED`, `AUTHORIZED` o `MERGED`.
+- [ ] La adopción fue proporcional y experimental; no se creó infraestructura RDD adicional sin necesidad demostrada y autorización separada.
+- [ ] Se midió si el perfil RDD aportó trazabilidad útil o burocracia innecesaria antes de promoverlo a un contrato o subsistema formal.
+
+---
+
 # Documentación
 
 Validar:
@@ -165,6 +223,19 @@ Validar:
 - [ ] Nuevos componentes documentados.
 - [ ] Al cerrar un Sprint, `README.md` fue revisado y reconciliado con el baseline integrado; cuando corresponda refleja el último Sprint completado, el estado operativo, la evidencia de validación y las capacidades disponibles.
 - [ ] Al cerrar un Sprint, las fuentes `CURRENT_STATE` aplicables fueron revisadas y reconciliadas después del merge, o se documentó explícitamente que no requerían cambios.
+
+---
+
+# Reconciliación derivada post-merge
+
+Después de integrar un cambio en `Aranwill/jarvis/main`, validar:
+
+- [ ] Se evaluó si las rutas modificadas están observadas o mapeadas por el Malāk Vault Synchronization Agent.
+- [ ] Cuando correspondía, el Project Vault fue reconciliado mediante el flujo gobernado del Sync Agent.
+- [ ] El Vault y el Sync Agent permanecieron explícitamente subordinados a `Aranwill/jarvis/main` como fuente de verdad.
+- [ ] Un fallo de sincronización dejó el drift visible y no fue presentado como reconciliación exitosa.
+- [ ] Antes de admitir una nueva unidad de trabajo no permanecía `BASELINE_DRIFT`, `PROJECTION_DRIFT`, `STATE_DRIFT` o drift semántico downstream relevante sin resolver, reconciliar o aceptar explícitamente como riesgo documentado.
+- [ ] La reconciliación downstream no fue interpretada como condición para reabrir un Sprint ya cerrado ni como autoridad sobre el baseline oficial.
 
 ---
 
@@ -192,6 +263,7 @@ Antes de cerrar el Sprint confirmar:
 - [ ] La aceptación humana requerida fue obtenida antes de promover el cambio al baseline.
 - [ ] No permanece un `FAIL` o `INCONCLUSIVE` crítico sin resolución o aceptación explícita de riesgo.
 - [ ] La reconciliación documental post-merge fue completada antes de declarar cerrado el Sprint.
+- [ ] Si existían proyecciones downstream afectadas, su reconciliación quedó completada o explícitamente registrada como pendiente antes de iniciar la siguiente admission review.
 
 ---
 
