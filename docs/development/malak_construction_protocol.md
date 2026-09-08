@@ -163,7 +163,7 @@ Una propuesta preservada solo puede incorporarse cuando una necesidad del baseli
 - dependencias actuales;
 - evidencia operacional disponible.
 
-## 4.3 Clasificación 4A
+## 4.3 Clasificación de disposición
 
 Toda idea o concepto candidato debe clasificarse explícitamente:
 
