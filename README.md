@@ -23,10 +23,10 @@ Rama permanente:
 Baseline operativo actual:
 
 ```text
-Sprint 7.8 completado — Cognitive Conversation Execution Path Foundation
+Sprint 7.10 completado — Conversation Session Isolation Foundation
 ```
 
-La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional y la primera ruta cognitiva conversacional integrada de Malāk.
+La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional, la continuidad conversacional efímera y el aislamiento de contexto por sesión.
 
 La CLI puede utilizar:
 
@@ -38,6 +38,8 @@ La selección del runtime se realiza mediante configuración externa en la front
 Las solicitudes conversacionales ordinarias ingresan actualmente mediante la frontera cognitiva `Kernel.receive()`.
 
 La conversación se encuentra integrada detrás de la abstracción `Capability`, preservando la independencia del Kernel respecto de servicios, providers, runtimes y modelos concretos.
+
+Sprint 7.9 añadió continuidad conversacional efímera en memoria y Sprint 7.10 añadió aislamiento explícito por `session_id`, sin introducir persistencia ni Memory cognitiva.
 
 ## Arquitectura actual de la CLI
 
@@ -202,6 +204,7 @@ Un runtime desconocido debe ser rechazado de forma controlada.
 help
 ayuda
 status
+new
 exit
 quit
 salir
@@ -210,6 +213,8 @@ salir
 La CLI también controla:
 
 - entradas vacías;
+- continuidad conversacional efímera durante la ejecución;
+- reinicio del contexto activo mediante `new`, con rotación de sesión;
 - interrupciones mediante `Ctrl + C`;
 - finalización mediante EOF;
 - errores del runtime presentados como errores controlados.
@@ -224,10 +229,10 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-Última suite completa documentada durante la validación y cierre del Sprint 7.8:
+Última suite completa documentada durante la validación post-merge del Sprint 7.10:
 
 ```text
-348 total passed
+372 passed
 ```
 
 Validar compilación:
@@ -264,7 +269,8 @@ Dentro de la CLI:
 1. ejecutar `status`;
 2. enviar un prompt breve y no sensible;
 3. comprobar que se recibe una respuesta;
-4. finalizar mediante `exit`.
+4. opcionalmente ejecutar `new` y comprobar que se inicia una nueva sesión conversacional;
+5. finalizar mediante `exit`.
 
 La integración real fue validada con:
 
@@ -272,7 +278,7 @@ La integración real fue validada con:
 qwen3.5:9b
 ```
 
-La validación real del Sprint 7.8 confirmó la misma ruta arquitectónica utilizando `OllamaRuntime`, sin introducir dependencias de Ollama dentro del Kernel.
+La ruta arquitectónica continúa utilizando `OllamaRuntime` sin introducir dependencias de Ollama dentro del Kernel.
 
 ## Alcance actual
 
@@ -286,6 +292,9 @@ La CLI permite:
 - delegar la generación mediante `ConversationService`;
 - resolver el provider mediante `ConversationProviderRegistry`;
 - utilizar `MockLLMRuntime` u `OllamaRuntime`;
+- mantener continuidad conversacional efímera;
+- aislar el contexto conversacional por `session_id`;
+- reiniciar el contexto mediante `new` sin persistencia;
 - retornar la respuesta a través de la frontera cognitiva;
 - gestionar comandos básicos y errores controlados.
 
@@ -348,6 +357,8 @@ docs/project/sprints/SPRINT-7.5.md
 docs/project/sprints/SPRINT-7.6.md
 docs/project/sprints/SPRINT-7.7.md
 docs/project/sprints/SPRINT-7.8.md
+docs/project/sprints/SPRINT-7.9.md
+docs/project/sprints/SPRINT-7.10.md
 ```
 
 ## Principios
