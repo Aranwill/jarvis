@@ -9,9 +9,28 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 
 ## [Unreleased]
 
+### Added
+
+- Sprint 7.11 incorporó una pipeline mínima de validación reproducible en
+  GitHub Actions para candidatos exactos y para `main`, con permisos de solo
+  lectura, Python 3.12, suite completa, `compileall` y `git diff --check`
+  candidate-bound.
+- Se declaró `pytest>=9,<10` como dependencia opcional de desarrollo sin añadir
+  dependencias de runtime.
+
+### Validated
+
+- Candidato final de Sprint 7.11: `388 passed`, `compileall: PASS`,
+  `diff-check: PASS`, FULL 4R PASS e independent validation PASS.
+- La ejecución post-merge de `Validation` sobre
+  `3413e8ccb348440aea757d1feccde25c65be011f` concluyó con `success`.
+
 ### Notes
 
-- Sprint 7.10 permanece como el último sprint funcional completado e integrado del baseline actual.
+- Sprint 7.11 es el último sprint integrado del baseline actual.
+- Sprint 7.10 permanece como la última unidad funcional de producto/runtime;
+  Sprint 7.11 modifica únicamente tooling y documentación de desarrollo.
+- RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
   únicamente por esta sección.
 
