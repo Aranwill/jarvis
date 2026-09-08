@@ -314,7 +314,10 @@ A validated
 
 Cualquier certificación de B requiere evidencia ligada explícitamente a B según
 las reglas normales de Candidate Identity. Stage 1 no introduce un store externo
-ni infraestructura adicional para resolver esta propiedad.
+ni infraestructura adicional para resolver esta propiedad. Un PR comment,
+artefacto de una herramienta de validación o soporte equivalente puede preservar
+el manifest activo siempre que sea accesible, auditable y esté ligado al SHA
+exacto; su ubicación no le concede autoridad.
 
 ---
 
