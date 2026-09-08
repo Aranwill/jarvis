@@ -61,6 +61,7 @@ Las fuentes principales incluyen:
 - `docs/architecture/architecture_quality_gates.md`
 - `docs/development/engineering_method.md`
 - `docs/development/development_checklist.md`
+- `docs/development/malak_construction_protocol.md`
 - `SECURITY.md`
 
 Los documentos derivados pueden resumir evidencia, pero no pueden establecer arquitectura, gobernanza, estado de release ni alcance aprobado de un sprint.
@@ -130,6 +131,7 @@ Malāk — source of truth
 ├── Blueprint
 ├── Architecture Quality Gates
 ├── docs/development/engineering_method.md
+├── docs/development/malak_construction_protocol.md
 ├── especificaciones y contratos aplicables
 ├── baseline vigente
 ├── sprint vigente o último baseline cerrado
@@ -160,10 +162,49 @@ Vault Sync Agent — mecanismo de reconciliación
 └── evidencia de reconciliación
 ```
 
-La profundidad de lectura deberá ser proporcional a la pregunta. No es necesario
-leer cada archivo completo cuando una búsqueda o sección concreta permita
-resolver la cuestión con evidencia suficiente, pero ninguna fuente relevante
-deberá omitirse silenciosamente.
+### Cobertura exhaustiva obligatoria
+
+Toda revisión declarada `integral`, `completa`, `transversal`, de admisión de sprint, certificación, reconciliación o auditoría debe comenzar por un inventario recursivo de todos los archivos trackeados de los repositorios incluidos en el alcance.
+
+Cada archivo debe recibir una clasificación o disposición explícita. La profundidad de lectura puede ser proporcional al rol del artefacto y a la pregunta, pero ningún archivo puede quedar fuera del inventario por no coincidir con una búsqueda textual.
+
+La revisión debe poder demostrar conceptualmente:
+
+```text
+tracked files discovered = N
+tracked files classified = N
+silently omitted files   = 0
+```
+
+Utiliza un File Coverage Ledger o evidencia equivalente con, como mínimo:
+
+```text
+path
+repository
+artifact_type
+authority_class
+review_relevance
+review_depth
+disposition
+related_findings
+```
+
+Disposiciones candidatas:
+
+```text
+FULL_READ
+TARGETED_READ
+STRUCTURAL_INSPECTION
+HISTORICAL_REFERENCE
+GENERATED_OR_DERIVED
+NOT_APPLICABLE_WITH_REASON
+PROTECTED
+REJECTED_DO_NOT_READ
+```
+
+Un archivo expresamente prohibido por estas instrucciones debe aparecer en el inventario como `REJECTED_DO_NOT_READ`; no debe abrirse, resumirse ni procesarse.
+
+La cobertura exhaustiva no obliga a leer todos los archivos con la misma profundidad. Obliga a que todos sean descubiertos, clasificados y tratados deliberadamente.
 
 ### Conjunto obligatorio para planificar la próxima implementación
 
@@ -187,6 +228,10 @@ referencias conceptuales no normativas; lectura recursiva cuando el tema aplique
 docs/development/engineering_method.md
         ↓
 método de ingeniería, revisión, bounded correction y validación
+
+docs/development/malak_construction_protocol.md
+        ↓
+cobertura exhaustiva, incorporación progresiva, gates, métricas y RDD experimental
 ```
 
 También deberán revisarse el baseline vigente, la última ficha de sprint
@@ -200,10 +245,28 @@ idea           != roadmap
 concepto       != baseline
 método         != autoridad arquitectónica
 evidencia      != permiso para ampliar alcance
+receipt        != autoridad
 ```
 
 No se debe proponer una implementación basándose únicamente en el roadmap ni
 únicamente en una idea o referencia conceptual.
+
+### Incubación progresiva de capacidades futuras
+
+Antes de diseñar desde cero una nueva capacidad, consulta primero el roadmap, `documents/projects/jarvis/ideas.md` y `docs/project/concepts/**` para determinar si la intención futura ya fue explorada o preservada.
+
+La necesidad debe nacer del baseline vigente. Una idea o concepto relacionado se revalida contra arquitectura, gobernanza, código, tests, riesgos y dependencias actuales y se clasifica como:
+
+```text
+ADOPT
+ADAPT
+OBSERVE
+REJECT
+```
+
+La clasificación organiza la decisión; no concede autorización.
+
+No se debe ignorar una intención futura ya preservada ni forzarla sobre un baseline que todavía no demuestra necesidad.
 
 ### Planificación por gates cortos, deterministas y reversibles
 
@@ -213,10 +276,14 @@ verificables. Cada gate debe declarar, cuando corresponda:
 ```text
 objetivo exacto
 precondición
+candidate identity
+risk class
 archivos autorizados
 cambio mínimo esperado
 fuera de alcance
 validación focalizada
+métricas
+4R aplicable
 resultado esperado
 condición de STOP
 checkpoint / rollback
@@ -229,6 +296,7 @@ Reglas operativas:
 - no mezclar refactors, limpieza o mejoras laterales no requeridas;
 - comenzar con tests focalizados y ampliar validación de forma proporcional;
 - no avanzar al gate siguiente si el gate actual no está verde;
+- un `INCONCLUSIVE` no equivale a `PASS`;
 - un fallo no autoriza ampliar automáticamente archivos, arquitectura o scope;
 - el checkpoint debe permitir identificar con claridad el último estado verde;
 - repetir una validación solo cuando cambió el artefacto o nueva evidencia la
@@ -242,17 +310,23 @@ Formato conceptual recomendado:
 Gate N
 ├── objetivo
 ├── scope exacto
+├── candidate identity
 ├── archivos
 ├── modificación
 ├── test / check
+├── metrics
+├── 4R evidence
 ├── expected result
 ├── STOP si falla
 └── rollback al último checkpoint verde
 ```
 
+Cuando corresponda FULL 4R, `Risk`, `Readability`, `Reliability` y `Resilience` deben registrar evidencia separada; una única etiqueta `4R PASS` no basta como demostración.
+
+El perfil RDD de Malāk es progresivo: Candidate Identity, evidencia candidate-bound, validación independiente y receipts experimentales pueden utilizarse para mejorar trazabilidad, pero `Evidence != Receipt != Validation != Decision != Authority`. Ningún receipt puede aprobar, autorizar, promover o mergear un candidato.
+
 Esta disciplina operacional complementa
-`docs/development/engineering_method.md`; no la reemplaza ni eleva la autoridad
-de `AGENTS.md` sobre las fuentes normativas.
+`docs/development/engineering_method.md` y `docs/development/malak_construction_protocol.md`; no las reemplaza ni eleva la autoridad de `AGENTS.md` sobre las fuentes normativas.
 
 ### Lectura obligatoria de referencias conceptuales
 
@@ -336,6 +410,7 @@ PROJECTION_DRIFT
 SYNC_DRIFT
 COVERAGE_DRIFT
 ENCODING_DRIFT
+STATE_DRIFT
 ```
 
 Ejemplos:
@@ -361,6 +436,9 @@ COVERAGE_DRIFT
 
 ENCODING_DRIFT
 → el contenido persistido presenta corrupción o transformación de caracteres.
+
+STATE_DRIFT
+→ el estado persistido, propuesta pendiente o cursor no representan de forma coherente la realidad verificable.
 ```
 
 Todo finding de drift deberá, cuando sea posible, indicar:
@@ -412,6 +490,8 @@ PROJECT - MANIFIESTO MALAK (1).docx
 ```
 
 No se debe leer, resumir, citar, indexar, transformar ni incorporar su contenido al proyecto.
+
+En una revisión integral puede aparecer únicamente en el inventario con disposición `REJECTED_DO_NOT_READ`.
 
 ## Evaluación obligatoria previa a cualquier cambio
 
@@ -847,15 +927,18 @@ La existencia de un sprint, una ficha de sprint, una entrada de roadmap, una rec
 Todos los sprints pendientes se consideran exclusivamente propuestas o recomendaciones hasta completar, como mínimo, las siguientes etapas:
 
 1. inspección completa del baseline vigente;
-2. lectura del código, pruebas y documentación aplicables;
-3. identificación de una necesidad real y comprobada de Malāk;
-4. justificación de su utilidad cognitiva, arquitectónica, operativa o de gobernanza;
-5. definición explícita del alcance y de lo que queda fuera de alcance;
-6. evaluación de riesgos, dependencias, impacto y rollback;
-7. validación mediante las cuatro preguntas obligatorias;
-8. presentación del plan de ejecución al propietario;
-9. debate y revisión integral del plan;
-10. aprobación explícita e inequívoca del propietario.
+2. inventario y clasificación exhaustivos de los archivos del alcance de revisión;
+3. lectura del código, pruebas y documentación aplicables;
+4. contraste de roadmap, `ideas.md` y `docs/project/concepts/**`;
+5. identificación de una necesidad real y comprobada de Malāk;
+6. justificación de su utilidad cognitiva, arquitectónica, operativa o de gobernanza;
+7. definición explícita del alcance y de lo que queda fuera de alcance;
+8. evaluación de riesgos, dependencias, impacto y rollback;
+9. validación mediante las cuatro preguntas obligatorias;
+10. definición de gates, métricas y 4R aplicable;
+11. presentación del plan de ejecución al propietario;
+12. debate y revisión integral del plan;
+13. aprobación explícita e inequívoca del propietario.
 
 Sin la aprobación explícita del propietario no se debe:
 
@@ -936,13 +1019,13 @@ Describe posibilidades y referencias, no baseline ni autorización.
 
 Una revisión integral no podrá declararse completa hasta que:
 
-1. se identifiquen las fuentes CURRENT_STATE aplicables;
-2. se contrasten entre sí y contra código/tests cuando corresponda;
-3. las referencias antiguas encontradas sean clasificadas explícitamente como
-   estado vigente, histórico, legacy o drift;
-4. se contrasten Project Vault y Sync Agent cuando el alcance sea global;
-5. se registren findings pendientes, si existen;
-6. se cierre primero el inventario de drift antes de iniciar correcciones.
+1. se cierre el File Coverage Ledger del alcance con omisiones silenciosas igual a cero;
+2. se identifiquen las fuentes CURRENT_STATE aplicables;
+3. se contrasten entre sí y contra código/tests cuando corresponda;
+4. las referencias antiguas encontradas sean clasificadas explícitamente como estado vigente, histórico, legacy o drift;
+5. se contrasten Project Vault y Sync Agent cuando el alcance sea global;
+6. se registren findings pendientes, si existen;
+7. se cierre primero el inventario de drift antes de iniciar correcciones.
 
 No se utilizará el patrón:
 
@@ -951,6 +1034,22 @@ detectar → corregir → continuar buscando → detectar nuevamente.
 El patrón requerido será:
 
 inventario → clasificación → corrective packet → validación → cierre.
+
+### Reconciliación derivada después de merge
+
+Después de integrar un cambio en `Aranwill/jarvis/main`, debe evaluarse si las rutas modificadas están observadas o mapeadas por el Malāk Vault Synchronization Agent.
+
+Cuando corresponda, el Project Vault debe reconciliarse mediante el flujo gobernado del Sync Agent antes de utilizar la proyección derivada como base de una nueva admission review.
+
+La reconciliación downstream:
+
+```text
+NO reabre el sprint ya cerrado
+NO convierte el Vault en source of truth
+NO concede autoridad al Sync Agent
+```
+
+Si existe `BASELINE_DRIFT`, `PROJECTION_DRIFT`, `STATE_DRIFT` o drift semántico downstream relevante, la siguiente admission review debe esperar a que el finding sea reconciliado, resuelto o aceptado explícitamente como riesgo documentado.
 
 ### Auditoría completa vs revisión incremental
 
