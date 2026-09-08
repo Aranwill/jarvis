@@ -4,7 +4,7 @@ Estado: Activo
 \---
 
 \# Principio
-Jarvis adopta una arquitectura \*\*Zero Trust\*\*.
+Malāk adopta una arquitectura \*\*Zero Trust\*\*.
 Ningún componente debe asumir confianza implícita sobre otro componente.
 Toda interacción deberá ser validada explícitamente.
 \---
