@@ -70,7 +70,7 @@ def sha(value: Any, name: str) -> str:
 
 
 def result(value: Any, name: str) -> str:
-    if value not in RESULTS:
+    if not isinstance(value, str) or value not in RESULTS:
         fail("INVALID_RESULT", f"{name} must be PASS, FAIL or INCONCLUSIVE")
     return value
 
@@ -185,6 +185,24 @@ def git(repo: Path, *args: str, object_missing_is_fail: bool = False) -> str:
     return done.stdout.strip()
 
 
+def require_ancestor(repo: Path, baseline: str, candidate: str) -> None:
+    try:
+        done = subprocess.run(
+            ["git", "-C", str(repo), "merge-base", "--is-ancestor", baseline, candidate],
+            capture_output=True, text=True, timeout=15, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise CheckError("GIT_UNAVAILABLE", "Git inspection unavailable", inconclusive=True) from exc
+    if done.returncode == 1:
+        raise CheckError(
+            "BASELINE_NOT_ANCESTOR",
+            f"baseline {baseline} is not an ancestor of candidate {candidate}",
+        )
+    if done.returncode != 0:
+        message = done.stderr.strip() or done.stdout.strip() or "Git ancestry check failed"
+        raise CheckError("GIT_COMMAND_FAILED", message, inconclusive=True)
+
+
 def validate_git(
     repo: Path,
     manifest: dict[str, str],
@@ -195,6 +213,7 @@ def validate_git(
     git(repo, "rev-parse", "--show-toplevel")
     for name in ("baseline_commit", "candidate_commit"):
         git(repo, "cat-file", "-e", f"{manifest[name]}^{{commit}}", object_missing_is_fail=True)
+    require_ancestor(repo, manifest["baseline_commit"], manifest["candidate_commit"])
 
     expected = None
     if expected_candidate is not None:
