@@ -11,25 +11,13 @@ language: es
 
 # Malāk Evidence Manifest v1
 
-## 1. Propósito
+## Propósito
 
-`MALAK-EVIDENCE-MANIFEST/v1` es el contrato estructurado mínimo para ligar
-evidencia de construcción y validación al candidato exacto evaluado.
+`MALAK-EVIDENCE-MANIFEST/v1` liga evidencia de construcción al candidato exacto
+evaluado. Implementa Stage 1 del perfil RDD progresivo.
 
-El manifest implementa Stage 1 del perfil RDD progresivo de Malāk.
-
-No es:
-
-- un receipt de Stage 2;
-- una decisión de aceptación;
-- una autorización;
-- un mecanismo de merge;
-- un store;
-- un registro de autoridad;
-- una fuente de permisos;
-- un componente del runtime cognitivo.
-
-Invariante:
+No es un receipt de Stage 2, decisión, autorización, store, mecanismo de merge ni
+componente del runtime.
 
 ```text
 Evidence != Receipt != Validation != Decision != Authority
@@ -37,9 +25,9 @@ Evidence != Receipt != Validation != Decision != Authority
 
 ---
 
-# 2. Frontera de autoridad
+## Autoridad
 
-El manifest solo puede describir evidencia observada.
+El manifest solo describe evidencia observada.
 
 ```text
 CONTROL / AUTHORITY / PERMISSIONS / COMMANDS
@@ -49,86 +37,53 @@ RESULTS / FINDINGS / METRICS / EVIDENCE
                     ↑
 ```
 
-La flecha ascendente transporta información con efecto de autoridad igual a cero.
+El retorno ascendente tiene efecto de autoridad cero.
 
-El campo obligatorio:
+Campo obligatorio:
 
 ```json
 "authority_effect": "none"
 ```
 
-es una afirmación contractual verificable y no una concesión de autoridad.
-
-Cualquier valor distinto vuelve inválido el manifest.
-
-Quedan prohibidos como campos, resultados o semántica del contrato:
-
-```text
-approved
-authorized
-merged
-promoted
-released
-authority_granted
-permission_elevated
-```
+Cualquier otro valor invalida el manifest. Estados o campos de authority/delivery
+como `approved`, `authorized`, `merged`, `promoted` o `released` quedan fuera del
+contrato v1.
 
 ---
 
-# 3. Identidad de candidato
+## Candidate Identity v1
 
-La identidad primaria de Stage 1 es deliberadamente simple:
-
-```text
-repository
-baseline_commit
-candidate_commit
-```
-
-Para v1:
+Stage 1 usa únicamente:
 
 ```text
 repository = Aranwill/jarvis
-baseline_commit = Git commit SHA completo de 40 caracteres hexadecimales
-candidate_commit = Git commit SHA completo de 40 caracteres hexadecimales
+baseline_commit = lowercase Git SHA de 40 caracteres
+candidate_commit = lowercase Git SHA de 40 caracteres
 ```
 
-No se incorporan en v1:
+Ambos commits deben existir y:
 
-- tree hashes adicionales;
-- hashes de changed paths;
-- hash chaining;
-- firmas;
-- Merkle trees;
-- attestation externa.
+```text
+baseline_commit must be ancestor of candidate_commit
+```
 
-Principio:
+No se añaden tree hashes, path digests, firmas, Merkle ni hash chaining.
 
 ```text
 candidate changes
-→ candidate_commit changes
+→ identity changes
 → previous manifest does not certify the new candidate
 → affected evidence must be revalidated
 ```
 
-Un manifest histórico puede seguir siendo válido como evidencia de su candidato
-original aunque `HEAD` haya avanzado. Por eso se distingue:
-
-```text
-structurally valid historical manifest
-```
-
-de:
-
-```text
-manifest bound to current HEAD
-```
+Un manifest histórico sigue describiendo su candidato original aunque `HEAD`
+avance.
 
 ---
 
-# 4. Forma canónica v1
+## Forma v1
 
-El objeto JSON de nivel superior debe contener exactamente las claves siguientes:
+El objeto JSON debe contener exactamente estas claves:
 
 ```json
 {
@@ -177,88 +132,36 @@ El objeto JSON de nivel superior debe contener exactamente las claves siguientes
   "validator": "validator-identity",
   "result": "PASS",
   "generated_at": "2026-09-08T18:00:00+00:00",
-  "evidence_references": [
-    "PR#64"
-  ],
+  "evidence_references": ["PR#64"],
   "authority_effect": "none"
 }
 ```
 
-Los SHA del ejemplo son placeholders y no constituyen candidatos reales.
+Los SHA del ejemplo son placeholders.
 
 ---
 
-# 5. Reglas de campos
+## Reglas de validación
 
-## `schema`
+### Identidad y provenance
 
-Valor exacto:
+- `schema` debe ser exactamente `MALAK-EVIDENCE-MANIFEST/v1`.
+- `repository` debe ser exactamente `Aranwill/jarvis`.
+- `baseline_commit` y `candidate_commit` son SHA lowercase de 40 caracteres.
+- `unit_id`, `specification_reference`, `gate`, `scope_reference`, `producer` y
+  `validator` deben ser strings no vacíos sin whitespace periférico.
+- `risk_class` es entero `0..4`.
+- `correction_round` es entero `>= 0`.
+- `generated_at` es ISO-8601 timezone-aware en UTC.
+- `evidence_references` es una lista no vacía.
 
-```text
-MALAK-EVIDENCE-MANIFEST/v1
-```
+`producer` y `validator` son provenance, no permisos. La independencia real entre
+roles se prueba mediante evidencia externa y el Engineering Method, no por confiar
+en dos strings diferentes.
 
-## `repository`
+### Validations
 
-Stage 1 se limita a:
-
-```text
-Aranwill/jarvis
-```
-
-La generalización multi-repositorio queda fuera de alcance hasta demostrar
-necesidad.
-
-## `baseline_commit`
-
-Commit exacto desde el cual parte la unidad o candidato.
-
-Debe ser SHA Git hexadecimal completo de 40 caracteres.
-
-## `candidate_commit`
-
-Commit exacto cuyo contenido fue evaluado.
-
-Debe ser SHA Git hexadecimal completo de 40 caracteres.
-
-## `unit_id`
-
-Identificador no vacío de la unidad autorizada.
-
-Ejemplo:
-
-```text
-RDD-M1
-```
-
-## `specification_reference`
-
-Referencia no vacía a la especificación o admission record que define el
-comportamiento esperado y sus criterios verificables.
-
-No concede autoridad.
-
-## `gate`
-
-Gate al que corresponde la evidencia.
-
-El valor es provenance operacional; no autoriza avanzar al gate siguiente.
-
-## `risk_class`
-
-Entero entre `0` y `4`, conforme al Engineering Method vigente.
-
-## `scope_reference`
-
-Referencia no vacía al alcance previamente autorizado.
-
-El manifest no puede ampliar ese alcance.
-
-## `validations`
-
-Lista no vacía de validaciones relevantes para la conclusión terminal.
-
-Cada entrada contiene exactamente:
+`validations` es una lista no vacía. Cada entrada contiene exactamente:
 
 ```text
 id
@@ -267,15 +170,15 @@ result
 evidence_reference
 ```
 
-`method` debe permitir identificar o reproducir la validación cuando sea
-técnicamente viable.
+`id`, `method` y `evidence_reference` no pueden estar vacíos. Los IDs de
+validación son únicos dentro del manifest.
 
-No se deben almacenar secretos, tokens, credenciales ni argumentos sensibles en
-`method` o `evidence_reference`.
+`method` debe identificar o permitir reproducir la validación cuando sea viable y
+no debe contener secretos, tokens o credenciales.
 
-## `four_r`
+### 4R proporcional
 
-Objeto cuyas únicas claves posibles son:
+`four_r` solo admite:
 
 ```text
 risk
@@ -284,7 +187,7 @@ reliability
 resilience
 ```
 
-Cada lente presente contiene exactamente:
+Cada lente contiene exactamente:
 
 ```text
 result
@@ -292,56 +195,17 @@ finding_refs
 evidence_reference
 ```
 
-Reglas proporcionales:
+Reglas:
 
 ```text
-risk_class = 0
-  → 4R puede estar vacío
-
-risk_class = 1 o 2
-  → al menos un lente debe estar registrado
-
-risk_class = 3 o 4
-  → Risk + Readability + Reliability + Resilience obligatorios
+risk_class 0     → four_r puede estar vacío
+risk_class 1–2   → al menos un lente
+risk_class 3–4   → FULL 4R obligatorio
 ```
 
-La presencia de más lentes por escalamiento dinámico es válida.
+### Resultados
 
-## `finding_refs`
-
-Lista de identificadores o referencias de findings preservados.
-
-El detalle del finding puede vivir en la ficha de unidad, PR o evidencia
-referenciada. El manifest no crea un segundo finding store.
-
-## `correction_round`
-
-Entero mayor o igual a cero.
-
-```text
-0 = candidato sin bounded correction previa
-1+ = candidato posterior a una o más rondas autorizadas
-```
-
-No concede permiso para iniciar una corrección.
-
-## `producer`
-
-Provenance no vacía del actor que produjo el candidato o consolidó su evidencia.
-
-No representa authority.
-
-## `validator`
-
-Provenance no vacía del actor que realizó la validación terminal registrada.
-
-El contrato no pretende demostrar por sí mismo independencia de identidad; esa
-separación continúa siendo una obligación del Engineering Method y debe ser
-auditable mediante evidencia externa.
-
-## `result`
-
-Únicamente:
+El único enum permitido es:
 
 ```text
 PASS
@@ -349,260 +213,198 @@ FAIL
 INCONCLUSIVE
 ```
 
-## `generated_at`
-
-Timestamp ISO-8601 timezone-aware en UTC.
-
-## `evidence_references`
-
-Lista no vacía de referencias necesarias para reconstruir la conclusión.
-
-Las referencias deben preservar provenance y no depender exclusivamente de una
-explicación narrativa del Writer.
-
-## `authority_effect`
-
-Valor exacto:
+Agregación terminal:
 
 ```text
-none
+any validation/4R FAIL
+→ FAIL
+
+no FAIL + any INCONCLUSIVE
+→ INCONCLUSIVE
+
+all recorded validation/4R PASS
+→ PASS
 ```
+
+El validator debe rechazar un `result` superior que contradiga esa agregación.
+Así un productor no puede convertir evidencia roja o inconclusa en PASS.
+
+Los findings no crean un segundo algoritmo: un finding bloqueante debe quedar
+reflejado en la validación o lente correspondiente.
 
 ---
 
-# 6. Semántica de resultados
+## Candidate binding
 
-Los únicos estados de evidencia terminal son:
+El helper responde dos preguntas distintas.
+
+### Validez histórica
+
+Por defecto verifica:
 
 ```text
-PASS
-FAIL
-INCONCLUSIVE
+schema + fields + enums
+baseline exists
+candidate exists
+baseline ancestor of candidate
+result aggregation
 ```
 
-El resultado de nivel superior debe ser consistente con todas las validaciones y
-lentes 4R registrados.
+Esto permite auditar manifests históricos sin exigir que su candidate sea el
+`HEAD` actual.
 
-Agregación v1:
+### Binding contra candidato esperado
 
 ```text
-si cualquier validation o 4R lens = FAIL
-→ result = FAIL
-
-si no existe FAIL y cualquier validation o 4R lens = INCONCLUSIVE
-→ result = INCONCLUSIVE
-
-si todas las validation y todos los 4R lens registrados = PASS
-→ result = PASS
+--expected-candidate <SHA>
 ```
 
-El tooling debe rechazar un manifest cuyo `result` contradiga esta agregación.
-
-Esto evita que un productor transforme manualmente evidencia roja o inconclusa
-en un `PASS` terminal.
-
-Los findings no introducen un segundo algoritmo de agregación. Todo finding que
-impida aceptación deberá reflejarse en la validación o lente correspondiente.
-
----
-
-# 7. Validación estructural vs candidate binding
-
-El tooling de Stage 1 debe distinguir dos preguntas.
-
-## 7.1 ¿El manifest es estructuralmente válido?
-
-Comprueba:
-
-- schema;
-- claves exactas;
-- tipos;
-- enums;
-- SHA syntax;
-- UTC timestamp;
-- reglas 4R proporcionales;
-- agregación del resultado;
-- `authority_effect = none`.
-
-## 7.2 ¿El manifest corresponde al candidato que quiero comprobar?
-
-El auditor puede comprobar:
+exige:
 
 ```text
-manifest.candidate_commit == expected candidate
+manifest.candidate_commit == expected SHA
 ```
 
-Cuando se solicita comprobar contra el `HEAD` actual:
+### Binding contra HEAD actual
 
 ```text
+--require-current
+```
+
+exige:
+
+```text
+worktree clean
 manifest.candidate_commit == git rev-parse HEAD
 ```
 
-Si no coinciden:
+Si no coincide:
 
 ```text
-binding diagnostic = STALE_CANDIDATE
+STALE_CANDIDATE
 ```
 
-`STALE_CANDIDATE` es un diagnóstico del tooling, no un resultado permitido del
-manifest.
+`STALE_CANDIDATE`, `DIRTY_WORKTREE` y otros códigos son diagnósticos del helper,
+no nuevos estados del manifest.
 
-Un manifest histórico no se reescribe porque `HEAD` haya cambiado.
+Para dogfood sobre un candidate activo, el manifest que se usa con
+`--require-current` debe generarse fuera del candidate worktree. No se crean
+excepciones que ignoren archivos dirty. Después puede preservarse una copia
+histórica en `docs/project/sprints/proposals/**` ligada al commit evaluado.
 
 ---
 
-# 8. Existencia Git
+## Git y fallo cerrado
 
-Cuando exista acceso al repositorio, el validator debe comprobar que:
-
-```text
-baseline_commit
-candidate_commit
-```
-
-resuelven a commits Git existentes.
-
-La ausencia de acceso suficiente no debe inventar un PASS.
-
-Cuando la comprobación requerida no pueda realizarse:
+Cuando Git está disponible:
 
 ```text
-INCONCLUSIVE / diagnostic explícito
+missing baseline/candidate commit
+→ FAIL
+
+baseline not ancestor of candidate
+→ FAIL
+
+required binding mismatch
+→ FAIL
+
+dirty worktree with --require-current
+→ FAIL
 ```
 
-según el contexto de validación.
+Si el entorno impide realizar una comprobación requerida:
+
+```text
+INCONCLUSIVE
+```
+
+Nunca `PASS` por defecto.
 
 ---
 
-# 9. Auditabilidad externa
+## External auditability
 
-Un auditor independiente debe poder partir del manifest y responder:
+Desde un manifest un auditor debe poder reconstruir:
 
 ```text
-qué unidad se evaluó
-qué alcance aplicaba
-qué baseline se utilizó
-qué commit fue el candidato
-qué riesgo tenía
-qué validaciones se ejecutaron
-qué lentes 4R se aplicaron
-qué findings existieron
-cuántas correcciones ocurrieron
-quién produjo
-quién validó
-qué evidencia respalda cada resultado
-cuál fue el resultado terminal
+unit / scope / specification
+baseline / candidate
+risk
+validations / 4R
+findings / correction round
+producer / validator provenance
+evidence references
+terminal result
 ```
 
-El auditor no debe necesitar:
+La reconstrucción no debe depender de memoria conversacional, chain-of-thought,
+la misma sesión, modelo o proveedor.
 
-- memoria conversacional del Writer;
-- chain-of-thought;
-- la misma sesión;
-- el mismo modelo;
-- el mismo proveedor;
-- una afirmación no verificable del productor.
-
-Chain-of-thought no es evidencia canónica de RDD-M1.
+Chain-of-thought no es evidencia canónica.
 
 ---
 
-# 10. Separación de dominios
+## Separación de dominios
 
-Este contrato no reutiliza como dependencia:
+RDD-M1 no depende de:
 
 ```text
 src/malak/security/audit.py
 src/malak/observability/**
-```
-
-porque esos componentes pertenecen al comportamiento operacional del producto.
-
-Tampoco depende de:
-
-```text
 Aranwill/malak-vault-sync-agent
 ```
 
-El Sync Agent es downstream y derivado.
-
-Se pueden adaptar patrones deterministas observados allí, pero Malāk no adquiere
-dependencia funcional sobre el agente.
+Los dos primeros pertenecen al runtime. El Sync Agent es downstream. Se adaptan
+patrones deterministas cuando aportan valor, nunca se introduce una dependencia
+upstream hacia ellos.
 
 ---
 
-# 11. Ubicaciones de Stage 1
-
-Para evitar nuevas familias documentales y `COVERAGE_DRIFT` innecesario:
+## Ubicaciones Stage 1
 
 ```text
-contract
-  docs/development/evidence_manifest.md
-
-helper
-  scripts/malak_evidence.py
-
-tests
-  tests/test_malak_evidence.py
-
-pilot manifest
-  docs/project/sprints/proposals/RDD-M1-EVIDENCE-MANIFEST.json
+contract:       docs/development/evidence_manifest.md
+helper:         scripts/malak_evidence.py
+tests:          tests/test_malak_evidence.py
+pilot manifest: docs/project/sprints/proposals/RDD-M1-EVIDENCE-MANIFEST.json
 ```
 
-No se crea `docs/project/evidence/**` en Stage 1.
+No se crea `docs/project/evidence/**` ni se modifica el Sync Agent.
 
 ---
 
-# 12. Fuera de alcance del contrato v1
+## Fuera de alcance v1
 
 ```text
-receipt_id
-manifest registry
-receipt store
-authority store
-database
-signatures
-PKI
-Merkle trees
-hash chaining
-CAS
-remote immutable storage
-provider binding
-agent identity protocol
-automatic correction
-automatic approval
-automatic merge
+receipt_id / receipt store / manifest registry
+authority store / database
+signatures / PKI / Merkle / hash chaining / CAS
+remote immutable storage / attestation
+provider bindings / agents
+automatic correction / approval / merge
 delivery enforcement
 multi-repository generic schema
 ```
 
-Cualquier necesidad futura para estos elementos requiere evidencia y admisión
-separadas.
-
 ---
 
-# 13. Criterios de aceptación G1
+## Criterio de aceptación G1
 
 ```text
-[PASS] contrato candidate-bound explícito
-[PASS] resultados limitados a PASS / FAIL / INCONCLUSIVE
-[PASS] authority_effect fijado a none
-[PASS] estados de delivery/authority prohibidos
-[PASS] reglas 4R proporcionales preservadas
-[PASS] provenance mínima preservada
-[PASS] external auditability preservada
-[PASS] historical evidence no se reescribe por cambio de HEAD
-[PASS] no dependencia sobre runtime audit/observability
-[PASS] no dependencia sobre Sync Agent
-[PASS] new dependencies = 0
-[PASS] Kernel delta = 0
-[PASS] runtime delta = 0
+candidate-bound contract             PASS
+authority_effect = none              PASS
+PASS/FAIL/INCONCLUSIVE only          PASS
+4R proportionality                   PASS
+result anti-greenwashing             PASS
+historical auditability              PASS
+runtime dependency                   0
+Sync Agent dependency                0
+new external dependencies            0
+Kernel delta                         0
 ```
 
 ```text
 G1 RESULT = PASS
-AUTHORIZED NEXT = G2 — Candidate Identity Binding
 ```
 
-Este resultado no autoriza Stage 2 ni concede autoridad de aceptación al
-manifest.
+G1 no autoriza Stage 2 ni convierte el manifest en autoridad.
