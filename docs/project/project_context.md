@@ -497,6 +497,7 @@ Componentes incorporados o consolidados:
 - `SecurityContextEnvelope` para propagación inmutable en memoria.
 
 Propiedades relevantes:
+
 - contextos futuros son inválidos antes de `issued_at`;
 - contextos expiran exactamente en `expires_at`;
 - la renovación exige que el contexto anterior continúe vigente;
