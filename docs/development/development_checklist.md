@@ -53,13 +53,38 @@ Cuando el trabajo sea una revisión integral, auditoría, certificación, reconc
 Antes de admitir una nueva unidad funcional o diseñar una capability futura, validar:
 
 - [ ] La necesidad fue demostrada desde el baseline actual y no únicamente desde una secuencia histórica del roadmap.
+- [ ] Se consultó `SECURITY.md` y se identificaron restricciones, riesgo residual o precondiciones activadas por la superficie propuesta.
 - [ ] Se consultó `docs/project/implementation_roadmap.md`.
 - [ ] Se consultó `documents/projects/jarvis/ideas.md`.
-- [ ] Se revisó recursivamente `docs/project/concepts/**` para las referencias relacionadas con la necesidad.
-- [ ] Las ideas o conceptos candidatos fueron revalidados contra Blueprint, Constituciones, Gobernanza, ADR, código, tests, riesgos y dependencias vigentes.
+- [ ] Se leyó explícitamente `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md` cuando la tarea busca determinar la próxima implementación.
+- [ ] Se revisó `docs/project/concepts/README.md` y recursivamente `docs/project/concepts/**` para las referencias relacionadas con la necesidad.
+- [ ] Las ideas o conceptos candidatos fueron revalidados contra Blueprint, Constituciones, Gobernanza, `SECURITY.md`, ADR, código, tests, riesgos y dependencias vigentes.
 - [ ] Cada propuesta reutilizada fue clasificada explícitamente como `ADOPT`, `ADAPT`, `OBSERVE` o `REJECT`.
-- [ ] Ninguna idea, concepto o referencia futura fue interpretada como autorización automática de implementación o sprint.
-- [ ] No se rediseñó desde cero una capacidad sin comprobar primero si su intención ya estaba preservada en `ideas.md` o `docs/project/concepts/**`.
+- [ ] Se distinguió `security requirement != implemented control` y `research gap != roadmap`.
+- [ ] Ninguna idea, concepto, research gap o referencia futura fue interpretada como autorización automática de implementación o sprint.
+- [ ] No se rediseñó desde cero una capacidad sin comprobar primero si su intención ya estaba preservada en `ideas.md`, `MALAK_RESEARCH_HORIZON_MAP.md` o `docs/project/concepts/**`.
+
+---
+
+# Seguridad
+
+Para todo cambio con impacto de seguridad, autoridad, identidad, contexto, persistencia, red, agentes, tools, modelos, datos o integraciones externas, validar según aplicabilidad:
+
+- [ ] Se revisó `SECURITY.md` como política protegida y se preservó su precedencia documental.
+- [ ] El cambio distingue controles implementados de requisitos o capacidades futuras.
+- [ ] Se preservan Zero Trust, Defense in Depth, Least Privilege, Least Context y Human in Control.
+- [ ] Una ausencia, inconsistencia o fallo de autorización no se convierte en permiso; el comportamiento es deny-by-default / fail-closed cuando corresponde.
+- [ ] LLM output, tool output, retrieval, Memory, evidence, score o receipt no se interpretan como autoridad.
+- [ ] La ruta sensible conserva separación entre request, decision, enforcement, protected operation y evidence/audit.
+- [ ] Si ingresa contenido no confiable, se evaluó Prompt & Context Trust Boundary e indirect prompt injection.
+- [ ] Si se incorporan datos sensibles o persistencia, se evaluaron minimización, finalidad, disclosure, retención y redaction.
+- [ ] Si se incorpora un modelo, dependency, dataset, skill, plugin, container, MCP/A2A server/adapter u otro artefacto externo, se evaluaron provenance, integridad, trust, permisos requeridos, rollback y supply-chain risk.
+- [ ] Si existe delegación entre agentes, tools o componentes, la autoridad efectiva no puede superar la autoridad del delegador ni los scopes/policies aplicables.
+- [ ] Si un componente puede ser comprometido, se evaluaron revocación, aislamiento, blast radius, preservación de evidencia, recovery y revalidación antes de reintroducción.
+- [ ] El diseño no depende de la cooperación de un componente sospechado para revocar autoridad o preservar evidencia crítica.
+- [ ] Un incidente o mejora no concede autoridad para modificar políticas, PDP/PEP, leyes fundacionales o baseline productivo.
+- [ ] No se habilita `hack back` autónomo ni respuesta fuera de infraestructura propia/expresamente autorizada.
+- [ ] Los riesgos residuales nuevos o existentes quedaron explícitos y no fueron ocultados por una validación parcial.
 
 ---
 
@@ -221,6 +246,8 @@ Validar:
 - [ ] Changelog actualizado cuando corresponda.
 - [ ] Decisiones arquitectónicas documentadas.
 - [ ] Nuevos componentes documentados.
+- [ ] Si cambió una política, límite o postura de seguridad, `SECURITY.md` fue revisado y reconciliado sin presentar requisitos futuros como controles ya implementados.
+- [ ] Si cambió una visión, gap o clasificación de investigación relevante, `MALAK_RESEARCH_HORIZON_MAP.md`, `docs/project/concepts/README.md` y las ideas relacionadas fueron revisadas para evitar drift conceptual.
 - [ ] Al cerrar un Sprint, `README.md` fue revisado y reconciliado con el baseline integrado; cuando corresponda refleja el último Sprint completado, el estado operativo, la evidencia de validación y las capacidades disponibles.
 - [ ] Al cerrar un Sprint, las fuentes `CURRENT_STATE` aplicables fueron revisadas y reconciliadas después del merge, o se documentó explícitamente que no requerían cambios.
 
@@ -231,6 +258,7 @@ Validar:
 Después de integrar un cambio en `Aranwill/jarvis/main`, validar:
 
 - [ ] Se evaluó si las rutas modificadas están observadas o mapeadas por el Malāk Vault Synchronization Agent.
+- [ ] Se verificó explícitamente la cobertura de nuevas referencias obligatorias o rutas relevantes introducidas en `AGENTS.md`, `SECURITY.md` y `docs/project/concepts/**`.
 - [ ] Cuando correspondía, el Project Vault fue reconciliado mediante el flujo gobernado del Sync Agent.
 - [ ] El Vault y el Sync Agent permanecieron explícitamente subordinados a `Aranwill/jarvis/main` como fuente de verdad.
 - [ ] Un fallo de sincronización dejó el drift visible y no fue presentado como reconciliación exitosa.
