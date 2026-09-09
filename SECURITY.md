@@ -487,9 +487,11 @@ Reglas:
 
 ## 15. Mejora y aprendizaje bajo seguridad
 
-Malāk puede observar su propio comportamiento, investigar, experimentar en entornos autorizados, generar evidencia y proponer mejoras.
+En futuras capacidades de autoevaluación y mejora expresamente aprobadas, Malāk podrá observar su propio comportamiento, investigar, experimentar en entornos autorizados, generar evidencia y proponer mejoras.
 
-No puede utilizar una mejora, incidente, emergencia o ventaja técnica como justificación para concederse autoridad adicional.
+Ese alcance no estará implementado por el solo hecho de estar definido como requisito de seguridad.
+
+Malāk no podrá utilizar una mejora, incidente, emergencia o ventaja técnica como justificación para concederse autoridad adicional.
 
 ```text
 Observation
@@ -537,17 +539,22 @@ No debe declararse cumplimiento total cuando sólo se evaluó un alcance parcial
 
 ## 17. Documentos relacionados
 
-### Fuentes normativas y estado implementado
+### Fuentes normativas y políticas protegidas
 
 - `docs/governance/cognitive_constitution.md`;
 - `docs/governance/governance_constitution.md`;
 - `docs/architecture/blueprint.md`;
-- `docs/architecture/architecture_quality_gates.md`;
+- `docs/architecture/architecture_quality_gates.md`.
+
+### Estado implementado y evidencia derivada o histórica
+
 - `docs/project/project_context.md`;
 - `docs/project/implementation_roadmap.md`;
 - `docs/project/sprints/SPRINT-7.5.md`;
 - `docs/project/sprints/SPRINT-7.6.md`;
 - `docs/project/sprints/SPRINT-7.7.md`.
+
+Estos documentos deben leerse según su propia clasificación documental; su inclusión aquí no modifica su autoridad.
 
 ### Referencias conceptuales no normativas
 
