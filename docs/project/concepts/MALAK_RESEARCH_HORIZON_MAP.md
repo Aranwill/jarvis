@@ -6,7 +6,7 @@ document_role: research_horizon_reconciliation
 language: es
 created: 2026-09-09
 as_of_branch: main
-as_of_commit: 6458fd98b3af16401d485495eb7cd1eae4b23881
+as_of_commit: c3080c6feda5771985aa4a10822c3eb034abd7e3
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md
@@ -105,7 +105,7 @@ arquitectónicamente limpio.
 | Deception / Honeypots / Adversarial Evaluation | `ALIGNED` | IDEA-019 / IDEA-010 | Honeypots, honeytokens, Adversarial Twin, red/purple team y aislamiento ya están representados. |
 | Incident Forensics / Attack Path | `ALIGNED` | ampliación IDEA-019 | Ya se contemplan timeline, IP observada, attack path, evidence package, recovery y security regression learning. |
 | Prompt & Context Trust Boundary | `REINFORCE_EXISTING` | IDEA-006 / IDEA-013 / IDEA-016 | Existe protección de prompt injection para evidencia externa, pero debe generalizarse a todo contenido no confiable. |
-| Memory & Knowledge Trust / Poisoning | `GAP_CANDIDATE` | futura Memory + IDEA-013 / IDEA-016 | Hay provenance, authority, freshness y promotion gates; falta explicitar admisión defensiva y propagación de contaminación. |
+| Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | G3 Episodic Memory Admission + futura Memory + IDEA-013 / IDEA-016 | G3 materializa la primera frontera aislada de admisión episódica; permanecen pendientes la procedencia de assessments y la propagación de trust, taint, revocation y quarantine hacia persistencia, retrieval y Knowledge. |
 | AI Supply-Chain Trust | `GAP_CANDIDATE` | IDEA-004 / IDEA-009 / IDEA-011 / IDEA-016 | Existen hashes, model governance y SLSA como referencia, pero falta una política conceptual unificada de admisión de artefactos AI. |
 | Agent Identity & Delegation | `GAP_CANDIDATE` | IDEA-005 / IDEA-024 / Security Control Plane | Identidad, TTL, scopes y no autoelevación existen; falta cadena de delegación verificable y revocación derivada. |
 | Compromise Containment & Trust Revocation | `GAP_CANDIDATE` | IDEA-019 / IDEA-001 / Security Control Plane | Existe cuarentena local; falta explicitar respuesta sistémica y propagación de desconfianza. |
@@ -291,12 +291,28 @@ No crear todavía un `PromptInjectionManager` ni un motor universal de trust.
 
 ---
 
-## 6. GAP CANDIDATE — Memory & Knowledge Trust / Poisoning
+## 6. REINFORCE EXISTING — Memory & Knowledge Trust / Poisoning
+
+G3 — `Episodic Memory Admission Boundary` materializó la primera frontera
+aislada de admisión episódica bajo `src/malak/memory/`.
+
+El baseline dispone ahora de contratos inmutables, separación entre payload y
+metadata de control y una policy determinista `REJECT | HOLD | ELIGIBLE`.
+
+G3 no incorporó persistencia, retrieval, Knowledge, wiring con Conversation,
+cambios al Kernel ni ampliación de autoridad.
+
+Por lo tanto, esta línea deja de representar un gap completamente no
+materializado y pasa a `REINFORCE_EXISTING`.
+
+La siguiente preocupación conceptual no consiste en volver a crear una frontera
+de admisión, sino en demostrar de dónde provienen sus assessments y extender de
+forma gobernada las propiedades de trust hacia futuras etapas de persistencia,
+retrieval y promoción.
 
 La futura Memory no deberá reducirse a almacenamiento y similarity search.
 
-Antes de que una observación pueda influir persistentemente en Malāk deberá existir
-conceptualmente una frontera de admisión:
+La frontera completa objetivo continúa siendo:
 
 ```text
 Memory Candidate
@@ -315,6 +331,11 @@ Admission decision
       ↓
 Retrieval eligibility
 ```
+
+G3 materializa actualmente la frontera episódica hasta `Admission decision`.
+La policy consume assessments y señales de control explícitas, pero no define
+todavía el productor autorizado de todas esas señales ni persiste o recupera el
+candidato.
 
 Separación obligatoria:
 
@@ -344,7 +365,7 @@ Principio:
 
 > Memory search is a trust boundary.
 
-Este gap deberá intentar reforzar futura Memory, IDEA-013 e IDEA-016 antes de
+El trabajo pendiente deberá reforzar futura Memory, IDEA-013 e IDEA-016 antes de
 justificar una iniciativa independiente.
 
 ---
@@ -797,7 +818,7 @@ Cuando el baseline produzca necesidad real, el orden lógico de evaluación ser�
 ```text
 1. Prompt / Context Trust Boundary
 2. Compromise Containment & Trust Revocation
-3. Memory / Knowledge Admission & Poisoning Defense
+3. Memory / Knowledge Trust Propagation & Poisoning Defense after G3
 4. AI Supply-Chain Trust
 5. Data Classification / Disclosure
 6. Agent Identity & Delegation
@@ -818,7 +839,7 @@ Autoridad: no normativa
 Baseline modificado: no
 Arquitectura aprobada: no
 Sprint autorizado: ninguno
-Implementación autorizada: ninguna
+Implementación autorizada por este documento: ninguna
 ```
 
 ### Resultado final
@@ -828,10 +849,12 @@ de forma coherente en Malāk, especialmente en Long Horizon, IDEA-001, IDEA-002,
 IDEA-003, IDEA-005, IDEA-006, IDEA-013, IDEA-016, IDEA-019, IDEA-021, IDEA-023 e
 IDEA-024.
 
-Los gaps que merecen permanecer visibles son principalmente:
+Los gaps y refuerzos que merecen permanecer visibles son principalmente:
 
 1. `Compromise Containment & Trust Revocation` sistémico;
-2. `Memory & Knowledge Trust / Poisoning` con admisión explícita;
+2. `Memory & Knowledge Trust / Poisoning` más allá de G3, especialmente
+   provenance de assessments, propagación de taint/revocation/quarantine y
+   retrieval eligibility;
 3. `AI Supply-Chain Trust` para artefactos AI y externos;
 4. `Agent Identity & Delegation` verificable y revocable;
 5. `Data Classification & Disclosure Control` transversal;
