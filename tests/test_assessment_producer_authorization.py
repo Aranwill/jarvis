@@ -507,7 +507,14 @@ def test_contract_rejects_non_utc_evaluation_time() -> None:
             assessment,
             _provenance(assessment),
             _evidence(assessment),
-            datetime(2026, 9, 9, 19, 20),
+            datetime(
+                2026,
+                9,
+                9,
+                19,
+                20,
+                tzinfo=timezone(timedelta(hours=-3)),
+            ),
         )
 
 
