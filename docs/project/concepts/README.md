@@ -72,6 +72,32 @@ Estado:
 
 `concept / non_normative / conceptual_reference`
 
+### Malāk Research Horizon Map
+
+Archivo:
+
+`MALAK_RESEARCH_HORIZON_MAP.md`
+
+Preserva la reconciliación entre investigación externa, visión futura y
+conceptos ya existentes de Malāk, distinguiendo explícitamente entre:
+
+- líneas ya alineadas;
+- responsabilidades existentes que necesitan refuerzo;
+- gaps conceptuales candidatos;
+- tecnologías que solo deben mantenerse bajo observación;
+- direcciones incompatibles con la visión de Malāk.
+
+Incluye el mapeo de seguridad y resiliencia relacionado con Prompt/Context Trust,
+Memory/Knowledge poisoning, supply chain de AI, identidad y delegación,
+contención sistémica de componentes comprometidos, deception/forensics,
+interoperabilidad gobernada y evolución controlada.
+
+No crea nuevas capabilities ni autoriza implementación.
+
+Estado:
+
+`concept / non_normative / research_horizon_reconciliation`
+
 ## Regla de uso
 
 Antes de utilizar cualquiera de estos documentos para proponer implementación:
