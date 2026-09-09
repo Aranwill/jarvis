@@ -20,6 +20,11 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - Se incorporó `MALAK_RESEARCH_HORIZON_MAP.md` como referencia conceptual no
   normativa para reconciliar investigación, gaps y conceptos existentes sin
   promoverlos automáticamente a roadmap o implementación.
+- G3 integró `Episodic Memory Admission Boundary` como primera
+  materialización aislada de la Memory Layer: contratos inmutables,
+  separación entre payload y metadata de control y policy determinista
+  `REJECT | HOLD | ELIGIBLE`, sin wiring runtime, persistencia, retrieval ni
+  dependencias externas.
 
 ### Changed
 
@@ -50,12 +55,18 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   `diff-check: PASS`, FULL 4R PASS e independent validation PASS.
 - La ejecución post-merge de `Validation` sobre
   `3413e8ccb348440aea757d1feccde25c65be011f` concluyó con `success`.
+- Candidate G3 `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b`: `431 passed`,
+  `compileall: PASS` y `diff-check: PASS`.
+- La validación post-merge de G3 sobre `2d5fe87c304927baeab29e5649f2383030e1a1fd` concluyó con `success`.
 
 ### Notes
 
-- Sprint 7.11 es el último sprint integrado del baseline actual.
-- Sprint 7.10 permanece como la última unidad funcional de producto/runtime;
-  Sprint 7.11 modifica únicamente tooling y documentación de desarrollo.
+- Sprint 7.11 permanece como el último sprint numerado integrado.
+- G3 — `Episodic Memory Admission Boundary` es la unidad de código de producto
+  integrada más reciente, pero permanece aislada y sin wiring runtime,
+  persistencia o retrieval.
+- Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
+- No existe actualmente una unidad posterior a G3 autorizada.
 - RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
   únicamente por esta sección.

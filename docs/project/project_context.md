@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-08
-as_of_commit: 3413e8ccb348440aea757d1feccde25c65be011f
+as_of_date: 2026-09-09
+as_of_commit: 2d5fe87c304927baeab29e5649f2383030e1a1fd
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -121,9 +121,11 @@ Repositorio oficial:             Aranwill/jarvis
 Raíz Git local:                  D:\Ollama\jarvis
 Rama permanente:                 main
 Commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
+HEAD integrado actual:           2d5fe87c304927baeab29e5649f2383030e1a1fd
 Baseline nominal:                v0.6.0-alpha
 Último sprint integrado:         Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Último sprint funcional:         Sprint 7.10 — Conversation Session Isolation Foundation
+Última unidad de producto:       G3 — Episodic Memory Admission Boundary
+Última ruta conversacional:      Sprint 7.10 — Conversation Session Isolation Foundation
 Sprint activo autorizado:        ninguno
 Rama de implementación activa:   ninguna
 Candidato Sprint 7.11:           59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -158,8 +160,52 @@ independent validation: PASS
 post-merge Validation: success
 ```
 
-Sprint 7.10 permanece como la última unidad funcional de producto/runtime.
-No existe un sprint ni una unidad posterior a Sprint 7.11 autorizados.
+Después de Sprint 7.11, el Owner autorizó de forma separada y acotada G3 —
+`Episodic Memory Admission Boundary`.
+
+G3 fue integrado mediante PR #76:
+
+~~~text
+candidate:
+e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b
+
+merge:
+2d5fe87c304927baeab29e5649f2383030e1a1fd
+
+pytest:
+431 passed
+
+compileall:
+PASS
+
+git diff --check:
+PASS
+
+post-merge Validation:
+success
+~~~
+
+G3 incorpora exclusivamente contratos episódicos inmutables y una policy pura
+de admisión `REJECT | HOLD | ELIGIBLE`.
+
+Permanece fuera de alcance:
+
+~~~text
+runtime wiring
+Memory persistente
+retrieval
+Knowledge
+Kernel changes
+Conversation changes
+Security changes
+Observability changes
+external dependencies
+Sprint 7.12
+RDD Stage 2
+~~~
+
+Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
+No existe actualmente ninguna unidad posterior a G3 autorizada.
 
 La sincronización del Malāk Project Vault es una proyección derivada posterior.
 Su estado no modifica el cierre oficial del sprint ni concede autoridad sobre
@@ -194,6 +240,7 @@ jarvis/
 │       ├── identity/
 │       ├── infrastructure/
 │       ├── kernel/
+│       ├── memory/
 │       ├── observability/
 │       ├── providers/
 │       ├── runtime/
@@ -302,6 +349,36 @@ Sprint 7.10 añade aislamiento explícito de sesiones conversacionales.
 
 La evolución no introduce persistencia, Memory ni estado conversacional
 dentro del Kernel o de `SecurityContext`.
+
+### Episodic Memory Admission Boundary — G3
+
+G3 materializa una frontera aislada de la Memory Layer bajo:
+
+~~~text
+src/malak/memory/
+~~~
+
+La unidad implementada contiene contratos episódicos inmutables y una policy
+pura y determinista de admisión:
+
+~~~text
+candidate
+   ↓
+REJECT | HOLD | ELIGIBLE
+~~~
+
+Se preservan explícitamente:
+
+~~~text
+Candidate != Decision
+payload != control metadata
+source authority != confidence != security trust != temporal validity
+ELIGIBLE != persistence authorization
+HOLD != retention authorization
+~~~
+
+G3 no está conectado a `ConversationCapability`, `ConversationService`, Kernel,
+Security u observabilidad y no persiste ni recupera Memory.
 
 ### Integración Kernel–ConversationService
 

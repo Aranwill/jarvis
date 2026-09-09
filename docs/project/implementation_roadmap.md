@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-08
-as_of_commit: 3413e8ccb348440aea757d1feccde25c65be011f
+as_of_date: 2026-09-09
+as_of_commit: 2d5fe87c304927baeab29e5649f2383030e1a1fd
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -245,7 +245,13 @@ v0.6.0-alpha
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 ```
 
-- Última unidad funcional de producto/runtime:
+- Última unidad de código de producto integrada:
+
+```text
+G3 — Episodic Memory Admission Boundary
+```
+
+- Última ruta conversacional/runtime integrada:
 
 ```text
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -281,8 +287,10 @@ independent validation: PASS
 
 - Validación post-merge sobre `main`: `success`.
 - `main` continúa siendo la única rama permanente.
-- Sprint 7.11 está completado e integrado.
-- Ningún Sprint 7.12 ni unidad posterior está autorizado.
+- Sprint 7.11 permanece completado e integrado como último sprint numerado.
+- G3 — `Episodic Memory Admission Boundary` fue autorizado separadamente,
+  implementado e integrado sin constituir Sprint 7.12.
+- Ningún Sprint 7.12 ni unidad posterior a G3 está autorizado.
 - RDD Stage 1 está adoptado; RDD Stage 2 no está autorizado.
 - La sincronización del Vault es una operación derivada downstream y no
   constituye autorización de nuevas unidades.
@@ -360,21 +368,31 @@ La frontera `Capability.execute(...)` preserva el `Request` existente,
 `ConversationService` selecciona historial por sesión y la CLI rota la
 identidad de sesión mediante `new`.
 
-La implementación permanece efímera y no introduce persistencia, Memory,
-RAG, agentes, Sandbox ni ampliación de autoridad.
+La implementación conversacional permanece efímera y no introduce
+persistencia, RAG, agentes, Sandbox ni ampliación de autoridad.
 
-La finalización de este pipeline no autoriza nuevas capabilities ni ampliación
+G3 incorporó posteriormente una frontera aislada de admisión episódica bajo
+`src/malak/memory/`, con contratos inmutables y una policy determinista
+`REJECT | HOLD | ELIGIBLE`.
+
+G3 no introduce wiring desde Conversation, persistencia, retrieval, Knowledge,
+cambios al Kernel, cambios a Security ni ampliación de autoridad.
+
+La finalización de estas unidades no autoriza nuevas capabilities ni ampliación
 de autoridad.
 
 ---
 
 # 7. Estado del baseline actual
 
-Estado verificado después de integrar Sprint 7.11:
+Estado verificado después de integrar G3:
 
 ```text
 commit de integración Sprint 7.11:
 3413e8ccb348440aea757d1feccde25c65be011f
+
+HEAD integrado actual:
+2d5fe87c304927baeab29e5649f2383030e1a1fd
 
 rama permanente:
 main
@@ -382,7 +400,10 @@ main
 Sprint 7.11:
 completado e integrado
 
-última unidad funcional de producto/runtime:
+última unidad de código de producto integrada:
+G3 — Episodic Memory Admission Boundary
+
+última ruta conversacional/runtime integrada:
 Sprint 7.10 — Conversation Session Isolation Foundation
 
 sprint activo autorizado:
@@ -406,9 +427,15 @@ success
 
 `main` continúa siendo la única rama permanente.
 
-La integración de Sprint 7.11 no autoriza automáticamente ninguna unidad
-posterior, RDD Stage 2, Memory persistente, agentes, tools, Sandbox o ampliación
-de autoridad.
+G3 fue integrado mediante PR #76 con candidate `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b` y merge
+`2d5fe87c304927baeab29e5649f2383030e1a1fd`. La validación candidate-bound registró `431 passed`,
+`compileall: PASS` y `git diff --check: PASS`; la validación post-merge sobre
+`main` concluyó con `success`.
+
+La integración de Sprint 7.11 no autorizó automáticamente G3: G3 requirió una
+autorización separada del Owner. Del mismo modo, la integración de G3 no
+autoriza automáticamente ninguna unidad posterior, Sprint 7.12, RDD Stage 2,
+Memory persistente, agentes, tools, Sandbox o ampliación de autoridad.
 
 La reconciliación del Malāk Project Vault representa este baseline de forma
 derivada y no altera la autoridad del repositorio oficial.
@@ -431,13 +458,19 @@ derivada y no altera la autoridad del repositorio oficial.
 | 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
 | 7.11 | Completado | Reproducible Validation Pipeline Foundation; integrado y validado post-merge |
 
+G3 — `Episodic Memory Admission Boundary` fue una unidad separada, autorizada e
+integrada después de Sprint 7.11. No constituye Sprint 7.12 y no modifica la
+numeración histórica del bloque 7.x.
+
 ---
 
 # 9. Estado de autorización de nuevos sprints
 
 ```text
 SPRINT 7.11 COMPLETADO E INTEGRADO
-NINGÚN SPRINT POSTERIOR AUTORIZADO
+G3 EPISODIC MEMORY ADMISSION BOUNDARY INTEGRADO COMO UNIDAD SEPARADA
+SPRINT 7.12 NO AUTORIZADO
+NINGUNA UNIDAD POSTERIOR A G3 AUTORIZADA
 RDD STAGE 2 NO AUTORIZADO
 ```
 
@@ -481,10 +514,21 @@ post-merge Validation:
 success
 ```
 
+G3 fue integrado mediante PR #76.
+
+Evidencia G3:
+
+- candidate: `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b`;
+- merge: `2d5fe87c304927baeab29e5649f2383030e1a1fd`;
+- pytest: `431 passed`;
+- compileall: `PASS`;
+- `git diff --check`: `PASS`;
+- post-merge Validation: `success`.
+
 No está autorizado:
 
 - Sprint 7.12;
-- ninguna unidad posterior;
+- ninguna unidad posterior a G3;
 - RDD Stage 2;
 - Memory persistente;
 - nuevas capabilities;
@@ -497,7 +541,7 @@ No está autorizado:
 La sincronización del Vault puede continuar como reconciliación derivada del
 baseline integrado, pero no constituye un nuevo sprint ni una autorización.
 
-Cualquier unidad posterior deberá atravesar nuevamente el proceso completo
+Cualquier unidad posterior a G3 deberá atravesar nuevamente el proceso completo
 de admisión y aprobación.
 ---
 
@@ -867,7 +911,7 @@ No constituyen autorización.
 | Procesamiento de Request | `materializado` | Existe flujo de Request mediante Kernel. |
 | Tests del Kernel | `materializado` | Existe validación automatizada del Kernel. |
 | Baseline Kernel v1.0 | `hito_historico` | Nomenclatura histórica; no representa la versión nominal actual. |
-| Memory Layer | `preservado` | Capacidad futura separada de Knowledge. |
+| Memory Layer | `parcialmente_materializado` | G3 materializa la frontera de admisión episódica; persistencia, retrieval y Memory operativa permanecen futuras. |
 | Knowledge Layer | `preservado` | Capacidad futura relacionada con AKS y retrieval. |
 | RAG | `preservado` | Capacidad futura. |
 | Vector DB | `candidato_tecnologico` | Infraestructura futura sustituible y reconstruible. |
@@ -981,7 +1025,7 @@ Toda selección futura deberá justificarse contra:
 | Propuesta | Estado | Observación |
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Unidad posterior a Sprint 7.11 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de Sprint 7.11 |
+| Unidad posterior a G3 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de G3 |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
@@ -1211,7 +1255,10 @@ Las diferencias históricas deben conservar contexto temporal.
 # 26. Estado actual de planificación
 
 ```text
-MATERIAL BASELINE REFERENCE
+CURRENT MATERIAL HEAD
+2d5fe87c304927baeab29e5649f2383030e1a1fd
+
+SPRINT 7.11 INTEGRATION REFERENCE
 3413e8ccb348440aea757d1feccde25c65be011f
 
 PERMANENT BRANCH
@@ -1223,16 +1270,22 @@ NONE
 NOMINAL VERSION
 v0.6.0-alpha
 
-LAST COMPLETED SPRINT
+LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
-LAST PRODUCT/RUNTIME SPRINT
+LATEST PRODUCT UNIT
+G3 — Episodic Memory Admission Boundary
+
+LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
 
 ACTIVE SPRINT
 NONE
 
-SPRINT AFTER 7.11
+SPRINT 7.12
+NONE AUTHORIZED
+
+UNIT AFTER G3
 NONE AUTHORIZED
 
 RDD STAGE 2
