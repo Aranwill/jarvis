@@ -17,6 +17,32 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   candidate-bound.
 - Se declaró `pytest>=9,<10` como dependencia opcional de desarrollo sin añadir
   dependencias de runtime.
+- Se incorporó `MALAK_RESEARCH_HORIZON_MAP.md` como referencia conceptual no
+  normativa para reconciliar investigación, gaps y conceptos existentes sin
+  promoverlos automáticamente a roadmap o implementación.
+
+### Changed
+
+- `SECURITY.md` fue reconciliado con el Security Control Plane y Secure Context
+  Lifecycle ya implementados, separando controles vigentes, riesgo residual y
+  requisitos obligatorios para futuras superficies sensibles.
+- `AGENTS.md`, el Malāk Construction Protocol, el Development Checklist y el
+  template de Pull Request fueron reforzados para exigir revisión explícita de
+  `SECURITY.md` y `MALAK_RESEARCH_HORIZON_MAP.md` durante admisiones y análisis
+  de próxima implementación cuando corresponda.
+
+### Security
+
+- La política activa preserva explícitamente Prompt & Context Trust Boundary,
+  Memory/Knowledge poisoning defenses, AI supply-chain trust, identidad y
+  delegación no expansiva, Compromise Containment & Trust Revocation, data
+  disclosure, Resource Governance y límites de interoperabilidad como requisitos
+  de seguridad proporcionales a futuras superficies.
+- Deception, honeypots, forensics y respuesta defensiva permanecen limitados a
+  capacidades futuras aprobadas e infraestructura propia o expresamente
+  autorizada; no se autoriza `hack back` autónomo.
+- Los requisitos futuros continúan separados de la implementación vigente:
+  `security requirement != implemented control`.
 
 ### Validated
 
@@ -33,6 +59,8 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
   únicamente por esta sección.
+- Esta reconciliación documental no autoriza un nuevo sprint, Memory persistente,
+  agentes, tools, Sandbox, navegación, MCP/A2A ni ampliación de autoridad.
 
 ---
 
