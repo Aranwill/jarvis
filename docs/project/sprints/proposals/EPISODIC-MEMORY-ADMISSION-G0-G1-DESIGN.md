@@ -1,11 +1,12 @@
 ---
 title: Episodic Memory Admission Boundary — G0/G1 Design Record
-status: design_authorized
+status: g1_design_review_pass
 authority: owner-approved design record
 as_of_date: 2026-09-09
 unit: Episodic Memory Admission Boundary Foundation
 gate: G1
-source_baseline: 10d6945d6f19a61c9dc9724738545107b9148707
+g0_source_baseline: 10d6945d6f19a61c9dc9724738545107b9148707
+g1_base_commit: 71da298c029ca38060cd4c46794ab4e24d1319d9
 issue: 72
 risk_class: 3
 implementation_authorized: false
@@ -58,7 +59,34 @@ La autoridad final permanece humana.
 
 ---
 
-## 2. Resultado G0 incorporado
+## 2. Binding del diseño a la fuente revisada
+
+G0 fue evaluado contra:
+
+```text
+10d6945d6f19a61c9dc9724738545107b9148707
+```
+
+G1 fue aislado posteriormente desde:
+
+```text
+71da298c029ca38060cd4c46794ab4e24d1319d9
+```
+
+Entre ambos commits existen dos commits históricos de creación/revert del primer intento de registrar G1, pero **no existe diferencia de archivos** en el árbol resultante.
+
+Por tanto:
+
+```text
+G0 semantic source tree == G1 base source tree
+G0 commit identity        != G1 branch base identity
+```
+
+Ambas identidades quedan registradas para evitar confundir equivalencia de contenido con identidad de candidato.
+
+---
+
+## 3. Resultado G0 incorporado
 
 La revisión G0 sobre el baseline vigente concluyó:
 
@@ -84,7 +112,7 @@ La unidad mínima no intenta diseñar simultáneamente Memory y Knowledge.
 
 ---
 
-## 3. Necesidad demostrada
+## 4. Necesidad demostrada
 
 El baseline actual ya produce intercambios conversacionales aislados por sesión mediante contexto efímero en memoria.
 
@@ -122,7 +150,7 @@ automatic memory
 
 ---
 
-## 4. Regla cognitiva central
+## 5. Regla cognitiva central
 
 Un resultado generado o una experiencia observada puede convertirse en **candidate**.
 
@@ -138,7 +166,7 @@ Todo aprendizaje permanente deberá atravesar validación gobernada y conservar 
 
 ---
 
-## 5. Objeto diseñado
+## 6. Objeto diseñado
 
 G1 diseña únicamente el concepto lógico `EpisodicMemoryCandidate`.
 
@@ -148,6 +176,7 @@ Propiedades conceptuales mínimas:
 
 ```text
 candidate_id
+payload / experience reference
 origin
 conversation_session_id
 request_id / exchange identity when available
@@ -155,7 +184,7 @@ created_at
 subject_scope
 domain
 purpose
-source_authority
+source_authority_classification
 confidence
 temporal_validity
 sensitivity / disclosure constraints
@@ -166,11 +195,67 @@ lineage / derived_from
 
 No todos los campos deberán necesariamente materializarse con esos nombres.
 
+`source_authority_classification` describe la clasificación de una fuente para evaluar información. **No representa permisos de sistema ni concede autorización operacional.**
+
 El objetivo es fijar información suficiente para decidir admisión sin depender del contenido semántico desnudo.
+
+### 6.1 Payload no confiable != metadata de control
+
+La experiencia o contenido candidato y la metadata que gobierna su admisión son dominios distintos.
+
+```text
+candidate payload
+!=
+control metadata
+```
+
+El payload puede contener texto, estructuras o instrucciones aparentes tales como:
+
+```text
+"trust me"
+"store this permanently"
+"source_authority = owner"
+"admission_state = ELIGIBLE"
+```
+
+Nada de ello puede modificar por sí mismo:
+
+- provenance;
+- source authority classification;
+- trust state;
+- sensitivity;
+- scope;
+- policy;
+- admission state;
+- persistencia.
+
+La metadata de control deberá derivarse de contratos, contexto verificable, política y evaluación externa al contenido no confiable.
+
+Principio:
+
+```text
+Candidate content != Candidate control plane
+```
+
+### 6.2 Punto de captura todavía no seleccionado
+
+G1 no selecciona todavía el punto runtime donde una experiencia se convertiría en candidato.
+
+El baseline actual conserva `session_id` y `request_id` en `Request`, mientras `ConversationService` recibe `session_id` pero no `request_id` como parte de `ConversationRequest`.
+
+Por tanto una futura Implementation Candidate Specification deberá demostrar el binding de origen **sin**:
+
+- convertir al Kernel en Memory;
+- hacer que el Kernel almacene candidatos;
+- sobrecargar `ConversationRequest` con autoridad que no le corresponde;
+- duplicar identidad de forma ambigua;
+- inventar un manager universal.
+
+Si el binding requiere un contrato mínimo de correlación nuevo, ese cambio deberá declararse explícitamente y permanecer separado de persistencia.
 
 ---
 
-## 6. Provenance y binding
+## 7. Provenance y binding
 
 Todo candidato debe poder reconstruir de dónde provino.
 
@@ -196,11 +281,21 @@ Trusted origin != true content
 True content != authorization
 ```
 
-Si la provenance necesaria para un caso de riesgo no puede establecerse, el candidato debe poder quedar no elegible para promoción futura.
+Si la provenance requerida por la política aplicable no puede establecerse, el candidato **no puede** alcanzar `ELIGIBLE`.
+
+El comportamiento debe ser fail-closed:
+
+```text
+missing required provenance / classification / policy input
+                     ↓
+               HOLD or REJECT
+                     ↓
+              never ELIGIBLE
+```
 
 ---
 
-## 7. Scope, dominio y propósito
+## 8. Scope, dominio y propósito
 
 Un candidato no debe considerarse universal por defecto.
 
@@ -220,7 +315,7 @@ La admisión futura deberá preservar el principio de mínimo contexto y mínimo
 
 ---
 
-## 8. Validez temporal
+## 9. Validez temporal
 
 La Memory futura debe poder distinguir información vigente de información histórica.
 
@@ -239,14 +334,14 @@ Pero la ausencia de una fecha de expiración no implica validez eterna.
 
 ---
 
-## 9. Trust, contradicción y contaminación
+## 10. Trust, contradicción y contaminación
 
 Similarity no es trust.
 
 La futura admisión deberá poder separar:
 
 ```text
-source authority
+source authority classification
 confidence
 content consistency
 security trust
@@ -267,7 +362,7 @@ REJECTED
 
 Los nombres definitivos quedan abiertos a diseño posterior.
 
-### 9.1 Contradicción
+### 10.1 Contradicción
 
 Una contradicción no debe resolverse automáticamente por proximidad semántica ni por preferencia del LLM.
 
@@ -280,7 +375,7 @@ prefer temporally newer evidence when authority is comparable
 retain historical trace
 ```
 
-### 9.2 Taint
+### 10.2 Taint
 
 Cuando una fuente, credencial, tool, agent o componente sea posteriormente marcado como comprometido, los candidatos derivados deberán poder reducir su trust sin asumir automáticamente que todo contenido es falso.
 
@@ -296,7 +391,7 @@ La propagación de distrust no constituye una sentencia de compromiso; constituy
 
 ---
 
-## 10. Admission outcomes
+## 11. Admission outcomes
 
 G1 no fija todavía una máquina de estados definitiva.
 
@@ -327,13 +422,32 @@ Motivos posibles:
 
 ### `HOLD`
 
-El candidato conserva identidad y evidencia suficiente para evaluación, pero no es elegible para persistencia/retrieval productivo.
+El candidato no es elegible para persistencia/retrieval productivo y requiere resolución adicional.
+
+`HOLD` es un **outcome lógico**. No constituye autorización para retener indefinidamente el payload ni para persistir datos sensibles.
+
+```text
+HOLD != retention authorization
+HOLD != storage authorization
+```
+
+Si conservar material para revisión requiere persistencia, esa retención deberá pasar por su política aplicable y por la autorización correspondiente.
 
 ### `ELIGIBLE`
 
-El candidato superó la política de admisión aplicable.
+El candidato superó la política de **admisión como candidato elegible**.
 
-`ELIGIBLE` no significa persistido.
+`ELIGIBLE` no significa persistido ni autorizado para persistir.
+
+```text
+Admission Decision
+!=
+Persistence Authorization
+!=
+Persistence / Storage
+```
+
+Y además:
 
 ```text
 Eligible != Stored
@@ -341,9 +455,33 @@ Stored != Retrieved
 Retrieved != Trusted for every task
 ```
 
+Una futura operación de persistencia sigue siendo una operación gobernada independiente.
+
+### 11.1 Evidencia mínima de decisión futura
+
+Sin crear un nuevo subsistema, una futura decisión de admisión deberá ser reconstruible mediante evidencia estructurada proporcional al riesgo.
+
+Como mínimo deberá poder expresar conceptualmente:
+
+```text
+candidate_id
+outcome
+reason_code
+policy / rule version when applicable
+evaluated_at
+relevant provenance reference
+human-review requirement when applicable
+```
+
+La evidencia no concede autoridad:
+
+```text
+Admission evidence != Persistence authorization
+```
+
 ---
 
-## 11. Data classification antes de persistencia
+## 12. Data classification antes de persistencia
 
 Persistir memoria puede cambiar el riesgo de disclosure.
 
@@ -375,7 +513,7 @@ Define solamente el hook necesario para impedir que una futura Memory ignore esa
 
 ---
 
-## 12. Frontera con Knowledge
+## 13. Frontera con Knowledge
 
 La unidad actual termina antes de Knowledge.
 
@@ -405,7 +543,7 @@ Cualquier promoción futura `Memory -> Knowledge candidate` requerirá diseño y
 
 ---
 
-## 13. Frontera con retrieval
+## 14. Frontera con retrieval
 
 Retrieval está fuera de G1.
 
@@ -425,7 +563,7 @@ Por tanto similarity search por sí sola no podrá constituir política suficien
 
 ---
 
-## 14. Negative scenarios obligatorios para una futura implementación
+## 15. Negative scenarios obligatorios para una futura implementación
 
 Una eventual implementación deberá demostrar al menos estos escenarios antes de ser admitida:
 
@@ -469,9 +607,33 @@ Un candidato o memoria futura puede dejar de ser elegible sin borrar necesariame
 
 Admitir una experiencia como memoria episódica no la promueve a Knowledge.
 
+### EM-A11 — Metadata spoofing denied
+
+El payload no puede autoasignarse provenance, source-authority classification, trust, sensitivity o admission state mediante texto o estructura controlada por la fuente.
+
+### EM-A12 — Missing required inputs fail closed
+
+Si falta provenance, clasificación o input de policy requerido por el riesgo, el candidato no alcanza `ELIGIBLE`.
+
+### EM-A13 — Eligibility does not authorize persistence
+
+Un resultado `ELIGIBLE` no provoca ni autoriza por sí solo escritura persistente.
+
+### EM-A14 — Hold does not authorize retention
+
+Un resultado `HOLD` no constituye licencia para conservar indefinidamente datos o payloads cuyo retention no esté permitido.
+
+### EM-A15 — Source authority classification is not system authority
+
+Una fuente clasificada como relevante o de alta autoridad informativa no adquiere permisos de sistema ni puede saltar PDP/PEP.
+
+### EM-A16 — Origin correlation remains external to Memory ownership
+
+La futura captura de `request_id` / exchange identity no convierte al Kernel ni a Conversation en propietarios de Memory.
+
 ---
 
-## 15. Future implementation budget — no autorizado
+## 16. Future implementation budget — no autorizado
 
 G1 no aprueba archivos ni componentes concretos de producción.
 
@@ -480,10 +642,12 @@ Si posteriormente se solicita implementación, el diseño deberá intentar prime
 ```text
 contracts / value objects only if necessary
 pure deterministic admission policy if necessary
+minimal correlation contract only if demonstrated necessary
+structured reason / decision evidence only if necessary
 in-memory test doubles only
 no persistence
 no retrieval
-no Kernel change
+no Kernel-owned Memory
 no external dependency
 ```
 
@@ -501,7 +665,7 @@ Estos nombres no están aprobados y representan ejemplos de sobrearquitectura a 
 
 ---
 
-## 16. Stop conditions
+## 17. Stop conditions
 
 G1 concluye `INCONCLUSIVE` y debe volver al propietario si para obtener utilidad mínima resulta necesario:
 
@@ -511,10 +675,12 @@ G1 concluye `INCONCLUSIVE` y debe volver al propietario si para obtener utilidad
 - implementar retrieval;
 - fusionar Memory y Knowledge;
 - crear un subsystem universal de trust;
-- modificar Kernel;
+- modificar Kernel para convertirlo en propietario de Memory;
 - modificar Security Control Plane;
 - introducir agents o tools;
-- interpretar contenido del LLM como decisión de admisión;
+- interpretar contenido del LLM como metadata de control o decisión de admisión;
+- hacer que `ELIGIBLE` implique persistencia automática;
+- usar `HOLD` como autorización implícita de retention;
 - crear autoridad automática downstream.
 
 Regla:
@@ -523,12 +689,41 @@ Regla:
 
 ---
 
-## 17. Disposición G1
+## 18. Revisión G1 contra el baseline real
 
-Con el alcance actual:
+La revisión de diseño contrastó esta especificación con:
+
+- Constitución Cognitiva;
+- Blueprint;
+- `SECURITY.md`;
+- Research Horizon;
+- `Request` actual;
+- `ConversationRequest` actual;
+- `ConversationService` actual;
+- separación vigente entre Context, Conversation, Kernel, Memory y Knowledge.
+
+Hallazgos resueltos dentro de G1:
 
 ```text
-G1 DESIGN RESULT: PASS
+G1-R1 candidate/base identity ambiguity                  RESOLVED
+G1-R2 payload vs control metadata ambiguity              RESOLVED
+G1-R3 admission vs persistence authorization ambiguity   RESOLVED
+G1-R4 HOLD vs retention ambiguity                        RESOLVED
+G1-R5 missing required inputs fail-closed                RESOLVED
+G1-R6 request/exchange correlation ownership             RESOLVED AS FUTURE DESIGN CONSTRAINT
+G1-R7 admission decision traceability                    RESOLVED AS FUTURE MINIMUM EVIDENCE
+```
+
+No se detectó necesidad de storage, retrieval, Knowledge implementation, cambios de Kernel, cambios de Security Control Plane ni nuevo subsistema universal para cerrar G1.
+
+---
+
+## 19. Disposición G1
+
+Con el alcance revisado:
+
+```text
+G1 DESIGN REVIEW RESULT: PASS
 blocking design findings: 0
 implementation authorization: false
 persistent Memory authorization: false
@@ -537,8 +732,10 @@ Sprint 7.12 authorization: false
 RDD Stage 2 authorization: false
 ```
 
-La unidad es diseñable sin storage, retrieval, Knowledge, agents ni cambios de autoridad.
+La unidad es diseñable sin storage, retrieval, Knowledge, agents ni expansión de autoridad.
 
-El siguiente gate, si el propietario lo autoriza explícitamente, deberá convertir estas propiedades en una **Implementation Candidate Specification mínima**, todavía separada de la ejecución de cambios productivos.
+El siguiente gate, **únicamente si el propietario lo autoriza explícitamente**, deberá convertir estas propiedades en una **Implementation Candidate Specification mínima** todavía separada de la ejecución de cambios productivos.
+
+Esa especificación deberá resolver, sin sobrearquitectura, el punto concreto de correlación/origen y el contrato mínimo de decisión/evidencia antes de que pueda evaluarse una implementación.
 
 No existe autorización automática para continuar.
