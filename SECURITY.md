@@ -1,8 +1,8 @@
 # Security Policy
 
-**Versión:** 2.0  
-**Estado:** Activo  
-**Clasificación:** Política de seguridad protegida  
+**Versión:** 2.0
+**Estado:** Activo
+**Clasificación:** Política de seguridad protegida
 **Actualizado:** 2026-09-09
 
 ---
