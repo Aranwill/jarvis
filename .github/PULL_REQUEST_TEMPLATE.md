@@ -54,6 +54,12 @@ Describa brevemente el objetivo de este Pull Request.
 
 \- \[ ] Kernel Specification
 
+\- \[ ] `SECURITY.md` cuando el cambio afecta seguridad, autoridad, identidad, contexto, persistencia, red, agents, tools, modelos, datos o integraciones externas.
+
+\- \[ ] Si este PR propone una nueva superficie o próxima implementación, revisé `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md` y las referencias conceptuales aplicables.
+
+\- \[ ] Distinguí explícitamente `security requirement != implemented control` y `research gap != implementation authorization`.
+
 
 
 \---
@@ -70,6 +76,8 @@ Describa brevemente el objetivo de este Pull Request.
 
 \- \[ ] No rompe funcionalidades existentes
 
+\- \[ ] Los cambios de seguridad incluyen casos negativos / fail-closed proporcionales cuando corresponde.
+
 
 
 \---
@@ -85,6 +93,10 @@ Describa brevemente el objetivo de este Pull Request.
 \- \[ ] No requiere cambios en la documentación.
 
 \- \[ ] Revisé impacto sobre documentos `CURRENT_STATE` definidos en `AGENTS.md`.
+
+\- \[ ] Si cambió una política o límite de seguridad, `SECURITY.md` fue reconciliado.
+
+\- \[ ] Si cambió una visión, gap o clasificación conceptual, revisé `MALAK_RESEARCH_HORIZON_MAP.md`, `docs/project/concepts/README.md` y las ideas relacionadas.
 
 \- \[ ] Si este PR cierra o integra un Sprint, `README.md` fue revisado y reconciliado con el baseline resultante, o se justificó explícitamente por qué no requiere cambios.
 
