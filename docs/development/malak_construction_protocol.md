@@ -1,6 +1,6 @@
 # Malāk Construction Protocol
 
-Versión: 0.1.0
+Versión: 0.2.0
 
 Estado: Activo
 
@@ -20,7 +20,8 @@ No reemplaza ni reinterpreta:
 4. especificaciones aprobadas;
 5. ADR aceptados;
 6. contratos públicos;
-7. Architecture Quality Gates.
+7. Architecture Quality Gates;
+8. `SECURITY.md`.
 
 En caso de conflicto prevalece la jerarquía documental oficial del proyecto.
 
@@ -39,7 +40,7 @@ necesidad real
         ↓
 inventario exhaustivo de fuentes
         ↓
-roadmap + ideas + concepts
+security policy + roadmap + ideas + research horizon + concepts
         ↓
 ADOPT / ADAPT / OBSERVE / REJECT
         ↓
@@ -66,7 +67,9 @@ baseline estable
 reconciliación derivada
 ```
 
-La existencia de una idea, concepto, roadmap o receipt no constituye autorización para implementar.
+La existencia de una idea, concepto, research gap, roadmap o receipt no constituye autorización para implementar.
+
+Un requisito de `SECURITY.md` define una restricción o condición de seguridad; no demuestra por sí mismo que la capability o control correspondiente ya esté implementado.
 
 ---
 
@@ -136,17 +139,24 @@ El Vault es una proyección derivada y el Sync Agent un mecanismo determinista d
 
 # 4. Incorporación progresiva de capacidades futuras
 
-## 4.1 Fuentes de incubación
+## 4.1 Fuentes de incubación y restricciones
 
 Antes de diseñar desde cero una nueva capacidad, la revisión debe consultar explícitamente:
 
 ```text
+SECURITY.md
 docs/project/implementation_roadmap.md
 documents/projects/jarvis/ideas.md
+docs/project/concepts/README.md
+docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md
 docs/project/concepts/**
 ```
 
-`ideas.md` y `docs/project/concepts/**` constituyen el principal reservorio de intención y diseño futuro ya explorado, sin adquirir por ello autoridad de implementación.
+`SECURITY.md` aporta requisitos y límites de seguridad protegidos.
+
+`ideas.md`, `MALAK_RESEARCH_HORIZON_MAP.md` y `docs/project/concepts/**` constituyen reservorios de intención, gaps y diseño futuro ya explorado, sin adquirir por ello autoridad de implementación.
+
+En una revisión cuyo objetivo sea seleccionar la próxima implementación, `MALAK_RESEARCH_HORIZON_MAP.md` debe recibir lectura explícita; no basta con asumir que quedó cubierto por el glob `docs/project/concepts/**`.
 
 ## 4.2 Regla de revalidación
 
@@ -155,6 +165,7 @@ Una propuesta preservada solo puede incorporarse cuando una necesidad del baseli
 - Blueprint;
 - Constitución Cognitiva;
 - Gobernanza;
+- `SECURITY.md`;
 - Architecture Quality Gates;
 - ADR vigentes;
 - código real;
@@ -162,6 +173,15 @@ Una propuesta preservada solo puede incorporarse cuando una necesidad del baseli
 - riesgos actuales;
 - dependencias actuales;
 - evidencia operacional disponible.
+
+La revisión debe distinguir:
+
+```text
+security requirement != implemented control
+research gap != roadmap
+concept != baseline
+proposal != authorization
+```
 
 ## 4.3 Clasificación de disposición
 
@@ -185,9 +205,36 @@ La clasificación no equivale a autorización.
 
 ## 4.4 Regla anti-rediseño
 
-No se debe rediseñar desde cero una capacidad futura sin comprobar primero si la intención ya está preservada en `ideas.md` o `docs/project/concepts/**`.
+No se debe rediseñar desde cero una capacidad futura sin comprobar primero si la intención ya está preservada en `ideas.md`, `MALAK_RESEARCH_HORIZON_MAP.md` o `docs/project/concepts/**`.
 
-Tampoco se debe forzar una idea histórica sobre un baseline que ya no la justifica.
+Tampoco se debe forzar una idea histórica o un gap de investigación sobre un baseline que todavía no la justifica.
+
+## 4.5 Security Horizon Check
+
+Antes de proponer una nueva superficie sensible —incluyendo Memory persistente, agentes, tools, red, interoperabilidad, ejecución externa, aprendizaje procedimental o manejo de datos sensibles— la admission review debe comprobar si activa requisitos o gaps ya preservados en `SECURITY.md` y `MALAK_RESEARCH_HORIZON_MAP.md`.
+
+Como mínimo debe evaluar, según aplicabilidad:
+
+- Prompt & Context Trust Boundary;
+- identidad y delegación;
+- compromise containment y trust revocation;
+- Memory / Knowledge admission y poisoning;
+- AI supply-chain trust;
+- data classification / disclosure;
+- Resource Governance;
+- observabilidad, evidencia, recovery y Human in Control.
+
+El resultado puede ser:
+
+```text
+ALREADY_COVERED
+REQUIRES_REINFORCEMENT
+BLOCKING_GAP
+NOT_APPLICABLE
+DEFERRED
+```
+
+Esta clasificación informa la admisión; no crea componentes ni autoriza implementación.
 
 ---
 

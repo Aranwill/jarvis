@@ -64,6 +64,14 @@ Las fuentes principales incluyen:
 - `docs/development/malak_construction_protocol.md`
 - `SECURITY.md`
 
+Para revisiones de próxima implementación, seguridad, capacidades futuras o arquitectura de horizonte, deberá consultarse además de forma explícita:
+
+- `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md`
+- `docs/project/concepts/README.md`
+- las referencias aplicables bajo `docs/project/concepts/**`.
+
+`MALAK_RESEARCH_HORIZON_MAP.md` es una referencia conceptual no normativa. Su lectura obligatoria evita perder gaps y restricciones ya investigados; no aumenta su autoridad ni convierte un gap en roadmap o autorización.
+
 Los documentos derivados pueden resumir evidencia, pero no pueden establecer arquitectura, gobernanza, estado de release ni alcance aprobado de un sprint.
 
 Los snapshots históricos de release describen el estado certificado en su fecha original. No deben reescribirse silenciosamente para coincidir con un HEAD posterior.
@@ -130,6 +138,7 @@ Malāk — source of truth
 ├── Constituciones aplicables
 ├── Blueprint
 ├── Architecture Quality Gates
+├── SECURITY.md                         ← política de seguridad obligatoria
 ├── docs/development/engineering_method.md
 ├── docs/development/malak_construction_protocol.md
 ├── especificaciones y contratos aplicables
@@ -139,6 +148,8 @@ Malāk — source of truth
 ├── ADR aceptados
 ├── Decision Index y decisiones relevantes
 ├── documents/projects/jarvis/ideas.md
+├── docs/project/concepts/README.md
+├── docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md
 ├── docs/project/concepts/**          ← lectura recursiva obligatoria
 ├── código afectado
 └── tests y evidencia aplicables
@@ -213,6 +224,10 @@ preparar un plan de implementación o decidir qué trabajo debe realizarse a
 continuación, la revisión deberá contrastar explícitamente, según aplicabilidad:
 
 ```text
+SECURITY.md
+        ↓
+política activa, límites actuales, riesgo residual y requisitos de seguridad
+
 docs/project/implementation_roadmap.md
         ↓
 planificación derivada vigente
@@ -220,6 +235,10 @@ planificación derivada vigente
 documents/projects/jarvis/ideas.md
         ↓
 ideas, visión e iniciativas todavía no necesariamente promovidas
+
+docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md
+        ↓
+gaps, refuerzos y líneas WATCH ya reconciliadas; referencia no normativa
 
 docs/project/concepts/**
         ↓
@@ -237,12 +256,16 @@ cobertura exhaustiva, incorporación progresiva, gates, métricas y RDD experime
 También deberán revisarse el baseline vigente, la última ficha de sprint
 integrada y las fuentes normativas o técnicas afectadas.
 
+`SECURITY.md` y `MALAK_RESEARCH_HORIZON_MAP.md` no deben omitirse únicamente porque el próximo cambio parezca funcional y no de seguridad: una nueva superficie puede activar una restricción, dependencia o gap previamente invisible desde el roadmap.
+
 La revisión debe distinguir explícitamente:
 
 ```text
 roadmap        != autorización
 idea           != roadmap
 concepto       != baseline
+research gap   != implementación aprobada
+security requirement != capability implementada
 método         != autoridad arquitectónica
 evidencia      != permiso para ampliar alcance
 receipt        != autoridad
@@ -253,9 +276,9 @@ No se debe proponer una implementación basándose únicamente en el roadmap ni
 
 ### Incubación progresiva de capacidades futuras
 
-Antes de diseñar desde cero una nueva capacidad, consulta primero el roadmap, `documents/projects/jarvis/ideas.md` y `docs/project/concepts/**` para determinar si la intención futura ya fue explorada o preservada.
+Antes de diseñar desde cero una nueva capacidad, consulta primero el roadmap, `documents/projects/jarvis/ideas.md`, `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md` y `docs/project/concepts/**` para determinar si la intención futura ya fue explorada o preservada.
 
-La necesidad debe nacer del baseline vigente. Una idea o concepto relacionado se revalida contra arquitectura, gobernanza, código, tests, riesgos y dependencias actuales y se clasifica como:
+La necesidad debe nacer del baseline vigente. Una idea o concepto relacionado se revalida contra arquitectura, gobernanza, `SECURITY.md`, código, tests, riesgos y dependencias actuales y se clasifica como:
 
 ```text
 ADOPT
@@ -347,6 +370,8 @@ obligatorio cuando una revisión trate, entre otros temas:
 - resource governance;
 - self-development;
 - capacidades todavía no promovidas al roadmap.
+
+En toda revisión cuyo objetivo sea **determinar la próxima implementación de Malāk**, `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md` debe recibir lectura explícita además del inventario recursivo. No debe considerarse cubierto únicamente por haber listado el glob `docs/project/concepts/**`.
 
 Los documentos de `docs/project/concepts/**` continúan siendo referencias
 conceptuales no normativas.
@@ -929,7 +954,7 @@ Todos los sprints pendientes se consideran exclusivamente propuestas o recomenda
 1. inspección completa del baseline vigente;
 2. inventario y clasificación exhaustivos de los archivos del alcance de revisión;
 3. lectura del código, pruebas y documentación aplicables;
-4. contraste de roadmap, `ideas.md` y `docs/project/concepts/**`;
+4. contraste de `SECURITY.md`, roadmap, `ideas.md`, `MALAK_RESEARCH_HORIZON_MAP.md` y `docs/project/concepts/**`;
 5. identificación de una necesidad real y comprobada de Malāk;
 6. justificación de su utilidad cognitiva, arquitectónica, operativa o de gobernanza;
 7. definición explícita del alcance y de lo que queda fuera de alcance;
@@ -1011,9 +1036,9 @@ dirija hacia la fuente vigente correspondiente.
 
 #### CONCEPTUAL
 
-Incluye `docs/project/concepts/**` y registros de ideas.
+Incluye `docs/project/concepts/**`, `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md` y registros de ideas.
 
-Describe posibilidades y referencias, no baseline ni autorización.
+Describe posibilidades, gaps, refuerzos y referencias; no baseline, roadmap ni autorización.
 
 ### Review Closure Gate
 
