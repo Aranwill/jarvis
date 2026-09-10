@@ -36,6 +36,16 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   reconstruye inputs efectivos de admisión desde assessments con provenance y
   autorización válidas más control temporal gobernado, con resultados
   `READY | HOLD | DENIED` y sin ejecutar la policy de admisión.
+- PR #92 integró `Episodic Admission Governed Projection Consumption Boundary`,
+  que consume únicamente projections gobernadas consumibles, construye una vista
+  efectiva efímera del candidate y delega exactamente una vez a la policy de
+  admisión, con resultado `EVALUATED | BLOCKED` y sin persistencia ni side effects.
+- PR #93 integró el diseño G0/G1 de `Episodic Candidate Content Identity Boundary`;
+  G2, implementación y propagación de identidad continúan no autorizados.
+- PR #97 preservó `Malāk Evidence-Bound Cognition Foundation` como referencia
+  conceptual no normativa; PR #98 y PR #99 integraron respectivamente G0 de
+  investigación/costos y G1 de diseño de Progressive Cognitive Assurance, sin
+  implementación runtime ni cambio constitucional.
 
 ### Changed
 
@@ -46,9 +56,12 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   template de Pull Request fueron reforzados para exigir revisión explícita de
   `SECURITY.md` y `MALAK_RESEARCH_HORIZON_MAP.md` durante admisiones y análisis
   de próxima implementación cuando corresponda.
-- La documentación derivada de proyecto se reconcilia al estado post-PR #88
-  para distinguir la policy aislada de admisión de las fronteras posteriores de
-  provenance, autorización del productor y proyección gobernada de inputs.
+- PR #96 reforzó `AGENTS.md` para exigir modificaciones acotadas, deterministas,
+  observables y proporcionales al objetivo autorizado; refactors, limpiezas,
+  simplificaciones o mejoras laterales requieren scope/gate separado.
+- La documentación derivada de proyecto se reconcilia al estado post-PR #99 sin
+  reestructuración editorial, preservando la distinción entre estado productivo,
+  diseño no implementado y autoridad no concedida.
 
 ### Security
 
@@ -75,24 +88,36 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - El candidate de PR #88 `87a7e31e0735edd25a80a693cf3f437f7a1501fc`
   pasó `Validation` candidate-bound en `ubuntu-latest`, `windows-latest` y
   `macos-latest`, incluyendo identidad exacta, suite, `compileall` y diff-check.
+- El candidate de PR #92 `5139d95aaa2c30971b3979ca7c3917067856a428`
+  pasó `Validation` candidate-bound en Ubuntu, Windows y macOS; Ubuntu reportó
+  `645 passed`, `compileall: PASS` y `git diff --check: PASS`.
+- La validación local post-G3 reportada por el Owner sobre el HEAD integrado de
+  PR #92 concluyó con `645 passed`, forced `compileall` PASS, diff-check PASS y
+  árbol de trabajo limpio.
 
 ### Notes
 
 - Sprint 7.11 permanece como el último sprint numerado integrado.
 - La unidad de código de producto integrada más reciente es
-  `Episodic Admission Governed Input Projection Boundary` (PR #88), precedida
-  por `Episodic Memory Admission Boundary`, Assessment Provenance y Assessment
-  Producer Authorization; toda la cadena permanece aislada y sin wiring
-  runtime, persistencia o retrieval.
-- `Projection READY != Admission ELIGIBLE != Stored != Authority`.
+  `Episodic Admission Governed Projection Consumption Boundary` (PR #92),
+  precedida por Governed Input Projection, Assessment Producer Authorization,
+  Assessment Provenance y Episodic Memory Admission; toda la cadena permanece
+  aislada de Conversation/runtime y sin persistencia o retrieval.
+- `Projection READY != Admission ELIGIBLE != Stored != Authority` y
+  `Consumption EVALUATED != persistence authorization != Authority`.
+- `candidate_id` binding no equivale a identidad criptográfica del contenido;
+  Candidate Content Identity permanece únicamente en G0/G1 y su G2 no está
+  autorizado.
+- Progressive Cognitive Assurance permanece en G0/G1 de diseño documental;
+  no existe todavía una frontera runtime de response assurance ni cambio
+  constitucional asociado.
 - Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
-- No existe actualmente una unidad posterior a la proyección gobernada autorizada.
 - RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
   únicamente por esta sección.
-- Esta reconciliación documental no autoriza Sprint 7.12, Memory persistente,
-  admission wiring, agentes, tools, Sandbox, navegación, MCP/A2A ni ampliación
-  de autoridad.
+- Esta reconciliación documental no autoriza Sprint 7.12, Candidate Content
+  Identity G2, Persistence Authorization, Memory persistente, runtime wiring,
+  agentes, tools, Sandbox, navegación, MCP/A2A ni ampliación de autoridad.
 
 ---
 
