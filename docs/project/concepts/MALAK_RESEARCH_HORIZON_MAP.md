@@ -6,7 +6,7 @@ document_role: research_horizon_reconciliation
 language: es
 created: 2026-09-09
 as_of_branch: main
-as_of_commit: c3080c6feda5771985aa4a10822c3eb034abd7e3
+as_of_commit: 2e8c5d7318678caeb67c8906c951935832760003
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md
@@ -105,7 +105,7 @@ arquitectónicamente limpio.
 | Deception / Honeypots / Adversarial Evaluation | `ALIGNED` | IDEA-019 / IDEA-010 | Honeypots, honeytokens, Adversarial Twin, red/purple team y aislamiento ya están representados. |
 | Incident Forensics / Attack Path | `ALIGNED` | ampliación IDEA-019 | Ya se contemplan timeline, IP observada, attack path, evidence package, recovery y security regression learning. |
 | Prompt & Context Trust Boundary | `REINFORCE_EXISTING` | IDEA-006 / IDEA-013 / IDEA-016 | Existe protección de prompt injection para evidencia externa, pero debe generalizarse a todo contenido no confiable. |
-| Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | G3 Episodic Memory Admission + futura Memory + IDEA-013 / IDEA-016 | G3 materializa la primera frontera aislada de admisión episódica; permanecen pendientes la procedencia de assessments y la propagación de trust, taint, revocation y quarantine hacia persistencia, retrieval y Knowledge. |
+| Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | Episodic Admission + Provenance + Producer Authorization + Governed Projection + futura Memory + IDEA-013 / IDEA-016 | El baseline ya valida provenance estructural, autorización scoped del productor y proyección gobernada de inputs; permanecen pendientes el consumo gobernado `Projection → Admission` y la propagación de trust, taint, revocation y quarantine hacia persistencia, retrieval y Knowledge. |
 | AI Supply-Chain Trust | `GAP_CANDIDATE` | IDEA-004 / IDEA-009 / IDEA-011 / IDEA-016 | Existen hashes, model governance y SLSA como referencia, pero falta una política conceptual unificada de admisión de artefactos AI. |
 | Agent Identity & Delegation | `GAP_CANDIDATE` | IDEA-005 / IDEA-024 / Security Control Plane | Identidad, TTL, scopes y no autoelevación existen; falta cadena de delegación verificable y revocación derivada. |
 | Compromise Containment & Trust Revocation | `GAP_CANDIDATE` | IDEA-019 / IDEA-001 / Security Control Plane | Existe cuarentena local; falta explicitar respuesta sistémica y propagación de desconfianza. |
@@ -293,22 +293,55 @@ No crear todavía un `PromptInjectionManager` ni un motor universal de trust.
 
 ## 6. REINFORCE EXISTING — Memory & Knowledge Trust / Poisoning
 
-G3 — `Episodic Memory Admission Boundary` materializó la primera frontera
-aislada de admisión episódica bajo `src/malak/memory/`.
+La fundación episódica aislada de Memory ya no se limita al G3 original de
+`Episodic Memory Admission Boundary`.
 
-El baseline dispone ahora de contratos inmutables, separación entre payload y
-metadata de control y una policy determinista `REJECT | HOLD | ELIGIBLE`.
+El baseline dispone ahora de fronteras separadas para:
 
-G3 no incorporó persistencia, retrieval, Knowledge, wiring con Conversation,
-cambios al Kernel ni ampliación de autoridad.
+```text
+EpisodicMemoryCandidate
+        ↓
+AdmissionAssessment
+        ↓
+Assessment Provenance
+VALID | HOLD | INVALID
+        ↓
+Assessment Producer Authorization
+AUTHORIZED | HOLD | DENIED
+        ↓
+Governed Input Projection
+READY | HOLD | DENIED
+```
 
-Por lo tanto, esta línea deja de representar un gap completamente no
-materializado y pasa a `REINFORCE_EXISTING`.
+Y, como policy separada todavía no cableada a esa proyección:
 
-La siguiente preocupación conceptual no consiste en volver a crear una frontera
-de admisión, sino en demostrar de dónde provienen sus assessments y extender de
-forma gobernada las propiedades de trust hacia futuras etapas de persistencia,
-retrieval y promoción.
+```text
+Episodic Admission
+REJECT | HOLD | ELIGIBLE
+```
+
+La evolución integrada mediante PR #82, PR #85 y PR #88 elimina como gap pendiente
+la provenance estructural de assessments y la autorización scoped de sus
+productores. La proyección gobernada también bloquea fallback trust-sensitive
+desde `candidate.control`, exige cardinalidad exacta y gobierna temporal validity
+mediante evidencia dedicada autorizada.
+
+Se preserva deliberadamente:
+
+```text
+Projection READY != Admission ELIGIBLE
+Projection HOLD != Admission HOLD automatically
+Projection DENIED != Candidate REJECT automatically
+ELIGIBLE != persistence authorization
+```
+
+Por lo tanto, la siguiente preocupación conceptual ya no consiste en demostrar
+de dónde provienen los assessments. El gap inmediato es decidir, mediante una
+frontera posterior y autorización separada, cómo una proyección `READY` puede ser
+consumida por la policy existente de Admission sin reabrir vías laterales de
+trust. Después de eso, el trabajo restante es propagar de forma gobernada trust,
+taint, revocation y quarantine hacia persistencia, retrieval y promoción a
+Knowledge.
 
 La futura Memory no deberá reducirse a almacenamiento y similarity search.
 
@@ -317,25 +350,41 @@ La frontera completa objetivo continúa siendo:
 ```text
 Memory Candidate
       ↓
-Provenance
+Assessment production
       ↓
-Type / Domain / Scope
+Assessment provenance
       ↓
-Trust classification
+Producer authorization
       ↓
-Temporal validity
+Governed temporal control
       ↓
-Conflict / contamination checks
+Governed input projection
       ↓
-Admission decision
+Admission evaluation
       ↓
-Retrieval eligibility
+Persistence authorization
+      ↓
+Stored Memory
+      ↓
+Trust-aware retrieval eligibility
+      ↓
+Knowledge candidate when applicable
 ```
 
-G3 materializa actualmente la frontera episódica hasta `Admission decision`.
-La policy consume assessments y señales de control explícitas, pero no define
-todavía el productor autorizado de todas esas señales ni persiste o recupera el
-candidato.
+Estado materializado a `2e8c5d7318678caeb67c8906c951935832760003`:
+
+```text
+candidate contracts                       implemented
+admission policy                          implemented
+assessment provenance                     implemented
+assessment producer authorization         implemented
+governed input projection                 implemented
+projection -> admission consumption       NOT YET
+persistence authorization                 NOT YET
+persistent Memory                         NOT YET
+retrieval                                 NOT YET
+Knowledge promotion                       NOT YET
+```
 
 Separación obligatoria:
 
@@ -347,9 +396,8 @@ Procedure    → Procedural Memory candidate
 Evidence     → Knowledge candidate
 ```
 
-Propiedades candidatas:
+Propiedades candidatas que permanecen relevantes downstream:
 
-- provenance obligatorio cuando exista;
 - source authority y confidence separados;
 - scope y dominio explícitos;
 - temporal validity / freshness;
@@ -774,6 +822,8 @@ External Content != Instructions
 Tool Output != Authority
 Protocol Identity != Internal Authority
 Artifact Trust != Execution Authorization
+Projection READY != Admission ELIGIBLE
+ELIGIBLE != Stored
 Compromise → Less Authority
 Compromise → More Isolation
 Compromise → More Observation
@@ -818,7 +868,7 @@ Cuando el baseline produzca necesidad real, el orden lógico de evaluación ser�
 ```text
 1. Prompt / Context Trust Boundary
 2. Compromise Containment & Trust Revocation
-3. Memory / Knowledge Trust Propagation & Poisoning Defense after G3
+3. Memory / Knowledge Trust Propagation & Poisoning Defense after governed projection
 4. AI Supply-Chain Trust
 5. Data Classification / Disclosure
 6. Agent Identity & Delegation
@@ -852,9 +902,9 @@ IDEA-024.
 Los gaps y refuerzos que merecen permanecer visibles son principalmente:
 
 1. `Compromise Containment & Trust Revocation` sistémico;
-2. `Memory & Knowledge Trust / Poisoning` más allá de G3, especialmente
-   provenance de assessments, propagación de taint/revocation/quarantine y
-   retrieval eligibility;
+2. `Memory & Knowledge Trust / Poisoning` más allá de la proyección gobernada,
+   especialmente el consumo `Projection → Admission`, la propagación de
+   taint/revocation/quarantine y retrieval eligibility;
 3. `AI Supply-Chain Trust` para artefactos AI y externos;
 4. `Agent Identity & Delegation` verificable y revocable;
 5. `Data Classification & Disclosure Control` transversal;
