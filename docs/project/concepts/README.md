@@ -46,6 +46,28 @@ Estado:
 
 `concept / non_normative / working_reference`
 
+### Malāk Evidence-Bound Cognition Foundation
+
+Archivo:
+
+`MALAK_EVIDENCE_BOUND_COGNITION_FOUNDATION.md`
+
+Preserva la dirección conceptual para que outputs probabilísticos, evidencia
+recuperada y conocimiento heterogéneo se transformen en respuestas finales
+validadas, justificables, rankeadas y cada vez más deterministas.
+
+Principio central:
+
+> Generation != Acceptance != Final Response.
+
+Define leyes cognitivas candidatas, la relación conceptual con RDD y el camino
+de promoción ADR → Blueprint → Cognitive Constitution → enforcement, sin
+modificar todavía ninguna fuente normativa ni autorizar implementación.
+
+Estado:
+
+`concept / non_normative / conceptual_reference`
+
 ### Governed Swarm and Long-Horizon Reference
 
 Archivo:
