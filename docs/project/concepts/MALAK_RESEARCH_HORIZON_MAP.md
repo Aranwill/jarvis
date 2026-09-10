@@ -5,8 +5,9 @@ authority: non_normative
 document_role: research_horizon_reconciliation
 language: es
 created: 2026-09-09
+updated: 2026-09-10
 as_of_branch: main
-as_of_commit: 2e8c5d7318678caeb67c8906c951935832760003
+as_of_commit: 3788caf68ac14da37040f06a0da3e0fe9db5a2db
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md
@@ -15,45 +16,34 @@ related:
   - SECURITY.md
 purpose: >
   Preservar la reconciliación entre la visión futura de Malāk, la investigación
-  externa reciente y los conceptos ya existentes, identificando únicamente los
-  refuerzos y gaps reales sin crear una segunda fuente de autoridad ni autorizar
-  implementación.
+  y el baseline material, identificando refuerzos y gaps sin crear autoridad ni
+  autorizar implementación.
 ---
 
 # Malāk Research Horizon Map
 
 ## 1. Propósito
 
-Este documento preserva la reconciliación realizada sobre la dirección futura de
-Malāk después de revisar los conceptos existentes, el registro de ideas y la
-investigación reciente sobre sistemas agentic, memoria, seguridad, identidad,
-interoperabilidad, ejecución durable y resiliencia.
+Este documento responde:
 
-Su función es responder:
+> ¿Qué parte de la visión futura ya está representada, qué debe reforzarse y qué
+> sigue siendo un gap real después del baseline actual?
 
-> ¿Qué parte de la visión futura ya está representada en Malāk, qué debe
-> reforzarse y qué constituye todavía un gap conceptual real?
+No modifica Blueprint, Constituciones, Kernel, `SECURITY.md`, ADR ni contratos.
+No autoriza sprints, agentes, Memory persistente, tools, MCP/A2A, Sandbox,
+Internet, PKI, firmas ni cambios de autoridad.
 
-Este documento:
-
-- no modifica el baseline;
-- no modifica Blueprint, Constitución Cognitiva ni Gobernanza;
-- no autoriza un sprint;
-- no autoriza agentes, Memory persistente, tools, MCP, A2A, Sandbox ni acceso externo;
-- no crea nuevos componentes, managers, registries o servicios;
-- no convierte investigación externa en autoridad;
-- no aprueba arquitectura detallada;
-- no sustituye `ideas.md`;
-- no sustituye las referencias de Long Horizon o ejecución agentic efímera.
-
-Toda promoción futura deberá volver a verificarse contra el baseline vigente y
-pasar por `Necessity & Complexity Review`.
+```text
+Research != architecture approval
+Concept != implementation authorization
+Evidence != authority
+```
 
 ---
 
 ## 2. Método de reconciliación
 
-Cada línea de investigación se clasifica mediante uno de estos estados:
+Estados utilizados:
 
 ```text
 ALIGNED
@@ -64,239 +54,151 @@ IRRELEVANT
 CONFLICTS_WITH_VISION
 ```
 
-Significado:
-
-- `ALIGNED`: ya existe representación conceptual suficiente;
-- `REINFORCE_EXISTING`: existe dueño conceptual, pero una propiedad debe quedar más explícita;
-- `GAP_CANDIDATE`: falta una propiedad importante o su dueño todavía no está suficientemente definido;
-- `WATCH`: relevante para el futuro, sin necesidad actual demostrada;
-- `IRRELEVANT`: no aporta a la dirección de Malāk;
-- `CONFLICTS_WITH_VISION`: contradice soberanía, Human in Control o límites constitucionales.
-
 Regla:
 
 ```text
-Research
-   ↓
-DIFF contra Malāk existente
-   ↓
-¿ya existe?
- ┌───────┴────────┐
- sí              no
- ↓                ↓
-reforzar      ¿gap real?
-                  ↓
-            propuesta candidata
+research / idea
+        ↓
+diff contra baseline actual
+        ↓
+¿ya existe dueño conceptual/material?
+   ┌────┴────┐
+  sí        no
+   ↓         ↓
+reforzar   gap candidato
+              ↓
+        necessity review futuro
 ```
 
-Solo un `GAP_CANDIDATE` demostrado puede originar posteriormente una nueva idea,
-y aun así deberá preferirse ampliar una responsabilidad existente cuando sea
-arquitectónicamente limpio.
+Se debe preferir ampliar una responsabilidad existente cuando sea limpio antes
+que crear managers, registries o subsistemas nuevos.
 
 ---
 
-## 3. Resultado ejecutivo
+## 3. Resultado ejecutivo post-PR #93
 
-| Línea | Estado | Dueño conceptual principal | Resultado |
+| Línea | Estado | Dueño conceptual principal | Estado actual |
 |---|---|---|---|
-| Durable Cognitive Execution | `ALIGNED` | Long Horizon / IDEA-023 / IDEA-024 | Ya existen Task State, checkpoints, recovery, idempotencia y continuidad fuera del LLM. |
-| Governed Self-Improvement | `ALIGNED` | IDEA-002 / Long Horizon | Malāk observa, investiga, experimenta y propone; no se autoaprueba ni modifica el baseline por autoridad propia. |
-| Resource Governance | `ALIGNED` | IDEA-003 | Presupuestos y límites de recursos ya están contemplados. |
-| Deception / Honeypots / Adversarial Evaluation | `ALIGNED` | IDEA-019 / IDEA-010 | Honeypots, honeytokens, Adversarial Twin, red/purple team y aislamiento ya están representados. |
-| Incident Forensics / Attack Path | `ALIGNED` | ampliación IDEA-019 | Ya se contemplan timeline, IP observada, attack path, evidence package, recovery y security regression learning. |
-| Prompt & Context Trust Boundary | `REINFORCE_EXISTING` | IDEA-006 / IDEA-013 / IDEA-016 | Existe protección de prompt injection para evidencia externa, pero debe generalizarse a todo contenido no confiable. |
-| Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | Episodic Admission + Provenance + Producer Authorization + Governed Projection + futura Memory + IDEA-013 / IDEA-016 | El baseline ya valida provenance estructural, autorización scoped del productor y proyección gobernada de inputs; permanecen pendientes el consumo gobernado `Projection → Admission` y la propagación de trust, taint, revocation y quarantine hacia persistencia, retrieval y Knowledge. |
-| AI Supply-Chain Trust | `GAP_CANDIDATE` | IDEA-004 / IDEA-009 / IDEA-011 / IDEA-016 | Existen hashes, model governance y SLSA como referencia, pero falta una política conceptual unificada de admisión de artefactos AI. |
-| Agent Identity & Delegation | `GAP_CANDIDATE` | IDEA-005 / IDEA-024 / Security Control Plane | Identidad, TTL, scopes y no autoelevación existen; falta cadena de delegación verificable y revocación derivada. |
-| Compromise Containment & Trust Revocation | `GAP_CANDIDATE` | IDEA-019 / IDEA-001 / Security Control Plane | Existe cuarentena local; falta explicitar respuesta sistémica y propagación de desconfianza. |
-| Data Classification & Disclosure Control | `GAP_CANDIDATE` | Context / Knowledge / Security | Least Context y minimización existen, pero no una clasificación transversal suficientemente explícita. |
-| Governed Interoperability (MCP/A2A) | `WATCH` | adapters futuros / contratos internos | Preservar `protocol-ready, not protocol-dependent`; ningún protocolo externo será autoridad interna. |
-| Governed Procedural Learning | `REINFORCE_EXISTING` | IDEA-002 / Skills-on-Demand / Knowledge Governance | La promoción de procedimientos aprendidos debe permanecer gobernada y no autoejecutable. |
-| Multimodal Perception Boundary | `WATCH` | futura Interface/Perception boundary | Visión, audio y otras percepciones son relevantes a largo plazo, sin necesidad actual de nuevo subsistema. |
-| World models | `WATCH` | futura investigación de percepción/entorno | No existe necesidad actual; reevaluar solo si tareas reales demuestran valor. |
-| Autonomous self-modification | `CONFLICTS_WITH_VISION` | — | La automodificación productiva autónoma permanece prohibida; la mejora debe seguir siendo gobernada y basada en propuestas. |
+| Durable Cognitive Execution | `ALIGNED` | Long Horizon / IDEA-023 / IDEA-024 | Task State, checkpoints, recovery e idempotencia ya están contemplados conceptualmente. |
+| Governed Self-Improvement | `ALIGNED` | IDEA-002 / Long Horizon | Malāk puede observar, investigar y proponer; no puede autoaprobar cambios de producción. |
+| Resource Governance | `ALIGNED` | IDEA-003 | Presupuestos y límites están contemplados para futuras capacidades costosas. |
+| Deception / Honeypots / Adversarial Evaluation | `ALIGNED` | IDEA-019 / IDEA-010 | Deception, honeytokens, red/purple team e aislamiento ya tienen dueño conceptual. |
+| Incident Forensics / Attack Path | `ALIGNED` | IDEA-019 | Timeline, attack path, evidence package, recovery y regression learning ya están contemplados. |
+| Prompt & Context Trust Boundary | `REINFORCE_EXISTING` | IDEA-006 / IDEA-013 / IDEA-016 / Security | Debe generalizarse a toda entrada no confiable, incluyendo Memory recuperada y tool output. |
+| Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | Memory chain + IDEA-013 / IDEA-016 | Provenance, producer authorization, governed projection y Projection→Admission consumption ya están materializados. El gap inmediato es content identity/binding antes de Persistence Authorization. |
+| Candidate Content Identity | `GAP_CANDIDATE` parcialmente madurado | Memory | G0/G1 integrado por PR #93; G2 e implementación no autorizados. |
+| AI Supply-Chain Trust | `GAP_CANDIDATE` | IDEA-004 / IDEA-009 / IDEA-011 / IDEA-016 | Falta una política unificada de admisión para artefactos AI. |
+| Agent Identity & Delegation | `GAP_CANDIDATE` | IDEA-005 / IDEA-024 / Security | Falta cadena verificable de delegación y revocación derivada. |
+| Compromise Containment & Trust Revocation | `GAP_CANDIDATE` | IDEA-019 / IDEA-001 / Security | Falta propagación sistémica de desconfianza hacia estado relacionado. |
+| Data Classification & Disclosure Control | `GAP_CANDIDATE` | Context / Memory / Knowledge / Security | Least Context existe; falta clasificación transversal suficientemente explícita. |
+| Governed Interoperability | `WATCH` | adapters futuros | Preservar `protocol-ready, not protocol-dependent`. |
+| Governed Procedural Learning | `REINFORCE_EXISTING` | IDEA-002 / Skills-on-Demand / Knowledge | Aprendizaje procedimental debe promoverse mediante governance, no autoejecutarse. |
+| Multimodal Perception | `WATCH` | futura Perception boundary | Relevante a largo plazo, sin necesidad material actual. |
+| World Models | `WATCH` | futura investigación | No existe necesidad demostrada actualmente. |
+| Autonomous self-modification | `CONFLICTS_WITH_VISION` | — | La automodificación productiva autónoma permanece prohibida. |
 
 ---
 
-## 4. Lo ya cubierto y que no debe duplicarse
+## 4. Governed Self-Improvement
 
-### 4.1. Durable Cognitive Execution
-
-Long Horizon ya preserva:
-
-```text
-Task
- ↓
-Checkpoint
- ↓
-Action
- ↓
-Evidence / Receipt candidate
- ↓
-Checkpoint
- ↓
-Pause / Interrupt
- ↓
-Recover
- ↓
-Validate
- ↓
-Resume
-```
-
-También contempla Persistent Task State, side effects, idempotencia y recuperación.
-No debe crearse una nueva iniciativa de Durable Execution mientras esos conceptos
-sean suficientes.
-
-### 4.2. Governed Self-Improvement
-
-IDEA-002 y Long Horizon ya preservan la distinción:
-
-> La autoobservación produce conocimiento; el conocimiento produce propuestas;
-> solo la gobernanza produce cambios.
-
-Flujo futuro permitido:
+La dirección permitida continúa siendo:
 
 ```text
 observe
-  ↓
-validate gap
-  ↓
-research
-  ↓
-experiment in sandbox
-  ↓
-collect evidence
-  ↓
-proposal
-  ↓
-Owner / applicable governance
+→ identify gap
+→ research
+→ experiment in authorized isolation
+→ collect evidence
+→ proposal
+→ human/applicable governance
+→ implementation only if authorized
 ```
 
-Queda prohibido transformar este ciclo en:
+Nunca:
 
 ```text
-observe → decide own authority → modify production
+observe
+→ decide own authority
+→ modify production autonomously
 ```
 
-Malāk podrá impulsar una mejora mediante investigación, comparación, prototipos,
-tests, evidencia e Implementation Packets candidatos, pero no aprobarla, mergearla
-o desplegarla por autoridad propia.
+La autoobservación produce información; la gobernanza produce autoridad de
+cambio.
 
-### 4.3. Adversarial Security, Deception y Forensics
+---
 
-IDEA-019 ya contempla:
+## 5. Defensa, deception y forensics
 
-- detección y contención;
-- aislamiento y bloqueo;
-- revocación de credenciales y cierre de sesiones;
-- kill switches;
-- honeypots, honeynets y honeytokens;
-- Adversarial Twin;
-- observación externa;
-- roles de contingencia;
-- niveles de contingencia;
-- forensics;
-- IP y otros indicadores técnicos;
-- reconstrucción del camino del ataque;
-- security regression learning;
-- red team / purple team autorizado.
-
-La dirección defensiva objetivo permanece:
+La postura defensiva conceptual permanece:
 
 ```text
 DETECT
-  ↓
-DENY / REVOKE
-  ↓
-CONTAIN
-  ↓
-ISOLATE
-  ↓
-DECEIVE
-  ↓
-OBSERVE
-  ↓
-PRESERVE EVIDENCE
-  ↓
-ANALYZE
-  ↓
-RECOVER
-  ↓
-LEARN
-  ↓
-PROPOSE HARDENING
+→ DENY / REVOKE
+→ CONTAIN
+→ ISOLATE
+→ DECEIVE
+→ OBSERVE
+→ PRESERVE EVIDENCE
+→ ANALYZE
+→ RECOVER
+→ LEARN
+→ PROPOSE HARDENING
 ```
 
-La evidencia de una IP, ASN, dominio, fingerprint o indicador no constituye por
-sí sola atribución de identidad.
+Futuras capacidades podrán, dentro de infraestructura propia o expresamente
+autorizada y bajo los gates correspondientes:
 
-La respuesta ordinaria queda limitada a infraestructura propia o expresamente
-autorizada. Un ataque recibido no concede autoridad de `hack back`.
+- detectar y bloquear;
+- aislar componentes o sesiones;
+- revocar credenciales y autoridad;
+- activar kill switches;
+- desplegar honeypots, honeynets, honeytokens y canary resources;
+- observar comportamiento adversarial en entornos contenidos;
+- reconstruir attack paths;
+- preservar evidencia forense;
+- generar security regression candidates;
+- proponer hardening.
+
+Una IP, ASN, dominio, fingerprint o hash es evidencia técnica, no atribución de
+identidad por sí sola.
+
+```text
+attack received != authority to hack back
+```
+
+Malāk no obtiene autoridad ofensiva automática por haber sido atacada.
 
 ---
 
-## 5. Refuerzo transversal — Prompt & Context Trust Boundary
+## 6. Prompt & Context Trust Boundary
 
-La regla histórica de Malāk:
-
-```text
-External information = DATA
-External information != INSTRUCTIONS
-```
-
-debe evolucionar conceptualmente hacia una frontera sistémica más general:
+Regla transversal:
 
 ```text
 USER INTENT
-!=
-EXTERNAL CONTENT
-!=
-TOOL OUTPUT
-!=
-RETRIEVED MEMORY
-!=
-KNOWLEDGE CANDIDATE
-!=
-AUTHORITY
+!= EXTERNAL CONTENT
+!= TOOL OUTPUT
+!= RETRIEVED MEMORY
+!= KNOWLEDGE CANDIDATE
+!= AUTHORITY
 ```
 
-Propiedades a preservar:
+Debe preservarse que:
 
-- contenido web, archivos, emails, documentos, tool output, MCP/A2A payloads,
-  resultados de retrieval y Memory recuperada se consideran datos con trust
-  explícito, no instrucciones privilegiadas;
-- ningún texto procesado puede conceder permisos, modificar policies, ampliar
-  scope o saltar PDP/PEP;
-- una tool description, skill, prompt template o recurso externo no podrá
-  convertirse por contenido en fuente de autoridad;
-- las instrucciones efectivas deberán provenir de canales, contratos y contextos
-  cuya autoridad pueda demostrarse fuera del LLM;
-- indirect prompt injection deberá evaluarse como amenaza de sistema y no solo
-  como problema de prompting.
+- contenido web, archivos, emails y documentos sean DATA;
+- tool output, MCP/A2A payloads y retrieved Memory sean DATA;
+- ningún texto conceda permisos, modifique policies o amplíe scope;
+- instrucciones efectivas para operaciones protegidas deriven de contratos,
+  contexto e identidad verificables fuera del LLM;
+- indirect prompt injection sea una amenaza sistémica, no solo de prompting.
 
-Dueños conceptuales candidatos:
-
-```text
-IDEA-006 Evidence Acquisition
-+
-IDEA-013 Context Efficiency
-+
-IDEA-016 Source Governance
-+
-Security Control Plane
-```
-
-No crear todavía un `PromptInjectionManager` ni un motor universal de trust.
+No se justifica todavía un `PromptInjectionManager` universal.
 
 ---
 
-## 6. REINFORCE EXISTING — Memory & Knowledge Trust / Poisoning
+## 7. Memory & Knowledge Trust — estado actual
 
-La fundación episódica aislada de Memory ya no se limita al G3 original de
-`Episodic Memory Admission Boundary`.
-
-El baseline dispone ahora de fronteras separadas para:
+La cadena episódica materializada es ahora:
 
 ```text
 EpisodicMemoryCandidate
@@ -311,41 +213,89 @@ AUTHORIZED | HOLD | DENIED
         ↓
 Governed Input Projection
 READY | HOLD | DENIED
-```
-
-Y, como policy separada todavía no cableada a esa proyección:
-
-```text
+        ↓
+Governed Projection Consumption
+BLOCKED | EVALUATED
+        ↓
 Episodic Admission
 REJECT | HOLD | ELIGIBLE
+        ↓
+STOP
 ```
 
-La evolución integrada mediante PR #82, PR #85 y PR #88 elimina como gap pendiente
-la provenance estructural de assessments y la autorización scoped de sus
-productores. La proyección gobernada también bloquea fallback trust-sensitive
-desde `candidate.control`, exige cardinalidad exacta y gobierna temporal validity
-mediante evidencia dedicada autorizada.
+Por tanto ya no es gap:
 
-Se preserva deliberadamente:
+- provenance estructural del assessment;
+- autorización scoped del productor;
+- reconstrucción gobernada de inputs;
+- consumo `Projection → Admission` sin fallback trust-sensitive desde
+  `candidate.control`.
+
+Permanece:
 
 ```text
 Projection READY != Admission ELIGIBLE
-Projection HOLD != Admission HOLD automatically
-Projection DENIED != Candidate REJECT automatically
-ELIGIBLE != persistence authorization
+Admission ELIGIBLE != Persistence Authorization
+ELIGIBLE != Stored
+Stored != trusted-for-retrieval
+Memory != Knowledge
 ```
 
-Por lo tanto, la siguiente preocupación conceptual ya no consiste en demostrar
-de dónde provienen los assessments. El gap inmediato es decidir, mediante una
-frontera posterior y autorización separada, cómo una proyección `READY` puede ser
-consumida por la policy existente de Admission sin reabrir vías laterales de
-trust. Después de eso, el trabajo restante es propagar de forma gobernada trust,
-taint, revocation y quarantine hacia persistencia, retrieval y promoción a
-Knowledge.
+---
 
-La futura Memory no deberá reducirse a almacenamiento y similarity search.
+## 8. Candidate Content Identity — nuevo hardening inmediato
 
-La frontera completa objetivo continúa siendo:
+PR #93 maduró el residual:
+
+```text
+candidate_id binding
+!=
+candidate content identity
+```
+
+Dos instancias pueden compartir `candidate_id` y contener datos distintos. La
+inmutabilidad de una dataclass no convierte al objeto en content-addressed.
+
+Dirección conceptual seleccionada:
+
+```text
+EpisodicMemoryCandidate
+        ↓
+canonical candidate representation v1
+        ↓
+deterministic digest
+        ↓
+EpisodicCandidateContentIdentity
+```
+
+La frontera debe permanecer:
+
+- pura;
+- determinista;
+- versionada;
+- reproducible entre plataformas;
+- independiente de `repr()`/`pickle`;
+- separada de autenticidad, trust y autorización.
+
+SHA-256 mediante stdlib es candidato actual, no una autorización de
+implementación.
+
+G2 todavía debe decidir exactamente:
+
+- qué campos entran en la representación;
+- si se identifica candidate completo o se separan payload/envelope identities;
+- formato canónico;
+- timestamps;
+- domain separation;
+- encoding;
+- digest format;
+- test vectors.
+
+---
+
+## 9. Frontera objetivo completa de Memory
+
+La dirección de maduración continúa siendo:
 
 ```text
 Memory Candidate
@@ -362,74 +312,97 @@ Governed input projection
       ↓
 Admission evaluation
       ↓
+Candidate content identity / strong binding
+      ↓
 Persistence authorization
       ↓
 Stored Memory
       ↓
 Trust-aware retrieval eligibility
       ↓
+Retrieval
+      ↓
 Knowledge candidate when applicable
+      ↓
+Governed Knowledge promotion
 ```
 
-Estado materializado a `2e8c5d7318678caeb67c8906c951935832760003`:
+Estado material actual:
 
 ```text
-candidate contracts                       implemented
-admission policy                          implemented
-assessment provenance                     implemented
-assessment producer authorization         implemented
-governed input projection                 implemented
-projection -> admission consumption       NOT YET
-persistence authorization                 NOT YET
-persistent Memory                         NOT YET
-retrieval                                 NOT YET
-Knowledge promotion                       NOT YET
+candidate contracts                     IMPLEMENTED
+admission policy                        IMPLEMENTED
+assessment provenance                   IMPLEMENTED
+assessment producer authorization       IMPLEMENTED
+governed input projection               IMPLEMENTED
+projection -> admission consumption     IMPLEMENTED
+candidate content identity              G0/G1 ONLY
+content identity propagation            NOT YET
+persistence authorization               NOT YET
+persistent Memory                       NOT YET
+retrieval                               NOT YET
+Knowledge promotion                     NOT YET
 ```
-
-Separación obligatoria:
-
-```text
-Conversation → Ephemeral Context
-Experience   → Episodic Memory candidate
-Stable fact  → Semantic Memory candidate
-Procedure    → Procedural Memory candidate
-Evidence     → Knowledge candidate
-```
-
-Propiedades candidatas que permanecen relevantes downstream:
-
-- source authority y confidence separados;
-- scope y dominio explícitos;
-- temporal validity / freshness;
-- detección de contradicción;
-- capacidad de marcar entradas como `SUSPECT`, `TAINTED`, `SUPERSEDED` o
-  equivalentes antes de reutilizarlas;
-- revocación o quarantine de memoria derivada de una fuente comprometida;
-- no promover automáticamente resultados de incidentes, agentes o herramientas
-  a conocimiento canónico;
-- retrieval condicionado por trust, aplicabilidad y autoridad, no únicamente por similitud.
-
-Principio:
-
-> Memory search is a trust boundary.
-
-El trabajo pendiente deberá reforzar futura Memory, IDEA-013 e IDEA-016 antes de
-justificar una iniciativa independiente.
 
 ---
 
-## 7. GAP CANDIDATE — AI Supply-Chain Trust
+## 10. Persistencia futura
 
-La cadena de suministro futura de Malāk no estará formada solamente por paquetes
-de software.
+La futura Memory no debe reducirse a storage + similarity search.
 
-Podrá incluir:
+Antes de persistir deberán poder tratarse proporcionalmente:
+
+- provenance;
+- content identity;
+- source authority;
+- confidence;
+- scope/domain/purpose;
+- temporal validity;
+- sensitivity;
+- contradiction;
+- trust state;
+- taint/revocation;
+- retention;
+- quarantine;
+- disclosure constraints.
+
+Principio:
+
+> Memory storage is a trust boundary, and Memory retrieval is another trust boundary.
+
+`ELIGIBLE` no debe transformarse directamente en una operación de escritura.
+
+---
+
+## 11. Trust, taint, revocation y quarantine
+
+Downstream de persistencia, el sistema deberá poder representar estados o
+equivalentes como:
+
+```text
+UNASSESSED
+ACCEPTABLE
+SUSPECT
+TAINTED
+SUPERSEDED
+REVOKED
+QUARANTINED
+```
+
+Una fuente comprometida puede reducir el trust de estado derivado sin demostrar
+automáticamente que cada elemento esté comprometido.
+
+La relación debe disparar revalidación proporcional, no atribución automática.
+
+---
+
+## 12. AI Supply-Chain Trust
+
+La cadena futura puede incluir:
 
 ```text
 packages
-dependencies
-models
-GGUF / weights
+models / weights / GGUF
 LoRA / adapters
 embedding models
 datasets
@@ -437,60 +410,35 @@ prompt templates
 skills
 agent definitions
 MCP servers
-A2A adapters
-plugins / external tools
-containers / images
+plugins / tools
+containers
 knowledge sources
 ```
 
-Antes de admitir un artefacto relevante deberá poder evaluarse, proporcionalmente
-al riesgo:
+Propiedades candidatas de admisión:
 
-- origen;
+- origen y provenance;
 - versión;
-- hash;
-- firma cuando exista y sea útil;
-- provenance;
+- hash e integridad;
+- firma cuando aplique;
 - licencia;
-- integridad;
-- vulnerabilidades conocidas;
-- permisos/capacidades requeridos;
+- vulnerabilidades;
 - dependencias transitivas;
-- posibilidad de rollback;
-- política de actualización;
-- capacidad de cuarentena o retiro.
-
-Principios:
+- permisos requeridos;
+- rollback;
+- actualización;
+- cuarentena/retiro.
 
 ```text
 Artifact integrity != Artifact trust
 Artifact trust != Execution authorization
 ```
 
-Un artefacto válido criptográficamente todavía puede ser inseguro, malicioso o
-incompatible con la política de Malāk.
-
-Dueños conceptuales a reforzar antes de crear nada nuevo:
-
-```text
-IDEA-004 Model Governance
-IDEA-009 Development Tooling
-IDEA-011 Validation & Delivery
-IDEA-016 Source Governance
-Security Control Plane
-```
-
-No crear todavía un `TrustedArtifactRegistry` salvo necesidad operacional demostrada.
-
 ---
 
-## 8. GAP CANDIDATE — Agent Identity & Delegation
+## 13. Agent Identity & Delegation
 
-IDEA-005 y IDEA-024 ya contemplan identidad, scopes, TTL, Security Context y
-prohibición de autoelevación. Falta preservar con mayor claridad la delegación
-cuando un componente autorizado origina trabajo que otro agente/tool ejecutará.
-
-Regla candidata:
+Toda futura delegación debe respetar:
 
 ```text
 Effective delegated authority
@@ -503,412 +451,145 @@ Delegator authority
 ∩ TTL
 ```
 
-Nunca:
+La delegación no puede producir elevación.
 
-```text
-delegation → authority expansion
-```
-
-Una futura cadena de delegación podrá necesitar evidencia de:
-
-- quién originó la delegación;
-- identidad del receptor;
-- propósito;
-- scope;
-- recursos;
-- restricciones;
-- issuer;
-- issued_at / expires_at;
-- revocation status;
-- parent context o referencia equivalente;
-- evidencia de autorización.
-
-La revocación del contexto padre deberá poder invalidar autoridad derivada cuando
-la política lo requiera.
-
-La identidad criptográfica fuerte, firmas, nonce/replay protection, PKI y
-mecanismos equivalentes permanecen sujetos a diseño y revisión propios.
+Firmas, identidad fuerte y revocación derivada requieren diseño separado antes
+de uso operacional.
 
 ---
 
-## 9. GAP CANDIDATE — Compromise Containment & Trust Revocation
+## 14. Data Classification & Disclosure
 
-IDEA-001 e IDEA-019 ya contemplan kill switch, quarantine, destrucción de sandbox,
-revocación y niveles de contingencia. El gap identificado es convertir esa
-respuesta local en una propiedad sistémica de componentes reemplazables.
-
-Aplica potencialmente a:
-
-```text
-runtime
-provider
-model
-agent
-tool
-skill
-MCP/A2A adapter
-plugin
-memory backend
-knowledge source
-sandbox
-external service
-```
-
-Principio rector candidato:
-
-> Compromise must reduce authority, never expand investigation privileges.
-
-Secuencia defensiva candidata:
-
-```text
-SUSPECT
-  ↓
-FREEZE / REVOKE AUTHORITY
-  ↓
-CUT OR RESTRICT COMMUNICATION
-  ↓
-ISOLATE
-  ↓
-QUARANTINE
-  ↓
-PRESERVE EVIDENCE
-  ↓
-ASSESS BLAST RADIUS
-  ↓
-MARK RELATED STATE / CREDENTIALS / ARTIFACTS AS SUSPECT
-  ↓
-ROTATE / REVOKE / REVALIDATE
-  ↓
-REBUILD FROM KNOWN-GOOD
-  ↓
-RESTORE ONLY TRUSTED STATE
-  ↓
-VERIFY BEFORE REINTRODUCTION
-```
-
-Debe evitarse eliminar inmediatamente un componente si eso destruye evidencia
-forense necesaria.
-
-Preferencia futura:
-
-```text
-compromised component
-        ↓
-discard after evidence preservation
-        ↓
-instantiate known-good component
-        ↓
-verify identity + provenance
-        ↓
-restore only trusted state
-```
-
-### Propagación de desconfianza
-
-Si un componente comprometido A interactuó con otros activos:
-
-```text
-A
-├── used credential B
-├── wrote artifact C
-├── contacted component D
-└── produced state E
-```
-
-la contención deberá poder evaluar:
-
-```text
-A → QUARANTINE
-B → REVOKE / ROTATE candidate
-C/D/E → SUSPECT → VALIDATE
-```
-
-La relación no implica que todos los activos estén comprometidos, sino que su
-trust debe volver a demostrarse cuando el riesgo lo justifique.
-
-La detección, revocación y preservación de evidencia crítica no deberán depender
-de la cooperación del componente sospechado.
-
-Dueños conceptuales a reforzar:
-
-```text
-Security Control Plane
-IDEA-001 Sandbox / Evidence
-IDEA-019 Incident Response / Deception
-IDEA-005 Secure Context
-IDEA-021 Emergency Control Surface
-```
-
----
-
-## 10. GAP CANDIDATE — Data Classification & Disclosure Control
-
-`Least Context`, privacidad y minimización ya existen como principios, pero la
-futura expansión de Malāk hacia Memory, tools, agents y servicios externos
-requerirá distinguir explícitamente la sensibilidad y el uso permitido de datos.
-
-Dimensiones candidatas, sin aprobar taxonomía:
-
-- sensibilidad;
-- propietario/origen;
-- finalidad permitida;
-- domain/scope;
-- retención;
-- posibilidad de exportación;
-- posibilidad de uso por modelos remotos;
-- posibilidad de persistencia en Memory;
-- posibilidad de incluirse en evidencia o reportes;
-- redaction / minimización;
-- requisitos de consentimiento o revisión humana.
-
-Principio:
+Acceso no implica permiso de reutilización:
 
 ```text
 Having access to data
-!=
-permission to disclose, persist or reuse it
+!= permission to persist
+!= permission to disclose
+!= permission to export
+!= permission to reuse
 ```
 
-No crear todavía un sistema universal de labels. Primero deberá existir una
-superficie real que necesite esta clasificación.
+Futuras superficies deberán considerar sensibilidad, finalidad, retención,
+redaction, uso por modelos remotos, consentimiento y límites de exportación.
 
 ---
 
-## 11. Interoperabilidad gobernada
+## 15. Governed Interoperability
 
-La dirección preservada es:
-
-```text
-Malāk Capability / Tool Contract
-          │
-          ▼
-Interoperability Adapter
-       ┌──┴───┐
-       ▼      ▼
-      MCP     A2A
-```
+MCP/A2A y protocolos futuros permanecen `WATCH`.
 
 Principio:
 
-> Protocol-ready, not protocol-dependent.
+```text
+protocol-ready
+not protocol-dependent
+```
 
-Reglas futuras:
-
-- MCP, A2A o protocolos equivalentes no entran al Kernel como autoridad;
-- adapters consumen contratos internos de Malāk;
-- mensajes y tool outputs externos se tratan como contenido no confiable;
-- identidad externa no se convierte automáticamente en identidad interna;
-- cada operación protegida continúa pasando por Security Control Plane;
-- tool metadata, schemas o descripciones no conceden permisos;
-- egress, recursos, secretos y scope continúan gobernados por Malāk.
-
-No existe necesidad demostrada de una capa universal de MCP/A2A.
+Ningún protocolo, manifest, tool description o peer externo podrá convertirse en
+autoridad interna por contenido.
 
 ---
 
-## 12. Governed Procedural Learning
+## 16. Governed Procedural Learning
 
-Malāk podrá aprender procedimientos sin concederse autoridad para cambiarse.
-
-Flujo candidato:
-
-```text
-Observed executions
-       ↓
-candidate procedure
-       ↓
-evidence / evaluation
-       ↓
-security review
-       ↓
-owner / knowledge governance approval
-       ↓
-Skill / Procedure artifact
-       ↓
-load on demand when authorized
-```
-
-Un procedimiento aprendido:
+Malāk podrá aprender candidatos de procedimientos, pero la promoción seguirá el
+mismo principio de mejora gobernada:
 
 ```text
-Skill != Capability
-Skill != Permission
-Skill != Policy
-Skill != Authority
+observed procedure
+→ candidate
+→ evaluation
+→ evidence
+→ proposal
+→ governance
+→ approved skill/procedure only if authorized
 ```
 
-La futura promoción de procedimientos deberá reutilizar IDEA-002, Skills-on-Demand,
-Knowledge Governance y validación existente antes de crear un nuevo sistema de
-procedural learning.
+No se permite aprendizaje procedimental que se auto-promueva a ejecución
+privilegiada.
 
 ---
 
-## 13. Multimodal Perception Boundary — WATCH
+## 17. Qué no debe crearse todavía
 
-A largo plazo Malāk podrá necesitar procesar:
+No existe necesidad actual demostrada para:
 
-```text
-text
-audio
-vision
-files
-system state
-sensor / environment observations
-```
+- Universal Trust Manager;
+- Universal Integrity Manager;
+- global Memory orchestrator;
+- autonomous Agent Manager;
+- protocol authority adapter;
+- world model subsystem;
+- general-purpose persistence engine para Memory;
+- self-modification service.
 
-Principio candidato:
-
-```text
-Perception != Authority
-Observation != Truth
-```
-
-Toda percepción deberá entrar mediante adapters/capabilities gobernadas, conservar
-provenance cuando corresponda y quedar fuera del plano de autoridad.
-
-No existe necesidad actual suficiente para crear una nueva Perception Layer ni
-incorporar world models.
+Cuando un gap pueda resolverse con una frontera específica, pequeña y pura, esa
+opción debe preferirse.
 
 ---
 
-## 14. Relación con investigación de seguridad 2026
+## 18. Próxima maduración candidata
 
-Las revisiones futuras deberán continuar contrastando Malāk contra, entre otros:
-
-- OWASP Top 10 para aplicaciones web;
-- OWASP Top 10 para aplicaciones LLM/GenAI;
-- OWASP Agentic Security y Agent Control Standard;
-- NIST AI RMF / perfiles de ciberseguridad para AI;
-- MITRE ATLAS;
-- investigación académica sobre prompt injection, tool poisoning, persistent
-  state corruption, memory poisoning y delegated authority;
-- incidentes reales de sistemas agentic y AI-assisted development.
-
-Estos marcos son referencias de aplicabilidad, no fuentes de autoridad superiores
-a Blueprint, Constituciones o Gobernanza.
-
-La revisión deberá concentrarse en propiedades de sistema:
+El único siguiente hardening de Memory suficientemente demostrado en el baseline
+actual es:
 
 ```text
-information flow
-identity
-delegated authority
-persistent state
-supply chain
-containment
-provenance
-detection
-recovery
+Episodic Candidate Content Identity Boundary
 ```
+
+Estado:
+
+```text
+G0/G1 integrated
+G2 not authorized
+implementation not authorized
+```
+
+Precondiciones antes de G2:
+
+```text
+canonical derived docs reconciled
+→ human merge
+→ Project Vault reconciled
+→ drift = 0
+→ explicit Owner authorization
+```
+
+Después de esa unidad todavía deberá evaluarse **cómo propagar** la identidad a
+la cadena antes de Persistence Authorization. No debe asumirse que calcular un
+digest local resuelve automáticamente el binding end-to-end.
 
 ---
 
-## 15. Invariantes candidatas a preservar en futuras evaluaciones
-
-Estas expresiones resumen el resultado de la reconciliación y deberán tratarse
-como candidatos conceptuales, no como nuevas leyes aprobadas:
+## 19. Invariantes de visión
 
 ```text
 Model != System
 Intelligence != Authority
-Capability != Permission
-Decision != Execution
-Execution != Evidence
-Evidence != Authority
-Conversation != Memory
 Memory != Knowledge
 Knowledge != Policy
-External Content != Instructions
-Tool Output != Authority
-Protocol Identity != Internal Authority
-Artifact Trust != Execution Authorization
-Projection READY != Admission ELIGIBLE
+Policy != Authority
+Evidence != Authority
+Content identity != authenticity
+Authenticity != trust
+Trust != truth
 ELIGIBLE != Stored
-Compromise → Less Authority
-Compromise → More Isolation
-Compromise → More Observation
-Incident → Evidence → Finding → Proposal
-Learning → Proposal, not self-authorization
+Compromise must reduce authority
 ```
 
----
-
-## 16. Qué NO debe crearse por esta reconciliación
-
-Este documento no justifica crear ahora:
-
-- `PromptInjectionManager`;
-- `MemoryTrustManager`;
-- `TrustedArtifactRegistry`;
-- `DelegationManager`;
-- `CompromiseManager`;
-- `IncidentResponseEngine`;
-- `HoneypotManager`;
-- `SelfImprovementManager`;
-- `AutonomyManager`;
-- una universal MCP layer;
-- una Perception Layer;
-- un workflow engine universal;
-- agentes permanentes de red/blue/purple team;
-- auto-hack-back;
-- auto-modificación productiva.
-
-Cada abstracción futura deberá demostrar responsabilidad propia, necesidad real,
-consumidores reales, autoridad mínima, observabilidad, testabilidad, rollback y
-beneficio superior al Complexity Budget.
-
----
-
-## 17. Orden de maduración conceptual sugerido
-
-No constituye roadmap ni asignación de sprint.
-
-Cuando el baseline produzca necesidad real, el orden lógico de evaluación sería:
+Y para self-improvement:
 
 ```text
-1. Prompt / Context Trust Boundary
-2. Compromise Containment & Trust Revocation
-3. Memory / Knowledge Trust Propagation & Poisoning Defense after governed projection
-4. AI Supply-Chain Trust
-5. Data Classification / Disclosure
-6. Agent Identity & Delegation
-7. Secure MCP/A2A interoperability adapters
-8. Governed Procedural Learning
-9. Multimodal Perception when justified
+Malāk may propose change
+Malāk may not self-authorize production change
 ```
-
-Este orden expresa dependencia conceptual, no prioridad de implementación.
 
 ---
 
-## 18. Estado
+## 20. Declaración final
 
-```text
-Documento: Research Horizon Map / reconciliation
-Autoridad: no normativa
-Baseline modificado: no
-Arquitectura aprobada: no
-Sprint autorizado: ninguno
-Implementación autorizada por este documento: ninguna
-```
+Este mapa preserva dirección de investigación y gaps. No crea una obligación de
+implementación ni promueve automáticamente ninguna idea.
 
-### Resultado final
-
-La revisión confirma que gran parte de la visión futura ya estaba distribuida
-de forma coherente en Malāk, especialmente en Long Horizon, IDEA-001, IDEA-002,
-IDEA-003, IDEA-005, IDEA-006, IDEA-013, IDEA-016, IDEA-019, IDEA-021, IDEA-023 e
-IDEA-024.
-
-Los gaps y refuerzos que merecen permanecer visibles son principalmente:
-
-1. `Compromise Containment & Trust Revocation` sistémico;
-2. `Memory & Knowledge Trust / Poisoning` más allá de la proyección gobernada,
-   especialmente el consumo `Projection → Admission`, la propagación de
-   taint/revocation/quarantine y retrieval eligibility;
-3. `AI Supply-Chain Trust` para artefactos AI y externos;
-4. `Agent Identity & Delegation` verificable y revocable;
-5. `Data Classification & Disclosure Control` transversal;
-6. generalización de `Prompt & Context Trust Boundary`.
-
-Ninguno de estos gaps constituye por sí mismo autorización para crear una nueva
-capability, componente o sprint.
+El baseline material y las fuentes normativas continúan prevaleciendo.
