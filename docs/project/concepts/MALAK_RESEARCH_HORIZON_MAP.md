@@ -6,12 +6,13 @@ document_role: research_horizon_reconciliation
 language: es
 created: 2026-09-09
 as_of_branch: main
-as_of_commit: 2e8c5d7318678caeb67c8906c951935832760003
+as_of_commit: cc9c7373879555a3eb267cd91be5228207427ae8
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md
   - docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md
   - docs/project/concepts/MALAK_COGNITIVE_DATASET_FOUNDATION.md
+  - docs/project/concepts/MALAK_EVIDENCE_BOUND_COGNITION_FOUNDATION.md
   - SECURITY.md
 purpose: >
   Preservar la reconciliación entre la visión futura de Malāk, la investigación
@@ -105,7 +106,7 @@ arquitectónicamente limpio.
 | Deception / Honeypots / Adversarial Evaluation | `ALIGNED` | IDEA-019 / IDEA-010 | Honeypots, honeytokens, Adversarial Twin, red/purple team y aislamiento ya están representados. |
 | Incident Forensics / Attack Path | `ALIGNED` | ampliación IDEA-019 | Ya se contemplan timeline, IP observada, attack path, evidence package, recovery y security regression learning. |
 | Prompt & Context Trust Boundary | `REINFORCE_EXISTING` | IDEA-006 / IDEA-013 / IDEA-016 | Existe protección de prompt injection para evidencia externa, pero debe generalizarse a todo contenido no confiable. |
-| Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | Episodic Admission + Provenance + Producer Authorization + Governed Projection + futura Memory + IDEA-013 / IDEA-016 | El baseline ya valida provenance estructural, autorización scoped del productor y proyección gobernada de inputs; permanecen pendientes el consumo gobernado `Projection → Admission` y la propagación de trust, taint, revocation y quarantine hacia persistencia, retrieval y Knowledge. |
+| Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | Episodic Admission + Provenance + Producer Authorization + Governed Projection/Consumption + futura Memory + IDEA-013 / IDEA-016 | El baseline ya valida provenance estructural, autorización scoped del productor, proyección gobernada y consumo controlado hacia Admission; permanecen pendientes Candidate Content Identity/propagación y trust, taint, revocation y quarantine hacia persistencia, retrieval y Knowledge. |
 | AI Supply-Chain Trust | `GAP_CANDIDATE` | IDEA-004 / IDEA-009 / IDEA-011 / IDEA-016 | Existen hashes, model governance y SLSA como referencia, pero falta una política conceptual unificada de admisión de artefactos AI. |
 | Agent Identity & Delegation | `GAP_CANDIDATE` | IDEA-005 / IDEA-024 / Security Control Plane | Identidad, TTL, scopes y no autoelevación existen; falta cadena de delegación verificable y revocación derivada. |
 | Compromise Containment & Trust Revocation | `GAP_CANDIDATE` | IDEA-019 / IDEA-001 / Security Control Plane | Existe cuarentena local; falta explicitar respuesta sistémica y propagación de desconfianza. |
@@ -311,20 +312,21 @@ AUTHORIZED | HOLD | DENIED
         ↓
 Governed Input Projection
 READY | HOLD | DENIED
-```
-
-Y, como policy separada todavía no cableada a esa proyección:
-
-```text
+        ↓
+Governed Projection Consumption
+BLOCKED | EVALUATED
+        ↓
 Episodic Admission
 REJECT | HOLD | ELIGIBLE
 ```
 
-La evolución integrada mediante PR #82, PR #85 y PR #88 elimina como gap pendiente
-la provenance estructural de assessments y la autorización scoped de sus
-productores. La proyección gobernada también bloquea fallback trust-sensitive
-desde `candidate.control`, exige cardinalidad exacta y gobierna temporal validity
-mediante evidencia dedicada autorizada.
+La evolución integrada mediante PR #82, PR #85, PR #88 y PR #92 elimina como gap
+pendiente la provenance estructural de assessments, la autorización scoped de sus
+productores y el consumo controlado de una projection hacia la policy existente
+de Admission. La proyección gobernada bloquea fallback trust-sensitive desde
+`candidate.control`, exige cardinalidad exacta y gobierna temporal validity
+mediante evidencia dedicada autorizada; el adapter de consumo bloquea projections
+no consumibles y delega exactamente una vez a Admission cuando corresponde.
 
 Se preserva deliberadamente:
 
@@ -332,15 +334,19 @@ Se preserva deliberadamente:
 Projection READY != Admission ELIGIBLE
 Projection HOLD != Admission HOLD automatically
 Projection DENIED != Candidate REJECT automatically
+Consumption EVALUATED != persistence authorization
 ELIGIBLE != persistence authorization
 ```
 
-Por lo tanto, la siguiente preocupación conceptual ya no consiste en demostrar
-de dónde provienen los assessments. El gap inmediato es decidir, mediante una
-frontera posterior y autorización separada, cómo una proyección `READY` puede ser
-consumida por la policy existente de Admission sin reabrir vías laterales de
-trust. Después de eso, el trabajo restante es propagar de forma gobernada trust,
-taint, revocation y quarantine hacia persistencia, retrieval y promoción a
+El residual inmediato ya no es `Projection → Admission`. PR #93 demostró que
+`candidate_id` binding no equivale a identidad del contenido del candidate y
+seleccionó G0/G1 para un `EpisodicCandidateContentIdentity` determinista y
+versionado. G2, implementación y propagación de esa identidad permanecen sin
+autorización. Persistence Authorization continúa diferida hasta que exista
+binding end-to-end suficiente.
+
+Después de esa frontera, el trabajo restante incluye propagar de forma gobernada
+trust, taint, revocation y quarantine hacia persistencia, retrieval y promoción a
 Knowledge.
 
 La futura Memory no deberá reducirse a almacenamiento y similarity search.
@@ -349,6 +355,8 @@ La frontera completa objetivo continúa siendo:
 
 ```text
 Memory Candidate
+      ↓
+Candidate content identity / binding
       ↓
 Assessment production
       ↓
@@ -359,6 +367,8 @@ Producer authorization
 Governed temporal control
       ↓
 Governed input projection
+      ↓
+Governed projection consumption
       ↓
 Admission evaluation
       ↓
@@ -371,7 +381,7 @@ Trust-aware retrieval eligibility
 Knowledge candidate when applicable
 ```
 
-Estado materializado a `2e8c5d7318678caeb67c8906c951935832760003`:
+Estado material observado a `cc9c7373879555a3eb267cd91be5228207427ae8`:
 
 ```text
 candidate contracts                       implemented
@@ -379,11 +389,13 @@ admission policy                          implemented
 assessment provenance                     implemented
 assessment producer authorization         implemented
 governed input projection                 implemented
-projection -> admission consumption       NOT YET
-persistence authorization                 NOT YET
-persistent Memory                         NOT YET
-retrieval                                 NOT YET
-Knowledge promotion                       NOT YET
+projection -> admission consumption       implemented
+candidate content identity                G0/G1 ONLY
+content identity propagation              NOT DESIGNED / NOT AUTHORIZED
+persistence authorization                 NOT AUTHORIZED
+persistent Memory                         NOT AUTHORIZED
+retrieval                                 NOT AUTHORIZED
+Knowledge promotion                       NOT AUTHORIZED
 ```
 
 Separación obligatoria:
@@ -823,6 +835,8 @@ Tool Output != Authority
 Protocol Identity != Internal Authority
 Artifact Trust != Execution Authorization
 Projection READY != Admission ELIGIBLE
+Consumption EVALUATED != Persistence Authorization
+Candidate Content Identity != Trust
 ELIGIBLE != Stored
 Compromise → Less Authority
 Compromise → More Isolation
@@ -868,7 +882,7 @@ Cuando el baseline produzca necesidad real, el orden lógico de evaluación ser�
 ```text
 1. Prompt / Context Trust Boundary
 2. Compromise Containment & Trust Revocation
-3. Memory / Knowledge Trust Propagation & Poisoning Defense after governed projection
+3. Memory / Knowledge Trust Propagation & Poisoning Defense after candidate content identity
 4. AI Supply-Chain Trust
 5. Data Classification / Disclosure
 6. Agent Identity & Delegation
@@ -902,9 +916,9 @@ IDEA-024.
 Los gaps y refuerzos que merecen permanecer visibles son principalmente:
 
 1. `Compromise Containment & Trust Revocation` sistémico;
-2. `Memory & Knowledge Trust / Poisoning` más allá de la proyección gobernada,
-   especialmente el consumo `Projection → Admission`, la propagación de
-   taint/revocation/quarantine y retrieval eligibility;
+2. `Memory & Knowledge Trust / Poisoning` más allá de Governed Projection
+   Consumption, especialmente Candidate Content Identity/end-to-end binding,
+   propagación de taint/revocation/quarantine y retrieval eligibility;
 3. `AI Supply-Chain Trust` para artefactos AI y externos;
 4. `Agent Identity & Delegation` verificable y revocable;
 5. `Data Classification & Disclosure Control` transversal;
