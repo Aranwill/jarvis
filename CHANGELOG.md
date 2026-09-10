@@ -25,6 +25,17 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   separación entre payload y metadata de control y policy determinista
   `REJECT | HOLD | ELIGIBLE`, sin wiring runtime, persistencia, retrieval ni
   dependencias externas.
+- PR #82 integró `Episodic Admission Assessment Provenance Boundary`, una
+  validación estructural aislada para ligar assessments a `assessment_id`,
+  `candidate_id`, kind y producer role sin convertir provenance en identidad,
+  truth, permiso o autoridad.
+- PR #85 integró `Episodic Admission Assessment Producer Authorization Boundary`,
+  reutilizando el Security Control Plane existente para validar evidencia de
+  autorización scoped del productor sin crear un segundo motor de autoridad.
+- PR #88 integró `Episodic Admission Governed Input Projection Boundary`, que
+  reconstruye inputs efectivos de admisión desde assessments con provenance y
+  autorización válidas más control temporal gobernado, con resultados
+  `READY | HOLD | DENIED` y sin ejecutar la policy de admisión.
 
 ### Changed
 
@@ -35,6 +46,9 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   template de Pull Request fueron reforzados para exigir revisión explícita de
   `SECURITY.md` y `MALAK_RESEARCH_HORIZON_MAP.md` durante admisiones y análisis
   de próxima implementación cuando corresponda.
+- La documentación derivada de proyecto se reconcilia al estado post-PR #88
+  para distinguir la policy aislada de admisión de las fronteras posteriores de
+  provenance, autorización del productor y proyección gobernada de inputs.
 
 ### Security
 
@@ -58,20 +72,27 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - Candidate G3 `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b`: `431 passed`,
   `compileall: PASS` y `diff-check: PASS`.
 - La validación post-merge de G3 sobre `2d5fe87c304927baeab29e5649f2383030e1a1fd` concluyó con `success`.
+- El candidate de PR #88 `87a7e31e0735edd25a80a693cf3f437f7a1501fc`
+  pasó `Validation` candidate-bound en `ubuntu-latest`, `windows-latest` y
+  `macos-latest`, incluyendo identidad exacta, suite, `compileall` y diff-check.
 
 ### Notes
 
 - Sprint 7.11 permanece como el último sprint numerado integrado.
-- G3 — `Episodic Memory Admission Boundary` es la unidad de código de producto
-  integrada más reciente, pero permanece aislada y sin wiring runtime,
-  persistencia o retrieval.
+- La unidad de código de producto integrada más reciente es
+  `Episodic Admission Governed Input Projection Boundary` (PR #88), precedida
+  por `Episodic Memory Admission Boundary`, Assessment Provenance y Assessment
+  Producer Authorization; toda la cadena permanece aislada y sin wiring
+  runtime, persistencia o retrieval.
+- `Projection READY != Admission ELIGIBLE != Stored != Authority`.
 - Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
-- No existe actualmente una unidad posterior a G3 autorizada.
+- No existe actualmente una unidad posterior a la proyección gobernada autorizada.
 - RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
   únicamente por esta sección.
-- Esta reconciliación documental no autoriza un nuevo sprint, Memory persistente,
-  agentes, tools, Sandbox, navegación, MCP/A2A ni ampliación de autoridad.
+- Esta reconciliación documental no autoriza Sprint 7.12, Memory persistente,
+  admission wiring, agentes, tools, Sandbox, navegación, MCP/A2A ni ampliación
+  de autoridad.
 
 ---
 

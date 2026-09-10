@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-09
-as_of_commit: 2d5fe87c304927baeab29e5649f2383030e1a1fd
+as_of_date: 2026-09-10
+as_of_commit: 2e8c5d7318678caeb67c8906c951935832760003
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -62,7 +62,10 @@ Este contexto fue reconciliado a partir de:
 - resultados de validación registrados durante el cierre del Sprint 7.8;
 - revalidación local del baseline previa a la activación del Sprint 7.9;
 - evidencia candidate-bound, cierre y validación post-merge de Sprint 7.11;
-- estado sincronizado del Malāk Project Vault.
+- integración posterior de Episodic Memory Admission, Assessment Provenance,
+  Assessment Producer Authorization y Governed Input Projection;
+- validación candidate-bound multiplataforma del candidate de PR #88;
+- estado sincronizado del Malāk Project Vault con el HEAD post-PR #88.
 
 El documento:
 
@@ -121,16 +124,17 @@ Repositorio oficial:             Aranwill/jarvis
 Raíz Git local:                  D:\Ollama\jarvis
 Rama permanente:                 main
 Commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:           2d5fe87c304927baeab29e5649f2383030e1a1fd
+HEAD integrado actual:           2e8c5d7318678caeb67c8906c951935832760003
 Baseline nominal:                v0.6.0-alpha
 Último sprint integrado:         Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Última unidad de producto:       G3 — Episodic Memory Admission Boundary
+Última unidad de producto:       Episodic Admission Governed Input Projection Boundary
 Última ruta conversacional:      Sprint 7.10 — Conversation Session Isolation Foundation
 Sprint activo autorizado:        ninguno
 Rama de implementación activa:   ninguna
 Candidato Sprint 7.11:           59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 Estado Sprint 7.11:              completado e integrado
 Sprint posterior autorizado:     ninguno
+Unidad posterior autorizada:     ninguna
 RDD Stage 2:                     no autorizado
 ```
 
@@ -160,10 +164,10 @@ independent validation: PASS
 post-merge Validation: success
 ```
 
-Después de Sprint 7.11, el Owner autorizó de forma separada y acotada G3 —
-`Episodic Memory Admission Boundary`.
+Después de Sprint 7.11, el Owner autorizó de forma separada y acotada una serie
+de unidades episódicas aisladas de Memory.
 
-G3 fue integrado mediante PR #76:
+La primera fue G3 — `Episodic Memory Admission Boundary`, integrada mediante PR #76:
 
 ~~~text
 candidate:
@@ -185,19 +189,68 @@ post-merge Validation:
 success
 ~~~
 
-G3 incorpora exclusivamente contratos episódicos inmutables y una policy pura
-de admisión `REJECT | HOLD | ELIGIBLE`.
+Después se integraron, cada una mediante autorización y gate separados:
+
+```text
+PR #82
+Episodic Admission Assessment Provenance Boundary
+
+PR #85
+Episodic Admission Assessment Producer Authorization Boundary
+
+PR #88
+Episodic Admission Governed Input Projection Boundary
+```
+
+El HEAD material resultante es:
+
+```text
+2e8c5d7318678caeb67c8906c951935832760003
+```
+
+El candidate de PR #88:
+
+```text
+87a7e31e0735edd25a80a693cf3f437f7a1501fc
+```
+
+pasó `Validation` candidate-bound en `ubuntu-latest`, `windows-latest` y
+`macos-latest`, incluyendo candidate identity, suite completa, `compileall` y
+candidate diff validation.
+
+La cadena materializada preserva:
+
+```text
+Assessment Provenance
+!= authenticated identity
+!= trusted truth
+
+Producer Authorization
+!= trusted truth
+!= Admission eligibility
+!= persistence authorization
+!= authority
+
+Projection READY
+!= Admission ELIGIBLE
+!= Stored
+!= Authority
+```
+
+La proyección no llama `evaluate_episodic_candidate(...)`; el consumo
+`Projection → Admission` permanece como frontera posterior no autorizada.
 
 Permanece fuera de alcance:
 
 ~~~text
 runtime wiring
+Projection -> Admission wiring
 Memory persistente
 retrieval
 Knowledge
 Kernel changes
 Conversation changes
-Security changes
+Security authority expansion
 Observability changes
 external dependencies
 Sprint 7.12
@@ -205,10 +258,12 @@ RDD Stage 2
 ~~~
 
 Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
-No existe actualmente ninguna unidad posterior a G3 autorizada.
+No existe actualmente ninguna unidad posterior a Governed Input Projection
+autorizada.
 
 La sincronización del Malāk Project Vault es una proyección derivada posterior.
-Su estado no modifica el cierre oficial del sprint ni concede autoridad sobre
+El Vault se encuentra sincronizado con el HEAD post-PR #88 y su estado no
+modifica el cierre oficial del sprint ni concede autoridad sobre
 `Aranwill/jarvis/main`.
 
 ---
@@ -350,22 +405,46 @@ Sprint 7.10 añade aislamiento explícito de sesiones conversacionales.
 La evolución no introduce persistencia, Memory ni estado conversacional
 dentro del Kernel o de `SecurityContext`.
 
-### Episodic Memory Admission Boundary — G3
+### Episodic Memory Admission chain — estado post-PR #88
 
-G3 materializa una frontera aislada de la Memory Layer bajo:
+La Memory Layer posee ahora varias fronteras aisladas bajo:
 
 ~~~text
 src/malak/memory/
 ~~~
 
-La unidad implementada contiene contratos episódicos inmutables y una policy
-pura y determinista de admisión:
+La policy de admisión original permanece pura y determinista:
 
 ~~~text
-candidate
-   ↓
+EpisodicMemoryCandidate
++
+EpisodicAdmissionSignals
+        ↓
 REJECT | HOLD | ELIGIBLE
 ~~~
+
+Sobre esa foundation se integró una cadena de evidencia y proyección separada:
+
+~~~text
+AdmissionAssessment
+        ↓
+Assessment Provenance
+VALID | HOLD | INVALID
+        ↓
+Assessment Producer Authorization
+AUTHORIZED | HOLD | DENIED
+        ↓
+Governed Input Projection
+READY | HOLD | DENIED
+        ↓
+STOP
+~~~
+
+La proyección reconstruye un `EpisodicAdmissionContext` y
+`EpisodicAdmissionSignals` efectivos solo cuando existe evidencia completa,
+coherente, candidate-bound y autorizada. Source authority, confidence,
+sensitivity y temporal validity no se heredan como trust por mera presencia en
+`candidate.control`.
 
 Se preservan explícitamente:
 
@@ -373,12 +452,19 @@ Se preservan explícitamente:
 Candidate != Decision
 payload != control metadata
 source authority != confidence != security trust != temporal validity
+structural provenance != authenticated identity
+AUTHORIZED != trusted truth
+Projection READY != Admission ELIGIBLE
 ELIGIBLE != persistence authorization
 HOLD != retention authorization
 ~~~
 
-G3 no está conectado a `ConversationCapability`, `ConversationService`, Kernel,
-Security u observabilidad y no persiste ni recupera Memory.
+La projection no ejecuta Admission y no modifica la precedencia de la policy.
+Un wiring posterior deberá ser autorizado de forma independiente.
+
+Toda la cadena continúa desconectada de `ConversationCapability`,
+`ConversationService`, Kernel y observabilidad; tampoco persiste ni recupera
+Memory.
 
 ### Integración Kernel–ConversationService
 
@@ -647,6 +733,9 @@ Estado del bloque 7.x:
 | 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
 | 7.11 | Completado | Reproducible Validation Pipeline Foundation; integrado y validado post-merge |
 
+Las unidades episódicas integradas después de Sprint 7.11 no constituyen Sprint
+7.12 y no alteran la numeración histórica del bloque 7.x.
+
 ### Sprint 7.0
 
 Estado:
@@ -894,6 +983,10 @@ aprobó explícitamente el cierre del Sprint 7.9 el 2026-09-03.
 La actualización de este documento registra evidencia y una autorización humana
 ya emitida; no crea autoridad por sí misma ni autoriza ningún sprint posterior.
 
+La evidencia candidate-bound más reciente de la cadena episódica corresponde al
+candidate de PR #88 `87a7e31e0735edd25a80a693cf3f437f7a1501fc`, cuya ejecución
+`Validation` concluyó con `success` en Ubuntu, Windows y macOS.
+
 ---
 
 ## Estado del baseline
@@ -911,30 +1004,33 @@ Estado reconciliado:
 
 ```text
 rama permanente: main
-commit de referencia: 3413e8ccb348440aea757d1feccde25c65be011f
+HEAD material de referencia: 2e8c5d7318678caeb67c8906c951935832760003
+commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
 Sprint 7.7: cerrado
 Sprint 7.8: completado
 Sprint 7.9: completado
 Sprint 7.10: completado
 Sprint 7.11: completado e integrado
-última unidad funcional de producto/runtime: Sprint 7.10
+última ruta conversacional/runtime: Sprint 7.10
+última unidad de producto: Episodic Admission Governed Input Projection Boundary
 candidato final Sprint 7.11: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 certification branch activa: no
 release promovida adicional: no
 sprint actualmente autorizado: ninguno
-sprint posterior autorizado: ninguno
+unidad posterior autorizada: ninguna
 RDD Stage 2: no autorizado
 ```
 
-El commit `3413e8ccb348440aea757d1feccde25c65be011f` es el estado de `main`
-resultante de integrar Sprint 7.11.
+El commit `3413e8ccb348440aea757d1feccde25c65be011f` continúa siendo el estado de
+`main` resultante de integrar Sprint 7.11, pero ya no es el HEAD material actual.
 
-Sprint 7.11 no modificó el producto/runtime; Sprint 7.10 permanece como la última
-unidad funcional de producto/runtime integrada.
+Sprint 7.11 no modificó el producto/runtime. La última ruta conversacional/runtime
+permanece Sprint 7.10, mientras que las unidades episódicas posteriores ampliaron
+la Memory Layer de forma aislada hasta Governed Input Projection.
 
-No debe certificarse una nueva release, crear o mover un tag, abrir un sprint
-posterior a 7.11 o ampliar autoridad sin un proceso específico de evaluación y
-aprobación.
+No debe certificarse una nueva release, crear o mover un tag, abrir Sprint 7.12,
+implementar el consumo `Projection → Admission` o ampliar autoridad sin un
+proceso específico de evaluación y aprobación.
 
 ---
 
@@ -963,6 +1059,12 @@ El Vault:
 - puede proyectar cambios detectados en el repositorio oficial;
 - requiere revisión humana para reconciliaciones gobernadas.
 
+El Vault fue sincronizado después de PR #88 con el HEAD oficial:
+
+```text
+2e8c5d7318678caeb67c8906c951935832760003
+```
+
 El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad para:
 
 - código;
@@ -975,7 +1077,7 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ---
 
-## Planificación vigente — post-Sprint 7.11
+## Planificación vigente — post-PR #88
 
 Sprint 7.8 está completado.
 
@@ -985,21 +1087,30 @@ propietario el 2026-09-03.
 Sprint 7.10 fue completado e integrado y su cierre fue aprobado explícitamente por el propietario el 2026-09-04.
 
 Sprint 7.11 fue completado, integrado mediante PR #65 y validado nuevamente sobre `main`.
-No existe un sprint posterior autorizado.
+
+Después de Sprint 7.11 fueron integradas de forma separada Episodic Memory
+Admission, Assessment Provenance, Assessment Producer Authorization y Governed
+Input Projection. Ninguna de esas unidades constituye Sprint 7.12.
 
 Actualmente:
 
 ```text
-LAST COMPLETED SPRINT
+LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
-LAST PRODUCT/RUNTIME SPRINT
+LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
+
+LATEST PRODUCT UNIT
+Episodic Admission Governed Input Projection Boundary
 
 ACTIVE AUTHORIZED SPRINT
 NONE
 
 SUBSEQUENT SPRINT
+NONE AUTHORIZED
+
+UNIT AFTER GOVERNED INPUT PROJECTION
 NONE AUTHORIZED
 
 RDD STAGE 2
@@ -1012,7 +1123,7 @@ La fuente derivada canónica para planificación es:
 docs/project/implementation_roadmap.md
 ```
 
-La ficha operativa del último sprint integrado es:
+La ficha operativa del último sprint numerado integrado es:
 
 ```text
 docs/project/sprints/SPRINT-7.11.md
@@ -1029,6 +1140,8 @@ Se mantiene:
 idea != roadmap
 roadmap != aprobación
 evidencia != autoridad
+Projection READY != Admission ELIGIBLE
+ELIGIBLE != Stored
 ```
 
 `project_context.md` no duplica el roadmap ni concede autoridad.
@@ -1041,7 +1154,7 @@ independiente y foundations suficientes.
 
 ## Capacidades explícitamente postergadas
 
-Hasta que un sprint aprobado las autorice, no se deben introducir:
+Hasta que un sprint o unidad aprobada las autorice, no se deben introducir:
 
 - agentes autónomos;
 - ejecución libre de herramientas externas;
@@ -1049,6 +1162,7 @@ Hasta que un sprint aprobado las autorice, no se deben introducir:
 - navegación externa;
 - comunicaciones externas automáticas;
 - memoria persistente sensible sin controles aprobados;
+- wiring `Projection → Admission` sin evaluación y autorización separadas;
 - elevación automática de privilegios;
 - acciones destructivas;
 - integraciones externas ocultas;
@@ -1174,17 +1288,18 @@ Una fase no se considera cerrada hasta que:
 
 estén reconciliados.
 
-No se debe iniciar el siguiente sprint hasta evaluar el baseline resultante y
-obtener aprobación explícita.
+No se debe iniciar el siguiente sprint o unidad funcional hasta evaluar el
+baseline resultante y obtener aprobación explícita.
 
 ---
 
 ## Política de actualización
 
-Este documento fue reconciliado contra el estado observado después de integrar Sprint 7.11:
+Este documento fue reconciliado contra el estado observado después de integrar
+PR #88 — `Episodic Admission Governed Input Projection Boundary`:
 
 ```text
-main@3413e8ccb348440aea757d1feccde25c65be011f
+main@2e8c5d7318678caeb67c8906c951935832760003
 active_work_branch@NONE
 ```
 
@@ -1196,6 +1311,7 @@ Debe volver a validarse cuando:
 
 - `HEAD` cambie de manera material para el contexto descrito;
 - un sprint se formalice, active o cierre;
+- una unidad funcional aislada relevante se integre;
 - se certifique una nueva release;
 - cambie arquitectura o gobernanza;
 - cambien resultados de tests relevantes;
