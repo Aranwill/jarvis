@@ -20,11 +20,10 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - Se incorporó `MALAK_RESEARCH_HORIZON_MAP.md` como referencia conceptual no
   normativa para reconciliar investigación, gaps y conceptos existentes sin
   promoverlos automáticamente a roadmap o implementación.
-- G3 integró `Episodic Memory Admission Boundary` como primera
-  materialización aislada de la Memory Layer: contratos inmutables,
-  separación entre payload y metadata de control y policy determinista
-  `REJECT | HOLD | ELIGIBLE`, sin wiring runtime, persistencia, retrieval ni
-  dependencias externas.
+- G3 integró `Episodic Memory Admission Boundary` como primera materialización
+  aislada de la Memory Layer: contratos inmutables, separación entre payload y
+  metadata de control y policy determinista `REJECT | HOLD | ELIGIBLE`, sin
+  wiring runtime, persistencia, retrieval ni dependencias externas.
 - PR #82 integró `Episodic Admission Assessment Provenance Boundary`, una
   validación estructural aislada para ligar assessments a `assessment_id`,
   `candidate_id`, kind y producer role sin convertir provenance en identidad,
@@ -36,6 +35,18 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   reconstruye inputs efectivos de admisión desde assessments con provenance y
   autorización válidas más control temporal gobernado, con resultados
   `READY | HOLD | DENIED` y sin ejecutar la policy de admisión.
+- PR #90 integró el design record G0/G1 de
+  `Episodic Admission Governed Projection Consumption Boundary`.
+- PR #91 integró la specification G2 de esa frontera, congelando
+  `EVALUATED | BLOCKED`, reason codes, precedencia y el presupuesto de dos
+  archivos para G3.
+- PR #92 integró `Episodic Admission Governed Projection Consumption Boundary`,
+  conectando una projection `READY` con la policy existente de Admission
+  mediante una vista efímera del candidate construida con el
+  `effective_context` gobernado, sin reabrir trust desde `candidate.control`.
+- PR #93 integró G0/G1 de `Episodic Candidate Content Identity Boundary`, que
+  identifica como siguiente hardening necesario una identidad de contenido
+  determinista y versionada antes de considerar Persistence Authorization.
 
 ### Changed
 
@@ -46,9 +57,9 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   template de Pull Request fueron reforzados para exigir revisión explícita de
   `SECURITY.md` y `MALAK_RESEARCH_HORIZON_MAP.md` durante admisiones y análisis
   de próxima implementación cuando corresponda.
-- La documentación derivada de proyecto se reconcilia al estado post-PR #88
-  para distinguir la policy aislada de admisión de las fronteras posteriores de
-  provenance, autorización del productor y proyección gobernada de inputs.
+- La documentación derivada de proyecto se reconcilia al estado post-PR #93:
+  Governed Projection Consumption ya está integrada y la siguiente frontera
+  candidata es Content Identity G0/G1, todavía sin G2 ni implementación.
 
 ### Security
 
@@ -62,6 +73,10 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   autorizada; no se autoriza `hack back` autónomo.
 - Los requisitos futuros continúan separados de la implementación vigente:
   `security requirement != implemented control`.
+- `candidate_id` continúa siendo identidad lógica/correlacional y no demuestra
+  por sí solo identidad material del contenido. Antes de Persistence
+  Authorization deberá existir un binding determinista del contenido y volver a
+  evaluarse autenticidad/anti-replay cuando la superficie lo requiera.
 
 ### Validated
 
@@ -69,30 +84,39 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   `diff-check: PASS`, FULL 4R PASS e independent validation PASS.
 - La ejecución post-merge de `Validation` sobre
   `3413e8ccb348440aea757d1feccde25c65be011f` concluyó con `success`.
-- Candidate G3 `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b`: `431 passed`,
-  `compileall: PASS` y `diff-check: PASS`.
-- La validación post-merge de G3 sobre `2d5fe87c304927baeab29e5649f2383030e1a1fd` concluyó con `success`.
+- Candidate G3 original `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b`:
+  `431 passed`, `compileall: PASS` y `diff-check: PASS`.
 - El candidate de PR #88 `87a7e31e0735edd25a80a693cf3f437f7a1501fc`
   pasó `Validation` candidate-bound en `ubuntu-latest`, `windows-latest` y
-  `macos-latest`, incluyendo identidad exacta, suite, `compileall` y diff-check.
+  `macos-latest`.
+- El candidate final de PR #92
+  `5139d95aaa2c30971b3979ca7c3917067856a428` pasó `Validation` candidate-bound
+  en Ubuntu, Windows y macOS; Ubuntu reportó `645 passed`, `compileall: PASS`,
+  candidate identity PASS y diff-check PASS.
+- El Owner reportó validación local post-merge sobre
+  `main@9438c66e315faa2b4c8c3f0a99d4e1e9619992c3`: `645 passed`,
+  `compileall -f tests: PASS`, `compileall -f src tests scripts: PASS`,
+  `git diff --check: PASS` y working tree limpio.
+- El candidate docs-only de PR #93
+  `4d41776b62fd4f001c850396cb35d365c59a6e0a` pasó el workflow `Validation`.
 
 ### Notes
 
 - Sprint 7.11 permanece como el último sprint numerado integrado.
-- La unidad de código de producto integrada más reciente es
-  `Episodic Admission Governed Input Projection Boundary` (PR #88), precedida
-  por `Episodic Memory Admission Boundary`, Assessment Provenance y Assessment
-  Producer Authorization; toda la cadena permanece aislada y sin wiring
-  runtime, persistencia o retrieval.
-- `Projection READY != Admission ELIGIBLE != Stored != Authority`.
 - Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
-- No existe actualmente una unidad posterior a la proyección gobernada autorizada.
+- La unidad de código de producto integrada más reciente es
+  `Episodic Admission Governed Projection Consumption Boundary` (PR #92).
+- La cadena episódica aislada actual termina en Admission:
+  `Projection READY → Consumption EVALUATED → Admission REJECT|HOLD|ELIGIBLE → STOP`.
+- `Projection READY != Admission ELIGIBLE != Persistence Authorization != Stored != Authority`.
+- El design G0/G1 de Content Identity está integrado mediante PR #93, pero
+  `G2`, implementación y propagación del digest todavía no están autorizados.
 - RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
   únicamente por esta sección.
 - Esta reconciliación documental no autoriza Sprint 7.12, Memory persistente,
-  admission wiring, agentes, tools, Sandbox, navegación, MCP/A2A ni ampliación
-  de autoridad.
+  Persistence Authorization, retrieval, Knowledge, agentes, tools, Sandbox,
+  navegación, MCP/A2A, PKI, firmas ni ampliación de autoridad.
 
 ---
 
