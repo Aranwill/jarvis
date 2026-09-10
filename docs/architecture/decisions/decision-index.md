@@ -48,6 +48,7 @@ Todas las ADR deberán:
 |------|--------|--------|--------|---------|
 | ADR-003 | Accepted | 2026-08-15 | Directional Communication and Authority Flow | Architecture / Communication |
 | ADR-004 | Accepted | 2026-08-19 | Specification and Verification First | Architecture / Engineering Method |
+| ADR-005 | Accepted | 2026-09-10 | Evidence-Bound Final Response Transition | Architecture / Cognition |
 
 ---
 
@@ -90,14 +91,15 @@ Toda ADR aceptada deberá registrarse aquí.
 | ADR-002 | Frontera de enforcement entre PDP y operación protegida | Accepted | 2026-07-26 | Security |
 | ADR-003 | Directional Communication and Authority Flow | Accepted | 2026-08-15 | Architecture |
 | ADR-004 | Specification and Verification First | Accepted | 2026-08-19 | Architecture |
+| ADR-005 | Evidence-Bound Final Response Transition | Accepted | 2026-09-10 | Architecture |
 
 ---
 
 ## Statistics
 
-Total ADRs: 4
+Total ADRs: 5
 
-Accepted: 4
+Accepted: 5
 
 Superseded: 0
 

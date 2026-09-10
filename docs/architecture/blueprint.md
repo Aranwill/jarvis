@@ -2,7 +2,7 @@
 id: DOC-ARQ-BLUEPRINT
 title: Blueprint
 status: active
-version: 0.6.1-alpha
+version: 0.6.2-alpha
 date: 2026-07-05
 author: Hector Rodriguez
 reviewed_by: []
@@ -20,6 +20,7 @@ related:
   adr:
     - ADR-001
     - ADR-003
+    - ADR-005
 
 graph:
   type: architecture_document
@@ -39,7 +40,7 @@ graph:
 
 history:
   created: 2026-06-27
-  updated: 2026-08-19
+  updated: 2026-09-10
 ---
 
 # Malāk Blueprint
@@ -53,13 +54,13 @@ history:
 >
 > Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
-**Blueprint Versión:** 0.6.1-alpha
+**Blueprint Versión:** 0.6.2-alpha
 **Project Version:** v0.6.0-alpha
 **Documento:** BP-001
 **Estado:** Aprobado y validado
 **Sprint:** Sprint 6.5 — Conversation Runtime
 **Clasificación:** Documento Maestro de Arquitectura
-**Última revisión arquitectónica:** 2026-08-19
+**Última revisión arquitectónica:** 2026-09-10
 
 ---
 
@@ -549,6 +550,23 @@ Queda prohibido:
 
 ---
 
+## R-022 — Transición protegida hacia Final Response
+
+Los outputs producidos o recuperados por modelos, providers, agentes, tools,
+Memory, Knowledge, retrieval u otras capacidades cognitivas constituyen
+información, evidencia, observaciones o candidatos según su naturaleza y no se
+convierten por sí mismos en una Final Response.
+
+Toda transición de una Candidate Response que contenga afirmaciones materiales
+hacia una Final Response deberá atravesar las validaciones cognitivas aplicables
+definidas por la Constitución Cognitiva y las policies/specifications vigentes.
+
+Ningún modelo, provider, agente, tool o componente downstream podrá omitir una
+validación aplicable y presentar directamente su output como Final Response.
+
+Esta regla define una propiedad arquitectónica y no prescribe por sí misma una
+nueva layer, service, manager, provider ni implementación concreta.
+
 # 10. Componentes Estratégicos
 
 El Blueprint establece los siguientes componentes principales:
@@ -597,7 +615,7 @@ Queda prohibido:
 
 Versión del Blueprint:
 
-**Blueprint v0.6.1-alpha**
+**Blueprint v0.6.2-alpha**
 
 Estado normativo:
 
