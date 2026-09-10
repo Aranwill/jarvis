@@ -20,6 +20,7 @@ related:
   adr:
     - ADR-001
     - ADR-003
+    - ADR-004
     - ADR-005
 
 graph:
