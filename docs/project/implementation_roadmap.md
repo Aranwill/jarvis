@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-10
-as_of_commit: 2e8c5d7318678caeb67c8906c951935832760003
+as_of_commit: cc9c7373879555a3eb267cd91be5228207427ae8
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -233,10 +233,16 @@ No deben actuar como segundo roadmap.
 3413e8ccb348440aea757d1feccde25c65be011f
 ```
 
-- HEAD material observado post-PR #88:
+- HEAD integrado observado post-PR #99:
 
 ```text
-2e8c5d7318678caeb67c8906c951935832760003
+cc9c7373879555a3eb267cd91be5228207427ae8
+```
+
+- HEAD de producto de la cadena episódica:
+
+```text
+9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
 ```
 
 - Baseline nominal:
@@ -254,7 +260,7 @@ Sprint 7.11 — Reproducible Validation Pipeline Foundation
 - Última unidad de código de producto integrada:
 
 ```text
-Episodic Admission Governed Input Projection Boundary
+Episodic Admission Governed Projection Consumption Boundary
 ```
 
 - Cadena episódica aislada integrada después de Sprint 7.11:
@@ -267,6 +273,8 @@ Assessment Provenance Boundary
 Assessment Producer Authorization Boundary
         ↓
 Governed Input Projection Boundary
+        ↓
+Governed Projection Consumption Boundary
 ```
 
 - Última ruta conversacional/runtime integrada:
@@ -310,17 +318,25 @@ independent validation: PASS
   unidades separadas y no constituyen Sprint 7.12.
 - PR #82 integró Assessment Provenance.
 - PR #85 integró Assessment Producer Authorization.
-- PR #88 integró Governed Input Projection; su candidate
-  `87a7e31e0735edd25a80a693cf3f437f7a1501fc` pasó Validation candidate-bound en
-  Ubuntu, Windows y macOS.
-- `Projection READY != Admission ELIGIBLE`; la proyección no ejecuta la policy
-  de admisión y no existe wiring runtime.
-- Ningún Sprint 7.12 ni unidad posterior a Governed Input Projection está
-  autorizado.
+- PR #88 integró Governed Input Projection.
+- PR #92 integró Governed Projection Consumption; su candidate
+  `5139d95aaa2c30971b3979ca7c3917067856a428` pasó Validation candidate-bound en
+  Ubuntu, Windows y macOS; Ubuntu reportó `645 passed`.
+- `Projection READY != Admission ELIGIBLE`; el adapter de consumo integrado
+  bloquea projections no consumibles y delega una vez a Admission cuando aplica,
+  sin wiring conversacional/runtime, persistencia ni side effects.
+- PR #93 integró únicamente G0/G1 de Candidate Content Identity; G2,
+  implementación y propagación no están autorizados.
+- PR #97–#99 preservaron y diseñaron Evidence-Bound Cognition / Progressive
+  Cognitive Assurance a nivel conceptual/G0/G1, sin implementación runtime ni
+  modificación constitucional.
+- Ningún Sprint 7.12 ni implementación posterior a Governed Projection
+  Consumption está autorizado.
 - RDD Stage 1 está adoptado; RDD Stage 2 no está autorizado.
-- La sincronización del Vault está alineada con `2e8c5d7318678caeb67c8906c951935832760003`
-  y continúa siendo una operación derivada downstream sin autoridad de nuevas
-  unidades.
+- La última reconciliación aceptada del Vault refleja
+  `9438c66e315faa2b4c8c3f0a99d4e1e9619992c3`; los cambios documentales desde
+  PR #93 deben reconciliarse downstream antes del siguiente gate que requiera
+  drift cero.
 
 Como referencia histórica, Sprint 7.9 cerró con candidato funcional:
 
@@ -415,22 +431,25 @@ AUTHORIZED | HOLD | DENIED
 Governed Input Projection
 READY | HOLD | DENIED
         ↓
-STOP
-```
-
-Y permanece separada la policy pura existente:
-
-```text
+Governed Projection Consumption
+BLOCKED | EVALUATED
+        ↓
 Episodic Admission
 REJECT | HOLD | ELIGIBLE
+        ↓
+STOP
 ```
 
 La proyección gobernada reconstruye source authority, confidence, sensitivity,
 source security status y señales de admisión desde assessments candidate-bound
 con provenance y autorización verificadas; temporal validity requiere evidencia
 dedicada autorizada. No confía en campos trust-sensitive de `candidate.control`
-por mera presencia, no aplica last-write-wins y no ejecuta
-`evaluate_episodic_candidate(...)`.
+por mera presencia y no aplica last-write-wins.
+
+La frontera de consumo valida el binding y policy-version de la projection,
+construye una vista efímera con el `effective_context` gobernado y llama
+exactamente una vez a `evaluate_episodic_candidate(...)` solo cuando la
+projection es consumible. No persiste Memory ni crea side effects.
 
 La cadena no introduce Conversation/runtime wiring, persistencia, retrieval,
 Knowledge, cambios al Kernel ni ampliación de autoridad.
@@ -442,14 +461,17 @@ de autoridad.
 
 # 7. Estado del baseline actual
 
-Estado verificado después de integrar PR #88:
+Estado verificado después de integrar PR #99:
 
 ```text
 commit de integración Sprint 7.11:
 3413e8ccb348440aea757d1feccde25c65be011f
 
 HEAD integrado actual:
-2e8c5d7318678caeb67c8906c951935832760003
+cc9c7373879555a3eb267cd91be5228207427ae8
+
+HEAD de producto de la cadena episódica:
+9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
 
 rama permanente:
 main
@@ -458,7 +480,7 @@ Sprint 7.11:
 completado e integrado
 
 última unidad de código de producto integrada:
-Episodic Admission Governed Input Projection Boundary
+Episodic Admission Governed Projection Consumption Boundary
 
 última ruta conversacional/runtime integrada:
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -478,8 +500,9 @@ PASS
 git diff --check:
 PASS
 
-PR #88 candidate validation:
+PR #92 candidate validation:
 success on ubuntu-latest / windows-latest / macos-latest
+645 passed on Ubuntu
 ```
 
 `main` continúa siendo la única rama permanente.
@@ -488,16 +511,23 @@ El G3 original de Episodic Memory Admission fue integrado mediante PR #76 con
 candidate `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b` y merge
 `2d5fe87c304927baeab29e5649f2383030e1a1fd`. Posteriormente se integraron de
 forma separada Assessment Provenance (PR #82), Assessment Producer Authorization
-(PR #85) y Governed Input Projection (PR #88), alcanzando el HEAD material
-`2e8c5d7318678caeb67c8906c951935832760003`.
+(PR #85), Governed Input Projection (PR #88) y Governed Projection Consumption
+(PR #92), alcanzando el HEAD de producto
+`9438c66e315faa2b4c8c3f0a99d4e1e9619992c3`.
 
 La integración de cada unidad requirió autorización separada y no promovió un
-Sprint 7.12. Del mismo modo, la integración de PR #88 no autoriza automáticamente
-ninguna unidad posterior, RDD Stage 2, Memory persistente, admission wiring,
-agentes, tools, Sandbox o ampliación de autoridad.
+Sprint 7.12. Del mismo modo, PR #92 no autoriza automáticamente Candidate Content
+Identity G2, Persistence Authorization, Memory persistente, agentes, tools,
+Sandbox, RDD Stage 2 o ampliación de autoridad.
 
-La reconciliación del Malāk Project Vault representa este HEAD de forma derivada
-y no altera la autoridad del repositorio oficial.
+PR #93 añadió únicamente el G0/G1 de Candidate Content Identity. PR #97–#99 son
+unidades documentales de Evidence-Bound Cognition / Progressive Cognitive
+Assurance; no materializan una nueva ruta runtime.
+
+La última reconciliación aceptada del Malāk Project Vault representa el HEAD de
+producto post-PR #92 de forma derivada. Los cambios documentales posteriores
+deben sincronizarse antes del siguiente gate que requiera drift cero y no alteran
+la autoridad del repositorio oficial.
 ---
 
 # 8. Estado de sprints del bloque 7.x
@@ -531,8 +561,11 @@ EPISODIC MEMORY ADMISSION BOUNDARY INTEGRADO
 ASSESSMENT PROVENANCE BOUNDARY INTEGRADO
 ASSESSMENT PRODUCER AUTHORIZATION BOUNDARY INTEGRADO
 GOVERNED INPUT PROJECTION BOUNDARY INTEGRADO
+GOVERNED PROJECTION CONSUMPTION BOUNDARY INTEGRADO
+CANDIDATE CONTENT IDENTITY G0/G1 INTEGRADO — G2 NO AUTORIZADO
+PROGRESSIVE COGNITIVE ASSURANCE G0/G1 INTEGRADO — RUNTIME NO AUTORIZADO
 SPRINT 7.12 NO AUTORIZADO
-NINGUNA UNIDAD POSTERIOR A GOVERNED INPUT PROJECTION AUTORIZADA
+NINGUNA IMPLEMENTACIÓN POSTERIOR A GOVERNED PROJECTION CONSUMPTION AUTORIZADA
 RDD STAGE 2 NO AUTORIZADO
 ```
 
@@ -581,17 +614,20 @@ La secuencia episódica integrada después de Sprint 7.11 es:
 - PR #76 — `Episodic Memory Admission Boundary`;
 - PR #82 — `Episodic Admission Assessment Provenance Boundary`;
 - PR #85 — `Episodic Admission Assessment Producer Authorization Boundary`;
-- PR #88 — `Episodic Admission Governed Input Projection Boundary`.
+- PR #88 — `Episodic Admission Governed Input Projection Boundary`;
+- PR #92 — `Episodic Admission Governed Projection Consumption Boundary`.
 
-PR #88 cerró en `main@2e8c5d7318678caeb67c8906c951935832760003`.
-Su candidate `87a7e31e0735edd25a80a693cf3f437f7a1501fc` pasó Validation
-candidate-bound en los tres hosted runners principales.
+PR #92 cerró la última unidad de producto de esta cadena en
+`main@9438c66e315faa2b4c8c3f0a99d4e1e9619992c3`. Su candidate
+`5139d95aaa2c30971b3979ca7c3917067856a428` pasó Validation candidate-bound en
+los tres hosted runners principales y Ubuntu reportó `645 passed`.
 
 No está autorizado:
 
 - Sprint 7.12;
-- ninguna unidad posterior a Governed Input Projection;
-- wiring `Projection → Admission`;
+- Candidate Content Identity G2 o su implementación/propagación;
+- Persistence Authorization;
+- Response Assurance runtime;
 - RDD Stage 2;
 - Memory persistente;
 - nuevas capabilities;
@@ -974,7 +1010,7 @@ No constituyen autorización.
 | Procesamiento de Request | `materializado` | Existe flujo de Request mediante Kernel. |
 | Tests del Kernel | `materializado` | Existe validación automatizada del Kernel. |
 | Baseline Kernel v1.0 | `hito_historico` | Nomenclatura histórica; no representa la versión nominal actual. |
-| Memory Layer | `parcialmente_materializado` | Admission, Assessment Provenance, Producer Authorization y Governed Input Projection están materializados de forma aislada; wiring `Projection → Admission`, persistencia, retrieval y Memory operativa permanecen futuras. |
+| Memory Layer | `parcialmente_materializado` | Admission, Assessment Provenance, Producer Authorization, Governed Input Projection y Governed Projection Consumption están materializados de forma aislada; Candidate Content Identity G2, Persistence Authorization, persistencia, retrieval y Memory operativa permanecen futuras. |
 | Knowledge Layer | `preservado` | Capacidad futura relacionada con AKS y retrieval. |
 | RAG | `preservado` | Capacidad futura. |
 | Vector DB | `candidato_tecnologico` | Infraestructura futura sustituible y reconstruible. |
@@ -1088,7 +1124,8 @@ Toda selección futura deberá justificarse contra:
 | Propuesta | Estado | Observación |
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Unidad posterior a Governed Input Projection | No aprobada | Debe definirse después de evaluar el baseline post-PR #88; un candidato conceptual es el consumo gobernado `Projection → Admission`, sin autorización de implementación |
+| Candidate Content Identity G2 | No aprobada | G0/G1 integrado por PR #93; debe congelar canonicalización/identity semantics antes de implementación y no autoriza Persistence Authorization |
+| Cognitive Assurance — Constitutional Impact Review | No aprobado | G0/G1 conceptual integrado por PR #98/#99; requiere primero reconciliación downstream y gate separado antes de cualquier ADR/Blueprint/Constitution change |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
@@ -1318,8 +1355,11 @@ Las diferencias históricas deben conservar contexto temporal.
 # 26. Estado actual de planificación
 
 ```text
-CURRENT MATERIAL HEAD
-2e8c5d7318678caeb67c8906c951935832760003
+CURRENT INTEGRATED HEAD
+cc9c7373879555a3eb267cd91be5228207427ae8
+
+CURRENT PRODUCT HEAD
+9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
 
 SPRINT 7.11 INTEGRATION REFERENCE
 3413e8ccb348440aea757d1feccde25c65be011f
@@ -1337,7 +1377,13 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST PRODUCT UNIT
-Episodic Admission Governed Input Projection Boundary
+Episodic Admission Governed Projection Consumption Boundary
+
+LATEST MEMORY DESIGN UNIT
+Episodic Candidate Content Identity — G0/G1 ONLY
+
+LATEST COGNITIVE ASSURANCE DESIGN
+Progressive Cognitive Assurance — G1 ONLY
 
 LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -1348,8 +1394,11 @@ NONE
 SPRINT 7.12
 NONE AUTHORIZED
 
-UNIT AFTER GOVERNED INPUT PROJECTION
+IMPLEMENTATION AFTER GOVERNED PROJECTION CONSUMPTION
 NONE AUTHORIZED
+
+CANDIDATE CONTENT IDENTITY G2
+NOT AUTHORIZED
 
 RDD STAGE 2
 NOT AUTHORIZED
