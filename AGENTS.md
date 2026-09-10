@@ -315,8 +315,9 @@ checkpoint / rollback
 Reglas operativas:
 
 - un gate debe resolver una preocupación principal;
-- preferir cambios acotados, deterministas y observables;
-- no mezclar refactors, limpieza o mejoras laterales no requeridas;
+- toda modificación debe ser acotada, determinista, observable y proporcional al objetivo autorizado;
+- el candidate debe contener únicamente el cambio mínimo necesario para resolver el invariante u objetivo aprobado;
+- cualquier refactor, limpieza, simplificación, reorganización o mejora lateral no necesaria debe quedar fuera del candidate y requiere un scope/gate separado;
 - comenzar con tests focalizados y ampliar validación de forma proporcional;
 - no avanzar al gate siguiente si el gate actual no está verde;
 - un `INCONCLUSIVE` no equivale a `PASS`;
@@ -347,6 +348,8 @@ Gate N
 Cuando corresponda FULL 4R, `Risk`, `Readability`, `Reliability` y `Resilience` deben registrar evidencia separada; una única etiqueta `4R PASS` no basta como demostración.
 
 El perfil RDD de Malāk es progresivo: Candidate Identity, evidencia candidate-bound, validación independiente y receipts experimentales pueden utilizarse para mejorar trazabilidad, pero `Evidence != Receipt != Validation != Decision != Authority`. Ningún receipt puede aprobar, autorizar, promover o mergear un candidato.
+
+Como adaptación incremental de RDD en Malāk, el alcance del candidate no debe expandirse durante implementación, corrección o review para incorporar mejoras laterales. Una necesidad nueva se registra y se somete a su propio gate; no se introduce silenciosamente en el candidate vigente. Esta regla no activa RDD Stage 2.
 
 Esta disciplina operacional complementa
 `docs/development/engineering_method.md` y `docs/development/malak_construction_protocol.md`; no las reemplaza ni eleva la autoridad de `AGENTS.md` sobre las fuentes normativas.
