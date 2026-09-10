@@ -1,7 +1,7 @@
 ---
 id: ADR-005
 title: Evidence-Bound Final Response Transition
-status: proposed
+status: accepted
 date: 2026-09-10
 author: Hector Rodriguez
 reviewed_by: ChatGPT
@@ -44,11 +44,11 @@ graph:
 
 ## Estado
 
-Proposed
+Accepted
 
-La presencia de este archivo en `main` no constituye aceptación. La decisión solo
-podrá pasar a `Accepted` mediante gate humano explícito y el paquete normativo de
-activación correspondiente.
+ADR-005 fue aceptada explícitamente por el Owner el 2026-09-10 mediante
+el gate humano de activación normativa. La aceptación de esta decisión no
+constituye autorización para implementar runtime.
 
 ```text
 Proposal != Acceptance != Implementation != Authority
@@ -90,9 +90,9 @@ ranking exacto fuera de Constitución.
 
 ---
 
-## Decisión candidata
+## Decisión
 
-Si ADR-005 es aceptada, Malāk adoptará las siguientes propiedades arquitectónicas
+Malāk adopta las siguientes propiedades arquitectónicas
 permanentes.
 
 ### 1. Generación y recuperación no finalizan una respuesta
@@ -255,7 +255,7 @@ Receipt != Authority
 
 ## Impacto arquitectónico
 
-Si se acepta, el impacto normativo mínimo será:
+El impacto normativo mínimo es:
 
 ```text
 Blueprint
@@ -339,22 +339,23 @@ diferida hasta existir Content Identity y binding end-to-end suficiente.
 
 ---
 
-## Criterio de aceptación
+## Estado de activación
 
-ADR-005 solo podrá aceptarse cuando:
+ADR-005 fue aceptada explícitamente por el Owner el 2026-09-10 mediante
+el gate humano de activación normativa.
 
-- [ ] el Owner apruebe explícitamente la decisión;
-- [ ] Blueprint candidate exprese la propiedad sin añadir nueva capa/componente;
-- [ ] Cognitive Constitution candidate limite el delta a dos principios nuevos
-      máximos y aclaraciones ya aprobadas por el impact review;
-- [ ] Governance Constitution permanezca sin cambios;
-- [ ] no exista código/runtime/tests en el mismo candidate;
-- [ ] el diff sea acotado, determinista y candidate-bound;
-- [ ] la validación de CI del candidate sea PASS;
-- [ ] la activación normativa se haga en un gate separado.
+La aceptación se realiza conjuntamente con:
 
-Hasta entonces:
+- Blueprint v0.6.2-alpha;
+- Cognitive Constitution v1.1.0;
+- la indexación correspondiente en Decision Index.
 
-```text
-ADR-005 = Proposed
-```
+Esta aceptación activa únicamente la decisión normativa descrita en este ADR.
+
+No autoriza por sí misma:
+
+- implementación runtime;
+- Candidate Content Identity G2;
+- Persistence Authorization;
+- RDD Stage 2;
+- Sprint 7.12.
