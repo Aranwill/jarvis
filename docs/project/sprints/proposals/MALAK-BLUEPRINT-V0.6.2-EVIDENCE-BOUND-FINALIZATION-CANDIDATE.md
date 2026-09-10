@@ -41,7 +41,7 @@ project version: v0.6.0-alpha
 
 ## 3. Operaciones permitidas exactas
 
-Una futura activación solo podrá aplicar estas cinco operaciones sobre el target:
+Una futura activación solo podrá aplicar estas siete operaciones sobre el target:
 
 ### BP-C1 — frontmatter version
 
@@ -86,7 +86,27 @@ La línea siguiente permanece exactamente:
 **Project Version:** v0.6.0-alpha
 ```
 
-### BP-C5 — nueva regla única R-022
+### BP-C5 — fecha visible de última revisión arquitectónica
+
+```diff
+-**Última revisión arquitectónica:** 2026-08-19
++**Última revisión arquitectónica:** 2026-09-10
+```
+
+El campo frontmatter `date: 2026-07-05` permanece sin cambios, consistente con el patrón de versionado ya aplicado al Blueprint; la revisión vigente se expresa mediante `history.updated` y esta fecha visible de última revisión.
+
+### BP-C6 — versión visible en Estado del Blueprint
+
+Dentro de `# 13. Estado del Blueprint`:
+
+```diff
+-**Blueprint v0.6.1-alpha**
++**Blueprint v0.6.2-alpha**
+```
+
+Esta operación evita que un mismo Blueprint activo declare dos versiones vigentes distintas.
+
+### BP-C7 — nueva regla única R-022
 
 Insertar inmediatamente después de `R-021 — Prohibición de bypass y ciclos de control`
 y antes de `# 10. Componentes Estratégicos`:
