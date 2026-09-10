@@ -98,7 +98,9 @@ El archivo candidato de Blueprint solo puede proponer estas operaciones futuras:
 2. Añadir `ADR-005` a `related.adr`.
 3. Actualizar `history.updated` a `2026-09-10`.
 4. Mantener `Project Version: v0.6.0-alpha` sin cambios.
-5. Añadir exactamente una regla nueva después de `R-021`:
+5. Actualizar `Última revisión arquitectónica` a `2026-09-10`.
+6. Actualizar la versión visible de `# 13. Estado del Blueprint` a `Blueprint v0.6.2-alpha`.
+7. Añadir exactamente una regla nueva después de `R-021`:
    `R-022 — Protected Final Response Transition`.
 
 R-022 puede exigir únicamente:
@@ -215,20 +217,94 @@ La unidad debe detenerse si:
 - se necesita decidir Content Identity G2, Persistence Authorization o RDD Stage 2;
 - el candidate diverge del baseline congelado.
 
-## 10. Gate posterior
+## 10. Gate posterior y patch de activación exacto
 
 La integración de este paquete solo preserva y revisa candidatos normativos.
 
 No activa las nuevas reglas en los documentos de ley vigentes.
 
-Una futura activación deberá requerir autorización separada del Owner y aplicar un
-patch exacto, candidate-bound, sobre:
+Una futura activación requiere autorización separada del Owner y queda limitada a:
 
 ```text
-ADR-005 status / aceptación
+docs/architecture/adr/ADR-005-evidence-bound-final-response-transition.md
 docs/architecture/blueprint.md
 docs/governance/cognitive_constitution.md
-docs/architecture/decisions/decision-index.md (solo si ADR-005 es aceptada)
+docs/architecture/decisions/decision-index.md
 ```
 
-sin implementación runtime en el mismo candidate.
+La activación deberá partir de un HEAD descendiente de este paquete y verificar que, antes de aplicar los hunks normativos, los blobs objetivo continúan siendo exactamente:
+
+```text
+ADR-005 proposed:       89494c24831a7a669386818bd79a7f410716f7dc
+Blueprint active:       939c53d8c354783efa4c7f7a901ea83e1cc77034
+Cognitive Constitution: aed596b55a069ab99b9c09c7aa7e235be706fb0b
+Decision Index:         f911d7a767e59244cfd4221dc52acfccae611d7d
+```
+
+Si cualquiera difiere, la activación debe detenerse y revalidarse.
+
+### 10.1 ADR-005 — aceptación
+
+Solo se permiten estas transformaciones de estado/finalización del ADR:
+
+1. frontmatter `status: proposed` → `status: accepted`;
+2. `## Estado` / `Proposed` → `Accepted`;
+3. reemplazar el bloque que declara que la presencia del archivo no constituye aceptación por una declaración factual de aceptación humana y de ausencia de autorización runtime;
+4. `## Decisión candidata` → `## Decisión`;
+5. `Si ADR-005 es aceptada, Malāk adoptará...` → formulación presente `Malāk adopta...`;
+6. `Si se acepta, el impacto normativo mínimo será:` → `El impacto normativo mínimo es:`;
+7. sustituir la sección terminal `## Criterio de aceptación` y `ADR-005 = Proposed` por una sección factual `## Estado de activación` que registre la aceptación conjunta con Blueprint v0.6.2-alpha, Cognitive Constitution v1.1.0 y Decision Index, y preserve explícitamente que no autoriza runtime, Candidate Content Identity G2, Persistence Authorization, RDD Stage 2 ni Sprint 7.12.
+
+No se permiten cambios a alternativas, consecuencias, riesgos, límites de scope ni semántica arquitectónica ya revisada.
+
+### 10.2 Blueprint — activación
+
+Aplicar únicamente `BP-C1..BP-C7` definidos en el candidate de Blueprint corregido. Ningún otro hunk queda permitido.
+
+### 10.3 Cognitive Constitution — activación
+
+Aplicar únicamente `CC-M1..CC-M4`, `CC-C1..CC-C8` y `CC-N1..CC-N2` definidos en el candidate constitucional. Ningún otro hunk queda permitido.
+
+### 10.4 Decision Index — indexación de ADR-005
+
+Solo se permiten cuatro cambios:
+
+1. añadir a la primera tabla, después de ADR-004:
+
+```text
+| ADR-005 | Accepted | 2026-09-10 | Evidence-Bound Final Response Transition | Architecture / Cognition |
+```
+
+2. añadir a la segunda tabla, después de ADR-004:
+
+```text
+| ADR-005 | Evidence-Bound Final Response Transition | Accepted | 2026-09-10 | Architecture |
+```
+
+3. `Total ADRs: 4` → `Total ADRs: 5`;
+4. `Accepted: 4` → `Accepted: 5`.
+
+No se modifica ninguna ADR previa ni otra estadística.
+
+### 10.5 Prohibiciones del activation candidate
+
+La activación no puede incluir:
+
+```text
+Governance Constitution
+AGENTS.md
+project_context / roadmap
+src/**
+tests/**
+Kernel
+Security
+runtime
+RAG
+Memory persistente
+Candidate Content Identity G2
+Persistence Authorization
+RDD Stage 2
+Sprint 7.12
+```
+
+La reconciliación de documentos derivados y Vault ocurre después de una eventual integración humana del activation candidate.
