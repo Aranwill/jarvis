@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-09
-as_of_commit: 2d5fe87c304927baeab29e5649f2383030e1a1fd
+as_of_date: 2026-09-10
+as_of_commit: 2e8c5d7318678caeb67c8906c951935832760003
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -233,6 +233,12 @@ No deben actuar como segundo roadmap.
 3413e8ccb348440aea757d1feccde25c65be011f
 ```
 
+- HEAD material observado post-PR #88:
+
+```text
+2e8c5d7318678caeb67c8906c951935832760003
+```
+
 - Baseline nominal:
 
 ```text
@@ -248,7 +254,19 @@ Sprint 7.11 — Reproducible Validation Pipeline Foundation
 - Última unidad de código de producto integrada:
 
 ```text
-G3 — Episodic Memory Admission Boundary
+Episodic Admission Governed Input Projection Boundary
+```
+
+- Cadena episódica aislada integrada después de Sprint 7.11:
+
+```text
+Episodic Memory Admission Boundary
+        ↓
+Assessment Provenance Boundary
+        ↓
+Assessment Producer Authorization Boundary
+        ↓
+Governed Input Projection Boundary
 ```
 
 - Última ruta conversacional/runtime integrada:
@@ -285,15 +303,24 @@ FULL 4R: PASS
 independent validation: PASS
 ```
 
-- Validación post-merge sobre `main`: `success`.
+- Validación post-merge de Sprint 7.11 sobre `main`: `success`.
 - `main` continúa siendo la única rama permanente.
 - Sprint 7.11 permanece completado e integrado como último sprint numerado.
-- G3 — `Episodic Memory Admission Boundary` fue autorizado separadamente,
-  implementado e integrado sin constituir Sprint 7.12.
-- Ningún Sprint 7.12 ni unidad posterior a G3 está autorizado.
+- Las fronteras de Memory posteriores fueron autorizadas e integradas como
+  unidades separadas y no constituyen Sprint 7.12.
+- PR #82 integró Assessment Provenance.
+- PR #85 integró Assessment Producer Authorization.
+- PR #88 integró Governed Input Projection; su candidate
+  `87a7e31e0735edd25a80a693cf3f437f7a1501fc` pasó Validation candidate-bound en
+  Ubuntu, Windows y macOS.
+- `Projection READY != Admission ELIGIBLE`; la proyección no ejecuta la policy
+  de admisión y no existe wiring runtime.
+- Ningún Sprint 7.12 ni unidad posterior a Governed Input Projection está
+  autorizado.
 - RDD Stage 1 está adoptado; RDD Stage 2 no está autorizado.
-- La sincronización del Vault es una operación derivada downstream y no
-  constituye autorización de nuevas unidades.
+- La sincronización del Vault está alineada con `2e8c5d7318678caeb67c8906c951935832760003`
+  y continúa siendo una operación derivada downstream sin autoridad de nuevas
+  unidades.
 
 Como referencia histórica, Sprint 7.9 cerró con candidato funcional:
 
@@ -371,12 +398,42 @@ identidad de sesión mediante `new`.
 La implementación conversacional permanece efímera y no introduce
 persistencia, RAG, agentes, Sandbox ni ampliación de autoridad.
 
-G3 incorporó posteriormente una frontera aislada de admisión episódica bajo
-`src/malak/memory/`, con contratos inmutables y una policy determinista
-`REJECT | HOLD | ELIGIBLE`.
+Después de Sprint 7.11 se materializó incrementalmente una cadena episódica
+aislada bajo `src/malak/memory/`:
 
-G3 no introduce wiring desde Conversation, persistencia, retrieval, Knowledge,
-cambios al Kernel, cambios a Security ni ampliación de autoridad.
+```text
+EpisodicMemoryCandidate
+        ↓
+AdmissionAssessment
+        ↓
+Assessment Provenance
+VALID | HOLD | INVALID
+        ↓
+Assessment Producer Authorization
+AUTHORIZED | HOLD | DENIED
+        ↓
+Governed Input Projection
+READY | HOLD | DENIED
+        ↓
+STOP
+```
+
+Y permanece separada la policy pura existente:
+
+```text
+Episodic Admission
+REJECT | HOLD | ELIGIBLE
+```
+
+La proyección gobernada reconstruye source authority, confidence, sensitivity,
+source security status y señales de admisión desde assessments candidate-bound
+con provenance y autorización verificadas; temporal validity requiere evidencia
+dedicada autorizada. No confía en campos trust-sensitive de `candidate.control`
+por mera presencia, no aplica last-write-wins y no ejecuta
+`evaluate_episodic_candidate(...)`.
+
+La cadena no introduce Conversation/runtime wiring, persistencia, retrieval,
+Knowledge, cambios al Kernel ni ampliación de autoridad.
 
 La finalización de estas unidades no autoriza nuevas capabilities ni ampliación
 de autoridad.
@@ -385,14 +442,14 @@ de autoridad.
 
 # 7. Estado del baseline actual
 
-Estado verificado después de integrar G3:
+Estado verificado después de integrar PR #88:
 
 ```text
 commit de integración Sprint 7.11:
 3413e8ccb348440aea757d1feccde25c65be011f
 
 HEAD integrado actual:
-2d5fe87c304927baeab29e5649f2383030e1a1fd
+2e8c5d7318678caeb67c8906c951935832760003
 
 rama permanente:
 main
@@ -401,7 +458,7 @@ Sprint 7.11:
 completado e integrado
 
 última unidad de código de producto integrada:
-G3 — Episodic Memory Admission Boundary
+Episodic Admission Governed Input Projection Boundary
 
 última ruta conversacional/runtime integrada:
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -412,7 +469,7 @@ ninguno
 candidato final Sprint 7.11:
 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
 
-suite del candidato:
+suite del candidato Sprint 7.11:
 388 passed
 
 compileall:
@@ -421,24 +478,26 @@ PASS
 git diff --check:
 PASS
 
-validación post-merge sobre main:
-success
+PR #88 candidate validation:
+success on ubuntu-latest / windows-latest / macos-latest
 ```
 
 `main` continúa siendo la única rama permanente.
 
-G3 fue integrado mediante PR #76 con candidate `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b` y merge
-`2d5fe87c304927baeab29e5649f2383030e1a1fd`. La validación candidate-bound registró `431 passed`,
-`compileall: PASS` y `git diff --check: PASS`; la validación post-merge sobre
-`main` concluyó con `success`.
+El G3 original de Episodic Memory Admission fue integrado mediante PR #76 con
+candidate `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b` y merge
+`2d5fe87c304927baeab29e5649f2383030e1a1fd`. Posteriormente se integraron de
+forma separada Assessment Provenance (PR #82), Assessment Producer Authorization
+(PR #85) y Governed Input Projection (PR #88), alcanzando el HEAD material
+`2e8c5d7318678caeb67c8906c951935832760003`.
 
-La integración de Sprint 7.11 no autorizó automáticamente G3: G3 requirió una
-autorización separada del Owner. Del mismo modo, la integración de G3 no
-autoriza automáticamente ninguna unidad posterior, Sprint 7.12, RDD Stage 2,
-Memory persistente, agentes, tools, Sandbox o ampliación de autoridad.
+La integración de cada unidad requirió autorización separada y no promovió un
+Sprint 7.12. Del mismo modo, la integración de PR #88 no autoriza automáticamente
+ninguna unidad posterior, RDD Stage 2, Memory persistente, admission wiring,
+agentes, tools, Sandbox o ampliación de autoridad.
 
-La reconciliación del Malāk Project Vault representa este baseline de forma
-derivada y no altera la autoridad del repositorio oficial.
+La reconciliación del Malāk Project Vault representa este HEAD de forma derivada
+y no altera la autoridad del repositorio oficial.
 ---
 
 # 8. Estado de sprints del bloque 7.x
@@ -458,9 +517,9 @@ derivada y no altera la autoridad del repositorio oficial.
 | 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
 | 7.11 | Completado | Reproducible Validation Pipeline Foundation; integrado y validado post-merge |
 
-G3 — `Episodic Memory Admission Boundary` fue una unidad separada, autorizada e
-integrada después de Sprint 7.11. No constituye Sprint 7.12 y no modifica la
-numeración histórica del bloque 7.x.
+Las unidades episódicas posteriores a Sprint 7.11 fueron autorizadas e integradas
+por separado. No constituyen Sprint 7.12 y no modifican la numeración histórica
+del bloque 7.x.
 
 ---
 
@@ -468,9 +527,12 @@ numeración histórica del bloque 7.x.
 
 ```text
 SPRINT 7.11 COMPLETADO E INTEGRADO
-G3 EPISODIC MEMORY ADMISSION BOUNDARY INTEGRADO COMO UNIDAD SEPARADA
+EPISODIC MEMORY ADMISSION BOUNDARY INTEGRADO
+ASSESSMENT PROVENANCE BOUNDARY INTEGRADO
+ASSESSMENT PRODUCER AUTHORIZATION BOUNDARY INTEGRADO
+GOVERNED INPUT PROJECTION BOUNDARY INTEGRADO
 SPRINT 7.12 NO AUTORIZADO
-NINGUNA UNIDAD POSTERIOR A G3 AUTORIZADA
+NINGUNA UNIDAD POSTERIOR A GOVERNED INPUT PROJECTION AUTORIZADA
 RDD STAGE 2 NO AUTORIZADO
 ```
 
@@ -514,21 +576,22 @@ post-merge Validation:
 success
 ```
 
-G3 fue integrado mediante PR #76.
+La secuencia episódica integrada después de Sprint 7.11 es:
 
-Evidencia G3:
+- PR #76 — `Episodic Memory Admission Boundary`;
+- PR #82 — `Episodic Admission Assessment Provenance Boundary`;
+- PR #85 — `Episodic Admission Assessment Producer Authorization Boundary`;
+- PR #88 — `Episodic Admission Governed Input Projection Boundary`.
 
-- candidate: `e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b`;
-- merge: `2d5fe87c304927baeab29e5649f2383030e1a1fd`;
-- pytest: `431 passed`;
-- compileall: `PASS`;
-- `git diff --check`: `PASS`;
-- post-merge Validation: `success`.
+PR #88 cerró en `main@2e8c5d7318678caeb67c8906c951935832760003`.
+Su candidate `87a7e31e0735edd25a80a693cf3f437f7a1501fc` pasó Validation
+candidate-bound en los tres hosted runners principales.
 
 No está autorizado:
 
 - Sprint 7.12;
-- ninguna unidad posterior a G3;
+- ninguna unidad posterior a Governed Input Projection;
+- wiring `Projection → Admission`;
 - RDD Stage 2;
 - Memory persistente;
 - nuevas capabilities;
@@ -541,8 +604,8 @@ No está autorizado:
 La sincronización del Vault puede continuar como reconciliación derivada del
 baseline integrado, pero no constituye un nuevo sprint ni una autorización.
 
-Cualquier unidad posterior a G3 deberá atravesar nuevamente el proceso completo
-de admisión y aprobación.
+Cualquier unidad posterior deberá atravesar nuevamente el proceso completo de
+admisión y aprobación.
 ---
 
 # 10. Secure Context Lifecycle Foundation — estado preservado
@@ -911,7 +974,7 @@ No constituyen autorización.
 | Procesamiento de Request | `materializado` | Existe flujo de Request mediante Kernel. |
 | Tests del Kernel | `materializado` | Existe validación automatizada del Kernel. |
 | Baseline Kernel v1.0 | `hito_historico` | Nomenclatura histórica; no representa la versión nominal actual. |
-| Memory Layer | `parcialmente_materializado` | G3 materializa la frontera de admisión episódica; persistencia, retrieval y Memory operativa permanecen futuras. |
+| Memory Layer | `parcialmente_materializado` | Admission, Assessment Provenance, Producer Authorization y Governed Input Projection están materializados de forma aislada; wiring `Projection → Admission`, persistencia, retrieval y Memory operativa permanecen futuras. |
 | Knowledge Layer | `preservado` | Capacidad futura relacionada con AKS y retrieval. |
 | RAG | `preservado` | Capacidad futura. |
 | Vector DB | `candidato_tecnologico` | Infraestructura futura sustituible y reconstruible. |
@@ -1025,7 +1088,7 @@ Toda selección futura deberá justificarse contra:
 | Propuesta | Estado | Observación |
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Unidad posterior a G3 | No aprobada | Debe definirse después de evaluar la evidencia y el baseline resultante de G3 |
+| Unidad posterior a Governed Input Projection | No aprobada | Debe definirse después de evaluar el baseline post-PR #88; un candidato conceptual es el consumo gobernado `Projection → Admission`, sin autorización de implementación |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
@@ -1256,7 +1319,7 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT MATERIAL HEAD
-2d5fe87c304927baeab29e5649f2383030e1a1fd
+2e8c5d7318678caeb67c8906c951935832760003
 
 SPRINT 7.11 INTEGRATION REFERENCE
 3413e8ccb348440aea757d1feccde25c65be011f
@@ -1274,7 +1337,7 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST PRODUCT UNIT
-G3 — Episodic Memory Admission Boundary
+Episodic Admission Governed Input Projection Boundary
 
 LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -1285,7 +1348,7 @@ NONE
 SPRINT 7.12
 NONE AUTHORIZED
 
-UNIT AFTER G3
+UNIT AFTER GOVERNED INPUT PROJECTION
 NONE AUTHORIZED
 
 RDD STAGE 2
