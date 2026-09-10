@@ -81,18 +81,18 @@ Una unidad anterior no autoriza la siguiente.
 ## 3. Estado de referencia
 
 ```text
-Repositorio:                       Aranwill/jarvis
-Rama permanente:                   main
-HEAD de referencia:                3788caf68ac14da37040f06a0da3e0fe9db5a2db
-Baseline nominal:                  v0.6.0-alpha
-Último sprint numerado:            Sprint 7.11
-Última ruta conversacional/runtime:Sprint 7.10
-Última unidad de producto:         Governed Projection Consumption
-Última unidad de diseño:           Candidate Content Identity G0/G1
-Sprint activo autorizado:          ninguno
-Implementación activa autorizada:  ninguna
-Sprint 7.12:                       no autorizado
-RDD Stage 2:                       no autorizado
+Repositorio:                        Aranwill/jarvis
+Rama permanente:                    main
+HEAD de referencia:                 3788caf68ac14da37040f06a0da3e0fe9db5a2db
+Baseline nominal:                   v0.6.0-alpha
+Último sprint numerado:             Sprint 7.11
+Última ruta conversacional/runtime: Sprint 7.10
+Última unidad de producto:          Governed Projection Consumption
+Última unidad de diseño:            Candidate Content Identity G0/G1
+Sprint activo autorizado:           ninguno
+Implementación activa autorizada:   ninguna
+Sprint 7.12:                        no autorizado
+RDD Stage 2:                        no autorizado
 ```
 
 El HEAD actual integra PR #93, que agrega únicamente G0/G1 de Candidate Content
@@ -476,25 +476,239 @@ PR #93 fue docs-only y su candidate
 
 ---
 
-## 15. Disposición de planificación legacy
+## 15. Iniciativas incorporadas a planificación futura
 
-Los documentos históricos, fichas de sprint, commits y snapshots conservan su
-valor de trazabilidad. Este roadmap no debe duplicar todo su contenido.
+Estas iniciativas siguen reconocidas. Su presencia aquí **no aprueba diseño,
+implementación ni número de sprint**.
 
-`ROADMAP.md` funciona como punto de entrada; este archivo es la fuente derivada
-canónica de planificación actual. `documents/projects/jarvis/ideas.md` conserva
-ideas y `docs/project/concepts/` conserva referencias conceptuales.
+### 15.1 Sandbox Containment & Evaluation Evidence Foundation
+
+Propósito futuro:
+
+- aislamiento y entornos descartables;
+- control de red, archivos y procesos;
+- límites de CPU/RAM/VRAM/disco/tiempo;
+- telemetría externa al agente;
+- evidencia reproducible, snapshots y hashes;
+- kill switch, timeout y quarantine;
+- pruebas de contención y revisión humana.
+
+Estado: `planificación futura reconocida / no aprobada`.
+
+### 15.2 Segmented Domain Governance Foundation
+
+Propósito futuro:
+
+- Malāk como control plane horizontal;
+- Domain Packs subordinados;
+- precedencia de políticas;
+- prohibición de ampliación de autoridad desde capas inferiores;
+- Kernel libre de lógica sectorial.
+
+Estado: `planificación futura reconocida / no aprobada`.
+
+### 15.3 Knowledge Intake & External Evidence Governance
+
+Propósito futuro:
+
+- gobernar fuentes externas;
+- conservar originales y provenance;
+- registrar autoridad, licencia y vigencia;
+- tratar índices/grafos como proyecciones reconstruibles;
+- saneamiento, validación y prevención de autocontaminación.
+
+Estado: `planificación futura reconocida / no aprobada`.
+
+### 15.4 Security Learning, Adversarial Evaluation & Deception
+
+Propósito futuro:
+
+- laboratorios locales y CTF autorizados;
+- aprendizaje defensivo;
+- evaluación externa de agentes;
+- deception defensiva aislada;
+- transformación de evidencia en propuestas de hardening.
+
+No habilita pentesting no autorizado ni respuesta ofensiva.
+
+Estado: `planificación futura reconocida / no aprobada`.
+
+---
+
+## 16. Legacy Planning & Disposition Registry
+
+El archivo `docs/project/roadmap.md` conserva planificación temprana. Su estado es
+histórico/legacy, pero no se considera descartado por mera antigüedad.
+
+Estados informativos:
 
 ```text
-idea != roadmap
-roadmap != specification
-specification != approval
-approval != authority beyond scope
+materializado
+parcialmente_materializado
+preservado
+evolucionado
+candidato_tecnologico
+requiere_revision
+hito_historico
+```
+
+### 16.1 Disposición de elementos legacy
+
+| Elemento legacy | Disposición | Interpretación actual |
+|---|---|---|
+| Ollama | `materializado` | Existe `OllamaRuntime`; continúa detrás de `LLMRuntime`. |
+| Open WebUI | `candidato_tecnologico`, `hito_historico` | No es componente obligatorio. |
+| Qwen2.5 | `candidato_tecnologico` | Modelo histórico/candidato; Malāk sigue Model Agnostic. |
+| DeepSeek | `candidato_tecnologico` | Modelo histórico/candidato; no dependencia permanente. |
+| Validación RAG | `preservado` | RAG continúa como capacidad futura. |
+| Optimización embeddings | `preservado` | Relevante para recuperación futura. |
+| Base documental | `evolucionado` | Evolucionó hacia Knowledge, AKS y retrieval futuro. |
+| n8n | `candidato_tecnologico` | Automatización futura; n8n no es requisito. |
+| Automatizaciones | `preservado` | Capacidad futura gobernada. |
+| ChromaDB | `hito_historico`, `candidato_tecnologico` | Una Vector DB futura debe ser sustituible. |
+| Memoria Documental | `evolucionado` | Evolucionó hacia Memory / Knowledge / AKS. |
+| Seguridad IA | `evolucionado` | Evolucionó hacia las fundaciones de seguridad actuales. |
+| OWASP LLM Top 10 | `preservado` | Referencia futura de seguridad. |
+| Prompt Injection | `preservado` | Amenaza para contenido externo, tools y retrieval. |
+| SSRF | `preservado` | Amenaza para futuras superficies de red. |
+| Auditoría documental | `evolucionado` | Relacionada con AKS, trazabilidad y governance. |
+| Voice | `preservado` | Capacidad futura. |
+| Whisper | `candidato_tecnologico` | Posible tecnología futura de Voice. |
+| Piper | `candidato_tecnologico` | Posible tecnología futura de Voice. |
+| Agentes | `preservado` | Capacidad futura sujeta a seguridad y gobernanza. |
+| Module Registry | `requiere_revision` | Responsabilidad legacy todavía no resuelta. |
+| Event Bus | `preservado` | Concepto sujeto a verificación del baseline antes de promoción. |
+| Lifecycle Manager | `requiere_revision` | Comparar intención legacy con lifecycle actual. |
+| Health Manager | `preservado`, `requiere_revision` | Responsabilidad mínima pendiente de definición. |
+| HelloCapability | `hito_historico` | Hito mínimo reemplazado por capabilities funcionales. |
+| Procesamiento de Request | `materializado` | Existe flujo mediante Kernel. |
+| Tests del Kernel | `materializado` | Existe validación automatizada. |
+| Baseline Kernel v1.0 | `hito_historico` | Nomenclatura histórica. |
+| Memory Layer | `parcialmente_materializado` | Admission, provenance, producer authorization, projection y consumption están materializados; Content Identity está en G0/G1; persistencia/retrieval siguen futuras. |
+| Knowledge Layer | `preservado` | Capacidad futura relacionada con AKS y retrieval. |
+| RAG | `preservado` | Capacidad futura. |
+| Vector DB | `candidato_tecnologico` | Infraestructura futura sustituible/reconstruible. |
+| Planning Engine | `parcialmente_materializado` | Existe Planner mínimo; planificación avanzada requiere diseño propio. |
+| Reasoning Engine | `preservado`, `requiere_revision` | Intención cognitiva futura. |
+| Capabilities reales | `parcialmente_materializado` | Existen capabilities funcionales; futuras siguen Capability First. |
+| FastAPI | `candidato_tecnologico` | Tecnología candidata, no compromiso. |
+| IoT | `preservado` | Capacidad futura. |
+| Vision | `preservado` | Capacidad futura. |
+| OSINT | `evolucionado` | Parte evolucionó hacia Evidence Acquisition. |
+| Workflows | `preservado` | Capacidad futura de automatización/orquestación. |
+| Malāk Platform v1.0 | `preservado` | Visión de largo plazo; no release plan aprobado. |
+
+---
+
+## 17. Propuestas pendientes
+
+| Propuesta | Estado | Observación |
+|---|---|---|
+| Candidate Content Identity — G2 | No aprobada | Próxima unidad candidata solo después de docs + Vault + Owner gate. |
+| Content Identity propagation | No diseñada/no aprobada | Deberá evaluarse después de una identidad material, antes de Persistence Authorization. |
+| Persistence Authorization | Diferida | `ELIGIBLE` no puede convertirse automáticamente en permiso de escritura. |
+| Preparación de AKS para GraphRAG | No aprobada | No implica implementar GraphRAG. |
+| Module Registry legacy | Requiere revisión | Determinar si sigue siendo necesario. |
+| Lifecycle Manager legacy | Requiere revisión | Comparar intención original con lifecycle actual. |
+| Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de proponer componente. |
+
+La tabla no establece secuencia obligatoria salvo donde exista un gate explícito.
+
+---
+
+## 18. Regla de admisión de Capabilities
+
+Una Capability solo debe incorporarse cuando añada funcionalidad:
+
+```text
+real
+necesaria
+permanente
+```
+
+No crear Capabilities solo para validar routing, Registry, cobertura artificial o
+una secuencia histórica.
+
+La infraestructura interna se valida con tests, doubles, fixtures, contratos e
+integración controlada.
+
+---
+
+## 19. Restricción estructural
+
+Antes de agentes, tools externas, automatización del OS, navegación, mensajería,
+Memory sensible o Capabilities de alto riesgo deben existir las foundations de
+seguridad y gobernanza requeridas.
+
+Ninguna propuesta puede por arrastre:
+
+- convertir Kernel en lógica de negocio;
+- acoplar Kernel a runtime/provider/model;
+- añadir dependencias no aprobadas;
+- modificar contratos centrales sin revisión;
+- asumir que el hardware actual define arquitectura permanente.
+
+---
+
+## 20. Fuentes relacionadas
+
+Evidencia detallada del bloque 7.x vive en:
+
+```text
+docs/project/sprints/SPRINT-7.0.md
+...
+docs/project/sprints/SPRINT-7.11.md
+```
+
+Registro de ideas:
+
+```text
+documents/projects/jarvis/ideas.md
+```
+
+Referencias conceptuales:
+
+```text
+docs/project/concepts/
+```
+
+```text
+Sprint file != authorization of next sprint
+Idea != roadmap
+Concept != implementation permission
 ```
 
 ---
 
-## 16. Restricciones de la siguiente iteración
+## 21. Disposición de `docs/project/roadmap.md`
+
+`docs/project/roadmap.md` se conserva como planificación legacy original y debe
+dirigir hacia este archivo para estado vigente.
+
+No se elimina ni se reinterpreta silenciosamente. Una futura propuesta para
+archivarlo o sustituirlo requiere comprobar primero que no contenga información
+histórica o de planificación única.
+
+---
+
+## 22. Regla de no duplicación
+
+Objetivo documental:
+
+```text
+un concepto → una ubicación responsable
+```
+
+- `project_context.md`: snapshot operativo derivado;
+- este archivo: planificación derivada canónica;
+- `ROADMAP.md`: punto de entrada;
+- `ideas.md`: registro de ideas;
+- `concepts/`: referencias conceptuales;
+- `sprints/`: evidencia de ejecución.
+
+---
+
+## 23. Restricciones de la siguiente iteración
 
 Hasta autorización separada no se debe:
 
@@ -508,12 +722,11 @@ Hasta autorización separada no se debe:
 - conectar Memory al runtime conversacional;
 - introducir agentes, tools, Sandbox, navegación o MCP/A2A operativo;
 - añadir PKI, firmas, nonce o replay protection por arrastre;
-- modificar Kernel, Blueprint, Constituciones o Security Control Plane sin gate
-  propio.
+- modificar Kernel, Blueprint, Constituciones o Security Control Plane sin gate propio.
 
 ---
 
-## 17. Próximo checkpoint
+## 24. Próximo checkpoint
 
 ```text
 CURRENT:
@@ -531,3 +744,19 @@ G2 Candidate Content Identity Specification
 ```
 
 Nada en este documento constituye esa autorización.
+
+---
+
+## 25. Principio de cierre
+
+La planificación de Malāk debe permanecer:
+
+```text
+trazable
+→ gobernada
+→ incremental
+→ reversible
+→ subordinada a autoridad superior
+```
+
+El roadmap organiza intención; no crea autoridad.
