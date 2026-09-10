@@ -1,6 +1,6 @@
 # Malāk Construction Protocol
 
-Versión: 0.2.0
+Versión: 0.2.1
 
 Estado: Activo
 
@@ -66,6 +66,8 @@ baseline estable
         ↓
 reconciliación derivada
 ```
+
+Para todo sprint material, este flujo constituye una obligación de ejecución y evidencia, no una guía aspiracional ni un checklist que dependa de un recordatorio conversacional del Owner. El asistente o agente debe aplicar automáticamente cada etapa que corresponda, demostrar su resultado o detenerse si no puede hacerlo.
 
 La existencia de una idea, concepto, research gap, roadmap o receipt no constituye autorización para implementar.
 
@@ -134,6 +136,32 @@ Aranwill/malak-vault-sync-agent
 La fuente oficial continúa siendo `Aranwill/jarvis/main`.
 
 El Vault es una proyección derivada y el Sync Agent un mecanismo determinista de observación y propuesta.
+
+## 3.4 Contexto de decisión activo
+
+Antes de determinar el próximo cambio, admitir un sprint o modificar documentación oficial, la revisión debe identificar si existen gates, proposals o packets activos materialmente relacionados con el trabajo actual y leer los que resulten aplicables.
+
+No se requiere releer de forma indiscriminada todo `docs/project/sprints/proposals/**` en cada interacción. La selección debe ser explícita y basada en estado y relevancia.
+
+Una proposal o gate record permanece activo mientras conserve una decisión, restricción, candidate, finding o condición de promoción todavía no cerrada, rechazada, superseded o promovida.
+
+Cuando una proposal haya sido promovida correctamente:
+
+```text
+proposal / gate record
+→ trazabilidad histórica de la decisión
+
+fuente normativa, especificación o baseline promovido
+→ dueño vigente de la verdad aplicable
+```
+
+Una proposal activa debe poder restringir el trabajo por su scope o findings, pero no adquiere por ello autoridad superior a las fuentes normativas.
+
+```text
+proposal != authority
+promotion evidence != normative owner
+historical record != current state
+```
 
 ---
 
@@ -275,6 +303,48 @@ INCONCLUSIVE
 
 No se avanza al gate siguiente si existe un `FAIL` bloqueante o un `INCONCLUSIVE` no resuelto.
 
+## 5.1 Envelope obligatorio de sprint material
+
+Todo sprint se considera material por defecto salvo clasificación explícita y justificada como microcambio no material aprobada por el Owner.
+
+Un sprint material no puede cerrarse únicamente porque el cambio exista o porque la suite esté verde. Debe ejecutar y dejar evidencia de este envelope, según aplicabilidad:
+
+```text
+Owner authorization
+        ↓
+baseline + scope freeze
+        ↓
+Candidate Identity
+        ↓
+candidate-bound evidence (RDD Stage 1)
+        ↓
+validación focalizada
+        ↓
+FULL 4R
+        ↓
+bounded correction
+        ↓
+validación independiente
+        ↓
+E2E del flujo o cadena afectada
+        ↓
+CI / evidencia candidate-bound
+        ↓
+revisión humana
+        ↓
+Ready humano
+        ↓
+merge humano
+        ↓
+validación post-merge
+        ↓
+reconciliación derivada cuando corresponda
+```
+
+No basta con mencionar RDD, 4R o E2E en una ficha o PR. Debe existir evidencia verificable de que las etapas aplicables fueron ejecutadas sobre el candidato correcto.
+
+El E2E no puede omitirse silenciosamente. Cuando no exista un runtime E2E aplicable, el cierre debe registrar la razón y ejecutar la validación end-to-end equivalente de la cadena realmente afectada —por ejemplo coherencia entre documentos, contratos, estados o artefactos— en lugar de declarar simplemente `N/A` sin evidencia.
+
 ---
 
 # 6. Cuatro lentes obligatorios
@@ -288,7 +358,7 @@ Reliability
 Resilience
 ```
 
-Cuando corresponda FULL 4R, cada lente debe producir evidencia separada.
+En todo sprint material, FULL 4R es obligatorio y cada lente debe producir evidencia separada.
 
 Formato mínimo recomendado:
 
@@ -302,6 +372,8 @@ residual_risk
 ```
 
 No debe utilizarse `4R PASS` como única evidencia cuando el riesgo requiera demostrar qué fue revisado por cada lente.
+
+Para un microcambio no material aprobado explícitamente, la profundidad puede ser proporcional, pero las cuatro lentes deben al menos recibir disposición explícita; una lente omitida requiere justificación.
 
 El escalamiento dinámico de revisión continúa regido por `engineering_method.md`.
 
@@ -346,9 +418,13 @@ Las métricas son evidencia; no son autoridad.
 
 ## 8.1 Estado
 
-Malāk no adopta todavía Receipt-Driven Development como metodología completa ni autoriza infraestructura específica de receipts.
+Malāk ha adoptado **RDD Stage 1 — Structured Evidence Manifest** como parte de su disciplina de construcción.
 
-Sí adopta de forma progresiva los patrones maduros que ya convergen con su Engineering Method:
+Stage 1 utiliza `MALAK-EVIDENCE-MANIFEST/v1`, definido en `docs/development/evidence_manifest.md`, para ligar evidencia de construcción al candidato exacto evaluado.
+
+Malāk no adopta Receipt-Driven Development como metodología externa completa ni concede autoridad a RDD. **RDD Stage 2 no está autorizado.**
+
+El perfil activo conserva:
 
 - Candidate Identity;
 - evidencia ligada al candidato;
@@ -369,7 +445,7 @@ Evidence
 != Authority
 ```
 
-Un receipt describe evidencia relativa a un candidato exacto. No aprueba, autoriza, promueve, mergea ni modifica gobernanza.
+Un manifest o receipt describe evidencia relativa a un candidato exacto. No aprueba, autoriza, promueve, mergea ni modifica gobernanza.
 
 ## 8.3 Candidate-bound evidence
 
@@ -384,28 +460,25 @@ candidate changes
 
 La identidad puede utilizar commit SHA, hash de contenido u otro identificador determinista aprobado.
 
-## 8.4 Evidence Receipt mínimo experimental
+## 8.4 Evidence Manifest v1
 
-Antes de implementar un subsistema RDD, los sprints pueden probar un perfil documental mínimo:
+Para todo candidate material que alcance cierre de validación, la evidencia RDD Stage 1 debe representarse mediante `MALAK-EVIDENCE-MANIFEST/v1` o evidencia estructurada equivalente explícitamente aprobada que preserve las mismas invariantes.
+
+El manifest debe, como mínimo:
 
 ```text
-receipt_id
-receipt_type
-baseline_identity
-candidate_identity
-specification_reference
-gate
-risk_class
-validations
-4R_results
-findings
-correction_round
-metrics
-evidence_references
-validator
-result
-generated_at
+bind baseline exacto
+bind candidate exacto
+referenciar scope / specification / gate
+registrar validaciones
+registrar FULL 4R
+preservar findings y correction rounds
+identificar validator
+registrar result
+mantener authority_effect = none
 ```
+
+No constituye un receipt de Stage 2.
 
 Resultados permitidos:
 
@@ -415,33 +488,36 @@ FAIL
 INCONCLUSIVE
 ```
 
-Resultados prohibidos para un receipt:
+Resultados o efectos prohibidos:
 
 ```text
 APPROVED
 AUTHORIZED
 MERGED
+PROMOTED
+RELEASED
+authority_effect != none
 ```
 
 ## 8.5 Evolución por evidencia
 
-Ruta de maduración candidata:
+Estado y ruta de maduración:
 
 ```text
-Stage 0 — Candidate Identity + evidencia actual
-Stage 1 — Structured Evidence Manifest
-Stage 2 — Candidate-Bound Validation Receipt
-Stage 3 — Candidate Evidence Package
-Stage 4 — Integrity hardening
+Stage 0 — Candidate Identity + evidencia base          integrado históricamente
+Stage 1 — Structured Evidence Manifest                 ADOPTED / ACTIVE
+Stage 2 — Candidate-Bound Validation Receipt           NOT AUTHORIZED
+Stage 3 — Candidate Evidence Package                   future candidate
+Stage 4 — Integrity hardening                          future candidate
 Stage 5 — agent-produced candidates + external validation
 Stage 6 — governed multi-agent candidate evaluation
 ```
 
-Ninguna etapa se implementa por secuencia automática.
+Ninguna etapa posterior se implementa por secuencia automática.
 
 Cada promoción requiere necesidad demostrada, evidencia de utilidad y aprobación separada.
 
-Se debe preferir primero usar el perfil documental en uno o más sprints y medir su utilidad antes de crear un contrato, servicio, base de datos, PKI o ledger.
+La adopción de Stage 1 no autoriza un servicio, base de datos, PKI, ledger, auto-finalización, auto-promoción ni auto-merge.
 
 ---
 
@@ -521,6 +597,78 @@ Findings relevantes deben clasificarse mediante la taxonomía de drift vigente.
 
 ---
 
-# 12. Regla final
+# 12. Frontera de modificación de documentos de ley
+
+Los documentos de ley y promoción normativa de Malāk poseen una frontera de escritura más estricta que la documentación ordinaria.
+
+Esta frontera aplica, como mínimo, a:
+
+```text
+docs/governance/cognitive_constitution.md
+docs/governance/governance_constitution.md
+docs/architecture/blueprint.md
+docs/architecture/adr/** cuando una ADR crea, acepta o modifica arquitectura normativa
+docs/architecture/decisions/decision-index.md cuando forma parte de una promoción normativa
+```
+
+Para estos documentos:
+
+```text
+assistant / agent
+→ puede leer
+→ puede analizar
+→ puede señalar conflictos
+→ puede proponer un patch exacto
+→ puede validar el diff y la evidencia
+
+assistant / agent
+→ NO puede materializar remotamente el cambio normativo
+→ NO puede escribirlo mediante API, connector o automatización
+→ NO puede crear unilateralmente una branch/PR normativa desde su propia edición
+```
+
+La materialización de la ley debe realizarla el Owner desde su consola local bajo supervisión directa y revisión hunk-by-hunk.
+
+Secuencia mínima:
+
+```text
+mostrar contenido vigente
+        ↓
+justificar cada modificación
+        ↓
+Owner aplica el patch mínimo desde consola
+        ↓
+git diff -- <archivo>
+        ↓
+revisión conjunta hunk-by-hunk
+        ↓
+FULL 4R + E2E de coherencia normativa
+        ↓
+candidate-bound evidence
+        ↓
+commit / push / PR por acción humana
+        ↓
+Ready humano
+        ↓
+merge humano
+```
+
+La ausencia de una instrucción conversacional que repita esta frontera no la desactiva. Un asistente o agente que detecte que el target pertenece a esta categoría debe aplicar automáticamente la restricción y detener cualquier escritura remota.
+
+Un proposal, candidate patch o research record no normativo puede preparar la decisión, pero no sustituye el acto humano de modificar la ley.
+
+```text
+proposal != law
+candidate patch != activation
+technical PASS != normative authority
+```
+
+---
+
+# 13. Regla final
+
+El cumplimiento de este protocolo es comportamiento por defecto del proceso de construcción de Malāk. No depende de que el Owner recuerde o reitere en cada sprint RDD, 4R, E2E, bounded correction, validación independiente, Human in Control o la frontera de documentos normativos.
+
+Si una etapa obligatoria se omite, debe tratarse como finding de proceso y resolverse antes de declarar el sprint cerrado.
 
 > **Malāk crece desde evidencia verificable, reusa y revalida su diseño futuro preservado, cambia mediante gates pequeños y solo convierte evidencia en baseline a través de gobernanza humana.**
