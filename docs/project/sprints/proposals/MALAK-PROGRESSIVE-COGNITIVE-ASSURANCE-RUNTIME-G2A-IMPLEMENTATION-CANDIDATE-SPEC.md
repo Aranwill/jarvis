@@ -5,7 +5,8 @@ authority: owner_authorized_candidate
 language: es
 as_of_date: 2026-09-11
 source_baseline: cba99129e1f18f465332329c7edf1018e4379ccb
-validated_candidate_sha: 80fa51e1292f4c4e5b72a5d54feaee39e7b26379
+validated_code_candidate_sha: 80fa51e1292f4c4e5b72a5d54feaee39e7b26379
+final_pr_head_validated_sha: a606e95abd587f0a276c77f50fda0f18f39137b8
 owner_authorized_at: 2026-09-11
 implementation_authorized: true
 g2a_authorized: true
@@ -350,13 +351,19 @@ También se prueban invariantes estructurales de IDs, content y tipos booleanos.
 
 ## 15. Evidencia de validación candidate-bound
 
-Candidate final certificado:
+Código G2A certificado en:
 
 ```text
 80fa51e1292f4c4e5b72a5d54feaee39e7b26379
 ```
 
-GitHub Actions Validation run `115` ejecutó la matriz:
+El HEAD documental posterior certificado de la PR es:
+
+```text
+a606e95abd587f0a276c77f50fda0f18f39137b8
+```
+
+GitHub Actions Validation run `116` ejecutó la matriz sobre ese HEAD final:
 
 ```text
 ubuntu-latest  → success
