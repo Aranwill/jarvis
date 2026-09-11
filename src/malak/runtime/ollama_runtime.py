@@ -31,6 +31,8 @@ class OllamaRuntime(LLMRuntime):
         timeout_seconds: float = 600.0,
         keep_alive: int | str = 0,
         metric_store: RuntimeMetricSink | None = None,
+        max_request_bytes: int = 4 * 1024 * 1024,
+        max_response_bytes: int = 16 * 1024 * 1024,
     ) -> None:
         normalized_base_url = base_url.strip().rstrip("/")
 
@@ -40,10 +42,30 @@ class OllamaRuntime(LLMRuntime):
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be greater than zero")
 
+        if (
+            isinstance(max_request_bytes, bool)
+            or not isinstance(max_request_bytes, int)
+            or max_request_bytes <= 0
+        ):
+            raise ValueError(
+                "max_request_bytes must be a positive integer"
+            )
+
+        if (
+            isinstance(max_response_bytes, bool)
+            or not isinstance(max_response_bytes, int)
+            or max_response_bytes <= 0
+        ):
+            raise ValueError(
+                "max_response_bytes must be a positive integer"
+            )
+
         self._base_url = normalized_base_url
         self._timeout_seconds = timeout_seconds
         self._keep_alive = keep_alive
         self._metric_store = metric_store
+        self._max_request_bytes = max_request_bytes
+        self._max_response_bytes = max_response_bytes
         self._last_metrics: RuntimeMetrics | None = None
 
     @property
@@ -106,6 +128,12 @@ class OllamaRuntime(LLMRuntime):
 
         encoded_payload = json.dumps(payload).encode("utf-8")
 
+        if len(encoded_payload) > self._max_request_bytes:
+            raise RuntimeError(
+                "Ollama request exceeded "
+                f"max_request_bytes ({self._max_request_bytes} bytes)"
+            )
+
         http_request = Request(
             url=f"{self._base_url}/api/chat",
             data=encoded_payload,
@@ -121,7 +149,16 @@ class OllamaRuntime(LLMRuntime):
                 http_request,
                 timeout=self._timeout_seconds,
             ) as http_response:
-                raw_response = http_response.read()
+                raw_response = http_response.read(
+                    self._max_response_bytes + 1
+                )
+
+                if len(raw_response) > self._max_response_bytes:
+                    raise RuntimeError(
+                        "Ollama response exceeded "
+                        f"max_response_bytes "
+                        f"({self._max_response_bytes} bytes)"
+                    )
 
         except HTTPError as exc:
             raise RuntimeError(
