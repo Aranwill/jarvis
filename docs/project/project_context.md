@@ -2,90 +2,92 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-10
-as_of_commit: cc9c7373879555a3eb267cd91be5228207427ae8
+as_of_date: 2026-09-11
+as_of_commit: e45a3e3c0ebf657a513596aa74452413479c05d1
 branch: main
 certification_branch: null
-candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
-certification_status: sprint_7_11_completed
+candidate_commit: null
+certification_status: current_main_validated
 baseline: v0.6.0-alpha
+language: es
 ---
 
 # Contexto del proyecto Malāk
 
 ## Propósito
 
-Este documento proporciona una visión consolidada del estado observado del repositorio de Malāk.
+Este documento proporciona una visión consolidada del estado operativo observado
+del repositorio de Malāk.
 
-Es un documento derivado, informativo y no normativo, destinado a ayudar a desarrolladores y asistentes automatizados a recuperar eficientemente el contexto operativo actual del proyecto.
+Es derivado, informativo y no normativo. Está destinado a ayudar a desarrolladores
+y asistentes automatizados a recuperar contexto actual sin convertir este resumen
+en una fuente de autoridad.
 
-No reemplaza, modifica ni reinterpreta:
+No reemplaza ni modifica:
 
-- la Constitución Cognitiva;
-- la Constitución de Gobernanza;
-- el Blueprint;
-- la especificación del Kernel;
-- los ADR aceptados;
-- los contratos centrales;
-- la política de seguridad;
-- los registros de release;
-- las fichas de sprint aprobadas;
-- el historial Git.
+- Cognitive Constitution;
+- Governance Constitution;
+- Blueprint;
+- Kernel Specification;
+- ADR aceptados;
+- contratos centrales;
+- SECURITY.md;
+- fichas de sprint y proposal records;
+- historial Git.
 
-Si este documento entra en conflicto con una fuente normativa, histórica o con evidencia más reciente del repositorio oficial, prevalece la fuente con mayor autoridad.
+Ante conflicto prevalece la fuente de mayor autoridad y la evidencia Git más
+reciente aplicable.
 
 ---
 
 ## Regla persistente de idioma
 
-La comunicación y la documentación futura de Malāk deben aplicar estas reglas:
-
-- Todas las respuestas al propietario del proyecto deben estar en español.
-- Toda documentación nueva debe redactarse en español.
-- Los análisis, planes, informes, ADR, RFC, notas de diseño y propuestas deben estar en español.
-- Los nombres de clases, funciones, módulos, APIs, comandos, rutas y términos técnicos existentes pueden mantenerse en inglés.
-- No se deben traducir identificadores técnicos ni nombres existentes cuando hacerlo afecte la consistencia del código o del repositorio.
-- Cuando una fuente esté en inglés, su contenido debe explicarse en español.
+- La comunicación y documentación nueva de Malāk debe redactarse en español.
+- Identificadores técnicos, clases, funciones, APIs, comandos y rutas existentes
+  permanecen en su forma original cuando traducirlos afectaría consistencia.
+- Fuentes externas en otro idioma deben explicarse en español.
 
 ---
 
-## Límites de la evidencia
+## Fuentes de evidencia de este snapshot
 
-Este contexto fue reconciliado a partir de:
-
-- inspección del repositorio oficial `Aranwill/jarvis`;
-- rama permanente `main`;
-- historial Git y commits integrados;
-- documentación oficial y derivada vigente;
-- fichas de sprint;
-- arquitectura implementada documentada;
-- resultados de validación registrados durante el cierre del Sprint 7.8;
-- revalidación local del baseline previa a la activación del Sprint 7.9;
-- evidencia candidate-bound, cierre y validación post-merge de Sprint 7.11;
-- integración posterior de Episodic Memory Admission, Assessment Provenance,
-  Assessment Producer Authorization, Governed Input Projection y Governed
-  Projection Consumption;
-- validación candidate-bound multiplataforma del candidate de PR #92 y
-  validación local post-G3 reportada por el Owner;
-- última reconciliación aceptada del Malāk Project Vault con el HEAD de producto
-  post-PR #92; los cambios documentales posteriores permanecen pendientes de
-  reconciliación downstream.
-
-El documento:
+Estado observado:
 
 ```text
-PROJECT - MANIFIESTO MALAK (1).docx
+Malāk
+repository: Aranwill/jarvis
+branch: main
+HEAD: e45a3e3c0ebf657a513596aa74452413479c05d1
+latest integrated unit: PR #111 — Assurance Signal Authority G0/G1
+Validation on current HEAD: success
+
+Malāk Project Vault
+repository: Aranwill/malak-project-vault
+branch: main
+HEAD: 34f0416a8d312f4f27b9b36c3733cc2703772364
+last reconciled Malāk source HEAD: 5865da6a5e502fe71e35e2e38bc4cceaab9b3600
+current disposition: drift esperado; nueva reconciliación pendiente
+
+Vault Sync Agent
+repository: Aranwill/malak-vault-sync-agent
+branch: main
+HEAD: f6eb42715dd7771f3bcf7909a99f7e4e7db465c1
+operating mode: manual-on-demand
 ```
 
-permanece rechazado y no debe utilizarse como fuente de autoridad ni influir en decisiones de Malāk.
+El Vault es una proyección derivada. Su drift actual no altera la autoridad de
+`Aranwill/jarvis/main`, pero debe reconciliarse antes de un gate que exija drift
+cero.
+
+El documento `docs/project/status/MALAK-POST-AUDIT-REBASELINE-20260911.md`
+queda preservado como snapshot histórico del punto `main@5865da6a`; ya no debe
+interpretarse como current state.
 
 ---
 
 ## Clasificación documental
 
-### Fuentes normativas
-
-Las principales fuentes de cumplimiento obligatorio son:
+### Fuentes normativas principales
 
 1. `docs/governance/cognitive_constitution.md`
 2. `docs/governance/governance_constitution.md`
@@ -94,311 +96,191 @@ Las principales fuentes de cumplimiento obligatorio son:
 5. `docs/architecture/architecture_quality_gates.md`
 6. ADR aceptados y contratos públicos aprobados
 7. `SECURITY.md`
-8. estándares aplicables de desarrollo y repositorio
+8. estándares de desarrollo y repositorio aplicables
 
 ### Fuentes históricas
 
-Las fuentes históricas incluyen:
-
-- snapshots de release;
-- changelogs;
-- registros de migración;
-- historial de Git;
-- historial de ADR aceptados;
-- documentos que conservan intencionalmente la identidad anterior de Jarvis.
-
-Los snapshots históricos describen el estado certificado en su fecha. Una diferencia entre un snapshot histórico y el HEAD actual no constituye, por sí sola, permiso para reescribir ese snapshot.
+Incluyen snapshots de release, changelogs, registros de migración, proposal
+records cerrados, fichas de sprint e historial Git. Describen su propio punto
+temporal y no deben reescribirse para simular estado actual.
 
 ### Fuentes derivadas
 
-Las fuentes derivadas incluyen:
+Incluyen este documento, `docs/project/implementation_roadmap.md`, resúmenes de
+estado no normativos y el Malāk Project Vault.
 
-- este `project_context.md`;
-- resúmenes de estado marcados explícitamente como no normativos;
-- artefactos derivados del Malāk Project Vault.
-
-Los documentos derivados pueden informar evidencia y contexto de planificación, pero no pueden aprobar arquitectura, alcance de sprint ni implementación.
+```text
+derived state != authority
+planning != authorization
+evidence != authority
+```
 
 ---
 
-## Snapshot validado del repositorio
+## Snapshot operativo actual
 
 ```text
-Repositorio oficial:             Aranwill/jarvis
-Raíz Git local:                  D:\Ollama\jarvis
-Rama permanente:                 main
-Commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:           cc9c7373879555a3eb267cd91be5228207427ae8
-Baseline nominal:                v0.6.0-alpha
-Último sprint integrado:         Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Última unidad de producto:       Episodic Admission Governed Projection Consumption Boundary
-Última ruta conversacional:      Sprint 7.10 — Conversation Session Isolation Foundation
-Sprint activo autorizado:        ninguno
-Rama de implementación activa:   ninguna
-Candidato Sprint 7.11:           59f592e2e36d11bbd14f7d9d93b1dac4f442c108
-Estado Sprint 7.11:              completado e integrado
-Sprint posterior autorizado:     ninguno
-Implementación posterior autorizada: ninguna
-RDD Stage 2:                     no autorizado
+Repositorio oficial:              Aranwill/jarvis
+Rama permanente:                  main
+HEAD integrado actual:            e45a3e3c0ebf657a513596aa74452413479c05d1
+Baseline nominal:                 v0.6.0-alpha
+Último sprint numerado:           Sprint 7.11 — Reproducible Validation Pipeline Foundation
+Última ruta conversacional:       Sprint 7.10 — Conversation Session Isolation Foundation
+Última unidad episódica:          Governed Projection Consumption Boundary
+Última unidad de código cognitivo: G2A — Protected Finalization Foundation
+Último diseño cognitivo:          Assurance Signal Authority Boundary — G0/G1
+Sprint activo autorizado:         ninguno
+Rama de implementación activa:    ninguna
+Sprint 7.12:                      no autorizado
+Signal Boundary G2:               no autorizado
+Conversation Finalization G2B:    no autorizado / bloqueado por signal-producer gap
+Candidate Content Identity G2:    no autorizado
+Persistence Authorization:        no autorizado
+RDD Stage 2:                      no autorizado
 ```
 
-Sprint 7.11 — `Reproducible Validation Pipeline Foundation` fue admitido,
-autorizado, implementado, validado e integrado mediante PR #65.
+---
 
-El candidato final validado fue:
+## Evolución integrada después de Sprint 7.11
+
+Las unidades siguientes fueron autorizadas e integradas de forma independiente;
+no constituyen Sprint 7.12:
 
 ```text
-59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+Episodic Memory Admission Boundary        PR #76
+        ↓
+Assessment Provenance Boundary            PR #82
+        ↓
+Assessment Producer Authorization         PR #85
+        ↓
+Governed Input Projection Boundary        PR #88
+        ↓
+Governed Projection Consumption Boundary  PR #92
 ```
 
-La integración se realizó mediante PR #65 con merge commit:
+La cadena episódica continúa aislada de Conversation/runtime y no persiste
+Memory.
+
+PR #93 integró únicamente G0/G1 de `Episodic Candidate Content Identity`.
+Candidate Content Identity G2, propagación de identidad y cualquier uso como
+precondición de persistencia continúan sin autorización.
+
+PR #97–#99 preservaron y diseñaron la dirección Evidence-Bound / Progressive
+Cognitive Assurance. La promoción normativa posterior quedó reflejada mediante
+ADR-005, Blueprint v0.6.2-alpha y Cognitive Constitution v1.1.0, incluyendo la
+separación entre generación y finalización y finalización vinculada a evidencia.
+
+---
+
+## G2A — Protected Finalization Foundation
+
+PR #110 fue integrada mediante:
 
 ```text
-3413e8ccb348440aea757d1feccde25c65be011f
+ecb1315946f47534135bbdc73d94ccf88df0d8d6
 ```
 
-Evidencia del candidato y validación post-merge:
+Materializó una foundation aislada bajo:
 
 ```text
-388 passed
-compileall: PASS
-git diff --check: PASS
-FULL 4R: PASS
-independent validation: PASS
-post-merge Validation: success
+src/malak/core/protected_finalization.py
 ```
 
-Después de Sprint 7.11, el Owner autorizó de forma separada y acotada una serie
-de unidades episódicas aisladas de Memory.
-
-La primera fue G3 — `Episodic Memory Admission Boundary`, integrada mediante PR #76:
-
-~~~text
-candidate:
-e3e3c2aa6031d4a6a9ad8f3a3c529a9453cbbe9b
-
-merge:
-2d5fe87c304927baeab29e5649f2383030e1a1fd
-
-pytest:
-431 passed
-
-compileall:
-PASS
-
-git diff --check:
-PASS
-
-post-merge Validation:
-success
-~~~
-
-Después se integraron, cada una mediante autorización y gate separados:
+con tests candidate-bound en:
 
 ```text
-PR #82
-Episodic Admission Assessment Provenance Boundary
-
-PR #85
-Episodic Admission Assessment Producer Authorization Boundary
-
-PR #88
-Episodic Admission Governed Input Projection Boundary
-
-PR #92
-Episodic Admission Governed Projection Consumption Boundary
+tests/test_protected_finalization.py
 ```
 
-El HEAD de producto resultante de esa cadena es:
+La foundation representa de forma ejecutable:
 
 ```text
-9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
+Generated Candidate
+        !=
+Final Response
+
+ProtectedResponseCandidate
+        +
+explicit assurance input
+        ↓
+deterministic evaluation
+        ↓
+ACCEPT | ABSTAIN | BLOCK
 ```
 
-El candidate de PR #92:
+Propiedades preservadas:
+
+- evaluator puro y determinista;
+- policy versionada;
+- `BLOCK` ante violación explícita de policy;
+- `ABSTAIN` ante applicability no resuelta, contradicción no resuelta o soporte
+  insuficiente cuando aplica;
+- `ACCEPT` únicamente para estados explícitamente permitidos;
+- sin side effects;
+- sin acceso a provider/runtime;
+- sin Kernel wiring;
+- sin Conversation wiring;
+- sin Memory/Knowledge/retrieval;
+- sin `QUALIFY` inventado;
+- sin ampliación de autoridad.
+
+G2A no convierte todavía la conversación real de Malāk en una ruta protegida.
+
+---
+
+## Assurance Signal Authority Boundary — G0/G1
+
+PR #111 fue integrada en el HEAD actual:
 
 ```text
-5139d95aaa2c30971b3979ca7c3917067856a428
+e45a3e3c0ebf657a513596aa74452413479c05d1
 ```
 
-pasó `Validation` candidate-bound en `ubuntu-latest`, `windows-latest` y
-`macos-latest`, incluyendo candidate identity, suite completa, `compileall` y
-candidate diff validation. Ubuntu reportó `645 passed`.
+El diseño G0/G1 confirmó que G2A no debe alimentarse desde metadata implícita ni
+desde decisiones de dominios ajenos.
 
-La cadena materializada preserva:
+Separación requerida:
 
 ```text
-Assessment Provenance
-!= authenticated identity
-!= trusted truth
-
-Producer Authorization
-!= trusted truth
-!= Admission eligibility
-!= persistence authorization
+observation
+!= producer authorization
+!= projected signal
+!= finalization decision
 != authority
-
-Projection READY
-!= Admission ELIGIBLE
-!= Stored
-!= Authority
-
-Consumption EVALUATED
-!= persistence authorization
-!= Authority
 ```
 
-La proyección continúa sin ejecutar por sí misma la policy de Admission. La
-frontera de consumo integrada en PR #92 valida la projection, construye una vista
-efímera con `effective_context` y, únicamente cuando es consumible, delega una
-vez a `evaluate_episodic_candidate(...)`. No persiste Memory ni introduce side
-effects.
+Los signals de G2A requieren ownership explícito y proyección determinista.
 
-Permanece fuera de alcance:
+En particular:
 
-~~~text
-Conversation/runtime wiring de la cadena episódica
-Candidate Content Identity G2 / implementation / propagation
-Persistence Authorization
-Memory persistente
-retrieval
-Knowledge
-Kernel changes
-Conversation changes
-Security authority expansion
-Observability changes
-external dependencies
-Sprint 7.12
-RDD Stage 2
-~~~
+- `applicability` y `evidence_required` pertenecen a policy cognitiva versionada;
+- `support_sufficient` exige evaluación de evidencia real;
+- `contradiction_unresolved` exige evaluación explícita;
+- `policy_violation` no debe derivarse automáticamente de cualquier `DENY` del
+  Security PDP.
 
-Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
-No existe actualmente ninguna implementación posterior a Governed Projection
-Consumption autorizada.
+El Security PDP continúa gobernando autorización de operaciones, no verdad ni
+suficiencia cognitiva.
 
-PR #93 integró únicamente G0/G1 de `Episodic Candidate Content Identity
-Boundary`. PR #97 preservó la dirección conceptual de Evidence-Bound Cognition y
-PR #98/#99 integraron G0/G1 documental de Progressive Cognitive Assurance. Esas
-unidades de diseño no constituyen implementación runtime ni Sprint 7.12.
+### Estado de autorización
 
-La sincronización del Malāk Project Vault es una proyección derivada posterior.
-La última reconciliación aceptada del Vault refleja el HEAD de producto post-PR
-#92 `9438c66e315faa2b4c8c3f0a99d4e1e9619992c3`; los cambios desde PR #93 hasta
-este baseline documental deben reconciliarse antes del siguiente gate que los
-requiera. El estado del Vault no concede autoridad sobre `Aranwill/jarvis/main`.
+```text
+Signal Authority G0/G1: integrated
+Signal Boundary G2: NOT AUTHORIZED
+Conversation Finalization G2B: NOT AUTHORIZED
+```
+
+G2B permanece bloqueado hasta que exista un productor explícito y autorizado de
+applicability/evidence signals.
 
 ---
 
-## Estructura relevante del repositorio
+## Ruta conversacional implementada
 
-```text
-jarvis/
-├── .github/
-├── configs/
-├── docs/
-│   ├── architecture/
-│   ├── development/
-│   ├── governance/
-│   ├── knowledge/
-│   ├── operations/
-│   └── project/
-├── documents/projects/jarvis/
-├── examples/
-├── scripts/
-├── src/
-│   ├── app/
-│   └── malak/
-│       ├── app/
-│       ├── capabilities/
-│       ├── contracts/
-│       ├── core/
-│       ├── events/
-│       ├── identity/
-│       ├── infrastructure/
-│       ├── kernel/
-│       ├── memory/
-│       ├── observability/
-│       ├── providers/
-│       ├── runtime/
-│       ├── security/
-│       ├── services/
-│       └── shared/
-├── tests/
-├── CHANGELOG.md
-├── PROJECT.md
-├── README.md
-├── ROADMAP.md
-├── SECURITY.md
-└── pyproject.toml
-```
-
-`D:\Ollama` es el espacio de trabajo contenedor y no la raíz Git. Los comandos del repositorio deben ejecutarse desde:
-
-```text
-D:\Ollama\jarvis
-```
-
----
-
-## Arquitectura implementada actual
-
-### Flujo Kernel–Planner–Capability
-
-La frontera cognitiva oficial permanece orientada al Kernel:
-
-```text
-Interface Layer
-→ Application Composition
-→ Kernel.receive()
-→ Planner
-→ CapabilityRegistry
-→ Capability
-→ Response
-```
-
-El Kernel:
-
-- coordina el flujo;
-- permanece independiente de providers concretos;
-- permanece independiente de runtimes concretos;
-- permanece independiente de modelos concretos;
-- no depende directamente de Ollama;
-- no contiene lógica de configuración de infraestructura;
-- no incorpora autoridad autónoma;
-- no accede directamente a Internet;
-- no debe convertirse en orquestador de infraestructura.
-
-El bootstrap mínimo del Kernel conserva `EchoCapability` como Capability
-determinista para validaciones estructurales.
-
-La composición conversacional vigente es distinta: se construye en la frontera
-de aplicación, registra `ConversationCapability` y configura el `Planner` para
-resolver esa capability sin introducir `ConversationService`, providers,
-runtimes o modelos dentro del Kernel.
-
-### Stack conversacional
-
-El stack conversacional implementado contiene:
-
-- `ConversationCapability`;
-- `ConversationMessage`;
-- `ConversationRequest`;
-- `ConversationResponse`;
-- `ConversationProvider`;
-- `RuntimeConversationProvider`;
-- `ConversationProviderRegistry`;
-- `ConversationProviderNotFoundError`;
-- `ConversationService`;
-- `InMemoryConversationContext`;
-- `LLMRuntime`;
-- `MockLLMRuntime`;
-- `OllamaRuntime`.
-
-Ruta cognitiva conversacional vigente:
+La ruta runtime vigente continúa siendo:
 
 ```text
 CLI
-→ CLIConfiguration
 → Application Composition
 → Kernel.receive()
 → Planner
@@ -411,42 +293,26 @@ CLI
 → Response
 ```
 
-La selección y construcción del runtime, provider y servicios se realiza en la
-frontera de aplicación mediante configuración externa.
+Sprint 7.9 añadió continuidad conversacional efímera y Sprint 7.10 aislamiento
+por `session_id`.
 
-Sprint 7.9 añadió continuidad conversacional efímera mediante
-`InMemoryConversationContext`, integrada opcionalmente en `ConversationService`
-y mantenida fuera del Kernel y de `SecurityContext`.
+La conversación continúa siendo efímera. No existe persistencia conversacional
+ni Memory persistente.
 
-Sprint 7.10 añade aislamiento explícito de sesiones conversacionales.
-`Request.session_id` se preserva a través de la frontera de Capability,
-`ConversationService` selecciona el contexto mediante esa identidad y
-`InMemoryConversationContext` mantiene ventanas independientes por sesión.
+La inspección G0 de Progressive Cognitive Assurance confirmó que actualmente el
+provider output puede llegar a `Response` sin pasar por G2A. Además, el historial
+conversacional existente se construye antes de una futura finalización protegida.
+Ese gap es conocido y **no está autorizado corregirlo mediante G2B todavía**.
 
-La evolución no introduce persistencia, Memory ni estado conversacional
-dentro del Kernel o de `SecurityContext`.
+---
 
-### Episodic Memory Admission chain — estado post-PR #92
+## Memory — estado actual
 
-La Memory Layer posee ahora varias fronteras aisladas bajo:
+La cadena aislada materializada es:
 
-~~~text
-src/malak/memory/
-~~~
-
-La policy de admisión original permanece pura y determinista:
-
-~~~text
+```text
 EpisodicMemoryCandidate
-+
-EpisodicAdmissionSignals
         ↓
-REJECT | HOLD | ELIGIBLE
-~~~
-
-Sobre esa foundation se integró una cadena de evidencia, proyección y consumo separada:
-
-~~~text
 AdmissionAssessment
         ↓
 Assessment Provenance
@@ -465,155 +331,34 @@ Episodic Admission
 REJECT | HOLD | ELIGIBLE
         ↓
 STOP
-~~~
+```
 
-La proyección reconstruye un `EpisodicAdmissionContext` y
-`EpisodicAdmissionSignals` efectivos solo cuando existe evidencia completa,
-coherente, candidate-bound y autorizada. Source authority, confidence,
-sensitivity y temporal validity no se heredan como trust por mera presencia en
-`candidate.control`.
+Se preserva:
 
-Se preservan explícitamente:
-
-~~~text
+```text
 Candidate != Decision
 payload != control metadata
-source authority != confidence != security trust != temporal validity
 structural provenance != authenticated identity
 AUTHORIZED != trusted truth
 Projection READY != Admission ELIGIBLE
 Consumption EVALUATED != persistence authorization
-ELIGIBLE != persistence authorization
-HOLD != retention authorization
-~~~
-
-La projection no modifica la precedencia de Admission. El adapter de consumo
-bloquea projections no consumibles y delega exactamente una vez a la policy de
-admisión para un candidate efectivo efímero cuando corresponde.
-
-Toda la cadena continúa desconectada de `ConversationCapability`,
-`ConversationService`, Kernel y observabilidad; tampoco persiste ni recupera
-Memory.
-
-### Integración Kernel–ConversationService
-
-Sprint 7.8 estableció y validó formalmente la integración entre el pipeline
-cognitivo y el subsistema conversacional mediante `ConversationCapability`.
-
-La frontera preservada es:
-
-```text
-Kernel
-→ Capability
+ELIGIBLE != Stored
 ```
 
-`ConversationCapability` adapta la solicitud del pipeline cognitivo al contrato
-de `ConversationService` y transforma su resultado para devolverlo por la
-frontera de Capability.
+Continúan fuera de alcance:
 
-Por lo tanto:
-
-- `Kernel.receive()` y `ConversationService` ya forman parte de una misma ruta
-  cognitiva conversacional validada;
-- el Kernel no conoce `ConversationService`;
-- el Kernel no conoce providers concretos;
-- el Kernel no conoce runtimes concretos;
-- el Kernel no conoce modelos concretos;
-- la evidencia de ejecución no concede autoridad ni altera el flujo de control.
+- Conversation/runtime wiring de la cadena episódica;
+- Candidate Content Identity G2;
+- Persistence Authorization;
+- Memory persistente;
+- retrieval;
+- Knowledge operativo.
 
 ---
 
-## Abstracción de runtime
+## Seguridad — foundations preservadas
 
-`LLMRuntime` permanece como el único punto de abstracción para integraciones de runtime LLM.
-
-Runtimes implementados:
-
-- `MockLLMRuntime`;
-- `OllamaRuntime`.
-
-### MockLLMRuntime
-
-Uso:
-
-- desarrollo;
-- pruebas deterministas;
-- validaciones reproducibles;
-- ejecución sin servicio externo.
-
-### OllamaRuntime
-
-Estado:
-
-```text
-implementado
-```
-
-Características:
-
-- integración local con Ollama;
-- composición externa al Kernel;
-- configuración mediante variables de entorno;
-- validación de entrada;
-- manejo de errores HTTP;
-- manejo de errores de conexión;
-- manejo de timeout;
-- validación de payloads;
-- soporte para métricas mediante interfaces desacopladas.
-
-La integración real fue validada durante Sprint 7.8 con `OllamaRuntime` y un modelo local, sin convertir Ollama en dependencia del Kernel.
-
----
-
-## Métricas, eventos operativos y auditoría
-
-Los tres subsistemas permanecen separados.
-
-### Métricas
-
-Se utilizan para medir rendimiento y comportamiento cuantificable.
-
-El repositorio contiene:
-
-- muestras normalizadas de métricas;
-- almacenamiento en memoria;
-- almacenamiento JSONL;
-- perfiles de rendimiento;
-- generación de perfiles estadísticos.
-
-### Eventos operativos
-
-Sprint 7.4 incorporó:
-
-- `OperationalEvent`;
-- `OperationalEventSink`;
-- stores operativos separados;
-- correlación mediante `request_id`;
-- integración opcional desde la CLI.
-
-### Auditoría de seguridad
-
-Sprint 7.5 incorporó evidencia estructurada de autorización separada de métricas y eventos operativos.
-
-No existe un envelope universal entre métricas, eventos y auditoría.
-
-No comparten:
-
-- contratos;
-- stores;
-- políticas de error;
-- políticas de retención;
-- autoridad.
-
-Pueden compartir únicamente convenciones mínimas de trazabilidad.
-
----
-
-## Security Control Plane Foundation
-
-El Sprint 7.5 está cerrado.
-
-La fundación implementada establece separación entre:
+El Security Control Plane mantiene separación entre:
 
 ```text
 solicitar
@@ -623,100 +368,16 @@ solicitar
 → ejecutar operación protegida
 ```
 
-Componentes fundamentales:
+El PDP permanece determinista, sin LLM, con denegación por defecto y
+comportamiento fail-closed.
 
-- `PermissionScope`;
-- `SecurityContext`;
-- `AuthorizationRequest`;
-- `AuthorizationDecision`;
-- Policy Decision Point mínimo;
-- Policy Enforcement Point inicial;
-- contratos de auditoría de autorización;
-- integración fail-closed de la evidencia de auditoría.
+El PEP no acepta decisiones aportadas por el llamador y permanece separado del
+Kernel y Planner.
 
-### Policy Decision Point
+El Secure Context Lifecycle conserva `Clock`, validación temporal, emisión,
+renovación y propagación inmutable en memoria.
 
-Propiedades:
-
-- determinista;
-- sin LLM;
-- denegación por defecto;
-- fail-closed;
-- confirmación humana explícita cuando corresponde;
-- ninguna confirmación modifica retroactivamente una decisión anterior.
-
-### Policy Enforcement Point
-
-Propiedades:
-
-- consulta directamente al PDP inyectado;
-- no acepta decisiones aportadas por el llamador;
-- exige asociación consistente entre solicitud y decisión;
-- ejecuta la operación protegida únicamente ante una decisión válida y permitida;
-- bloquea ante errores, incongruencias o respuestas inválidas;
-- permanece separado del Kernel y del Planner.
-
-### Auditoría de autorización
-
-La evidencia de autorización:
-
-- es estructurada;
-- permanece separada de métricas y eventos operativos;
-- forma parte del comportamiento fail-closed;
-- no concede autoridad;
-- no reemplaza la decisión de autorización.
-
----
-
-## Secure Context Lifecycle Foundation
-
-El Sprint 7.6 está cerrado.
-
-La fundación implementada establece un lifecycle temporal explícito para
-`SecurityContext`, sin ampliar autoridad ni introducir todavía identidad
-criptográfica o transporte seguro entre procesos.
-
-Componentes incorporados o consolidados:
-
-- `SecurityContext` con `context_id`, `session_id`, `subject_id`,
-  `authenticated`, `issued_at`, `expires_at` y `parent_context_id`;
-- frontera temporal `Clock` / `SystemClock`;
-- `SecurityContextValidator`;
-- `SecurityContextIssuer`;
-- `SecurityContextRenewer`;
-- enforcement temporal en `StaticPolicyDecisionPoint`;
-- semántica de validez `issued_at <= now < expires_at`;
-- `SecurityContextEnvelope` para propagación inmutable en memoria.
-
-Propiedades relevantes:
-
-- contextos futuros son inválidos antes de `issued_at`;
-- contextos expiran exactamente en `expires_at`;
-- la renovación exige que el contexto anterior continúe vigente;
-- la renovación preserva sesión, sujeto y estado de autenticación;
-- cada renovación genera un nuevo `context_id` y conserva lineage mediante
-  `parent_context_id`;
-- el PDP valida lifecycle antes de evaluar políticas;
-- la propagación conserva el mismo `SecurityContext` sin reconstruirlo;
-- Validator, Issuer, Renewer y Envelope no conceden permisos;
-- Kernel, Planner y runtimes permanecieron fuera del alcance.
-
-Permanecen fuera de alcance:
-
-- nonce y replay protection;
-- identidad y firmas criptográficas;
-- MFA;
-- Secure Context Manager criptográfico completo;
-- Secure Message Bus;
-- IPC seguro;
-- receipts / RDD;
-- agentes, navegación y rutas operativas reales de alto riesgo.
-
----
-
-## Riesgo de seguridad residual
-
-Permanece registrado el finding:
+Permanece registrado como riesgo residual histórico:
 
 ```text
 7.7-D-001 — Strong SecurityContext Provenance
@@ -725,417 +386,50 @@ severity: MEDIUM
 blocking_release: NO
 ```
 
-La foundation actual todavía no incorpora de forma completa:
-
-- PKI;
-- nonce;
-- replay protection;
-- identidad criptográfica fuerte;
-- MFA;
-- Secure Message Bus;
-- Secure Context Manager criptográfico completo.
-
-Este riesgo no bloquea el baseline actual, pero debe permanecer visible antes de
-incorporar agentes, tools, red, mensajería externa, automatización o rutas
-operativas de mayor riesgo.
-
-Su existencia no autoriza por sí sola una implementación de seguridad adicional.
-
----
-
-## Estado de sprints
-
-Estado del bloque 7.x:
-
-| Sprint | Estado | Resultado |
-|---|---|---|
-| 7.0 | Cerrado | CLI mínima con `MockLLMRuntime` |
-| 7.1 | Cerrado | Composición de CLI con `OllamaRuntime` |
-| 7.2 | Cerrado | `RuntimeMetricSink` |
-| 7.3 | Cerrado | Conversation Provider Boundary Stabilization |
-| 7.4 | Cerrado | Logs, métricas, eventos operativos y sincronización gobernada |
-| 7.5 | Cerrado | Security Control Plane Foundation |
-| 7.6 | Cerrado | Secure Context Lifecycle Foundation |
-| 7.7 | Cerrado | Validación de baseline y release interna |
-| 7.8 | Completado | Cognitive Conversation Execution Path Foundation |
-| 7.9 | Completado | Conversation Continuity Foundation; cierre aprobado por el propietario |
-| 7.10 | Completado | Conversation Session Isolation Foundation; integrado y validado post-merge |
-| 7.11 | Completado | Reproducible Validation Pipeline Foundation; integrado y validado post-merge |
-
-Las unidades episódicas integradas después de Sprint 7.11 no constituyen Sprint
-7.12 y no alteran la numeración histórica del bloque 7.x.
-
-### Sprint 7.0
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- CLI técnica mínima;
-- soporte para `MockLLMRuntime`;
-- comandos básicos;
-- control de errores;
-- sin integración formal con `Kernel.receive`.
-
-### Sprint 7.1
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- soporte para `OllamaRuntime`;
-- configuración externa;
-- Runtime Independence preservada;
-- Kernel sin modificación.
-
-### Sprint 7.2
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- `RuntimeMetricSink`;
-- contrato estructural de solo escritura;
-- separación respecto de stores concretos.
-
-### Sprint 7.3
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- estabilización del límite entre `ConversationService`, provider y runtime;
-- incorporación de `RuntimeConversationProvider`;
-- fortalecimiento de `ConversationProviderRegistry`;
-- manejo explícito de provider inexistente;
-- Kernel y Planner intactos.
-
-### Sprint 7.4
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- consolidación de eventos operativos;
-- correlación desde CLI;
-- separación entre métricas, eventos y auditoría;
-- sincronización gobernada del Vault.
-
-### Sprint 7.5
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- contratos fundamentales de autorización;
-- PDP mínimo determinista;
-- PEP inicial;
-- auditoría de autorización;
-- revisión integral y cierre;
-- sin habilitar rutas operativas reales de alto riesgo.
-
-El cierre del Sprint 7.5 no autoriza automáticamente ningún sprint posterior.
-
-### Sprint 7.6
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- lifecycle temporal explícito para `SecurityContext`;
-- frontera `Clock`;
-- validación temporal determinista;
-- emisión y renovación con lineage;
-- enforcement fail-closed en PDP;
-- semántica `issued_at <= now < expires_at`;
-- propagación inmutable en memoria mediante `SecurityContextEnvelope`;
-- Kernel, Planner y runtimes sin cambios;
-- sin identidad criptográfica, replay protection ni Secure Message Bus.
-
-El cierre del Sprint 7.6 no autoriza automáticamente Sprint 7.7 ni ninguna
-implementación posterior.
-
-### Sprint 7.7
-
-Estado:
-
-```text
-cerrado
-```
-
-Resultado:
-
-- validación integral y certificación interna del baseline;
-- reconciliación de arquitectura y documentación;
-- cierre del proceso de certificación;
-- preservación de `7.7-D-001` como riesgo residual aceptado, MEDIUM y no bloqueante.
-
-### Sprint 7.8
-
-Estado:
-
-```text
-completado
-```
-
-Resultado:
-
-- primera ruta cognitiva conversacional end-to-end;
-- incorporación de `ConversationCapability` como adapter detrás de la frontera de Capability;
-- integración `Kernel.receive()` → `Planner` → `CapabilityRegistry` → `ConversationCapability`;
-- preservación de Runtime Independence;
-- validación determinista con `MockLLMRuntime`;
-- validación real con `OllamaRuntime`;
-- 348 pruebas totales aprobadas durante el cierre documentado.
-
-El cierre de Sprint 7.8 no autorizó automáticamente Sprint 7.9 ni ninguna otra
-unidad de implementación.
-
-Sprint 7.9 fue autorizado posteriormente mediante un proceso independiente de
-inspección, definición, evaluación, debate y aprobación explícita.
-
-### Sprint 7.9
-
-Estado:
-
-```text
-completado
-```
-
-Objetivo autorizado:
-
-- continuidad conversacional efímera durante una conversación activa;
-- historial estructurado y limitado en memoria;
-- limpieza explícita del contexto conversacional;
-- integración aditiva y reversible;
-- preservación de Kernel, Planner, Capability contract y SecurityContext.
-
-Baseline de activación:
-
-```text
-2864435401353e5abcfcb51fc276361a0225c2b7
-```
-
-Rama temporal:
-
-```text
-sprint/7.9-conversation-continuity
-```
-
-Estado de ejecución:
-
-```text
-gates 7.9-A → 7.9-H: PASS
-candidato funcional validado: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
-suite final: 365 passed
-runtime real: PASS
-revisión final 4R: PASS
-cierre del sprint: aprobado por el propietario el 2026-09-03
-```
-
-Sprint 7.9 no autoriza Memory persistente, agentes, tools, Sandbox, navegación,
-Internet, RAG, GraphRAG, cambios del Kernel, generalización del contrato
-Capability ni ampliación de autoridad.
-
----
-
-## Validación
-
-Última validación integral documentada durante el cierre de Sprint 7.8:
-
-```text
-348 total passed
-compileall: PASS
-git diff --check: PASS
-```
-
-La ruta cognitiva conversacional fue validada tanto con runtime determinista como
-con `OllamaRuntime`, preservando el desacoplamiento del Kernel.
-
-Antes de activar Sprint 7.9 se revalidó localmente el baseline de referencia:
-
-```text
-main == origin/main
-commit reconciliado: 2864435401353e5abcfcb51fc276361a0225c2b7
-working tree: clean
-Python: 3.12.10
-virtual environment: .venv
-pytest: 348 passed
-compileall: PASS
-git diff --check: PASS
-```
-
-La validación anterior certifica el punto de partida técnico del sprint.
-
-El candidato funcional de Sprint 7.9 fue validado posteriormente:
-
-```text
-candidate: d58b8ec98d48f5e2eac115d1d54b193e1df617fd
-pytest: 365 passed
-compileall: PASS
-git diff --check baseline..candidate: PASS
-runtime real: PASS
-revisión final 4R: PASS
-```
-
-La implementación, validación y revisión están completas. El propietario
-aprobó explícitamente el cierre del Sprint 7.9 el 2026-09-03.
-
-La actualización de este documento registra evidencia y una autorización humana
-ya emitida; no crea autoridad por sí misma ni autoriza ningún sprint posterior.
-
-La evidencia candidate-bound más reciente de la cadena episódica corresponde al
-candidate de PR #92 `5139d95aaa2c30971b3979ca7c3917067856a428`, cuya ejecución
-`Validation` concluyó con `success` en Ubuntu, Windows y macOS; Ubuntu reportó
-`645 passed`.
-
----
-
-## Estado del baseline
-
-Baseline nominal:
-
-```text
-v0.6.0-alpha
-```
-
-El baseline nominal no debe confundirse con el commit de desarrollo utilizado
-como referencia de reconciliación.
-
-Estado reconciliado:
-
-```text
-rama permanente: main
-HEAD material de referencia: cc9c7373879555a3eb267cd91be5228207427ae8
-commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
-Sprint 7.7: cerrado
-Sprint 7.8: completado
-Sprint 7.9: completado
-Sprint 7.10: completado
-Sprint 7.11: completado e integrado
-última ruta conversacional/runtime: Sprint 7.10
-última unidad de producto: Episodic Admission Governed Projection Consumption Boundary
-último diseño Memory: Episodic Candidate Content Identity G0/G1
-último diseño cognitivo: Progressive Cognitive Assurance G1
-candidato final Sprint 7.11: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
-certification branch activa: no
-release promovida adicional: no
-sprint actualmente autorizado: ninguno
-implementación posterior autorizada: ninguna
-RDD Stage 2: no autorizado
-```
-
-El commit `3413e8ccb348440aea757d1feccde25c65be011f` continúa siendo el estado de
-`main` resultante de integrar Sprint 7.11, pero ya no es el HEAD material actual.
-
-Sprint 7.11 no modificó el producto/runtime. La última ruta conversacional/runtime
-permanece Sprint 7.10, mientras que las unidades episódicas posteriores ampliaron
-la Memory Layer de forma aislada hasta Governed Projection Consumption.
-
-No debe certificarse una nueva release, crear o mover un tag, abrir Sprint 7.12,
-iniciar Candidate Content Identity G2, implementar Persistence Authorization o
-materializar Response Assurance sin un proceso específico de evaluación y
-aprobación.
+No habilita por sí mismo trabajo de seguridad adicional.
 
 ---
 
 ## Malāk Project Vault
 
-Repositorio derivado:
-
-```text
-Aranwill/malak-project-vault
-```
-
-Rama:
-
-```text
-main
-```
-
 El Vault:
 
-- permanece separado del repositorio oficial;
 - es derivado;
-- no tiene autoridad operativa;
-- no puede modificar Malāk automáticamente;
-- utiliza Obsidian únicamente como interfaz humana;
-- conserva snapshots históricos inmutables;
-- puede proyectar cambios detectados en el repositorio oficial;
-- requiere revisión humana para reconciliaciones gobernadas.
+- no posee autoridad operativa;
+- no modifica automáticamente el repositorio oficial;
+- requiere revisión humana para propuestas gobernadas;
+- conserva snapshots históricos;
+- puede proyectar cambios observados desde Malāk.
 
-La última reconciliación aceptada del Vault refleja el HEAD oficial de producto
-post-PR #92:
+Última reconciliación aceptada:
 
 ```text
-9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
+Vault main@34f0416a8d312f4f27b9b36c3733cc2703772364
+represents Malāk main@5865da6a5e502fe71e35e2e38bc4cceaab9b3600
 ```
 
-Los cambios documentales integrados desde PR #93 hasta el baseline actual deben
-reconciliarse mediante el Vault Sync Agent antes del siguiente gate que requiera
-drift cero.
+Estado actual:
 
-El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad para:
+```text
+Malāk main@e45a3e3c0ebf657a513596aa74452413479c05d1
+Vault reconciliation: pending
+known drift: expected after PR #110 + PR #111
+```
 
-- código;
-- tests;
-- documentación oficial;
-- contratos;
-- arquitectura;
-- sprints;
-- historial Git.
+La reconciliación del Vault es un paso operativo derivado y no constituye nuevo
+sprint ni autorización cognitiva.
 
 ---
 
-## Planificación vigente — post-PR #99
+## Planificación vigente
 
-Sprint 7.8 está completado.
+La fuente derivada canónica para planificación es:
 
-Sprint 7.9 fue completado y su cierre fue aprobado explícitamente por el
-propietario el 2026-09-03.
+```text
+docs/project/implementation_roadmap.md
+```
 
-Sprint 7.10 fue completado e integrado y su cierre fue aprobado explícitamente por el propietario el 2026-09-04.
-
-Sprint 7.11 fue completado, integrado mediante PR #65 y validado nuevamente sobre `main`.
-
-Después de Sprint 7.11 fueron integradas de forma separada Episodic Memory
-Admission, Assessment Provenance, Assessment Producer Authorization, Governed
-Input Projection y Governed Projection Consumption. Ninguna de esas unidades
-constituye Sprint 7.12.
-
-PR #93 integró únicamente G0/G1 de Candidate Content Identity. PR #97–#99
-preservaron y diseñaron, también de forma documental/no runtime, la dirección de
-Evidence-Bound Cognition y Progressive Cognitive Assurance.
-
-Actualmente:
+El estado actual es:
 
 ```text
 LAST COMPLETED NUMBERED SPRINT
@@ -1144,247 +438,162 @@ Sprint 7.11 — Reproducible Validation Pipeline Foundation
 LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
 
-LATEST PRODUCT UNIT
-Episodic Admission Governed Projection Consumption Boundary
+LATEST EPISODIC MEMORY UNIT
+Governed Projection Consumption Boundary
 
-LATEST MEMORY DESIGN UNIT
-Episodic Candidate Content Identity — G0/G1 ONLY
+LATEST COGNITIVE CODE UNIT
+G2A — Protected Finalization Foundation
 
-LATEST COGNITIVE ASSURANCE DESIGN
-Progressive Cognitive Assurance — G1 ONLY
+LATEST COGNITIVE DESIGN UNIT
+Assurance Signal Authority Boundary — G0/G1
 
 ACTIVE AUTHORIZED SPRINT
 NONE
 
-SUBSEQUENT SPRINT
-NONE AUTHORIZED
+SIGNAL BOUNDARY G2
+NOT AUTHORIZED
 
-IMPLEMENTATION AFTER GOVERNED PROJECTION CONSUMPTION
-NONE AUTHORIZED
+CONVERSATION FINALIZATION G2B
+NOT AUTHORIZED
 
 CANDIDATE CONTENT IDENTITY G2
+NOT AUTHORIZED
+
+PERSISTENCE AUTHORIZATION
 NOT AUTHORIZED
 
 RDD STAGE 2
 NOT AUTHORIZED
 ```
 
-La fuente derivada canónica para planificación es:
-
-```text
-docs/project/implementation_roadmap.md
-```
-
-La ficha operativa del último sprint numerado integrado es:
-
-```text
-docs/project/sprints/SPRINT-7.11.md
-```
-
-Las ideas registradas en `documents/projects/jarvis/ideas.md`, las referencias
-de `docs/project/concepts/` y las iniciativas reconocidas para planificación
-futura pueden informar la implementación únicamente dentro del alcance
-autorizado.
-
-Se mantiene:
-
-```text
-idea != roadmap
-roadmap != aprobación
-evidencia != autoridad
-Projection READY != Admission ELIGIBLE
-Consumption EVALUATED != persistence authorization
-ELIGIBLE != Stored
-```
-
-`project_context.md` no duplica el roadmap ni concede autoridad.
-
-Agentes, tools, red, navegación, mensajería externa, automatización y otras
-rutas operativas de mayor riesgo continúan postergadas salvo autorización
-independiente y foundations suficientes.
+La siguiente decisión funcional debe tomarse solo después de reconciliar el
+Vault o aceptar explícitamente el drift como riesgo para un gate concreto.
 
 ---
 
 ## Capacidades explícitamente postergadas
 
-Hasta que un sprint o unidad aprobada las autorice, no se deben introducir:
+Sin una unidad aprobada de manera independiente no se deben introducir:
 
 - agentes autónomos;
 - ejecución libre de herramientas externas;
-- control autónomo del sistema operativo;
 - navegación externa;
 - comunicaciones externas automáticas;
-- memoria persistente sensible sin controles aprobados;
-- Candidate Content Identity G2/implementación/propagación sin gate separado;
-- Persistence Authorization sin diseño y autorización propios;
-- Response Assurance runtime sin promoción normativa y specification aplicables;
+- control autónomo del sistema operativo;
+- Memory persistente sensible;
+- retrieval/Knowledge operativo;
+- Candidate Content Identity G2;
+- Persistence Authorization;
+- Signal Boundary G2;
+- Conversation Finalization G2B;
+- RDD Stage 2;
+- modificación automática de políticas, Kernel, Blueprint o Constituciones;
 - elevación automática de privilegios;
-- acciones destructivas;
-- integraciones externas ocultas;
-- modificación automática de políticas;
-- modificación automática del Kernel;
-- autoaprobación de decisiones;
-- cambios autónomos sobre Blueprint, Constituciones o Gobernanza.
+- autoaprobación de decisiones.
 
 ---
 
-## Restricciones permanentes de trabajo
+## Disciplina de trabajo
 
-Todo trabajo futuro debe preservar:
+La evolución de Malāk mantiene:
+
+```text
+idea o necesidad
+→ evaluación
+→ specification / design
+→ ADR cuando corresponda
+→ alcance aprobado
+→ rama temporal
+→ TDD / implementación
+→ 4R
+→ Bounded Correction cuando aplique
+→ Independent Validation
+→ evidencia
+→ Pull Request
+→ revisión humana
+→ merge humano
+→ baseline
+```
+
+Principios persistentes:
 
 - Kernel First;
 - Capability First;
 - Runtime Independence;
 - Vendor Independence;
 - Human in Control;
-- Zero Trust interno;
+- Zero Trust;
 - Defense in Depth;
-- denegación por defecto para acciones sensibles;
 - mínimo privilegio;
 - autorización explícita;
-- contratos públicos estables;
+- contratos estables;
 - cambios pequeños, trazables y reversibles;
 - separación entre autoridad cognitiva y autoridad de seguridad;
-- trazabilidad completa.
+- evidencia no equivalente a autoridad.
 
-La metodología vigente combina:
-
-```text
-SDD
-+ TDD
-+ 4R
-+ Bounded Correction
-+ Independent Validation
-```
-
-ADR-003 preserva la dirección de autoridad:
-
-```text
-CONTROL / AUTHORITY
-Upstream → Downstream
-
-RESULTS / EVENTS / EVIDENCE
-Downstream → Upstream
-```
-
-La evidencia puede informar una decisión, pero nunca concede autoridad.
-
-ADR-004 establece `Specification & Verification First`: todo cambio
-significativo debe definir comportamiento esperado y criterios verificables antes
-de ser aceptado en el baseline.
-
-Antes de cualquier modificación importante se deben responder las cuatro
-preguntas obligatorias:
+Antes de cambios importantes deben responderse las cuatro preguntas:
 
 1. ¿Respeta el Blueprint?
-2. ¿Respeta la Constitución Cognitiva?
-3. ¿Respeta la Gobernanza?
+2. ¿Respeta la Cognitive Constitution?
+3. ¿Respeta Governance?
 4. ¿Preserva o reduce la complejidad del Kernel?
-
-Si alguna respuesta es negativa, dudosa o carece de evidencia suficiente, el
-trabajo debe detenerse antes de editar.
 
 ---
 
 ## Artefactos protegidos
 
-No modificar sin autorización explícita y proceso de gobernanza aplicable:
+No modificar sin autorización explícita y proceso aplicable:
 
 - Kernel;
 - contratos centrales;
 - Blueprint;
-- Constitución Cognitiva;
-- Constitución de Gobernanza;
+- Cognitive Constitution;
+- Governance Constitution;
 - políticas de seguridad;
 - ADR aceptados;
-- fundamentos de seguridad;
 - snapshots históricos;
 - metadatos de release.
 
-Ningún agente, runtime, capability o herramienta puede modificar estos artefactos durante operación normal.
-
 ---
 
-## Disciplina de sprints
+## Referencias de evidencia detallada
 
-La evolución de Malāk debe mantener una cadena explícita de promoción:
+Para historia y validación detallada consultar:
 
 ```text
-idea o necesidad real
-→ evaluación
-→ roadmap cuando corresponda
-→ specification
-→ ADR cuando corresponda
-→ alcance aprobado
-→ rama temporal
-→ TDD / implementación
-→ 4R
-→ Bounded Correction cuando sea necesaria
-→ Independent Validation
-→ evidencia
-→ Draft Pull Request
-→ revisión visual humana
-→ promoción humana a Ready for Review
-→ autorización humana de merge
-→ baseline
+docs/project/sprints/SPRINT-7.0.md ... SPRINT-7.11.md
+docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-G0-G1-DESIGN.md
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G0-INSPECTION.md
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G1-DESIGN.md
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G2A-IMPLEMENTATION-CANDIDATE-SPEC.md
+docs/project/sprints/proposals/MALAK-ASSURANCE-SIGNAL-AUTHORITY-G0-G1-DESIGN.md
+docs/architecture/adr/ADR-005-evidence-bound-final-response-transition.md
 ```
 
-No todos los cambios requieren un sprint funcional. Una corrección documental
-acotada puede ejecutarse como corrective packet independiente cuando el alcance,
-la evidencia y la autoridad estén explícitamente delimitados.
-
-Una fase no se considera cerrada hasta que:
-
-- código, cuando aplique;
-- tests, cuando apliquen;
-- documentación;
-- evidencia relevante;
-- estado del repositorio
-
-estén reconciliados.
-
-No se debe iniciar el siguiente sprint o unidad funcional hasta evaluar el
-baseline resultante y obtener aprobación explícita.
+Este contexto no replica toda esa evidencia para evitar drift y duplicación.
 
 ---
 
 ## Política de actualización
 
-Este documento fue reconciliado contra el estado observado después de integrar
-PR #99 — `Malāk Cognitive Assurance — G1 Progressive Assurance Design`:
+Este documento queda reconciliado contra:
 
 ```text
-main@cc9c7373879555a3eb267cd91be5228207427ae8
+main@e45a3e3c0ebf657a513596aa74452413479c05d1
 active_work_branch@NONE
 ```
 
-`as_of_commit` identifica el commit de referencia utilizado para reconstruir el
-contexto, no una obligación de reescribir el documento ante cada commit
-puramente mecánico o documental.
+Debe revalidarse cuando:
 
-Debe volver a validarse cuando:
-
-- `HEAD` cambie de manera material para el contexto descrito;
-- un sprint se formalice, active o cierre;
-- una unidad funcional aislada relevante se integre;
-- se certifique una nueva release;
+- `HEAD` cambie materialmente el contexto descrito;
+- se integre una unidad funcional relevante;
+- se active o cierre un sprint;
 - cambie arquitectura o gobernanza;
-- cambien resultados de tests relevantes;
-- cambie la raíz del repositorio;
-- cambie el entorno de desarrollo de forma material;
-- se incorpore una nueva frontera de seguridad;
-- se modifique de forma material el estado operativo del Vault.
+- cambie materialmente el estado del Vault;
+- se certifique una release;
+- se incorpore una nueva frontera de seguridad o cognición.
 
-Las actualizaciones deben distinguir claramente entre:
-
-- evidencia verificada del repositorio;
-- registros históricos;
-- estado derivado;
-- contexto de planificación;
-- decisiones normativas aprobadas.
-
-Los registros históricos no deben reescribirse para aparentar que describen el
-presente.
+Los registros históricos no deben reescribirse para aparentar presente.
 
 ---
 
@@ -1393,15 +602,13 @@ presente.
 Este documento no puede:
 
 - aprobar un sprint;
-- autorizar una implementación;
-- modificar arquitectura;
-- cambiar gobernanza;
-- redefinir el Kernel;
-- modificar contratos;
+- autorizar implementación;
+- modificar arquitectura o gobernanza;
+- redefinir Kernel o contratos;
 - certificar una release;
 - anular un ADR;
-- convertir una propuesta en alcance aprobado;
 - conceder permisos;
 - ampliar autoridad operativa.
 
-Su único propósito es proporcionar un snapshot de contexto trazable, actualizado y conveniente.
+Su propósito es proporcionar un snapshot de contexto actual, trazable y
+conveniente.
