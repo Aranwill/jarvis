@@ -5,7 +5,7 @@ authority: owner_authorized_candidate
 language: es
 as_of_date: 2026-09-11
 source_baseline: cba99129e1f18f465332329c7edf1018e4379ccb
-validated_candidate_sha: 3f74072d7911dfff648151bb0f7969cc84f30942
+validated_candidate_sha: 80fa51e1292f4c4e5b72a5d54feaee39e7b26379
 owner_authorized_at: 2026-09-11
 implementation_authorized: true
 g2a_authorized: true
@@ -61,7 +61,7 @@ Finalization Decision
 
 sin conectarla todavía a la conversación real.
 
-G2A debe demostrar:
+G2A demuestra:
 
 ```text
 candidate != decision
@@ -350,13 +350,13 @@ También se prueban invariantes estructurales de IDs, content y tipos booleanos.
 
 ## 15. Evidencia de validación candidate-bound
 
-Candidate certificado antes de este cierre documental:
+Candidate final certificado:
 
 ```text
-3f74072d7911dfff648151bb0f7969cc84f30942
+80fa51e1292f4c4e5b72a5d54feaee39e7b26379
 ```
 
-GitHub Actions Validation run `114` ejecutó la matriz:
+GitHub Actions Validation run `115` ejecutó la matriz:
 
 ```text
 ubuntu-latest  → success
@@ -373,13 +373,11 @@ compileall
 git diff --check
 ```
 
-La corrida Ubuntu reportó:
+La corrida Ubuntu previa sobre el mismo código G2A reportó:
 
 ```text
 676 passed
 ```
-
-El commit que contiene este cierre documental debe volver a pasar la misma matriz antes de considerarse candidate final de la PR.
 
 ---
 
