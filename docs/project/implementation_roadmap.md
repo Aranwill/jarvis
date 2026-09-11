@@ -1125,7 +1125,7 @@ Toda selección futura deberá justificarse contra:
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
 | Candidate Content Identity G2 | No aprobada | G0/G1 integrado por PR #93; debe congelar canonicalización/identity semantics antes de implementación y no autoriza Persistence Authorization |
-| Cognitive Assurance — Constitutional Impact Review | No aprobado | G0/G1 conceptual integrado por PR #98/#99; requiere primero reconciliación downstream y gate separado antes de cualquier ADR/Blueprint/Constitution change |
+| Cognitive Assurance — Constitutional Impact Review | Completado | G0/G1 completado; su promoción normativa fue aceptada mediante ADR-005, Blueprint v0.6.2-alpha y Cognitive Constitution v1.1.0. Runtime e implementación posterior permanecen no autorizados y requieren gate separado |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
