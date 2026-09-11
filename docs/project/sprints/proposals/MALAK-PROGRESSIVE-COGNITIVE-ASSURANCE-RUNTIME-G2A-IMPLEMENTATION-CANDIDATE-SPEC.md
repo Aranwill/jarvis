@@ -1,13 +1,15 @@
 ---
 title: Malāk Progressive Cognitive Assurance Runtime — G2A Implementation Candidate Spec
-status: implementation_authorized
+status: implemented_candidate
 authority: owner_authorized_candidate
 language: es
 as_of_date: 2026-09-11
 source_baseline: cba99129e1f18f465332329c7edf1018e4379ccb
+validated_candidate_sha: 3f74072d7911dfff648151bb0f7969cc84f30942
 owner_authorized_at: 2026-09-11
 implementation_authorized: true
 g2a_authorized: true
+g2a_candidate_validation: success
 g2b_authorized: false
 sprint_7_12_authorized: false
 rdd_stage_2_authorized: false
@@ -72,7 +74,7 @@ missing support != sufficient support
 
 ## 3. Ubicación seleccionada
 
-La foundation se implementará como módulo interno:
+La foundation se implementa como módulo interno:
 
 ```text
 src/malak/core/protected_finalization.py
@@ -198,7 +200,7 @@ no qualified content producer
 protected-finalization/v1
 ```
 
-La versión debe formar parte de toda decisión válida.
+La versión forma parte de toda decisión válida.
 
 ---
 
@@ -283,6 +285,8 @@ G2A no puede:
 - generar texto lingüístico alternativo;
 - crear receipts durables.
 
+La implementación candidate respeta estas restricciones.
+
 ---
 
 ## 13. Archivos de implementación autorizados
@@ -292,15 +296,15 @@ src/malak/core/protected_finalization.py
 tests/test_protected_finalization.py
 ```
 
-Más este documento de especificación.
+Más este documento de especificación y la reconciliación documental de G1.
 
-Cualquier archivo adicional requiere evidencia de necesidad antes de incorporarlo.
+No se incorporaron dependencias externas ni otros cambios de runtime.
 
 ---
 
 ## 14. Tests obligatorios
 
-Debe existir cobertura explícita de:
+Existe cobertura explícita de:
 
 ```text
 wrong candidate type
@@ -340,29 +344,50 @@ same inputs
 → same outcome/reason/policy semantics
 ```
 
-También deben probarse invariantes estructurales de IDs, content y tipos booleanos.
+También se prueban invariantes estructurales de IDs, content y tipos booleanos.
 
 ---
 
-## 15. Criterios de aceptación candidate-bound
+## 15. Evidencia de validación candidate-bound
+
+Candidate certificado antes de este cierre documental:
 
 ```text
-pytest PASS
-compileall PASS
-git diff --check PASS
-CI matrix PASS
-no Kernel change
-no conversation wiring
-no provider/runtime change
-no persistence
-no new dependency
+3f74072d7911dfff648151bb0f7969cc84f30942
 ```
+
+GitHub Actions Validation run `114` ejecutó la matriz:
+
+```text
+ubuntu-latest  → success
+macos-latest   → success
+windows-latest → success
+```
+
+Cada job completó exitosamente:
+
+```text
+Verify candidate identity
+pytest
+compileall
+git diff --check
+```
+
+La corrida Ubuntu reportó:
+
+```text
+676 passed
+```
+
+El commit que contiene este cierre documental debe volver a pasar la misma matriz antes de considerarse candidate final de la PR.
 
 ---
 
 ## 16. Stop conditions
 
-Detener la implementación si requiere:
+No se activó ninguna stop condition de G2A.
+
+No hubo:
 
 - Kernel changes;
 - provider/runtime changes;
@@ -378,19 +403,23 @@ Detener la implementación si requiere:
 
 ---
 
-## 17. Estado posterior esperado
-
-Si G2A pasa todos los criterios:
+## 17. Estado posterior
 
 ```text
 Protected Finalization Foundation:
-IMPLEMENTED IN ISOLATION
+IMPLEMENTED IN ISOLATION / VALIDATED
 
 Live conversation assurance:
 NOT IMPLEMENTED
 
 G2B:
-BLOCKED BY SIGNAL-PRODUCER GAP
+BLOCKED BY SIGNAL-PRODUCER GAP / NOT AUTHORIZED
+
+Sprint 7.12:
+NOT AUTHORIZED
+
+RDD Stage 2:
+NOT AUTHORIZED
 ```
 
 La existencia de G2A no permite afirmar que toda respuesta conversacional de Malāk ya atraviesa assurance cognitivo runtime.
