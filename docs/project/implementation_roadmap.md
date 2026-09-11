@@ -3,13 +3,13 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-10
-as_of_commit: cc9c7373879555a3eb267cd91be5228207427ae8
+as_of_date: 2026-09-11
+as_of_commit: e45a3e3c0ebf657a513596aa74452413479c05d1
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
-certification_status: sprint_7_11_completed
+candidate_commit: null
+certification_status: current_main_validated
 legacy_planning_source:
   - docs/project/roadmap.md
 language: es
@@ -233,10 +233,10 @@ No deben actuar como segundo roadmap.
 3413e8ccb348440aea757d1feccde25c65be011f
 ```
 
-- HEAD integrado observado post-PR #99:
+- HEAD integrado observado post-PR #111:
 
 ```text
-cc9c7373879555a3eb267cd91be5228207427ae8
+e45a3e3c0ebf657a513596aa74452413479c05d1
 ```
 
 - HEAD de producto de la cadena episódica:
@@ -260,7 +260,13 @@ Sprint 7.11 — Reproducible Validation Pipeline Foundation
 - Última unidad de código de producto integrada:
 
 ```text
-Episodic Admission Governed Projection Consumption Boundary
+G2A — Protected Finalization Foundation
+```
+
+- Último diseño cognitivo integrado:
+
+```text
+Assurance Signal Authority Boundary — G0/G1
 ```
 
 - Cadena episódica aislada integrada después de Sprint 7.11:
@@ -328,15 +334,19 @@ independent validation: PASS
 - PR #93 integró únicamente G0/G1 de Candidate Content Identity; G2,
   implementación y propagación no están autorizados.
 - PR #97–#99 preservaron y diseñaron Evidence-Bound Cognition / Progressive
-  Cognitive Assurance a nivel conceptual/G0/G1, sin implementación runtime ni
-  modificación constitucional.
-- Ningún Sprint 7.12 ni implementación posterior a Governed Projection
-  Consumption está autorizado.
+  Cognitive Assurance a nivel conceptual/G0/G1; la promoción normativa posterior
+  quedó reflejada mediante ADR-005, Blueprint v0.6.2-alpha y Cognitive
+  Constitution v1.1.0.
+- PR #110 integró G2A — Protected Finalization Foundation de forma aislada,
+  determinista y sin wiring a Conversation/Kernel/provider/runtime.
+- PR #111 integró G0/G1 de Assurance Signal Authority Boundary; Signal Boundary
+  G2 y Conversation Finalization G2B permanecen no autorizados.
+- Ningún Sprint 7.12 ni implementación posterior a G2A está autorizado.
 - RDD Stage 1 está adoptado; RDD Stage 2 no está autorizado.
-- La última reconciliación aceptada del Vault refleja
-  `9438c66e315faa2b4c8c3f0a99d4e1e9619992c3`; los cambios documentales desde
-  PR #93 deben reconciliarse downstream antes del siguiente gate que requiera
-  drift cero.
+- La última reconciliación aceptada del Vault refleja Malāk
+  `5865da6a5e502fe71e35e2e38bc4cceaab9b3600` mediante Vault PR #98; los cambios
+  posteriores deben reconciliarse downstream antes del siguiente gate que
+  requiera drift cero.
 
 Como referencia histórica, Sprint 7.9 cerró con candidato funcional:
 
@@ -454,21 +464,29 @@ projection es consumible. No persiste Memory ni crea side effects.
 La cadena no introduce Conversation/runtime wiring, persistencia, retrieval,
 Knowledge, cambios al Kernel ni ampliación de autoridad.
 
+PR #110 añadió, de forma separada, G2A — Protected Finalization Foundation bajo
+`src/malak/core/protected_finalization.py`. La foundation materializa la
+separación `Generated Candidate != Final Response` mediante evaluación
+`ACCEPT | ABSTAIN | BLOCK`, permanece pura/determinista y no está conectada a la
+ruta conversacional. PR #111 documentó G0/G1 del ownership de las señales que
+G2A necesitaría para una integración posterior.
+
 La finalización de estas unidades no autoriza nuevas capabilities ni ampliación
-de autoridad.
+de autoridad. Signal Boundary G2 y Conversation Finalization G2B requieren gates
+y aprobación separados.
 
 ---
 
 # 7. Estado del baseline actual
 
-Estado verificado después de integrar PR #99:
+Estado verificado después de integrar PR #111:
 
 ```text
 commit de integración Sprint 7.11:
 3413e8ccb348440aea757d1feccde25c65be011f
 
 HEAD integrado actual:
-cc9c7373879555a3eb267cd91be5228207427ae8
+e45a3e3c0ebf657a513596aa74452413479c05d1
 
 HEAD de producto de la cadena episódica:
 9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
@@ -480,7 +498,10 @@ Sprint 7.11:
 completado e integrado
 
 última unidad de código de producto integrada:
-Episodic Admission Governed Projection Consumption Boundary
+G2A — Protected Finalization Foundation
+
+último diseño cognitivo integrado:
+Assurance Signal Authority Boundary — G0/G1
 
 última ruta conversacional/runtime integrada:
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -503,6 +524,9 @@ PASS
 PR #92 candidate validation:
 success on ubuntu-latest / windows-latest / macos-latest
 645 passed on Ubuntu
+
+current main validation:
+success on e45a3e3c0ebf657a513596aa74452413479c05d1
 ```
 
 `main` continúa siendo la única rama permanente.
@@ -520,14 +544,16 @@ Sprint 7.12. Del mismo modo, PR #92 no autoriza automáticamente Candidate Conte
 Identity G2, Persistence Authorization, Memory persistente, agentes, tools,
 Sandbox, RDD Stage 2 o ampliación de autoridad.
 
-PR #93 añadió únicamente el G0/G1 de Candidate Content Identity. PR #97–#99 son
-unidades documentales de Evidence-Bound Cognition / Progressive Cognitive
-Assurance; no materializan una nueva ruta runtime.
+PR #93 añadió únicamente el G0/G1 de Candidate Content Identity. PR #97–#99
+preservaron y diseñaron Evidence-Bound Cognition / Progressive Cognitive
+Assurance; su promoción normativa posterior quedó registrada mediante ADR-005,
+Blueprint v0.6.2-alpha y Cognitive Constitution v1.1.0. PR #110 materializó G2A
+en aislamiento y PR #111 integró G0/G1 de Assurance Signal Authority Boundary.
 
-La última reconciliación aceptada del Malāk Project Vault representa el HEAD de
-producto post-PR #92 de forma derivada. Los cambios documentales posteriores
-deben sincronizarse antes del siguiente gate que requiera drift cero y no alteran
-la autoridad del repositorio oficial.
+La última reconciliación aceptada del Malāk Project Vault representa Malāk
+`main@5865da6a5e502fe71e35e2e38bc4cceaab9b3600` mediante Vault PR #98. Los
+cambios posteriores deben sincronizarse antes del siguiente gate que requiera
+drift cero y no alteran la autoridad del repositorio oficial.
 ---
 
 # 8. Estado de sprints del bloque 7.x
@@ -563,9 +589,13 @@ ASSESSMENT PRODUCER AUTHORIZATION BOUNDARY INTEGRADO
 GOVERNED INPUT PROJECTION BOUNDARY INTEGRADO
 GOVERNED PROJECTION CONSUMPTION BOUNDARY INTEGRADO
 CANDIDATE CONTENT IDENTITY G0/G1 INTEGRADO — G2 NO AUTORIZADO
-PROGRESSIVE COGNITIVE ASSURANCE G0/G1 INTEGRADO — RUNTIME NO AUTORIZADO
+PROGRESSIVE COGNITIVE ASSURANCE G0/G1 INTEGRADO
+G2A — PROTECTED FINALIZATION FOUNDATION INTEGRADO
+ASSURANCE SIGNAL AUTHORITY G0/G1 INTEGRADO
+SIGNAL BOUNDARY G2 NO AUTORIZADO
+CONVERSATION FINALIZATION G2B NO AUTORIZADO
 SPRINT 7.12 NO AUTORIZADO
-NINGUNA IMPLEMENTACIÓN POSTERIOR A GOVERNED PROJECTION CONSUMPTION AUTORIZADA
+NINGUNA IMPLEMENTACIÓN POSTERIOR A G2A AUTORIZADA
 RDD STAGE 2 NO AUTORIZADO
 ```
 
@@ -627,7 +657,8 @@ No está autorizado:
 - Sprint 7.12;
 - Candidate Content Identity G2 o su implementación/propagación;
 - Persistence Authorization;
-- Response Assurance runtime;
+- Signal Boundary G2;
+- Conversation Finalization G2B;
 - RDD Stage 2;
 - Memory persistente;
 - nuevas capabilities;
@@ -1125,7 +1156,7 @@ Toda selección futura deberá justificarse contra:
 |---|---|---|
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
 | Candidate Content Identity G2 | No aprobada | G0/G1 integrado por PR #93; debe congelar canonicalización/identity semantics antes de implementación y no autoriza Persistence Authorization |
-| Cognitive Assurance — Constitutional Impact Review | Completado | G0/G1 completado; su promoción normativa fue aceptada mediante ADR-005, Blueprint v0.6.2-alpha y Cognitive Constitution v1.1.0. Runtime e implementación posterior permanecen no autorizados y requieren gate separado |
+| Cognitive Assurance — Protected Finalization | Parcialmente materializada | Promoción normativa aceptada; G2A integrado por PR #110 y Signal Authority G0/G1 integrado por PR #111. Signal Boundary G2 y Conversation Finalization G2B permanecen no autorizados |
 | Module Registry legacy | Requiere revisión | Determinar si la responsabilidad continúa siendo necesaria o fue absorbida por otra abstracción |
 | Lifecycle Manager legacy | Requiere revisión | Comparar intención original contra lifecycle actual |
 | Health Manager legacy | Requiere revisión | Definir responsabilidad mínima antes de cualquier propuesta |
@@ -1356,10 +1387,10 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-cc9c7373879555a3eb267cd91be5228207427ae8
+e45a3e3c0ebf657a513596aa74452413479c05d1
 
 CURRENT PRODUCT HEAD
-9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
+e45a3e3c0ebf657a513596aa74452413479c05d1
 
 SPRINT 7.11 INTEGRATION REFERENCE
 3413e8ccb348440aea757d1feccde25c65be011f
@@ -1377,13 +1408,13 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST PRODUCT UNIT
-Episodic Admission Governed Projection Consumption Boundary
+G2A — Protected Finalization Foundation
 
 LATEST MEMORY DESIGN UNIT
 Episodic Candidate Content Identity — G0/G1 ONLY
 
 LATEST COGNITIVE ASSURANCE DESIGN
-Progressive Cognitive Assurance — G1 ONLY
+Assurance Signal Authority Boundary — G0/G1
 
 LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -1394,8 +1425,14 @@ NONE
 SPRINT 7.12
 NONE AUTHORIZED
 
-IMPLEMENTATION AFTER GOVERNED PROJECTION CONSUMPTION
+IMPLEMENTATION AFTER G2A
 NONE AUTHORIZED
+
+SIGNAL BOUNDARY G2
+NOT AUTHORIZED
+
+CONVERSATION FINALIZATION G2B
+NOT AUTHORIZED
 
 CANDIDATE CONTENT IDENTITY G2
 NOT AUTHORIZED
