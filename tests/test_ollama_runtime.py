@@ -11,6 +11,8 @@ from malak.runtime.ollama_runtime import OllamaRuntime
 class FakeHTTPResponse:
     def __init__(self, payload: dict[str, object]) -> None:
         self._payload = payload
+        self._raw_payload = json.dumps(payload).encode("utf-8")
+        self.read_sizes: list[int] = []
 
     def __enter__(self) -> "FakeHTTPResponse":
         return self
@@ -18,8 +20,13 @@ class FakeHTTPResponse:
     def __exit__(self, *args: object) -> None:
         return None
 
-    def read(self) -> bytes:
-        return json.dumps(self._payload).encode("utf-8")
+    def read(self, size: int = -1) -> bytes:
+        self.read_sizes.append(size)
+
+        if size < 0:
+            return self._raw_payload
+
+        return self._raw_payload[:size]
 
 
 def test_ollama_runtime_generates_conversation_response(
@@ -283,3 +290,226 @@ def test_ollama_runtime_appends_metric_sample_to_store(
     assert sample.eval_count == 200
     assert sample.tokens_per_second == 20.0
     assert sample.captured_at.tzinfo is not None
+@pytest.mark.parametrize(
+    "max_request_bytes",
+    (0, -1),
+)
+def test_ollama_runtime_rejects_invalid_max_request_bytes(
+    max_request_bytes: int,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="max_request_bytes",
+    ):
+        OllamaRuntime(
+            max_request_bytes=max_request_bytes,
+        )
+
+
+@pytest.mark.parametrize(
+    "max_response_bytes",
+    (0, -1),
+)
+def test_ollama_runtime_rejects_invalid_max_response_bytes(
+    max_response_bytes: int,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="max_response_bytes",
+    ):
+        OllamaRuntime(
+            max_response_bytes=max_response_bytes,
+        )
+
+
+def test_ollama_runtime_allows_request_at_exact_byte_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request = ConversationRequest(
+        prompt="Hola Malak",
+        model="qwen3.5:9b",
+    )
+
+    expected_payload = {
+        "model": "qwen3.5:9b",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Hola Malak",
+            },
+        ],
+        "stream": False,
+        "keep_alive": 0,
+    }
+
+    encoded_payload = json.dumps(expected_payload).encode("utf-8")
+
+    called = False
+
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> FakeHTTPResponse:
+        nonlocal called
+        called = True
+
+        return FakeHTTPResponse(
+            {
+                "model": "qwen3.5:9b",
+                "message": {
+                    "role": "assistant",
+                    "content": "OK",
+                },
+            }
+        )
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    runtime = OllamaRuntime(
+        keep_alive=0,
+        max_request_bytes=len(encoded_payload),
+    )
+
+    response = runtime.generate(request)
+
+    assert called is True
+    assert response.content == "OK"
+
+
+def test_ollama_runtime_rejects_request_above_byte_limit_before_urlopen(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    request = ConversationRequest(
+        prompt="Hola Malak",
+        model="qwen3.5:9b",
+    )
+
+    expected_payload = {
+        "model": "qwen3.5:9b",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Hola Malak",
+            },
+        ],
+        "stream": False,
+        "keep_alive": 0,
+    }
+
+    encoded_payload = json.dumps(expected_payload).encode("utf-8")
+
+    called = False
+
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> FakeHTTPResponse:
+        nonlocal called
+        called = True
+        raise AssertionError("urlopen must not be called")
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    runtime = OllamaRuntime(
+        keep_alive=0,
+        max_request_bytes=len(encoded_payload) - 1,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="max_request_bytes",
+    ):
+        runtime.generate(request)
+
+    assert called is False
+
+
+def test_ollama_runtime_allows_response_at_exact_byte_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response_payload = {
+        "model": "qwen3.5:9b",
+        "message": {
+            "role": "assistant",
+            "content": "Respuesta acotada.",
+        },
+    }
+
+    raw_response = json.dumps(response_payload).encode("utf-8")
+    fake_response = FakeHTTPResponse(response_payload)
+
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> FakeHTTPResponse:
+        return fake_response
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    runtime = OllamaRuntime(
+        max_response_bytes=len(raw_response),
+    )
+
+    response = runtime.generate(
+        ConversationRequest(
+            prompt="Hola Malak",
+            model="qwen3.5:9b",
+        )
+    )
+
+    assert response.content == "Respuesta acotada."
+    assert fake_response.read_sizes == [len(raw_response) + 1]
+
+
+def test_ollama_runtime_rejects_response_above_byte_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response_payload = {
+        "model": "qwen3.5:9b",
+        "message": {
+            "role": "assistant",
+            "content": "Respuesta demasiado grande.",
+        },
+    }
+
+    raw_response = json.dumps(response_payload).encode("utf-8")
+    fake_response = FakeHTTPResponse(response_payload)
+
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> FakeHTTPResponse:
+        return fake_response
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    max_response_bytes = len(raw_response) - 1
+
+    runtime = OllamaRuntime(
+        max_response_bytes=max_response_bytes,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="max_response_bytes",
+    ):
+        runtime.generate(
+            ConversationRequest(
+                prompt="Hola Malak",
+                model="qwen3.5:9b",
+            )
+        )
+
+    assert fake_response.read_sizes == [max_response_bytes + 1]
