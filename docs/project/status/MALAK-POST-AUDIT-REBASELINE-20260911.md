@@ -1,6 +1,6 @@
 ---
 title: Malāk Post-Audit Rebaseline — 2026-09-11
-status: derived_current_state
+status: superseded_derived_snapshot
 authority: non-normative
 language: es
 as_of_date: 2026-09-11
@@ -11,12 +11,20 @@ vault_repository: Aranwill/malak-project-vault
 vault_commit: 34f0416a8d312f4f27b9b36c3733cc2703772364
 sync_agent_repository: Aranwill/malak-vault-sync-agent
 sync_agent_commit: f6eb42715dd7771f3bcf7909a99f7e4e7db465c1
+superseded_by_commit: e45a3e3c0ebf657a513596aa74452413479c05d1
 implementation_authorized: false
 sprint_7_12_authorized: false
 rdd_stage_2_authorized: false
 ---
 
 # Malāk Post-Audit Rebaseline — 2026-09-11
+
+> [!IMPORTANT]
+> Este documento se conserva como snapshot derivado point-in-time del estado
+> observado en `main@5865da6a5e502fe71e35e2e38bc4cceaab9b3600`.
+> Ya no representa el estado operativo actual de Malāk; para estado vigente deben
+> consultarse `docs/project/project_context.md` y
+> `docs/project/implementation_roadmap.md`.
 
 ## 1. Propósito
 
