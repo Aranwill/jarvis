@@ -6,7 +6,6 @@ language: es
 as_of_date: 2026-09-11
 source_baseline: cba99129e1f18f465332329c7edf1018e4379ccb
 validated_code_candidate_sha: 80fa51e1292f4c4e5b72a5d54feaee39e7b26379
-final_pr_head_validated_sha: a606e95abd587f0a276c77f50fda0f18f39137b8
 owner_authorized_at: 2026-09-11
 implementation_authorized: true
 g2a_authorized: true
@@ -357,21 +356,17 @@ Código G2A certificado en:
 80fa51e1292f4c4e5b72a5d54feaee39e7b26379
 ```
 
-El HEAD documental posterior certificado de la PR es:
+La certificación del HEAD vigente de la PR se mantiene como evidencia externa de GitHub Actions y no se incrusta aquí para evitar una referencia circular que mueva el propio HEAD al actualizar el documento.
+
+La matriz obligatoria es:
 
 ```text
-a606e95abd587f0a276c77f50fda0f18f39137b8
+ubuntu-latest
+macos-latest
+windows-latest
 ```
 
-GitHub Actions Validation run `116` ejecutó la matriz sobre ese HEAD final:
-
-```text
-ubuntu-latest  → success
-macos-latest   → success
-windows-latest → success
-```
-
-Cada job completó exitosamente:
+Cada job debe completar exitosamente:
 
 ```text
 Verify candidate identity
