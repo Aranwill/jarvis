@@ -1,12 +1,15 @@
 ---
 title: Malāk Progressive Cognitive Assurance Runtime — G1 Design
-status: gate_candidate
+status: completed
 authority: design_evidence
 language: es
 as_of_date: 2026-09-11
 source_baseline: 5865da6a5e502fe71e35e2e38bc4cceaab9b3600
 g0_source: docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G0-INSPECTION.md
 implementation_authorized: false
+g2a_authorized_after_g1: true
+g2a_authorized_at: 2026-09-11
+g2b_authorized: false
 sprint_7_12_authorized: false
 rdd_stage_2_authorized: false
 related:
@@ -23,7 +26,7 @@ related:
 
 Este documento transforma la inspección G0 en un diseño mínimo candidato.
 
-No autoriza implementación.
+En su cierre original, G1 no autorizaba implementación. Posteriormente, el Owner autorizó explícitamente **G2A — Protected Finalization Foundation** el 2026-09-11. Esa autorización posterior no extiende G1 ni autoriza G2B.
 
 No crea Sprint 7.12.
 
@@ -31,6 +34,7 @@ No modifica el Blueprint, la Cognitive Constitution ni ADR-005.
 
 ```text
 G1 Design != G2 Authorization
+G2A Authorization != G2B Authorization
 Design != Runtime Capability
 Evidence != Authority
 ```
@@ -734,21 +738,20 @@ Puede comenzar como una boundary determinista separada, pero necesita su propio 
 
 ## 25. Decisión de implementación candidata
 
-G1 recomienda que una futura solicitud de implementación autorice, como máximo y de forma separada:
+G1 recomendó que una futura solicitud de implementación autorizara, como máximo y de forma separada:
 
 ```text
 G2A only
 Protected Finalization Foundation
 ```
 
-No recomienda todavía autorizar G2B.
-
-Razón:
+El Owner autorizó posteriormente G2A el 2026-09-11. La specification ejecutable correspondiente se registra en:
 
 ```text
-we can build the law-preserving decision boundary now
-without pretending we already possess the evidence producers needed for live enforcement
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G2A-IMPLEMENTATION-CANDIDATE-SPEC.md
 ```
+
+G2B continúa sin autorización.
 
 ---
 
@@ -787,10 +790,10 @@ G2A foundation first
 G2B live integration later
 
 G2A implementation:
-NOT AUTHORIZED YET
+AUTHORIZED BY OWNER ON 2026-09-11
 
 G2B implementation:
-BLOCKED BY SIGNAL-PRODUCER GAP
+BLOCKED BY SIGNAL-PRODUCER GAP / NOT AUTHORIZED
 
 Sprint 7.12:
 NOT AUTHORIZED
@@ -805,4 +808,4 @@ RDD Stage 2:
 NOT AUTHORIZED
 ```
 
-El siguiente gate válido es una decisión explícita del Owner sobre si autoriza o no **G2A — Protected Finalization Foundation** como unidad aislada y candidate-bound.
+La autorización posterior de G2A no modifica los límites de G1 ni habilita ningún wiring conversacional.
