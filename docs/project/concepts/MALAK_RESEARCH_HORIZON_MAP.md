@@ -926,3 +926,112 @@ Los gaps y refuerzos que merecen permanecer visibles son principalmente:
 
 Ninguno de estos gaps constituye por sí mismo autorización para crear una nueva
 capability, componente o sprint.
+
+---
+
+## 19. Evidence Map — artefactos externos revisados e insumos futuros
+
+Revisión realizada: `2026-09-12`  
+Baseline contrastado: `Aranwill/jarvis/main@cd50c308e1f5a1481851d6402ae4435341410d27`
+
+Esta sección **agrega evidencia** a la reconciliación existente sin modificar ni
+reclasificar las secciones 1–18.
+
+Principio rector:
+
+> **Malāk adopta propiedades demostradas, no arquitecturas externas.**
+
+Una referencia preservada aquí describe un artefacto ya revisado y la propiedad
+que se extrajo de él. No es una instrucción para volver a consultar Internet, no
+es contenido confiable vivo, no es una dependencia y no adquiere autoridad sobre
+la arquitectura de Malāk.
+
+```text
+artefacto externo revisado
+        ↓
+propiedad observada
+        ↓
+línea de Malāk relacionada
+        ↓
+future admission review
+        ↓
+ADOPT / ADAPT / OBSERVE / REJECT
+        ↓
+diseño propio de Malāk cuando corresponda
+```
+
+La lectura explícita de este documento y la clasificación de material futuro ya
+están exigidas por `docs/development/malak_construction_protocol.md`. Por ello,
+cuando una entrada marcada `IMPLEMENTATION_INPUT` sea materialmente relevante a
+una capability o responsabilidad bajo admisión, deberá entrar en el inventario de
+fuentes aplicables y recibir disposición explícita dentro de ese proceso.
+
+Esto **no autoriza implementación**. Significa únicamente que la evidencia ya
+obtenida no debe perderse ni quedar fuera del scope cuando llegue el momento de
+diseñar o implementar la superficie relacionada.
+
+### 19.1. Roles de uso futuro
+
+```text
+CORROBORATION
+→ refuerza una decisión, límite o dirección que Malāk ya preserva.
+
+IMPLEMENTATION_INPUT
+→ si la línea relacionada entra en admission, la propiedad observada debe ser
+  considerada y recibir disposición explícita antes del diseño/implementación.
+
+WATCH_SIGNAL
+→ señal relevante que todavía requiere nueva revalidación antes de convertirse
+  en input de diseño.
+```
+
+Los roles pueden coexistir. Ninguno equivale a roadmap, prioridad, sprint,
+aprobación o autoridad.
+
+### 19.2. Ledger de evidencia revisada
+
+| ID | Artefacto revisado / identidad | Alcance exacto revisado | Propiedad observada | Línea Malāk relacionada | Uso futuro | No implica |
+|---|---|---|---|---|---|---|
+| `EXT-01` | NIST — *Back to the Future: Why Agentic AI Needs a Strong Identity Foundation* — 2026-08-27 | identidad de agentes/workloads, credenciales acotadas y de corta vida, separación respecto de identidad humana | la seguridad agentic necesita identidad verificable y lifecycle de credenciales fuera del modelo | Agent Identity & Delegation / Security Control Plane | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar automáticamente OAuth, SPIFFE, JWT, X.509 o una PKI concreta |
+| `EXT-02` | ACSC/CISA/NSA/Cyber Centre Canada/NCSC-NZ/NCSC-UK — *Careful adoption of agentic AI services* — 2026-05-01 | principals distintos, least privilege, credenciales efímeras, resource limits, human control points, aislamiento, monitoreo y rollback | la autoridad agentic debe estar acotada, verificable y revocable en runtime | Agent Identity / Resource Governance / Containment / Human in Control | `CORROBORATION` + `IMPLEMENTATION_INPUT` | importar su arquitectura o convertir controles externos en autoridad Malāk |
+| `EXT-03` | ASD — *Agentic AI Harnesses — The layer above the model* — 2026-09-11 | seguridad, gobernanza, validación, monitoreo y assurance fuera del modelo | controles críticos deben vivir también en el sistema/harness y no depender del prompt o comportamiento probabilístico | `Model != System` / Security Control Plane | `CORROBORATION` | adoptar un harness concreto |
+| `EXT-04` | Google Developers — *Build zero-trust AI agents with Google's Agent Development Kit* — 2026-08-17 | identidad/signing para writes, sandboxing, restricciones de egress/resources y gateways deterministas | side effects agentic requieren fronteras verificables fuera del LLM | Zero Trust / Sandbox / provenance / protected execution | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar ADK, gVisor o su composición concreta como diseño de Malāk |
+| `EXT-05` | Anthropic — *How we contain Claude across products* — 2026-05-25 | containment, blast radius, approval fatigue, tool output, memory y subagent trust | hard boundaries deben sobrevivir a fallos probabilísticos; Human in Control no debe reducirse a aprobación de cada microacción | Containment / Prompt & Context Trust / Human in Control | `CORROBORATION` + `IMPLEMENTATION_INPUT` | eliminar checkpoints humanos reservados ni copiar su infraestructura |
+| `EXT-06` | A2A Protocol — specification revisada 2026-09-12; snapshot externo inmutable no preservado | semántica de `TASK_STATE_AUTH_REQUIRED`, scope, validez y revocación | requerir autorización no equivale a poseer autorización para ejecutar | Governed Interoperability / Authorization | `CORROBORATION` + `WATCH_SIGNAL` | adoptar A2A como autoridad interna o protocolo obligatorio |
+| `EXT-07` | OWASP GenAI Security Project — *Top 10 for Agentic Applications 2026* — 2025-12-09 | goal hijack, tool misuse, privilege abuse, supply chain, memory/context poisoning, inter-agent communication, cascading failures y rogue agents | el threat model agentic requiere controles sistémicos más allá de prompting | Security Horizon / agents / tools / Memory | `CORROBORATION` | implementar una taxonomía OWASP como arquitectura |
+| `EXT-08` | OWASP GenAI Security Project — *Memory Is a Feature. It Is Also an Attack Surface* — 2026-05-13 | contaminación persistente y memory/context poisoning entre interacciones | Memory persistente es una frontera de trust capaz de transportar compromiso | Memory & Knowledge Trust / Poisoning | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar un memory framework o habilitar persistencia |
+| `EXT-09` | W3C — *PROV-Overview* — 2013 | entidades, actividades, agentes, derivación, atribución y provenance | provenance puede representarse separadamente de decisión y autoridad | AI Supply-Chain Trust / evidence lineage / future RDD | `IMPLEMENTATION_INPUT` | adoptar el modelo PROV completo o sus schemas como contrato Malāk |
+| `EXT-10` | SLSA v1.2 — *Provenance* | identidad del artefacto y attestations sobre cómo fue producido | provenance/integridad puede ligar un artefacto a su proceso de producción sin autorizar su uso | AI Supply-Chain Trust / candidate evidence | `IMPLEMENTATION_INPUT` | adoptar SLSA completo ni convertir provenance en autorización |
+| `EXT-11` | seL4 — documentación de *Capabilities* revisada 2026-09-12; snapshot externo inmutable no preservado | tokens no falsificables con derechos explícitos y acotados | autoridad mínima explícita puede expresarse mediante derechos verificables | Capability First / explicit authority | `CORROBORATION` + `IMPLEMENTATION_INPUT` | equiparar la `capability` de seL4 con la Capability funcional de Malāk |
+| `EXT-12` | Google — *Zanzibar: Google's Consistent, Global Authorization System* — USENIX ATC 2019 | autorización como infraestructura separada, consistente y evaluable | autorización merece semántica/control propios y no inferencias dispersas por consumidor | Security Control Plane / Authorization | `CORROBORATION` + `IMPLEMENTATION_INPUT` | copiar Zanzibar o introducir infraestructura global innecesaria |
+| `EXT-13` | SPIFFE — workload identity specifications/docs revisadas 2026-09-12; snapshot externo inmutable no preservado | workload identity verificable y credenciales de vida acotada | una identidad de workload puede separarse de identidad humana y tener lifecycle propio | Agent Identity & Delegation | `IMPLEMENTATION_INPUT` | seleccionar SPIFFE automáticamente como implementación |
+| `EXT-14` | Kubernetes — patrón/documentación de Controllers revisada 2026-09-12; snapshot externo inmutable no preservado | desired state, observed state y reconciliation loop | sistemas dinámicos deben poder reconciliar estado deseado con estado realmente observado | Durable Cognitive Execution / runtime lifecycle | `IMPLEMENTATION_INPUT` | Kubernetes, controller-runtime o sus APIs como dependencia |
+| `EXT-15` | Erlang/OTP — Supervisor Behaviour docs revisadas 2026-09-12; snapshot externo inmutable no preservado | supervision trees, restart strategies y restart intensity | recuperación de procesos requiere supervisión explícita y límites, no reinicio ciego | Task / process lifecycle / Resource Governance | `IMPLEMENTATION_INPUT` | copiar OTP, sus estrategias o límites numéricos |
+| `EXT-16` | Temporal — documentación de durable execution revisada 2026-09-12; snapshot externo inmutable no preservado | persistencia de progreso, retries/replay, idempotencia, side effects y compensation | ejecución durable exige semántica explícita de retry/resume/replay/idempotence/compensation | Long Horizon / Durable Cognitive Execution | `IMPLEMENTATION_INPUT` | adoptar Temporal como workflow engine de Malāk |
+| `EXT-17` | OpenTelemetry — context propagation docs revisadas 2026-09-12; snapshot externo inmutable no preservado | trace/span context y propagación causal entre procesos/servicios | correlación causal puede mejorar observabilidad sin convertir telemetry en evidencia o autoridad | Observability / forensics / long-horizon execution | `IMPLEMENTATION_INPUT` | convertir spans/logs en evidencia canónica automáticamente |
+| `EXT-18` | OpenAI — *A shared playbook for trustworthy third party evaluations* — 2026-05-29 | modelo, tools, harness, environment, safeguards, budget y validity checks como contexto de una evaluación | un resultado de evaluación no es interpretable sin contexto suficiente sobre cómo fue producido | RDD evolution / validation evidence | `CORROBORATION` + `IMPLEMENTATION_INPUT` | autorizar RDD Stage 2 ni copiar un harness de evaluación |
+| `EXT-19` | OpenAI — *Separating signal from noise in coding evaluations* — 2026-07-08 | calidad de tareas, tests y cobertura como condición de validez de evaluación | `PASS` no garantiza evidencia válida si el instrumento de evaluación está defectuoso | Engineering validation / future RDD | `CORROBORATION` | tratar benchmarks externos como autoridad |
+| `EXT-20` | Anthropic — *Demystifying evals for AI agents* — 2026-01-09 | trayectorias multistep, tool calls y cambios de estado en evaluaciones agentic | evaluar solo output final puede ocultar fallos importantes de proceso | Agent evaluation / future validation | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar su framework o métricas sin revalidación propia |
+| `EXT-21` | USENIX Security 2026 — *AttriGuard: Defeating Indirect Prompt Injection in LLM Agents via Causal Attribution of Tool Invocations* | causal attribution de tool invocations frente a indirect prompt injection | vincular una acción con su causa/intención puede ayudar a distinguir user intent de contenido no confiable | Prompt & Context Trust / tool provenance | `WATCH_SIGNAL` | asumir madurez suficiente ni incorporar el método experimental ahora |
+| `EXT-22` | Gentleman Programming `gentle-pi` — `main@6e4478c04615b0c013a017178dcfefa51579982d` | native RDD workflow, review integration, runner/protocol, task lifecycle y presence projection | candidate freeze, explicit lineage, candidate-bound receipts, bounded correction, review sin delivery authority, typed lifecycle y bounded concurrency son propiedades implementables | future RDD / Task lifecycle / agent execution | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | copiar Pi, OpenSpec, schemas, defaults, CLI/TUI, authority model ni autorizar RDD Stage 2 |
+
+### 19.3. Regla de revalidación
+
+El ledger preserva **lo que fue revisado en esta fecha**, no lo que una fuente
+externa pueda contener después.
+
+```text
+artifact identity
+!= live external content
+
+external evidence
+!= trusted instruction
+
+implementation input
+!= implementation authorization
+```
+
+Si una futura admission review necesita comprobar que una propiedad externa sigue
+vigente, cambió materialmente o requiere mayor detalle, esa comprobación debe ser
+una acción de research nueva, explícita y acotada. El contenido nuevo no sustituye
+silenciosamente lo registrado aquí.
