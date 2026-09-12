@@ -229,24 +229,8 @@ def project_assurance_signals(
         raise TypeError("observations must be a materialized tuple")
     if type(authorization_evidence) is not tuple:
         raise TypeError("authorization_evidence must be a materialized tuple")
-    if not all(isinstance(x, AssuranceSignalObservation) for x in observations):
-        raise TypeError("observations must contain AssuranceSignalObservation values")
-    if not all(
-        isinstance(x, AssuranceSignalProducerAuthorizationEvidence)
-        for x in authorization_evidence
-    ):
-        raise TypeError(
-            "authorization_evidence must contain "
-            "AssuranceSignalProducerAuthorizationEvidence values"
-        )
 
     evaluated_at = _utc(evaluated_at, "evaluated_at")
-    for item in authorization_evidence:
-        request = item.authorization_request
-        _utc(request.context.issued_at, "context.issued_at")
-        _utc(request.context.expires_at, "context.expires_at")
-        _utc(request.created_at, "authorization_request.created_at")
-
     deny = lambda reason: _decision(  # noqa: E731
         candidate,
         AssuranceSignalProjectionOutcome.DENIED,
@@ -262,6 +246,23 @@ def project_assurance_signals(
 
     if max(len(observations), len(authorization_evidence)) > _MAX_SIGNALS:
         return deny(AssuranceSignalProjectionReason.INPUT_CARDINALITY_EXCEEDED)
+
+    if not all(isinstance(x, AssuranceSignalObservation) for x in observations):
+        raise TypeError("observations must contain AssuranceSignalObservation values")
+    if not all(
+        isinstance(x, AssuranceSignalProducerAuthorizationEvidence)
+        for x in authorization_evidence
+    ):
+        raise TypeError(
+            "authorization_evidence must contain "
+            "AssuranceSignalProducerAuthorizationEvidence values"
+        )
+
+    for item in authorization_evidence:
+        request = item.authorization_request
+        _utc(request.context.issued_at, "context.issued_at")
+        _utc(request.context.expires_at, "context.expires_at")
+        _utc(request.created_at, "authorization_request.created_at")
 
     observation_counts = Counter(x.signal_kind for x in observations)
     evidence_counts = Counter(x.signal_kind for x in authorization_evidence)
