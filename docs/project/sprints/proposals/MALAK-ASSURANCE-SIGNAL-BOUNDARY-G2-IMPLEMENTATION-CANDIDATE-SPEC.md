@@ -1,13 +1,17 @@
 ---
 title: Malāk Assurance Signal Boundary — G2 Implementation Candidate Spec
-status: scope_frozen_candidate
-authority: owner_authorized_specification_gate
+status: implemented_candidate
+authority: owner_authorized_candidate
 language: es
 as_of_date: 2026-09-11
-source_baseline: c979f481e2e5353c8953e41e56e9218c7b1d4c6f
+source_baseline: 7339805d5da51de526e2a50718f9a6a655dff11d
+design_source_baseline: c979f481e2e5353c8953e41e56e9218c7b1d4c6f
+validated_code_and_budget_candidate_sha: 74ae9f7d69d7f8215d5bdb69d56dd8e02b0e7426
+owner_authorized_at: 2026-09-11
 spec_gate_authorized: true
-implementation_authorized: false
-g2_signal_boundary_authorized: false
+implementation_authorized: true
+g2_signal_boundary_authorized: true
+g2_candidate_validation: success
 g2b_conversation_integration_authorized: false
 sprint_7_12_authorized: false
 rdd_stage_2_authorized: false
@@ -29,36 +33,44 @@ related:
 
 ## 1. Estado de autoridad
 
-El Owner autorizó únicamente el gate de especificación de:
+El scope freeze inicial autorizó primero el gate de especificación de:
 
 ```text
 G2 — Assurance Signal Authority & Projection Foundation
 ```
 
-Esta autorización congela diseño, invariantes, alcance y criterios de validación.
-No autoriza código productivo ni tests de implementación.
+Después de la revisión humana de la spec, el Owner autorizó explícitamente el 2026-09-11
+**G2-IMPLEMENTATION** para esta foundation aislada y dentro del scope congelado.
 
 ```text
-G2-SPEC authorized
-!= G2 implementation authorized
+G2 implementation authorized — isolated foundation only
 != G2B authorized
+!= Conversation wiring authorized
 != Sprint 7.12 authorized
 != RDD Stage 2 authorized
 ```
 
-Este documento no modifica Blueprint, Cognitive Constitution, Governance Constitution,
+La autorización no modifica Blueprint, Cognitive Constitution, Governance Constitution,
 ADR-005, Security Control Plane ni contratos públicos existentes.
 
 ---
 
 ## 2. Baseline y necesidad comprobada
 
-Baseline exacto:
+Baseline exacto de implementación:
 
 ```text
 Aranwill/jarvis
-main@c979f481e2e5353c8953e41e56e9218c7b1d4c6f
+main@7339805d5da51de526e2a50718f9a6a655dff11d
 ```
+
+El diseño G2-SPEC fue originalmente congelado sobre:
+
+```text
+c979f481e2e5353c8953e41e56e9218c7b1d4c6f
+```
+
+y quedó integrado documentalmente antes de abrir esta implementación.
 
 G2A ya materializa:
 
@@ -98,26 +110,26 @@ Por tanto:
 ```text
 G2A exists
 +
-no authorized signal projection boundary
+no authorized signal projection boundary in main
 =
 G2B remains blocked
 ```
 
-Resultado de admisión:
+Resultado de admisión y autorización:
 
 ```text
 Assurance Signal Boundary G2: ADOPT
 risk class: 3 — HIGH
-implementation authorized: false
+implementation authorized: true — isolated candidate only
 ```
 
 ---
 
 ## 3. Objetivo verificable
 
-Una futura implementación separadamente autorizada deberá aceptar observations explícitas
-y producir un `ProtectedFinalizationInput` únicamente cuando authority evidence, binding,
-cardinalidad, temporalidad y policy compatibility puedan validarse determinísticamente.
+La implementación autorizada debe aceptar observations explícitas y producir un
+`ProtectedFinalizationInput` únicamente cuando authority evidence, binding, cardinalidad,
+temporalidad y policy compatibility puedan validarse determinísticamente.
 
 ```text
 ProtectedResponseCandidate
@@ -462,9 +474,9 @@ permission to assert X
 
 ## 12. Input collection contract y límites
 
-La futura API de G2 debe aceptar únicamente colecciones materializadas y finitas.
+La API de G2 acepta únicamente colecciones materializadas y finitas.
 
-Dirección preferida:
+Contrato:
 
 ```text
 tuple[AssuranceSignalObservation, ...]
@@ -490,7 +502,8 @@ max authorization evidence objects = 5
 Un set incompleto puede producir `HOLD`.
 
 Un set por encima del máximo o con duplicados explícitos produce `DENIED`; G2 no consume
-inputs ilimitados antes de verificar cardinalidad.
+inputs ilimitados antes de verificar cardinalidad. La cardinalidad se verifica antes de
+inspeccionar tipos internos o timestamps anidados de los elementos.
 
 Cada `authorization_request.request_id` debe ser único dentro del set completo.
 
@@ -771,43 +784,46 @@ observations/evidence.
 Precedencia congelada:
 
 ```text
-0. invalid top-level contract/type/time representation
+0. invalid candidate / collection container type / evaluated_at representation
    → fail safe / no READY
 
 1. input count above maximum
+   → DENIED before element or nested timestamp inspection
+
+2. invalid element contract/type or nested time representation
+   → fail safe / no READY
+
+3. duplicate signal / duplicate evidence / duplicate auth request id
    → DENIED
 
-2. duplicate signal / duplicate evidence / duplicate auth request id
-   → DENIED
-
-3. missing signal or missing matching evidence
+4. missing signal or missing matching evidence
    → HOLD
 
-4. request/session/candidate binding mismatch
+5. request/session/candidate binding mismatch
    → DENIED
 
-5. kind/value/type incompatibility
+6. kind/value/type incompatibility
    → DENIED
 
-6. producer subject / authenticated binding failure
+7. producer subject / authenticated binding failure
    → DENIED
 
-7. permission scope mismatch
+8. permission scope mismatch
    → DENIED
 
-8. temporal coherence failure
+9. temporal coherence failure
    → DENIED
 
-9. authorization decision binding or allowed=False
-   → DENIED
-
-10. signal policy version mismatch
+10. authorization decision binding or allowed=False
     → DENIED
 
-11. cross-signal incoherence
+11. signal policy version mismatch
     → DENIED
 
-12. complete valid set
+12. cross-signal incoherence
+    → DENIED
+
+13. complete valid set
     → READY
 ```
 
@@ -850,7 +866,7 @@ G2A evaluates finalization policy
 
 ## 23. E2E aislado obligatorio
 
-La implementación futura debe demostrar:
+El candidate de implementación debe demostrar:
 
 ```text
 ProtectedResponseCandidate
@@ -921,6 +937,7 @@ generator/iterator input                → fail safe
 non-UTC evaluated_at                    → fail safe
 non-UTC auth request created_at         → fail safe
 input cardinality above max             → DENIED
+oversized invalid-element tuple         → INPUT_CARDINALITY_EXCEEDED before element inspection
 missing signal                          → HOLD
 missing auth evidence                   → HOLD
 duplicate signal                        → DENIED
@@ -975,9 +992,9 @@ G2 no puede:
 
 ---
 
-## 26. Scope máximo de futura implementación
+## 26. Scope máximo de implementación autorizada
 
-Si el Owner autoriza G2-IMPLEMENTATION:
+El Owner autorizó G2-IMPLEMENTATION únicamente para:
 
 ```text
 NEW
@@ -985,7 +1002,8 @@ src/malak/core/assurance_signal_projection.py
 tests/test_assurance_signal_projection.py
 ```
 
-Este documento podrá actualizarse solo para candidate identity y evidencia de implementación.
+Este documento puede actualizarse para candidate identity, evidencia de implementación y
+recalibraciones de budget explícitamente autorizadas por el Owner.
 
 No se autoriza modificar otros archivos productivos sin nuevo gate.
 
@@ -1027,10 +1045,23 @@ conversation_delta: 0
 memory_delta: 0
 knowledge_delta: 0
 persistence_delta: 0
-max_fix_rounds_before_escalation: 1
-production_delta_loc_guardrail: 350
+max_fix_rounds_before_escalation: 2
+production_delta_loc_guardrail: 400
 test_delta_loc_guardrail: 800
 ```
+
+Recalibración Owner-authorized durante G2-IMPLEMENTATION:
+
+- el guardrail original de `350` LOC era una estimación local de tamaño, no una restricción
+  del Blueprint, Constitutions, RDD ni harness;
+- la revisión Risk + Readability del candidate de 385 LOC no encontró 35 LOC de complejidad
+  accidental cuya eliminación justificara degradar claridad o auditabilidad;
+- F002 detectó que la cardinalidad se verificaba después de inspeccionar elementos y
+  timestamps anidados;
+- el Owner autorizó explícitamente una segunda bounded correction para F002 y la
+  recalibración `350 → 400`;
+- esta segunda ronda es la última autorizada para este candidate; cualquier ronda adicional
+  vuelve a requerir escalamiento explícito.
 
 Si una solución razonable supera materialmente este budget:
 
@@ -1122,7 +1153,7 @@ STOP
 
 ## 31. Condiciones para abrir G2B posteriormente
 
-Una futura implementación exitosa de G2 no autoriza G2B.
+Una implementación exitosa de G2 no autoriza G2B.
 
 Antes de G2B deberán existir, como mínimo:
 
@@ -1142,7 +1173,7 @@ Antes de G2B deberán existir, como mínimo:
 ```
 
 ```text
-G2 implemented
+G2 implemented candidate exists
 != legitimate conversation producers exist
 != PDP decision provenance solved for live use
 != G2B authorized
@@ -1162,7 +1193,7 @@ No existe migration, persistence, schema externo ni data repair.
 
 ---
 
-## 33. Resultado del hardening de scope freeze
+## 33. Resultado del candidate implementado
 
 ```text
 G2 problem                              CONFIRMED
@@ -1171,30 +1202,74 @@ architecture fit                        PASS
 current Security contracts reused       PASS, same-process only
 cryptographic identity claimed          NO
 PDP-origin cryptographically claimed    NO
-authorization evidence request-bound    FROZEN
-authorization evidence session-bound    FROZEN
-value-sensitive producer scopes         FROZEN
-temporal coherence                      FROZEN
-bounded materialized collections        FROZEN
-unique authorization request ids        FROZEN
-exact completeness                      FROZEN
-canonical NOT_APPLICABLE representation FROZEN
-validation precedence                   FROZEN
-permutation invariance                  REQUIRED
-fail-closed projection                  FROZEN
-G2 → G2A isolated E2E                   REQUIRED
-Kernel change                           PROHIBITED
-Conversation change                     PROHIBITED
-Memory / Knowledge                      PROHIBITED
-persistence                             PROHIBITED
-external dependencies                   PROHIBITED
-G2 implementation                       NOT AUTHORIZED
+authorization evidence request-bound    IMPLEMENTED
+authorization evidence session-bound    IMPLEMENTED
+value-sensitive producer scopes         IMPLEMENTED
+temporal coherence                      IMPLEMENTED
+bounded materialized collections        IMPLEMENTED
+cardinality before element inspection   IMPLEMENTED
+unique authorization request ids        IMPLEMENTED
+exact completeness                      IMPLEMENTED
+canonical NOT_APPLICABLE representation IMPLEMENTED
+validation precedence                   IMPLEMENTED
+permutation invariance                  PASS
+fail-closed projection                  IMPLEMENTED
+G2 → G2A isolated E2E                   PASS
+Kernel change                           NONE
+Conversation change                     NONE
+Memory / Knowledge                      NONE
+persistence                             NONE
+external dependencies                   NONE
+G2 implementation                       AUTHORIZED / VALIDATED CANDIDATE
+main integration                        PENDING HUMAN REVIEW + HUMAN MERGE
 G2B                                     BLOCKED / NOT AUTHORIZED
 Sprint 7.12                             NOT AUTHORIZED
 RDD Stage 2                             NOT AUTHORIZED
 ```
 
-Este documento queda listo para revisión humana del Owner.
+---
 
-Una aprobación posterior e inequívoca de **G2-IMPLEMENTATION** será necesaria antes de crear
-`assurance_signal_projection.py` o cualquier test de implementación.
+## 34. Evidencia de implementación
+
+```text
+implementation baseline:
+7339805d5da51de526e2a50718f9a6a655dff11d
+
+TDD RED candidate:
+82032c3eef7ab75d40abb35a7a4ff79e28e66a95
+
+validated code + F002 + budget candidate:
+74ae9f7d69d7f8215d5bdb69d56dd8e02b0e7426
+
+Validation #146:
+Ubuntu  PASS
+Windows PASS
+```
+
+Diff contra el baseline de implementación en ese candidate:
+
+```text
+src/malak/core/assurance_signal_projection.py   386 LOC added
+ tests/test_assurance_signal_projection.py      703 LOC added
+production guardrail                            386 / 400 PASS
+test guardrail                                  703 / 800 PASS
+```
+
+F002 queda cerrado por evidencia ejecutable:
+
+```text
+oversized tuple
+→ cardinality check
+→ INPUT_CARDINALITY_EXCEEDED
+→ no element/nested timestamp inspection
+```
+
+La PR de implementación permanece Draft hasta revisión humana.
+
+```text
+assistant/agent may prepare + validate + maintain Draft
+Draft → Ready for Review = Owner-only manual action
+merge execution           = Owner-only manual action
+```
+
+G2B, Conversation wiring, Sprint 7.12 y RDD Stage 2 continúan fuera de alcance.
