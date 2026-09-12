@@ -114,6 +114,15 @@ Memory/Knowledge poisoning, supply chain de AI, identidad y delegación,
 contención sistémica de componentes comprometidos, deception/forensics,
 interoperabilidad gobernada y evolución controlada.
 
+Además, mantiene el **registro canónico de evidencia externa validada** usada por
+esta capa conceptual. Los demás documentos no normativos deben referenciar ese
+mapa en lugar de duplicar catálogos de fuentes, salvo que una especificación o
+revisión concreta necesite preservar evidencia propia del candidato evaluado.
+
+La presencia de una fuente externa en el mapa demuestra únicamente que fue
+revisada y clasificada por aplicabilidad. No convierte esa fuente en autoridad de
+Malāk, no promueve automáticamente un gap y no autoriza implementación.
+
 No crea nuevas capabilities ni autoriza implementación.
 
 Estado:
@@ -134,6 +143,17 @@ Antes de utilizar cualquiera de estos documentos para proponer implementación:
 8. aplicar Necessity & Complexity Review;
 9. proponer un alcance pequeño;
 10. esperar autorización explícita del Owner.
+
+Cuando una decisión dependa de investigación externa, deberá consultarse primero
+el registro de evidencia de `MALAK_RESEARCH_HORIZON_MAP.md` y distinguir:
+
+```text
+fuente externa
+!= evidencia aplicable
+!= disposición ADOPT / ADAPT / OBSERVE / REJECT
+!= roadmap
+!= autorización
+```
 
 ### Governed Ephemeral Agent Execution, Evidence and Candidate Evaluation Reference
 
