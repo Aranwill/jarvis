@@ -444,6 +444,28 @@ def test_cardinality_above_maximum_denies() -> None:
     assert result.reason_code is AssuranceSignalProjectionReason.INPUT_CARDINALITY_EXCEEDED
 
 
+@pytest.mark.parametrize(
+    "observations,evidence",
+    [
+        ((object(),) * 6, ()),
+        ((), (object(),) * 6),
+    ],
+)
+def test_cardinality_guard_precedes_element_inspection(
+    observations: object,
+    evidence: object,
+) -> None:
+    result = project_assurance_signals(
+        _candidate(),
+        observations,  # type: ignore[arg-type]
+        evidence,  # type: ignore[arg-type]
+        EVALUATED_AT,
+    )
+
+    assert result.outcome is AssuranceSignalProjectionOutcome.DENIED
+    assert result.reason_code is AssuranceSignalProjectionReason.INPUT_CARDINALITY_EXCEEDED
+
+
 def test_duplicate_signal_denies_before_missing_checks() -> None:
     observations, evidence = _material()
     duplicated = observations[:-1] + (observations[0],)
