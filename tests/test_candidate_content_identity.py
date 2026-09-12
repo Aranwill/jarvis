@@ -376,3 +376,108 @@ def test_sidecar_rejects_non_string_fields(field_name: str) -> None:
 
     with pytest.raises(TypeError):
         EpisodicCandidateContentIdentity(**values)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("path", "value"),
+    [
+        ("candidate_id", "candidate-999"),
+        ("origin.session_id", "session-999"),
+        ("origin.request_id", "request-999"),
+        (
+            "origin.request_created_at",
+            datetime(2026, 9, 12, 12, 0, 0, 1, tzinfo=UTC),
+        ),
+        ("origin.provider", "provider-b"),
+        ("origin.model", "model-b"),
+        ("experience.user_content", "Hola Malāk!"),
+        ("experience.assistant_content", "Respuesta distinta"),
+        ("control.subject_scope", "session"),
+        ("control.domain", "memory"),
+        ("control.purpose", "identity_test"),
+        ("control.source_authority_classification", "derived"),
+        ("control.confidence_classification", "high"),
+        ("control.sensitivity_classification", "restricted"),
+        (
+            "control.valid_from",
+            datetime(2026, 9, 12, 11, 59, 59, 999999, tzinfo=UTC),
+        ),
+        (
+            "control.valid_until",
+            datetime(2026, 9, 13, 12, 0, 0, 1, tzinfo=UTC),
+        ),
+        ("created_at", datetime(2026, 9, 12, 12, 0, 1, 123457, tzinfo=UTC)),
+    ],
+)
+def test_verify_every_material_field_mutation_mismatches(
+    path: str,
+    value: object,
+) -> None:
+    candidate = vector_a()
+    identity = compute_episodic_candidate_content_identity(candidate)
+    changed = mutate_candidate(candidate, path, value)
+
+    assert (
+        verify_episodic_candidate_content_identity(changed, identity)
+        is CandidateContentIdentityVerification.MISMATCH
+    )
+
+
+@pytest.mark.parametrize(
+    ("field_name", "value"),
+    [
+        ("digest_hex", "a" * 63),
+        ("digest_hex", "a" * 65),
+        ("digest_algorithm", "sha256 "),
+        ("canonicalization_version", "episodic-memory-candidate-json/v1 "),
+        ("policy_version", " episodic-candidate-content-identity/v1"),
+    ],
+)
+def test_verify_syntactically_valid_degraded_metadata_mismatches(
+    field_name: str,
+    value: str,
+) -> None:
+    candidate = vector_a()
+    identity = compute_episodic_candidate_content_identity(candidate)
+    degraded = replace(identity, **{field_name: value})
+
+    assert (
+        verify_episodic_candidate_content_identity(candidate, degraded)
+        is CandidateContentIdentityVerification.MISMATCH
+    )
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        'quote"backslash\\slash/',
+        "line1\r\nline2\t\x00",
+        "emoji 😀 + supplementary 𝄞",
+    ],
+)
+def test_adversarial_content_serialization_is_deterministic_and_fail_closed(
+    content: str,
+) -> None:
+    candidate = vector_b()
+    baseline_identity = compute_episodic_candidate_content_identity(candidate)
+    changed = replace(
+        candidate,
+        experience=EpisodicExperience(
+            user_content=content,
+            assistant_content="",
+        ),
+    )
+
+    first = compute_episodic_candidate_content_identity(changed)
+    second = compute_episodic_candidate_content_identity(changed)
+
+    assert first == second
+    assert first.digest_hex != baseline_identity.digest_hex
+    assert (
+        verify_episodic_candidate_content_identity(changed, baseline_identity)
+        is CandidateContentIdentityVerification.MISMATCH
+    )
+    assert (
+        verify_episodic_candidate_content_identity(changed, first)
+        is CandidateContentIdentityVerification.MATCH
+    )
