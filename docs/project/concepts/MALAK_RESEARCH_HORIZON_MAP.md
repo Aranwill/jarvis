@@ -107,17 +107,17 @@ arquitectónicamente limpio.
 | Resource Governance | `ALIGNED` | IDEA-003 | Presupuestos y límites de recursos ya están contemplados. |
 | Deception / Honeypots / Adversarial Evaluation | `ALIGNED` | IDEA-019 / IDEA-010 | Honeypots, honeytokens, Adversarial Twin, red/purple team y aislamiento ya están representados. |
 | Incident Forensics / Attack Path | `ALIGNED` | ampliación IDEA-019 | Ya se contemplan timeline, IP observada, attack path, evidence package, recovery y security regression learning. |
-| Prompt & Context Trust Boundary | `REINFORCE_EXISTING` | IDEA-006 / IDEA-013 / IDEA-016 | Existe protección de prompt injection para evidencia externa, pero debe generalizarse a todo contenido no confiable. |
+| Prompt & Context Trust Boundary | `REINFORCE_EXISTING` | `SECURITY.md` / IDEA-006 / IDEA-013 / IDEA-016 | La política ya establece la frontera de contenido no confiable; el delta de research es verificar su generalización operacional y futuras técnicas de atribución causal. |
 | Memory & Knowledge Trust / Poisoning | `REINFORCE_EXISTING` | Episodic Admission + Provenance + Producer Authorization + Governed Projection/Consumption + futura Memory + IDEA-013 / IDEA-016 | El baseline ya valida provenance estructural, autorización scoped del productor, proyección gobernada y consumo controlado hacia Admission; permanecen pendientes Candidate Content Identity/propagación y trust, taint, revocation y quarantine hacia persistencia, retrieval y Knowledge. |
-| AI Supply-Chain Trust | `GAP_CANDIDATE` | IDEA-004 / IDEA-009 / IDEA-011 / IDEA-016 | Existen hashes, model governance y SLSA como referencia, pero falta una política conceptual unificada de admisión de artefactos AI. |
-| Agent Identity & Delegation | `GAP_CANDIDATE` | IDEA-005 / IDEA-024 / Security Control Plane | Identidad, TTL, scopes y no autoelevación existen; falta cadena de delegación verificable y revocación derivada. |
-| Compromise Containment & Trust Revocation | `GAP_CANDIDATE` | IDEA-019 / IDEA-001 / Security Control Plane | Existe cuarentena local; falta explicitar respuesta sistémica y propagación de desconfianza. |
-| Data Classification & Disclosure Control | `GAP_CANDIDATE` | Context / Knowledge / Security | Least Context y minimización existen, pero no una clasificación transversal suficientemente explícita. |
-| Governed Interoperability (MCP/A2A) | `WATCH` | adapters futuros / contratos internos | Preservar `protocol-ready, not protocol-dependent`; ningún protocolo externo será autoridad interna. |
+| AI Supply-Chain Trust | `GAP_CANDIDATE` | IDEA-004 / IDEA-009 / IDEA-011 / IDEA-016 | Existen hashes, model governance y referencias de provenance; falta una política conceptual unificada de admisión de artefactos AI. |
+| Agent Identity & Delegation | `GAP_CANDIDATE` | `SECURITY.md` / IDEA-005 / IDEA-024 / Security Control Plane | La política ya exige delegación no expansiva; falta una cadena verificable de identidad/delegación y revocación derivada. |
+| Compromise Containment & Trust Revocation | `GAP_CANDIDATE` | `SECURITY.md` / IDEA-019 / IDEA-001 / Security Control Plane | La política ya define la postura de contención; falta explicitar propagación sistémica de desconfianza y reemplazabilidad de componentes. |
+| Data Classification & Disclosure Control | `GAP_CANDIDATE` | `SECURITY.md` / Context / Knowledge | La política ya limita disclosure/reuse; falta una clasificación transversal suficientemente explícita cuando exista superficie real que la necesite. |
+| Governed Interoperability (MCP/A2A) | `WATCH` | `SECURITY.md` / adapters futuros / contratos internos | La política conserva precedencia sobre protocolos externos; investigar adapters solo ante necesidad demostrada. |
 | Governed Procedural Learning | `REINFORCE_EXISTING` | IDEA-002 / Skills-on-Demand / Knowledge Governance | La promoción de procedimientos aprendidos debe permanecer gobernada y no autoejecutable. |
 | Multimodal Perception Boundary | `WATCH` | futura Interface/Perception boundary | Visión, audio y otras percepciones son relevantes a largo plazo, sin necesidad actual de nuevo subsistema. |
 | World models | `WATCH` | futura investigación de percepción/entorno | No existe necesidad actual; reevaluar solo si tareas reales demuestran valor. |
-| Autonomous self-modification | `CONFLICTS_WITH_VISION` | — | La automodificación productiva autónoma permanece prohibida; la mejora debe seguir siendo gobernada y basada en propuestas. |
+| Autonomous self-modification | `CONFLICTS_WITH_VISION` | Governance / IDEA-002 | La automodificación productiva autónoma permanece fuera de la visión; la mejora continúa gobernada y basada en propuestas. |
 
 ---
 
@@ -153,38 +153,13 @@ sean suficientes.
 
 ### 4.2. Governed Self-Improvement
 
-IDEA-002 y Long Horizon ya preservan la distinción:
-
-> La autoobservación produce conocimiento; el conocimiento produce propuestas;
-> solo la gobernanza produce cambios.
-
-Flujo futuro permitido:
-
-```text
-observe
-  ↓
-validate gap
-  ↓
-research
-  ↓
-experiment in sandbox
-  ↓
-collect evidence
-  ↓
-proposal
-  ↓
-Owner / applicable governance
-```
-
-Queda prohibido transformar este ciclo en:
-
-```text
-observe → decide own authority → modify production
-```
+IDEA-002 y Long Horizon ya preservan la distinción entre observación, propuesta y
+gobernanza. Este mapa no vuelve a definir esa regla; únicamente registra que la
+investigación externa revisada no aporta evidencia suficiente para relajarla.
 
 Malāk podrá impulsar una mejora mediante investigación, comparación, prototipos,
-tests, evidencia e Implementation Packets candidatos, pero no aprobarla, mergearla
-o desplegarla por autoridad propia.
+tests, evidencia e Implementation Packets candidatos, pero su autoridad y
+promoción continúan regidas por Governance, `ideas.md` y el Construction Protocol.
 
 ### 4.3. Adversarial Security, Deception y Forensics
 
@@ -205,88 +180,38 @@ IDEA-019 ya contempla:
 - security regression learning;
 - red team / purple team autorizado.
 
-La dirección defensiva objetivo permanece:
-
-```text
-DETECT
-  ↓
-DENY / REVOKE
-  ↓
-CONTAIN
-  ↓
-ISOLATE
-  ↓
-DECEIVE
-  ↓
-OBSERVE
-  ↓
-PRESERVE EVIDENCE
-  ↓
-ANALYZE
-  ↓
-RECOVER
-  ↓
-LEARN
-  ↓
-PROPOSE HARDENING
-```
+`SECURITY.md` es el dueño normativo de la postura de respuesta, alcance permitido,
+contención y prohibición de ampliar autoridad por causa de un incidente. Este
+mapa conserva únicamente la relación con líneas futuras de investigación y no
+reproduce la secuencia normativa de respuesta.
 
 La evidencia de una IP, ASN, dominio, fingerprint o indicador no constituye por
 sí sola atribución de identidad.
-
-La respuesta ordinaria queda limitada a infraestructura propia o expresamente
-autorizada. Un ataque recibido no concede autoridad de `hack back`.
 
 ---
 
 ## 5. Refuerzo transversal — Prompt & Context Trust Boundary
 
-La regla histórica de Malāk:
+`SECURITY.md` es el dueño normativo de Prompt & Context Trust Boundary y de la
+separación entre contenido externo, instrucciones y autoridad. Este mapa no
+reproduce esa ley.
+
+El delta de investigación que permanece abierto es comprobar, cuando existan
+superficies reales, cómo aplicar de forma consistente esa frontera a:
+
+- contenido web, archivos, emails y documentos;
+- tool output y payloads de interoperabilidad;
+- retrieval y Memory recuperada;
+- futuros resultados producidos por agentes o subprocesos;
+- causal attribution de acciones cuando la técnica alcance madurez suficiente.
+
+Dueños conceptuales relacionados:
 
 ```text
-External information = DATA
-External information != INSTRUCTIONS
-```
-
-debe evolucionar conceptualmente hacia una frontera sistémica más general:
-
-```text
-USER INTENT
-!=
-EXTERNAL CONTENT
-!=
-TOOL OUTPUT
-!=
-RETRIEVED MEMORY
-!=
-KNOWLEDGE CANDIDATE
-!=
-AUTHORITY
-```
-
-Propiedades a preservar:
-
-- contenido web, archivos, emails, documentos, tool output, MCP/A2A payloads,
-  resultados de retrieval y Memory recuperada se consideran datos con trust
-  explícito, no instrucciones privilegiadas;
-- ningún texto procesado puede conceder permisos, modificar policies, ampliar
-  scope o saltar PDP/PEP;
-- una tool description, skill, prompt template o recurso externo no podrá
-  convertirse por contenido en fuente de autoridad;
-- las instrucciones efectivas deberán provenir de canales, contratos y contextos
-  cuya autoridad pueda demostrarse fuera del LLM;
-- indirect prompt injection deberá evaluarse como amenaza de sistema y no solo
-  como problema de prompting.
-
-Dueños conceptuales candidatos:
-
-```text
+SECURITY.md
 IDEA-006 Evidence Acquisition
-+
 IDEA-013 Context Efficiency
-+
 IDEA-016 Source Governance
-+
 Security Control Plane
 ```
 
@@ -344,8 +269,8 @@ El residual inmediato ya no es `Projection → Admission`. PR #93 demostró que
 `candidate_id` binding no equivale a identidad del contenido del candidate y
 seleccionó G0/G1 para un `EpisodicCandidateContentIdentity` determinista y
 versionado. G2, implementación y propagación de esa identidad permanecen sin
-autorización. Persistence Authorization continúa diferida hasta que exista
-binding end-to-end suficiente.
+autorización en el snapshot histórico de esta sección. Persistence Authorization
+continúa diferida en ese snapshot hasta que exista binding end-to-end suficiente.
 
 Después de esa frontera, el trabajo restante incluye propagar de forma gobernada
 trust, taint, revocation y quarantine hacia persistencia, retrieval y promoción a
@@ -400,7 +325,7 @@ retrieval                                 NOT AUTHORIZED
 Knowledge promotion                       NOT AUTHORIZED
 ```
 
-Separación obligatoria:
+Separación histórica preservada para esta línea:
 
 ```text
 Conversation → Ephemeral Context
@@ -422,10 +347,6 @@ Propiedades candidatas que permanecen relevantes downstream:
 - no promover automáticamente resultados de incidentes, agentes o herramientas
   a conocimiento canónico;
 - retrieval condicionado por trust, aplicabilidad y autoridad, no únicamente por similitud.
-
-Principio:
-
-> Memory search is a trust boundary.
 
 El trabajo pendiente deberá reforzar futura Memory, IDEA-013 e IDEA-016 antes de
 justificar una iniciativa independiente.
@@ -474,19 +395,14 @@ al riesgo:
 - política de actualización;
 - capacidad de cuarentena o retiro.
 
-Principios:
-
-```text
-Artifact integrity != Artifact trust
-Artifact trust != Execution authorization
-```
-
-Un artefacto válido criptográficamente todavía puede ser inseguro, malicioso o
-incompatible con la política de Malāk.
+`SECURITY.md` conserva las restricciones normativas de supply-chain trust. El
+gap de research es cómo materializar admission/provenance de artefactos AI sin
+crear prematuramente un registry universal ni copiar esquemas externos completos.
 
 Dueños conceptuales a reforzar antes de crear nada nuevo:
 
 ```text
+SECURITY.md
 IDEA-004 Model Governance
 IDEA-009 Development Tooling
 IDEA-011 Validation & Delivery
@@ -500,30 +416,15 @@ No crear todavía un `TrustedArtifactRegistry` salvo necesidad operacional demos
 
 ## 8. GAP CANDIDATE — Agent Identity & Delegation
 
+`SECURITY.md` es el dueño de la regla de delegación no expansiva y de los límites
+de autoridad efectiva. Este mapa no conserva una segunda fórmula normativa.
+
 IDEA-005 y IDEA-024 ya contemplan identidad, scopes, TTL, Security Context y
-prohibición de autoelevación. Falta preservar con mayor claridad la delegación
-cuando un componente autorizado origina trabajo que otro agente/tool ejecutará.
+prohibición de autoelevación. El gap de investigación restante es una cadena de
+delegación verificable y revocable cuando un componente autorizado origina
+trabajo que otro agente, tool o executor realizará.
 
-Regla candidata:
-
-```text
-Effective delegated authority
-=
-Delegator authority
-∩ applicable policy
-∩ task scope
-∩ capability scope
-∩ resource limits
-∩ TTL
-```
-
-Nunca:
-
-```text
-delegation → authority expansion
-```
-
-Una futura cadena de delegación podrá necesitar evidencia de:
+Una futura investigación podrá necesitar evidencia de:
 
 - quién originó la delegación;
 - identidad del receptor;
@@ -537,9 +438,6 @@ Una futura cadena de delegación podrá necesitar evidencia de:
 - parent context o referencia equivalente;
 - evidencia de autorización.
 
-La revocación del contexto padre deberá poder invalidar autoridad derivada cuando
-la política lo requiera.
-
 La identidad criptográfica fuerte, firmas, nonce/replay protection, PKI y
 mecanismos equivalentes permanecen sujetos a diseño y revisión propios.
 
@@ -547,9 +445,14 @@ mecanismos equivalentes permanecen sujetos a diseño y revisión propios.
 
 ## 9. GAP CANDIDATE — Compromise Containment & Trust Revocation
 
+`SECURITY.md` es el dueño normativo de la reducción de autoridad ante compromiso,
+la secuencia de contención, preservación de evidencia y reintroducción segura.
+Este mapa no replica esas reglas.
+
 IDEA-001 e IDEA-019 ya contemplan kill switch, quarantine, destrucción de sandbox,
-revocación y niveles de contingencia. El gap identificado es convertir esa
-respuesta local en una propiedad sistémica de componentes reemplazables.
+revocación y niveles de contingencia. El gap de investigación identificado es
+convertir la respuesta local en una propiedad sistémica de componentes
+reemplazables y estudiar cómo propagar desconfianza sin asumir compromiso total.
 
 Aplica potencialmente a:
 
@@ -568,55 +471,6 @@ sandbox
 external service
 ```
 
-Principio rector candidato:
-
-> Compromise must reduce authority, never expand investigation privileges.
-
-Secuencia defensiva candidata:
-
-```text
-SUSPECT
-  ↓
-FREEZE / REVOKE AUTHORITY
-  ↓
-CUT OR RESTRICT COMMUNICATION
-  ↓
-ISOLATE
-  ↓
-QUARANTINE
-  ↓
-PRESERVE EVIDENCE
-  ↓
-ASSESS BLAST RADIUS
-  ↓
-MARK RELATED STATE / CREDENTIALS / ARTIFACTS AS SUSPECT
-  ↓
-ROTATE / REVOKE / REVALIDATE
-  ↓
-REBUILD FROM KNOWN-GOOD
-  ↓
-RESTORE ONLY TRUSTED STATE
-  ↓
-VERIFY BEFORE REINTRODUCTION
-```
-
-Debe evitarse eliminar inmediatamente un componente si eso destruye evidencia
-forense necesaria.
-
-Preferencia futura:
-
-```text
-compromised component
-        ↓
-discard after evidence preservation
-        ↓
-instantiate known-good component
-        ↓
-verify identity + provenance
-        ↓
-restore only trusted state
-```
-
 ### Propagación de desconfianza
 
 Si un componente comprometido A interactuó con otros activos:
@@ -629,23 +483,13 @@ A
 └── produced state E
 ```
 
-la contención deberá poder evaluar:
-
-```text
-A → QUARANTINE
-B → REVOKE / ROTATE candidate
-C/D/E → SUSPECT → VALIDATE
-```
-
-La relación no implica que todos los activos estén comprometidos, sino que su
-trust debe volver a demostrarse cuando el riesgo lo justifique.
-
-La detección, revocación y preservación de evidencia crítica no deberán depender
-de la cooperación del componente sospechado.
+la investigación futura deberá determinar cómo marcar y revalidar de forma
+proporcional esos activos sin asumir que todos están comprometidos.
 
 Dueños conceptuales a reforzar:
 
 ```text
+SECURITY.md
 Security Control Plane
 IDEA-001 Sandbox / Evidence
 IDEA-019 Incident Response / Deception
@@ -657,9 +501,12 @@ IDEA-021 Emergency Control Surface
 
 ## 10. GAP CANDIDATE — Data Classification & Disclosure Control
 
+`SECURITY.md` es el dueño de las restricciones normativas sobre acceso, disclosure,
+persistencia y reuse. Este mapa no vuelve a declarar esa ley.
+
 `Least Context`, privacidad y minimización ya existen como principios, pero la
-futura expansión de Malāk hacia Memory, tools, agents y servicios externos
-requerirá distinguir explícitamente la sensibilidad y el uso permitido de datos.
+futura expansión de Malāk hacia Memory, tools, agents y servicios externos puede
+requerir una clasificación transversal más explícita.
 
 Dimensiones candidatas, sin aprobar taxonomía:
 
@@ -675,14 +522,6 @@ Dimensiones candidatas, sin aprobar taxonomía:
 - redaction / minimización;
 - requisitos de consentimiento o revisión humana.
 
-Principio:
-
-```text
-Having access to data
-!=
-permission to disclose, persist or reuse it
-```
-
 No crear todavía un sistema universal de labels. Primero deberá existir una
 superficie real que necesite esta clasificación.
 
@@ -690,31 +529,18 @@ superficie real que necesite esta clasificación.
 
 ## 11. Interoperabilidad gobernada
 
-La dirección preservada es:
+`SECURITY.md` es el dueño normativo de la postura de interoperabilidad y de la
+precedencia de contratos internos sobre protocolos externos. Este mapa conserva
+únicamente el estado `WATCH` y el gap de investigación.
 
-```text
-Malāk Capability / Tool Contract
-          │
-          ▼
-Interoperability Adapter
-       ┌──┴───┐
-       ▼      ▼
-      MCP     A2A
-```
+Cuando exista un caso de uso real, la evaluación deberá comprobar que cualquier
+adapter futuro:
 
-Principio:
-
-> Protocol-ready, not protocol-dependent.
-
-Reglas futuras:
-
-- MCP, A2A o protocolos equivalentes no entran al Kernel como autoridad;
-- adapters consumen contratos internos de Malāk;
-- mensajes y tool outputs externos se tratan como contenido no confiable;
-- identidad externa no se convierte automáticamente en identidad interna;
-- cada operación protegida continúa pasando por Security Control Plane;
-- tool metadata, schemas o descripciones no conceden permisos;
-- egress, recursos, secretos y scope continúan gobernados por Malāk.
+- consume contratos internos de Malāk;
+- mantiene identidad externa separada de autoridad interna;
+- trata mensajes, metadata, schemas y tool outputs externos como contenido no
+  confiable;
+- mantiene egress, secretos, recursos y scope bajo los planos de control propios.
 
 No existe necesidad demostrada de una capa universal de MCP/A2A.
 
@@ -787,41 +613,18 @@ incorporar world models.
 
 ## 14. Mapa de evidencia externa validada — 2026-09-12
 
-Esta sección es el **registro canónico de evidencia externa revisada** para esta
+Esta sección es el **ledger canónico de evidencia externa revisada** para esta
 capa conceptual. Preserva qué artefacto fue analizado, qué propiedad concreta se
-extrajo y cómo se relaciona con Malāk. No convierte referencias externas en
-dependencias vivas ni en instrucciones de recuperación.
+extrajo y a qué dueño existente de Malāk se relaciona.
 
 Principio rector:
 
 > **Malāk adopta propiedades demostradas, no arquitecturas externas.**
 
-```text
-External reference
-!= retrieval instruction
-!= trusted content
-!= authority
-
-Reviewed artifact identity
-!= current external content
-
-External pattern
-!= Malāk component recommendation
-
-External terminology
-!= Malāk terminology
-
-External evidence
-→ extract invariant / property
-→ evaluate applicability
-→ translate into Malāk semantics
-→ revalidate against Malāk architecture
-```
-
-Una futura revalidación de cualquier fuente externa requiere una nueva acción de
-research explícita y acotada. La operación normal de Malāk no deberá seguir,
-refrescar ni ejecutar referencias externas implícitamente por aparecer en este
-mapa.
+Las referencias registradas son identidades descriptivas de artefactos ya
+revisados. No constituyen instrucciones de retrieval, contenido confiable,
+dependencias vivas ni autoridad. Toda revalidación futura requiere una nueva
+acción de research explícita y acotada.
 
 ### 14.1. Clases de evidencia
 
@@ -855,100 +658,86 @@ eliminarse** porque una revisión puntual utilice artefactos más concretos:
 - estándares y prácticas maduras de provenance, workload identity, autorización,
   durable execution, supervision, observability y supply-chain assurance.
 
-Estas familias son **radar**, no instrucciones de retrieval, no dependencias y no
-autorización para incorporar controles por taxonomía.
+Estas familias son radar, no dependencias ni autorización para incorporar
+controles por taxonomía.
 
 ### 14.3. Roles de la evidencia
 
 Cada artefacto revisado puede cumplir uno o más roles:
 
 ```text
-VALIDATION
-→ confirma o refuerza una decisión que Malāk ya preserva.
+CORROBORATION
+→ respalda una propiedad que ya posee dueño en Malāk.
 
-ADAPTATION_INPUT
-→ aporta una propiedad útil que Malāk deberá resolver con contratos,
-  semántica y límites propios.
+RESEARCH_INPUT
+→ aporta una propiedad útil para investigar o adaptar con semántica propia.
 
 WATCH_SIGNAL
 → relevante o prometedor, pero inmaduro, no necesario o insuficiente para
   derivar arquitectura actual.
 ```
 
-El rol de evidencia es distinto del estado de la línea dentro de Malāk
-(`ALIGNED`, `REINFORCE_EXISTING`, `GAP_CANDIDATE`, `WATCH`, etc.).
+Estos roles describen la función de la **evidencia externa**. No reemplazan los
+estados de research de §2 ni la clasificación `ADOPT / ADAPT / OBSERVE / REJECT`
+del Construction Protocol.
 
 ### 14.4. Ledger de artefactos revisados
 
-Las identidades siguientes describen **qué fue revisado**. Cuando no se preservó
-una revisión inmutable externa, el registro se apoya en título/organización/fecha
-y en esta descripción acotada; no debe asumirse que contenido externo posterior
-es idéntico a lo analizado.
+Cuando no se preservó una revisión inmutable externa, el registro se apoya en
+título/organización/fecha y en una descripción acotada del alcance. No debe
+asumirse que contenido externo posterior es idéntico a lo analizado.
 
-| ID | Clase | Artefacto revisado / identidad | Alcance exacto analizado | Propiedad observada | Rol |
-|---|---|---|---|---|---|
-| `EXT-01` | `E1` | NIST — *Back to the Future: Why Agentic AI Needs a Strong Identity Foundation* — 2026-08-27 | identidad de agentes/workloads, credenciales acotadas y de corta vida, separación respecto de identidad humana | la seguridad agentic necesita identidad verificable y lifecycle de credenciales fuera del modelo | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-02` | `E1` | ACSC/CISA/NSA/Cyber Centre Canadá/NCSC-NZ/NCSC-UK — *Careful adoption of agentic AI services* — 2026-05-01 | principals distintos, least privilege, credenciales efímeras, resource limits, human control points, aislamiento, monitoreo y rollback | la autoridad agentic debe estar acotada, verificable y revocable en runtime | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-03` | `E1` | ASD — *Agentic AI Harnesses — The layer above the model* — 2026-09-11 | seguridad, gobernanza, validación, supervisión y assurance en el harness/infraestructura | controles críticos no deben depender solamente del prompt o comportamiento probabilístico del modelo | `VALIDATION` |
-| `EXT-04` | `E2` | Google Developers — *Build zero-trust AI agents with Google's Agent Development Kit* — 2026-08-17 | Zero Trust para agentes con efectos sobre estado real y validación determinista fuera del LLM | un agente que puede producir side effects necesita fronteras de sistema independientes del modelo | `VALIDATION` |
-| `EXT-05` | `E2` | Anthropic — *How we contain Claude across products* — 2026-05-25 | containment del entorno, blast radius y approval fatigue | hard boundaries deben sobrevivir a fallos probabilísticos; demasiadas aprobaciones humanas pueden degradar atención | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-06` | `E1` | A2A Protocol — specification revisada 2026-09-12; revisión inmutable no preservada | semántica de `TASK_STATE_AUTH_REQUIRED`, scope, validez y revocación | solicitar/requerir autorización no equivale a poseer autorización para ejecutar | `VALIDATION` |
-| `EXT-07` | `E1` | OWASP GenAI Security Project — *Top 10 for Agentic Applications 2026* — 2025-12-09 | goal hijack, tool misuse, identity/privilege abuse, supply chain, memory/context poisoning, inter-agent communication, cascading failures, human-agent trust y rogue agents | el threat model agentic requiere controles sistémicos más allá de prompting | `VALIDATION` |
-| `EXT-08` | `E2` | OWASP GenAI Security Project — *Memory Is a Feature. It Is Also an Attack Surface* — 2026-05-13 | persistencia de contaminación, memory/context poisoning y reutilización posterior | Memory persistente es una frontera de trust y puede transportar compromiso entre interacciones | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-09` | `E1` | W3C — *PROV-Overview* — 2013 | entidades, actividades, agentes, derivación, atribución y provenance | provenance puede modelarse separadamente de autoridad y decisión | `ADAPTATION_INPUT` |
-| `EXT-10` | `E1` | SLSA v1.2 — *Provenance* | identidad del artefacto, origen/proceso de build y attestations | integridad/provenance verificable puede ligar evidencia a cómo se produjo un artefacto sin convertirla en autorización | `ADAPTATION_INPUT` |
-| `EXT-11` | `E1` | seL4 — documentación de *Capabilities* revisada 2026-09-12; revisión inmutable no preservada | tokens no falsificables con derechos explícitos | autoridad mínima y explícita puede representarse mediante derechos verificables; el término no equivale a `Capability` funcional de Malāk | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-12` | `E3` | Google — *Zanzibar: Google's Consistent, Global Authorization System* — USENIX ATC 2019 | autorización como infraestructura separada y consistente | autorización no debe depender de inferencias dispersas en cada consumidor | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-13` | `E1` | SPIFFE — workload identity specifications/docs revisadas 2026-09-12; revisión inmutable no preservada | identidad verificable de workloads y credenciales de vida acotada | identidad de workload puede separarse de identidad humana y operar con lifecycle propio | `ADAPTATION_INPUT` |
-| `EXT-14` | `E2` | Kubernetes — patrón/documentación de Controllers revisada 2026-09-12; revisión inmutable no preservada | desired state, observed state y reconciliation loop | un sistema dinámico no debe asumir que un estado deseado/autorizado continúa siendo el estado real | `ADAPTATION_INPUT` |
-| `EXT-15` | `E2` | Erlang/OTP — Supervisor Behaviour docs revisadas 2026-09-12; revisión inmutable no preservada | supervision trees, restart strategies y restart intensity | lifecycle y recuperación de procesos requieren supervisión explícita y límites, no reinicio ciego | `ADAPTATION_INPUT` |
-| `EXT-16` | `E2` | Temporal — documentación de durable execution revisada 2026-09-12; revisión inmutable no preservada | persistencia de progreso, retries/replay, idempotencia y side effects | recuperación durable exige semántica explícita de retry/resume/replay/compensation | `ADAPTATION_INPUT` |
-| `EXT-17` | `E1` | OpenTelemetry — context propagation docs revisadas 2026-09-12; revisión inmutable no preservada | trace/span context y propagación causal entre procesos/servicios | correlación causal puede mejorar observabilidad sin convertir telemetry en evidencia o autoridad | `ADAPTATION_INPUT` |
-| `EXT-18` | `E2` | OpenAI — *A shared playbook for trustworthy third party evaluations* — 2026-05-29 | harness, tools, environment y configuration como parte de la validez de una evaluación | un resultado no es interpretable sin contexto suficiente sobre cómo fue producido | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-19` | `E2` | OpenAI — *Separating signal from noise in coding evaluations* — 2026-07-08 | auditoría de calidad/validez de tareas de evaluación | `PASS` no garantiza evidencia válida cuando el instrumento de evaluación está defectuoso | `VALIDATION` |
-| `EXT-20` | `E2` | Anthropic — *Demystifying evals for AI agents* — 2026-01-09 | trayectorias multistep, tool calls y cambios de estado en evals agentic | evaluar solo output final puede ocultar fallos importantes del proceso | `VALIDATION` + `ADAPTATION_INPUT` |
-| `EXT-21` | `E3` | USENIX Security 2026 — *AttriGuard: Defeating Indirect Prompt Injection in LLM Agents via Causal Attribution of Tool Invocations* | causal attribution de tool invocations frente a indirect prompt injection | vincular una acción con su causa/intención puede ayudar a distinguir user intent de contenido no confiable | `WATCH_SIGNAL` |
-| `EXT-22` | `E4` | Gentleman Programming `gentle-pi` — `main@6e4478c04615b0c013a017178dcfefa51579982d` | native RDD workflow, review integration, runner/protocol, task lifecycle y presence projection | candidate freeze, lineage, candidate-bound receipts, bounded correction, review sin delivery authority, typed lifecycle y bounded concurrency son propiedades implementables; la línea RDD inspeccionada permanece inestable | `ADAPTATION_INPUT` + `WATCH_SIGNAL` |
+| ID | Clase | Artefacto revisado / identidad | Alcance exacto analizado | Propiedad observada | Rol | Malāk target / owner |
+|---|---|---|---|---|---|---|
+| `EXT-01` | `E1` | NIST — *Back to the Future: Why Agentic AI Needs a Strong Identity Foundation* — 2026-08-27 | identidad de agentes/workloads, credenciales acotadas y de corta vida, separación respecto de identidad humana | la seguridad agentic necesita identidad verificable y lifecycle de credenciales fuera del modelo | `CORROBORATION` + `RESEARCH_INPUT` | §8 / `SECURITY.md` |
+| `EXT-02` | `E1` | ACSC/CISA/NSA/Cyber Centre Canadá/NCSC-NZ/NCSC-UK — *Careful adoption of agentic AI services* — 2026-05-01 | principals distintos, least privilege, credenciales efímeras, resource limits, human control points, aislamiento, monitoreo y rollback | la autoridad agentic debe estar acotada, verificable y revocable en runtime | `CORROBORATION` + `RESEARCH_INPUT` | `SECURITY.md` / §8 / §10 / IDEA-003 |
+| `EXT-03` | `E1` | ASD — *Agentic AI Harnesses — The layer above the model* — 2026-09-11 | seguridad, gobernanza, validación, supervisión y assurance en el harness/infraestructura | controles críticos no deben depender solamente del prompt o comportamiento probabilístico del modelo | `CORROBORATION` | `SECURITY.md` |
+| `EXT-04` | `E2` | Google Developers — *Build zero-trust AI agents with Google's Agent Development Kit* — 2026-08-17 | Zero Trust para agentes con efectos sobre estado real y validación determinista fuera del LLM | un agente que puede producir side effects necesita fronteras de sistema independientes del modelo | `CORROBORATION` | `SECURITY.md` |
+| `EXT-05` | `E2` | Anthropic — *How we contain Claude across products* — 2026-05-25 | containment del entorno, blast radius y approval fatigue | hard boundaries deben sobrevivir a fallos probabilísticos; demasiadas aprobaciones humanas pueden degradar atención | `CORROBORATION` + `RESEARCH_INPUT` | `SECURITY.md` / Human in Control |
+| `EXT-06` | `E1` | A2A Protocol — specification revisada 2026-09-12; revisión inmutable no preservada | semántica de `TASK_STATE_AUTH_REQUIRED`, scope, validez y revocación | solicitar/requerir autorización no equivale a poseer autorización para ejecutar | `CORROBORATION` | §8 / `SECURITY.md` |
+| `EXT-07` | `E1` | OWASP GenAI Security Project — *Top 10 for Agentic Applications 2026* — 2025-12-09 | goal hijack, tool misuse, identity/privilege abuse, supply chain, memory/context poisoning, inter-agent communication, cascading failures, human-agent trust y rogue agents | el threat model agentic requiere controles sistémicos más allá de prompting | `CORROBORATION` | `SECURITY.md` / §§5–10 |
+| `EXT-08` | `E2` | OWASP GenAI Security Project — *Memory Is a Feature. It Is Also an Attack Surface* — 2026-05-13 | persistencia de contaminación, memory/context poisoning y reutilización posterior | Memory persistente es una frontera de trust y puede transportar compromiso entre interacciones | `CORROBORATION` + `RESEARCH_INPUT` | §6 / `SECURITY.md` |
+| `EXT-09` | `E1` | W3C — *PROV-Overview* — 2013 | entidades, actividades, agentes, derivación, atribución y provenance | provenance puede modelarse separadamente de autoridad y decisión | `RESEARCH_INPUT` | §7 / future validation research |
+| `EXT-10` | `E1` | SLSA v1.2 — *Provenance* | identidad del artefacto, origen/proceso de build y attestations | integridad/provenance verificable puede ligar evidencia a cómo se produjo un artefacto sin convertirla en autorización | `RESEARCH_INPUT` | §7 / future validation research |
+| `EXT-11` | `E1` | seL4 — documentación de *Capabilities* revisada 2026-09-12; revisión inmutable no preservada | tokens no falsificables con derechos explícitos | autoridad mínima y explícita puede representarse mediante derechos verificables; el término no equivale a `Capability` funcional de Malāk | `CORROBORATION` + `RESEARCH_INPUT` | `SECURITY.md` / Capability First |
+| `EXT-12` | `E3` | Google — *Zanzibar: Google's Consistent, Global Authorization System* — USENIX ATC 2019 | autorización como infraestructura separada y consistente | autorización no debe depender de inferencias dispersas en cada consumidor | `CORROBORATION` + `RESEARCH_INPUT` | §8 / Security Control Plane |
+| `EXT-13` | `E1` | SPIFFE — workload identity specifications/docs revisadas 2026-09-12; revisión inmutable no preservada | identidad verificable de workloads y credenciales de vida acotada | identidad de workload puede separarse de identidad humana y operar con lifecycle propio | `RESEARCH_INPUT` | §8 |
+| `EXT-14` | `E2` | Kubernetes — patrón/documentación de Controllers revisada 2026-09-12; revisión inmutable no preservada | desired state, observed state y reconciliation loop | un sistema dinámico no debe asumir que un estado deseado continúa siendo el estado real | `RESEARCH_INPUT` | §4.1 / Long Horizon |
+| `EXT-15` | `E2` | Erlang/OTP — Supervisor Behaviour docs revisadas 2026-09-12; revisión inmutable no preservada | supervision trees, restart strategies y restart intensity | lifecycle y recuperación de procesos requieren supervisión explícita y límites, no reinicio ciego | `RESEARCH_INPUT` | §4.1 / IDEA-003 |
+| `EXT-16` | `E2` | Temporal — documentación de durable execution revisada 2026-09-12; revisión inmutable no preservada | persistencia de progreso, retries/replay, idempotencia y side effects | recuperación durable exige semántica explícita de retry/resume/replay/compensation | `RESEARCH_INPUT` | §4.1 / Long Horizon |
+| `EXT-17` | `E1` | OpenTelemetry — context propagation docs revisadas 2026-09-12; revisión inmutable no preservada | trace/span context y propagación causal entre procesos/servicios | correlación causal puede mejorar observabilidad sin convertir telemetry en evidencia o autoridad | `RESEARCH_INPUT` | Long Horizon / Engineering evidence |
+| `EXT-18` | `E2` | OpenAI — *A shared playbook for trustworthy third party evaluations* — 2026-05-29 | harness, tools, environment y configuration como parte de la validez de una evaluación | un resultado no es interpretable sin contexto suficiente sobre cómo fue producido | `CORROBORATION` + `RESEARCH_INPUT` | `docs/development/malak_construction_protocol.md` / future validation research |
+| `EXT-19` | `E2` | OpenAI — *Separating signal from noise in coding evaluations* — 2026-07-08 | auditoría de calidad/validez de tareas de evaluación | `PASS` no garantiza evidencia válida cuando el instrumento de evaluación está defectuoso | `CORROBORATION` | `docs/development/malak_construction_protocol.md` |
+| `EXT-20` | `E2` | Anthropic — *Demystifying evals for AI agents* — 2026-01-09 | trayectorias multistep, tool calls y cambios de estado en evals agentic | evaluar solo output final puede ocultar fallos importantes del proceso | `CORROBORATION` + `RESEARCH_INPUT` | `docs/development/malak_construction_protocol.md` / future validation research |
+| `EXT-21` | `E3` | USENIX Security 2026 — *AttriGuard: Defeating Indirect Prompt Injection in LLM Agents via Causal Attribution of Tool Invocations* | causal attribution de tool invocations frente a indirect prompt injection | vincular una acción con su causa/intención puede ayudar a distinguir user intent de contenido no confiable | `WATCH_SIGNAL` | §5 |
+| `EXT-22` | `E4` | Gentleman Programming `gentle-pi` — `main@6e4478c04615b0c013a017178dcfefa51579982d` | native RDD workflow, review integration, runner/protocol, task lifecycle y presence projection | candidate freeze, lineage, candidate-bound receipts, bounded correction, review sin delivery authority, typed lifecycle y bounded concurrency son propiedades implementables; la línea RDD inspeccionada permanece inestable | `RESEARCH_INPUT` + `WATCH_SIGNAL` | Construction Protocol / §4.1 / Long Horizon |
 
-### 14.5. Traducción de evidencia a semántica propia de Malāk
+El ledger termina en el **target/owner**. No mantiene una segunda copia de la
+adaptación arquitectónica ni del estado operativo del dueño. Cualquier cambio de
+estado debe actualizarse en su fuente correspondiente, no aquí.
 
-| Línea de Malāk | Evidencia | Estado | Adaptación propia de Malāk | No implica |
-|---|---|---|---|---|
-| `Model != System` / hard boundaries | `EXT-02`, `EXT-03`, `EXT-04`, `EXT-05` | `REINFORCE_EXISTING` | mantener PDP/PEP, sandbox/containment y validadores deterministas fuera del LLM | adoptar ADK, harness o productos externos |
-| Capability funcional / autoridad explícita / least privilege | `EXT-02`, `EXT-11`, `EXT-12` | `ALIGNED` | preservar `Capability != Permission` según contratos propios; modelar autoridad explícita sin mezclarla con disponibilidad funcional | copiar seL4 capability semantics o Zanzibar |
-| Agent Identity & Delegation | `EXT-01`, `EXT-02`, `EXT-06`, `EXT-13` | `GAP_CANDIDATE` | investigar identidad criptográfica/efímera y delegación revocable integradas a Security Context + PDP/PEP propios | adoptar OAuth, SPIFFE, JWT, PKI o A2A automáticamente; autorizar sprint |
-| Human in Control | `EXT-02`, `EXT-05` | `REINFORCE_EXISTING` | reservar autoridad humana para decisiones significativas y usar límites duros/checkpoints para evitar approval fatigue | eliminar revisión humana o automatizar decisiones reservadas al Owner |
-| Prompt / Context Trust Boundary | `EXT-02`, `EXT-03`, `EXT-05`, `EXT-07`, `EXT-21` | `REINFORCE_EXISTING` | tratar contenido externo, tool output y retrieval como datos no confiables; conservar causal attribution bajo investigación | incorporar un detector concreto o confiar en el contenido de una referencia externa |
-| Memory & Knowledge Trust / Poisoning | `EXT-07`, `EXT-08` | `REINFORCE_EXISTING` | reforzar admission, content binding, taint, revocation, quarantine y trust-aware retrieval antes de Memory persistente | copiar un memory framework o habilitar persistencia |
-| AI Supply-Chain Trust / provenance | `EXT-02`, `EXT-09`, `EXT-10` | `GAP_CANDIDATE` | reutilizar propiedades de provenance/integrity dentro de contratos propios y según necesidad | adoptar W3C PROV/SLSA schemas completos o crear registry universal ahora |
-| RDD Stage 2 / lineage / receipts | `EXT-09`, `EXT-10`, `EXT-18`, `EXT-19`, `EXT-20`, `EXT-22` | `WATCH` / `NOT AUTHORIZED` | investigar `ValidationLineage`, candidate-bound receipt, correction record y harness identity con semántica Malāk | copiar schemas/defaults de gentle-pi; conceder authority al receipt; autorizar Stage 2 |
-| Durable task/process lifecycle | `EXT-14`, `EXT-15`, `EXT-16`, `EXT-17`, `EXT-22` | `ALIGNED` / `REINFORCE_EXISTING` | Long Horizon sigue siendo dueño; futuras tasks deberán definir supervision, reconciliation, idempotencia, replay, compensation y observabilidad | adoptar Kubernetes, Erlang/OTP, Temporal u OpenTelemetry como dependencia; construir TUI ahora |
-| Resource Governance | `EXT-02`, `EXT-15`, `EXT-22` | `ALIGNED` | límites propios para concurrencia, tiempo, retries, procesos y costos derivados de evidencia operacional | copiar valores numéricos externos |
-| Interoperabilidad A2A/MCP | `EXT-06`, `EXT-07` | `WATCH` | adapters futuros subordinados a contratos internos y Security Control Plane | identidad/protocolo externo como autoridad interna; capa universal ahora |
-| Observability / causal tracing | `EXT-17` | `REINFORCE_EXISTING` | evaluar trace context propio para reconstrucción causal preservando `Telemetry != Evidence != Authority` | convertir spans/logs automáticamente en evidencia canónica |
-| Causal action attribution | `EXT-21` | `WATCH` | mantener como research candidate para futuros tool provenance/intention binding | asumir madurez suficiente o incorporar el método experimental ahora |
-| Governed Self-Improvement | evidencia externa no demuestra necesidad de relajar la frontera | `ALIGNED` | conservar `Observation → Evidence → Finding → Proposal → Human/governance` | self-modification productiva autónoma |
+### 14.5. Contrafuerzos derivados de la evidencia
 
-### 14.6. Contrafuerzos derivados de la evidencia
+La investigación produjo estas observaciones de diseño, siempre subordinadas a
+los dueños documentales aplicables:
 
-La investigación también corrige interpretaciones demasiado simples:
+1. Human in Control no debe degradarse en aprobación humana de cada microacción.
+2. Una identidad verificable no sustituye una decisión de autorización.
+3. Telemetry puede ayudar a reconstruir causalidad sin convertirse por sí sola en evidencia canónica.
+4. Un `PASS` no demuestra validez del instrumento de evaluación.
+5. Presence no demuestra liveness ni autoridad.
+6. Retry no equivale a recovery; durable execution debe estudiar idempotencia,
+   replay y compensation.
+7. Un artefacto externo revisado no se convierte en dependencia externa viva.
+8. Una propiedad validada externamente no autoriza adopción de la arquitectura completa que la implementa.
 
-1. `Human in Control != Human approves everything`.
-2. `Identity != Authority`.
-3. `Telemetry != Evidence`.
-4. `PASS != Valid Evidence`.
-5. `Presence != Liveness != Authority`.
-6. `Retry != Recovery`.
-7. `Reviewed external artifact != live external dependency`.
-8. `Validated external property != wholesale architecture adoption`.
-
-### 14.7. Señal comunitaria y foros
+### 14.6. Señal comunitaria y foros
 
 La revisión de foros técnicos y comunidades se conserva únicamente como señal de
 fricción operativa. Los temas recurrentes —frameworks sobredimensionados,
 observabilidad insuficiente, retries descontrolados, costos, recovery, permisos y
-estado corrupto— son coherentes con los controles ya preservados, pero **no se
-usan para crear requisitos** porque su evidencia es anecdótica y variable.
+estado corrupto— son coherentes con controles ya preservados, pero no se usan
+para crear requisitos porque su evidencia es anecdótica y variable.
 
 Una señal comunitaria que sugiera una propiedad nueva deberá pasar por una acción
 de investigación separada y buscar corroboración en especificaciones, sistemas
@@ -956,35 +745,33 @@ maduros, investigación o incidentes verificables antes de modificar este mapa.
 
 ---
 
-## 15. Invariantes candidatas a preservar en futuras evaluaciones
+## 15. Ownership de invariantes y delta de research
 
-Estas expresiones resumen el resultado de la reconciliación y deberán tratarse
-como candidatos conceptuales, no como nuevas leyes aprobadas:
+Este mapa **no es dueño de las leyes normativas que cita**.
+
+- `SECURITY.md` es dueño de las invariantes de seguridad, autoridad, Prompt &
+  Context Trust, delegación no expansiva, containment, disclosure e
+  interoperabilidad segura.
+- Las especificaciones y contratos de Memory/Admission son dueños de sus estados,
+  bindings y separaciones operativas vigentes.
+- Governance e `ideas.md` son dueños de límites e intención de self-improvement.
+- Long Horizon y las referencias conceptuales especializadas son dueños de la
+  semántica detallada de task lifecycle, ejecución agentic efímera y recursos.
+- `docs/development/malak_construction_protocol.md` es dueño del perfil y estado
+  operativo de RDD, candidate-bound evidence y disciplina de construcción.
+
+Este documento conserva únicamente:
 
 ```text
-Model != System
-Intelligence != Authority
-Capability != Permission
-Decision != Execution
-Execution != Evidence
-Evidence != Authority
-Conversation != Memory
-Memory != Knowledge
-Knowledge != Policy
-External Content != Instructions
-Tool Output != Authority
-Protocol Identity != Internal Authority
-Artifact Trust != Execution Authorization
-Projection READY != Admission ELIGIBLE
-Consumption EVALUATED != Persistence Authorization
-Candidate Content Identity != Trust
-ELIGIBLE != Stored
-Compromise → Less Authority
-Compromise → More Isolation
-Compromise → More Observation
-Incident → Evidence → Finding → Proposal
-Learning → Proposal, not self-authorization
+research line
+research classification
+external evidence ledger
+research delta / gap
+pointer to the applicable owner
 ```
+
+Si una propiedad ya tiene dueño superior o especializado, este mapa debe
+referenciarla en lugar de mantener una segunda copia mutable.
 
 ---
 
@@ -1036,8 +823,8 @@ Este orden expresa dependencia conceptual, no prioridad de implementación.
 
 La evidencia externa revisada el 2026-09-12 aumenta especialmente la fuerza de
 `Agent Identity & Delegation`, provenance/candidate binding y durable execution,
-pero **no reordena por sí sola esta secuencia ni convierte una línea de
-investigación en prioridad de implementación**.
+pero no reordena por sí sola esta secuencia ni convierte una línea de
+investigación en prioridad de implementación.
 
 ---
 
@@ -1048,9 +835,9 @@ Documento: Research Horizon Map / reconciliation
 Autoridad: no normativa
 Baseline modificado: no
 Arquitectura aprobada: no
-Sprint autorizado: ninguno
+Sprint autorizado por este documento: ninguno
 Implementación autorizada por este documento: ninguna
-RDD Stage 2 autorizado: no
+Estado operativo de RDD: owned by docs/development/malak_construction_protocol.md
 ```
 
 ### Resultado final
@@ -1062,16 +849,16 @@ IDEA-024.
 
 Los gaps y refuerzos que merecen permanecer visibles son principalmente:
 
-1. `Compromise Containment & Trust Revocation` sistémico;
+1. `Compromise Containment & Trust Revocation` sistémico, sin duplicar la política de `SECURITY.md`;
 2. `Memory & Knowledge Trust / Poisoning` más allá de Governed Projection
    Consumption, especialmente Candidate Content Identity/end-to-end binding,
    propagación de taint/revocation/quarantine y retrieval eligibility;
 3. `AI Supply-Chain Trust` para artefactos AI y externos;
 4. `Agent Identity & Delegation` verificable y revocable;
 5. `Data Classification & Disclosure Control` transversal;
-6. generalización de `Prompt & Context Trust Boundary`;
-7. `RDD Stage 2` únicamente como línea de investigación sobre lineage, receipts,
-   provenance y validez del harness, sin autorización de implementación;
+6. generalización operacional de `Prompt & Context Trust Boundary`;
+7. investigación sobre lineage, candidate-bound receipts, provenance y validez
+   del harness, cuyo estado de admisión pertenece al Construction Protocol;
 8. lifecycle durable de tasks/procesos como refuerzo de Long Horizon, no como
    justificación para introducir ahora un workflow engine o una TUI compleja.
 
