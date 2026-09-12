@@ -14,24 +14,22 @@ from malak.security.contracts import (
     PermissionScope,
 )
 
-
 POLICY_VERSION = "assurance-signal-projection/v1"
 SIGNAL_POLICY_VERSION = "assurance-signal-authority/v1"
 _MAX_SIGNALS = 5
 
 
-def _require_canonical_text(value: str, field_name: str) -> str:
+def _canonical_text(value: str, field_name: str) -> str:
     if not isinstance(value, str):
         raise TypeError(f"{field_name} must be a string")
-    normalized = value.strip()
-    if not normalized:
+    if not value.strip():
         raise ValueError(f"{field_name} must not be empty")
-    if normalized != value:
+    if value.strip() != value:
         raise ValueError(f"{field_name} must not contain surrounding whitespace")
     return value
 
 
-def _require_utc_datetime(value: datetime, field_name: str) -> datetime:
+def _utc(value: datetime, field_name: str) -> datetime:
     if not isinstance(value, datetime):
         raise TypeError(f"{field_name} must be a datetime")
     if value.tzinfo is None or value.utcoffset() is None:
@@ -39,6 +37,15 @@ def _require_utc_datetime(value: datetime, field_name: str) -> datetime:
     if value.utcoffset() != timedelta(0):
         raise ValueError(f"{field_name} must be UTC")
     return value
+
+
+def _normalize_text_fields(instance: object, names: tuple[str, ...]) -> None:
+    for name in names:
+        object.__setattr__(
+            instance,
+            name,
+            _canonical_text(getattr(instance, name), name),
+        )
 
 
 class AssuranceSignalKind(StrEnum):
@@ -61,17 +68,15 @@ class AssuranceSignalObservation:
     def __post_init__(self) -> None:
         if not isinstance(self.signal_kind, AssuranceSignalKind):
             raise TypeError("signal_kind must be an AssuranceSignalKind")
-        for field_name in (
-            "request_id",
-            "session_id",
-            "producer_subject_id",
-            "signal_policy_version",
-        ):
-            object.__setattr__(
-                self,
-                field_name,
-                _require_canonical_text(getattr(self, field_name), field_name),
-            )
+        _normalize_text_fields(
+            self,
+            (
+                "request_id",
+                "session_id",
+                "producer_subject_id",
+                "signal_policy_version",
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,17 +92,15 @@ class AssuranceSignalProducerAuthorizationEvidence:
     def __post_init__(self) -> None:
         if not isinstance(self.signal_kind, AssuranceSignalKind):
             raise TypeError("signal_kind must be an AssuranceSignalKind")
-        for field_name in (
-            "canonical_value",
-            "request_id",
-            "session_id",
-            "producer_subject_id",
-        ):
-            object.__setattr__(
-                self,
-                field_name,
-                _require_canonical_text(getattr(self, field_name), field_name),
-            )
+        _normalize_text_fields(
+            self,
+            (
+                "canonical_value",
+                "request_id",
+                "session_id",
+                "producer_subject_id",
+            ),
+        )
         if not isinstance(self.authorization_request, AuthorizationRequest):
             raise TypeError("authorization_request must be an AuthorizationRequest")
         if not isinstance(self.authorization_decision, AuthorizationDecision):
@@ -148,20 +151,15 @@ class AssuranceSignalProjectionDecision:
         object.__setattr__(
             self,
             "request_id",
-            _require_canonical_text(self.request_id, "request_id"),
+            _canonical_text(self.request_id, "request_id"),
         )
         if not isinstance(self.outcome, AssuranceSignalProjectionOutcome):
             raise TypeError("outcome must be an AssuranceSignalProjectionOutcome")
         if not isinstance(self.reason_code, AssuranceSignalProjectionReason):
             raise TypeError("reason_code must be an AssuranceSignalProjectionReason")
-        object.__setattr__(
-            self,
-            "evaluated_at",
-            _require_utc_datetime(self.evaluated_at, "evaluated_at"),
-        )
+        object.__setattr__(self, "evaluated_at", _utc(self.evaluated_at, "evaluated_at"))
         if self.projected_input is not None and not isinstance(
-            self.projected_input,
-            ProtectedFinalizationInput,
+            self.projected_input, ProtectedFinalizationInput
         ):
             raise TypeError(
                 "projected_input must be a ProtectedFinalizationInput or None"
@@ -174,18 +172,13 @@ class AssuranceSignalProjectionDecision:
         object.__setattr__(
             self,
             "policy_version",
-            _require_canonical_text(self.policy_version, "policy_version"),
+            _canonical_text(self.policy_version, "policy_version"),
         )
 
 
-def _canonical_signal_value(
-    kind: AssuranceSignalKind,
-    value: object,
-) -> str | None:
+def _signal_value(kind: AssuranceSignalKind, value: object) -> str | None:
     if kind is AssuranceSignalKind.APPLICABILITY:
-        if not isinstance(value, AssuranceApplicability):
-            return None
-        return value.value
+        return value.value if isinstance(value, AssuranceApplicability) else None
     if type(value) is not bool:
         return None
     return "true" if value else "false"
@@ -197,21 +190,20 @@ def required_permission_for_signal(
 ) -> PermissionScope | None:
     if not isinstance(kind, AssuranceSignalKind):
         raise TypeError("kind must be an AssuranceSignalKind")
-    canonical_value = _canonical_signal_value(kind, value)
-    if canonical_value is None:
+    canonical = _signal_value(kind, value)
+    if canonical is None:
         return None
     return PermissionScope(
         resource=f"cognition.assurance_signal.{kind.value}",
-        action=f"produce.{canonical_value}",
+        action=f"produce.{canonical}",
     )
 
 
-def _result(
+def _decision(
     candidate: ProtectedResponseCandidate,
     outcome: AssuranceSignalProjectionOutcome,
     reason: AssuranceSignalProjectionReason,
     evaluated_at: datetime,
-    *,
     projected_input: ProtectedFinalizationInput | None = None,
 ) -> AssuranceSignalProjectionDecision:
     return AssuranceSignalProjectionDecision(
@@ -223,38 +215,11 @@ def _result(
     )
 
 
-def _denied(
-    candidate: ProtectedResponseCandidate,
-    reason: AssuranceSignalProjectionReason,
-    evaluated_at: datetime,
-) -> AssuranceSignalProjectionDecision:
-    return _result(
-        candidate,
-        AssuranceSignalProjectionOutcome.DENIED,
-        reason,
-        evaluated_at,
-    )
-
-
-def _hold(
-    candidate: ProtectedResponseCandidate,
-    reason: AssuranceSignalProjectionReason,
-    evaluated_at: datetime,
-) -> AssuranceSignalProjectionDecision:
-    return _result(
-        candidate,
-        AssuranceSignalProjectionOutcome.HOLD,
-        reason,
-        evaluated_at,
-    )
-
-
 def project_assurance_signals(
     candidate: ProtectedResponseCandidate,
     observations: tuple[AssuranceSignalObservation, ...],
     authorization_evidence: tuple[
-        AssuranceSignalProducerAuthorizationEvidence,
-        ...,
+        AssuranceSignalProducerAuthorizationEvidence, ...
     ],
     evaluated_at: datetime,
 ) -> AssuranceSignalProjectionDecision:
@@ -264,262 +229,157 @@ def project_assurance_signals(
         raise TypeError("observations must be a materialized tuple")
     if type(authorization_evidence) is not tuple:
         raise TypeError("authorization_evidence must be a materialized tuple")
-    if not all(isinstance(item, AssuranceSignalObservation) for item in observations):
+    if not all(isinstance(x, AssuranceSignalObservation) for x in observations):
         raise TypeError("observations must contain AssuranceSignalObservation values")
     if not all(
-        isinstance(item, AssuranceSignalProducerAuthorizationEvidence)
-        for item in authorization_evidence
+        isinstance(x, AssuranceSignalProducerAuthorizationEvidence)
+        for x in authorization_evidence
     ):
         raise TypeError(
             "authorization_evidence must contain "
             "AssuranceSignalProducerAuthorizationEvidence values"
         )
 
-    evaluated_at = _require_utc_datetime(evaluated_at, "evaluated_at")
+    evaluated_at = _utc(evaluated_at, "evaluated_at")
     for item in authorization_evidence:
-        context = item.authorization_request.context
-        _require_utc_datetime(context.issued_at, "context.issued_at")
-        _require_utc_datetime(context.expires_at, "context.expires_at")
-        _require_utc_datetime(
-            item.authorization_request.created_at,
-            "authorization_request.created_at",
-        )
+        request = item.authorization_request
+        _utc(request.context.issued_at, "context.issued_at")
+        _utc(request.context.expires_at, "context.expires_at")
+        _utc(request.created_at, "authorization_request.created_at")
 
-    if (
-        len(observations) > _MAX_SIGNALS
-        or len(authorization_evidence) > _MAX_SIGNALS
-    ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.INPUT_CARDINALITY_EXCEEDED,
-            evaluated_at,
-        )
-
-    observation_counts = Counter(item.signal_kind for item in observations)
-    evidence_counts = Counter(item.signal_kind for item in authorization_evidence)
-    if any(count > 1 for count in observation_counts.values()):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.DUPLICATE_SIGNAL,
-            evaluated_at,
-        )
-    if any(count > 1 for count in evidence_counts.values()):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.DUPLICATE_AUTHORIZATION_EVIDENCE,
-            evaluated_at,
-        )
-    request_id_counts = Counter(
-        item.authorization_request.request_id
-        for item in authorization_evidence
+    deny = lambda reason: _decision(  # noqa: E731
+        candidate,
+        AssuranceSignalProjectionOutcome.DENIED,
+        reason,
+        evaluated_at,
     )
-    if any(count > 1 for count in request_id_counts.values()):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.DUPLICATE_AUTHORIZATION_REQUEST_ID,
-            evaluated_at,
-        )
+    hold = lambda reason: _decision(  # noqa: E731
+        candidate,
+        AssuranceSignalProjectionOutcome.HOLD,
+        reason,
+        evaluated_at,
+    )
+
+    if max(len(observations), len(authorization_evidence)) > _MAX_SIGNALS:
+        return deny(AssuranceSignalProjectionReason.INPUT_CARDINALITY_EXCEEDED)
+
+    observation_counts = Counter(x.signal_kind for x in observations)
+    evidence_counts = Counter(x.signal_kind for x in authorization_evidence)
+    if any(count > 1 for count in observation_counts.values()):
+        return deny(AssuranceSignalProjectionReason.DUPLICATE_SIGNAL)
+    if any(count > 1 for count in evidence_counts.values()):
+        return deny(AssuranceSignalProjectionReason.DUPLICATE_AUTHORIZATION_EVIDENCE)
+    auth_request_counts = Counter(
+        x.authorization_request.request_id for x in authorization_evidence
+    )
+    if any(count > 1 for count in auth_request_counts.values()):
+        return deny(AssuranceSignalProjectionReason.DUPLICATE_AUTHORIZATION_REQUEST_ID)
 
     required_kinds = frozenset(AssuranceSignalKind)
     if frozenset(observation_counts) != required_kinds:
-        return _hold(
-            candidate,
-            AssuranceSignalProjectionReason.MISSING_SIGNAL,
-            evaluated_at,
-        )
+        return hold(AssuranceSignalProjectionReason.MISSING_SIGNAL)
     if frozenset(evidence_counts) != required_kinds:
-        return _hold(
-            candidate,
-            AssuranceSignalProjectionReason.MISSING_AUTHORIZATION_EVIDENCE,
-            evaluated_at,
-        )
+        return hold(AssuranceSignalProjectionReason.MISSING_AUTHORIZATION_EVIDENCE)
 
-    observation_by_kind = {item.signal_kind: item for item in observations}
-    evidence_by_kind = {
-        item.signal_kind: item for item in authorization_evidence
-    }
+    obs = {x.signal_kind: x for x in observations}
+    auth = {x.signal_kind: x for x in authorization_evidence}
 
-    if any(
-        item.request_id != candidate.request_id
-        for item in observations
-    ) or any(
-        item.request_id != candidate.request_id
-        for item in authorization_evidence
+    if any(x.request_id != candidate.request_id for x in observations) or any(
+        x.request_id != candidate.request_id for x in authorization_evidence
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.REQUEST_ID_MISMATCH,
-            evaluated_at,
-        )
-
-    if any(
-        item.session_id != candidate.session_id
-        for item in observations
-    ) or any(
-        item.session_id != candidate.session_id
-        or item.authorization_request.context.session_id != candidate.session_id
-        for item in authorization_evidence
+        return deny(AssuranceSignalProjectionReason.REQUEST_ID_MISMATCH)
+    if any(x.session_id != candidate.session_id for x in observations) or any(
+        x.session_id != candidate.session_id
+        or x.authorization_request.context.session_id != candidate.session_id
+        for x in authorization_evidence
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.SESSION_ID_MISMATCH,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.SESSION_ID_MISMATCH)
 
-    canonical_values: dict[AssuranceSignalKind, str] = {}
+    canonical: dict[AssuranceSignalKind, str] = {}
     for kind in AssuranceSignalKind:
-        observation = observation_by_kind[kind]
-        canonical = _canonical_signal_value(kind, observation.value)
-        if canonical is None:
-            return _denied(
-                candidate,
-                AssuranceSignalProjectionReason.SIGNAL_VALUE_INVALID,
-                evaluated_at,
-            )
-        canonical_values[kind] = canonical
-    if any(
-        evidence_by_kind[kind].canonical_value != canonical_values[kind]
-        for kind in AssuranceSignalKind
-    ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.SIGNAL_VALUE_MISMATCH,
-            evaluated_at,
-        )
+        value = _signal_value(kind, obs[kind].value)
+        if value is None:
+            return deny(AssuranceSignalProjectionReason.SIGNAL_VALUE_INVALID)
+        canonical[kind] = value
+    if any(auth[k].canonical_value != canonical[k] for k in AssuranceSignalKind):
+        return deny(AssuranceSignalProjectionReason.SIGNAL_VALUE_MISMATCH)
 
     if any(
-        evidence_by_kind[kind].producer_subject_id
-        != observation_by_kind[kind].producer_subject_id
-        or evidence_by_kind[kind].producer_subject_id
-        != evidence_by_kind[kind].authorization_request.context.subject_id
-        for kind in AssuranceSignalKind
+        auth[k].producer_subject_id != obs[k].producer_subject_id
+        or auth[k].producer_subject_id
+        != auth[k].authorization_request.context.subject_id
+        for k in AssuranceSignalKind
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.PRODUCER_SUBJECT_MISMATCH,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.PRODUCER_SUBJECT_MISMATCH)
     if any(
-        evidence_by_kind[kind].authorization_request.context.authenticated
-        is not True
-        for kind in AssuranceSignalKind
+        auth[k].authorization_request.context.authenticated is not True
+        for k in AssuranceSignalKind
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.PRODUCER_NOT_AUTHENTICATED,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.PRODUCER_NOT_AUTHENTICATED)
 
-    for kind in AssuranceSignalKind:
-        expected_permission = required_permission_for_signal(
-            kind,
-            observation_by_kind[kind].value,
-        )
-        if evidence_by_kind[kind].authorization_request.permission != expected_permission:
-            return _denied(
-                candidate,
-                AssuranceSignalProjectionReason.PERMISSION_SCOPE_MISMATCH,
-                evaluated_at,
-            )
+    if any(
+        auth[k].authorization_request.permission
+        != required_permission_for_signal(k, obs[k].value)
+        for k in AssuranceSignalKind
+    ):
+        return deny(AssuranceSignalProjectionReason.PERMISSION_SCOPE_MISMATCH)
 
-    contexts = [
-        evidence_by_kind[kind].authorization_request.context
-        for kind in AssuranceSignalKind
-    ]
-    requests = [
-        evidence_by_kind[kind].authorization_request
-        for kind in AssuranceSignalKind
-    ]
-    if any(evaluated_at < context.issued_at for context in contexts):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.CONTEXT_NOT_YET_VALID,
-            evaluated_at,
-        )
-    if any(evaluated_at >= context.expires_at for context in contexts):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.CONTEXT_EXPIRED,
-            evaluated_at,
-        )
+    requests = [auth[k].authorization_request for k in AssuranceSignalKind]
+    if any(evaluated_at < request.context.issued_at for request in requests):
+        return deny(AssuranceSignalProjectionReason.CONTEXT_NOT_YET_VALID)
+    if any(evaluated_at >= request.context.expires_at for request in requests):
+        return deny(AssuranceSignalProjectionReason.CONTEXT_EXPIRED)
     if any(
         request.created_at < request.context.issued_at
         or request.created_at > evaluated_at
         for request in requests
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.AUTHORIZATION_REQUEST_TIME_INVALID,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.AUTHORIZATION_REQUEST_TIME_INVALID)
 
     if any(
-        evidence_by_kind[kind].authorization_decision.request_id
-        != evidence_by_kind[kind].authorization_request.request_id
-        for kind in AssuranceSignalKind
+        auth[k].authorization_decision.request_id
+        != auth[k].authorization_request.request_id
+        for k in AssuranceSignalKind
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.DECISION_REQUEST_MISMATCH,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.DECISION_REQUEST_MISMATCH)
     if any(
-        evidence_by_kind[kind].authorization_decision.allowed is False
-        for kind in AssuranceSignalKind
+        auth[k].authorization_decision.allowed is False
+        for k in AssuranceSignalKind
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.AUTHORIZATION_DENIED,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.AUTHORIZATION_DENIED)
 
     if any(
-        observation_by_kind[kind].signal_policy_version
-        != SIGNAL_POLICY_VERSION
-        for kind in AssuranceSignalKind
+        obs[k].signal_policy_version != SIGNAL_POLICY_VERSION
+        for k in AssuranceSignalKind
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.SIGNAL_POLICY_VERSION_MISMATCH,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.SIGNAL_POLICY_VERSION_MISMATCH)
 
-    applicability = observation_by_kind[AssuranceSignalKind.APPLICABILITY].value
-    evidence_required = observation_by_kind[
-        AssuranceSignalKind.EVIDENCE_REQUIRED
-    ].value
-    support_sufficient = observation_by_kind[
-        AssuranceSignalKind.SUPPORT_SUFFICIENT
-    ].value
-    contradiction_unresolved = observation_by_kind[
+    applicability = obs[AssuranceSignalKind.APPLICABILITY].value
+    evidence_required = obs[AssuranceSignalKind.EVIDENCE_REQUIRED].value
+    support_sufficient = obs[AssuranceSignalKind.SUPPORT_SUFFICIENT].value
+    contradiction_unresolved = obs[
         AssuranceSignalKind.CONTRADICTION_UNRESOLVED
     ].value
-    policy_violation = observation_by_kind[
-        AssuranceSignalKind.POLICY_VIOLATION
-    ].value
+    policy_violation = obs[AssuranceSignalKind.POLICY_VIOLATION].value
 
     if applicability is AssuranceApplicability.NOT_APPLICABLE and (
         evidence_required is not False
         or support_sufficient is not False
         or contradiction_unresolved is not False
     ):
-        return _denied(
-            candidate,
-            AssuranceSignalProjectionReason.SIGNAL_SET_INCOHERENT,
-            evaluated_at,
-        )
+        return deny(AssuranceSignalProjectionReason.SIGNAL_SET_INCOHERENT)
 
-    projected_input = ProtectedFinalizationInput(
+    projected = ProtectedFinalizationInput(
         applicability=applicability,
         evidence_required=evidence_required,
         support_sufficient=support_sufficient,
         contradiction_unresolved=contradiction_unresolved,
         policy_violation=policy_violation,
     )
-    return _result(
+    return _decision(
         candidate,
         AssuranceSignalProjectionOutcome.READY,
         AssuranceSignalProjectionReason.READY,
         evaluated_at,
-        projected_input=projected_input,
+        projected,
     )
