@@ -490,7 +490,8 @@ max authorization evidence objects = 5
 Un set incompleto puede producir `HOLD`.
 
 Un set por encima del máximo o con duplicados explícitos produce `DENIED`; G2 no consume
-inputs ilimitados antes de verificar cardinalidad.
+inputs ilimitados antes de verificar cardinalidad. La cardinalidad debe verificarse antes de
+inspeccionar tipos internos o timestamps anidados de los elementos.
 
 Cada `authorization_request.request_id` debe ser único dentro del set completo.
 
@@ -771,43 +772,46 @@ observations/evidence.
 Precedencia congelada:
 
 ```text
-0. invalid top-level contract/type/time representation
+0. invalid candidate / collection container type / evaluated_at representation
    → fail safe / no READY
 
 1. input count above maximum
+   → DENIED before element or nested timestamp inspection
+
+2. invalid element contract/type or nested time representation
+   → fail safe / no READY
+
+3. duplicate signal / duplicate evidence / duplicate auth request id
    → DENIED
 
-2. duplicate signal / duplicate evidence / duplicate auth request id
-   → DENIED
-
-3. missing signal or missing matching evidence
+4. missing signal or missing matching evidence
    → HOLD
 
-4. request/session/candidate binding mismatch
+5. request/session/candidate binding mismatch
    → DENIED
 
-5. kind/value/type incompatibility
+6. kind/value/type incompatibility
    → DENIED
 
-6. producer subject / authenticated binding failure
+7. producer subject / authenticated binding failure
    → DENIED
 
-7. permission scope mismatch
+8. permission scope mismatch
    → DENIED
 
-8. temporal coherence failure
+9. temporal coherence failure
    → DENIED
 
-9. authorization decision binding or allowed=False
-   → DENIED
-
-10. signal policy version mismatch
+10. authorization decision binding or allowed=False
     → DENIED
 
-11. cross-signal incoherence
+11. signal policy version mismatch
     → DENIED
 
-12. complete valid set
+12. cross-signal incoherence
+    → DENIED
+
+13. complete valid set
     → READY
 ```
 
@@ -921,6 +925,7 @@ generator/iterator input                → fail safe
 non-UTC evaluated_at                    → fail safe
 non-UTC auth request created_at         → fail safe
 input cardinality above max             → DENIED
+oversized invalid-element tuple         → INPUT_CARDINALITY_EXCEEDED before element inspection
 missing signal                          → HOLD
 missing auth evidence                   → HOLD
 duplicate signal                        → DENIED
@@ -1027,10 +1032,23 @@ conversation_delta: 0
 memory_delta: 0
 knowledge_delta: 0
 persistence_delta: 0
-max_fix_rounds_before_escalation: 1
-production_delta_loc_guardrail: 350
+max_fix_rounds_before_escalation: 2
+production_delta_loc_guardrail: 400
 test_delta_loc_guardrail: 800
 ```
+
+Recalibración Owner-authorized durante G2-IMPLEMENTATION:
+
+- el guardrail original de `350` LOC era una estimación local de tamaño, no una restricción
+  del Blueprint, Constitutions, RDD ni harness;
+- la revisión Risk + Readability del candidate de 385 LOC no encontró 35 LOC de complejidad
+  accidental cuya eliminación justificara degradar claridad o auditabilidad;
+- F002 detectó que la cardinalidad se verificaba después de inspeccionar elementos y
+  timestamps anidados;
+- el Owner autorizó explícitamente una segunda bounded correction para F002 y la
+  recalibración `350 → 400`;
+- esta segunda ronda es la última autorizada para este candidate; cualquier ronda adicional
+  vuelve a requerir escalamiento explícito.
 
 Si una solución razonable supera materialmente este budget:
 
@@ -1176,6 +1194,7 @@ authorization evidence session-bound    FROZEN
 value-sensitive producer scopes         FROZEN
 temporal coherence                      FROZEN
 bounded materialized collections        FROZEN
+cardinality before element inspection   FROZEN
 unique authorization request ids        FROZEN
 exact completeness                      FROZEN
 canonical NOT_APPLICABLE representation FROZEN
