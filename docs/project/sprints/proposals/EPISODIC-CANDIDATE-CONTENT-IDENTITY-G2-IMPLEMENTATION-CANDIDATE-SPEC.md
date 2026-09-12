@@ -335,10 +335,10 @@ forma fail-closed identidades incompatibles como `MISMATCH`.
 La función de compute v1 siempre deberá producir exactamente:
 
 ```text
-digest_algorithm        = "sha256"
+digest_algorithm         = "sha256"
 canonicalization_version = "episodic-memory-candidate-json/v1"
-policy_version           = "episodic-candidate-content-identity/v1"
-digest_hex length        = 64
+policy_version            = "episodic-candidate-content-identity/v1"
+digest_hex length         = 64
 ```
 
 ---
@@ -445,17 +445,17 @@ canonical_json.encode("utf-8")
 Propiedades congeladas:
 
 ```text
-encoding             UTF-8
-ASCII escaping       enabled
-object key order     ascending lexicographic order
-whitespace           none outside JSON string content
-separator object     ':'
-separator array      ','
-trailing newline     none
+encoding              UTF-8
+ASCII escaping        enabled
+object key order      ascending lexicographic order
+whitespace            none outside JSON string content
+separator object      ':'
+separator array       ','
+trailing newline      none
 Unicode normalization none
-strip                none
-casefold             none
-locale dependency    none
+strip                 none
+casefold              none
+locale dependency     none
 ```
 
 `ensure_ascii=True` es parte del protocolo v1. No representa normalización de
@@ -689,7 +689,7 @@ created_at = 2026-09-12T12:00:01.123456Z
 Canonical JSON v1 exacto:
 
 ```json
-{"candidate_id":"candidate-001","control":{"confidence_classification":"observed","domain":"general","purpose":"episodic_memory_candidate","sensitivity_classification":"internal","source_authority_classification":"user_asserted","subject_scope":"conversation","valid_from":"2026-09-12T12:00:00.000000Z","valid_until":"2026-09-13T12:00:00.000000Z"},"created_at":"2026-09-12T12:00:01.123456Z","experience":{"assistant_content":"Hola. \\u00bfEn qu\\u00e9 puedo ayudarte?","user_content":"Hola Mal\\u0101k"},"origin":{"model":"qwen3:8b","provider":"ollama","request_created_at":"2026-09-12T12:00:00.000000Z","request_id":"request-001","session_id":"session-001"},"schema":"malak.episodic_memory_candidate/v1"}
+{"candidate_id":"candidate-001","control":{"confidence_classification":"observed","domain":"general","purpose":"episodic_memory_candidate","sensitivity_classification":"internal","source_authority_classification":"user_asserted","subject_scope":"conversation","valid_from":"2026-09-12T12:00:00.000000Z","valid_until":"2026-09-13T12:00:00.000000Z"},"created_at":"2026-09-12T12:00:01.123456Z","experience":{"assistant_content":"Hola. \u00bfEn qu\u00e9 puedo ayudarte?","user_content":"Hola Mal\u0101k"},"origin":{"model":"qwen3:8b","provider":"ollama","request_created_at":"2026-09-12T12:00:00.000000Z","request_id":"request-001","session_id":"session-001"},"schema":"malak.episodic_memory_candidate/v1"}
 ```
 
 Expected SHA-256:
@@ -730,7 +730,7 @@ Expected SHA-256:
 
 ### 16.3. Vector C — Unicode compuesto vs descompuesto
 
-Caso C1:
+C1 parte **exactamente del Vector B** y modifica únicamente:
 
 ```text
 candidate_id = candidate-unicode
@@ -743,7 +743,7 @@ Expected SHA-256:
 ea2f7d8c891cacd28eac11bebd5ad1c9c39c9601e7f88ab075f46def9dcb80d9
 ```
 
-Caso C2: todos los demás campos idénticos a C1, pero:
+C2 parte exactamente de C1 y modifica únicamente:
 
 ```text
 experience.user_content = U+0065 U+0301  # e + combining acute
