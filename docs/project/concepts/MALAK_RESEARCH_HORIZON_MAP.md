@@ -931,7 +931,7 @@ capability, componente o sprint.
 
 ## 19. Evidence Map — artefactos externos revisados e insumos futuros
 
-Revisión realizada: `2026-09-12`  
+Revisión realizada: `2026-09-12`
 Baseline contrastado: `Aranwill/jarvis/main@cd50c308e1f5a1481851d6402ae4435341410d27`
 
 Esta sección **agrega evidencia** a la reconciliación existente sin modificar ni
