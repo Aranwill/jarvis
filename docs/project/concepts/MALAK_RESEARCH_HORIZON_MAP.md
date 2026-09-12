@@ -7,6 +7,8 @@ language: es
 created: 2026-09-09
 as_of_branch: main
 as_of_commit: cc9c7373879555a3eb267cd91be5228207427ae8
+external_evidence_reviewed: 2026-09-12
+external_evidence_baseline_commit: cd50c308e1f5a1481851d6402ae4435341410d27
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md
@@ -783,35 +785,124 @@ incorporar world models.
 
 ---
 
-## 14. Relación con investigación de seguridad 2026
+## 14. Mapa de evidencia externa validada — 2026-09-12
 
-Las revisiones futuras deberán continuar contrastando Malāk contra, entre otros:
+Esta sección es el **registro canónico de evidencia externa** para este documento.
+Su objetivo es evitar copiar catálogos de fuentes en `SECURITY.md`, `ideas.md`,
+roadmaps u otras referencias y reducir así drift documental.
 
-- OWASP Top 10 para aplicaciones web;
-- OWASP Top 10 para aplicaciones LLM/GenAI;
-- OWASP Agentic Security y Agent Control Standard;
-- NIST AI RMF / perfiles de ciberseguridad para AI;
-- MITRE ATLAS;
-- investigación académica sobre prompt injection, tool poisoning, persistent
-  state corruption, memory poisoning y delegated authority;
-- incidentes reales de sistemas agentic y AI-assisted development.
-
-Estos marcos son referencias de aplicabilidad, no fuentes de autoridad superiores
-a Blueprint, Constituciones o Gobernanza.
-
-La revisión deberá concentrarse en propiedades de sistema:
+La evidencia externa:
 
 ```text
-information flow
-identity
-delegated authority
-persistent state
-supply chain
-containment
-provenance
-detection
-recovery
+puede reforzar una propiedad
+puede demostrar un gap
+puede justificar mantener una línea bajo WATCH
+
+pero
+
+NO modifica la jerarquía documental
+NO crea una capability
+NO promueve una idea al roadmap
+NO autoriza un sprint
+NO convierte una práctica externa en arquitectura de Malāk
 ```
+
+### 14.1. Clases de evidencia
+
+Para esta reconciliación se usa la siguiente precedencia orientativa:
+
+```text
+E1 — estándares, organismos públicos, especificaciones formales
+E2 — documentación primaria de sistemas/productos y postmortems verificables
+E3 — investigación académica publicada o revisada
+E4 — implementación open-source inspeccionable
+E5 — comunidades, foros y experiencia anecdótica
+```
+
+La precedencia no sustituye el análisis de aplicabilidad. Una fuente `E1` puede
+ser irrelevante para Malāk y una observación `E4` puede revelar una propiedad
+útil. Las fuentes `E5` sirven para detectar fricción operativa o corroborar una
+tendencia; no deben establecer por sí solas requisitos de seguridad, arquitectura
+o gobernanza.
+
+### 14.2. Registro de fuentes
+
+| ID | Clase | Fuente primaria | Evidencia relevante para Malāk |
+|---|---|---|---|
+| `EXT-01` | `E1` | NIST, *Back to the Future: Why Agentic AI Needs a Strong Identity Foundation*, 2026-08-27 — https://www.nist.gov/blogs/cybersecurity-insights/back-future-why-agentic-ai-needs-strong-identity-foundation | Los guardrails del modelo no bastan para seguridad agentic; identidad fuerte y credenciales/autorizaciones acotadas son fundaciones del sistema. |
+| `EXT-02` | `E1` | ACSC + CISA + NSA + Cyber Centre Canadá + NCSC-NZ + NCSC-UK, *Careful adoption of agentic AI services*, 2026-05-01 — https://www.cyber.gov.au/business-government/secure-design/artificial-intelligence/careful-adoption-of-agentic-ai-services | Recomienda least privilege, agentes como principals criptográficos distintos, credenciales efímeras, límites de recursos, aislamiento, human control points, monitoreo, rollback y autorización verificada en runtime. |
+| `EXT-03` | `E1` | ASD, *Agentic AI Harnesses — The layer above the model*, 2026-09-11 — https://www.cyber.gov.au/business-government/secure-design/artificial-intelligence/agentic-ai-harnesses | El harness y la infraestructura circundante deben aplicar seguridad, gobernanza, validación, supervisión y supply-chain assurance en lugar de depender solo del comportamiento del modelo o del prompt. |
+| `EXT-04` | `E2` | Google Developers, *Build zero-trust AI agents with Google's Agent Development Kit*, 2026-08-17 — https://developers.googleblog.com/build-zero-trust-ai-agents-with-googles-agent-development-kit/ | Los agentes que mutan estado real requieren fronteras Zero Trust y validación determinista fuera del LLM. |
+| `EXT-05` | `E2` | Anthropic, *How we contain Claude across products*, 2026-05-25 — https://www.anthropic.com/engineering/how-we-contain-claude | Refuerza containment por entorno y blast-radius control; los controles probabilísticos del modelo no sustituyen fronteras duras. También documenta approval fatigue, por lo que Human in Control no debe reducirse a pedir permiso por cada microacción. |
+| `EXT-06` | `E1` | A2A Protocol, specification — https://a2a-protocol.org/dev/specification/ | `TASK_STATE_AUTH_REQUIRED` no constituye autorización; scope, validez y revocación deben definirse y verificarse antes de ejecutar. |
+| `EXT-07` | `E1` | OWASP GenAI Security Project, *Top 10 for Agentic Applications 2026*, 2025-12-09 — https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/ | Goal hijack, tool misuse, identity/privilege abuse, supply chain, memory/context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation y rogue agents coinciden con amenazas ya preservadas en Malāk. |
+| `EXT-08` | `E2` | OWASP GenAI Security Project, *Memory Is a Feature. It Is Also an Attack Surface*, 2026-05-13 — https://genai.owasp.org/2026/05/13/memory-is-a-feature-it-is-also-an-attack-surface/ | El estado persistente puede transportar prompt injection y contaminación más allá de la interacción original; refuerza Memory admission, taint, revocation y quarantine. |
+| `EXT-09` | `E1` | W3C, *PROV-Overview*, 2013 — https://www.w3.org/TR/prov-overview/ | Modela provenance mediante entidades, actividades y agentes; aporta vocabulario maduro para derivación, atribución y trazabilidad sin confundir provenance con autoridad. |
+| `EXT-10` | `E1` | SLSA v1.2, *Provenance* — https://slsa.dev/spec/v1.2/provenance | Provenance verificable describe dónde, cuándo y cómo se produjo un artefacto; refuerza AI Supply-Chain Trust y el futuro binding de evidencia a candidatos. |
+| `EXT-11` | `E1` | seL4, *Capabilities* — https://docs.sel4.systems/Tutorials/capabilities.html | Una capability es un token no falsificable con derechos concretos; refuerza `Capability != Permission` y autoridad mínima por objeto/operación. |
+| `EXT-12` | `E3` | Google, *Zanzibar: Google's Consistent, Global Authorization System*, USENIX ATC 2019 — https://research.google/pubs/zanzibar-googles-consistent-global-authorization-system/ | Muestra autorización como infraestructura separada, consistente y centralmente evaluable en lugar de inferencia dispersa en cada consumidor. |
+| `EXT-13` | `E1` | SPIFFE, workload identity specifications — https://spiffe.io/docs/latest/spiffe/concepts/ | SVIDs aportan identidad criptográficamente verificable y de corta vida para workloads; refuerza Agent Identity, revocabilidad y separación entre identidad del workload y credenciales humanas. |
+| `EXT-14` | `E2` | Kubernetes, *Controllers* — https://kubernetes.io/docs/concepts/architecture/controller/ | Control loops comparan estado deseado y observado; refuerza una futura reconciliación de identity/runtime/resource state sin asumir que una autorización histórica sigue vigente. |
+| `EXT-15` | `E2` | Erlang/OTP, *Supervisor Behaviour* — https://www.erlang.org/doc/system/sup_princ.html | Supervision trees, restart strategies y restart intensity aportan precedentes maduros para lifecycle, contención de fallos y escalamiento de procesos. |
+| `EXT-16` | `E2` | Temporal, documentation — https://docs.temporal.io/ | Durable execution preserva progreso ante crashes/fallos y separa workflow durable de side effects; refuerza retries, resume/replay, idempotencia y compensación como problemas explícitos. |
+| `EXT-17` | `E1` | OpenTelemetry, *Context propagation* — https://opentelemetry.io/docs/concepts/context-propagation/ | Trace/span context permite reconstruir causalidad a través de procesos y servicios; útil para observabilidad, sin convertir telemetry en evidencia o autoridad por sí sola. |
+| `EXT-18` | `E2` | OpenAI, *A shared playbook for trustworthy third party evaluations*, 2026-05-29 — https://openai.com/index/trustworthy-third-party-evaluations-foundations/ | La validez de una evaluación depende también de harness, herramientas, entorno y configuración; refuerza candidate-bound evidence más allá del resultado final. |
+| `EXT-19` | `E2` | OpenAI, *Separating signal from noise in coding evaluations*, 2026-07-08 — https://openai.com/index/separating-signal-from-noise-coding-evaluations/ | Una auditoría estimó ~30 % de tareas problemáticas en SWE-Bench Pro; un PASS puede ser evidencia defectuosa si el instrumento de evaluación no es válido. |
+| `EXT-20` | `E2` | Anthropic, *Demystifying evals for AI agents*, 2026-01-09 — https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents | Evals agentic deben considerar trayectorias multistep, tools y cambios de estado; refuerza evidencia de proceso y no solo evaluación de output final. |
+| `EXT-21` | `E3` | USENIX Security 2026, *AttriGuard: Defeating Indirect Prompt Injection in LLM Agents via Causal Attribution of Tool Invocations* — https://www.usenix.org/conference/usenixsecurity26/presentation/he-yu | Propone atribución causal de tool calls para distinguir intención del usuario de observaciones no confiables. Resultado prometedor, todavía experimental: `WATCH`. |
+| `EXT-22` | `E4` | Gentleman Programming, `gentle-pi`, inspeccionado en `main@6e4478c04615b0c013a017178dcfefa51579982d` — https://github.com/Gentleman-Programming/gentle-pi | RDD nativo conserva candidate freeze, lineage, receipts ligados al candidato, correction acotada y review sin delivery authority; su TUI separa procesos RPC, estado tipado, concurrencia acotada y proyección de UI. La propia línea RDD se declara inestable, por lo que se usa como evidencia de implementación, no como metodología a copiar. |
+
+### 14.3. Mapeo de evidencia → lógica de Malāk
+
+| Propiedad / línea | Evidencia principal | Disposición | Consecuencia para Malāk |
+|---|---|---|---|
+| `Model != System` / hard boundaries | `EXT-02`, `EXT-03`, `EXT-04`, `EXT-05` | `REINFORCE_EXISTING` | Mantener PDP/PEP, sandbox/containment y validadores deterministas fuera del LLM. |
+| Capability / least privilege | `EXT-02`, `EXT-11`, `EXT-12` | `ALIGNED` | Preservar Capability First sin convertir existencia de capability en permiso. |
+| Agent Identity & Delegation | `EXT-01`, `EXT-02`, `EXT-06`, `EXT-13` | `GAP_CANDIDATE` | La evidencia eleva la relevancia de identidad criptográfica, TTL, revocación y delegación verificable, pero no autoriza diseño ni sprint. |
+| Human in Control | `EXT-02`, `EXT-05` | `REINFORCE_EXISTING` | Mantener autoridad humana para decisiones sensibles y reducir approval fatigue mediante límites duros y checkpoints significativos. |
+| Prompt / Context Trust Boundary | `EXT-02`, `EXT-03`, `EXT-05`, `EXT-07`, `EXT-21` | `REINFORCE_EXISTING` | Tratar tool output y contenido recuperado como datos no confiables; mantener causal attribution bajo `WATCH`. |
+| Memory & Knowledge Trust / Poisoning | `EXT-07`, `EXT-08` | `REINFORCE_EXISTING` | Refuerza admission, content binding, taint, revocation, quarantine y trust-aware retrieval antes de Memory persistente. |
+| AI Supply-Chain Trust / provenance | `EXT-02`, `EXT-09`, `EXT-10` | `GAP_CANDIDATE` | Reutilizar provenance e integrity concepts; no crear registry universal sin necesidad operacional. |
+| RDD Stage 2 / lineage / receipts | `EXT-09`, `EXT-10`, `EXT-18`, `EXT-19`, `EXT-20`, `EXT-22` | `OBSERVE` | Hay evidencia fuerte para investigar lineage, receipt y harness identity; **RDD Stage 2 permanece NOT AUTHORIZED**. |
+| Durable task/process lifecycle | `EXT-14`, `EXT-15`, `EXT-16`, `EXT-17`, `EXT-22` | `ALIGNED` / `REINFORCE_EXISTING` | Long Horizon ya posee dueño conceptual; futuras ejecuciones deberán considerar supervision, reconciliation, idempotencia, replay y compensación antes de una TUI compleja. |
+| Resource Governance | `EXT-02`, `EXT-15`, `EXT-22` | `ALIGNED` | Concurrencia, tiempo, retries y procesos deben permanecer acotados y observables. |
+| Interoperabilidad A2A/MCP | `EXT-06`, `EXT-07` | `WATCH` | Un estado/protocolo externo no transfiere autoridad interna; adapters siguen subordinados a contratos y Security Control Plane de Malāk. |
+| Observability / causal tracing | `EXT-17` | `REINFORCE_EXISTING` | Trace context puede mejorar reconstrucción causal, preservando `Telemetry != Evidence != Authority`. |
+| Causal action attribution | `EXT-21` | `WATCH` | Línea prometedora para tool provenance/intention binding; no incorporar hasta madurez y necesidad demostradas. |
+| Autonomous self-modification | evidencia externa no demuestra necesidad para cambiar la frontera actual | `CONFLICTS_WITH_VISION` | Mantener `Observation → Evidence → Finding → Proposal → Human/governance`. |
+
+### 14.4. Contrafuerzos y límites derivados de la evidencia
+
+La investigación no solo confirma decisiones; también introduce correcciones a
+interpretaciones demasiado simples:
+
+1. `Human in Control != Human approves everything`: el Owner conserva autoridad,
+   pero la arquitectura debe reducir prompts repetitivos mediante límites duros,
+   políticas deterministas y checkpoints significativos.
+2. `Identity != Authority`: una identidad criptográfica válida demuestra quién o
+   qué presenta una credencial; la autorización aplicable continúa siendo una
+   decisión separada.
+3. `Telemetry != Evidence`: traces y eventos ayudan a reconstruir causalidad, pero
+   su admisión como evidencia exige las reglas correspondientes.
+4. `PASS != Valid Evidence`: un resultado de test/eval no basta si harness,
+   dataset, environment o criterio de evaluación son inválidos o no están ligados
+   al candidato evaluado.
+5. `Presence != Liveness != Authority`: una sesión/proceso visible no debe
+   convertirse por observación en actor confiable o autorizado.
+6. `Retry != Recovery`: durable execution requiere idempotencia, replay,
+   compensación y supervisión explícitos antes de repetir side effects.
+
+### 14.5. Señal comunitaria y foros
+
+La revisión de foros técnicos y comunidades se conserva únicamente como señal de
+fricción operativa. Los temas recurrentes —frameworks sobredimensionados,
+observabilidad insuficiente, retries descontrolados, costos, recovery, permisos y
+estado corrupto— son coherentes con los controles ya preservados, pero **no se
+usan para crear requisitos** porque su evidencia es anecdótica y variable.
+
+Cuando una señal comunitaria revele una posible propiedad nueva, deberá buscarse
+primero corroboración en especificaciones, sistemas maduros, investigación o
+incidentes verificables antes de cambiar este mapa.
 
 ---
 
@@ -893,6 +984,11 @@ Cuando el baseline produzca necesidad real, el orden lógico de evaluación ser�
 
 Este orden expresa dependencia conceptual, no prioridad de implementación.
 
+La evidencia externa revisada el 2026-09-12 aumenta especialmente la fuerza de
+`Agent Identity & Delegation`, provenance/candidate binding y durable execution,
+pero **no reordena por sí sola esta secuencia ni convierte una línea de
+investigación en prioridad de implementación**.
+
 ---
 
 ## 18. Estado
@@ -904,6 +1000,7 @@ Baseline modificado: no
 Arquitectura aprobada: no
 Sprint autorizado: ninguno
 Implementación autorizada por este documento: ninguna
+RDD Stage 2 autorizado: no
 ```
 
 ### Resultado final
@@ -922,7 +1019,11 @@ Los gaps y refuerzos que merecen permanecer visibles son principalmente:
 3. `AI Supply-Chain Trust` para artefactos AI y externos;
 4. `Agent Identity & Delegation` verificable y revocable;
 5. `Data Classification & Disclosure Control` transversal;
-6. generalización de `Prompt & Context Trust Boundary`.
+6. generalización de `Prompt & Context Trust Boundary`;
+7. `RDD Stage 2` únicamente como línea de investigación sobre lineage, receipts,
+   provenance y validez del harness, sin autorización de implementación;
+8. lifecycle durable de tasks/procesos como refuerzo de Long Horizon, no como
+   justificación para introducir ahora un workflow engine o una TUI compleja.
 
 Ninguno de estos gaps constituye por sí mismo autorización para crear una nueva
 capability, componente o sprint.
