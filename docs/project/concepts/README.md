@@ -114,37 +114,10 @@ Memory/Knowledge poisoning, supply chain de AI, identidad y delegación,
 contención sistémica de componentes comprometidos, deception/forensics,
 interoperabilidad gobernada y evolución controlada.
 
-Además, mantiene el **registro canónico de evidencia externa revisada** usada por
-esta capa conceptual. Ese registro conserva artefacto revisado, alcance analizado,
-propiedad observada, rol de evidencia y adaptación propia de Malāk, en lugar de
-convertir referencias externas en dependencias vivas o recomendaciones de copiar
-arquitecturas ajenas.
-
-Principio de uso:
-
-> **Malāk adopta propiedades demostradas, no arquitecturas externas.**
-
-```text
-External reference
-!= retrieval instruction
-!= trusted content
-!= authority
-
-Reviewed external artifact
-!= live external dependency
-
-External pattern
-!= Malāk component recommendation
-```
-
-Una referencia externa registrada no autoriza recuperación automática ni implica
-que el contenido disponible posteriormente en su origen sea idéntico al artefacto
-analizado. Toda revalidación futura requiere una acción de research explícita y
-acotada.
-
-Los demás documentos no normativos deben referenciar este mapa en lugar de
-duplicar el ledger, salvo que una especificación o revisión concreta necesite
-preservar evidencia propia del candidato evaluado.
+Además mantiene el **ledger canónico de evidencia externa revisada** para esta
+capa conceptual. El propio Research Horizon Map es dueño de la semántica, roles,
+reglas de revalidación y relación de cada evidencia con su owner correspondiente.
+Este índice solo señala esa responsabilidad y no duplica sus reglas.
 
 No crea nuevas capabilities ni autoriza implementación.
 
@@ -167,23 +140,9 @@ Antes de utilizar cualquiera de estos documentos para proponer implementación:
 9. proponer un alcance pequeño;
 10. esperar autorización explícita del Owner.
 
-Cuando una decisión dependa de investigación externa, deberá consultarse primero
-el ledger de `MALAK_RESEARCH_HORIZON_MAP.md` y distinguir:
-
-```text
-artefacto externo revisado
-!= contenido externo actual
-!= instrucción de retrieval
-!= propiedad aplicable
-!= adaptación Malāk
-!= roadmap
-!= autorización
-```
-
-La investigación externa debe aportar propiedades, invariantes, amenazas o
-métodos verificables que puedan traducirse a la arquitectura propia de Malāk.
-No debe utilizarse para importar de forma implícita componentes, nomenclatura,
-defaults, schemas, workflows o modelos de autoridad de terceros.
+Cuando una decisión dependa de investigación externa, consultar
+`MALAK_RESEARCH_HORIZON_MAP.md`; este índice no replica sus clasificaciones,
+invariantes ni reglas de consumo.
 
 ### Governed Ephemeral Agent Execution, Evidence and Candidate Evaluation Reference
 
