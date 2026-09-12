@@ -29,14 +29,13 @@ related:
 
 ## 1. Estado de autoridad
 
-El Owner autorizó únicamente el gate de especificación de la siguiente unidad candidata posterior a G2A:
+El Owner autorizó únicamente el gate de especificación de:
 
 ```text
 G2 — Assurance Signal Authority & Projection Foundation
 ```
 
-Esta autorización congela diseño, alcance, invariantes y criterios de validación.
-
+Esta autorización congela diseño, invariantes, alcance y criterios de validación.
 No autoriza código productivo ni tests de implementación.
 
 ```text
@@ -47,7 +46,8 @@ G2-SPEC authorized
 != RDD Stage 2 authorized
 ```
 
-Este documento no modifica Blueprint, Cognitive Constitution, Governance Constitution, ADR-005, Security Control Plane ni contratos públicos existentes.
+Este documento no modifica Blueprint, Cognitive Constitution, Governance Constitution,
+ADR-005, Security Control Plane ni contratos públicos existentes.
 
 ---
 
@@ -115,7 +115,9 @@ implementation authorized: false
 
 ## 3. Objetivo verificable
 
-Una futura implementación separadamente autorizada deberá aceptar observations explícitas y producir un `ProtectedFinalizationInput` únicamente cuando authority evidence, binding, cardinalidad y policy compatibility puedan validarse de forma determinista.
+Una futura implementación separadamente autorizada deberá aceptar observations explícitas
+y producir un `ProtectedFinalizationInput` únicamente cuando authority evidence, binding,
+cardinalidad, temporalidad y policy compatibility puedan validarse determinísticamente.
 
 ```text
 ProtectedResponseCandidate
@@ -124,13 +126,19 @@ Explicit Signal Observations
         +
 Producer Authorization Evidence
         ↓
-producer scope validation
+bounded materialized input validation
         ↓
 request/session/candidate binding
         ↓
 signal/value compatibility
         ↓
+producer authorization binding
+        ↓
+temporal coherence
+        ↓
 policy compatibility
+        ↓
+canonical cross-signal coherence
         ↓
 exact completeness
         ↓
@@ -139,7 +147,8 @@ READY | HOLD | DENIED
 ProtectedFinalizationInput only when READY
 ```
 
-La projection no decide verdad, materialidad ni suficiencia. Solo valida si observations explícitas pueden alimentar legítimamente el contrato que G2A ya entiende.
+La projection no decide verdad, materialidad ni suficiencia. Solo valida si observations
+explícitas pueden alimentar legítimamente el contrato que G2A ya entiende.
 
 ---
 
@@ -170,9 +179,10 @@ Y:
 
 ```text
 G2 READY != G2A ACCEPT
+G2 DENIED != G2A BLOCK
 ```
 
-`READY` significa únicamente que el set puede proyectarse de forma válida a G2A.
+`READY` significa únicamente que el set puede proyectarse válidamente a G2A.
 
 ---
 
@@ -190,7 +200,7 @@ Tests candidatos:
 tests/test_assurance_signal_projection.py
 ```
 
-No se crea una nueva layer, manager, registry global, service runtime ni authority domain.
+No se crea nueva layer, manager, registry global, service runtime ni authority domain.
 
 No se modifica `src/malak/core/protected_finalization.py` para implementar G2.
 
@@ -277,9 +287,8 @@ observation.session_id == candidate.session_id
 
 El significado del binding termina con la invocación actual.
 
-### Stop condition
-
-Si la solución necesita transportar, persistir, rehidratar o reutilizar observations fuera de este boundary same-process:
+Si la solución necesita transportar, persistir, rehidratar o reutilizar observations fuera
+de este boundary same-process:
 
 ```text
 STOP
@@ -309,12 +318,20 @@ Evidence conceptual:
 AssuranceSignalProducerAuthorizationEvidence
 ├── signal_kind
 ├── canonical_value
+├── request_id
+├── session_id
 ├── producer_subject_id
 ├── authorization_request
 └── authorization_decision
 ```
 
-Debe demostrar autorización interna para ese **kind + value** concreto.
+Debe demostrar autorización interna para ese **kind + value** concreto y quedar ligada a
+la misma request/session de la observation y del candidate.
+
+```text
+evidence.request_id == observation.request_id == candidate.request_id
+evidence.session_id == observation.session_id == candidate.session_id
+```
 
 No basta una autorización genérica como `assurance producer`.
 
@@ -322,7 +339,8 @@ No basta una autorización genérica como `assurance producer`.
 
 ## 10. Límite de identidad y provenance de autorización
 
-El Security Control Plane vigente no posee todavía una raíz criptográfica fuerte de identidad/provenance.
+El Security Control Plane vigente no posee todavía una raíz criptográfica fuerte de
+identidad/provenance.
 
 Por tanto esta foundation solo puede afirmar:
 
@@ -341,15 +359,51 @@ remote producer authenticity
 replay protection
 ```
 
-La implementación debe exigir además:
+La implementación debe exigir:
 
 ```text
 authorization_request.context.authenticated is True
 ```
 
-pero incluso eso significa identidad interna autenticada según el baseline actual, no identidad criptográfica fuerte.
+pero incluso eso significa identidad interna autenticada según el baseline actual.
 
-### Stop condition de trust boundary
+### 10.1 Residual explícito: origen de AuthorizationDecision
+
+`AuthorizationDecision` es un contrato estructural ordinario. Un objeto con:
+
+```text
+allowed=True
+request_id=<matching id>
+```
+
+no constituye por sí solo prueba de que el PDP real haya producido esa decisión.
+
+Por tanto G2 v1 no puede afirmar:
+
+```text
+"PDP origin cryptographically proven"
+```
+
+ni tratar `AuthorizationDecision.reason` como attestation de origen.
+
+La garantía máxima de G2 v1 es:
+
+```text
+structurally valid authorization evidence
+supplied inside trusted same-process orchestration
+```
+
+Si un uso futuro necesita demostrar origen de la decisión y no solo su binding estructural:
+
+```text
+STOP
+→ abrir Authorization Decision Provenance gate
+```
+
+Ese gate futuro podrá evaluar, de forma separada, obtención directa desde PDP, attestation,
+firmas u otro mecanismo gobernado. No se incorpora implícitamente a G2.
+
+### 10.2 Stop condition de trust boundary
 
 Si G2 necesitara aceptar observations o authorization evidence desde:
 
@@ -367,8 +421,6 @@ entonces:
 STOP
 → reevaluar identity, signatures, nonce/replay protection and secure messaging
 ```
-
-G2 no puede convertir el contrato actual en una garantía criptográfica que no existe.
 
 ---
 
@@ -397,7 +449,9 @@ policy_violation / false
 → produce.false
 ```
 
-Razón: valores como `support_sufficient=True`, `policy_violation=False`, `evidence_required=False`, `applicability=NOT_APPLICABLE` o `contradiction_unresolved=False` pueden remover blockers cognitivos.
+Razón: valores como `support_sufficient=True`, `policy_violation=False`,
+`evidence_required=False`, `applicability=NOT_APPLICABLE` o
+`contradiction_unresolved=False` pueden remover blockers cognitivos.
 
 ```text
 permission to assert X
@@ -406,30 +460,117 @@ permission to assert X
 
 ---
 
-## 12. Validaciones obligatorias de producer authorization
+## 12. Input collection contract y límites
 
-Por cada observation deben validarse como mínimo:
+La futura API de G2 debe aceptar únicamente colecciones materializadas y finitas.
+
+Dirección preferida:
+
+```text
+tuple[AssuranceSignalObservation, ...]
+tuple[AssuranceSignalProducerAuthorizationEvidence, ...]
+```
+
+Prohibido aceptar como contrato público de esta foundation:
+
+```text
+arbitrary generator
+unbounded iterator
+lazy stream
+network-backed iterable
+```
+
+Guardrails:
+
+```text
+max observations = 5
+max authorization evidence objects = 5
+```
+
+Un set incompleto puede producir `HOLD`.
+
+Un set por encima del máximo o con duplicados explícitos produce `DENIED`; G2 no consume
+inputs ilimitados antes de verificar cardinalidad.
+
+Cada `authorization_request.request_id` debe ser único dentro del set completo.
+
+```text
+same AuthorizationRequest reused for two signals
+→ DENIED
+```
+
+Esto evita reutilización accidental de una decisión para scopes distintos.
+
+---
+
+## 13. Validaciones obligatorias de producer authorization
+
+Por cada observation/evidence pair deben validarse, como mínimo:
 
 ```text
 1. evidence type válido
 2. evidence.signal_kind == observation.signal_kind
 3. evidence.canonical_value == observation canonical value
-4. evidence.producer_subject_id == observation.producer_subject_id
-5. producer_subject_id == request.context.subject_id
-6. request.context.authenticated is True
-7. request.context.session_id == candidate.session_id
-8. request.permission == required permission for kind + value
-9. decision.request_id == request.request_id
-10. evaluated_at >= context.issued_at
-11. evaluated_at < context.expires_at
-12. decision.allowed is True
+4. evidence.request_id == observation.request_id == candidate.request_id
+5. evidence.session_id == observation.session_id == candidate.session_id
+6. evidence.producer_subject_id == observation.producer_subject_id
+7. producer_subject_id == authorization_request.context.subject_id
+8. authorization_request.context.authenticated is True
+9. authorization_request.context.session_id == candidate.session_id
+10. authorization_request.permission == required permission for kind + value
+11. authorization_decision.request_id == authorization_request.request_id
+12. authorization_request.request_id unique inside the set
+13. temporal coherence valid
+14. authorization_decision.allowed is True
 ```
 
-Una decision permitida demuestra producer permission dentro de su scope same-process; no demuestra verdad del signal.
+Una decision permitida demuestra producer permission dentro del scope estructural
+same-process; no demuestra verdad del signal ni prueba criptográfica de origen PDP.
 
 ---
 
-## 13. Separación Security / Cognitive Policy
+## 14. Temporal coherence
+
+Toda evaluación recibe `evaluated_at` explícito y todos los timestamps usados por G2 deben
+ser timezone-aware UTC.
+
+G2 exige:
+
+```text
+context.issued_at
+    <= authorization_request.created_at
+    <= evaluated_at
+    < context.expires_at
+```
+
+Además:
+
+```text
+context.issued_at      = UTC
+context.expires_at     = UTC
+authorization_request.created_at = UTC
+evaluated_at           = UTC
+```
+
+No se consulta reloj global.
+
+El mismo `evaluated_at` valida todo el set.
+
+Resultados:
+
+```text
+created_at before context.issued_at → DENIED
+created_at after evaluated_at       → DENIED
+evaluated_at before issued_at       → DENIED
+evaluated_at >= expires_at          → DENIED
+non-UTC temporal input              → fail safe / no READY
+```
+
+`AuthorizationDecision` no posee timestamp en el baseline actual; G2 no inventa uno.
+
+---
+
+## 15. Separación Security / Cognitive Policy
 
 Prohibido:
 
@@ -442,13 +583,14 @@ Security responde si un subject puede producir una observation concreta.
 
 El valor cognitivo responde una pregunta diferente.
 
-Solo una futura policy de finalización explícita y separadamente autorizada podría consumir una security disposition como input cognitivo.
+Solo una futura policy de finalización explícita y separadamente autorizada podría consumir
+una security disposition como input cognitivo.
 
 Esta unidad no crea ese adapter.
 
 ---
 
-## 14. Policy versioning
+## 16. Policy versioning
 
 Boundary version:
 
@@ -468,13 +610,14 @@ Compatible G2A target:
 protected-finalization/v1
 ```
 
-Todas las observations de un set proyectable deben declarar la versión exacta de signal semantics aceptada.
+Todas las observations de un set proyectable deben declarar exactamente la signal semantics
+version aceptada.
 
 Versión desconocida o incompatible no puede producir `READY`.
 
 ---
 
-## 15. Exact completeness
+## 17. Exact completeness
 
 Debe existir exactamente una observation autorizada por kind:
 
@@ -486,13 +629,17 @@ CONTRADICTION_UNRESOLVED       1
 POLICY_VIOLATION               1
 ```
 
+Y exactamente una authorization evidence object correspondiente a cada observation.
+
 Semántica:
 
 ```text
-missing signal        → HOLD
-missing auth evidence → HOLD
-duplicate kind        → DENIED
-unknown kind          → invalid contract / no READY
+missing signal                 → HOLD
+missing auth evidence          → HOLD
+duplicate signal               → DENIED
+duplicate auth evidence        → DENIED
+duplicate authorization req id → DENIED
+unknown kind                   → invalid contract / no READY
 ```
 
 Duplicados idénticos también son `DENIED`.
@@ -501,7 +648,59 @@ No hay last-write-wins ni selección arbitraria.
 
 ---
 
-## 16. Projection outcome contract
+## 18. Canonical cross-signal coherence
+
+G2 no decide verdad ni suficiencia, pero sí debe impedir representaciones internas
+contradictorias que hagan ambiguo el input de G2A.
+
+Para:
+
+```text
+APPLICABILITY = NOT_APPLICABLE
+```
+
+la única representación canónica proyectable es:
+
+```text
+evidence_required        = False
+support_sufficient       = False
+contradiction_unresolved = False
+```
+
+`policy_violation` permanece independiente y puede ser `True` o `False`, porque G2A le da
+precedencia propia.
+
+Por tanto:
+
+```text
+NOT_APPLICABLE + evidence_required=True
+→ DENIED / SIGNAL_SET_INCOHERENT
+
+NOT_APPLICABLE + contradiction_unresolved=True
+→ DENIED / SIGNAL_SET_INCOHERENT
+
+NOT_APPLICABLE + support_sufficient=True
+→ DENIED / SIGNAL_SET_INCOHERENT
+```
+
+Razón:
+
+```text
+not applicable
+!= evidence required
+!= unresolved contradiction
+!= positive support claim
+```
+
+Esto no desplaza policy de finalización hacia G2. G2 solo canonicaliza el shape semántico
+que entrega; G2A conserva ownership de `ACCEPT | ABSTAIN | BLOCK`.
+
+`REQUIRED` y `UNRESOLVED` no reciben reglas adicionales en G2 v1 más allá de contracts,
+authority, binding y types ya congelados.
+
+---
+
+## 19. Projection outcome contract
 
 ```text
 READY
@@ -511,43 +710,48 @@ DENIED
 
 ### READY
 
-Authority evidence, binding, versions, cardinalidad y types son válidos y completos.
+Authority evidence, binding, temporalidad, versions, cardinalidad, types y cross-signal
+coherence son válidos y completos.
 
-Solo READY puede contener `ProtectedFinalizationInput`.
+Solo `READY` puede contener `ProtectedFinalizationInput`.
 
 ### HOLD
 
 Falta evidencia necesaria sin prueba suficiente de una violación definitiva.
 
-HOLD no contiene input parcial.
+`HOLD` no contiene input parcial.
 
 ### DENIED
 
-Existe misbinding, duplicidad, incompatibilidad, scope incorrecto, contexto inválido, producer no autenticado o authorization denial.
+Existe misbinding, duplicidad, incoherencia, scope incorrecto, contexto inválido, producer no
+autenticado, temporalidad inválida o authorization denial.
 
 ```text
 G2 DENIED != G2A BLOCK
 ```
 
-G2 decide projection eligibility; G2A decide finalization.
-
 ---
 
-## 17. Reason codes mínimos
+## 20. Reason codes mínimos
 
 ```text
 MISSING_SIGNAL
 MISSING_AUTHORIZATION_EVIDENCE
 DUPLICATE_SIGNAL
+DUPLICATE_AUTHORIZATION_EVIDENCE
+DUPLICATE_AUTHORIZATION_REQUEST_ID
+INPUT_CARDINALITY_EXCEEDED
 REQUEST_ID_MISMATCH
 SESSION_ID_MISMATCH
 SIGNAL_KIND_MISMATCH
 SIGNAL_VALUE_MISMATCH
 SIGNAL_VALUE_INVALID
+SIGNAL_SET_INCOHERENT
 PRODUCER_SUBJECT_MISMATCH
 PRODUCER_NOT_AUTHENTICATED
 PERMISSION_SCOPE_MISMATCH
 DECISION_REQUEST_MISMATCH
+AUTHORIZATION_REQUEST_TIME_INVALID
 CONTEXT_NOT_YET_VALID
 CONTEXT_EXPIRED
 AUTHORIZATION_DENIED
@@ -559,9 +763,71 @@ Los nombres Python exactos pueden variar si preservan esta semántica cerrada.
 
 ---
 
-## 18. Deterministic projection
+## 21. Precedencia determinista e invariancia ante orden
 
-Solo en READY:
+Para inputs materialmente equivalentes, outcome y reason code no pueden depender del orden de
+observations/evidence.
+
+Precedencia congelada:
+
+```text
+0. invalid top-level contract/type/time representation
+   → fail safe / no READY
+
+1. input count above maximum
+   → DENIED
+
+2. duplicate signal / duplicate evidence / duplicate auth request id
+   → DENIED
+
+3. missing signal or missing matching evidence
+   → HOLD
+
+4. request/session/candidate binding mismatch
+   → DENIED
+
+5. kind/value/type incompatibility
+   → DENIED
+
+6. producer subject / authenticated binding failure
+   → DENIED
+
+7. permission scope mismatch
+   → DENIED
+
+8. temporal coherence failure
+   → DENIED
+
+9. authorization decision binding or allowed=False
+   → DENIED
+
+10. signal policy version mismatch
+    → DENIED
+
+11. cross-signal incoherence
+    → DENIED
+
+12. complete valid set
+    → READY
+```
+
+Dentro de una misma clase de precedencia, la selección de reason code debe ser canónica y no
+depender del primer elemento encontrado.
+
+Test obligatorio:
+
+```text
+permutation(observations, evidence)
+→ same outcome
+→ same reason code
+→ same projected input when READY
+```
+
+---
+
+## 22. Deterministic projection
+
+Solo en `READY`:
 
 ```text
 ProtectedFinalizationInput(
@@ -575,14 +841,6 @@ ProtectedFinalizationInput(
 
 La projection no infiere, clasifica, corrige ni completa faltantes.
 
-Una combinación cognitivamente inconsistente pero legítimamente observada, por ejemplo:
-
-```text
-NOT_APPLICABLE + evidence_required=True
-```
-
-puede proyectarse; G2A conserva ownership de su precedencia y producirá la decisión correspondiente.
-
 ```text
 G2 validates authority/projection
 G2A evaluates finalization policy
@@ -590,23 +848,7 @@ G2A evaluates finalization policy
 
 ---
 
-## 19. evaluated_at
-
-Toda evaluación recibe `evaluated_at` explícito:
-
-```text
-datetime
-timezone-aware
-UTC
-```
-
-No se consulta reloj global.
-
-El mismo instante valida todos los `SecurityContext` del set.
-
----
-
-## 20. E2E aislado obligatorio
+## 23. E2E aislado obligatorio
 
 La implementación futura debe demostrar:
 
@@ -615,7 +857,7 @@ ProtectedResponseCandidate
         +
 5 explicit observations
         +
-5 valid authorization evidence objects
+5 bound authorization evidence objects
         ↓
 G2 Signal Authority / Projection
         ↓
@@ -629,10 +871,10 @@ ACCEPT | ABSTAIN | BLOCK
 Escenarios mínimos:
 
 ```text
-A. complete valid set + NOT_APPLICABLE + evidence_required=False
+A. complete canonical NOT_APPLICABLE set
    → G2 READY → G2A ACCEPT
 
-B. complete valid set + REQUIRED + support_sufficient=False
+B. complete valid REQUIRED set + support_sufficient=False
    → G2 READY → G2A ABSTAIN
 
 C. complete valid set + policy_violation=True
@@ -642,49 +884,77 @@ D. missing signal
    → G2 HOLD → G2A not invoked with projected input
 
 E. unauthorized trust-clearing value
-   → G2 DENIED → G2A not invoked with projected input
+   → G2 DENIED → G2A not invoked
 
 F. unauthenticated producer context even with allowed=True object
    → G2 DENIED
+
+G. authorization evidence from another request in same session
+   → G2 DENIED
+
+H. authorization_request.created_at after evaluated_at
+   → G2 DENIED
+
+I. NOT_APPLICABLE + contradiction_unresolved=True
+   → G2 DENIED
+
+J. duplicated authorization_request.request_id across two signals
+   → G2 DENIED
+
+K. all permutations of the same valid set
+   → same READY semantics and exact projected input
 ```
 
 Este E2E no permite afirmar live Conversation assurance.
 
 ---
 
-## 21. Tests negativos obligatorios
+## 24. Tests negativos obligatorios
 
 Como mínimo:
 
 ```text
-wrong candidate type                 → fail safe
-wrong observation type               → fail safe
-wrong auth evidence type              → fail safe
-non-UTC evaluated_at                 → fail safe
-missing signal                       → HOLD
-missing auth evidence                → HOLD
-duplicate signal                     → DENIED
-request mismatch                     → DENIED
-session mismatch                     → DENIED
-kind/value mismatch                  → DENIED
-producer subject mismatch            → DENIED
-producer not authenticated           → DENIED
-permission scope mismatch            → DENIED
-decision/request mismatch            → DENIED
-context not yet valid                → DENIED
-context expired                      → DENIED
-authorization denied                 → DENIED
-unknown signal policy version        → DENIED
-all five valid + authorized          → READY
-READY contains exact projected input → PASS
-same material inputs                 → same projection semantics
+wrong candidate type                    → fail safe
+wrong observation collection type       → fail safe
+wrong auth evidence collection type     → fail safe
+generator/iterator input                → fail safe
+non-UTC evaluated_at                    → fail safe
+non-UTC auth request created_at         → fail safe
+input cardinality above max             → DENIED
+missing signal                          → HOLD
+missing auth evidence                   → HOLD
+duplicate signal                        → DENIED
+duplicate auth evidence                 → DENIED
+duplicate authorization request id      → DENIED
+observation request mismatch            → DENIED
+evidence request mismatch               → DENIED
+observation session mismatch            → DENIED
+evidence session mismatch               → DENIED
+kind/value mismatch                     → DENIED
+producer subject mismatch               → DENIED
+producer not authenticated              → DENIED
+permission scope mismatch               → DENIED
+decision/request mismatch               → DENIED
+auth request created before context     → DENIED
+auth request created after evaluation   → DENIED
+context not yet valid                   → DENIED
+context expired                         → DENIED
+authorization denied                    → DENIED
+unknown signal policy version           → DENIED
+NOT_APPLICABLE + evidence_required      → DENIED
+NOT_APPLICABLE + support_sufficient     → DENIED
+NOT_APPLICABLE + contradiction unresolved → DENIED
+all five valid + authorized             → READY
+READY contains exact projected input    → PASS
+same material inputs                    → same projection semantics
+all input permutations                  → same outcome/reason
 ```
 
 Debe demostrarse que no existen defaults favorables.
 
 ---
 
-## 22. Side effects prohibidos
+## 25. Side effects prohibidos
 
 G2 no puede:
 
@@ -705,7 +975,7 @@ G2 no puede:
 
 ---
 
-## 23. Scope máximo de futura implementación
+## 26. Scope máximo de futura implementación
 
 Si el Owner autoriza G2-IMPLEMENTATION:
 
@@ -744,7 +1014,7 @@ RDD Stage 2
 
 ---
 
-## 24. Correction Budget candidato
+## 27. Correction Budget candidato
 
 ```yaml
 production_files_new: 1
@@ -759,7 +1029,7 @@ knowledge_delta: 0
 persistence_delta: 0
 max_fix_rounds_before_escalation: 1
 production_delta_loc_guardrail: 350
-test_delta_loc_guardrail: 700
+test_delta_loc_guardrail: 800
 ```
 
 Si una solución razonable supera materialmente este budget:
@@ -771,7 +1041,7 @@ STOP
 
 ---
 
-## 25. Validation envelope
+## 28. Validation envelope
 
 Risk Class 3 exige:
 
@@ -797,24 +1067,12 @@ RDD Stage 2 permanece no autorizado.
 
 ---
 
-## 26. Cuatro preguntas obligatorias
-
-```text
-Blueprint compliance              PASS
-Cognitive Constitution compliance PASS
-Governance Constitution           PASS
-Kernel simplicity                 PASS — kernel delta = 0
-```
-
-R-022/CC-011/CC-012 requieren proteger finalización sin convertir evidence o producers en authority. La unidad propuesta materializa únicamente el boundary previo de signal authority/projection.
-
----
-
-## 27. Security Horizon Check
+## 29. Security Horizon Check
 
 ```text
 Prompt & Context Trust Boundary   NOT_APPLICABLE
-Identity / delegation             ALREADY_COVERED only for governed same-process scope
+Identity / delegation             PARTIALLY_COVERED — same-process only
+Decision origin attestation       BLOCKING_IF_REQUIRED_FOR_LIVE_USE
 Strong cryptographic identity     DEFERRED / explicitly not claimed
 Compromise containment            DEFERRED / no new operational surface
 Memory / Knowledge poisoning      NOT_APPLICABLE
@@ -829,7 +1087,7 @@ No se habilita superficie externa ni persistente.
 
 ---
 
-## 28. Stop conditions
+## 30. Stop conditions
 
 Detener si la implementación requiere:
 
@@ -840,9 +1098,12 @@ Detener si la implementación requiere:
 - aceptar `authenticated=False` como producer válido;
 - aceptar evidence desde boundary remoto/no confiable;
 - afirmar cryptographic identity/provenance no existente;
+- afirmar PDP-origin a partir de un `AuthorizationDecision` estructural solamente;
+- resolver proof-of-origin sin gate independiente;
 - mapping general Security ALLOW/DENY → cognitive signal;
 - durable binding sin identity/integrity suficiente;
 - transporte/persistencia/replay de observations;
+- colecciones lazy/unbounded;
 - modificar G2A para esconder gaps de projection;
 - Kernel o Conversation wiring;
 - Memory/Knowledge/persistence;
@@ -859,7 +1120,7 @@ STOP
 
 ---
 
-## 29. Condiciones para abrir G2B posteriormente
+## 31. Condiciones para abrir G2B posteriormente
 
 Una futura implementación exitosa de G2 no autoriza G2B.
 
@@ -869,24 +1130,27 @@ Antes de G2B deberán existir, como mínimo:
 1. G2 integrado y validado;
 2. producers legítimos para el scope conversacional elegido;
 3. producer/runtime wiring diseñado sin confiar en callers arbitrarios;
-4. applicability production autorizada;
-5. evidence/support/contradiction production explícita;
-6. cualquier Security→Cognitive mapping especificado y versionado;
-7. history timing corregido:
+4. decisión explícita sobre cómo se obtiene/verifica el origen de AuthorizationDecision
+   para el scope live elegido;
+5. applicability production autorizada;
+6. evidence/support/contradiction production explícita;
+7. cualquier Security→Cognitive mapping especificado y versionado;
+8. history timing corregido:
    raw provider output must not enter assistant history before finalization;
-8. G2B scope freeze independiente;
-9. aprobación explícita del Owner.
+9. G2B scope freeze independiente;
+10. aprobación explícita del Owner.
 ```
 
 ```text
 G2 implemented
 != legitimate conversation producers exist
+!= PDP decision provenance solved for live use
 != G2B authorized
 ```
 
 ---
 
-## 30. Rollback
+## 32. Rollback
 
 Mientras G2 permanezca aislado:
 
@@ -898,30 +1162,39 @@ No existe migration, persistence, schema externo ni data repair.
 
 ---
 
-## 31. Resultado del scope freeze
+## 33. Resultado del hardening de scope freeze
 
 ```text
-G2 problem                         CONFIRMED
-G2 necessity                       PASS
-architecture fit                   PASS
-current Security contracts reused  PASS, same-process only
-cryptographic identity claimed     NO
-value-sensitive producer scopes    FROZEN
-same-process binding               FROZEN
-exact completeness                 FROZEN
-fail-closed projection             FROZEN
-G2 → G2A isolated E2E              REQUIRED
-Kernel change                      PROHIBITED
-Conversation change                PROHIBITED
-Memory / Knowledge                 PROHIBITED
-persistence                        PROHIBITED
-external dependencies              PROHIBITED
-G2 implementation                  NOT AUTHORIZED
-G2B                                BLOCKED / NOT AUTHORIZED
-Sprint 7.12                        NOT AUTHORIZED
-RDD Stage 2                        NOT AUTHORIZED
+G2 problem                              CONFIRMED
+G2 necessity                            PASS
+architecture fit                        PASS
+current Security contracts reused       PASS, same-process only
+cryptographic identity claimed          NO
+PDP-origin cryptographically claimed    NO
+authorization evidence request-bound    FROZEN
+authorization evidence session-bound    FROZEN
+value-sensitive producer scopes         FROZEN
+temporal coherence                      FROZEN
+bounded materialized collections        FROZEN
+unique authorization request ids        FROZEN
+exact completeness                      FROZEN
+canonical NOT_APPLICABLE representation FROZEN
+validation precedence                   FROZEN
+permutation invariance                  REQUIRED
+fail-closed projection                  FROZEN
+G2 → G2A isolated E2E                   REQUIRED
+Kernel change                           PROHIBITED
+Conversation change                     PROHIBITED
+Memory / Knowledge                      PROHIBITED
+persistence                             PROHIBITED
+external dependencies                   PROHIBITED
+G2 implementation                       NOT AUTHORIZED
+G2B                                     BLOCKED / NOT AUTHORIZED
+Sprint 7.12                             NOT AUTHORIZED
+RDD Stage 2                             NOT AUTHORIZED
 ```
 
 Este documento queda listo para revisión humana del Owner.
 
-Una aprobación posterior e inequívoca de **G2-IMPLEMENTATION** será necesaria antes de crear `assurance_signal_projection.py` o cualquier test de implementación.
+Una aprobación posterior e inequívoca de **G2-IMPLEMENTATION** será necesaria antes de crear
+`assurance_signal_projection.py` o cualquier test de implementación.
