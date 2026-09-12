@@ -153,9 +153,29 @@ sean suficientes.
 
 ### 4.2. Governed Self-Improvement
 
-IDEA-002 y Long Horizon ya preservan la distinción entre observación, propuesta y
-gobernanza. Este mapa no vuelve a definir esa regla; únicamente registra que la
-investigación externa revisada no aporta evidencia suficiente para relajarla.
+IDEA-002 y Long Horizon son los dueños de la distinción entre observación,
+propuesta y gobernanza. Este mapa no vuelve a definir esa regla, pero conserva la
+interpretación de research necesaria para explicar por qué la línea permanece
+`ALIGNED`:
+
+```text
+observe
+  ↓
+collect evidence
+  ↓
+identify / validate gap
+  ↓
+research / bounded experiment
+  ↓
+proposal
+  ↓
+governed decision
+```
+
+La investigación externa revisada refuerza que observación, evaluación y evidencia
+pueden mejorar la calidad de las propuestas. No aporta evidencia suficiente para
+convertir self-improvement en self-authorization ni en self-modification
+productiva.
 
 Malāk podrá impulsar una mejora mediante investigación, comparación, prototipos,
 tests, evidencia e Implementation Packets candidatos, pero su autoridad y
@@ -483,8 +503,22 @@ A
 └── produced state E
 ```
 
-la investigación futura deberá determinar cómo marcar y revalidar de forma
-proporcional esos activos sin asumir que todos están comprometidos.
+este mapa conserva las preguntas de research que justifican el gap, sin prescribir
+la respuesta normativa:
+
+- qué relaciones justifican revalidación, reducción temporal de trust o
+  quarantine candidate;
+- cómo distinguir `related / suspect` de `compromised` para evitar propagación
+  automática de una conclusión no demostrada;
+- qué provenance y evidencia hacen falta para reconstruir blast radius y cadena
+  causal;
+- cómo propagar revocación o invalidación derivada cuando corresponda sin generar
+  cascadas injustificadas;
+- qué condiciones permiten volver a considerar confiable un activo relacionado.
+
+La política de respuesta, los estados de enforcement y cualquier acción concreta
+permanecen bajo `SECURITY.md` y el futuro Security Control Plane. La relación con
+A no demuestra por sí sola compromiso de B, C, D o E.
 
 Dueños conceptuales a reforzar:
 
