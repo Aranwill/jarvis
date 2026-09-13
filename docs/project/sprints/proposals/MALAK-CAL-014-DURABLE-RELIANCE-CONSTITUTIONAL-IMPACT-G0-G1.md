@@ -193,6 +193,10 @@ G1 debe evitar una ambigüedad importante:
 durable retention
 !=
 durable reliance
+
+durable storage alone
+!=
+durable reliance
 ```
 
 `Durable reliance` significa que Malāk permite que contenido, evidencia, Memory,
@@ -203,6 +207,22 @@ Knowledge o un artefacto derivado influya materialmente como base aceptada para:
 - una futura decisión cuya corrección dependa de ese material;
 - promoción o reutilización durable donde la identidad/integridad/provenance sean
   materialmente relevantes.
+
+Existe influencia material cuando el material retenido participa como input
+aceptado en una decisión, promoción, evaluación relevante para autorización,
+efecto persistente u otra transición de estado durable cuya corrección dependa de
+él. La mera presencia física o lógica del material en almacenamiento no satisface
+esta definición.
+
+```text
+retained material
++ materially relied upon by a governed transition
+→ durable reliance
+
+retained material
+without trusted/reliance semantics
+→ retention only
+```
 
 No significa que todo byte almacenado deba ser previamente confiable.
 
@@ -402,6 +422,41 @@ cryptographic mechanism
 
 La Constitución puede exigir una propiedad; no debe congelar SHA-256, HMAC,
 firmas, PKI, nonce, TTL, database schema, reason codes ni un algoritmo concreto.
+
+### 7.1 Interpretaciones explícitamente prohibidas
+
+CAL-014 no deberá reinterpretarse en el futuro como ninguna de estas equivalencias:
+
+```text
+stored
+→ trusted
+
+verified digest
+→ authentic producer
+
+known provenance
+→ truthful content
+
+previously eligible
+→ currently valid
+
+authorized operation
+→ trusted payload
+
+absence of taint
+→ proof of safety
+
+retention permission
+→ reuse permission
+
+repeated observation
+→ canonical Knowledge
+```
+
+La ausencia de una señal negativa no constituye evidencia positiva suficiente.
+Una garantía requerida pero no disponible no puede considerarse satisfecha por
+default ni reemplazarse por historial de almacenamiento, frecuencia de reutilización
+o falta de contradicción detectada.
 
 ---
 
@@ -672,15 +727,25 @@ Texto normativo candidato:
 > integridad del contenido y provenance. Un identificador lógico, la mera presencia
 > o recuperación del material, su admisión previa, su almacenamiento, el consenso o
 > la confianza declarada no sustituyen esas garantías. Cuando una garantía material
-> requerida no pueda establecerse, Malāk deberá limitar, retener para revisión,
-> negar o abstenerse según la policy aplicable.
+> requerida no pueda establecerse, no podrá considerarse implícitamente satisfecha:
+> Malāk deberá limitar, retener para revisión, negar o abstenerse según la policy
+> aplicable.
 
 Aclaración normativa candidata:
 
 > Esta regla no convierte identidad, provenance, receipts, almacenamiento ni
 > evidencia en trust o autoridad; no impide retención forense o cuarentena gobernada
 > de material no confiable; y no prescribe un mecanismo criptográfico, tecnología de
-> almacenamiento o implementación concreta.
+> almacenamiento o implementación concreta. Una admisión previa, almacenamiento
+> previo, reutilización frecuente o ausencia de contradicción detectada tampoco
+> sustituyen una garantía material requerida en el momento de reliance.
+
+Regla fail-closed candidata:
+
+```text
+required but unavailable
+!= implicitly satisfied
+```
 
 ### Por qué es mínimo
 
@@ -710,16 +775,16 @@ Todo mecanismo queda en specifications, policies y Security.
 | ADR-002 | accepted ADR | decision != enforcement; caller cannot inject authority; no blind retry | PDP/PEP boundary implemented | ADOPT | future Persistence Authorization remains separate | CAL-014 must not become an authorization token | preserves Security ownership | `docs/architecture/adr/ADR-002-policy-enforcement-boundary.md` |
 | ADR-005 | accepted ADR | Evidence != Authority; CAL-014 deferred until Content Identity + binding | defer condition now satisfied | ADAPT | reopen review now | ADR-005 itself grants no persistence authority | explicit historical trigger reached | `docs/architecture/adr/ADR-005-evidence-bound-final-response-transition.md` |
 | Episodic Memory Admission G0/G1 | owner-approved design record | HOLD != retention authorization; ELIGIBLE != persistence authorization; data-handling hooks | design properties implemented progressively downstream | ADOPT | future durable design reuses separations | no automatic persistence | direct precursor to this unit | `docs/project/sprints/proposals/EPISODIC-MEMORY-ADMISSION-G0-G1-DESIGN.md` |
-| Candidate Content Identity | implemented design/baseline | logical id != content identity; identity != trust | sidecar implemented and tested | ADOPT | prerequisite fulfilled | no source authenticity claim | satisfies first deferred dependency | `EPISODIC-CANDIDATE-CONTENT-IDENTITY-*` |
-| Content Identity Propagation | implemented design/baseline | end-to-end material binding; no transitive trust | propagation implemented through terminal Consumption | ADOPT | prerequisite fulfilled | no persistence authority | satisfies second deferred dependency | `EPISODIC-CANDIDATE-CONTENT-IDENTITY-PROPAGATION-*` |
+| Candidate Content Identity | implemented design/baseline | logical id != content identity; identity != trust | sidecar implemented and tested | ADOPT | prerequisite fulfilled | no source authenticity claim | satisfies first deferred dependency | `docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-G0-G1-DESIGN.md`; `docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-G2-IMPLEMENTATION-CANDIDATE-SPEC.md`; `src/malak/memory/candidate_content_identity.py` |
+| Content Identity Propagation | implemented design/baseline | end-to-end material binding; no transitive trust | propagation implemented through terminal Consumption | ADOPT | prerequisite fulfilled | no persistence authority | satisfies second deferred dependency | `docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-PROPAGATION-G0-G1-DESIGN.md`; `docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-PROPAGATION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md`; `src/malak/memory/governed_projection_consumption.py` |
 | Evidence-Bound Cognition Foundation | non-normative concept | CAL-014 conceptual intent | candidate law preserved | ADAPT | candidate wording refined | original wording not promoted verbatim | preserve intent without overclaim | `docs/project/concepts/MALAK_EVIDENCE_BOUND_COGNITION_FOUNDATION.md` |
-| Research Horizon Evidence Map EXT-08 | external evidence / corroboration + input | persistent Memory is attack surface | evidence previously reviewed | ADAPT | future Memory threat model input | no OWASP architecture import | supports need, no authority | `MALAK_RESEARCH_HORIZON_MAP.md#19` |
-| Evidence Map EXT-09 | external implementation input | provenance can be separate from decision/authority | evidence previously reviewed | ADAPT | future lineage input | no full PROV schema | supports original/derived distinction | `MALAK_RESEARCH_HORIZON_MAP.md#19` |
-| Evidence Map EXT-10 | external implementation input | artifact identity/provenance != authorization | evidence previously reviewed | ADOPT | preserve separation | no SLSA adoption | aligns directly with Malāk invariant | `MALAK_RESEARCH_HORIZON_MAP.md#19` |
-| Evidence Map EXT-12 | external corroboration + input | authorization is separately evaluable | evidence previously reviewed | ADAPT | future Persistence Authorization input | not constitutional mechanism | reinforces separation of responsibility | `MALAK_RESEARCH_HORIZON_MAP.md#19` |
-| Evidence Map EXT-16 | external implementation input | durable side effects need retry/replay/idempotency semantics | evidence previously reviewed | OBSERVE | DEFERRED to protected durable write | no Temporal dependency | relevant later, not CAL-014 text | `MALAK_RESEARCH_HORIZON_MAP.md#19` |
+| Research Horizon Evidence Map EXT-08 | external evidence / corroboration + input | persistent Memory is attack surface | evidence previously reviewed | ADAPT | future Memory threat model input | no OWASP architecture import | supports need, no authority | `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md#19` |
+| Evidence Map EXT-09 | external implementation input | provenance can be separate from decision/authority | evidence previously reviewed | ADAPT | future lineage input | no full PROV schema | supports original/derived distinction | `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md#19` |
+| Evidence Map EXT-10 | external implementation input | artifact identity/provenance != authorization | evidence previously reviewed | ADOPT | preserve separation | no SLSA adoption | aligns directly with Malāk invariant | `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md#19` |
+| Evidence Map EXT-12 | external corroboration + input | authorization is separately evaluable | evidence previously reviewed | ADAPT | future Persistence Authorization input | not constitutional mechanism | reinforces separation of responsibility | `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md#19` |
+| Evidence Map EXT-16 | external implementation input | durable side effects need retry/replay/idempotency semantics | evidence previously reviewed | OBSERVE | DEFERRED to protected durable write | no Temporal dependency | relevant later, not CAL-014 text | `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md#19` |
 | ideas.md / IDEA-016 | non-normative incubation | preserve original source, provenance, authority, retention, governed promotion | future planning intent | ADAPT | future design input | no Source Registry/GraphRAG implied | compatible but lower authority | `documents/projects/jarvis/ideas.md` |
-| current code/tests | executable baseline | content identity + propagation are real, Persistence remains absent | current `src/malak/memory/**` and tests | ADOPT | prerequisite observed | no code delta in this review | baseline drives review | `main@0bf4f839...` |
+| current code/tests | executable baseline | content identity + propagation are real, Persistence remains absent | current `src/malak/memory/**` and tests | ADOPT | prerequisite observed | no code delta in this review | baseline drives review | `main@0bf4f839f73de075589129886b044918622b53e7` |
 
 ### Matrix result
 
@@ -748,6 +813,37 @@ implementation authority inferred from evidence: 0
 No `BLOCKING_GAP` impide concluir el review normativo.
 
 Los `REQUIRES_REINFORCEMENT` sí bloquean inferir que Persistent Memory está lista.
+
+### 13.1 Readiness boundary: review normativo vs durable write
+
+La ausencia de `BLOCKING_GAP` en este G0/G1 aplica únicamente a la capacidad de
+concluir el review normativo de CAL-014.
+
+```text
+NO BLOCKING_GAP FOR:
+CAL-014 normative review
+
+BUT
+
+BLOCKING BEFORE PROTECTED DURABLE WRITE:
+- exact persistence subject / payload binding
+- authorization freshness and replay semantics
+- taint / revocation / quarantine lifecycle
+- retention / disclosure / consent policy
+- idempotency / partial-failure semantics
+```
+
+Por tanto:
+
+```text
+normative review readiness
+!=
+persistence implementation readiness
+```
+
+Ninguna conclusión de esta PR puede reutilizarse como evidencia de que esos cinco
+frentes estén resueltos. Cada uno deberá obtener diseño, ownership, validación y
+autorización propios según su gate aplicable.
 
 ---
 
@@ -804,7 +900,37 @@ Este review debe detenerse y volver al Owner si intenta:
 
 ---
 
-## 16. G1 result
+## 16. Normative Promotion Acceptance Criteria
+
+Una futura unidad de promoción normativa de CAL-014 solo podrá concluir `PASS` si,
+como mínimo, demuestra simultáneamente:
+
+1. la formulación permanece mechanism-neutral y no congela criptografía,
+   almacenamiento, taxonomy, TTL, replay o schemas concretos;
+2. la responsabilidad de Governance sobre autorización y ejecución de operaciones
+   persistentes no se duplica ni se desplaza;
+3. Security conserva ownership de enforcement, taint, revocation, quarantine,
+   retention, disclosure y controles operativos;
+4. la retención forense o en cuarentena de material no confiable sigue siendo
+   posible sin elevarlo a trust o reliance;
+5. el principio no implica ni exige una nueva layer, service, manager o cambio de
+   Kernel;
+6. la promoción no crea autorización de implementación, Persistence Authorization,
+   Persistent Memory, retrieval ni Knowledge;
+7. identity, integrity y provenance permanecen separados de trust y authority;
+8. el Owner acepta explícitamente la enmienda normativa mediante el gate humano
+   correspondiente.
+
+Cualquier incumplimiento material produce:
+
+```text
+FAIL or INCONCLUSIVE
+never implicit PASS
+```
+
+---
+
+## 17. G1 result
 
 ```text
 G1 RESULT: PASS
@@ -839,7 +965,7 @@ end-to-end suficiente ya existen en el baseline.
 
 ---
 
-## 17. Próximo gate posible — requiere autorización humana separada
+## 18. Próximo gate posible — requiere autorización humana separada
 
 Este G0/G1 no activa nada automáticamente.
 
@@ -872,7 +998,7 @@ constitutional principle
 
 ---
 
-## 18. Cierre
+## 19. Cierre
 
 La reapertura confirma que Malāk llegó al punto arquitectónico que sus propios
 documentos habían previsto para revisar CAL-014.
