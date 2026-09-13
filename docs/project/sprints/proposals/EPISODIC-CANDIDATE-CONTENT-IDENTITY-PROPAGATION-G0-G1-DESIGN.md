@@ -1,6 +1,6 @@
 ---
 title: Episodic Candidate Content Identity Propagation & Binding — G0/G1 Design Record
-status: g1_design_review
+status: g1_design_review_hardened
 authority: owner-authorized design analysis
 as_of_date: 2026-09-12
 unit: Episodic Candidate Content Identity Propagation & Binding Boundary
@@ -26,6 +26,10 @@ runtime_wiring_authorized: false
 kernel_change_authorized: false
 security_control_plane_change_authorized: false
 sprint_7_12_authorized: false
+compromise_aware_binding_required: true
+verification_transitivity_allowed: false
+self_attestation_allowed: false
+candidate_id_fallback_allowed: false
 language: es
 ---
 
@@ -48,7 +52,8 @@ Esta unidad responde solamente:
 > ¿cómo debe propagarse la identidad exacta del contenido de un
 > `EpisodicMemoryCandidate` a través de la cadena episódica gobernada para impedir
 > que evidencia o decisiones válidas para un contenido sean reutilizadas contra
-> otro contenido que conserve el mismo `candidate_id`?
+> otro contenido que conserve el mismo `candidate_id`, sin confundir presencia de
+> una identidad con verificación independiente, trust, autenticidad o autoridad?
 
 Esta autorización comprende **análisis G0, decisión arquitectónica G1 y scope freeze
 documental**.
@@ -67,8 +72,8 @@ No autoriza:
 - Conversation wiring;
 - cambios de Kernel;
 - cambios del Security Control Plane;
-- firmas, HMAC o PKI;
-- replay protection;
+- firmas, HMAC, PKI o remote attestation;
+- replay protection general;
 - Sprint 7.12;
 - RDD Stage 2;
 - merge automático.
@@ -77,11 +82,15 @@ Separaciones obligatorias:
 
 ```text
 candidate_id != candidate content identity
+identity carried != identity verified against actual candidate
+identity verified != producer/component trusted
 content identity != source authenticity
 content integrity != source trust
 content integrity != truth
 content identity binding != producer authorization
 producer authorization != signal truth
+component output != authority
+component self-assertion != independent verification
 Projection READY != Admission ELIGIBLE
 Admission ELIGIBLE != Persistence Authorization
 Persistence Authorization != Stored Memory
@@ -269,7 +278,9 @@ implementation authorized: false
 
 ## 5. Threat / failure model de esta unidad
 
-La unidad protege contra **re-pairing estructural** dentro de la cadena episódica.
+La unidad protege primariamente contra **re-pairing estructural** y downgrade de
+binding dentro de la cadena episódica. Después del hardening G1 también congela
+qué puede y qué no puede afirmarse cuando un componente está comprometido.
 
 ### 5.1. Sustitución same-ID
 
@@ -314,6 +325,126 @@ candidate_id-only acceptance
 Una identidad con algoritmo, canonicalization version o policy version incompatible
 no debe aceptarse por comparación parcial del digest.
 
+### 5.8. Presencia confundida con verificación
+
+Transportar un sidecar no prueba que el componente haya verificado el candidate real.
+
+Regla:
+
+```text
+identity present
+!=
+identity verified against actual candidate
+```
+
+Ningún artefacto puede aumentar su autoridad incluyendo un flag equivalente a:
+
+```text
+verified = true
+```
+
+si ese flag proviene del mismo componente que produce el artefacto.
+
+### 5.9. Verificación transitiva
+
+Queda prohibida la inferencia:
+
+```text
+component A verified
+therefore component B may trust without verifying
+```
+
+Cuando una frontera dispone del candidate real, verifica localmente por sí misma.
+
+No se admiten como sustitutos:
+
+- caches globales de "verified";
+- tokens de verificación reutilizables;
+- booleans transitivos;
+- headers internos de confianza;
+- "already checked" como bypass del recompute/verify requerido.
+
+### 5.10. Self-attestation de componente
+
+Un componente no puede convertir su propio output en evidencia independiente de su
+integridad mediante texto, metadata o una identity que él mismo copió.
+
+```text
+component says "I verified it"
+!=
+independent verification
+```
+
+La siguiente frontera trata el output recibido como DATA sujeto a su propio contrato.
+
+### 5.11. TOCTOU / re-resolution por `candidate_id`
+
+Una frontera que verifica un candidate concreto no debe:
+
+```text
+verify candidate instance X
+↓
+resolve again by candidate_id
+↓
+operate on candidate instance Y
+```
+
+La operación protegida debe continuar sobre la **misma instancia/material** cuya
+identity fue calculada o verificada dentro de esa invocación.
+
+Este requisito bloquea una sustitución entre check y use aunque X e Y compartan ID.
+
+### 5.12. Unable-to-verify
+
+Si una frontera que debe verificar no puede hacerlo por:
+
+- metadata incompatible;
+- identidad ausente;
+- tipo inválido;
+- versión desconocida;
+- error de contrato;
+- imposibilidad material de obtener la comprobación requerida;
+
+no existe modo `best effort`.
+
+```text
+unable to verify
+=> fail closed
+```
+
+Nunca:
+
+```text
+unable to verify
+=> candidate_id fallback
+```
+
+### 5.13. Componente comprometido con output consistentemente falso
+
+Esta unidad **no** pretende demostrar honestidad del código que ejecuta una frontera.
+
+Un componente comprometido puede, dependiendo de su posición:
+
+- producir un assessment semánticamente falso pero ligado correctamente a DX;
+- producir una projection internamente consistente para DX con señales incorrectas;
+- omitir un check si el propio código de esa frontera fue sustituido;
+- copiar una identity válida y afirmar que la verificó.
+
+El SHA-256 in-process no puede demostrar que el código que lo evaluó fue honesto.
+
+Por tanto:
+
+```text
+content-bound output
+!=
+tamper-proof output
+!=
+independently trustworthy output
+```
+
+Este límite debe permanecer explícito para impedir que Content Identity se expanda
+por interpretación hasta convertirse en una falsa garantía universal de seguridad.
+
 ---
 
 ## 6. Qué problema NO intenta resolver esta unidad
@@ -324,6 +455,8 @@ Esta unidad no prueba:
 - autenticidad criptográfica de una fuente;
 - verdad del contenido;
 - corrección semántica de un assessment;
+- honestidad del código de un componente comprometido;
+- integridad de ejecución / remote attestation;
 - autorización para persistir;
 - autorización para recuperar;
 - freshness de credenciales fuera de contratos ya existentes;
@@ -337,13 +470,19 @@ Esta unidad no prueba:
 La responsabilidad es únicamente:
 
 ```text
-this downstream artifact refers to this exact candidate content identity
+this downstream artifact claims/binds to this exact candidate content identity
+```
+
+y, en fronteras con candidate real:
+
+```text
+this presented identity MATCHES this actual candidate content
 ```
 
 No significa:
 
 ```text
-this artifact is true / trusted / authentic / authorized to persist
+this artifact is true / trusted / authentic / independently attested / authorized to persist
 ```
 
 ---
@@ -406,6 +545,8 @@ Decisión G1:
 MUST carry exact candidate content identity
 ```
 
+Portarla significa **binding declarado por contrato**, no verificación independiente.
+
 ### 7.4. `AssessmentProvenanceDecision`
 
 Estado actual:
@@ -423,6 +564,8 @@ Decisión G1:
 ```text
 MUST echo exact candidate content identity
 ```
+
+El echo conserva binding; no constituye attestation.
 
 ### 7.5. `AssessmentProducerAuthorizationEvidence`
 
@@ -445,7 +588,7 @@ MUST carry exact candidate content identity
 ```
 
 El Security `AuthorizationRequest` / `AuthorizationDecision` permanece sin cambios.
-La autorización prueba permiso del productor, no identidad material del candidate.
+La autorización prueba permiso scoped del productor, no identidad material del candidate.
 
 ### 7.6. `AssessmentProducerAuthorizationDecision`
 
@@ -494,7 +637,8 @@ Decisión G1:
 MUST carry exact candidate content identity for READY, HOLD and DENIED
 ```
 
-Una projection no debe ser atribuible únicamente por ID lógico.
+La projection function dispone del candidate real y por ello debe verificar/recomputar
+localmente la identity durante su propia invocación.
 
 ### 7.9. `GovernedAdmissionConsumptionResult`
 
@@ -507,13 +651,43 @@ reason
 admission_decision?
 ```
 
-Decisión G1:
+Decisión G1 endurecida:
 
 ```text
-MUST carry exact content identity of the actual candidate supplied to consumption
+MUST carry:
+- actual_candidate_content_identity
+- presented_projection_content_identity
 ```
 
-Este resultado será el terminal content-bound de la unidad.
+Semántica:
+
+```text
+actual_candidate_content_identity
+=
+identity calculada/verificada del candidate realmente recibido por Consumption
+
+presented_projection_content_identity
+=
+identity que la projection presentó a Consumption
+```
+
+Para `EVALUATED`:
+
+```text
+actual == presented
+```
+
+Para `BLOCKED` por content mismatch:
+
+```text
+actual != presented
+```
+
+Esta distinción preserva evidencia del conflicto y evita que un resultado de bloqueo
+borre cuál fue la identity stale/presentada.
+
+Para bloqueos no relacionados con identity, ambas identities deben seguir reflejando
+el estado real/presentado disponible sin convertir igualdad en trust.
 
 ### 7.10. `EpisodicAdmissionDecision`
 
@@ -537,7 +711,7 @@ Justificación:
 
 - Admission es una policy pura existente;
 - no debe adquirir dependencia sobre hashing para evaluar reglas;
-- el adapter de consumo ya es la frontera gobernada que controla acceso a Admission;
+- el adapter de consumo es la frontera gobernada que controla acceso a Admission;
 - el `GovernedAdmissionConsumptionResult` content-bound puede contener la decisión
   de Admission sin convertir esa decisión interna en evidencia suficiente de persistencia.
 
@@ -572,7 +746,6 @@ REJECT AS INSUFFICIENT
 
 Bloquearía una projection stale en la última frontera, pero dejaría assessments,
 provenance, producer authorization y temporal evidence semánticamente ambiguos.
-La trazabilidad intermedia seguiría sin indicar a qué contenido exacto pertenece.
 
 ### 8.3. Alternativa C — propagar únicamente `digest_hex`
 
@@ -603,12 +776,8 @@ Sería un alias adicional para información ya representada por
 REJECT FOR CURRENT UNIT
 ```
 
-Motivos:
-
-- generaliza prematuramente fuera de episodic Memory;
-- introduce abstracción transversal sin necesidad demostrada;
-- aumenta tipos y complejidad;
-- puede confundirse con integridad universal o autenticidad.
+Generaliza prematuramente fuera de episodic Memory y puede confundirse con integridad
+universal o autenticidad.
 
 ### 8.6. Alternativa F — `UniversalIntegrityManager` / registry global
 
@@ -626,13 +795,15 @@ REJECT
 
 `candidate_id` conserva su semántica de correlación lógica.
 
-### 8.8. Alternativa H — firmas / HMAC / PKI
+### 8.8. Alternativa H — firmas / HMAC / PKI / attestation ahora
 
 ```text
 DEFER
 ```
 
-Autenticidad no es el problema de esta unidad.
+Autenticidad o integridad de ejecución no son el problema mínimo de esta unidad.
+Si un threat model futuro demuestra que Persistence necesita independencia frente a
+compromiso del proceso/productor, deberá abrirse una unidad separada.
 
 ### 8.9. Alternativa I — propagar el sidecar completo existente
 
@@ -649,14 +820,31 @@ La identidad completa ya es:
 - determinista;
 - validable contra el candidate.
 
-No requiere nuevo algoritmo ni nueva abstracción criptográfica.
+### 8.10. Alternativa J — confiar transitivamente en un `verified` upstream
+
+```text
+REJECT
+```
+
+Un flag producido por la misma frontera no constituye verificación independiente y
+crearía un bypass permanente ante compromiso o stale state.
+
+### 8.11. Alternativa K — cache global de identity verification
+
+```text
+REJECT FOR CURRENT UNIT
+```
+
+Además de introducir estado global, reabre TOCTOU y vuelve ambiguo qué candidate
+material fue verificado.
 
 ---
 
 ## 9. Decisión G1 — arquitectura seleccionada
 
 G1 selecciona propagación **explícita, obligatoria, por contrato y fail-closed** del
-mismo `EpisodicCandidateContentIdentity`.
+mismo `EpisodicCandidateContentIdentity`, con verificación local no transitiva en las
+fronteras que poseen el candidate real.
 
 Cadena objetivo:
 
@@ -668,32 +856,33 @@ compute content identity
 EpisodicCandidateContentIdentity
         ↓
 AdmissionAssessment
-[candidate_id + candidate_content_identity]
+[candidate_id + carried identity]
         ↓
 AssessmentProvenanceDecision
-[same identity]
+[same carried identity]
         ↓
 AssessmentProducerAuthorizationEvidence / Decision
-[same identity]
+[same carried identity]
         ↓
 GovernedTemporalControlEvidence
-[same identity]
+[same carried identity]
         ↓
 Governed Admission Input Projection
-[same identity]
+[recompute/verify against actual candidate locally]
         ↓
 Governed Projection Consumption
-[verify against actual candidate]
+[recompute/verify against same actual candidate locally]
         ↓
 GovernedAdmissionConsumptionResult
-[actual candidate identity]
+[actual identity + presented projection identity]
         ↓
 STOP
 ```
 
 El objetivo no es que cada artefacto posea un hash distinto.
 
-Todos propagan **la identidad del mismo candidate content**.
+Todos propagan **la identidad del mismo candidate content**, sin afirmar por ello que
+cada productor o componente sea confiable.
 
 ---
 
@@ -715,13 +904,12 @@ assessment.identity
 == producer_decision.identity
 == temporal_evidence.identity
 == projection.identity
-== consumption_result.identity
 ```
 
 Cuando existe acceso al candidate real:
 
 ```text
-verify_episodic_candidate_content_identity(candidate, identity)
+verify_episodic_candidate_content_identity(candidate, presented_identity)
 == MATCH
 ```
 
@@ -736,6 +924,14 @@ canonicalization_version
 policy_version
 digest_hex
 candidate_id
+```
+
+Pero queda congelado:
+
+```text
+sidecar equality
+!=
+component integrity
 ```
 
 ---
@@ -757,20 +953,108 @@ if identity is None:
     fallback to candidate_id
 ```
 
-Motivo:
-
-Una identidad opcional convertiría la antigua ruta débil en bypass permanente.
+No habrá modo `legacy`, feature flag, env var ni configuración para omitir binding.
 
 La futura implementación deberá actualizar de forma atómica los contratos y tests
 afectados dentro del candidate de implementación.
 
-No habrá modo `legacy`, feature flag, env var ni configuración para omitir binding.
+---
+
+## 12. Compromise-Aware Binding — reglas duras
+
+Esta sección forma parte del scope freeze y no es comentario informativo.
+
+### 12.1. Carried vs verified vs trusted
+
+Se congelan tres estados conceptuales distintos:
+
+```text
+CARRIED
+identity está presente en el artefacto
+
+VERIFIED LOCALLY
+la frontera actual posee el candidate real y obtiene MATCH por sí misma
+
+TRUSTED COMPONENT
+propiedad externa a esta unidad; NO se deriva de CARRIED ni VERIFIED
+```
+
+No se introduce un enum productivo con estos nombres salvo que G2 demuestre necesidad.
+La distinción es semántica y obligatoria.
+
+### 12.2. Verificación no transitiva
+
+Projection y Consumption no pueden aceptar como sustituto de su propia verificación:
+
+```text
+upstream_verified
+verified_at
+verification_token
+trusted_by_previous_component
+```
+
+ni equivalentes.
+
+### 12.3. No self-attestation
+
+Un artefacto no puede autoelevarse por incluir metadata que afirme:
+
+```text
+integrity_verified
+trusted
+attested
+safe
+```
+
+La siguiente frontera evalúa únicamente propiedades que pueda comprobar bajo su
+contrato y autoridad actuales.
+
+### 12.4. Same-material-after-check
+
+Después de verificar un candidate, la frontera debe seguir operando sobre ese mismo
+objeto/material dentro de la misma invocación.
+
+Prohibido:
+
+```text
+verify(candidate_X)
+resolve(candidate_id)
+use(candidate_Y)
+```
+
+### 12.5. No verification cache as authority
+
+Una cache puede ser estudiada en el futuro por performance, pero no puede convertirse
+en autoridad de binding sin un diseño separado que preserve material identity,
+invalidación y TOCTOU.
+
+Esta unidad no autoriza tal cache.
+
+### 12.6. Fail closed on unverifiable state
+
+Cualquier estado donde el binding requerido no pueda comprobarse no debe producir:
+
+```text
+READY
+AUTHORIZED
+EVALUATED
+```
+
+por fallback.
+
+### 12.7. Component-compromise boundary
+
+Si el código de la misma frontera que debería verificar está comprometido, el atacante
+puede omitir el check. Esta unidad no puede resolverlo desde dentro del mismo proceso.
+
+No se permite documentar G1/G2 futuro como si content binding diera garantía contra
+arbitrary code execution o sustitución del verificador.
 
 ---
 
-## 12. Reglas por frontera
+## 13. Reglas por frontera
 
-### 12.1. Assessment construction
+### 13.1. Assessment construction
 
 `AdmissionAssessment` deberá exigir una instancia válida de
 `EpisodicCandidateContentIdentity`.
@@ -784,7 +1068,10 @@ assessment.candidate_id
 
 Una inconsistencia interna de construcción es error de contrato, no `HOLD`.
 
-### 12.2. Assessment Provenance
+El constructor no puede declarar que verificó el candidate porque no recibe
+necesariamente el candidate real.
+
+### 13.2. Assessment Provenance
 
 G1 selecciona que la validación de provenance deje de depender exclusivamente de
 un `expected_candidate_id` y reciba una expectativa content-bound.
@@ -816,7 +1103,7 @@ No `HOLD`, porque existe evidencia contradictoria de binding.
 
 G2 congelará el nombre exacto del reason code.
 
-### 12.3. Producer Authorization
+### 13.3. Producer Authorization
 
 Debe exigir igualdad exacta de content identity entre:
 
@@ -835,7 +1122,9 @@ DENIED
 
 No cambia las reglas del PDP ni el significado de `AuthorizationDecision`.
 
-### 12.4. Governed Temporal Control
+Tampoco convierte permiso del productor en prueba de corrección semántica.
+
+### 13.4. Governed Temporal Control
 
 Temporal evidence deberá incluir la misma identidad.
 
@@ -847,12 +1136,13 @@ DENIED
 
 No debe reducirse a `candidate_id` mismatch solamente.
 
-### 12.5. Governed Projection construction
+### 13.5. Governed Projection construction
 
 La función de proyección posee acceso al `EpisodicMemoryCandidate` real.
 
-Por tanto, G1 exige que recompute o verifique explícitamente la identidad actual
-del candidate y compruebe que toda evidencia de entrada está ligada a ella.
+Por tanto, G1 exige que **esta invocación** recompute o verifique explícitamente la
+identity actual del candidate y compruebe que toda evidencia de entrada está ligada
+a ella.
 
 Conceptualmente:
 
@@ -875,13 +1165,16 @@ antes de producir READY.
 
 La projection resultante deberá incluir `actual_identity` en todos sus outcomes.
 
-### 12.6. Governed Projection Consumption
+No puede aceptar `verified upstream` como sustituto de este paso.
+
+### 13.6. Governed Projection Consumption
 
 Consumption vuelve a disponer del candidate real.
 
-Antes de consumir READY/HOLD/DENIED debe verificar:
+Antes de consumir READY/HOLD/DENIED debe verificar localmente:
 
 ```text
+actual_identity = compute(candidate)
 verify(candidate, projection.candidate_content_identity) == MATCH
 ```
 
@@ -895,30 +1188,45 @@ El content binding check debe ocurrir antes de delegar a Admission.
 
 No se llama `evaluate_episodic_candidate` ante mismatch.
 
-### 12.7. Consumption Result
+La misma instancia `candidate` verificada debe ser la utilizada para construir la
+vista efectiva y delegar a Admission; no se re-resuelve por `candidate_id`.
 
-El resultado deberá llevar la identidad calculada/verificada del candidate real
-suministrado a Consumption.
+### 13.7. Consumption Result — preservación de evidencia
+
+El resultado deberá llevar:
+
+```text
+actual_candidate_content_identity
+presented_projection_content_identity
+```
 
 Para `EVALUATED`:
 
 ```text
-result.identity == projection.identity == actual candidate identity
+actual == presented == compute(candidate)
 ```
 
-Para un `BLOCKED` por mismatch de projection:
+Para un `BLOCKED` por mismatch:
 
 ```text
-result.identity == actual candidate identity
+actual == compute(candidate)
+presented == projection.candidate_content_identity
+actual != presented
 ```
 
-El reason code preserva que la projection estaba ligada a otra identidad.
+Eso permite distinguir:
 
-Esto evita que el resultado de bloqueo quede ambiguamente ligado al artefacto stale.
+```text
+qué candidate real fue recibido
+vs.
+qué identity intentó presentar la projection
+```
+
+sin convertir el resultado en una attestation independiente.
 
 ---
 
-## 13. Precedencia de fallos
+## 14. Precedencia de fallos
 
 G1 no congela todavía todos los rankings exactos de reasons; eso corresponde a G2.
 
@@ -935,28 +1243,28 @@ Y:
 missing binding is not a HOLD-compatible legacy state
 ```
 
-porque el binding será obligatorio por constructor.
-
 Precedencias mínimas:
 
 1. type / structural contract errors se rechazan al construir;
 2. content identity mismatch conocido se evalúa antes de producir READY/AUTHORIZED;
-3. Consumption verifica identity antes de Admission;
-4. una incompatibilidad de identity no puede transformarse en un resultado permisivo
-   por otra señal posterior.
+3. Projection verifica localmente contra el candidate antes de READY;
+4. Consumption verifica localmente identity antes de Admission;
+5. una incompatibilidad de identity no puede transformarse en un resultado permisivo
+   por otra señal posterior;
+6. un claim de `verified` upstream nunca altera esta precedencia.
 
-G2 deberá congelar los reason codes y rankings exactos sin alterar estas reglas.
+G2 deberá congelar reason codes y rankings exactos sin alterar estas reglas.
 
 ---
 
-## 14. `candidate_id` se conserva
+## 15. `candidate_id` se conserva
 
 G1 no elimina `candidate_id` de ningún contrato.
 
 Motivo:
 
 ```text
-candidate_id            = logical correlation
+candidate_id             = logical correlation
 content identity sidecar = exact material identity
 ```
 
@@ -972,7 +1280,7 @@ No se permite que digest sustituya semánticamente IDs operativos existentes.
 
 ---
 
-## 15. El sidecar completo se propaga; no se re-canonicaliza downstream
+## 16. El sidecar completo se propaga; no se re-canonicaliza downstream
 
 Los módulos downstream no deben volver a implementar canonicalización del candidate.
 
@@ -990,13 +1298,12 @@ Los demás módulos:
 - comparan sidecars;
 - usan `compute_...` o `verify_...` únicamente cuando tienen el candidate real;
 - no reconstruyen manualmente digest inputs;
-- no interpretan `digest_hex` por separado.
-
-Esto previene divergencia entre implementaciones de hashing.
+- no interpretan `digest_hex` por separado;
+- no crean un segundo concepto de "verified identity" persistente.
 
 ---
 
-## 16. Security boundary permanece separada
+## 17. Security boundary permanece separada
 
 `AssessmentProducerAuthorizationEvidence` contiene Security contracts porque debe
 probar permiso scoped del productor.
@@ -1028,21 +1335,21 @@ candidate content identity
 producer permission
 ```
 
-Ambos controles deben coexistir sin absorberse.
+Un componente productor comprometido tampoco se vuelve confiable por portar una
+identity correcta.
 
 ---
 
-## 17. Admission policy permanece pura
+## 18. Admission policy permanece pura
 
-No se modifica `evaluate_episodic_candidate` ni la precedence existente de
-Admission.
+No se modifica `evaluate_episodic_candidate` ni la precedence existente de Admission.
 
 La protección ocurre alrededor de Admission:
 
 ```text
 bound projection
     ↓
-content-bound Consumption check
+local content verification in Consumption
     ↓
 Admission evaluation
     ↓
@@ -1061,16 +1368,19 @@ como prueba criptográfica de content binding.
 
 ---
 
-## 18. Future Persistence Authorization dependency
+## 19. Future Persistence Authorization dependency
 
 Esta unidad es una precondición, no una autorización de persistencia.
 
 Después de completar una futura implementación de Propagation / Binding deberá
-existir una revisión independiente que pregunte:
+existir una revisión independiente que pregunte al menos:
 
 ```text
-¿es suficiente el bound consumption result como evidencia de entrada para una
-Persistence Authorization pura y fail-closed?
+1. ¿es suficiente el bound consumption result como evidencia estructural?
+2. ¿qué evidencia de producer authorization necesita persistencia?
+3. ¿Persistence necesita confianza adicional sobre la ejecución/productor?
+4. ¿el threat model requiere aislamiento, firma o attestation independiente?
+5. ¿cómo se preserva/verifica content identity en write/read durable?
 ```
 
 Hasta entonces:
@@ -1088,9 +1398,19 @@ content binding complete
 persistence authorization granted
 ```
 
+Especialmente:
+
+```text
+terminal content-bound artifact
+!=
+tamper-proof artifact
+!=
+independently trustworthy artifact
+```
+
 ---
 
-## 19. Estrategia de implementación futura — atomic packet
+## 20. Estrategia de implementación futura — atomic packet
 
 G1 evalúa la división lógica inicial P1–P4:
 
@@ -1122,7 +1442,7 @@ merges parciales.
 
 ---
 
-## 20. Scope freeze candidato para G2
+## 21. Scope freeze candidato para G2
 
 Si el Owner autoriza posteriormente G2-SPEC, el alcance productivo candidato queda
 limitado inicialmente a **cuatro módulos existentes**:
@@ -1142,9 +1462,6 @@ tests/test_assessment_producer_authorization.py
 tests/test_governed_input_projection.py
 tests/test_governed_projection_consumption.py
 ```
-
-G1 observa que los constructores afectados se concentran materialmente en esos
-tests downstream.
 
 Fuera del file budget inicial:
 
@@ -1171,7 +1488,7 @@ STOP → demonstrate necessity → owner review → new scope decision
 
 ---
 
-## 21. File / dependency budget preliminar
+## 22. File / dependency budget preliminar
 
 G1 congela para una futura G2-SPEC este presupuesto inicial:
 
@@ -1194,11 +1511,11 @@ candidato detallado.
 
 ---
 
-## 22. TDD contract candidato para una futura implementación
+## 23. TDD contract candidato para una futura implementación
 
 G2 deberá congelar tests que demuestren al menos:
 
-### 22.1. Structural binding
+### 23.1. Structural binding
 
 - `AdmissionAssessment` exige content identity;
 - `candidate_id` y identity.candidate_id deben coincidir;
@@ -1206,9 +1523,9 @@ G2 deberá congelar tests que demuestren al menos:
 - producer authorization evidence/decision conserva identity exacta;
 - temporal evidence conserva identity exacta;
 - projection conserva identity exacta;
-- consumption result conserva identity exacta.
+- consumption result conserva actual + presented identities.
 
-### 22.2. Same-ID substitution
+### 23.2. Same-ID substitution
 
 Dos candidates con:
 
@@ -1219,7 +1536,7 @@ different material content
 
 deben producir identities distintas y la cadena stale debe fallar cerrada.
 
-### 22.3. Cross-artifact re-pairing
+### 23.3. Cross-artifact re-pairing
 
 Debe probarse mismatch independiente en:
 
@@ -1230,7 +1547,7 @@ Debe probarse mismatch independiente en:
 - assessment bundle ↔ candidate;
 - projection ↔ candidate.
 
-### 22.4. Metadata downgrade
+### 23.4. Metadata downgrade
 
 Identities con:
 
@@ -1241,7 +1558,7 @@ Identities con:
 
 deben fallar cerradas cuando se verifican contra el candidate.
 
-### 22.5. No candidate-id fallback
+### 23.5. No candidate-id fallback
 
 No debe existir caso donde una identity incompatible sea aceptada únicamente porque:
 
@@ -1249,7 +1566,7 @@ No debe existir caso donde una identity incompatible sea aceptada únicamente po
 candidate_id matches
 ```
 
-### 22.6. Admission isolation
+### 23.6. Admission isolation
 
 Ante projection identity mismatch:
 
@@ -1258,18 +1575,44 @@ Consumption = BLOCKED
 Admission evaluator = not invoked
 ```
 
-La futura prueba puede demostrarlo por resultado/estructura sin introducir mocks
-frágiles si la implementación permite observación determinista equivalente.
-
-### 22.7. Bound terminal result
+### 23.7. Bound terminal result
 
 Un `EVALUATED` debe demostrar:
 
 ```text
-result.identity == projection.identity == computed candidate identity
+result.actual_identity
+== result.presented_identity
+== projection.identity
+== computed candidate identity
 ```
 
-### 22.8. Regression
+Un `BLOCKED` por mismatch debe demostrar:
+
+```text
+result.actual_identity == computed candidate identity
+result.presented_identity == projection.identity
+result.actual_identity != result.presented_identity
+```
+
+### 23.8. Verification non-transitivity
+
+Tests deben impedir un diseño donde Projection o Consumption puedan saltarse su
+verificación local usando un flag/campo upstream equivalente a `verified`.
+
+No es obligatorio introducir mocks; puede demostrarse por API/superficie contractual.
+
+### 23.9. Same-material-after-check
+
+La implementación no debe resolver otro candidate por `candidate_id` después del
+check. G2 deberá seleccionar una prueba estructural o de comportamiento que proteja
+esta propiedad sin introducir infraestructura innecesaria.
+
+### 23.10. Unable-to-verify fail closed
+
+Metadata no soportada o estado unverificable no debe producir READY/EVALUATED por
+fallback.
+
+### 23.11. Regression
 
 - todo el suite existente debe permanecer PASS;
 - canonical vectors A/B/C de Candidate Content Identity permanecen intactos;
@@ -1278,7 +1621,7 @@ result.identity == projection.identity == computed candidate identity
 
 ---
 
-## 23. FULL 4R requerido
+## 24. FULL 4R requerido
 
 Risk class 3 exige FULL 4R en futura implementación.
 
@@ -1290,7 +1633,8 @@ Demostrar que content identity:
 - no concede producer authorization;
 - no concede Admission eligibility;
 - no concede Persistence Authorization;
-- no cambia Security authority.
+- no cambia Security authority;
+- no se presenta falsamente como protección frente a un verificador comprometido.
 
 ### Readability
 
@@ -1298,12 +1642,13 @@ Un reviewer debe poder seguir visualmente:
 
 ```text
 candidate content identity
-→ assessment
-→ provenance
-→ producer authorization
-→ temporal evidence
-→ projection
-→ consumption result
+→ carried by assessment
+→ carried by provenance
+→ carried by producer authorization
+→ carried by temporal evidence
+→ locally verified by projection
+→ locally verified by consumption
+→ actual/presented identities preserved in result
 ```
 
 sin inferencia oculta ni helper genérico opaco.
@@ -1315,6 +1660,8 @@ Demostrar:
 - exact sidecar propagation;
 - same-ID substitution failure;
 - stale evidence failure;
+- non-transitive verification;
+- actual vs presented terminal evidence;
 - Ubuntu + Windows candidate-bound PASS;
 - full pytest;
 - compileall;
@@ -1328,11 +1675,13 @@ Demostrar:
 - no digest-only comparison;
 - incompatible metadata fail-closed;
 - no candidate_id fallback;
+- no `verified upstream` bypass;
+- no re-resolution by ID after local verification;
 - no path alternativo hacia Admission desde una projection stale dentro de esta frontera.
 
 ---
 
-## 24. RDD Stage 1
+## 25. RDD Stage 1
 
 Una futura implementación deberá emitir `MALAK-EVIDENCE-MANIFEST/v1` ligado al SHA
 exacto del candidate.
@@ -1368,7 +1717,7 @@ RDD Stage 2 permanece no autorizado.
 
 ---
 
-## 25. STOP conditions
+## 26. STOP conditions
 
 Una futura G2 o implementación debe detenerse si requiere:
 
@@ -1383,17 +1732,22 @@ Una futura G2 o implementación debe detenerse si requiere:
 - introducir Memory store;
 - introducir retrieval;
 - introducir runtime wiring;
-- introducir HMAC, firmas o PKI;
+- introducir HMAC, firmas, PKI o attestation;
 - introducir dependencia externa;
 - hacer identity opcional;
 - agregar legacy fallback a `candidate_id`;
 - agregar un manager/registry global;
+- agregar un cache de "verified" como autoridad;
+- agregar self-attestation como bypass;
+- re-resolver candidate por ID después del check dentro de la misma frontera;
 - requerir un quinto módulo productivo sin nueva revisión de scope;
-- usar digest como trust score o authority signal.
+- usar digest como trust score o authority signal;
+- afirmar protección frente a compromise del propio verificador sin una unidad de
+  seguridad independiente que la demuestre.
 
 ---
 
-## 26. Riesgos residuales después de esta unidad
+## 27. Riesgos residuales después de esta unidad
 
 Incluso después de una futura implementación correcta permanecerán fuera:
 
@@ -1410,26 +1764,56 @@ Un contenido falso puede tener identidad perfecta.
 Un productor autorizado puede emitir un assessment incorrecto; content binding solo
 prueba a qué candidate content se refiere.
 
-### R4 — authorization replay externo
+### R4 — component compromise
+
+Un componente cuyo código fue comprometido puede generar output semánticamente falso,
+omitir checks o mentir sobre haber verificado. La siguiente frontera puede limitar el
+impacto solo cuando dispone de evidencia/candidate que pueda verificar por sí misma.
+
+### R5 — authorization replay externo
 
 La unidad no crea anti-replay general para Security contracts.
 
-### R5 — persistence policy
+### R6 — persistence policy
 
 Todavía faltará decidir qué evidencia exacta autoriza o bloquea almacenamiento.
 
-### R6 — stored-content integrity
+### R7 — stored-content integrity
 
 Esta unidad no define cómo una futura Memory store preservará/verificará identidad
 durante escritura y lectura.
 
-### R7 — retrieval / Knowledge
+### R8 — execution trust / attestation
+
+No se define aislamiento, firma de artefactos, process identity, TPM/TEE, remote
+attestation ni validación fuera del proceso. Solo deberán considerarse si un threat
+model futuro demuestra necesidad.
+
+### R9 — retrieval / Knowledge
 
 No define taint, revocation, quarantine, retrieval eligibility ni promoción a Knowledge.
 
 ---
 
-## 27. Orden de maduración preservado
+## 28. Interpretaciones explícitamente prohibidas
+
+Una implementación o documento futuro contradice este G1 si afirma cualquiera de:
+
+```text
+"tiene el digest correcto, por lo tanto es confiable"
+"Producer Authorization significa que el assessment es verdadero"
+"Projection lo verificó, por lo tanto Consumption no necesita verificar"
+"el result está content-bound, por lo tanto es tamper-proof"
+"candidate_id coincide, así que una identity ausente es aceptable"
+"verified=True convierte self-attestation en evidencia independiente"
+"un hash in-process prueba que el componente no fue comprometido"
+```
+
+Estas equivalencias quedan normativamente rechazadas por este design record.
+
+---
+
+## 29. Orden de maduración preservado
 
 La secuencia correcta continúa siendo:
 
@@ -1446,6 +1830,8 @@ post-merge reconciliation                  future
         ↓
 Persistence Authorization G0/G1            NOT AUTHORIZED
         ↓
+possible execution-trust hardening         ONLY IF DEMONSTRATED NECESSARY
+        ↓
 Persistent Memory                          NOT AUTHORIZED
         ↓
 Trust-aware retrieval                      NOT AUTHORIZED
@@ -1453,25 +1839,40 @@ Trust-aware retrieval                      NOT AUTHORIZED
 Knowledge promotion                        NOT AUTHORIZED
 ```
 
-No se permite saltar directamente a persistencia porque exista un digest.
+No se permite saltar directamente a persistencia porque exista un digest o un bound
+consumption result.
 
 ---
 
-## 28. Resultado final G0/G1
+## 30. Resultado final G0/G1
 
 ```text
 unit:
 Episodic Candidate Content Identity Propagation & Binding Boundary
 
 G0 necessity: PASS
-G1 architecture: SELECTED
+G1 architecture: SELECTED + COMPROMISE-AWARE HARDENED
 risk class: 3 — HIGH
+
 selected direction:
 mandatory propagation of the existing full EpisodicCandidateContentIdentity sidecar
 through the governed episodic evidence chain
 
+verification model:
+local, explicit, non-transitive where actual candidate is available
+
+self-attestation:
+PROHIBITED as independent evidence
+
+TOCTOU rule:
+verify and use the same candidate material within the same invocation
+
 selected terminal binding:
-GovernedAdmissionConsumptionResult
+GovernedAdmissionConsumptionResult carrying both actual candidate identity and
+presented projection identity
+
+terminal semantics:
+content-bound artifact != tamper-proof artifact != independently trustworthy artifact
 
 raw EpisodicAdmissionDecision:
 NOT sufficient for future Persistence Authorization
