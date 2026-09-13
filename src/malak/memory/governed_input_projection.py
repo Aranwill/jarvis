@@ -15,6 +15,10 @@ from malak.memory.assessment_producer_authorization import (
     AssessmentProducerAuthorizationReason,
     validate_assessment_producer_authorization,
 )
+from malak.memory.candidate_content_identity import (
+    EpisodicCandidateContentIdentity,
+    compute_episodic_candidate_content_identity,
+)
 from malak.memory.episodic_admission import (
     EpisodicAdmissionContext,
     EpisodicAdmissionSignals,
@@ -28,7 +32,7 @@ from malak.security.contracts import (
 )
 
 
-POLICY_VERSION = "episodic-admission-governed-input-projection/v1"
+POLICY_VERSION = "episodic-admission-governed-input-projection/v2"
 
 _TEMPORAL_PERMISSION = PermissionScope(
     resource="memory.episodic_admission.temporal_control",
@@ -80,9 +84,26 @@ def _require_utc_datetime(value: datetime, field_name: str) -> datetime:
     return value
 
 
+def _require_content_identity(
+    value: EpisodicCandidateContentIdentity,
+    candidate_id: str,
+) -> EpisodicCandidateContentIdentity:
+    if not isinstance(value, EpisodicCandidateContentIdentity):
+        raise TypeError(
+            "candidate_content_identity must be an "
+            "EpisodicCandidateContentIdentity"
+        )
+    if value.candidate_id != candidate_id:
+        raise ValueError(
+            "candidate_content_identity candidate_id must match candidate_id"
+        )
+    return value
+
+
 @dataclass(frozen=True, slots=True)
 class GovernedTemporalControlEvidence:
     candidate_id: str
+    candidate_content_identity: EpisodicCandidateContentIdentity
     valid_from: datetime
     valid_until: datetime
     policy_or_rule_reference: str
@@ -95,6 +116,14 @@ class GovernedTemporalControlEvidence:
             self,
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
+        )
+        object.__setattr__(
+            self,
+            "candidate_content_identity",
+            _require_content_identity(
+                self.candidate_content_identity,
+                self.candidate_id,
+            ),
         )
         object.__setattr__(
             self,
@@ -174,6 +203,9 @@ class GovernedAdmissionProjectionOutcome(StrEnum):
 
 
 class GovernedAdmissionProjectionReason(StrEnum):
+    ASSESSMENT_CONTENT_IDENTITY_MISMATCH = (
+        "assessment_content_identity_mismatch"
+    )
     ASSESSMENT_BINDING_MISMATCH = "assessment_binding_mismatch"
     ASSESSMENT_PROVENANCE_HOLD = "assessment_provenance_hold"
     ASSESSMENT_PROVENANCE_INVALID = "assessment_provenance_invalid"
@@ -184,6 +216,7 @@ class GovernedAdmissionProjectionReason(StrEnum):
     INVALID_EFFECTIVE_ASSESSMENT_VALUE = "invalid_effective_assessment_value"
     MISSING_TEMPORAL_CONTROL = "missing_temporal_control"
     TEMPORAL_CANDIDATE_MISMATCH = "temporal_candidate_mismatch"
+    TEMPORAL_CONTENT_IDENTITY_MISMATCH = "temporal_content_identity_mismatch"
     TEMPORAL_PRODUCER_SUBJECT_MISMATCH = "temporal_producer_subject_mismatch"
     TEMPORAL_PERMISSION_SCOPE_MISMATCH = "temporal_permission_scope_mismatch"
     TEMPORAL_DECISION_REQUEST_MISMATCH = "temporal_decision_request_mismatch"
@@ -196,6 +229,7 @@ class GovernedAdmissionProjectionReason(StrEnum):
 @dataclass(frozen=True, slots=True)
 class GovernedAdmissionInputProjection:
     candidate_id: str
+    candidate_content_identity: EpisodicCandidateContentIdentity
     outcome: GovernedAdmissionProjectionOutcome
     reason_code: GovernedAdmissionProjectionReason
     evaluated_at: datetime
@@ -209,6 +243,14 @@ class GovernedAdmissionInputProjection:
             self,
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
+        )
+        object.__setattr__(
+            self,
+            "candidate_content_identity",
+            _require_content_identity(
+                self.candidate_content_identity,
+                self.candidate_id,
+            ),
         )
         if not isinstance(self.outcome, GovernedAdmissionProjectionOutcome):
             raise TypeError("outcome must be a GovernedAdmissionProjectionOutcome")
@@ -273,17 +315,19 @@ class _Finding:
 
 
 _DENIED_RANK = {
-    GovernedAdmissionProjectionReason.ASSESSMENT_BINDING_MISMATCH: 1,
-    GovernedAdmissionProjectionReason.ASSESSMENT_PROVENANCE_INVALID: 2,
-    GovernedAdmissionProjectionReason.ASSESSMENT_AUTHORIZATION_DENIED: 3,
-    GovernedAdmissionProjectionReason.INVALID_EFFECTIVE_ASSESSMENT_VALUE: 4,
-    GovernedAdmissionProjectionReason.TEMPORAL_CANDIDATE_MISMATCH: 5,
-    GovernedAdmissionProjectionReason.TEMPORAL_PRODUCER_SUBJECT_MISMATCH: 6,
-    GovernedAdmissionProjectionReason.TEMPORAL_PERMISSION_SCOPE_MISMATCH: 7,
-    GovernedAdmissionProjectionReason.TEMPORAL_DECISION_REQUEST_MISMATCH: 8,
-    GovernedAdmissionProjectionReason.TEMPORAL_CONTEXT_NOT_YET_VALID: 9,
-    GovernedAdmissionProjectionReason.TEMPORAL_CONTEXT_EXPIRED: 9,
-    GovernedAdmissionProjectionReason.TEMPORAL_AUTHORIZATION_DENIED: 10,
+    GovernedAdmissionProjectionReason.ASSESSMENT_CONTENT_IDENTITY_MISMATCH: 1,
+    GovernedAdmissionProjectionReason.ASSESSMENT_BINDING_MISMATCH: 2,
+    GovernedAdmissionProjectionReason.ASSESSMENT_PROVENANCE_INVALID: 3,
+    GovernedAdmissionProjectionReason.ASSESSMENT_AUTHORIZATION_DENIED: 4,
+    GovernedAdmissionProjectionReason.INVALID_EFFECTIVE_ASSESSMENT_VALUE: 5,
+    GovernedAdmissionProjectionReason.TEMPORAL_CANDIDATE_MISMATCH: 6,
+    GovernedAdmissionProjectionReason.TEMPORAL_CONTENT_IDENTITY_MISMATCH: 7,
+    GovernedAdmissionProjectionReason.TEMPORAL_PRODUCER_SUBJECT_MISMATCH: 8,
+    GovernedAdmissionProjectionReason.TEMPORAL_PERMISSION_SCOPE_MISMATCH: 9,
+    GovernedAdmissionProjectionReason.TEMPORAL_DECISION_REQUEST_MISMATCH: 10,
+    GovernedAdmissionProjectionReason.TEMPORAL_CONTEXT_NOT_YET_VALID: 11,
+    GovernedAdmissionProjectionReason.TEMPORAL_CONTEXT_EXPIRED: 11,
+    GovernedAdmissionProjectionReason.TEMPORAL_AUTHORIZATION_DENIED: 12,
 }
 
 _HOLD_RANK = {
@@ -389,6 +433,19 @@ def _has_assessment_binding_mismatch(
     )
 
 
+def _has_assessment_content_identity_mismatch(
+    bundle: GovernedAssessmentProjectionInput,
+    actual_identity: EpisodicCandidateContentIdentity,
+) -> bool:
+    return not (
+        bundle.assessment.candidate_content_identity
+        == bundle.provenance_decision.candidate_content_identity
+        == bundle.producer_authorization_evidence.candidate_content_identity
+        == bundle.producer_authorization_decision.candidate_content_identity
+        == actual_identity
+    )
+
+
 def _effective_assessment_value(
     assessment: AdmissionAssessment,
 ) -> tuple[str | bool | SourceSecurityStatus | None, _Finding | None]:
@@ -444,11 +501,21 @@ def _effective_assessment_value(
 def _bundle_findings(
     bundle: GovernedAssessmentProjectionInput,
     candidate: EpisodicMemoryCandidate,
+    actual_identity: EpisodicCandidateContentIdentity,
     evaluated_at: datetime,
 ) -> tuple[list[_Finding], str | bool | SourceSecurityStatus | None]:
     assessment = bundle.assessment
     kind = assessment.kind if isinstance(assessment.kind, AssessmentKind) else None
     findings: list[_Finding] = []
+
+    if _has_assessment_content_identity_mismatch(bundle, actual_identity):
+        findings.append(
+            _denied(
+                GovernedAdmissionProjectionReason.ASSESSMENT_CONTENT_IDENTITY_MISMATCH,
+                kind=kind,
+            )
+        )
+        return findings, None
 
     if _has_assessment_binding_mismatch(bundle, candidate.candidate_id):
         findings.append(
@@ -550,6 +617,7 @@ def _bundle_findings(
 def _temporal_findings(
     temporal_control: GovernedTemporalControlEvidence | None,
     candidate: EpisodicMemoryCandidate,
+    actual_identity: EpisodicCandidateContentIdentity,
     evaluated_at: datetime,
 ) -> list[_Finding]:
     if temporal_control is None:
@@ -564,6 +632,13 @@ def _temporal_findings(
         findings.append(
             _denied(
                 GovernedAdmissionProjectionReason.TEMPORAL_CANDIDATE_MISMATCH,
+            )
+        )
+
+    if temporal_control.candidate_content_identity != actual_identity:
+        findings.append(
+            _denied(
+                GovernedAdmissionProjectionReason.TEMPORAL_CONTENT_IDENTITY_MISMATCH,
             )
         )
 
@@ -617,11 +692,13 @@ def _temporal_findings(
 
 def _projection_from_finding(
     candidate: EpisodicMemoryCandidate,
+    actual_identity: EpisodicCandidateContentIdentity,
     finding: _Finding,
     evaluated_at: datetime,
 ) -> GovernedAdmissionInputProjection:
     return GovernedAdmissionInputProjection(
         candidate_id=candidate.candidate_id,
+        candidate_content_identity=actual_identity,
         outcome=finding.outcome,
         reason_code=finding.reason_code,
         evaluated_at=evaluated_at,
@@ -653,6 +730,7 @@ def project_governed_admission_inputs(
         )
 
     evaluated_at = _require_utc_datetime(evaluated_at, "evaluated_at")
+    actual_identity = compute_episodic_candidate_content_identity(candidate)
 
     findings: list[_Finding] = []
     groups: dict[AssessmentKind, list[GovernedAssessmentProjectionInput]] = {
@@ -671,6 +749,7 @@ def project_governed_admission_inputs(
         bundle_findings, effective_value = _bundle_findings(
             bundle,
             candidate,
+            actual_identity,
             evaluated_at,
         )
         findings.extend(bundle_findings)
@@ -703,6 +782,7 @@ def project_governed_admission_inputs(
         _temporal_findings(
             temporal_control,
             candidate,
+            actual_identity,
             evaluated_at,
         )
     )
@@ -711,6 +791,7 @@ def project_governed_admission_inputs(
     if selected_finding is not None:
         return _projection_from_finding(
             candidate,
+            actual_identity,
             selected_finding,
             evaluated_at,
         )
@@ -750,6 +831,7 @@ def project_governed_admission_inputs(
 
     return GovernedAdmissionInputProjection(
         candidate_id=candidate.candidate_id,
+        candidate_content_identity=actual_identity,
         outcome=GovernedAdmissionProjectionOutcome.READY,
         reason_code=GovernedAdmissionProjectionReason.READY,
         evaluated_at=evaluated_at,
