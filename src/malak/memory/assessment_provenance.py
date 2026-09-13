@@ -2,8 +2,12 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
 
+from malak.memory.candidate_content_identity import (
+    EpisodicCandidateContentIdentity,
+)
 
-POLICY_VERSION = "episodic-assessment-provenance/v1"
+
+POLICY_VERSION = "episodic-assessment-provenance/v2"
 
 
 def _require_canonical_text(value: str, field_name: str) -> str:
@@ -38,6 +42,22 @@ def _require_utc_datetime(value: datetime, field_name: str) -> datetime:
     return value
 
 
+def _require_content_identity(
+    value: EpisodicCandidateContentIdentity,
+    candidate_id: str,
+) -> EpisodicCandidateContentIdentity:
+    if not isinstance(value, EpisodicCandidateContentIdentity):
+        raise TypeError(
+            "candidate_content_identity must be an "
+            "EpisodicCandidateContentIdentity"
+        )
+    if value.candidate_id != candidate_id:
+        raise ValueError(
+            "candidate_content_identity candidate_id must match candidate_id"
+        )
+    return value
+
+
 class AssessmentKind(StrEnum):
     SOURCE_AUTHORITY = "source_authority"
     CONFIDENCE = "confidence"
@@ -62,6 +82,7 @@ class AssessmentProducerRole(StrEnum):
 class AdmissionAssessment:
     assessment_id: str
     candidate_id: str
+    candidate_content_identity: EpisodicCandidateContentIdentity
     kind: AssessmentKind
     value: str | bool
     producer_role: AssessmentProducerRole | None = None
@@ -79,6 +100,14 @@ class AdmissionAssessment:
             self,
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
+        )
+        object.__setattr__(
+            self,
+            "candidate_content_identity",
+            _require_content_identity(
+                self.candidate_content_identity,
+                self.candidate_id,
+            ),
         )
 
         if not isinstance(self.kind, AssessmentKind):
@@ -141,6 +170,7 @@ class AssessmentProvenanceReason(StrEnum):
     MISSING_ASSESSED_AT = "missing_assessed_at"
     ASSESSMENT_FROM_FUTURE = "assessment_from_future"
     CANDIDATE_MISMATCH = "candidate_mismatch"
+    CONTENT_IDENTITY_MISMATCH = "content_identity_mismatch"
     PRODUCER_ROLE_NOT_ALLOWED_FOR_KIND = "producer_role_not_allowed_for_kind"
     VALID = "valid"
 
@@ -149,6 +179,7 @@ class AssessmentProvenanceReason(StrEnum):
 class AssessmentProvenanceDecision:
     assessment_id: str
     candidate_id: str
+    candidate_content_identity: EpisodicCandidateContentIdentity
     kind: AssessmentKind
     outcome: AssessmentProvenanceOutcome
     reason_code: AssessmentProvenanceReason
@@ -165,6 +196,14 @@ class AssessmentProvenanceDecision:
             self,
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
+        )
+        object.__setattr__(
+            self,
+            "candidate_content_identity",
+            _require_content_identity(
+                self.candidate_content_identity,
+                self.candidate_id,
+            ),
         )
 
         if not isinstance(self.kind, AssessmentKind):
@@ -232,6 +271,7 @@ def _decision(
     return AssessmentProvenanceDecision(
         assessment_id=assessment.assessment_id,
         candidate_id=assessment.candidate_id,
+        candidate_content_identity=assessment.candidate_content_identity,
         kind=assessment.kind,
         outcome=outcome,
         reason_code=reason_code,
@@ -241,17 +281,37 @@ def _decision(
 
 def validate_assessment_provenance(
     assessment: AdmissionAssessment,
-    expected_candidate_id: str,
+    expected_candidate_content_identity: EpisodicCandidateContentIdentity,
     evaluated_at: datetime,
 ) -> AssessmentProvenanceDecision:
     if not isinstance(assessment, AdmissionAssessment):
         raise TypeError("assessment must be an AdmissionAssessment")
+    if not isinstance(
+        expected_candidate_content_identity,
+        EpisodicCandidateContentIdentity,
+    ):
+        raise TypeError(
+            "expected_candidate_content_identity must be an "
+            "EpisodicCandidateContentIdentity"
+        )
 
-    expected_candidate_id = _require_canonical_text(
-        expected_candidate_id,
-        "expected_candidate_id",
-    )
     evaluated_at = _require_utc_datetime(evaluated_at, "evaluated_at")
+
+    if assessment.candidate_id != expected_candidate_content_identity.candidate_id:
+        return _decision(
+            assessment,
+            AssessmentProvenanceOutcome.INVALID,
+            AssessmentProvenanceReason.CANDIDATE_MISMATCH,
+            evaluated_at,
+        )
+
+    if assessment.candidate_content_identity != expected_candidate_content_identity:
+        return _decision(
+            assessment,
+            AssessmentProvenanceOutcome.INVALID,
+            AssessmentProvenanceReason.CONTENT_IDENTITY_MISMATCH,
+            evaluated_at,
+        )
 
     if assessment.producer_role is None:
         return _decision(
@@ -282,14 +342,6 @@ def validate_assessment_provenance(
             assessment,
             AssessmentProvenanceOutcome.HOLD,
             AssessmentProvenanceReason.MISSING_ASSESSED_AT,
-            evaluated_at,
-        )
-
-    if assessment.candidate_id != expected_candidate_id:
-        return _decision(
-            assessment,
-            AssessmentProvenanceOutcome.INVALID,
-            AssessmentProvenanceReason.CANDIDATE_MISMATCH,
             evaluated_at,
         )
 
