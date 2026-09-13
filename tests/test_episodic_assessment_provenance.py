@@ -22,6 +22,23 @@ from malak.memory.candidate_content_identity import (
 EVALUATED_AT = datetime(2026, 9, 9, 18, 30, tzinfo=UTC)
 
 
+def _identity(
+    *,
+    candidate_id: str = "candidate-1",
+    digest_hex: str = "a" * 64,
+    digest_algorithm: str = "sha256",
+    canonicalization_version: str = "episodic-memory-candidate-json/v1",
+    policy_version: str = "episodic-candidate-content-identity/v1",
+) -> EpisodicCandidateContentIdentity:
+    return EpisodicCandidateContentIdentity(
+        candidate_id=candidate_id,
+        digest_algorithm=digest_algorithm,
+        digest_hex=digest_hex,
+        canonicalization_version=canonicalization_version,
+        policy_version=policy_version,
+    )
+
+
 def make_assessment(**overrides: object) -> AdmissionAssessment:
     values: dict[str, object] = {
         "assessment_id": "assessment-1",
@@ -34,27 +51,42 @@ def make_assessment(**overrides: object) -> AdmissionAssessment:
         "assessed_at": EVALUATED_AT - timedelta(seconds=1),
     }
     values.update(overrides)
+    if "candidate_content_identity" not in overrides:
+        candidate_id = values.get("candidate_id")
+        identity_candidate_id = (
+            candidate_id
+            if isinstance(candidate_id, str)
+            and candidate_id
+            and candidate_id.strip() == candidate_id
+            else "candidate-1"
+        )
+        values["candidate_content_identity"] = _identity(
+            candidate_id=identity_candidate_id
+        )
     return AdmissionAssessment(**values)  # type: ignore[arg-type]
 
 
 def test_valid_structural_provenance() -> None:
     assessment = make_assessment()
+    identity = assessment.candidate_content_identity
 
     decision = validate_assessment_provenance(
         assessment,
-        "candidate-1",
+        identity,
         EVALUATED_AT,
     )
 
     assert decision == AssessmentProvenanceDecision(
         assessment_id="assessment-1",
         candidate_id="candidate-1",
+        candidate_content_identity=identity,
         kind=AssessmentKind.SOURCE_AUTHORITY,
         outcome=AssessmentProvenanceOutcome.VALID,
         reason_code=AssessmentProvenanceReason.VALID,
         evaluated_at=EVALUATED_AT,
         policy_version=POLICY_VERSION,
     )
+    assert POLICY_VERSION == "episodic-assessment-provenance/v2"
 
 
 @pytest.mark.parametrize(
@@ -86,7 +118,7 @@ def test_missing_provenance_is_held(
 
     decision = validate_assessment_provenance(
         assessment,
-        "candidate-1",
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -95,20 +127,79 @@ def test_missing_provenance_is_held(
 
 
 def test_candidate_misbinding_is_invalid() -> None:
+    assessment = make_assessment(candidate_id="candidate-a")
     decision = validate_assessment_provenance(
-        make_assessment(candidate_id="candidate-a"),
-        "candidate-b",
+        assessment,
+        _identity(candidate_id="candidate-b"),
         EVALUATED_AT,
     )
 
     assert decision.outcome is AssessmentProvenanceOutcome.INVALID
     assert decision.reason_code is AssessmentProvenanceReason.CANDIDATE_MISMATCH
+    assert decision.candidate_content_identity is assessment.candidate_content_identity
+
+
+def test_same_id_different_content_identity_is_invalid() -> None:
+    assessment = make_assessment(
+        candidate_content_identity=_identity(digest_hex="a" * 64),
+    )
+    decision = validate_assessment_provenance(
+        assessment,
+        _identity(digest_hex="b" * 64),
+        EVALUATED_AT,
+    )
+
+    assert decision.outcome is AssessmentProvenanceOutcome.INVALID
+    assert decision.reason_code is AssessmentProvenanceReason.CONTENT_IDENTITY_MISMATCH
+    assert decision.candidate_content_identity is assessment.candidate_content_identity
+
+
+@pytest.mark.parametrize(
+    "expected_identity",
+    [
+        _identity(digest_hex="b" * 64),
+        _identity(digest_algorithm="sha256 "),
+        _identity(canonicalization_version="episodic-memory-candidate-json/v2"),
+        _identity(policy_version="episodic-candidate-content-identity/v2"),
+    ],
+)
+def test_full_sidecar_equality_is_required(
+    expected_identity: EpisodicCandidateContentIdentity,
+) -> None:
+    assessment = make_assessment()
+    decision = validate_assessment_provenance(
+        assessment,
+        expected_identity,
+        EVALUATED_AT,
+    )
+    assert decision.outcome is AssessmentProvenanceOutcome.INVALID
+    assert decision.reason_code is AssessmentProvenanceReason.CONTENT_IDENTITY_MISMATCH
+
+
+def test_identity_mismatch_precedes_missing_metadata_hold() -> None:
+    assessment = make_assessment(
+        candidate_content_identity=_identity(digest_hex="a" * 64),
+        producer_role=None,
+        producer_reference=None,
+        policy_or_rule_reference=None,
+        assessed_at=None,
+    )
+    decision = validate_assessment_provenance(
+        assessment,
+        _identity(digest_hex="b" * 64),
+        EVALUATED_AT,
+    )
+    assert decision.outcome is AssessmentProvenanceOutcome.INVALID
+    assert decision.reason_code is AssessmentProvenanceReason.CONTENT_IDENTITY_MISMATCH
 
 
 def test_future_assessment_is_held() -> None:
+    assessment = make_assessment(
+        assessed_at=EVALUATED_AT + timedelta(microseconds=1)
+    )
     decision = validate_assessment_provenance(
-        make_assessment(assessed_at=EVALUATED_AT + timedelta(microseconds=1)),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -117,13 +208,14 @@ def test_future_assessment_is_held() -> None:
 
 
 def test_dimensional_producer_scope_is_enforced() -> None:
+    assessment = make_assessment(
+        kind=AssessmentKind.SOURCE_SECURITY_STATUS,
+        value="acceptable",
+        producer_role=AssessmentProducerRole.DATA_CLASSIFICATION,
+    )
     decision = validate_assessment_provenance(
-        make_assessment(
-            kind=AssessmentKind.SOURCE_SECURITY_STATUS,
-            value="acceptable",
-            producer_role=AssessmentProducerRole.DATA_CLASSIFICATION,
-        ),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -144,13 +236,14 @@ def test_dimensional_producer_scope_is_enforced() -> None:
 def test_policy_violation_accepts_both_allowed_roles(
     producer_role: AssessmentProducerRole,
 ) -> None:
+    assessment = make_assessment(
+        kind=AssessmentKind.POLICY_VIOLATION,
+        value=False,
+        producer_role=producer_role,
+    )
     decision = validate_assessment_provenance(
-        make_assessment(
-            kind=AssessmentKind.POLICY_VIOLATION,
-            value=False,
-            producer_role=producer_role,
-        ),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -159,12 +252,13 @@ def test_policy_violation_accepts_both_allowed_roles(
 
 
 def test_producer_reference_does_not_grant_role() -> None:
+    assessment = make_assessment(
+        producer_role=None,
+        producer_reference="security",
+    )
     decision = validate_assessment_provenance(
-        make_assessment(
-            producer_role=None,
-            producer_reference="security",
-        ),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -173,27 +267,30 @@ def test_producer_reference_does_not_grant_role() -> None:
 
 
 def test_valid_decision_does_not_claim_verified_identity() -> None:
+    assessment = make_assessment()
     decision = validate_assessment_provenance(
-        make_assessment(),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
     decision_fields = {item.name for item in fields(AssessmentProvenanceDecision)}
 
     assert decision.outcome is AssessmentProvenanceOutcome.VALID
+    assert "candidate_content_identity" in decision_fields
     assert "identity_verified" not in decision_fields
     assert "producer_authenticated" not in decision_fields
 
 
 @pytest.mark.parametrize("value", ["trusted", "owner", "security", True])
 def test_value_cannot_expand_producer_scope(value: str | bool) -> None:
+    assessment = make_assessment(
+        kind=AssessmentKind.SOURCE_SECURITY_STATUS,
+        value=value,
+        producer_role=AssessmentProducerRole.DATA_CLASSIFICATION,
+    )
     decision = validate_assessment_provenance(
-        make_assessment(
-            kind=AssessmentKind.SOURCE_SECURITY_STATUS,
-            value=value,
-            producer_role=AssessmentProducerRole.DATA_CLASSIFICATION,
-        ),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -205,12 +302,13 @@ def test_value_cannot_expand_producer_scope(value: str | bool) -> None:
 
 
 def test_missing_provenance_precedence_is_deterministic() -> None:
+    assessment = make_assessment(
+        producer_role=None,
+        producer_reference=None,
+    )
     decision = validate_assessment_provenance(
-        make_assessment(
-            producer_role=None,
-            producer_reference=None,
-        ),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -222,12 +320,12 @@ def test_validation_is_deterministic() -> None:
 
     first = validate_assessment_provenance(
         assessment,
-        "candidate-1",
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
     second = validate_assessment_provenance(
         assessment,
-        "candidate-1",
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -238,7 +336,7 @@ def test_assessment_and_decision_are_immutable() -> None:
     assessment = make_assessment()
     decision = validate_assessment_provenance(
         assessment,
-        "candidate-1",
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -259,7 +357,7 @@ def test_validation_does_not_mutate_input_or_create_side_effects(
 
     decision = validate_assessment_provenance(
         assessment,
-        "candidate-1",
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -331,9 +429,14 @@ def test_closed_matrix_allows_declared_combinations(
         else "classified"
     )
 
+    assessment = make_assessment(
+        kind=kind,
+        value=value,
+        producer_role=producer_role,
+    )
     decision = validate_assessment_provenance(
-        make_assessment(kind=kind, value=value, producer_role=producer_role),
-        "candidate-1",
+        assessment,
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -358,6 +461,7 @@ def test_required_ids_must_be_canonical_strings(
         ("value", 1.0),
         ("value", None),
         ("producer_role", "source_governance"),
+        ("candidate_content_identity", object()),
     ],
 )
 def test_contract_rejects_wrong_runtime_types(
@@ -366,6 +470,14 @@ def test_contract_rejects_wrong_runtime_types(
 ) -> None:
     with pytest.raises(TypeError):
         make_assessment(**{field_name: value})
+
+
+def test_assessment_rejects_identity_candidate_id_mismatch() -> None:
+    with pytest.raises(ValueError, match="candidate_id"):
+        make_assessment(
+            candidate_id="candidate-1",
+            candidate_content_identity=_identity(candidate_id="candidate-2"),
+        )
 
 
 @pytest.mark.parametrize("value", ["", "   ", " trusted", "trusted "])
@@ -395,17 +507,11 @@ def test_assessment_timestamp_must_be_utc_when_present(
         make_assessment(assessed_at=bad_time)
 
 
-@pytest.mark.parametrize(
-    "bad_expected_candidate_id",
-    ["", "   ", " candidate-1", "candidate-1 ", 1],
-)
-def test_expected_candidate_id_must_be_canonical(
-    bad_expected_candidate_id: object,
-) -> None:
-    with pytest.raises((TypeError, ValueError)):
+def test_expected_identity_must_have_correct_runtime_type() -> None:
+    with pytest.raises(TypeError, match="expected_candidate_content_identity"):
         validate_assessment_provenance(
             make_assessment(),
-            bad_expected_candidate_id,  # type: ignore[arg-type]
+            "candidate-1",  # type: ignore[arg-type]
             EVALUATED_AT,
         )
 
@@ -425,10 +531,11 @@ def test_expected_candidate_id_must_be_canonical(
     ],
 )
 def test_evaluated_at_must_be_utc(bad_time: datetime) -> None:
+    assessment = make_assessment()
     with pytest.raises(ValueError):
         validate_assessment_provenance(
-            make_assessment(),
-            "candidate-1",
+            assessment,
+            assessment.candidate_content_identity,
             bad_time,
         )
 
@@ -442,20 +549,30 @@ def test_bool_value_is_supported_without_integer_coercion() -> None:
 
     decision = validate_assessment_provenance(
         assessment,
-        "candidate-1",
+        assessment.candidate_content_identity,
         EVALUATED_AT,
     )
 
     assert decision.outcome is AssessmentProvenanceOutcome.VALID
 
 
-def test_assessment_binding_survives_dataclass_replace() -> None:
+def test_dataclass_replace_cannot_desynchronize_candidate_id_and_identity() -> None:
     original = make_assessment()
-    rebound = replace(original, candidate_id="candidate-2")
+    with pytest.raises(ValueError, match="candidate_id"):
+        replace(original, candidate_id="candidate-2")
+
+
+def test_candidate_binding_mismatch_survives_valid_structural_rebind() -> None:
+    original = make_assessment()
+    rebound = replace(
+        original,
+        candidate_id="candidate-2",
+        candidate_content_identity=_identity(candidate_id="candidate-2"),
+    )
 
     decision = validate_assessment_provenance(
         rebound,
-        "candidate-1",
+        original.candidate_content_identity,
         EVALUATED_AT,
     )
 
@@ -463,79 +580,3 @@ def test_assessment_binding_survives_dataclass_replace() -> None:
     assert decision.candidate_id == "candidate-2"
     assert decision.outcome is AssessmentProvenanceOutcome.INVALID
     assert decision.reason_code is AssessmentProvenanceReason.CANDIDATE_MISMATCH
-
-
-# G2 TDD RED checkpoint -------------------------------------------------------
-
-
-def _g2_identity(
-    *,
-    candidate_id: str = "candidate-1",
-    digest_hex: str = "a" * 64,
-) -> EpisodicCandidateContentIdentity:
-    return EpisodicCandidateContentIdentity(
-        candidate_id=candidate_id,
-        digest_algorithm="sha256",
-        digest_hex=digest_hex,
-        canonicalization_version="episodic-memory-candidate-json/v1",
-        policy_version="episodic-candidate-content-identity/v1",
-    )
-
-
-def test_g2_assessment_content_identity_is_mandatory() -> None:
-    with pytest.raises(TypeError):
-        AdmissionAssessment(
-            assessment_id="assessment-g2",
-            candidate_id="candidate-1",
-            kind=AssessmentKind.SOURCE_AUTHORITY,
-            value="conversation-source",
-        )
-
-
-def test_g2_same_id_different_content_identity_is_invalid_before_hold() -> None:
-    assessment = AdmissionAssessment(
-        assessment_id="assessment-g2",
-        candidate_id="candidate-1",
-        candidate_content_identity=_g2_identity(digest_hex="a" * 64),
-        kind=AssessmentKind.SOURCE_AUTHORITY,
-        value="conversation-source",
-        producer_role=None,
-        producer_reference=None,
-        policy_or_rule_reference=None,
-        assessed_at=None,
-    )
-
-    decision = validate_assessment_provenance(
-        assessment,
-        _g2_identity(digest_hex="b" * 64),
-        EVALUATED_AT,
-    )
-
-    assert decision.outcome is AssessmentProvenanceOutcome.INVALID
-    assert decision.reason_code is AssessmentProvenanceReason.CONTENT_IDENTITY_MISMATCH
-    assert decision.candidate_content_identity == assessment.candidate_content_identity
-
-
-def test_g2_valid_provenance_carries_identity_and_policy_v2() -> None:
-    identity = _g2_identity()
-    assessment = AdmissionAssessment(
-        assessment_id="assessment-g2",
-        candidate_id="candidate-1",
-        candidate_content_identity=identity,
-        kind=AssessmentKind.SOURCE_AUTHORITY,
-        value="conversation-source",
-        producer_role=AssessmentProducerRole.SOURCE_GOVERNANCE,
-        producer_reference="source-governance/default",
-        policy_or_rule_reference="source-authority/v1",
-        assessed_at=EVALUATED_AT - timedelta(seconds=1),
-    )
-
-    decision = validate_assessment_provenance(
-        assessment,
-        identity,
-        EVALUATED_AT,
-    )
-
-    assert decision.outcome is AssessmentProvenanceOutcome.VALID
-    assert decision.candidate_content_identity is identity
-    assert decision.policy_version == "episodic-assessment-provenance/v2"
