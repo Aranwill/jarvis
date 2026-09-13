@@ -2,9 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
 
-from malak.memory.candidate_content_identity import (
-    EpisodicCandidateContentIdentity,
-)
+from malak.memory.candidate_content_identity import EpisodicCandidateContentIdentity
 
 
 POLICY_VERSION = "episodic-assessment-provenance/v2"
@@ -43,18 +41,12 @@ def _require_utc_datetime(value: datetime, field_name: str) -> datetime:
 
 
 def _require_content_identity(
-    value: EpisodicCandidateContentIdentity,
-    candidate_id: str,
+    value: EpisodicCandidateContentIdentity, candidate_id: str
 ) -> EpisodicCandidateContentIdentity:
     if not isinstance(value, EpisodicCandidateContentIdentity):
-        raise TypeError(
-            "candidate_content_identity must be an "
-            "EpisodicCandidateContentIdentity"
-        )
+        raise TypeError("candidate_content_identity must be an EpisodicCandidateContentIdentity")
     if value.candidate_id != candidate_id:
-        raise ValueError(
-            "candidate_content_identity candidate_id must match candidate_id"
-        )
+        raise ValueError("candidate_content_identity candidate_id must match candidate_id")
     return value
 
 
@@ -101,14 +93,9 @@ class AdmissionAssessment:
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
         )
-        object.__setattr__(
-            self,
-            "candidate_content_identity",
-            _require_content_identity(
-                self.candidate_content_identity,
-                self.candidate_id,
-            ),
-        )
+        object.__setattr__(self, "candidate_content_identity", _require_content_identity(
+            self.candidate_content_identity, self.candidate_id
+        ))
 
         if not isinstance(self.kind, AssessmentKind):
             raise TypeError("kind must be an AssessmentKind")
@@ -197,14 +184,9 @@ class AssessmentProvenanceDecision:
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
         )
-        object.__setattr__(
-            self,
-            "candidate_content_identity",
-            _require_content_identity(
-                self.candidate_content_identity,
-                self.candidate_id,
-            ),
-        )
+        object.__setattr__(self, "candidate_content_identity", _require_content_identity(
+            self.candidate_content_identity, self.candidate_id
+        ))
 
         if not isinstance(self.kind, AssessmentKind):
             raise TypeError("kind must be an AssessmentKind")
@@ -286,13 +268,9 @@ def validate_assessment_provenance(
 ) -> AssessmentProvenanceDecision:
     if not isinstance(assessment, AdmissionAssessment):
         raise TypeError("assessment must be an AdmissionAssessment")
-    if not isinstance(
-        expected_candidate_content_identity,
-        EpisodicCandidateContentIdentity,
-    ):
+    if not isinstance(expected_candidate_content_identity, EpisodicCandidateContentIdentity):
         raise TypeError(
-            "expected_candidate_content_identity must be an "
-            "EpisodicCandidateContentIdentity"
+            "expected_candidate_content_identity must be an EpisodicCandidateContentIdentity"
         )
 
     evaluated_at = _require_utc_datetime(evaluated_at, "evaluated_at")
