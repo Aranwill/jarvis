@@ -5,6 +5,7 @@ import socket
 
 import pytest
 
+import malak.memory.governed_input_projection as projection_module
 from malak.memory.assessment_provenance import (
     AdmissionAssessment,
     AssessmentKind,
@@ -22,6 +23,10 @@ from malak.memory.assessment_producer_authorization import (
     required_permission_for_assessment,
     validate_assessment_producer_authorization,
 )
+from malak.memory.candidate_content_identity import (
+    EpisodicCandidateContentIdentity,
+    compute_episodic_candidate_content_identity,
+)
 from malak.memory.episodic_admission import (
     EpisodicAdmissionContext,
     EpisodicExperience,
@@ -30,6 +35,7 @@ from malak.memory.episodic_admission import (
     SourceSecurityStatus,
 )
 from malak.memory.governed_input_projection import (
+    POLICY_VERSION,
     GovernedAdmissionProjectionOutcome,
     GovernedAdmissionProjectionReason,
     GovernedAssessmentProjectionInput,
@@ -73,9 +79,13 @@ ROLE_BY_KIND = {
 }
 
 
-def _candidate() -> EpisodicMemoryCandidate:
+def _candidate(
+    *,
+    candidate_id: str = "candidate-1",
+    user_content: str = "user content",
+) -> EpisodicMemoryCandidate:
     return EpisodicMemoryCandidate(
-        candidate_id="candidate-1",
+        candidate_id=candidate_id,
         origin=EpisodicOrigin(
             session_id="session-1",
             request_id="request-origin-1",
@@ -84,7 +94,7 @@ def _candidate() -> EpisodicMemoryCandidate:
             model="model-1",
         ),
         experience=EpisodicExperience(
-            user_content="user content",
+            user_content=user_content,
             assistant_content="assistant content",
         ),
         control=EpisodicAdmissionContext(
@@ -101,16 +111,44 @@ def _candidate() -> EpisodicMemoryCandidate:
     )
 
 
+def _identity(
+    *,
+    candidate: EpisodicMemoryCandidate | None = None,
+    candidate_id: str = "candidate-1",
+) -> EpisodicCandidateContentIdentity:
+    return compute_episodic_candidate_content_identity(
+        candidate or _candidate(candidate_id=candidate_id)
+    )
+
+
+def _stale_identity(
+    *,
+    candidate_id: str = "candidate-1",
+) -> EpisodicCandidateContentIdentity:
+    return _identity(
+        candidate=_candidate(
+            candidate_id=candidate_id,
+            user_content="different user content",
+        )
+    )
+
+
 def _assessment(
     kind: AssessmentKind,
     *,
     value: str | bool | None = None,
     assessment_id: str | None = None,
     candidate_id: str = "candidate-1",
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
 ) -> AdmissionAssessment:
     return AdmissionAssessment(
         assessment_id=assessment_id or f"assessment-{kind.value}",
         candidate_id=candidate_id,
+        candidate_content_identity=(
+            candidate_content_identity
+            if candidate_content_identity is not None
+            else _identity(candidate_id=candidate_id)
+        ),
         kind=kind,
         value=KIND_VALUES[kind] if value is None else value,
         producer_role=ROLE_BY_KIND[kind],
@@ -124,6 +162,7 @@ def _provenance(
     assessment: AdmissionAssessment,
     *,
     outcome: AssessmentProvenanceOutcome = AssessmentProvenanceOutcome.VALID,
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
 ) -> AssessmentProvenanceDecision:
     if outcome is AssessmentProvenanceOutcome.VALID:
         reason = AssessmentProvenanceReason.VALID
@@ -134,6 +173,11 @@ def _provenance(
     return AssessmentProvenanceDecision(
         assessment_id=assessment.assessment_id,
         candidate_id=assessment.candidate_id,
+        candidate_content_identity=(
+            candidate_content_identity
+            if candidate_content_identity is not None
+            else assessment.candidate_content_identity
+        ),
         kind=assessment.kind,
         outcome=outcome,
         reason_code=reason,
@@ -161,6 +205,8 @@ def _security_context(
 
 def _authorization_evidence(
     assessment: AdmissionAssessment,
+    *,
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
 ) -> AssessmentProducerAuthorizationEvidence:
     permission = required_permission_for_assessment(assessment)
     assert permission is not None
@@ -183,6 +229,11 @@ def _authorization_evidence(
     return AssessmentProducerAuthorizationEvidence(
         assessment_id=assessment.assessment_id,
         candidate_id=assessment.candidate_id,
+        candidate_content_identity=(
+            candidate_content_identity
+            if candidate_content_identity is not None
+            else assessment.candidate_content_identity
+        ),
         kind=assessment.kind,
         influence_class=influence,
         producer_subject_id=producer_subject_id,
@@ -244,6 +295,7 @@ def _without_kind(
 def _temporal(
     *,
     candidate_id: str = "candidate-1",
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
     producer_subject_id: str = "temporal-producer",
     permission: PermissionScope = TEMPORAL_PERMISSION,
     request_id: str = "temporal-request-1",
@@ -275,6 +327,11 @@ def _temporal(
     )
     return GovernedTemporalControlEvidence(
         candidate_id=candidate_id,
+        candidate_content_identity=(
+            candidate_content_identity
+            if candidate_content_identity is not None
+            else _identity(candidate_id=candidate_id)
+        ),
         valid_from=valid_from or NOW - timedelta(minutes=10),
         valid_until=valid_until or NOW + timedelta(minutes=10),
         policy_or_rule_reference="temporal-rule/v1",
@@ -342,6 +399,7 @@ def test_gp2_t04_temporal_window_requires_utc(field_name: str) -> None:
     )
     kwargs = {
         "candidate_id": "candidate-1",
+        "candidate_content_identity": _identity(),
         "valid_from": NOW - timedelta(minutes=10),
         "valid_until": NOW + timedelta(minutes=10),
         "policy_or_rule_reference": "temporal-rule/v1",
@@ -358,6 +416,7 @@ def test_gp2_t05_temporal_valid_until_must_be_after_valid_from() -> None:
     with pytest.raises(ValueError, match="after valid_from"):
         GovernedTemporalControlEvidence(
             candidate_id="candidate-1",
+            candidate_content_identity=_identity(),
             valid_from=NOW,
             valid_until=NOW,
             policy_or_rule_reference="temporal-rule/v1",
@@ -531,11 +590,12 @@ def test_gp2_t20_candidate_id_binding_mismatch_is_denied() -> None:
         provenance_decision=replace(
             target.provenance_decision,
             candidate_id="other-candidate",
+            candidate_content_identity=_identity(candidate_id="other-candidate"),
         ),
     )
     projection = _project(bundles=_replace_kind(bundles, AssessmentKind.CONFIDENCE, target))
     assert projection.outcome is GovernedAdmissionProjectionOutcome.DENIED
-    assert projection.reason_code is GovernedAdmissionProjectionReason.ASSESSMENT_BINDING_MISMATCH
+    assert projection.reason_code is GovernedAdmissionProjectionReason.ASSESSMENT_CONTENT_IDENTITY_MISMATCH
 
 
 def test_gp2_t21_kind_binding_mismatch_is_denied() -> None:
@@ -730,6 +790,8 @@ def test_gp2_t39_exactly_eight_authorized_assessments_and_temporal_evidence_are_
     assert projection.outcome is GovernedAdmissionProjectionOutcome.READY
     assert projection.reason_code is GovernedAdmissionProjectionReason.READY
     assert projection.finding_kind is None
+    assert projection.policy_version == POLICY_VERSION
+    assert POLICY_VERSION == "episodic-admission-governed-input-projection/v2"
 
 
 def test_gp2_t40_ready_projection_contains_exact_effective_mapping() -> None:
@@ -867,3 +929,179 @@ def test_gp2_t47_same_level_findings_use_canonical_kind_order() -> None:
     assert projection.outcome is GovernedAdmissionProjectionOutcome.HOLD
     assert projection.reason_code is GovernedAdmissionProjectionReason.ASSESSMENT_PROVENANCE_HOLD
     assert projection.finding_kind is AssessmentKind.SOURCE_AUTHORITY
+
+
+@pytest.mark.parametrize(
+    "component",
+    ["assessment", "provenance", "evidence", "decision"],
+)
+def test_g2_stale_identity_in_each_bundle_component_is_denied(component: str) -> None:
+    bundles = _all_bundles()
+    kind = AssessmentKind.SOURCE_AUTHORITY
+    target = next(item for item in bundles if item.assessment.kind is kind)
+    stale = _stale_identity()
+
+    if component == "assessment":
+        target = replace(
+            target,
+            assessment=replace(target.assessment, candidate_content_identity=stale),
+        )
+    elif component == "provenance":
+        target = replace(
+            target,
+            provenance_decision=replace(
+                target.provenance_decision,
+                candidate_content_identity=stale,
+            ),
+        )
+    elif component == "evidence":
+        target = replace(
+            target,
+            producer_authorization_evidence=replace(
+                target.producer_authorization_evidence,
+                candidate_content_identity=stale,
+            ),
+        )
+    else:
+        target = replace(
+            target,
+            producer_authorization_decision=replace(
+                target.producer_authorization_decision,
+                candidate_content_identity=stale,
+            ),
+        )
+
+    projection = _project(bundles=_replace_kind(bundles, kind, target))
+    assert projection.outcome is GovernedAdmissionProjectionOutcome.DENIED
+    assert (
+        projection.reason_code
+        is GovernedAdmissionProjectionReason.ASSESSMENT_CONTENT_IDENTITY_MISMATCH
+    )
+    assert projection.candidate_content_identity == _identity()
+
+
+def test_g2_temporal_same_id_stale_identity_is_denied() -> None:
+    projection = _project(
+        temporal=_temporal(candidate_content_identity=_stale_identity())
+    )
+    assert projection.outcome is GovernedAdmissionProjectionOutcome.DENIED
+    assert (
+        projection.reason_code
+        is GovernedAdmissionProjectionReason.TEMPORAL_CONTENT_IDENTITY_MISMATCH
+    )
+    assert projection.candidate_content_identity == _identity()
+
+
+@pytest.mark.parametrize(
+    "stale",
+    [
+        replace(_identity(), digest_hex="0" * 64),
+        replace(_identity(), digest_algorithm="sha256 "),
+        replace(_identity(), canonicalization_version="episodic-memory-candidate-json/v2"),
+        replace(_identity(), policy_version="episodic-candidate-content-identity/v2"),
+    ],
+)
+def test_g2_identity_metadata_mismatch_fails_closed(
+    stale: EpisodicCandidateContentIdentity,
+) -> None:
+    bundles = _all_bundles()
+    kind = AssessmentKind.CONFIDENCE
+    target = next(item for item in bundles if item.assessment.kind is kind)
+    target = replace(
+        target,
+        provenance_decision=replace(
+            target.provenance_decision,
+            candidate_content_identity=stale,
+        ),
+    )
+    projection = _project(bundles=_replace_kind(bundles, kind, target))
+    assert projection.outcome is GovernedAdmissionProjectionOutcome.DENIED
+    assert (
+        projection.reason_code
+        is GovernedAdmissionProjectionReason.ASSESSMENT_CONTENT_IDENTITY_MISMATCH
+    )
+
+
+def test_g2_digest_only_equality_is_not_accepted() -> None:
+    actual = _identity()
+    stale = replace(actual, digest_algorithm="sha256 ")
+    projection = _project(
+        temporal=_temporal(candidate_content_identity=stale)
+    )
+    assert stale.digest_hex == actual.digest_hex
+    assert projection.outcome is GovernedAdmissionProjectionOutcome.DENIED
+    assert (
+        projection.reason_code
+        is GovernedAdmissionProjectionReason.TEMPORAL_CONTENT_IDENTITY_MISMATCH
+    )
+
+
+def test_g2_same_id_candidate_substitution_is_denied() -> None:
+    original_candidate = _candidate()
+    substituted_candidate = _candidate(user_content="substituted content")
+    assert original_candidate.candidate_id == substituted_candidate.candidate_id
+    assert _identity(candidate=original_candidate) != _identity(candidate=substituted_candidate)
+
+    projection = _project(
+        candidate=substituted_candidate,
+        bundles=_all_bundles(),
+        temporal=_temporal(),
+    )
+    assert projection.outcome is GovernedAdmissionProjectionOutcome.DENIED
+    assert (
+        projection.reason_code
+        is GovernedAdmissionProjectionReason.ASSESSMENT_CONTENT_IDENTITY_MISMATCH
+    )
+    assert projection.candidate_content_identity == _identity(candidate=substituted_candidate)
+
+
+@pytest.mark.parametrize(
+    "projection_factory",
+    [
+        lambda: _project(),
+        lambda: _project(
+            bundles=_without_kind(_all_bundles(), AssessmentKind.SENSITIVITY)
+        ),
+        lambda: _project(
+            temporal=_temporal(candidate_content_identity=_stale_identity())
+        ),
+    ],
+)
+def test_g2_all_projection_outcomes_carry_actual_identity(projection_factory) -> None:
+    projection = projection_factory()
+    assert projection.candidate_content_identity == _identity()
+
+
+def test_g2_projection_computes_actual_identity_exactly_once(monkeypatch) -> None:
+    original_compute = projection_module.compute_episodic_candidate_content_identity
+    calls = 0
+
+    def counting_compute(candidate: EpisodicMemoryCandidate):
+        nonlocal calls
+        calls += 1
+        return original_compute(candidate)
+
+    monkeypatch.setattr(
+        projection_module,
+        "compute_episodic_candidate_content_identity",
+        counting_compute,
+    )
+    projection = _project()
+    assert projection.outcome is GovernedAdmissionProjectionOutcome.READY
+    assert calls == 1
+
+
+def test_g2_temporal_identity_candidate_mismatch_rejected_structurally() -> None:
+    with pytest.raises(ValueError, match="candidate_id"):
+        _temporal(
+            candidate_id="candidate-1",
+            candidate_content_identity=_identity(candidate_id="candidate-2"),
+        )
+
+
+def test_g2_projection_contract_has_no_self_attestation_fields() -> None:
+    projection = _project()
+    fields = set(projection.__dataclass_fields__)
+    assert "verified" not in fields
+    assert "trusted" not in fields
+    assert "integrity_ok" not in fields
