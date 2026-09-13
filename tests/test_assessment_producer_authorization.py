@@ -14,6 +14,7 @@ from malak.memory.assessment_provenance import (
     AssessmentProvenanceReason,
 )
 from malak.memory.assessment_producer_authorization import (
+    POLICY_VERSION,
     AssessmentInfluenceClass,
     AssessmentProducerAuthorizationDecision,
     AssessmentProducerAuthorizationEvidence,
@@ -21,6 +22,9 @@ from malak.memory.assessment_producer_authorization import (
     AssessmentProducerAuthorizationReason,
     required_permission_for_assessment,
     validate_assessment_producer_authorization,
+)
+from malak.memory.candidate_content_identity import (
+    EpisodicCandidateContentIdentity,
 )
 from malak.security.contracts import (
     AuthorizationDecision,
@@ -33,10 +37,28 @@ from malak.security.contracts import (
 NOW = datetime(2026, 9, 9, 22, 20, tzinfo=timezone.utc)
 
 
+def _identity(
+    *,
+    candidate_id: str = "candidate-1",
+    digest_hex: str = "a" * 64,
+    digest_algorithm: str = "sha256",
+    canonicalization_version: str = "episodic-memory-candidate-json/v1",
+    policy_version: str = "episodic-candidate-content-identity/v1",
+) -> EpisodicCandidateContentIdentity:
+    return EpisodicCandidateContentIdentity(
+        candidate_id=candidate_id,
+        digest_algorithm=digest_algorithm,
+        digest_hex=digest_hex,
+        canonicalization_version=canonicalization_version,
+        policy_version=policy_version,
+    )
+
+
 def _assessment(
     *,
     assessment_id: str = "assessment-1",
     candidate_id: str = "candidate-1",
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
     kind: AssessmentKind = AssessmentKind.SOURCE_SECURITY_STATUS,
     value: str | bool = "suspect",
     producer_reference: str = "opaque-producer-reference",
@@ -54,6 +76,11 @@ def _assessment(
     return AdmissionAssessment(
         assessment_id=assessment_id,
         candidate_id=candidate_id,
+        candidate_content_identity=(
+            candidate_content_identity
+            if candidate_content_identity is not None
+            else _identity(candidate_id=candidate_id)
+        ),
         kind=kind,
         value=value,
         producer_role=role_by_kind[kind],
@@ -69,6 +96,7 @@ def _provenance(
     outcome: AssessmentProvenanceOutcome = AssessmentProvenanceOutcome.VALID,
     assessment_id: str | None = None,
     candidate_id: str | None = None,
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
     kind: AssessmentKind | None = None,
 ) -> AssessmentProvenanceDecision:
     reason = AssessmentProvenanceReason.VALID
@@ -77,9 +105,22 @@ def _provenance(
     elif outcome is AssessmentProvenanceOutcome.INVALID:
         reason = AssessmentProvenanceReason.CANDIDATE_MISMATCH
 
+    effective_candidate_id = candidate_id or assessment.candidate_id
+    effective_identity = (
+        candidate_content_identity
+        if candidate_content_identity is not None
+        else assessment.candidate_content_identity
+    )
+    if effective_identity.candidate_id != effective_candidate_id:
+        effective_identity = replace(
+            effective_identity,
+            candidate_id=effective_candidate_id,
+        )
+
     return AssessmentProvenanceDecision(
         assessment_id=assessment_id or assessment.assessment_id,
-        candidate_id=candidate_id or assessment.candidate_id,
+        candidate_id=effective_candidate_id,
+        candidate_content_identity=effective_identity,
         kind=kind or assessment.kind,
         outcome=outcome,
         reason_code=reason,
@@ -115,6 +156,7 @@ def _evidence(
     context: SecurityContext | None = None,
     assessment_id: str | None = None,
     candidate_id: str | None = None,
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
     kind: AssessmentKind | None = None,
 ) -> AssessmentProducerAuthorizationEvidence:
     request = AuthorizationRequest(
@@ -132,9 +174,21 @@ def _evidence(
         allowed=allowed,
         reason="policy_allowed" if allowed else "policy_denied",
     )
+    effective_candidate_id = candidate_id or assessment.candidate_id
+    effective_identity = (
+        candidate_content_identity
+        if candidate_content_identity is not None
+        else assessment.candidate_content_identity
+    )
+    if effective_identity.candidate_id != effective_candidate_id:
+        effective_identity = replace(
+            effective_identity,
+            candidate_id=effective_candidate_id,
+        )
     return AssessmentProducerAuthorizationEvidence(
         assessment_id=assessment_id or assessment.assessment_id,
-        candidate_id=candidate_id or assessment.candidate_id,
+        candidate_id=effective_candidate_id,
+        candidate_content_identity=effective_identity,
         kind=kind or assessment.kind,
         influence_class=influence_class,
         producer_subject_id=producer_subject_id,
@@ -217,6 +271,40 @@ def test_provenance_must_bind_to_exact_assessment(
     assert decision.reason_code is reason
 
 
+def test_provenance_content_identity_mismatch_is_denied() -> None:
+    assessment = _assessment()
+    provenance = _provenance(
+        assessment,
+        candidate_content_identity=_identity(digest_hex="b" * 64),
+    )
+    decision = validate_assessment_producer_authorization(
+        assessment,
+        provenance,
+        None,
+        NOW,
+    )
+    assert decision.outcome is AssessmentProducerAuthorizationOutcome.DENIED
+    assert decision.reason_code is AssessmentProducerAuthorizationReason.CONTENT_IDENTITY_MISMATCH
+    assert decision.candidate_content_identity is assessment.candidate_content_identity
+
+
+def test_provenance_identity_mismatch_precedes_provenance_hold() -> None:
+    assessment = _assessment()
+    provenance = _provenance(
+        assessment,
+        outcome=AssessmentProvenanceOutcome.HOLD,
+        candidate_content_identity=_identity(digest_hex="b" * 64),
+    )
+    decision = validate_assessment_producer_authorization(
+        assessment,
+        provenance,
+        None,
+        NOW,
+    )
+    assert decision.outcome is AssessmentProducerAuthorizationOutcome.DENIED
+    assert decision.reason_code is AssessmentProducerAuthorizationReason.CONTENT_IDENTITY_MISMATCH
+
+
 def test_unknown_closed_value_holds_without_inference() -> None:
     assessment = _assessment(value="mystery")
     assert required_permission_for_assessment(assessment) is None
@@ -261,6 +349,17 @@ def test_authorization_evidence_must_bind_to_exact_assessment(
     decision = _validate(assessment, evidence=evidence(assessment))
     assert decision.outcome is AssessmentProducerAuthorizationOutcome.DENIED
     assert decision.reason_code is reason
+
+
+def test_authorization_evidence_content_identity_mismatch_is_denied() -> None:
+    assessment = _assessment()
+    evidence = _evidence(
+        assessment,
+        candidate_content_identity=_identity(digest_hex="b" * 64),
+    )
+    decision = _validate(assessment, evidence=evidence)
+    assert decision.outcome is AssessmentProducerAuthorizationOutcome.DENIED
+    assert decision.reason_code is AssessmentProducerAuthorizationReason.CONTENT_IDENTITY_MISMATCH
 
 
 def test_caller_supplied_influence_cannot_override_derived_influence() -> None:
@@ -352,6 +451,9 @@ def test_exact_allowed_scope_and_bindings_authorize_only_this_boundary() -> None
     assert decision.influence_class is AssessmentInfluenceClass.TRUST_REDUCING
     assert decision.producer_subject_id == "security-producer"
     assert decision.authorization_request_id == "request-1"
+    assert decision.candidate_content_identity is assessment.candidate_content_identity
+    assert decision.policy_version == POLICY_VERSION
+    assert POLICY_VERSION == "episodic-assessment-producer-authorization/v2"
 
 
 def test_trust_reducing_permission_cannot_authorize_trust_increasing_value() -> None:
@@ -467,6 +569,8 @@ def test_authorized_decision_cannot_self_promote_to_admission_or_storage() -> No
     assert not hasattr(decision, "stored")
     assert not hasattr(decision, "persistence_authorized")
     assert not hasattr(decision, "knowledge")
+    assert not hasattr(decision, "verified")
+    assert not hasattr(decision, "trusted")
 
 
 @pytest.mark.parametrize(
@@ -525,9 +629,40 @@ def test_evidence_requires_canonical_ids() -> None:
         AssessmentProducerAuthorizationEvidence(
             assessment_id=" assessment-1 ",
             candidate_id=base.candidate_id,
+            candidate_content_identity=base.candidate_content_identity,
             kind=base.kind,
             influence_class=base.influence_class,
             producer_subject_id=base.producer_subject_id,
             request=base.request,
             decision=base.decision,
+        )
+
+
+def test_evidence_rejects_wrong_identity_type() -> None:
+    assessment = _assessment()
+    base = _evidence(assessment)
+    with pytest.raises(TypeError, match="candidate_content_identity"):
+        AssessmentProducerAuthorizationEvidence(
+            assessment_id=base.assessment_id,
+            candidate_id=base.candidate_id,
+            candidate_content_identity=object(),  # type: ignore[arg-type]
+            kind=base.kind,
+            influence_class=base.influence_class,
+            producer_subject_id=base.producer_subject_id,
+            request=base.request,
+            decision=base.decision,
+        )
+
+
+def test_decision_rejects_identity_candidate_mismatch() -> None:
+    assessment = _assessment()
+    with pytest.raises(ValueError, match="candidate_id"):
+        AssessmentProducerAuthorizationDecision(
+            assessment_id=assessment.assessment_id,
+            candidate_id=assessment.candidate_id,
+            candidate_content_identity=_identity(candidate_id="candidate-2"),
+            kind=assessment.kind,
+            outcome=AssessmentProducerAuthorizationOutcome.HOLD,
+            reason_code=AssessmentProducerAuthorizationReason.MISSING_AUTHORIZATION_EVIDENCE,
+            evaluated_at=NOW,
         )
