@@ -6,6 +6,12 @@ import socket
 import pytest
 
 import malak.memory.governed_input_projection as projection_module
+from malak.memory.candidate_content_identity import (
+    CandidateContentIdentityVerification,
+    EpisodicCandidateContentIdentity,
+    compute_episodic_candidate_content_identity,
+    verify_episodic_candidate_content_identity,
+)
 from malak.memory.episodic_admission import (
     EpisodicAdmissionContext,
     EpisodicAdmissionDecision,
@@ -63,6 +69,7 @@ def _candidate(
     *,
     candidate_id: str = "candidate-1",
     control: EpisodicAdmissionContext | None = None,
+    user_content: str = "user content",
 ) -> EpisodicMemoryCandidate:
     return EpisodicMemoryCandidate(
         candidate_id=candidate_id,
@@ -74,7 +81,7 @@ def _candidate(
             model="model-1",
         ),
         experience=EpisodicExperience(
-            user_content="user content",
+            user_content=user_content,
             assistant_content="assistant content",
         ),
         control=control or _context(
@@ -84,6 +91,20 @@ def _candidate(
         ),
         created_at=NOW - timedelta(hours=2),
     )
+
+
+def _identity(
+    *,
+    candidate: EpisodicMemoryCandidate | None = None,
+    candidate_id: str = "candidate-1",
+) -> EpisodicCandidateContentIdentity:
+    return compute_episodic_candidate_content_identity(
+        candidate or _candidate(candidate_id=candidate_id)
+    )
+
+
+def _stale_identity() -> EpisodicCandidateContentIdentity:
+    return _identity(candidate=_candidate(user_content="different user content"))
 
 
 def _signals(
@@ -106,15 +127,18 @@ def _signals(
 def _projection(
     *,
     candidate_id: str = "candidate-1",
+    candidate_content_identity: EpisodicCandidateContentIdentity | None = None,
     outcome: GovernedAdmissionProjectionOutcome = GovernedAdmissionProjectionOutcome.READY,
     evaluated_at: datetime = NOW,
     effective_context: EpisodicAdmissionContext | None = None,
     effective_signals: EpisodicAdmissionSignals | None = None,
     policy_version: str = PROJECTION_POLICY_VERSION,
 ) -> GovernedAdmissionInputProjection:
+    identity = candidate_content_identity or _identity(candidate_id=candidate_id)
     if outcome is GovernedAdmissionProjectionOutcome.READY:
         return GovernedAdmissionInputProjection(
             candidate_id=candidate_id,
+            candidate_content_identity=identity,
             outcome=outcome,
             reason_code=GovernedAdmissionProjectionReason.READY,
             evaluated_at=evaluated_at,
@@ -128,6 +152,7 @@ def _projection(
         reason = GovernedAdmissionProjectionReason.ASSESSMENT_AUTHORIZATION_DENIED
     return GovernedAdmissionInputProjection(
         candidate_id=candidate_id,
+        candidate_content_identity=identity,
         outcome=outcome,
         reason_code=reason,
         evaluated_at=evaluated_at,
@@ -156,9 +181,14 @@ def _consume(
     projection: GovernedAdmissionInputProjection | None = None,
     evaluated_at: datetime = NOW,
 ) -> GovernedAdmissionConsumptionResult:
+    actual_candidate = candidate or _candidate()
+    actual_projection = projection or _projection(
+        candidate_id=actual_candidate.candidate_id,
+        candidate_content_identity=_identity(candidate=actual_candidate),
+    )
     return consume_governed_admission_projection(
-        candidate or _candidate(),
-        projection or _projection(),
+        actual_candidate,
+        actual_projection,
         evaluated_at,
     )
 
@@ -173,6 +203,30 @@ def _assert_evaluated(
     assert result.admission_decision is not None
     assert result.admission_decision.outcome is outcome
     assert result.admission_decision.reason_code is reason
+    assert (
+        result.actual_candidate_content_identity
+        == result.presented_projection_content_identity
+    )
+
+
+def _result(
+    *,
+    outcome: GovernedAdmissionConsumptionOutcome,
+    reason: GovernedAdmissionConsumptionReason,
+    actual: EpisodicCandidateContentIdentity | None = None,
+    presented: EpisodicCandidateContentIdentity | None = None,
+    admission_decision: EpisodicAdmissionDecision | None = None,
+) -> GovernedAdmissionConsumptionResult:
+    actual_identity = actual or _identity()
+    return GovernedAdmissionConsumptionResult(
+        candidate_id="candidate-1",
+        actual_candidate_content_identity=actual_identity,
+        presented_projection_content_identity=presented or actual_identity,
+        outcome=outcome,
+        reason_code=reason,
+        evaluated_at=NOW,
+        admission_decision=admission_decision,
+    )
 
 
 def test_gc2_t01_result_is_immutable() -> None:
@@ -209,53 +263,43 @@ def test_gc2_t06_non_utc_evaluated_at_raises_value_error() -> None:
 
 def test_gc2_t07_evaluated_result_requires_decision() -> None:
     with pytest.raises(ValueError):
-        GovernedAdmissionConsumptionResult(
-            candidate_id="candidate-1",
+        _result(
             outcome=GovernedAdmissionConsumptionOutcome.EVALUATED,
-            reason_code=GovernedAdmissionConsumptionReason.EVALUATED,
-            evaluated_at=NOW,
+            reason=GovernedAdmissionConsumptionReason.EVALUATED,
         )
 
 
 def test_gc2_t08_blocked_result_forbids_decision() -> None:
     with pytest.raises(ValueError):
-        GovernedAdmissionConsumptionResult(
-            candidate_id="candidate-1",
+        _result(
             outcome=GovernedAdmissionConsumptionOutcome.BLOCKED,
-            reason_code=GovernedAdmissionConsumptionReason.PROJECTION_HOLD,
-            evaluated_at=NOW,
+            reason=GovernedAdmissionConsumptionReason.PROJECTION_HOLD,
             admission_decision=_decision(),
         )
 
 
 def test_gc2_t09_outcome_reason_mismatch_fails_construction() -> None:
     with pytest.raises(ValueError):
-        GovernedAdmissionConsumptionResult(
-            candidate_id="candidate-1",
+        _result(
             outcome=GovernedAdmissionConsumptionOutcome.BLOCKED,
-            reason_code=GovernedAdmissionConsumptionReason.EVALUATED,
-            evaluated_at=NOW,
+            reason=GovernedAdmissionConsumptionReason.EVALUATED,
         )
 
 
 def test_gc2_t10_decision_candidate_id_must_match_result() -> None:
     with pytest.raises(ValueError):
-        GovernedAdmissionConsumptionResult(
-            candidate_id="candidate-1",
+        _result(
             outcome=GovernedAdmissionConsumptionOutcome.EVALUATED,
-            reason_code=GovernedAdmissionConsumptionReason.EVALUATED,
-            evaluated_at=NOW,
+            reason=GovernedAdmissionConsumptionReason.EVALUATED,
             admission_decision=_decision(candidate_id="candidate-2"),
         )
 
 
 def test_gc2_t11_decision_evaluated_at_must_match_result() -> None:
     with pytest.raises(ValueError):
-        GovernedAdmissionConsumptionResult(
-            candidate_id="candidate-1",
+        _result(
             outcome=GovernedAdmissionConsumptionOutcome.EVALUATED,
-            reason_code=GovernedAdmissionConsumptionReason.EVALUATED,
-            evaluated_at=NOW,
+            reason=GovernedAdmissionConsumptionReason.EVALUATED,
             admission_decision=_decision(evaluated_at=NOW + timedelta(seconds=1)),
         )
 
@@ -265,6 +309,8 @@ def test_gc2_t12_candidate_id_mismatch_blocks() -> None:
     assert result.outcome is GovernedAdmissionConsumptionOutcome.BLOCKED
     assert result.reason_code is GovernedAdmissionConsumptionReason.CANDIDATE_BINDING_MISMATCH
     assert result.admission_decision is None
+    assert result.actual_candidate_content_identity.candidate_id == "candidate-1"
+    assert result.presented_projection_content_identity.candidate_id == "candidate-2"
 
 
 def test_gc2_t13_unknown_projection_policy_blocks() -> None:
@@ -411,7 +457,7 @@ def test_gc2_t31_original_candidate_remains_unmodified() -> None:
 
 def test_gc2_t32_effective_candidate_view_does_not_escape(monkeypatch: pytest.MonkeyPatch) -> None:
     candidate = _candidate()
-    projection = _projection()
+    projection = _projection(candidate_content_identity=_identity(candidate=candidate))
     captured: list[EpisodicMemoryCandidate] = []
 
     def fake_evaluator(
@@ -509,6 +555,7 @@ def test_gc2_t43_all_blocked_paths_call_admission_zero_times(monkeypatch: pytest
     monkeypatch.setattr(consumption, "evaluate_episodic_candidate", fake_evaluator)
     cases = (
         (_candidate(), _projection(candidate_id="candidate-2"), NOW),
+        (_candidate(), _projection(candidate_content_identity=_stale_identity()), NOW),
         (_candidate(), _projection(policy_version="projection/unknown"), NOW),
         (_candidate(), _projection(evaluated_at=NOW + timedelta(seconds=1)), NOW),
         (_candidate(), _projection(outcome=GovernedAdmissionProjectionOutcome.DENIED), NOW),
@@ -538,7 +585,7 @@ def test_gc2_t44_admission_decision_is_preserved_exactly(monkeypatch: pytest.Mon
 
 def test_gc2_t45_same_inputs_and_time_are_deterministic() -> None:
     candidate = _candidate()
-    projection = _projection()
+    projection = _projection(candidate_content_identity=_identity(candidate=candidate))
     first = consume_governed_admission_projection(candidate, projection, NOW)
     second = consume_governed_admission_projection(candidate, projection, NOW)
     assert first == second
@@ -577,13 +624,185 @@ def test_gc2_t48_consumer_has_no_filesystem_network_or_persistence_side_effects(
 def test_gc2_t49_eligible_stops_without_persistence_authorization() -> None:
     result = _consume()
     assert result.policy_version == POLICY_VERSION
+    assert POLICY_VERSION == "episodic-admission-governed-projection-consumption/v2"
+    assert PROJECTION_POLICY_VERSION == "episodic-admission-governed-input-projection/v2"
     assert result.admission_decision is not None
     assert result.admission_decision.outcome is EpisodicAdmissionOutcome.ELIGIBLE
     assert set(result.__dataclass_fields__) == {
         "candidate_id",
+        "actual_candidate_content_identity",
+        "presented_projection_content_identity",
         "outcome",
         "reason_code",
         "evaluated_at",
         "admission_decision",
         "policy_version",
     }
+
+
+def test_g2_same_id_stale_projection_identity_blocks_and_preserves_evidence() -> None:
+    stale = _stale_identity()
+    actual = _identity()
+    assert stale.candidate_id == actual.candidate_id
+    assert stale != actual
+
+    result = _consume(
+        projection=_projection(candidate_content_identity=stale),
+    )
+    assert result.outcome is GovernedAdmissionConsumptionOutcome.BLOCKED
+    assert (
+        result.reason_code
+        is GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH
+    )
+    assert result.actual_candidate_content_identity == actual
+    assert result.presented_projection_content_identity == stale
+    assert result.admission_decision is None
+
+
+@pytest.mark.parametrize(
+    "presented",
+    [
+        replace(_identity(), digest_hex="0" * 64),
+        replace(_identity(), digest_algorithm="sha256 "),
+        replace(_identity(), canonicalization_version="episodic-memory-candidate-json/v2"),
+        replace(_identity(), policy_version="episodic-candidate-content-identity/v2"),
+    ],
+)
+def test_g2_incompatible_identity_metadata_blocks(
+    presented: EpisodicCandidateContentIdentity,
+) -> None:
+    result = _consume(
+        projection=_projection(candidate_content_identity=presented),
+    )
+    assert (
+        result.reason_code
+        is GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH
+    )
+    assert result.presented_projection_content_identity == presented
+
+
+def test_g2_digest_only_match_is_not_accepted() -> None:
+    actual = _identity()
+    presented = replace(actual, digest_algorithm="sha256 ")
+    assert presented.digest_hex == actual.digest_hex
+    result = _consume(
+        projection=_projection(candidate_content_identity=presented),
+    )
+    assert (
+        result.reason_code
+        is GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH
+    )
+
+
+def test_g2_identity_mismatch_precedes_policy_outcome_and_context_checks() -> None:
+    projection = _projection(
+        candidate_content_identity=_stale_identity(),
+        outcome=GovernedAdmissionProjectionOutcome.DENIED,
+        evaluated_at=NOW + timedelta(minutes=1),
+        policy_version="projection/unknown",
+    )
+    result = _consume(projection=projection, evaluated_at=NOW)
+    assert (
+        result.reason_code
+        is GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH
+    )
+
+
+def test_g2_identity_mismatch_never_invokes_admission(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = 0
+
+    def forbidden(*args: object, **kwargs: object) -> EpisodicAdmissionDecision:
+        nonlocal calls
+        calls += 1
+        raise AssertionError("Admission must not run after identity mismatch")
+
+    monkeypatch.setattr(consumption, "evaluate_episodic_candidate", forbidden)
+    result = _consume(
+        projection=_projection(candidate_content_identity=_stale_identity())
+    )
+    assert result.outcome is GovernedAdmissionConsumptionOutcome.BLOCKED
+    assert calls == 0
+
+
+def test_g2_consumption_verifies_identity_independently(monkeypatch: pytest.MonkeyPatch) -> None:
+    original_verify = verify_episodic_candidate_content_identity
+    calls = 0
+
+    def counting_verify(
+        candidate: EpisodicMemoryCandidate,
+        identity: EpisodicCandidateContentIdentity,
+    ) -> CandidateContentIdentityVerification:
+        nonlocal calls
+        calls += 1
+        return original_verify(candidate, identity)
+
+    monkeypatch.setattr(
+        consumption,
+        "verify_episodic_candidate_content_identity",
+        counting_verify,
+    )
+    _assert_evaluated(
+        _consume(),
+        EpisodicAdmissionOutcome.ELIGIBLE,
+        EpisodicAdmissionReason.ELIGIBLE,
+    )
+    assert calls == 1
+
+
+def test_g2_same_id_candidate_substitution_blocks() -> None:
+    original = _candidate()
+    substituted = _candidate(user_content="substituted content")
+    assert original.candidate_id == substituted.candidate_id
+    original_identity = _identity(candidate=original)
+    substituted_identity = _identity(candidate=substituted)
+    assert original_identity != substituted_identity
+
+    result = _consume(
+        candidate=substituted,
+        projection=_projection(candidate_content_identity=original_identity),
+    )
+    assert (
+        result.reason_code
+        is GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH
+    )
+    assert result.actual_candidate_content_identity == substituted_identity
+    assert result.presented_projection_content_identity == original_identity
+
+
+def test_g2_evaluated_result_rejects_different_actual_and_presented_identities() -> None:
+    with pytest.raises(ValueError, match="matching actual and presented"):
+        _result(
+            outcome=GovernedAdmissionConsumptionOutcome.EVALUATED,
+            reason=GovernedAdmissionConsumptionReason.EVALUATED,
+            presented=_stale_identity(),
+            admission_decision=_decision(),
+        )
+
+
+def test_g2_nonbinding_blocked_result_rejects_different_identities() -> None:
+    with pytest.raises(ValueError, match="non-binding BLOCKED"):
+        _result(
+            outcome=GovernedAdmissionConsumptionOutcome.BLOCKED,
+            reason=GovernedAdmissionConsumptionReason.PROJECTION_HOLD,
+            presented=_stale_identity(),
+        )
+
+
+def test_g2_binding_blocked_result_allows_forensic_identity_difference() -> None:
+    result = _result(
+        outcome=GovernedAdmissionConsumptionOutcome.BLOCKED,
+        reason=GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH,
+        presented=_stale_identity(),
+    )
+    assert (
+        result.actual_candidate_content_identity
+        != result.presented_projection_content_identity
+    )
+
+
+def test_g2_result_has_no_self_attestation_fields() -> None:
+    result = _consume()
+    fields = set(result.__dataclass_fields__)
+    assert "verified" not in fields
+    assert "trusted" not in fields
+    assert "integrity_ok" not in fields
