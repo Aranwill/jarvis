@@ -2,7 +2,7 @@
 id: DOC-ARQ-BLUEPRINT
 title: Blueprint
 status: active
-version: 0.6.2-alpha
+version: 0.6.3-alpha
 date: 2026-07-05
 author: Hector Rodriguez
 reviewed_by: []
@@ -22,6 +22,7 @@ related:
     - ADR-003
     - ADR-004
     - ADR-005
+    - ADR-006
 
 graph:
   type: architecture_document
@@ -41,7 +42,7 @@ graph:
 
 history:
   created: 2026-06-27
-  updated: 2026-09-10
+  updated: 2026-09-13
 ---
 
 # Malāk Blueprint
@@ -55,13 +56,13 @@ history:
 >
 > Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
-**Blueprint Versión:** 0.6.2-alpha
+**Blueprint Versión:** 0.6.3-alpha
 **Project Version:** v0.6.0-alpha
 **Documento:** BP-001
 **Estado:** Aprobado y validado
 **Sprint:** Sprint 6.5 — Conversation Runtime
 **Clasificación:** Documento Maestro de Arquitectura
-**Última revisión arquitectónica:** 2026-09-10
+**Última revisión arquitectónica:** 2026-09-13
 
 ---
 
@@ -568,6 +569,57 @@ validación aplicable y presentar directamente su output como Final Response.
 Esta regla define una propiedad arquitectónica y no prescribe por sí misma una
 nueva layer, service, manager, provider ni implementación concreta.
 
+
+
+---
+
+## R-023 — Transición protegida hacia Reliance Durable
+
+La retención, almacenamiento, recuperación o admisión previa de material no lo
+convierte por sí mismo en fundamento válido para reliance durable.
+
+Toda transición en la que Memory, Knowledge, evidencia externa o un artefacto
+derivado pase a ser fundamento material de un efecto durable, o de una decisión de
+alto impacto cuya clasificación deba determinarse mediante reglas gobernadas,
+auditables y fail-closed y cuya corrección dependa materialmente de ese contenido,
+deberá satisfacer las garantías aplicables de identidad, integridad y provenance
+definidas por la Constitución Cognitiva y las policies/specifications vigentes.
+
+Las garantías deberán corresponder al material exacto, a la derivación relevante y
+al contexto actual de la transición; no podrán heredarse únicamente por compartir
+un identificador lógico, fuente declarada, ubicación de almacenamiento, historial
+de admisión o relación de derivación. Una policy puede refinar la instanciación,
+suficiencia, profundidad proporcional al riesgo, revalidación y aplicabilidad
+condicional dentro de criterios gobernados superiores; no puede anular una
+obligación constitucional aplicable, fabricar no-aplicabilidad para evadirla ni
+convertir ausencia de capacidad de evaluación en autorización para continuar.
+
+Toda no-aplicabilidad material que elimine una garantía deberá estar gobernada,
+justificada y ser reconstructible/auditable. Costo, latencia, conveniencia, ausencia
+de evaluator o preferencia del productor/presentador no constituyen por sí solos
+justificación válida.
+
+La ausencia o incertidumbre material de clasificación de impacto no equivale a bajo
+impacto. Si dicha incertidumbre pudiera cambiar las garantías exigibles, deberán
+aplicarse protecciones de alto impacto o bloquearse/escalarse la transición; nunca
+degradarse por default.
+
+Una garantía válida para un artefacto, versión, contexto o momento no se presume
+válida para otro. Cuando una garantía material requerida no pueda establecerse, haya
+dejado de ser aplicable, esté stale o no pueda revalidarse cuando corresponda, la
+transición deberá fallar de forma cerrada: deberá bloquearse, limitarse, negarse o
+producir abstención según la policy aplicable.
+
+Cualquier retención o quarantine de revisión es un efecto operativo separado:
+requiere autorización independiente bajo Governance/policy de autorización
+aplicable, queda sujeto a Security enforcement/constraints y respeta las semantics
+de lifecycle de Memory correspondientes. Retención o quarantine no equivalen a
+autorización para reliance posterior.
+
+Esta regla define una propiedad arquitectónica y no prescribe por sí misma una nueva
+layer, service, manager, mecanismo criptográfico, storage technology ni
+implementación concreta.
+
 # 10. Componentes Estratégicos
 
 El Blueprint establece los siguientes componentes principales:
@@ -616,7 +668,7 @@ Queda prohibido:
 
 Versión del Blueprint:
 
-**Blueprint v0.6.2-alpha**
+**Blueprint v0.6.3-alpha**
 
 Estado normativo:
 
