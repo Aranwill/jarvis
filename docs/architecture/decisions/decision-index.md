@@ -51,6 +51,7 @@ Todas las ADR deberán:
 | ADR-003 | Accepted | 2026-08-15 | Directional Communication and Authority Flow | Architecture / Communication |
 | ADR-004 | Accepted | 2026-08-19 | Specification and Verification First | Architecture / Engineering Method |
 | ADR-005 | Accepted | 2026-09-10 | Evidence-Bound Final Response Transition | Architecture / Cognition |
+| ADR-006 | Accepted | 2026-09-13 | Protected Durable Reliance Preconditions | Architecture / Cognition / Memory |
 
 ---
 
@@ -94,14 +95,15 @@ Toda ADR aceptada deberá registrarse aquí.
 | ADR-003 | Directional Communication and Authority Flow | Accepted | 2026-08-15 | Architecture |
 | ADR-004 | Specification and Verification First | Accepted | 2026-08-19 | Architecture |
 | ADR-005 | Evidence-Bound Final Response Transition | Accepted | 2026-09-10 | Architecture |
+| ADR-006 | Protected Durable Reliance Preconditions | Accepted | 2026-09-13 | Architecture |
 
 ---
 
 ## Statistics
 
-Total ADRs: 5
+Total ADRs: 6
 
-Accepted: 5
+Accepted: 6
 
 Superseded: 0
 
