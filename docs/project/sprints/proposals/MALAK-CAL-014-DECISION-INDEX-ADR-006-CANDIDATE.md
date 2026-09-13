@@ -4,15 +4,18 @@ status: gate_candidate
 authority: non_normative_patch_candidate
 language: es
 as_of_date: 2026-09-13
-source_baseline: b61c2764b708bf96ca3829e5a9959a0c5e53ad2c
+source_baseline: 876fa62819ec511d4f0d2e7ad6e759aa3f275cf9
 target_path: docs/architecture/decisions/decision-index.md
 target_blob: 9d3c12a80adfbbca5bb9cdb6c90c933dab19c427
+controlling_hardening: docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-SCOPE-INTERPRETIVE-HARDENING.md
+refreshes_candidate_from_pr: 130
 adr_acceptance_authorized: false
 normative_activation_authorized: false
 law_materialization_authorized: false
 owner_local_materialization_required: true
 related:
   - docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-PROMOTION-SCOPE-FREEZE.md
+  - docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-SCOPE-INTERPRETIVE-HARDENING.md
   - docs/project/sprints/proposals/MALAK-CAL-014-ADR-006-CANDIDATE.md
   - docs/architecture/decisions/decision-index.md
 ---
@@ -23,6 +26,10 @@ related:
 
 Preservar el delta exacto del Decision Index que solo podrá aplicarse después de
 una aceptación humana explícita de ADR-006.
+
+El Interpretive Hardening no modificó identidad, status target ni domain del
+bookkeeping de ADR-006; por tanto este refresh conserva el gating original y solo
+actualiza su binding al baseline controlante.
 
 ```text
 ADR candidate != Accepted ADR
@@ -113,6 +120,14 @@ Draft: 0
 all previous dates/titles/domains
 ```
 
+Y debe seguir siendo cierto:
+
+```text
+Proposed ADR-006 -> no Decision Index delta
+Accepted ADR-006 by Owner -> this candidate delta becomes eligible
+Decision Index bookkeeping != architectural authority
+```
+
 ## 5. Stop conditions
 
 Detener si:
@@ -121,6 +136,7 @@ Detener si:
 - el target blob cambió;
 - ADR-006 ya aparece en cualquiera de las tablas;
 - otra ADR ocupó el identificador ADR-006;
+- cambió materialmente title/domain/status esperado de ADR-006;
 - se requiere modificar una ADR previa o cualquier otra estadística;
 - se intenta usar el índice como sustituto de la decisión arquitectónica.
 
