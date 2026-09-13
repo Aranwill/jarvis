@@ -7,7 +7,7 @@ status: active
 
 version: 0.6.0-alpha
 
-date: 2026-09-10
+date: 2026-09-13
 
 author: Hector Rodriguez
 
@@ -26,6 +26,7 @@ related:
   adr:
     - ADR-001
     - ADR-005
+    - ADR-006
 
 graph:
   type: governance_document
@@ -44,7 +45,7 @@ graph:
 
 history:
   created: 2026-06-27
-  updated: 2026-09-10
+  updated: 2026-09-13
 ---
 
 # 1. Constitución Cognitiva
@@ -58,7 +59,7 @@ history:
 >
 > Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
-**Versión:** 1.1.0
+**Versión:** 1.2.0
 
 ---
 
@@ -247,6 +248,67 @@ validación aplicable y presentar directamente un candidato como respuesta final
 Esta obligación no prescribe un número fijo de modelos, fuentes, verificadores ni
 pasos cognitivos; la profundidad de assurance deberá permanecer proporcional y
 gobernada.
+
+---
+
+
+
+---
+
+## CC-013 — Reliance Durable Protegido
+
+Antes de que Memory, Knowledge, evidencia externa o artefactos derivados sean
+utilizados como fundamento material de una transición durable, o de una decisión de
+alto impacto cuya clasificación deba determinarse mediante reglas gobernadas,
+auditables y fail-closed y cuya corrección dependa materialmente de ese contenido,
+Malāk deberá satisfacer, proporcionalmente al riesgo y en el momento del reliance,
+garantías aplicables y suficientes ligadas al material exacto y a su derivación
+relevante sobre identidad de origen o productor cuando dicha identidad sea material
+para la corrección, provenance, trust, authority, admissibility o riesgo de la
+transición, integridad del contenido y provenance.
+
+La aplicabilidad y suficiencia podrán ser refinadas por rules/policies gobernadas,
+pero ninguna policy inferior podrá omitir, rebajar, declarar satisfecha por default
+o convertir en opcional una obligación constitucional materialmente aplicable. La
+no-aplicabilidad material que elimine una garantía deberá estar gobernada,
+justificada y ser reconstructible/auditable bajo criterios superiores aplicables; no
+podrá fabricarse por conveniencia, costo, latencia, ausencia de evaluator ni interés
+del productor/presentador. La suficiencia no podrá surgir de autoafirmación del
+material, de su productor ni del componente que lo presenta. Cuando una obligación
+constitucional material sea aplicable y no exista una policy o mecanismo autorizado
+capaz de evaluarla, la transición deberá fallar de forma cerrada.
+
+La ausencia o incertidumbre material de clasificación de impacto no podrá
+interpretarse como bajo impacto. Cuando dicha incertidumbre pueda alterar la
+aplicabilidad de estas garantías, Malāk deberá aplicar las protecciones de alto
+impacto o bloquear/escalar la transición según las policies gobernadas aplicables;
+nunca degradarla por default.
+
+Estas garantías no son transitivas ni reutilizables por default entre artefactos,
+versiones, derivaciones, contextos, propósitos o momentos distintos. Un identificador
+lógico, la igualdad de fuente declarada, la mera presencia o recuperación del
+material, su admisión o almacenamiento previo, el consenso, la repetición, la
+ausencia de contradicciones detectadas o la confianza declarada no sustituyen una
+garantía material aplicable. `content integrity != semantic truth`, `provenance !=
+trust` y `source identity != authority`.
+
+Cuando una garantía material requerida no pueda establecerse, haya quedado obsoleta
+para la transición, no pueda revalidarse cuando corresponda o una no-aplicabilidad
+material no pueda justificarse bajo criterios gobernados, no podrá considerarse
+implícitamente satisfecha. Malāk deberá impedir la transición, limitar su alcance,
+negar o abstenerse según las policies aplicables.
+
+Cualquier retención o quarantine de revisión es un efecto operativo separado y solo
+podrá ocurrir cuando exista autorización independiente bajo Governance/policy de
+autorización aplicable, sujeta a los controles de Security y a las semantics de
+lifecycle de Memory que correspondan. Dicha autorización no concede reliance
+posterior sin una nueva evaluación aplicable.
+
+Esta regla no convierte identidad, integridad, provenance, receipts, almacenamiento
+ni evidencia en trust o autoridad; no impide retención forense o quarantine
+gobernada de material no confiable cuando exista autorización independiente
+aplicable; y no prescribe un mecanismo criptográfico, tecnología de almacenamiento
+o implementación concreta.
 
 ---
 
