@@ -24,10 +24,10 @@ exact_candidate_refresh_required: true
 related:
   - docs/project/sprints/proposals/MALAK-CAL-014-DURABLE-RELIANCE-CONSTITUTIONAL-IMPACT-G0-G1.md
   - docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-PROMOTION-SCOPE-FREEZE.md
-  - docs/project/sprints/proposals/MALAK-CAL-014-COGNITIVE-CONSTITUTION-CANDIDATE-PATCH.md
-  - docs/project/sprints/proposals/MALAK-CAL-014-BLUEPRINT-CANDIDATE-PATCH.md
+  - docs/project/sprints/proposals/MALAK-CAL-014-COGNITIVE-CONSTITUTION-V1.2-CANDIDATE.md
+  - docs/project/sprints/proposals/MALAK-CAL-014-BLUEPRINT-V0.6.3-CANDIDATE.md
   - docs/project/sprints/proposals/MALAK-CAL-014-ADR-006-CANDIDATE.md
-  - docs/project/sprints/proposals/MALAK-CAL-014-DECISION-INDEX-CANDIDATE-PATCH.md
+  - docs/project/sprints/proposals/MALAK-CAL-014-DECISION-INDEX-ADR-006-CANDIDATE.md
   - docs/governance/cognitive_constitution.md
   - docs/governance/governance_constitution.md
   - docs/architecture/blueprint.md
