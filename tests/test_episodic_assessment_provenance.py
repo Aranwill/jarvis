@@ -14,6 +14,9 @@ from malak.memory.assessment_provenance import (
     AssessmentProvenanceReason,
     validate_assessment_provenance,
 )
+from malak.memory.candidate_content_identity import (
+    EpisodicCandidateContentIdentity,
+)
 
 
 EVALUATED_AT = datetime(2026, 9, 9, 18, 30, tzinfo=UTC)
@@ -460,3 +463,79 @@ def test_assessment_binding_survives_dataclass_replace() -> None:
     assert decision.candidate_id == "candidate-2"
     assert decision.outcome is AssessmentProvenanceOutcome.INVALID
     assert decision.reason_code is AssessmentProvenanceReason.CANDIDATE_MISMATCH
+
+
+# G2 TDD RED checkpoint -------------------------------------------------------
+
+
+def _g2_identity(
+    *,
+    candidate_id: str = "candidate-1",
+    digest_hex: str = "a" * 64,
+) -> EpisodicCandidateContentIdentity:
+    return EpisodicCandidateContentIdentity(
+        candidate_id=candidate_id,
+        digest_algorithm="sha256",
+        digest_hex=digest_hex,
+        canonicalization_version="episodic-memory-candidate-json/v1",
+        policy_version="episodic-candidate-content-identity/v1",
+    )
+
+
+def test_g2_assessment_content_identity_is_mandatory() -> None:
+    with pytest.raises(TypeError):
+        AdmissionAssessment(
+            assessment_id="assessment-g2",
+            candidate_id="candidate-1",
+            kind=AssessmentKind.SOURCE_AUTHORITY,
+            value="conversation-source",
+        )
+
+
+def test_g2_same_id_different_content_identity_is_invalid_before_hold() -> None:
+    assessment = AdmissionAssessment(
+        assessment_id="assessment-g2",
+        candidate_id="candidate-1",
+        candidate_content_identity=_g2_identity(digest_hex="a" * 64),
+        kind=AssessmentKind.SOURCE_AUTHORITY,
+        value="conversation-source",
+        producer_role=None,
+        producer_reference=None,
+        policy_or_rule_reference=None,
+        assessed_at=None,
+    )
+
+    decision = validate_assessment_provenance(
+        assessment,
+        _g2_identity(digest_hex="b" * 64),
+        EVALUATED_AT,
+    )
+
+    assert decision.outcome is AssessmentProvenanceOutcome.INVALID
+    assert decision.reason_code is AssessmentProvenanceReason.CONTENT_IDENTITY_MISMATCH
+    assert decision.candidate_content_identity == assessment.candidate_content_identity
+
+
+def test_g2_valid_provenance_carries_identity_and_policy_v2() -> None:
+    identity = _g2_identity()
+    assessment = AdmissionAssessment(
+        assessment_id="assessment-g2",
+        candidate_id="candidate-1",
+        candidate_content_identity=identity,
+        kind=AssessmentKind.SOURCE_AUTHORITY,
+        value="conversation-source",
+        producer_role=AssessmentProducerRole.SOURCE_GOVERNANCE,
+        producer_reference="source-governance/default",
+        policy_or_rule_reference="source-authority/v1",
+        assessed_at=EVALUATED_AT - timedelta(seconds=1),
+    )
+
+    decision = validate_assessment_provenance(
+        assessment,
+        identity,
+        EVALUATED_AT,
+    )
+
+    assert decision.outcome is AssessmentProvenanceOutcome.VALID
+    assert decision.candidate_content_identity is identity
+    assert decision.policy_version == "episodic-assessment-provenance/v2"
