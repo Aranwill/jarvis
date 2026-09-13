@@ -1,6 +1,6 @@
 # Malāk Construction Protocol
 
-Versión: 0.2.1
+Versión: 0.2.2
 
 Estado: Activo
 
@@ -264,6 +264,84 @@ DEFERRED
 
 Esta clasificación informa la admisión; no crea componentes ni autoriza implementación.
 
+## 4.6 Malāk Alignment Matrix
+
+Toda unidad material que alcance G0/G1, admission review o selección formal de la próxima implementación debe producir una **Malāk Alignment Matrix** antes de congelar una especificación de implementación.
+
+La matriz existe para demostrar que el cambio nace del baseline y se adapta a la lógica propia de Malāk, en lugar de introducir por inercia un patrón externo, una idea histórica o una interpretación conversacional no trazable.
+
+Debe contrastar, según aplicabilidad:
+
+```text
+Cognitive Constitution
+Governance Constitution
+Blueprint
+SECURITY.md
+Architecture Quality Gates
+especificaciones / ADR / contratos vigentes relacionados
+implementation roadmap
+ideas.md
+MALAK_RESEARCH_HORIZON_MAP.md
+concepts/** relevantes
+código y tests del baseline
+```
+
+Formato mínimo equivalente:
+
+```text
+source
+source_authority_class
+applicable_invariant_or_intent
+baseline_evidence
+alignment_disposition
+implementation_effect
+deferred_or_rejected_effect
+rationale
+traceability_reference
+```
+
+`alignment_disposition` utiliza:
+
+```text
+ADOPT
+ADAPT
+OBSERVE
+REJECT
+```
+
+La matriz debe distinguir explícitamente:
+
+```text
+IMPLEMENTED / TO IMPLEMENT
+NOT IMPLEMENTED
+DEFERRED
+REJECTED
+WHY
+```
+
+Reglas obligatorias:
+
+- una fuente de menor autoridad no puede reinterpretar ni suavizar una obligación de una fuente superior;
+- una idea o concepto incompatible con Constitución, Gobernanza, Blueprint, Security o un contrato vigente debe recibir `REJECT` o producir `STOP`; no puede legitimarse mediante `ADAPT`;
+- una fuente histórica o conceptual con estado operativo obsoleto puede conservar intención útil, pero su snapshot no sustituye al baseline actual;
+- `ADOPT` o `ADAPT` no constituyen autorización de implementación;
+- `OBSERVE` y `DEFERRED` deben permanecer fuera del candidate vigente;
+- `REJECT` debe conservar la razón suficiente para impedir que la misma interpretación reaparezca silenciosamente;
+- una ausencia material de trazabilidad entre el cambio propuesto y las fuentes relevantes constituye finding de proceso;
+- si el baseline cambia materialmente entre G0/G1 y la especificación o implementación, la parte afectada de la matriz debe revalidarse;
+- la matriz puede vivir dentro del design record, admission review o artefacto equivalente; no requiere un registry, manager o servicio nuevo.
+
+La matriz no crea una nueva jerarquía documental. Su función es hacer demostrable la aplicación de la jerarquía existente.
+
+Separación obligatoria:
+
+```text
+alignment evidence != authority
+conceptual reuse != implementation authorization
+historical intent != current baseline
+method compliance != architectural permission
+```
+
 ---
 
 # 5. Planificación por gates
@@ -278,6 +356,7 @@ objective
 preconditions
 candidate_identity
 risk_class
+alignment_matrix_ref
 allowed_files
 allowed_components
 forbidden_components
