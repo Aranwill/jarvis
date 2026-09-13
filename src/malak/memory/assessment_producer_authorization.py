@@ -8,6 +8,9 @@ from malak.memory.assessment_provenance import (
     AssessmentProvenanceDecision,
     AssessmentProvenanceOutcome,
 )
+from malak.memory.candidate_content_identity import (
+    EpisodicCandidateContentIdentity,
+)
 from malak.security.contracts import (
     AuthorizationDecision,
     AuthorizationRequest,
@@ -15,7 +18,7 @@ from malak.security.contracts import (
 )
 
 
-POLICY_VERSION = "episodic-assessment-producer-authorization/v1"
+POLICY_VERSION = "episodic-assessment-producer-authorization/v2"
 
 
 def _require_canonical_text(value: str, field_name: str) -> str:
@@ -50,6 +53,22 @@ def _require_utc_datetime(value: datetime, field_name: str) -> datetime:
     return value
 
 
+def _require_content_identity(
+    value: EpisodicCandidateContentIdentity,
+    candidate_id: str,
+) -> EpisodicCandidateContentIdentity:
+    if not isinstance(value, EpisodicCandidateContentIdentity):
+        raise TypeError(
+            "candidate_content_identity must be an "
+            "EpisodicCandidateContentIdentity"
+        )
+    if value.candidate_id != candidate_id:
+        raise ValueError(
+            "candidate_content_identity candidate_id must match candidate_id"
+        )
+    return value
+
+
 class AssessmentInfluenceClass(StrEnum):
     TRUST_INCREASING = "trust_increasing"
     TRUST_REDUCING = "trust_reducing"
@@ -62,6 +81,7 @@ class AssessmentInfluenceClass(StrEnum):
 class AssessmentProducerAuthorizationEvidence:
     assessment_id: str
     candidate_id: str
+    candidate_content_identity: EpisodicCandidateContentIdentity
     kind: AssessmentKind
     influence_class: AssessmentInfluenceClass
     producer_subject_id: str
@@ -78,6 +98,14 @@ class AssessmentProducerAuthorizationEvidence:
             self,
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
+        )
+        object.__setattr__(
+            self,
+            "candidate_content_identity",
+            _require_content_identity(
+                self.candidate_content_identity,
+                self.candidate_id,
+            ),
         )
         object.__setattr__(
             self,
@@ -113,6 +141,7 @@ class AssessmentProducerAuthorizationReason(StrEnum):
     MISSING_AUTHORIZATION_EVIDENCE = "missing_authorization_evidence"
     ASSESSMENT_ID_MISMATCH = "assessment_id_mismatch"
     CANDIDATE_ID_MISMATCH = "candidate_id_mismatch"
+    CONTENT_IDENTITY_MISMATCH = "content_identity_mismatch"
     KIND_MISMATCH = "kind_mismatch"
     UNSUPPORTED_ASSESSMENT_VALUE = "unsupported_assessment_value"
     INFLUENCE_CLASS_MISMATCH = "influence_class_mismatch"
@@ -129,6 +158,7 @@ class AssessmentProducerAuthorizationReason(StrEnum):
 class AssessmentProducerAuthorizationDecision:
     assessment_id: str
     candidate_id: str
+    candidate_content_identity: EpisodicCandidateContentIdentity
     kind: AssessmentKind
     outcome: AssessmentProducerAuthorizationOutcome
     reason_code: AssessmentProducerAuthorizationReason
@@ -148,6 +178,14 @@ class AssessmentProducerAuthorizationDecision:
             self,
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
+        )
+        object.__setattr__(
+            self,
+            "candidate_content_identity",
+            _require_content_identity(
+                self.candidate_content_identity,
+                self.candidate_id,
+            ),
         )
 
         if not isinstance(self.kind, AssessmentKind):
@@ -291,6 +329,7 @@ def _decision(
     return AssessmentProducerAuthorizationDecision(
         assessment_id=assessment.assessment_id,
         candidate_id=assessment.candidate_id,
+        candidate_content_identity=assessment.candidate_content_identity,
         kind=assessment.kind,
         outcome=outcome,
         reason_code=reason_code,
@@ -373,20 +412,6 @@ def validate_assessment_producer_authorization(
             evaluated_at,
         )
 
-    if provenance_decision.outcome is AssessmentProvenanceOutcome.HOLD:
-        return _hold(
-            assessment,
-            AssessmentProducerAuthorizationReason.PROVENANCE_HOLD,
-            evaluated_at,
-        )
-
-    if provenance_decision.outcome is AssessmentProvenanceOutcome.INVALID:
-        return _denied(
-            assessment,
-            AssessmentProducerAuthorizationReason.PROVENANCE_INVALID,
-            evaluated_at,
-        )
-
     if provenance_decision.assessment_id != assessment.assessment_id:
         return _denied(
             assessment,
@@ -401,10 +426,34 @@ def validate_assessment_producer_authorization(
             evaluated_at,
         )
 
+    if (
+        provenance_decision.candidate_content_identity
+        != assessment.candidate_content_identity
+    ):
+        return _denied(
+            assessment,
+            AssessmentProducerAuthorizationReason.CONTENT_IDENTITY_MISMATCH,
+            evaluated_at,
+        )
+
     if provenance_decision.kind is not assessment.kind:
         return _denied(
             assessment,
             AssessmentProducerAuthorizationReason.KIND_MISMATCH,
+            evaluated_at,
+        )
+
+    if provenance_decision.outcome is AssessmentProvenanceOutcome.HOLD:
+        return _hold(
+            assessment,
+            AssessmentProducerAuthorizationReason.PROVENANCE_HOLD,
+            evaluated_at,
+        )
+
+    if provenance_decision.outcome is AssessmentProvenanceOutcome.INVALID:
+        return _denied(
+            assessment,
+            AssessmentProducerAuthorizationReason.PROVENANCE_INVALID,
             evaluated_at,
         )
 
@@ -438,6 +487,15 @@ def validate_assessment_producer_authorization(
         return _denied(
             assessment,
             AssessmentProducerAuthorizationReason.CANDIDATE_ID_MISMATCH,
+            evaluated_at,
+            influence_class=influence_class,
+            evidence=evidence,
+        )
+
+    if evidence.candidate_content_identity != assessment.candidate_content_identity:
+        return _denied(
+            assessment,
+            AssessmentProducerAuthorizationReason.CONTENT_IDENTITY_MISMATCH,
             evaluated_at,
             influence_class=influence_class,
             evidence=evidence,
