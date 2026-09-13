@@ -4,7 +4,7 @@ title: Architecture Decision Title
 status: proposed
 date: YYYY-MM-DD
 author: Hector Rodriguez
-reviewed_by: ChatGPT
+reviewed_by: []
 version: 0.6.0-alpha
 
 tags:
