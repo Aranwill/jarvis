@@ -2,6 +2,12 @@ import dataclasses
 from datetime import datetime, timedelta
 from enum import StrEnum
 
+from malak.memory.candidate_content_identity import (
+    CandidateContentIdentityVerification,
+    EpisodicCandidateContentIdentity,
+    compute_episodic_candidate_content_identity,
+    verify_episodic_candidate_content_identity,
+)
 from malak.memory.episodic_admission import (
     EpisodicAdmissionDecision,
     EpisodicMemoryCandidate,
@@ -14,7 +20,7 @@ from malak.memory.governed_input_projection import (
 )
 
 
-POLICY_VERSION = "episodic-admission-governed-projection-consumption/v1"
+POLICY_VERSION = "episodic-admission-governed-projection-consumption/v2"
 
 
 def _require_canonical_text(value: str, field_name: str) -> str:
@@ -40,6 +46,15 @@ def _require_utc_datetime(value: datetime, field_name: str) -> datetime:
     return value
 
 
+def _require_content_identity(
+    value: EpisodicCandidateContentIdentity,
+    field_name: str,
+) -> EpisodicCandidateContentIdentity:
+    if not isinstance(value, EpisodicCandidateContentIdentity):
+        raise TypeError(f"{field_name} must be an EpisodicCandidateContentIdentity")
+    return value
+
+
 class GovernedAdmissionConsumptionOutcome(StrEnum):
     EVALUATED = "evaluated"
     BLOCKED = "blocked"
@@ -47,6 +62,7 @@ class GovernedAdmissionConsumptionOutcome(StrEnum):
 
 class GovernedAdmissionConsumptionReason(StrEnum):
     CANDIDATE_BINDING_MISMATCH = "candidate_binding_mismatch"
+    CONTENT_IDENTITY_BINDING_MISMATCH = "content_identity_binding_mismatch"
     UNSUPPORTED_PROJECTION_POLICY = "unsupported_projection_policy"
     CONSUMPTION_TIME_PRECEDES_PROJECTION = "consumption_time_precedes_projection"
     PROJECTION_DENIED = "projection_denied"
@@ -58,6 +74,8 @@ class GovernedAdmissionConsumptionReason(StrEnum):
 @dataclasses.dataclass(frozen=True, slots=True)
 class GovernedAdmissionConsumptionResult:
     candidate_id: str
+    actual_candidate_content_identity: EpisodicCandidateContentIdentity
+    presented_projection_content_identity: EpisodicCandidateContentIdentity
     outcome: GovernedAdmissionConsumptionOutcome
     reason_code: GovernedAdmissionConsumptionReason
     evaluated_at: datetime
@@ -70,6 +88,27 @@ class GovernedAdmissionConsumptionResult:
             "candidate_id",
             _require_canonical_text(self.candidate_id, "candidate_id"),
         )
+        object.__setattr__(
+            self,
+            "actual_candidate_content_identity",
+            _require_content_identity(
+                self.actual_candidate_content_identity,
+                "actual_candidate_content_identity",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "presented_projection_content_identity",
+            _require_content_identity(
+                self.presented_projection_content_identity,
+                "presented_projection_content_identity",
+            ),
+        )
+        if self.actual_candidate_content_identity.candidate_id != self.candidate_id:
+            raise ValueError(
+                "actual_candidate_content_identity candidate_id must match "
+                "result candidate_id"
+            )
         if not isinstance(self.outcome, GovernedAdmissionConsumptionOutcome):
             raise TypeError(
                 "outcome must be a GovernedAdmissionConsumptionOutcome"
@@ -101,11 +140,31 @@ class GovernedAdmissionConsumptionResult:
                 raise ValueError("EVALUATED outcome requires EVALUATED reason_code")
             if self.admission_decision is None:
                 raise ValueError("EVALUATED outcome requires admission_decision")
+            if (
+                self.actual_candidate_content_identity
+                != self.presented_projection_content_identity
+            ):
+                raise ValueError(
+                    "EVALUATED outcome requires matching actual and presented identities"
+                )
         else:
             if self.reason_code is GovernedAdmissionConsumptionReason.EVALUATED:
                 raise ValueError("BLOCKED outcome cannot use EVALUATED reason_code")
             if self.admission_decision is not None:
                 raise ValueError("BLOCKED outcome must not carry admission_decision")
+            mismatch_reasons = {
+                GovernedAdmissionConsumptionReason.CANDIDATE_BINDING_MISMATCH,
+                GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH,
+            }
+            if (
+                self.reason_code not in mismatch_reasons
+                and self.actual_candidate_content_identity
+                != self.presented_projection_content_identity
+            ):
+                raise ValueError(
+                    "non-binding BLOCKED outcome requires matching actual and "
+                    "presented identities"
+                )
 
         if self.admission_decision is not None:
             if self.admission_decision.candidate_id != self.candidate_id:
@@ -120,11 +179,17 @@ class GovernedAdmissionConsumptionResult:
 
 def _blocked(
     candidate: EpisodicMemoryCandidate,
+    projection: GovernedAdmissionInputProjection,
+    actual_identity: EpisodicCandidateContentIdentity,
     reason_code: GovernedAdmissionConsumptionReason,
     evaluated_at: datetime,
 ) -> GovernedAdmissionConsumptionResult:
     return GovernedAdmissionConsumptionResult(
         candidate_id=candidate.candidate_id,
+        actual_candidate_content_identity=actual_identity,
+        presented_projection_content_identity=(
+            projection.candidate_content_identity
+        ),
         outcome=GovernedAdmissionConsumptionOutcome.BLOCKED,
         reason_code=reason_code,
         evaluated_at=evaluated_at,
@@ -142,17 +207,35 @@ def consume_governed_admission_projection(
         raise TypeError("projection must be a GovernedAdmissionInputProjection")
 
     evaluated_at = _require_utc_datetime(evaluated_at, "evaluated_at")
+    actual_identity = compute_episodic_candidate_content_identity(candidate)
+    presented_identity = projection.candidate_content_identity
 
     if projection.candidate_id != candidate.candidate_id:
         return _blocked(
             candidate,
+            projection,
+            actual_identity,
             GovernedAdmissionConsumptionReason.CANDIDATE_BINDING_MISMATCH,
+            evaluated_at,
+        )
+
+    if (
+        verify_episodic_candidate_content_identity(candidate, presented_identity)
+        is not CandidateContentIdentityVerification.MATCH
+    ):
+        return _blocked(
+            candidate,
+            projection,
+            actual_identity,
+            GovernedAdmissionConsumptionReason.CONTENT_IDENTITY_BINDING_MISMATCH,
             evaluated_at,
         )
 
     if projection.policy_version != PROJECTION_POLICY_VERSION:
         return _blocked(
             candidate,
+            projection,
+            actual_identity,
             GovernedAdmissionConsumptionReason.UNSUPPORTED_PROJECTION_POLICY,
             evaluated_at,
         )
@@ -160,6 +243,8 @@ def consume_governed_admission_projection(
     if evaluated_at < projection.evaluated_at:
         return _blocked(
             candidate,
+            projection,
+            actual_identity,
             GovernedAdmissionConsumptionReason.CONSUMPTION_TIME_PRECEDES_PROJECTION,
             evaluated_at,
         )
@@ -167,6 +252,8 @@ def consume_governed_admission_projection(
     if projection.outcome is GovernedAdmissionProjectionOutcome.DENIED:
         return _blocked(
             candidate,
+            projection,
+            actual_identity,
             GovernedAdmissionConsumptionReason.PROJECTION_DENIED,
             evaluated_at,
         )
@@ -174,6 +261,8 @@ def consume_governed_admission_projection(
     if projection.outcome is GovernedAdmissionProjectionOutcome.HOLD:
         return _blocked(
             candidate,
+            projection,
+            actual_identity,
             GovernedAdmissionConsumptionReason.PROJECTION_HOLD,
             evaluated_at,
         )
@@ -188,6 +277,8 @@ def consume_governed_admission_projection(
     ):
         return _blocked(
             candidate,
+            projection,
+            actual_identity,
             GovernedAdmissionConsumptionReason.CONTEXT_BINDING_MISMATCH,
             evaluated_at,
         )
@@ -204,6 +295,8 @@ def consume_governed_admission_projection(
 
     return GovernedAdmissionConsumptionResult(
         candidate_id=candidate.candidate_id,
+        actual_candidate_content_identity=actual_identity,
+        presented_projection_content_identity=presented_identity,
         outcome=GovernedAdmissionConsumptionOutcome.EVALUATED,
         reason_code=GovernedAdmissionConsumptionReason.EVALUATED,
         evaluated_at=evaluated_at,
