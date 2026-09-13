@@ -4,9 +4,14 @@ status: gate_candidate
 authority: non_normative_adr_candidate
 language: es
 as_of_date: 2026-09-13
-source_baseline: b61c2764b708bf96ca3829e5a9959a0c5e53ad2c
+source_baseline: 876fa62819ec511d4f0d2e7ad6e759aa3f275cf9
 future_target_path: docs/architecture/adr/ADR-006-protected-durable-reliance-preconditions.md
 future_target_must_not_exist: true
+cognitive_constitution_blob: 34ecc6685dd686f9e7143b3547b61ec0d91c7c41
+blueprint_blob: 9c09b26d040164955e99cc27c362b0e72373dc3f
+decision_index_blob: 9d3c12a80adfbbca5bb9cdb6c90c933dab19c427
+controlling_hardening: docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-SCOPE-INTERPRETIVE-HARDENING.md
+refreshes_candidate_from_pr: 130
 adr_acceptance_authorized: false
 normative_activation_authorized: false
 law_materialization_authorized: false
@@ -15,6 +20,7 @@ implementation_authorized: false
 related:
   - docs/project/sprints/proposals/MALAK-CAL-014-DURABLE-RELIANCE-CONSTITUTIONAL-IMPACT-G0-G1.md
   - docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-PROMOTION-SCOPE-FREEZE.md
+  - docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-SCOPE-INTERPRETIVE-HARDENING.md
   - docs/architecture/adr/ADR-005-evidence-bound-final-response-transition.md
   - docs/architecture/adr/ADR-TEMPLATE.md
 ---
@@ -23,9 +29,10 @@ related:
 
 ## 1. Propósito
 
-Preservar el contenido exacto candidato de una futura
-`ADR-006 — Protected Durable Reliance Preconditions` sin crear remotamente una ADR
-normativa ni aceptar una decisión arquitectónica.
+Preservar el contenido exacto candidato, refrescado contra el Scope Freeze y el
+Interpretive Hardening, de una futura `ADR-006 — Protected Durable Reliance
+Preconditions` sin crear remotamente una ADR normativa ni aceptar una decisión
+arquitectónica.
 
 ```text
 candidate draft != ADR-006 file
@@ -40,6 +47,7 @@ Antes de cualquier materialización local:
 ```text
 ADR-006 target path MUST NOT EXIST
 Scope Freeze MUST remain applicable
+Interpretive Hardening MUST remain controlling for covered semantics
 Cognitive Constitution blob = 34ecc6685dd686f9e7143b3547b61ec0d91c7c41
 Blueprint blob = 9c09b26d040164955e99cc27c362b0e72373dc3f
 Decision Index blob = 9d3c12a80adfbbca5bb9cdb6c90c933dab19c427
@@ -79,6 +87,7 @@ related:
   - ADR-005
   - docs/project/sprints/proposals/MALAK-CAL-014-DURABLE-RELIANCE-CONSTITUTIONAL-IMPACT-G0-G1.md
   - docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-PROMOTION-SCOPE-FREEZE.md
+  - docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-SCOPE-INTERPRETIVE-HARDENING.md
 
 affects:
   - Blueprint
@@ -118,21 +127,15 @@ Proposal != Acceptance != Implementation != Authority
 
 ## Contexto
 
-Malāk ya separa evidencia, autoridad, finalización, autorización y ejecución. La
-Cognitive Constitution exige evidencia, trazabilidad, coherencia, consistencia
-temporal y aprendizaje controlado. El Blueprint mantiene Zero Trust, Human in
-Control, ownership único, contratos públicos y prohibición de reinterpretar
-resultados o evidence como autoridad.
+Malāk ya separa evidencia, autoridad, autorización, enforcement y ejecución. El
+baseline implementado dispone de Candidate Content Identity y propagación/binding
+end-to-end suficiente para cerrar la condición histórica que mantenía diferida
+CAL-014 en ADR-005. Ese hecho no convierte por sí mismo Memory, Knowledge, evidencia
+externa o artefactos derivados en fundamento válido para efectos durables.
 
-El baseline implementado ya dispone de Candidate Content Identity y propagación /
-binding end-to-end suficiente a través de la cadena gobernada de Episodic Admission.
-Ese trabajo resolvió la condición histórica que mantenía diferida CAL-014 en
-ADR-005, pero no convierte por sí mismo Memory, Knowledge, evidencia externa o
-artefactos derivados en fundamentos válidos para efectos durables.
-
-El gap arquitectónico restante es proteger la transición mediante la cual material
-retenido, recuperado, admitido o derivado pasa a ser utilizado como fundamento
-material de una transición durable o de una decisión de alto impacto.
+El gap arquitectónico es la transición mediante la cual material retenido,
+recuperado, admitido o derivado pasa a ser utilizado como fundamento material de una
+transición durable o de una decisión de alto impacto.
 
 ```text
 retention != reliance
@@ -142,6 +145,55 @@ identity != trust
 integrity != semantic truth
 provenance != trust
 trust != authority
+permission to persist != permission to rely
+repeated observation != canonical Knowledge
+```
+
+---
+
+## Definiciones interpretativas
+
+### Exact material
+
+`Exact material` es el contenido o representación material realmente utilizado como
+fundamento de la transición o decisión.
+
+```text
+exact material
+!= logical ID
+!= pointer
+!= alias
+!= source label
+!= storage location
+!= historical candidate/admission ID
+```
+
+Una specification futura puede definir representación canonical o mecanismo de
+binding, pero no puede sustituir el material real por un identificador indirecto.
+
+### Relevant derivation
+
+`Relevant derivation` es provenance/lineage suficiente para reconstruir los cambios
+materiales entre el origen o antecedente pertinente y el artefacto objeto de
+reliance.
+
+```text
+relationship exists != derivation sufficiently known
+rehash / rewrap / copy != provenance reset
+```
+
+Una transformación material para identity, integrity, provenance, trust, authority,
+admissibility o applicability no puede omitirse silenciosamente.
+
+### Reliance context
+
+`Reliance context` comprende, según aplicabilidad, propósito, operación o transición
+concreta, policy vigente, estado temporal y contextos de autoridad/seguridad
+necesarios para evaluar si las garantías continúan siendo válidas.
+
+```text
+same content != same reliance context
+previously valid context != current applicability
 ```
 
 ---
@@ -152,7 +204,7 @@ Si ADR-006 es aceptada, Malāk adoptará las siguientes propiedades arquitectón
 
 ### 1. Durable reliance es una transición protegida independiente
 
-`Durable reliance` será tratado como una transición distinta de:
+`Durable reliance` es distinta de:
 
 ```text
 retention
@@ -173,11 +225,54 @@ garantías aplicables de identidad, integridad y provenance exigidas por la
 Constitución Cognitiva y por las policies/specifications vigentes.
 
 Las garantías deberán quedar ligadas al material exacto, a la derivación relevante
-y al contexto de reliance. Compartir únicamente un identificador lógico, fuente
-declarada, storage location, historial de admisión o relación de derivación no
-constituye binding suficiente.
+y al contexto actual de reliance. Compartir únicamente un identificador lógico,
+fuente declarada, storage location, historial de admisión o relación de derivación
+no constituye binding suficiente.
 
-### 3. Garantías no transitivas ni reutilizables por default
+### 3. Policy refina; no puede reducir el piso constitucional
+
+Una policy puede refinar:
+
+```text
+how an applicable constitutional guarantee is instantiated
+how sufficiency is evaluated
+risk-proportional depth
+revalidation conditions
+conditional applicability within superior governed criteria
+```
+
+Una policy no puede:
+
+```text
+waive an applicable constitutional requirement
+manufacture non-applicability to evade a material guarantee
+declare a required guarantee satisfied by absence of evidence
+convert missing evaluation capability into PASS
+lower the constitutional floor for convenience/cost/latency
+infer trust from prior storage/admission/repetition
+```
+
+Toda no-aplicabilidad material que elimine una garantía deberá ser:
+
+```text
+governed
++ justified
++ reconstructible/auditable
++ compatible with superior invariants
+```
+
+Costo, latencia, convenience, ausencia de evaluator o preferencia del
+producer/presenter no constituyen por sí solos justificación válida.
+
+Si una obligación constitucional material es aplicable y no existe capacidad
+autorizada para evaluarla:
+
+```text
+no evaluation capability != no assurance required
+result -> fail closed for durable reliance
+```
+
+### 4. Garantías no transitivas ni reutilizables por default
 
 Una garantía válida para un artefacto, versión, derivación, propósito, contexto o
 momento no se presume válida para otro.
@@ -191,21 +286,56 @@ rehash != clean provenance
 Cuando la policy aplicable requiera revalidación, una garantía stale o no
 revalidable deberá fallar cerrado.
 
-### 4. Fail-closed ante garantía requerida ausente o no aplicable
+### 5. High-impact classification es gobernada y fail-closed
+
+La clasificación de alto impacto deberá ser gobernada y reconstructible/auditable.
+No puede ser autoasignada ni auto-rebajada por producer, presenter, model, agent o
+componente interesado.
+
+```text
+unable to determine impact != low impact
+unclassified != low impact
+missing classifier != low impact
+```
+
+Cuando incertidumbre material pueda cambiar las garantías exigibles:
+
+```text
+apply high-impact protections OR block/escalate
+never downgrade by default
+```
+
+### 6. Origin/producer identity applicability es gobernada
+
+La identidad de origen/productor es materialmente aplicable cuando correctness,
+provenance, trust, authority, admissibility o risk dependen de quién o qué produjo,
+originó o transformó materialmente el contenido.
+
+La aplicabilidad deberá surgir de rules/policies gobernadas o de una invariante
+superior aplicable.
+
+```text
+producer says identity irrelevant != identity not applicable
+presenter lacks identity != identity requirement waived
+```
+
+Si la identidad materialmente requerida no puede establecerse, la transición falla
+cerrado.
+
+### 7. Fail-closed ante garantía requerida ausente, stale, unbound o no justificable
 
 ```text
 required but unavailable != implicitly satisfied
 required but stale != satisfied
 required but unbound != satisfied
+unjustified non-applicability != satisfied
 ```
 
-La ausencia de contradicciones, taint detectado o incidentes conocidos no equivale
-a evidencia positiva suficiente. Una admisión previa, almacenamiento previo,
-repetición frecuente o consenso tampoco elevan material a trusted por default.
+Ausencia de contradicción, taint detectado o incidentes conocidos no equivale a
+evidencia positiva suficiente. Admission previa, storage previo, repetición o
+consenso tampoco elevan material a trusted por default.
 
-### 5. Integridad, provenance, trust y authority permanecen separados
-
-La decisión congela estas separaciones:
+### 8. Integridad, provenance, trust y authority permanecen separados
 
 ```text
 content integrity != semantic truth
@@ -217,12 +347,12 @@ source identity != authority
 stored != trusted
 ```
 
-Ningún componente productor o presentador puede autoafirmar la suficiencia de sus
-propias garantías.
+Ningún producer o presenter puede autoafirmar la suficiencia de sus propias
+garantías.
 
-### 6. Governance conserva autorización operativa
+### 9. Governance conserva autorización operativa
 
-La Governance Constitution y sus policies conservan ownership sobre si una
+Governance y la policy de autorización aplicable conservan ownership sobre si una
 operación persistente o protegida está permitida.
 
 ```text
@@ -230,51 +360,116 @@ CAL-014 compliance != permission to persist
 CAL-014 compliance != Persistence Authorization
 ```
 
-### 7. Security conserva enforcement y restricciones de seguridad
+### 10. Security conserva constraints y enforcement
 
-Security conserva ownership sobre enforcement y sobre restricciones aplicables a:
+Security constrains y enforces una permission aplicable. No adquiere autoridad
+operativa autónoma ni lifecycle ownership de Memory.
 
-- taint;
-- revocation;
-- quarantine;
-- disclosure;
-- consent;
-- freshness/replay;
-- idempotency;
-- otros controles de seguridad aplicables.
+```text
+Security constraint/enforcement != operational authority
+```
 
-Esto no convierte a Security en owner del lifecycle semántico de Memory. Esta ADR
-tampoco asigna ownership sobre la futura semántica de partial-failure de un write
-protegido; ese límite deberá resolverse en el gate operativo correspondiente.
+Security puede imponer controles aplicables a taint, revocation, quarantine,
+disclosure, consent, freshness/replay, idempotency y otros requisitos de seguridad,
+sin convertirse en fuente autónoma de permiso.
 
-### 8. Memory Layer conserva lifecycle de dominio
+### 11. Memory Layer conserva lifecycle semantics de dominio
 
-Memory Layer conservará ownership sobre la futura semántica de lifecycle de Memory
-cuando dicha capacidad sea diseñada y autorizada, subordinada a Constitución,
-Governance y Security.
+Memory Layer conservará ownership sobre futuras lifecycle semantics de Memory cuando
+esa capacidad sea diseñada y autorizada, subordinada a Constitution, Governance y
+Security.
 
-Esta ADR no autoriza Persistent Memory ni define todavía storage, retention runtime,
+```text
+Memory lifecycle semantics != operational authority
+```
+
+Esta ADR no autoriza Persistent Memory ni define storage, retention runtime,
 retrieval eligibility, supersession, quarantine implementation o promotion a
 Knowledge.
 
-### 9. La propiedad no crea automáticamente un componente
+### 12. Failure handling cognitivo permanece separado de retention/quarantine
+
+Cuando CAL-014 falla:
 
 ```text
-constitutional requirement
-!= automatic new layer/service/manager
+block / limit / deny / abstain the reliance transition
 ```
 
-La decisión no prescribe:
+Cualquier retention o quarantine es un efecto operativo separado y solo puede
+ocurrir cuando exista authorization independiente bajo Governance/policy de
+autorización aplicable, sujeta a Security constraints/enforcement y a Memory
+lifecycle semantics aplicables.
 
-- database o storage provider;
-- schema;
-- hash/HMAC/PKI;
-- nonce/TTL;
-- vector store;
-- encryption mechanism;
-- provider/model;
-- threshold;
-- algoritmo concreto.
+```text
+retention/quarantine authorization != later reliance permission
+```
+
+### 13. Partial-failure permanece diferido al gate operativo
+
+La futura semántica de partial-failure de un protected durable write deberá resolverse
+en el gate operativo correspondiente. Esta ADR no le asigna ownership por inferencia
+a Governance, Security ni Memory.
+
+### 14. La propiedad no crea automáticamente un componente
+
+```text
+constitutional requirement != automatic new layer/service/manager
+```
+
+La decisión no prescribe database, storage provider, schema, hash/HMAC/PKI,
+nonce/TTL, vector store, encryption mechanism, provider/model, threshold ni algoritmo
+concreto.
+
+### 15. Runtime readiness permanece separado de la activación normativa
+
+La aceptación de esta ADR y la activación de CC-013/R-023 no demuestran que exista
+runtime autorizado o suficientemente diseñado.
+
+```text
+normative activation readiness
+!= durable reliance runtime readiness
+!= persistence implementation readiness
+```
+
+Antes de cualquier durable reliance runtime deberán quedar resueltos y validados,
+como mínimo:
+
+```text
+exact reliance subject/content binding
+derivation/lineage binding
+applicability + freshness + non-transitivity
+fail closed when a required guarantee is unavailable
+```
+
+Antes de cualquier protected durable write deberán resolverse además:
+
+```text
+exact persistence subject/payload binding
+authorization freshness/replay
+taint/revocation/quarantine lifecycle
+retention/disclosure/consent
+idempotency/partial-failure
+```
+
+Estos requisitos son readiness gates futuros; no autorizan ni prescriben su
+implementación en esta ADR.
+
+---
+
+## Threats explícitamente bloqueados
+
+La decisión está diseñada para impedir, como mínimo:
+
+```text
+trust laundering through storage / retrieval / repetition
+identity laundering through re-hashing or re-wrapping derived content
+provenance truncation across derivation boundaries
+stale-guarantee replay
+cross-artifact or cross-context guarantee reuse
+authorization laundering: permission to persist -> permission to rely
+self-attestation of sufficiency by producer/presenter
+risk laundering through relabeling or missing classification
+```
 
 ---
 
@@ -285,7 +480,7 @@ ADR-005 queda preservada sin supersession.
 ```text
 ADR-006 references ADR-005 for historical traceability
 ADR-006 resolves the CAL-014 deferred condition recorded by ADR-005
-ADR-006 does NOT depend operationally on Final Response semantics
+ADR-006 does NOT depend operationally on ADR-005 finalization semantics
 ADR-006 does NOT supersede ADR-005 as a whole
 ```
 
@@ -295,42 +490,28 @@ ADR-006 does NOT supersede ADR-005 as a whole
 
 ### A. Resolver CAL-014 únicamente en SECURITY.md
 
-Rechazada como solución completa.
-
-Security posee enforcement y restricciones de seguridad, pero durable reliance es
-una propiedad transversal a Memory, Knowledge, evidencia externa y artefactos
-derivados y no debe transferir a Security ownership del lifecycle cognitivo.
+Rechazada: durable reliance es una propiedad transversal y Security no debe absorber
+operational authority ni Memory lifecycle semantics.
 
 ### B. Extender únicamente CC-003 o CC-010
 
-Rechazada.
-
-CC-003 gobierna evidencia y CC-010 aprendizaje permanente. Ninguna cubre por sí
-sola toda transición de material previamente retenido/recuperado hacia reliance
-durable.
+Rechazada: ninguna cubre por sí sola toda transición de material previamente
+retenido/recuperado hacia durable reliance.
 
 ### C. Convertir Content Identity en prueba de confianza
 
-Rechazada.
-
-Una identidad material estable demuestra igualdad/diferencia de contenido bajo el
-contrato definido; no demuestra verdad semántica, productor auténtico, trust ni
-authority.
+Rechazada: content identity no demuestra semantic truth, producer authenticity,
+trust ni authority.
 
 ### D. Crear un `Durable Reliance Manager` inmediatamente
 
-Rechazada.
-
-La necesidad demostrada es una propiedad arquitectónica. Un nuevo componente solo
-podrá justificarse si una specification futura demuestra una responsabilidad real
-que no pueda expresarse mediante fronteras existentes.
+Rechazada: la necesidad demostrada es una propiedad arquitectónica; un nuevo
+componente requeriría justificación posterior independiente.
 
 ### E. Considerar cualquier almacenamiento como reliance
 
-Rechazada.
-
-Debe seguir siendo posible retener evidencia forense o material en cuarentena sin
-convertirlo en trusted ni permitir su reutilización material.
+Rechazada: debe poder existir forensic/quarantine retention sin trust ni permiso de
+reutilización material.
 
 ---
 
@@ -338,39 +519,29 @@ convertirlo en trusted ni permitir su reutilización material.
 
 ### Positivas
 
-- reduce trust laundering a través de storage, retrieval o repetición;
-- evita reutilización implícita de garantías entre artefactos/contextos;
+- reduce trust laundering por storage/retrieval/repetition;
+- bloquea manufactured non-applicability;
+- evita risk laundering por falta de clasificación;
+- evita reutilización implícita de garantías entre artefactos/contextos/tiempos;
 - preserva provenance a través de derivaciones;
-- obliga a tratar freshness y applicability como parte de la transición;
-- mantiene separadas autoridad operativa, seguridad y lifecycle de Memory;
-- permite retención forense/quarantine sin elevar material a trust.
+- mantiene separadas operational authorization, Security enforcement y Memory lifecycle;
+- permite forensic/quarantine retention sin elevar material a trust.
 
 ### Negativas
 
-- futuras capabilities de Memory/Knowledge deberán modelar binding, freshness y
-  provenance con mayor precisión;
-- algunos flujos podrán producir `HOLD`, deny o abstention en vez de reutilizar
-  evidencia previa de forma implícita;
-- la futura persistencia requerirá más contratos antes de habilitar side effects.
+- futuras capabilities de Memory/Knowledge deberán modelar binding, freshness,
+  applicability y provenance con mayor precisión;
+- algunos flujos producirán HOLD/deny/abstention en vez de reutilizar evidencia
+  previa de forma implícita;
+- futura persistence requerirá contratos adicionales antes de side effects.
 
-### Riesgos
+### Riesgos restantes
 
-- policies futuras podrían definir assurance insuficiente;
-- implementaciones podrían intentar usar hashes como sustituto de provenance;
-- una autorización válida podría ser reutilizada fuera de contexto si no se resuelve
-  replay/freshness en gates posteriores;
-- lifecycle post-write de revocation/quarantine sigue pendiente antes de Persistent
-  Memory real.
-
-Mitigación normativa:
-
-```text
-mechanism-neutral law
-+ exact-material binding
-+ non-transitivity
-+ fail-closed applicability
-+ explicit ownership boundaries
-```
+- specifications futuras podrían intentar convertir mecanismos en sustitutos de las
+  garantías constitucionales;
+- replay/freshness operacional requerirá gates específicos;
+- protected write partial-failure sigue diferido;
+- lifecycle post-write sigue pendiente antes de Persistent Memory real.
 
 ---
 
@@ -379,10 +550,10 @@ mechanism-neutral law
 Impacto permitido:
 
 ```text
-Cognitive Constitution → CC-013
-Blueprint              → R-023 + v0.6.3-alpha bookkeeping
-ADR repository         → ADR-006
-Decision Index         → only after human acceptance
+Cognitive Constitution -> CC-013
+Blueprint              -> R-023 + v0.6.3-alpha bookkeeping
+ADR repository         -> ADR-006
+Decision Index         -> only after human acceptance
 ```
 
 Impacto explícitamente no autorizado:
@@ -404,41 +575,31 @@ Sprint 7.12
 
 ---
 
-## Relación con Gobernanza
-
-La decisión respeta la precedencia constitucional y no crea permiso operativo.
-Governance conserva decisión de autorización sobre operaciones persistentes y
-protegidas. Security conserva enforcement y restricciones de seguridad. Memory
-conserva su futuro lifecycle de dominio.
-
-```text
-Evidence != Authority
-Decision != Enforcement != Execution
-CAL-014 compliance != operational permission
-```
-
----
-
-## Compatibilidad con AKS / GraphRAG
-
-La ADR puede representarse como decisión arquitectónica permanente y relacionarse
-con Cognitive Constitution, Blueprint, ADR-005, Memory y Knowledge. Esta
-representación no convierte GraphRAG/AKS en runtime autorizado ni autoriza retrieval.
-
----
-
 ## Criterio de aceptación
 
 - [ ] CC-013 permanece mechanism-neutral.
 - [ ] R-023 expresa solo la propiedad arquitectónica necesaria.
 - [ ] CC-001..CC-012 permanecen semánticamente intactos.
 - [ ] Governance Constitution permanece sin cambios.
-- [ ] Security conserva enforcement sin absorber Memory lifecycle.
-- [ ] Memory conserva ownership de su lifecycle futuro sin quedar autorizada a persistir.
-- [ ] forensic/quarantine retention permanece posible sin trust/reliance.
+- [ ] policy refinement no puede convertirse en constitutional waiver.
+- [ ] manufactured non-applicability queda prohibida.
+- [ ] material non-applicability exige governed + justified + reconstructible/auditable.
+- [ ] no evaluation capability falla cerrado cuando la obligación material aplica.
+- [ ] high-impact classification es governed + auditable + non-self-downgradeable.
+- [ ] `unable to determine impact != low impact`.
+- [ ] origin/producer identity applicability es gobernada.
+- [ ] exact material, relevant derivation y reliance context preservan sus definiciones.
+- [ ] Governance authorization, Security enforcement y Memory lifecycle permanecen separados.
+- [ ] failure handling cognitivo no concede retention/quarantine/persistence authority.
+- [ ] forensic/quarantine retention permanece posible solo bajo authorization independiente.
 - [ ] identity, integrity y provenance permanecen distintas de truth, trust y authority.
-- [ ] garantías permanecen ligadas al material exacto, derivación relevante y contexto.
-- [ ] stale, unavailable, non-applicable o unbound nunca se convierten en satisfied por default.
+- [ ] garantías permanecen no transitivas y ligadas al material/contexto aplicable.
+- [ ] stale, unavailable, unjustified non-applicability o unbound nunca pasan por default.
+- [ ] partial-failure permanece diferido sin ownership inferido.
+- [ ] normative activation readiness permanece distinta de runtime/persistence readiness.
+- [ ] durable reliance runtime gate conserva binding/lineage/applicability/freshness/fail-closed.
+- [ ] protected durable write gate conserva payload binding, authorization freshness/replay,
+      lifecycle, consent/disclosure/retention e idempotency/partial-failure.
 - [ ] no se crea nueva layer/service/manager.
 - [ ] no se crea Persistence Authorization ni Persistent Memory.
 - [ ] ADR-005 queda preservada sin dependencia operativa de Final Response.
@@ -451,7 +612,7 @@ representación no convierte GraphRAG/AKS en runtime autorizado ni autoriza retr
 Este candidate draft solo define el contenido `Proposed`.
 
 Una futura aceptación de ADR-006 requiere un gate humano separado que, como mínimo,
-debe convertir de forma explícita:
+debe convertir explícitamente:
 
 ```text
 frontmatter status: proposed -> accepted
@@ -461,7 +622,7 @@ Decisión candidata -> Decisión
 
 y registrar la aceptación humana junto con los hunks normativos de CC-013/R-023.
 
-Ese futuro gate debe volver a validar blobs, coherencia normativa y ausencia de
+Ese futuro gate deberá volver a validar blobs, coherencia normativa y ausencia de
 autoridad de implementación.
 
 ## 5. Stop conditions
@@ -469,9 +630,14 @@ autoridad de implementación.
 Detener si:
 
 - ADR-006 ya existe en el target normativo;
+- cambia cualquiera de los blobs normativos ligados al candidate;
 - aparece necesidad de modificar Governance Constitution o SECURITY.md;
 - se requiere una nueva layer/service/manager;
 - se intenta convertir Content Identity en trust/authority;
-- se requiere resolver storage/DB/schema/PKI/nonce/TTL;
+- una policy necesita waiviar el piso constitucional;
+- se intenta fabricar non-applicability para evadir una garantía;
+- se intenta interpretar `unclassified` como low impact;
+- se intenta inferir runtime readiness desde normative activation;
+- se requiere resolver storage/DB/schema/PKI/nonce/TTL en este gate;
 - se intenta autorizar Persistence Intent, Persistence Authorization o Persistent Memory;
 - se pretende aceptar remotamente ADR-006 mediante este candidate file.
