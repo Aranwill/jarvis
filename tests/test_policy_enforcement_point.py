@@ -9,6 +9,7 @@ from malak.security import (
     AuthorizationDecision,
     AuthorizationDeniedError,
     AuthorizationEnforcementError,
+    AuthorizationOperationBinding,
     AuthorizationRequest,
     HumanConfirmationEvidence,
     InMemoryAuthorizationAuditStore,
@@ -26,9 +27,11 @@ class RecordingOperation:
         self,
         result: object = "executed",
         error: Exception | None = None,
+        authorization_binding: AuthorizationOperationBinding | None = None,
     ) -> None:
         self.result = result
         self.error = error
+        self.authorization_binding = authorization_binding
         self.calls = 0
 
     def execute(self) -> object:
@@ -107,6 +110,7 @@ class AcceptingConfirmationVerifier:
     ) -> bool:
         return True
 
+
 class FixedClock:
     def __init__(self, current_time: datetime) -> None:
         self._current_time = current_time
@@ -123,10 +127,21 @@ def make_context_validator() -> SecurityContextValidator:
     )
 
 
+def make_binding(digest_character: str = "a") -> AuthorizationOperationBinding:
+    return AuthorizationOperationBinding(
+        namespace="memory.episodic.persistence",
+        binding_version="v1",
+        digest_algorithm="sha256",
+        digest_hex=digest_character * 64,
+    )
+
+
 def make_request(
     *,
     request_id: str = "request-001",
     authenticated: bool = True,
+    created_at: datetime | None = None,
+    operation_binding: AuthorizationOperationBinding | None = None,
 ) -> AuthorizationRequest:
     return AuthorizationRequest(
         context=SecurityContext(
@@ -142,6 +157,12 @@ def make_request(
             action="update",
         ),
         request_id=request_id,
+        created_at=(
+            created_at
+            if created_at is not None
+            else datetime(2026, 8, 15, 18, 10, tzinfo=timezone.utc)
+        ),
+        operation_binding=operation_binding,
     )
 
 
@@ -150,15 +171,20 @@ def make_decision(
     request_id: str = "request-001",
     allowed: bool = True,
     reason: str = "policy_allowed",
+    operation_binding: AuthorizationOperationBinding | None = None,
 ) -> AuthorizationDecision:
     return AuthorizationDecision(
         request_id=request_id,
         allowed=allowed,
         reason=reason,
+        operation_binding=operation_binding,
     )
 
 
-def make_confirmation() -> HumanConfirmationEvidence:
+def make_confirmation(
+    *,
+    operation_binding: AuthorizationOperationBinding | None = None,
+) -> HumanConfirmationEvidence:
     return HumanConfirmationEvidence(
         confirmation_id="confirmation-001",
         original_request_id="request-original",
@@ -170,6 +196,7 @@ def make_confirmation() -> HumanConfirmationEvidence:
         ),
         confirmed_by="owner",
         confirmed_at=datetime(2026, 7, 26, tzinfo=timezone.utc),
+        operation_binding=operation_binding,
     )
 
 
@@ -184,6 +211,120 @@ def test_allowed_decision_executes_operation_exactly_once() -> None:
     assert result == {"status": "ok"}
     assert pdp.calls == [(request, None)]
     assert operation.calls == 1
+
+
+def test_bound_operation_executes_only_with_exact_binding_chain() -> None:
+    binding = make_binding()
+    request = make_request(operation_binding=binding)
+    decision = make_decision(operation_binding=binding)
+    pdp = RecordingPolicyDecisionPoint(decision)
+    operation = RecordingOperation(authorization_binding=binding)
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    assert pep.execute(request) == "executed"
+
+    assert pdp.calls == [(request, None)]
+    assert operation.calls == 1
+    assert len(store.records) == 1
+    assert store.records[0].operation_binding == binding
+    assert store.records[0].protected_operation_binding == binding
+    assert store.records[0].outcome is AuthorizationAuditOutcome.ALLOWED
+
+
+def test_bound_request_with_unbound_operation_is_blocked_before_pdp() -> None:
+    binding = make_binding()
+    request = make_request(operation_binding=binding)
+    pdp = RecordingPolicyDecisionPoint(make_decision(operation_binding=binding))
+    operation = RecordingOperation()
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError, match="binding presence differ"):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert store.records[0].reason_code == "request_operation_binding_presence_mismatch"
+    assert store.records[0].operation_binding == binding
+    assert store.records[0].protected_operation_binding is None
+
+
+def test_unbound_request_with_bound_operation_is_blocked_before_pdp() -> None:
+    binding = make_binding()
+    request = make_request()
+    pdp = RecordingPolicyDecisionPoint(make_decision())
+    operation = RecordingOperation(authorization_binding=binding)
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError, match="binding presence differ"):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert store.records[0].reason_code == "request_operation_binding_presence_mismatch"
+    assert store.records[0].operation_binding is None
+    assert store.records[0].protected_operation_binding == binding
+
+
+def test_mismatched_request_and_operation_binding_is_blocked_before_pdp() -> None:
+    request_binding = make_binding("a")
+    operation_binding = make_binding("b")
+    request = make_request(operation_binding=request_binding)
+    pdp = RecordingPolicyDecisionPoint(
+        make_decision(operation_binding=request_binding)
+    )
+    operation = RecordingOperation(authorization_binding=operation_binding)
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError, match="does not match protected operation"):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert store.records[0].reason_code == "request_operation_binding_mismatch"
+    assert store.records[0].operation_binding == request_binding
+    assert store.records[0].protected_operation_binding == operation_binding
+
+
+def test_mismatched_decision_binding_blocks_bound_operation() -> None:
+    request_binding = make_binding("a")
+    decision_binding = make_binding("b")
+    request = make_request(operation_binding=request_binding)
+    pdp = RecordingPolicyDecisionPoint(
+        make_decision(operation_binding=decision_binding)
+    )
+    operation = RecordingOperation(authorization_binding=request_binding)
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError, match="decision operation binding"):
+        pep.execute(request)
+
+    assert pdp.calls == [(request, None)]
+    assert operation.calls == 0
+    assert store.records[0].outcome is AuthorizationAuditOutcome.INVALID_DECISION
+    assert store.records[0].reason_code == "decision_operation_binding_mismatch"
+
+
+def test_temporally_incoherent_request_is_blocked_before_pdp() -> None:
+    request = make_request(
+        created_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc)
+    )
+    pdp = RecordingPolicyDecisionPoint(make_decision())
+    operation = RecordingOperation()
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError, match="outside security context lifecycle"):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert store.records[0].outcome is AuthorizationAuditOutcome.ENFORCEMENT_FAILED
+    assert store.records[0].reason_code == "authorization_request_time_invalid"
 
 
 @pytest.mark.parametrize(

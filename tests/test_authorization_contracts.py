@@ -6,6 +6,7 @@ import pytest
 
 from malak.security import (
     AuthorizationDecision,
+    AuthorizationOperationBinding,
     AuthorizationRequest,
     HumanConfirmationEvidence,
     PermissionScope,
@@ -657,4 +658,153 @@ def test_security_context_rejects_empty_parent_context_id(
             issued_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
             expires_at=datetime(2026, 8, 15, 19, 0, tzinfo=timezone.utc),
             parent_context_id=parent_context_id,
+        )
+
+
+def make_operation_binding() -> AuthorizationOperationBinding:
+    return AuthorizationOperationBinding(
+        namespace="memory.episodic.persistence",
+        binding_version="v1",
+        digest_algorithm="sha256",
+        digest_hex="a" * 64,
+    )
+
+
+def test_authorization_operation_binding_normalizes_required_text() -> None:
+    binding = AuthorizationOperationBinding(
+        namespace="  memory.episodic.persistence  ",
+        binding_version="  v1  ",
+        digest_algorithm="  sha256  ",
+        digest_hex=f"  {'a' * 64}  ",
+    )
+
+    assert binding.namespace == "memory.episodic.persistence"
+    assert binding.binding_version == "v1"
+    assert binding.digest_algorithm == "sha256"
+    assert binding.digest_hex == "a" * 64
+
+
+@pytest.mark.parametrize("field_name", ["namespace", "binding_version", "digest_algorithm"])
+@pytest.mark.parametrize("value", ["", "   "])
+def test_authorization_operation_binding_rejects_empty_text(
+    field_name: str,
+    value: str,
+) -> None:
+    values = {
+        "namespace": "memory.episodic.persistence",
+        "binding_version": "v1",
+        "digest_algorithm": "sha256",
+        "digest_hex": "a" * 64,
+    }
+    values[field_name] = value
+
+    with pytest.raises(ValueError):
+        AuthorizationOperationBinding(**values)
+
+
+@pytest.mark.parametrize("digest_hex", ["", "   ", "A" * 64, "g" * 64, "not-hex"])
+def test_authorization_operation_binding_rejects_invalid_digest(
+    digest_hex: str,
+) -> None:
+    with pytest.raises(ValueError):
+        AuthorizationOperationBinding(
+            namespace="memory.episodic.persistence",
+            binding_version="v1",
+            digest_algorithm="sha256",
+            digest_hex=digest_hex,
+        )
+
+
+def test_authorization_operation_binding_is_structural_and_immutable() -> None:
+    first = make_operation_binding()
+    second = make_operation_binding()
+
+    assert first == second
+    with pytest.raises(FrozenInstanceError):
+        first.digest_hex = "b" * 64
+
+
+def test_authorization_request_preserves_operation_binding() -> None:
+    binding = make_operation_binding()
+    request = AuthorizationRequest(
+        context=SecurityContext(
+            context_id="context-001",
+            session_id="session-001",
+            subject_id="aranwill",
+            authenticated=True,
+            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+        ),
+        permission=PermissionScope(resource="system", action="update"),
+        operation_binding=binding,
+    )
+
+    assert request.operation_binding == binding
+
+
+def test_authorization_request_rejects_invalid_operation_binding() -> None:
+    with pytest.raises(TypeError, match="operation_binding"):
+        AuthorizationRequest(
+            context=SecurityContext(
+                context_id="context-001",
+                session_id="session-001",
+                subject_id="aranwill",
+                authenticated=True,
+                issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
+                expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+            ),
+            permission=PermissionScope(resource="system", action="update"),
+            operation_binding="not-a-binding",
+        )
+
+
+def test_authorization_decision_preserves_operation_binding() -> None:
+    binding = make_operation_binding()
+    decision = AuthorizationDecision(
+        request_id="request-001",
+        allowed=True,
+        reason="policy_allowed",
+        operation_binding=binding,
+    )
+
+    assert decision.operation_binding == binding
+
+
+def test_authorization_decision_rejects_invalid_operation_binding() -> None:
+    with pytest.raises(TypeError, match="operation_binding"):
+        AuthorizationDecision(
+            request_id="request-001",
+            allowed=True,
+            reason="policy_allowed",
+            operation_binding="not-a-binding",
+        )
+
+
+def test_human_confirmation_preserves_operation_binding() -> None:
+    binding = make_operation_binding()
+    confirmation = HumanConfirmationEvidence(
+        confirmation_id="confirmation-001",
+        original_request_id="request-original",
+        new_request_id="request-new",
+        subject_id="aranwill",
+        permission=PermissionScope(resource="system", action="update"),
+        confirmed_by="owner",
+        confirmed_at=datetime(2026, 8, 15, 18, 5, tzinfo=timezone.utc),
+        operation_binding=binding,
+    )
+
+    assert confirmation.operation_binding == binding
+
+
+def test_human_confirmation_rejects_invalid_operation_binding() -> None:
+    with pytest.raises(TypeError, match="operation_binding"):
+        HumanConfirmationEvidence(
+            confirmation_id="confirmation-001",
+            original_request_id="request-original",
+            new_request_id="request-new",
+            subject_id="aranwill",
+            permission=PermissionScope(resource="system", action="update"),
+            confirmed_by="owner",
+            confirmed_at=datetime(2026, 8, 15, 18, 5, tzinfo=timezone.utc),
+            operation_binding="not-a-binding",
         )
