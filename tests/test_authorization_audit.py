@@ -208,6 +208,26 @@ def test_authorization_audit_record_accepts_aware_datetime() -> None:
     assert record.created_at == created_at
 
 
+def test_authorization_audit_record_preserves_legacy_positional_optionals() -> None:
+    created_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+
+    record = AuthorizationAuditRecord(
+        "request-001",
+        "aranwill",
+        "conversation",
+        "write",
+        AuthorizationAuditOutcome.DENIED,
+        "no_applicable_policy",
+        "audit-001",
+        created_at,
+    )
+
+    assert record.audit_id == "audit-001"
+    assert record.created_at == created_at
+    assert record.operation_binding is None
+    assert record.protected_operation_binding is None
+
+
 def test_authorization_audit_record_is_immutable() -> None:
     record = make_record()
 
