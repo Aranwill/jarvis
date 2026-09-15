@@ -86,10 +86,6 @@ class EpisodicPersistenceIntent:
                 "candidate_content_identity must be an "
                 "EpisodicCandidateContentIdentity"
             )
-        if self.candidate_content_identity.candidate_id != self.candidate_id:
-            raise ValueError(
-                "candidate_content_identity candidate_id must match intent candidate_id"
-            )
         for field_name in ("subject_scope", "domain", "purpose"):
             object.__setattr__(
                 self,
