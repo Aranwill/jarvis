@@ -36,12 +36,12 @@ class AuthorizationAuditRecord:
     action: str
     outcome: AuthorizationAuditOutcome
     reason_code: str
-    operation_binding: AuthorizationOperationBinding | None = None
-    protected_operation_binding: AuthorizationOperationBinding | None = None
     audit_id: str = field(default_factory=lambda: str(uuid4()))
     created_at: datetime = field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+    operation_binding: AuthorizationOperationBinding | None = None
+    protected_operation_binding: AuthorizationOperationBinding | None = None
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -66,6 +66,17 @@ class AuthorizationAuditRecord:
                 "outcome must be an AuthorizationAuditOutcome"
             )
 
+        if not isinstance(self.created_at, datetime):
+            raise TypeError("created_at must be a datetime")
+
+        if (
+            self.created_at.tzinfo is None
+            or self.created_at.utcoffset() is None
+        ):
+            raise ValueError(
+                "created_at must include timezone information"
+            )
+
         for field_name in (
             "operation_binding",
             "protected_operation_binding",
@@ -78,17 +89,6 @@ class AuthorizationAuditRecord:
                 raise TypeError(
                     f"{field_name} must be an AuthorizationOperationBinding or None"
                 )
-
-        if not isinstance(self.created_at, datetime):
-            raise TypeError("created_at must be a datetime")
-
-        if (
-            self.created_at.tzinfo is None
-            or self.created_at.utcoffset() is None
-        ):
-            raise ValueError(
-                "created_at must include timezone information"
-            )
 
 
 class AuthorizationAuditSink(Protocol):
