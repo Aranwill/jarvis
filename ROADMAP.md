@@ -26,6 +26,16 @@ Cada sprint debe:
 
 El propietario puede aprobar, redefinir, diferir, reemplazar o descartar cualquier propuesta.
 
+## Reconciliación de estado vigente
+
+El corrective record vigente para interpretar estado mutable posterior a las últimas unidades integradas es:
+
+`docs/project/status/MALAK-STATE-RECONCILIATION-20260915.md`
+
+Ese registro no reemplaza el roadmap ni concede autoridad. Únicamente identifica afirmaciones derivadas históricas que quedaron superseded por evidencia posterior del repositorio.
+
+Ante una contradicción de estado mutable entre un snapshot derivado anterior y evidencia oficial más reciente, prevalece el repositorio oficial y la fuente de mayor autoridad aplicable.
+
 ## Estado operativo
 
 El estado operativo resumido del proyecto se mantiene en:
