@@ -510,3 +510,108 @@ def test_g2b_t21_non_utc_readiness_time_is_rejected() -> None:
             _intent(candidate),
             non_utc,
         )
+
+
+def test_g2b_t22_unsupported_projection_policy_propagates_as_hold() -> None:
+    candidate = _candidate()
+    consumption = _consumption(
+        candidate,
+        outcome=GovernedAdmissionConsumptionOutcome.BLOCKED,
+        reason=GovernedAdmissionConsumptionReason.UNSUPPORTED_PROJECTION_POLICY,
+    )
+
+    result = evaluate_episodic_persistence_readiness(
+        candidate,
+        consumption,
+        _intent(candidate),
+        NOW,
+    )
+
+    assert result.outcome is EpisodicPersistenceReadinessOutcome.HOLD
+    assert result.reason_code is EpisodicPersistenceReadinessReason.CONSUMPTION_HOLD
+    assert result.authorization_operation_binding is None
+
+
+@pytest.mark.parametrize(
+    ("binding", "match"),
+    [
+        (
+            AuthorizationOperationBinding(
+                namespace="malak.memory.other",
+                binding_version=OPERATION_BINDING_VERSION,
+                digest_algorithm="sha256",
+                digest_hex="ab" * 32,
+            ),
+            "namespace",
+        ),
+        (
+            AuthorizationOperationBinding(
+                namespace=OPERATION_BINDING_NAMESPACE,
+                binding_version="episodic-persistence-subject/v0",
+                digest_algorithm="sha256",
+                digest_hex="ab" * 32,
+            ),
+            "version",
+        ),
+        (
+            AuthorizationOperationBinding(
+                namespace=OPERATION_BINDING_NAMESPACE,
+                binding_version=OPERATION_BINDING_VERSION,
+                digest_algorithm="sha512",
+                digest_hex="ab" * 32,
+            ),
+            "algorithm",
+        ),
+        (
+            AuthorizationOperationBinding(
+                namespace=OPERATION_BINDING_NAMESPACE,
+                binding_version=OPERATION_BINDING_VERSION,
+                digest_algorithm="sha256",
+                digest_hex="ab",
+            ),
+            "digest",
+        ),
+    ],
+)
+def test_g2b_t23_ready_result_rejects_noncanonical_binding(
+    binding: AuthorizationOperationBinding,
+    match: str,
+) -> None:
+    candidate = _candidate()
+
+    with pytest.raises(ValueError, match=match):
+        EpisodicPersistenceReadinessResult(
+            candidate_id=candidate.candidate_id,
+            candidate_content_identity=compute_episodic_candidate_content_identity(candidate),
+            intent=_intent(candidate),
+            outcome=EpisodicPersistenceReadinessOutcome.READY,
+            reason_code=EpisodicPersistenceReadinessReason.READY,
+            evaluated_at=NOW,
+            authorization_operation_binding=binding,
+        )
+
+
+def test_g2b_t24_ready_result_requires_exact_intent_identity_binding() -> None:
+    candidate = _candidate()
+    other = _candidate(user_content="other")
+    malformed_intent = replace(
+        _intent(candidate),
+        candidate_content_identity=compute_episodic_candidate_content_identity(other),
+    )
+    binding = AuthorizationOperationBinding(
+        namespace=OPERATION_BINDING_NAMESPACE,
+        binding_version=OPERATION_BINDING_VERSION,
+        digest_algorithm="sha256",
+        digest_hex="ab" * 32,
+    )
+
+    with pytest.raises(ValueError, match="intent"):
+        EpisodicPersistenceReadinessResult(
+            candidate_id=candidate.candidate_id,
+            candidate_content_identity=compute_episodic_candidate_content_identity(candidate),
+            intent=malformed_intent,
+            outcome=EpisodicPersistenceReadinessOutcome.READY,
+            reason_code=EpisodicPersistenceReadinessReason.READY,
+            evaluated_at=NOW,
+            authorization_operation_binding=binding,
+        )
