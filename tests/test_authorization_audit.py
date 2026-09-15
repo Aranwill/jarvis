@@ -13,12 +13,12 @@ from malak.security import (
 )
 
 
-def make_binding() -> AuthorizationOperationBinding:
+def make_binding(digest_character: str = "a") -> AuthorizationOperationBinding:
     return AuthorizationOperationBinding(
         namespace="memory.episodic.persistence",
         binding_version="v1",
         digest_algorithm="sha256",
-        digest_hex="a" * 64,
+        digest_hex=digest_character * 64,
     )
 
 
@@ -28,6 +28,7 @@ def make_record(
         AuthorizationAuditOutcome.DENIED
     ),
     operation_binding: AuthorizationOperationBinding | None = None,
+    protected_operation_binding: AuthorizationOperationBinding | None = None,
 ) -> AuthorizationAuditRecord:
     return AuthorizationAuditRecord(
         request_id="request-001",
@@ -37,6 +38,7 @@ def make_record(
         outcome=outcome,
         reason_code="no_applicable_policy",
         operation_binding=operation_binding,
+        protected_operation_binding=protected_operation_binding,
     )
 
 
@@ -214,7 +216,10 @@ def test_authorization_audit_record_is_immutable() -> None:
 
 
 def test_authorization_audit_record_excludes_sensitive_payloads() -> None:
-    record = make_record(operation_binding=make_binding())
+    record = make_record(
+        operation_binding=make_binding("a"),
+        protected_operation_binding=make_binding("b"),
+    )
 
     for field_name in (
         "prompt",
@@ -230,22 +235,37 @@ def test_authorization_audit_record_excludes_sensitive_payloads() -> None:
         assert not hasattr(record, field_name)
 
 
-def test_authorization_audit_record_preserves_exact_operation_binding() -> None:
-    binding = make_binding()
+def test_authorization_audit_record_preserves_requested_and_actual_bindings() -> None:
+    requested = make_binding("a")
+    actual = make_binding("b")
 
-    record = make_record(operation_binding=binding)
+    record = make_record(
+        operation_binding=requested,
+        protected_operation_binding=actual,
+    )
 
-    assert record.operation_binding == binding
+    assert record.operation_binding == requested
+    assert record.protected_operation_binding == actual
 
 
-def test_authorization_audit_record_rejects_invalid_operation_binding() -> None:
-    with pytest.raises(TypeError, match="operation_binding"):
-        AuthorizationAuditRecord(
-            request_id="request-001",
-            subject_id="aranwill",
-            resource="conversation",
-            action="write",
-            outcome=AuthorizationAuditOutcome.DENIED,
-            reason_code="no_applicable_policy",
-            operation_binding="not-a-binding",
-        )
+@pytest.mark.parametrize(
+    "field_name",
+    ["operation_binding", "protected_operation_binding"],
+)
+def test_authorization_audit_record_rejects_invalid_bindings(
+    field_name: str,
+) -> None:
+    values = {
+        "request_id": "request-001",
+        "subject_id": "aranwill",
+        "resource": "conversation",
+        "action": "write",
+        "outcome": AuthorizationAuditOutcome.DENIED,
+        "reason_code": "no_applicable_policy",
+        "operation_binding": None,
+        "protected_operation_binding": None,
+    }
+    values[field_name] = "not-a-binding"
+
+    with pytest.raises(TypeError, match=field_name):
+        AuthorizationAuditRecord(**values)
