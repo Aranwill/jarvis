@@ -6,6 +6,7 @@ from malak.security.context_validator import SecurityContextValidator
 import pytest
 
 from malak.security import (
+    AuthorizationOperationBinding,
     AuthorizationRequest,
     HumanConfirmationEvidence,
     PermissionScope,
@@ -40,6 +41,7 @@ class RecordingVerifier:
 
         return self.result
 
+
 class FixedClock:
     def __init__(self, current_time: datetime) -> None:
         self._current_time = current_time
@@ -50,6 +52,7 @@ class FixedClock:
 
 def make_validator(current_time: datetime) -> SecurityContextValidator:
     return SecurityContextValidator(FixedClock(current_time))
+
 
 def make_pdp(
     rules: list[PolicyRule] | list[object],
@@ -64,6 +67,16 @@ def make_pdp(
         confirmation_verifier=confirmation_verifier,
     )
 
+
+def make_binding(digest_character: str = "a") -> AuthorizationOperationBinding:
+    return AuthorizationOperationBinding(
+        namespace="memory.episodic.persistence",
+        binding_version="v1",
+        digest_algorithm="sha256",
+        digest_hex=digest_character * 64,
+    )
+
+
 def make_request(
     *,
     request_id: str = "request-new",
@@ -71,21 +84,31 @@ def make_request(
     authenticated: bool = True,
     resource: str = "system",
     action: str = "update",
+    created_at: datetime | None = None,
+    operation_binding: AuthorizationOperationBinding | None = None,
 ) -> AuthorizationRequest:
+    issued_at = datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc)
+    expires_at = datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc)
     return AuthorizationRequest(
         context=SecurityContext(
             context_id="context-001",
             session_id="session-001",
             subject_id=subject_id,
             authenticated=authenticated,
-            issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
-            expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
+            issued_at=issued_at,
+            expires_at=expires_at,
         ),
         permission=PermissionScope(
             resource=resource,
             action=action,
         ),
         request_id=request_id,
+        created_at=(
+            created_at
+            if created_at is not None
+            else datetime(2026, 8, 15, 18, 10, tzinfo=timezone.utc)
+        ),
+        operation_binding=operation_binding,
     )
 
 
@@ -113,6 +136,7 @@ def make_confirmation(
     subject_id: str = "aranwill",
     resource: str = "system",
     action: str = "update",
+    operation_binding: AuthorizationOperationBinding | None = None,
 ) -> HumanConfirmationEvidence:
     return HumanConfirmationEvidence(
         confirmation_id="confirmation-001",
@@ -125,6 +149,7 @@ def make_confirmation(
         ),
         confirmed_by="owner",
         confirmed_at=datetime(2026, 7, 26, tzinfo=timezone.utc),
+        operation_binding=operation_binding,
     )
 
 
@@ -214,6 +239,66 @@ def test_verified_confirmation_authorizes_only_new_request() -> None:
 
     assert decision.allowed is True
     assert decision.reason == "human_confirmation_approved"
+    assert verifier.calls == [(request, confirmation)]
+
+
+def test_bound_allow_decision_preserves_exact_operation_binding() -> None:
+    binding = make_binding()
+    request = make_request(operation_binding=binding)
+    pdp = make_pdp([make_rule(PolicyEffect.ALLOW)])
+
+    decision = pdp.decide(request)
+
+    assert decision.allowed is True
+    assert decision.operation_binding == binding
+
+
+def test_bound_deny_decision_preserves_exact_operation_binding() -> None:
+    binding = make_binding()
+    request = make_request(operation_binding=binding)
+    pdp = make_pdp([make_rule(PolicyEffect.DENY)])
+
+    decision = pdp.decide(request)
+
+    assert decision.allowed is False
+    assert decision.reason == "policy_denied"
+    assert decision.operation_binding == binding
+
+
+def test_bound_confirmation_requires_exact_operation_binding() -> None:
+    request_binding = make_binding("a")
+    other_binding = make_binding("b")
+    request = make_request(operation_binding=request_binding)
+    confirmation = make_confirmation(operation_binding=other_binding)
+    verifier = RecordingVerifier()
+    pdp = make_pdp(
+        [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
+        confirmation_verifier=verifier,
+    )
+
+    decision = pdp.decide(request, confirmation)
+
+    assert decision.allowed is False
+    assert decision.reason == "invalid_human_confirmation"
+    assert decision.operation_binding == request_binding
+    assert verifier.calls == []
+
+
+def test_bound_confirmation_authorizes_matching_operation_binding() -> None:
+    binding = make_binding()
+    request = make_request(operation_binding=binding)
+    confirmation = make_confirmation(operation_binding=binding)
+    verifier = RecordingVerifier()
+    pdp = make_pdp(
+        [make_rule(PolicyEffect.REQUIRE_HUMAN_CONFIRMATION)],
+        confirmation_verifier=verifier,
+    )
+
+    decision = pdp.decide(request, confirmation)
+
+    assert decision.allowed is True
+    assert decision.reason == "human_confirmation_approved"
+    assert decision.operation_binding == binding
     assert verifier.calls == [(request, confirmation)]
 
 
@@ -433,6 +518,31 @@ def test_pdp_value_objects_are_immutable(
     with pytest.raises(FrozenInstanceError):
         setattr(instance, field_name, replacement)
 
+
+def test_request_created_before_context_is_denied() -> None:
+    pdp = make_pdp([make_rule(PolicyEffect.ALLOW)])
+    request = make_request(
+        created_at=datetime(2026, 8, 15, 17, 59, tzinfo=timezone.utc)
+    )
+
+    decision = pdp.decide(request)
+
+    assert decision.allowed is False
+    assert decision.reason == "authorization_request_time_invalid"
+
+
+def test_request_created_at_context_expiry_is_denied() -> None:
+    pdp = make_pdp([make_rule(PolicyEffect.ALLOW)])
+    request = make_request(
+        created_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc)
+    )
+
+    decision = pdp.decide(request)
+
+    assert decision.allowed is False
+    assert decision.reason == "authorization_request_time_invalid"
+
+
 def test_pdp_denies_expired_security_context() -> None:
     expires_at = datetime(2026, 8, 15, 23, 30, tzinfo=timezone.utc)
 
@@ -463,6 +573,7 @@ def test_pdp_denies_expired_security_context() -> None:
             resource="conversation",
             action="read",
         ),
+        created_at=expires_at - timedelta(minutes=10),
     )
 
     decision = pdp.decide(request)
@@ -501,6 +612,7 @@ def test_pdp_allows_valid_security_context_to_reach_policy() -> None:
             resource="conversation",
             action="read",
         ),
+        created_at=now,
     )
 
     decision = pdp.decide(request)
