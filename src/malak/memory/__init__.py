@@ -11,10 +11,26 @@ from malak.memory.episodic_admission import (
     SourceSecurityStatus,
     evaluate_episodic_candidate,
 )
+from malak.memory.episodic_persistence_readiness import (
+    OPERATION_BINDING_DIGEST_ALGORITHM,
+    OPERATION_BINDING_NAMESPACE,
+    OPERATION_BINDING_VERSION,
+    POLICY_VERSION as PERSISTENCE_READINESS_POLICY_VERSION,
+    EpisodicPersistenceIntent,
+    EpisodicPersistenceReadinessOutcome,
+    EpisodicPersistenceReadinessReason,
+    EpisodicPersistenceReadinessResult,
+    compute_episodic_persistence_operation_binding,
+    evaluate_episodic_persistence_readiness,
+)
 
 
 __all__ = [
     "POLICY_VERSION",
+    "PERSISTENCE_READINESS_POLICY_VERSION",
+    "OPERATION_BINDING_NAMESPACE",
+    "OPERATION_BINDING_VERSION",
+    "OPERATION_BINDING_DIGEST_ALGORITHM",
     "EpisodicAdmissionContext",
     "EpisodicAdmissionDecision",
     "EpisodicAdmissionOutcome",
@@ -24,5 +40,11 @@ __all__ = [
     "EpisodicMemoryCandidate",
     "EpisodicOrigin",
     "SourceSecurityStatus",
+    "EpisodicPersistenceIntent",
+    "EpisodicPersistenceReadinessOutcome",
+    "EpisodicPersistenceReadinessReason",
+    "EpisodicPersistenceReadinessResult",
+    "compute_episodic_persistence_operation_binding",
     "evaluate_episodic_candidate",
+    "evaluate_episodic_persistence_readiness",
 ]
