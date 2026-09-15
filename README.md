@@ -20,11 +20,21 @@ Rama permanente:
 
 `main`
 
-Baseline operativo actual:
+Último sprint numerado completado e integrado:
 
 ```text
-Sprint 7.10 completado — Conversation Session Isolation Foundation
+Sprint 7.11 — Reproducible Validation Pipeline Foundation
 ```
+
+Última ruta conversacional/runtime integrada:
+
+```text
+Sprint 7.10 — Conversation Session Isolation Foundation
+```
+
+Después de Sprint 7.11 se integraron unidades aisladas de Memory y Cognitive Assurance sin constituir Sprint 7.12. El baseline actual incluye `EpisodicCandidateContentIdentity` y su propagación/binding gobernado a través de la cadena episódica, además de G2A — Protected Finalization Foundation y G2 — Assurance Signal Authority & Projection Foundation en aislamiento.
+
+CAL-014 — Protected Durable Reliance está activado normativamente mediante CC-013, R-023 y ADR-006. Esa activación no autoriza Persistence Authorization, Persistent Memory, Conversation G2B, RDD Stage 2 ni Sprint 7.12.
 
 La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional, la continuidad conversacional efímera y el aislamiento de contexto por sesión.
 
@@ -229,11 +239,17 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-Última suite completa documentada durante la validación post-merge del Sprint 7.10:
+La última implementación productiva integrada de Candidate Content Identity Propagation & Binding fue validada candidate-bound con:
 
 ```text
-372 passed
+838 passed — Ubuntu
+838 passed — Windows
+compileall: PASS
+git diff --check: PASS
+FULL 4R: PASS
 ```
+
+Los commits documentales posteriores conservaron Validation en verde sobre `main`.
 
 Validar compilación:
 
@@ -344,6 +360,7 @@ Documentos relevantes:
 ```text
 docs/architecture/blueprint.md
 docs/architecture/kernel.md
+docs/architecture/adr/ADR-006-protected-durable-reliance-preconditions.md
 docs/governance/cognitive_constitution.md
 docs/governance/governance_constitution.md
 docs/development/development_environment.md
@@ -359,6 +376,7 @@ docs/project/sprints/SPRINT-7.7.md
 docs/project/sprints/SPRINT-7.8.md
 docs/project/sprints/SPRINT-7.9.md
 docs/project/sprints/SPRINT-7.10.md
+docs/project/sprints/SPRINT-7.11.md
 ```
 
 ## Principios
