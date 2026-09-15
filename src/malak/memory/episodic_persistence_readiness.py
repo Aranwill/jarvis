@@ -32,6 +32,7 @@ _OPERATION_BINDING_SCHEMA = "malak.episodic_persistence_subject/v1"
 _OPERATION_BINDING_DOMAIN_SEPARATOR = (
     "MALAK:EPISODIC_PERSISTENCE_SUBJECT:v1\n"
 )
+_SHA256_HEX_LENGTH = 64
 
 
 def _require_canonical_text(value: str, field_name: str) -> str:
@@ -186,8 +187,29 @@ class EpisodicPersistenceReadinessResult:
         if self.outcome is EpisodicPersistenceReadinessOutcome.READY:
             if self.reason_code is not EpisodicPersistenceReadinessReason.READY:
                 raise ValueError("READY outcome requires READY reason_code")
-            if self.authorization_operation_binding is None:
+            binding = self.authorization_operation_binding
+            if binding is None:
                 raise ValueError("READY outcome requires operation binding")
+            if self.intent.candidate_id != self.candidate_id:
+                raise ValueError(
+                    "READY intent candidate_id must match result candidate_id"
+                )
+            if self.intent.candidate_content_identity != self.candidate_content_identity:
+                raise ValueError(
+                    "READY intent content identity must match result content identity"
+                )
+            if self.intent.created_at > self.evaluated_at:
+                raise ValueError(
+                    "READY intent created_at must not be after evaluated_at"
+                )
+            if binding.namespace != OPERATION_BINDING_NAMESPACE:
+                raise ValueError("READY operation binding namespace is invalid")
+            if binding.binding_version != OPERATION_BINDING_VERSION:
+                raise ValueError("READY operation binding version is invalid")
+            if binding.digest_algorithm != OPERATION_BINDING_DIGEST_ALGORITHM:
+                raise ValueError("READY operation binding algorithm is invalid")
+            if len(binding.digest_hex) != _SHA256_HEX_LENGTH:
+                raise ValueError("READY operation binding digest length is invalid")
         else:
             if self.reason_code is EpisodicPersistenceReadinessReason.READY:
                 raise ValueError("non-READY outcome cannot use READY reason_code")
@@ -422,10 +444,10 @@ def evaluate_episodic_persistence_readiness(
         )
 
     if consumption.outcome is GovernedAdmissionConsumptionOutcome.BLOCKED:
-        if (
-            consumption.reason_code
-            is GovernedAdmissionConsumptionReason.PROJECTION_HOLD
-        ):
+        if consumption.reason_code in {
+            GovernedAdmissionConsumptionReason.PROJECTION_HOLD,
+            GovernedAdmissionConsumptionReason.UNSUPPORTED_PROJECTION_POLICY,
+        }:
             return _hold(
                 candidate,
                 intent,
