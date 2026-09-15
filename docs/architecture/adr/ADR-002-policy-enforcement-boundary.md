@@ -5,8 +5,6 @@ status: accepted
 date: 2026-07-26
 updated: 2026-09-15
 author: Hector Rodriguez
-reviewed_by:
-  - ChatGPT
 version: 1.3.0
 tags:
   - security
