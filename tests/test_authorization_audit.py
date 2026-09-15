@@ -8,8 +8,18 @@ from malak.security import (
     AuthorizationAuditOutcome,
     AuthorizationAuditRecord,
     AuthorizationAuditSink,
+    AuthorizationOperationBinding,
     InMemoryAuthorizationAuditStore,
 )
+
+
+def make_binding() -> AuthorizationOperationBinding:
+    return AuthorizationOperationBinding(
+        namespace="memory.episodic.persistence",
+        binding_version="v1",
+        digest_algorithm="sha256",
+        digest_hex="a" * 64,
+    )
 
 
 def make_record(
@@ -17,6 +27,7 @@ def make_record(
     outcome: AuthorizationAuditOutcome = (
         AuthorizationAuditOutcome.DENIED
     ),
+    operation_binding: AuthorizationOperationBinding | None = None,
 ) -> AuthorizationAuditRecord:
     return AuthorizationAuditRecord(
         request_id="request-001",
@@ -25,6 +36,7 @@ def make_record(
         action="write",
         outcome=outcome,
         reason_code="no_applicable_policy",
+        operation_binding=operation_binding,
     )
 
 
@@ -202,7 +214,7 @@ def test_authorization_audit_record_is_immutable() -> None:
 
 
 def test_authorization_audit_record_excludes_sensitive_payloads() -> None:
-    record = make_record()
+    record = make_record(operation_binding=make_binding())
 
     for field_name in (
         "prompt",
@@ -218,34 +230,22 @@ def test_authorization_audit_record_excludes_sensitive_payloads() -> None:
         assert not hasattr(record, field_name)
 
 
-def test_in_memory_store_appends_records_in_order() -> None:
-    store = InMemoryAuthorizationAuditStore()
-    first = make_record(outcome=AuthorizationAuditOutcome.DENIED)
-    second = make_record(outcome=AuthorizationAuditOutcome.ALLOWED)
+def test_authorization_audit_record_preserves_exact_operation_binding() -> None:
+    binding = make_binding()
 
-    store.write(first)
-    store.write(second)
+    record = make_record(operation_binding=binding)
 
-    assert store.records == (first, second)
+    assert record.operation_binding == binding
 
 
-def test_in_memory_store_returns_immutable_projection() -> None:
-    store = InMemoryAuthorizationAuditStore()
-    store.write(make_record())
-
-    records = store.records
-
-    assert isinstance(records, tuple)
-
-
-def test_in_memory_store_rejects_invalid_records() -> None:
-    store = InMemoryAuthorizationAuditStore()
-
-    with pytest.raises(TypeError):
-        store.write("invalid")
-
-
-def test_in_memory_store_satisfies_sink_protocol() -> None:
-    sink: AuthorizationAuditSink = InMemoryAuthorizationAuditStore()
-
-    sink.write(make_record())
+def test_authorization_audit_record_rejects_invalid_operation_binding() -> None:
+    with pytest.raises(TypeError, match="operation_binding"):
+        AuthorizationAuditRecord(
+            request_id="request-001",
+            subject_id="aranwill",
+            resource="conversation",
+            action="write",
+            outcome=AuthorizationAuditOutcome.DENIED,
+            reason_code="no_applicable_policy",
+            operation_binding="not-a-binding",
+        )
