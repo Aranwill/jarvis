@@ -4,6 +4,8 @@ from enum import Enum
 from typing import Protocol
 from uuid import uuid4
 
+from malak.security.contracts import AuthorizationOperationBinding
+
 
 def _normalize_required_text(value: str, field_name: str) -> str:
     if not isinstance(value, str):
@@ -34,6 +36,8 @@ class AuthorizationAuditRecord:
     action: str
     outcome: AuthorizationAuditOutcome
     reason_code: str
+    operation_binding: AuthorizationOperationBinding | None = None
+    protected_operation_binding: AuthorizationOperationBinding | None = None
     audit_id: str = field(default_factory=lambda: str(uuid4()))
     created_at: datetime = field(
         default_factory=lambda: datetime.now(timezone.utc)
@@ -61,6 +65,19 @@ class AuthorizationAuditRecord:
             raise TypeError(
                 "outcome must be an AuthorizationAuditOutcome"
             )
+
+        for field_name in (
+            "operation_binding",
+            "protected_operation_binding",
+        ):
+            binding = getattr(self, field_name)
+            if binding is not None and not isinstance(
+                binding,
+                AuthorizationOperationBinding,
+            ):
+                raise TypeError(
+                    f"{field_name} must be an AuthorizationOperationBinding or None"
+                )
 
         if not isinstance(self.created_at, datetime):
             raise TypeError("created_at must be a datetime")
