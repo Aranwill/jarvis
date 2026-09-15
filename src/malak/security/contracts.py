@@ -15,6 +15,18 @@ def _normalize_required_text(value: str, field_name: str) -> str:
     return normalized
 
 
+def _normalize_lower_hex(value: str, field_name: str) -> str:
+    normalized = _normalize_required_text(value, field_name)
+
+    if normalized != normalized.lower():
+        raise ValueError(f"{field_name} must be lowercase hexadecimal")
+
+    if any(character not in "0123456789abcdef" for character in normalized):
+        raise ValueError(f"{field_name} must be lowercase hexadecimal")
+
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class PermissionScope:
     resource: str
@@ -30,6 +42,35 @@ class PermissionScope:
             self,
             "action",
             _normalize_required_text(self.action, "action"),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AuthorizationOperationBinding:
+    namespace: str
+    binding_version: str
+    digest_algorithm: str
+    digest_hex: str
+
+    def __post_init__(self) -> None:
+        for field_name in (
+            "namespace",
+            "binding_version",
+            "digest_algorithm",
+        ):
+            object.__setattr__(
+                self,
+                field_name,
+                _normalize_required_text(
+                    getattr(self, field_name),
+                    field_name,
+                ),
+            )
+
+        object.__setattr__(
+            self,
+            "digest_hex",
+            _normalize_lower_hex(self.digest_hex, "digest_hex"),
         )
 
 
@@ -97,6 +138,7 @@ class AuthorizationRequest:
     created_at: datetime = field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+    operation_binding: AuthorizationOperationBinding | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.context, SecurityContext):
@@ -120,6 +162,14 @@ class AuthorizationRequest:
         ):
             raise ValueError("created_at must include timezone information")
 
+        if self.operation_binding is not None and not isinstance(
+            self.operation_binding,
+            AuthorizationOperationBinding,
+        ):
+            raise TypeError(
+                "operation_binding must be an AuthorizationOperationBinding or None"
+            )
+
 
 @dataclass(frozen=True, slots=True)
 class HumanConfirmationEvidence:
@@ -130,6 +180,7 @@ class HumanConfirmationEvidence:
     permission: PermissionScope
     confirmed_by: str
     confirmed_at: datetime
+    operation_binding: AuthorizationOperationBinding | None = None
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -165,12 +216,21 @@ class HumanConfirmationEvidence:
         ):
             raise ValueError("confirmed_at must include timezone information")
 
+        if self.operation_binding is not None and not isinstance(
+            self.operation_binding,
+            AuthorizationOperationBinding,
+        ):
+            raise TypeError(
+                "operation_binding must be an AuthorizationOperationBinding or None"
+            )
+
 
 @dataclass(frozen=True, slots=True)
 class AuthorizationDecision:
     request_id: str
     allowed: bool
     reason: str
+    operation_binding: AuthorizationOperationBinding | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -187,3 +247,11 @@ class AuthorizationDecision:
             "reason",
             _normalize_required_text(self.reason, "reason"),
         )
+
+        if self.operation_binding is not None and not isinstance(
+            self.operation_binding,
+            AuthorizationOperationBinding,
+        ):
+            raise TypeError(
+                "operation_binding must be an AuthorizationOperationBinding or None"
+            )
