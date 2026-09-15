@@ -4,6 +4,8 @@ from enum import Enum
 from typing import Protocol
 from uuid import uuid4
 
+from malak.security.contracts import AuthorizationOperationBinding
+
 
 def _normalize_required_text(value: str, field_name: str) -> str:
     if not isinstance(value, str):
@@ -38,6 +40,8 @@ class AuthorizationAuditRecord:
     created_at: datetime = field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+    operation_binding: AuthorizationOperationBinding | None = None
+    protected_operation_binding: AuthorizationOperationBinding | None = None
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -72,6 +76,19 @@ class AuthorizationAuditRecord:
             raise ValueError(
                 "created_at must include timezone information"
             )
+
+        for field_name in (
+            "operation_binding",
+            "protected_operation_binding",
+        ):
+            binding = getattr(self, field_name)
+            if binding is not None and not isinstance(
+                binding,
+                AuthorizationOperationBinding,
+            ):
+                raise TypeError(
+                    f"{field_name} must be an AuthorizationOperationBinding or None"
+                )
 
 
 class AuthorizationAuditSink(Protocol):

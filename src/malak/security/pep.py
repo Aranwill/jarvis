@@ -7,6 +7,7 @@ from malak.security.audit import (
 )
 from malak.security.contracts import (
     AuthorizationDecision,
+    AuthorizationOperationBinding,
     AuthorizationRequest,
     HumanConfirmationEvidence,
 )
@@ -85,6 +86,27 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                 "request must be an AuthorizationRequest"
             )
 
+        operation_binding = self._read_operation_binding(request)
+
+        if not self._is_temporally_coherent(request):
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="authorization_request_time_invalid",
+                failure_message=(
+                    "authorization audit failed after request time rejection"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "authorization request is outside security context lifecycle"
+            )
+
+        self._validate_request_operation_binding(
+            request,
+            operation_binding,
+        )
+
         try:
             decision = self._policy_decision_point.decide(
                 request,
@@ -93,6 +115,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
         except Exception as error:
             self._write_audit(
                 request=request,
+                protected_operation_binding=operation_binding,
                 outcome=AuthorizationAuditOutcome.DECISION_FAILED,
                 reason_code="policy_decision_failed",
                 failure_message=(
@@ -107,6 +130,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
         if not isinstance(decision, AuthorizationDecision):
             self._write_audit(
                 request=request,
+                protected_operation_binding=operation_binding,
                 outcome=AuthorizationAuditOutcome.INVALID_DECISION,
                 reason_code="invalid_decision_type",
                 failure_message=(
@@ -121,6 +145,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
         if decision.request_id != request.request_id:
             self._write_audit(
                 request=request,
+                protected_operation_binding=operation_binding,
                 outcome=AuthorizationAuditOutcome.INVALID_DECISION,
                 reason_code="decision_request_mismatch",
                 failure_message=(
@@ -132,9 +157,25 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                 "authorization decision does not match request"
             )
 
+        if decision.operation_binding != request.operation_binding:
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.INVALID_DECISION,
+                reason_code="decision_operation_binding_mismatch",
+                failure_message=(
+                    "authorization audit failed after "
+                    "decision operation binding mismatch"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "authorization decision operation binding does not match request"
+            )
+
         if not decision.allowed:
             self._write_audit(
                 request=request,
+                protected_operation_binding=operation_binding,
                 outcome=AuthorizationAuditOutcome.DENIED,
                 reason_code=decision.reason,
                 failure_message=(
@@ -148,6 +189,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
 
         self._write_audit(
             request=request,
+            protected_operation_binding=operation_binding,
             outcome=AuthorizationAuditOutcome.ALLOWED,
             reason_code=decision.reason,
             failure_message=(
@@ -161,6 +203,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
             try:
                 self._write_audit(
                     request=request,
+                    protected_operation_binding=operation_binding,
                     outcome=AuthorizationAuditOutcome.OPERATION_FAILED,
                     reason_code="protected_operation_failed",
                     failure_message=(
@@ -174,10 +217,105 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
 
             raise
 
+    def _read_operation_binding(
+        self,
+        request: AuthorizationRequest,
+    ) -> AuthorizationOperationBinding | None:
+        try:
+            operation_binding = getattr(
+                self._protected_operation,
+                "authorization_binding",
+                None,
+            )
+        except Exception as error:
+            self._write_audit(
+                request=request,
+                protected_operation_binding=None,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="protected_operation_binding_unavailable",
+                failure_message=(
+                    "authorization audit failed after protected operation "
+                    "binding access failure"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "protected operation binding could not be read"
+            ) from error
+
+        if operation_binding is not None and not isinstance(
+            operation_binding,
+            AuthorizationOperationBinding,
+        ):
+            self._write_audit(
+                request=request,
+                protected_operation_binding=None,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="invalid_protected_operation_binding",
+                failure_message=(
+                    "authorization audit failed after invalid protected "
+                    "operation binding"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "protected operation returned an invalid authorization binding"
+            )
+
+        return operation_binding
+
+    def _validate_request_operation_binding(
+        self,
+        request: AuthorizationRequest,
+        operation_binding: AuthorizationOperationBinding | None,
+    ) -> None:
+        request_binding = request.operation_binding
+
+        if (request_binding is None) != (operation_binding is None):
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="request_operation_binding_presence_mismatch",
+                failure_message=(
+                    "authorization audit failed after request/operation "
+                    "binding presence mismatch"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "authorization request and protected operation binding presence differ"
+            )
+
+        if (
+            request_binding is not None
+            and operation_binding is not None
+            and request_binding != operation_binding
+        ):
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="request_operation_binding_mismatch",
+                failure_message=(
+                    "authorization audit failed after request/operation "
+                    "binding mismatch"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "authorization request does not match protected operation"
+            )
+
+    @staticmethod
+    def _is_temporally_coherent(request: AuthorizationRequest) -> bool:
+        return (
+            request.context.issued_at
+            <= request.created_at
+            < request.context.expires_at
+        )
+
     def _write_audit(
         self,
         *,
         request: AuthorizationRequest,
+        protected_operation_binding: AuthorizationOperationBinding | None,
         outcome: AuthorizationAuditOutcome,
         reason_code: str,
         failure_message: str,
@@ -189,6 +327,8 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
             action=request.permission.action,
             outcome=outcome,
             reason_code=reason_code,
+            operation_binding=request.operation_binding,
+            protected_operation_binding=protected_operation_binding,
         )
 
         try:

@@ -6,6 +6,7 @@ from malak.security.audit import (
 )
 from malak.security.contracts import (
     AuthorizationDecision,
+    AuthorizationOperationBinding,
     AuthorizationRequest,
     HumanConfirmationEvidence,
     PermissionScope,
@@ -34,6 +35,7 @@ __all__ = [
     "AuthorizationDecision",
     "AuthorizationDeniedError",
     "AuthorizationEnforcementError",
+    "AuthorizationOperationBinding",
     "AuthorizationRequest",
     "HumanConfirmationEvidence",
     "HumanConfirmationVerifier",

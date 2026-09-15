@@ -118,6 +118,9 @@ class StaticPolicyDecisionPoint:
         if not isinstance(request, AuthorizationRequest):
             raise TypeError("request must be an AuthorizationRequest")
 
+        if not self._is_temporally_coherent(request):
+            return self._deny(request, "authorization_request_time_invalid")
+
         if not request.context.authenticated:
             return self._deny(request, "unauthenticated_subject")
 
@@ -144,6 +147,7 @@ class StaticPolicyDecisionPoint:
             request_id=request.request_id,
             allowed=True,
             reason="policy_allowed",
+            operation_binding=request.operation_binding,
         )
 
     def _decide_with_confirmation(
@@ -199,6 +203,15 @@ class StaticPolicyDecisionPoint:
             request_id=request.request_id,
             allowed=True,
             reason="human_confirmation_approved",
+            operation_binding=request.operation_binding,
+        )
+
+    @staticmethod
+    def _is_temporally_coherent(request: AuthorizationRequest) -> bool:
+        return (
+            request.context.issued_at
+            <= request.created_at
+            < request.context.expires_at
         )
 
     @staticmethod
@@ -212,6 +225,7 @@ class StaticPolicyDecisionPoint:
             != request.request_id
             and confirmation.subject_id == request.context.subject_id
             and confirmation.permission == request.permission
+            and confirmation.operation_binding == request.operation_binding
         )
 
     @staticmethod
@@ -223,4 +237,5 @@ class StaticPolicyDecisionPoint:
             request_id=request.request_id,
             allowed=False,
             reason=reason,
+            operation_binding=request.operation_binding,
         )
