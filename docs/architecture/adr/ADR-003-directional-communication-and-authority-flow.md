@@ -4,8 +4,7 @@ title: Directional Communication and Authority Flow
 status: accepted
 date: 2026-08-15
 author: Hector Rodriguez
-reviewed_by:
-  - ChatGPT
+reviewed_by: []
 version: 0.6.0-alpha
 
 tags:
