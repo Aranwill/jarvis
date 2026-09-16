@@ -5,9 +5,7 @@ status: accepted
 date: 2026-07-26
 updated: 2026-09-15
 author: Hector Rodriguez
-reviewed_by:
-  - ChatGPT
-version: 1.2.0
+version: 1.3.0
 tags:
   - security
   - authorization
@@ -70,6 +68,16 @@ request_id match
 
 allowed=True
 != reusable permission token
+```
+
+El hardening posterior también demuestra que exact subject binding no alcanza si
+la `PermissionScope` evaluada no coincide con la permission que la operación
+protegida declara requerir realmente.
+
+```text
+exact protected-operation subject binding
++ wrong permission
+!= valid authorization
 ```
 
 Esta ampliación endurece la misma frontera PDP–PEP. No transfiere autoridad a
@@ -164,6 +172,106 @@ specification no exija binding. Una futura operación sensible puede declarar
 que `None` es inválido; un protected durable write deberá hacerlo antes de ser
 admitido.
 
+### Hardening v1.3.0 — permission requerida ligada a la operación protegida
+
+`PermissionScope` y `operation_binding` representan dimensiones distintas de la
+autorización:
+
+```text
+PermissionScope
+-> qué clase de capacidad se solicita
+
+operation binding
+-> sobre qué sujeto material exacto
+```
+
+Para una operación protegida que declare una permission requerida, el PEP debe
+demostrar:
+
+```text
+AuthorizationRequest.permission
+== ProtectedOperation.required_permission
+```
+
+La operación protegida declara la permission que requiere; no se concede a sí
+misma esa permission. La autoridad continúa siendo decidida por el PDP sobre la
+`AuthorizationRequest` exacta.
+
+Quedan prohibidas estas interpretaciones:
+
+```text
+required permission declaration
+!= authorization
+
+permission equality
+!= exact subject equality
+
+exact subject equality
+!= permission equality
+
+operation binding
+!= permission
+```
+
+Para una operación bound, omitir la permission requerida deja incompleta la
+asociación de autorización:
+
+```text
+ProtectedOperation.authorization_binding != None
+AND ProtectedOperation.required_permission == None
+-> BLOCK
+```
+
+La compatibilidad legacy permanece limitada a operaciones unbound que no
+declaren `required_permission`.
+
+Security trata `required_permission` como un `PermissionScope` opaco respecto de
+la semántica de dominio. No interpreta `purpose`, `domain`, `subject_scope`,
+retention, consent, storage ni tipos de Memory.
+
+El PDP permanece genérico y continúa decidiendo sobre:
+
+```text
+subject_id + PermissionScope
+```
+
+No necesita conocer la semántica interna de la operación protegida.
+
+El PEP debe fallar cerrado cuando:
+
+```text
+required_permission no puede leerse
+required_permission tiene tipo inválido
+request.permission != required_permission
+bound operation no declara required_permission
+```
+
+La comparación de permission requerida debe realizarse antes de solicitar una
+decisión al PDP. Esta obligación no requiere alterar la comprobación temporal ya
+existente: la coherencia temporal puede seguir validándose antes de la permission
+si la implementación preserva fail-closed y ninguna decisión del PDP ocurre antes
+de demostrar la permission correcta.
+
+La auditoría debe permitir reconstruir, cuando aplique:
+
+```text
+requested permission
+actual protected-operation required permission
+requested exact subject binding
+actual protected-operation binding
+outcome / reason
+```
+
+La igualdad estructural tampoco demuestra que una implementación defectuosa haya
+declarado la permission semánticamente correcta para su comportamiento real. Cada
+operación sensible deberá fijar `required_permission` mediante su specification y
+pruebas correspondientes.
+
+```text
+request.permission == operation.required_permission
+!= proof that operation declared the semantically correct permission
+```
+
 ### Human confirmation ligada al mismo sujeto
 
 Cuando una policy requiera confirmación humana para una request bound, la
@@ -208,13 +316,15 @@ La evidencia auditable debe permitir distinguir al menos:
 
 ```text
 permission class
+requested required permission
+actual protected-operation required permission
 requested exact subject binding
 actual protected-operation binding
 outcome / reason
 ```
 
-Un mismatch de binding nunca debe degradarse a un audit de autorización
-permitida.
+Un mismatch de permission o binding nunca debe degradarse a un audit de
+autorización permitida.
 
 ### Replay e idempotencia
 
@@ -253,10 +363,11 @@ Kernel y mezclaría coordinación con decisión y ejecución.
 
 ### Incorporar ahora sesiones, firmas, TTL o prevención de replay
 
-Rechazada para el incremento original. El hardening v1.2.0 tampoco declara
-resuelto replay durable: liga autorización y ejecución al mismo sujeto material,
-pero freshness/replay durable continúa requiriendo contratos y fundamentos
-adicionales coordinados con la operación concreta.
+Rechazada para el incremento original. Los hardenings v1.2.0 y v1.3.0 tampoco
+declaran resuelto replay durable: ligan autorización y ejecución al mismo sujeto
+material y a la permission requerida, pero freshness/replay durable continúa
+requiriendo contratos y fundamentos adicionales coordinados con la operación
+concreta.
 
 ### Resolver el binding únicamente en un wrapper de dominio
 
@@ -271,6 +382,18 @@ Rechazada. Introduciría acoplamiento inverso y transferiría semántica de domi
 a Security. El binding debe permanecer opaco y versionado; cada dominio es
 responsable de derivarlo/recomputarlo desde el material real que protege.
 
+### Confiar en la PermissionScope seleccionada por el caller
+
+Rechazada. Permitiría permission laundering: un caller podría conservar el exact
+operation binding pero solicitar una permission distinta que el PDP sí permita.
+La permission debe contrastarse con la operación protegida real en el PEP.
+
+### Codificar la permission dentro del operation binding
+
+Rechazada. `PermissionScope` y exact operation subject representan propiedades
+diferentes. Mezclarlas dentro de un digest opaco perdería claridad de
+responsabilidades y no reemplaza la comparación estructural de permission.
+
 ## Consecuencias
 
 ### Positivas
@@ -280,12 +403,14 @@ responsable de derivarlo/recomputarlo desde el material real que protege.
 - La asociación entre solicitud y decisión es explícita.
 - Las operaciones bound agregan asociación explícita con el sujeto material
   exacto que será ejecutado.
+- La permission evaluada puede quedar ligada a la permission que la operación
+  protegida declara requerir.
 - La confirmación humana no puede interpretarse como permiso para otro sujeto
   bound de la misma clase.
-- La auditoría puede conservar qué sujeto exacto fue autorizado sin copiar el
-  payload.
-- Los fallos del PDP, las decisiones incongruentes y los binding mismatches
-  bloquean la ejecución.
+- La auditoría puede conservar qué permission y qué sujeto exactos fueron
+  autorizados sin copiar el payload.
+- Los fallos del PDP, las decisiones incongruentes, permission mismatches y
+  binding mismatches bloquean la ejecución.
 - El Kernel permanece intacto.
 
 ### Negativas y límites
@@ -293,6 +418,8 @@ responsable de derivarlo/recomputarlo desde el material real que protege.
 - La confianza en el PDP depende de la composición que lo inyecta.
 - El binding requiere una specification de dominio que defina material exacto,
   canonicalización, versión y algoritmo aceptado.
+- Cada operación sensible deberá declarar correctamente su `required_permission`;
+  igualdad estructural no demuestra corrección semántica de esa declaración.
 - Equality de bindings no demuestra trust, autenticidad ni verdad semántica.
 - El hardening no impide replay durable por sí mismo.
 - Un durable write futuro deberá resolver además idempotencia y fallos parciales.
@@ -303,7 +430,9 @@ correctamente el estado al aprobar ADR-002. Posteriormente, el Sprint 7.5
 incorporó contratos de auditoría mediante la PR #22 y su integración fail-closed
 con el PEP mediante la PR #23. v1.2.0 extiende la propiedad arquitectónica para
 que una futura operación bound preserve también la identidad exacta del sujeto
-en esa evidencia.
+en esa evidencia. v1.3.0 extiende la misma frontera para preservar también la
+coherencia entre la permission solicitada y la permission requerida por la
+operación protegida.
 
 ### Riesgos
 
@@ -311,6 +440,9 @@ en esa evidencia.
 - Una operation implementation defectuosa podría declarar un binding que no
   corresponda al payload real; cada dominio sensible debe definir cómo deriva o
   recomputa el binding desde el estado realmente ejecutado.
+- Una operation implementation defectuosa podría declarar una
+  `required_permission` que no represente su semántica real; la specification y
+  los tests de la operación deben cerrar esa brecha.
 - Una operación no idempotente puede fallar después de iniciarse; el PEP no debe
   reintentarla automáticamente.
 - Confundir operation binding con replay protection produciría una garantía
@@ -337,13 +469,26 @@ contratos Security para representar y propagar un operation binding opaco en:
 - `ProtectedOperation` / enforcement;
 - `AuthorizationAuditRecord` para operaciones bound.
 
+v1.3.0 autoriza como dirección arquitectónica una evolución compatible de la
+misma frontera para:
+
+- exponer `ProtectedOperation.required_permission` cuando aplique;
+- comparar en el PEP la permission solicitada contra la requerida por la
+  operación protegida;
+- exigir `required_permission` en nuevas operaciones bound;
+- preservar requested vs protected-operation permission en auditoría cuando
+  aplique.
+
+No se demuestra necesidad de cambiar la semántica del PDP ni de agregar
+`permission` a `AuthorizationDecision` en este incremento.
+
 Esta aceptación arquitectónica no constituye por sí misma autorización de
 implementación. No autoriza Persistence Authorization, Persistent Memory,
 Protected Durable Write, Durable Reliance runtime, Conversation G2B, RDD Stage 2
 o Sprint 7.12.
 
 No se agrega responsabilidad al Kernel, Planner, CLI, runtimes ni Capability
-Registry.
+Registry, ni se crea un nuevo layer/service/manager.
 
 ## Relación con Gobernanza
 
@@ -353,8 +498,9 @@ Registry.
   de LLM.
 - Constitución de Gobernanza: aplica seguridad por defecto, mínimo
   privilegio, separación de responsabilidades, trazabilidad y control humano.
-- ADR-006: el hardening satisface la precondición arquitectónica de exact
-  operation-subject binding, pero no declara satisfechas freshness/replay,
+- ADR-006: los hardenings satisfacen precondiciones arquitectónicas de exact
+  operation-subject binding y de coherencia entre permission solicitada y
+  operación protegida, pero no declaran satisfechas freshness/replay,
   retention/disclosure/consent, idempotencia o partial-failure de un futuro
   durable write.
 - Kernel First: no agrega responsabilidades al Kernel.
@@ -396,18 +542,35 @@ bound:
 - [x] Replay durable e idempotencia permanecen explícitamente fuera de la
   garantía provista por el binding.
 
+Requisitos arquitectónicos aceptados por v1.3.0 para una futura implementación
+de required-permission binding:
+
+- [x] La permission solicitada debe coincidir exactamente con la permission
+  requerida por la operación protegida cuando ésta la declare.
+- [x] Una operación bound no puede omitir `required_permission`.
+- [x] La lectura inválida o no disponible de `required_permission` debe fallar
+  cerrado.
+- [x] El mismatch de permission debe bloquear antes de consultar al PDP.
+- [x] El PDP permanece genérico y no interpreta semántica de dominio.
+- [x] Audit debe poder distinguir permission solicitada y permission requerida.
+- [x] Legacy unbound sin `required_permission` puede conservar semántica
+  compatible.
+- [x] Permission equality no se confunde con exact subject binding ni con prueba
+  de corrección semántica de la permission declarada.
+
 Estos checks expresan aceptación de la **decisión arquitectónica**; no afirman
-que el runtime v1.2.0 ya esté implementado.
+que el runtime v1.2.0 o v1.3.0 ya esté implementado.
 
 ## Rollback
 
 Para el incremento original, revertir su commit elimina la frontera, sus pruebas
 y esta ADR sin afectar el PDP.
 
-Para el hardening v1.2.0, antes de cualquier implementación el rollback consiste
-en revertir exclusivamente la enmienda documental. Si posteriormente existiera
-una implementación bound, su rollback deberá revertir primero el runtime y sus
-contratos de forma compatible antes de retirar esta obligación arquitectónica.
+Para los hardenings v1.2.0 y v1.3.0, antes de cualquier implementación el
+rollback consiste en revertir exclusivamente la enmienda documental
+correspondiente. Si posteriormente existiera una implementación bound, su
+rollback deberá revertir primero el runtime y sus contratos de forma compatible
+antes de retirar la obligación arquitectónica aplicable.
 
 No existe en este momento estado persistente ni integración durable que deba
 migrarse por esta enmienda.
@@ -419,3 +582,4 @@ migrarse por esta enmienda.
 | 1.0.0 | 2026-07-26 | Decisión inicial para la frontera PDP–PEP. |
 | 1.1.0 | 2026-08-09 | Reconciliación histórica: auditoría incorporada posteriormente por PR #22 y PR #23 sin cambiar la frontera PDP–PEP. |
 | 1.2.0 | 2026-09-15 | Hardening normativo: exact operation binding, propagación request/decision/confirmation, enforcement fail-closed, audit bound y coherencia temporal; durable replay/idempotencia permanecen fuera de scope. |
+| 1.3.0 | 2026-09-15 | Hardening normativo: exact required-permission binding entre request y operación protegida, fail-closed ante mismatch/ausencia en operaciones bound y auditoría requested-vs-required; runtime y Persistence Authorization permanecen no autorizados. |
