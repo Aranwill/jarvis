@@ -4,7 +4,10 @@ from enum import Enum
 from typing import Protocol
 from uuid import uuid4
 
-from malak.security.contracts import AuthorizationOperationBinding
+from malak.security.contracts import (
+    AuthorizationOperationBinding,
+    PermissionScope,
+)
 
 
 def _normalize_required_text(value: str, field_name: str) -> str:
@@ -42,6 +45,7 @@ class AuthorizationAuditRecord:
     )
     operation_binding: AuthorizationOperationBinding | None = None
     protected_operation_binding: AuthorizationOperationBinding | None = None
+    protected_operation_permission: PermissionScope | None = None
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -89,6 +93,17 @@ class AuthorizationAuditRecord:
                 raise TypeError(
                     f"{field_name} must be an AuthorizationOperationBinding or None"
                 )
+
+        if (
+            self.protected_operation_permission is not None
+            and not isinstance(
+                self.protected_operation_permission,
+                PermissionScope,
+            )
+        ):
+            raise TypeError(
+                "protected_operation_permission must be a PermissionScope or None"
+            )
 
 
 class AuthorizationAuditSink(Protocol):

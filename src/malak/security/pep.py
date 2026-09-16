@@ -10,6 +10,7 @@ from malak.security.contracts import (
     AuthorizationOperationBinding,
     AuthorizationRequest,
     HumanConfirmationEvidence,
+    PermissionScope,
 )
 from malak.security.pdp import PolicyDecisionPoint
 
@@ -102,9 +103,15 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                 "authorization request is outside security context lifecycle"
             )
 
+        required_permission = self._read_required_permission(
+            request,
+            operation_binding,
+        )
+
         self._validate_request_operation_binding(
             request,
             operation_binding,
+            required_permission,
         )
 
         try:
@@ -122,6 +129,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                     "authorization audit failed after "
                     "policy decision failure"
                 ),
+                protected_operation_permission=required_permission,
             )
             raise AuthorizationEnforcementError(
                 "policy decision failed"
@@ -137,6 +145,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                     "authorization audit failed after "
                     "invalid policy decision"
                 ),
+                protected_operation_permission=required_permission,
             )
             raise AuthorizationEnforcementError(
                 "policy decision point returned an invalid decision"
@@ -152,6 +161,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                     "authorization audit failed after "
                     "decision request mismatch"
                 ),
+                protected_operation_permission=required_permission,
             )
             raise AuthorizationEnforcementError(
                 "authorization decision does not match request"
@@ -167,6 +177,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                     "authorization audit failed after "
                     "decision operation binding mismatch"
                 ),
+                protected_operation_permission=required_permission,
             )
             raise AuthorizationEnforcementError(
                 "authorization decision operation binding does not match request"
@@ -181,6 +192,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                 failure_message=(
                     "authorization audit failed for denied decision"
                 ),
+                protected_operation_permission=required_permission,
             )
             raise AuthorizationDeniedError(
                 decision.request_id,
@@ -195,6 +207,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
             failure_message=(
                 "authorization audit failed before protected operation"
             ),
+            protected_operation_permission=required_permission,
         )
 
         try:
@@ -210,6 +223,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                         "authorization audit failed after "
                         "protected operation failure"
                     ),
+                    protected_operation_permission=required_permission,
                 )
             except AuthorizationEnforcementError as audit_error:
                 secondary_error = audit_error.__cause__ or audit_error
@@ -262,10 +276,91 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
 
         return operation_binding
 
+    def _read_required_permission(
+        self,
+        request: AuthorizationRequest,
+        operation_binding: AuthorizationOperationBinding | None,
+    ) -> PermissionScope | None:
+        try:
+            required_permission = getattr(
+                self._protected_operation,
+                "required_permission",
+                None,
+            )
+        except Exception as error:
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="protected_operation_permission_unavailable",
+                failure_message=(
+                    "authorization audit failed after protected operation "
+                    "permission access failure"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "protected operation permission could not be read"
+            ) from error
+
+        if required_permission is not None and not isinstance(
+            required_permission,
+            PermissionScope,
+        ):
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="invalid_protected_operation_permission",
+                failure_message=(
+                    "authorization audit failed after invalid protected "
+                    "operation permission"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "protected operation returned an invalid required permission"
+            )
+
+        if operation_binding is not None and required_permission is None:
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="bound_operation_permission_missing",
+                failure_message=(
+                    "authorization audit failed after bound operation "
+                    "permission rejection"
+                ),
+            )
+            raise AuthorizationEnforcementError(
+                "bound protected operation must declare a required permission"
+            )
+
+        if (
+            required_permission is not None
+            and request.permission != required_permission
+        ):
+            self._write_audit(
+                request=request,
+                protected_operation_binding=operation_binding,
+                outcome=AuthorizationAuditOutcome.ENFORCEMENT_FAILED,
+                reason_code="request_operation_permission_mismatch",
+                failure_message=(
+                    "authorization audit failed after request/operation "
+                    "permission mismatch"
+                ),
+                protected_operation_permission=required_permission,
+            )
+            raise AuthorizationEnforcementError(
+                "authorization request permission does not match protected operation"
+            )
+
+        return required_permission
+
     def _validate_request_operation_binding(
         self,
         request: AuthorizationRequest,
         operation_binding: AuthorizationOperationBinding | None,
+        required_permission: PermissionScope | None,
     ) -> None:
         request_binding = request.operation_binding
 
@@ -279,6 +374,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                     "authorization audit failed after request/operation "
                     "binding presence mismatch"
                 ),
+                protected_operation_permission=required_permission,
             )
             raise AuthorizationEnforcementError(
                 "authorization request and protected operation binding presence differ"
@@ -298,6 +394,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
                     "authorization audit failed after request/operation "
                     "binding mismatch"
                 ),
+                protected_operation_permission=required_permission,
             )
             raise AuthorizationEnforcementError(
                 "authorization request does not match protected operation"
@@ -319,6 +416,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
         outcome: AuthorizationAuditOutcome,
         reason_code: str,
         failure_message: str,
+        protected_operation_permission: PermissionScope | None = None,
     ) -> None:
         record = AuthorizationAuditRecord(
             request_id=request.request_id,
@@ -329,6 +427,7 @@ class StrictPolicyEnforcementPoint(Generic[ResultT]):
             reason_code=reason_code,
             operation_binding=request.operation_binding,
             protected_operation_binding=protected_operation_binding,
+            protected_operation_permission=protected_operation_permission,
         )
 
         try:
