@@ -68,7 +68,7 @@ title: Protected Durable Reliance Preconditions
 status: proposed
 date: <activation-date>
 author: Hector Rodriguez
-reviewed_by: ChatGPT
+reviewed_by: []
 version: 0.6.0-alpha
 
 tags:
