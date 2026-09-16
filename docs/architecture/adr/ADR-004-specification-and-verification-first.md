@@ -4,8 +4,7 @@ title: Specification and Verification First
 status: accepted
 date: 2026-08-19
 author: Hector Rodriguez
-reviewed_by:
-  - ChatGPT
+reviewed_by: []
 version: 0.6.0-alpha
 
 tags:
