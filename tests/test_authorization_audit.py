@@ -10,6 +10,7 @@ from malak.security import (
     AuthorizationAuditSink,
     AuthorizationOperationBinding,
     InMemoryAuthorizationAuditStore,
+    PermissionScope,
 )
 
 
@@ -289,3 +290,22 @@ def test_authorization_audit_record_rejects_invalid_bindings(
 
     with pytest.raises(TypeError, match=field_name):
         AuthorizationAuditRecord(**values)
+
+
+def test_authorization_audit_record_preserves_protected_operation_permission() -> None:
+    required_permission = PermissionScope(
+        resource="memory.episodic",
+        action="persist",
+    )
+
+    record = AuthorizationAuditRecord(
+        request_id="request-001",
+        subject_id="aranwill",
+        resource="memory.episodic",
+        action="persist",
+        outcome=AuthorizationAuditOutcome.ALLOWED,
+        reason_code="policy_allowed",
+        protected_operation_permission=required_permission,
+    )
+
+    assert record.protected_operation_permission == required_permission
