@@ -28,10 +28,12 @@ class RecordingOperation:
         result: object = "executed",
         error: Exception | None = None,
         authorization_binding: AuthorizationOperationBinding | None = None,
+        required_permission: PermissionScope | None = None,
     ) -> None:
         self.result = result
         self.error = error
         self.authorization_binding = authorization_binding
+        self.required_permission = required_permission
         self.calls = 0
 
     def execute(self) -> object:
@@ -142,6 +144,7 @@ def make_request(
     authenticated: bool = True,
     created_at: datetime | None = None,
     operation_binding: AuthorizationOperationBinding | None = None,
+    permission: PermissionScope | None = None,
 ) -> AuthorizationRequest:
     return AuthorizationRequest(
         context=SecurityContext(
@@ -152,9 +155,13 @@ def make_request(
             issued_at=datetime(2026, 8, 15, 18, 0, tzinfo=timezone.utc),
             expires_at=datetime(2026, 8, 15, 18, 30, tzinfo=timezone.utc),
         ),
-        permission=PermissionScope(
-            resource="system",
-            action="update",
+        permission=(
+            permission
+            if permission is not None
+            else PermissionScope(
+                resource="system",
+                action="update",
+            )
         ),
         request_id=request_id,
         created_at=(
@@ -218,7 +225,10 @@ def test_bound_operation_executes_only_with_exact_binding_chain() -> None:
     request = make_request(operation_binding=binding)
     decision = make_decision(operation_binding=binding)
     pdp = RecordingPolicyDecisionPoint(decision)
-    operation = RecordingOperation(authorization_binding=binding)
+    operation = RecordingOperation(
+        authorization_binding=binding,
+        required_permission=request.permission,
+    )
     store = InMemoryAuthorizationAuditStore()
     pep = make_pep(pdp, operation, store)
 
@@ -254,7 +264,10 @@ def test_unbound_request_with_bound_operation_is_blocked_before_pdp() -> None:
     binding = make_binding()
     request = make_request()
     pdp = RecordingPolicyDecisionPoint(make_decision())
-    operation = RecordingOperation(authorization_binding=binding)
+    operation = RecordingOperation(
+        authorization_binding=binding,
+        required_permission=request.permission,
+    )
     store = InMemoryAuthorizationAuditStore()
     pep = make_pep(pdp, operation, store)
 
@@ -275,7 +288,10 @@ def test_mismatched_request_and_operation_binding_is_blocked_before_pdp() -> Non
     pdp = RecordingPolicyDecisionPoint(
         make_decision(operation_binding=request_binding)
     )
-    operation = RecordingOperation(authorization_binding=operation_binding)
+    operation = RecordingOperation(
+        authorization_binding=operation_binding,
+        required_permission=request.permission,
+    )
     store = InMemoryAuthorizationAuditStore()
     pep = make_pep(pdp, operation, store)
 
@@ -296,7 +312,10 @@ def test_mismatched_decision_binding_blocks_bound_operation() -> None:
     pdp = RecordingPolicyDecisionPoint(
         make_decision(operation_binding=decision_binding)
     )
-    operation = RecordingOperation(authorization_binding=request_binding)
+    operation = RecordingOperation(
+        authorization_binding=request_binding,
+        required_permission=request.permission,
+    )
     store = InMemoryAuthorizationAuditStore()
     pep = make_pep(pdp, operation, store)
 
@@ -784,3 +803,157 @@ def test_invalid_request_is_not_fabricated_into_audit_record() -> None:
 
     assert store.records == ()
     assert operation.calls == 0
+
+
+def test_permission_mismatch_is_blocked_before_pdp_and_operation() -> None:
+    requested_permission = PermissionScope(
+        resource="memory.episodic",
+        action="read",
+    )
+    required_permission = PermissionScope(
+        resource="memory.episodic",
+        action="persist",
+    )
+    request = make_request(permission=requested_permission)
+    pdp = RecordingPolicyDecisionPoint(make_decision())
+    operation = RecordingOperation(required_permission=required_permission)
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert len(store.records) == 1
+    assert store.records[0].outcome is AuthorizationAuditOutcome.ENFORCEMENT_FAILED
+    assert store.records[0].reason_code == "request_operation_permission_mismatch"
+
+
+def test_bound_operation_without_required_permission_is_blocked_before_pdp() -> None:
+    binding = make_binding()
+    request = make_request(operation_binding=binding)
+    pdp = RecordingPolicyDecisionPoint(
+        make_decision(operation_binding=binding)
+    )
+    operation = RecordingOperation(authorization_binding=binding)
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert len(store.records) == 1
+    assert store.records[0].outcome is AuthorizationAuditOutcome.ENFORCEMENT_FAILED
+    assert store.records[0].reason_code == "bound_operation_permission_missing"
+
+
+def test_invalid_required_permission_type_is_blocked_before_pdp() -> None:
+    request = make_request()
+    pdp = RecordingPolicyDecisionPoint(make_decision())
+    operation = RecordingOperation()
+    operation.required_permission = "memory.episodic:persist"
+    store = InMemoryAuthorizationAuditStore()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert len(store.records) == 1
+    assert store.records[0].reason_code == "invalid_protected_operation_permission"
+
+
+def test_required_permission_access_failure_is_fail_closed_before_pdp() -> None:
+    request = make_request()
+    pdp = RecordingPolicyDecisionPoint(make_decision())
+    store = InMemoryAuthorizationAuditStore()
+
+    class PermissionAccessFailingOperation:
+        calls = 0
+        authorization_binding = None
+
+        @property
+        def required_permission(self) -> PermissionScope:
+            raise RuntimeError("permission unavailable")
+
+        def execute(self) -> str:
+            self.calls += 1
+            return "executed"
+
+    operation = PermissionAccessFailingOperation()
+    pep = make_pep(pdp, operation, store)
+
+    with pytest.raises(AuthorizationEnforcementError):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+    assert len(store.records) == 1
+    assert store.records[0].reason_code == "protected_operation_permission_unavailable"
+
+
+def test_permission_mismatch_remains_fail_closed_when_audit_fails() -> None:
+    requested_permission = PermissionScope(
+        resource="memory.episodic",
+        action="read",
+    )
+    required_permission = PermissionScope(
+        resource="memory.episodic",
+        action="persist",
+    )
+    request = make_request(permission=requested_permission)
+    pdp = RecordingPolicyDecisionPoint(make_decision())
+    operation = RecordingOperation(required_permission=required_permission)
+    pep = make_pep(pdp, operation, FailingAuditSink())
+
+    with pytest.raises(AuthorizationEnforcementError):
+        pep.execute(request)
+
+    assert pdp.calls == []
+    assert operation.calls == 0
+
+
+def test_matching_required_permission_still_respects_denied_pdp_decision() -> None:
+    request = make_request()
+    pdp = RecordingPolicyDecisionPoint(
+        make_decision(allowed=False, reason="policy_denied")
+    )
+    operation = RecordingOperation(required_permission=request.permission)
+    pep = make_pep(pdp, operation)
+
+    with pytest.raises(AuthorizationDeniedError):
+        pep.execute(request)
+
+    assert pdp.calls == [(request, None)]
+    assert operation.calls == 0
+
+
+def test_required_permission_is_read_once_per_pep_invocation() -> None:
+    request = make_request()
+    pdp = RecordingPolicyDecisionPoint(make_decision())
+
+    class CountingPermissionOperation:
+        def __init__(self) -> None:
+            self.permission_reads = 0
+            self.calls = 0
+            self.authorization_binding = None
+
+        @property
+        def required_permission(self) -> PermissionScope:
+            self.permission_reads += 1
+            return request.permission
+
+        def execute(self) -> str:
+            self.calls += 1
+            return "executed"
+
+    operation = CountingPermissionOperation()
+    pep = make_pep(pdp, operation)
+
+    assert pep.execute(request) == "executed"
+    assert operation.permission_reads == 1
+    assert operation.calls == 1
