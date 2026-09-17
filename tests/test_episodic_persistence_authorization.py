@@ -109,9 +109,11 @@ def _security_context() -> SecurityContext:
 
 
 def test_g2pb_red_c01_ready_composes_authorization_request() -> None:
-    request = _composer()(_readiness(), _security_context(), NOW)
+    created_at = NOW
+    request = _composer()(_readiness(), _security_context(), created_at)
 
     assert isinstance(request, AuthorizationRequest)
+    assert request.created_at == created_at
 
 
 def test_g2pb_red_c02_permission_is_exact_persistence_scope() -> None:
