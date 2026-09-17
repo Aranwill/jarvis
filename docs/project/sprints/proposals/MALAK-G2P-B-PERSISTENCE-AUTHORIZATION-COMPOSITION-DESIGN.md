@@ -179,13 +179,19 @@ G2PB-I9  non-READY readiness
 
 G2PB-I10 composition
            -> no side effect
+
+G2PB-I11 Memory composer
+           != upstream authorization initiation
+
+G2PB-I12 successful composition or PDP ALLOW
+           != durable freshness proof
 ```
 
 ---
 
-## 6. Decisión candidata D1 — función pura de composición
+## 6. Decisión candidata D1 — composición sin side effects
 
-Se propone una única función pura de dominio Memory:
+Se propone una única función de composición de dominio Memory, sin side effects observables:
 
 ```python
 compose_episodic_persistence_authorization_request(
@@ -210,6 +216,19 @@ creates sessions
 mutates readiness
 mutates SecurityContext
 ```
+
+La construcción puede utilizar el `request_id` generado por el contrato vigente de `AuthorizationRequest`.
+
+Ese identificador:
+
+```text
+request_id
+!= idempotency key
+!= anti-replay token
+!= proof of authorization
+```
+
+G2P-B no introduce un generador propio de IDs ni permite al caller seleccionar `request_id` como mecanismo de autoridad.
 
 ---
 
@@ -307,6 +326,18 @@ El PDP conserva la validación de vigencia real del `SecurityContext` mediante s
 
 G2P-B no introduce `Clock`, TTL propio, nonce ni anti-replay durable.
 
+Además:
+
+```text
+successful G2P-B composition
+!= proof that G2B readiness remains fresh for durable execution
+
+PDP ALLOW
+!= proof that G2B readiness remains fresh for durable write
+```
+
+La freshness necesaria para un futuro efecto durable, su revalidación y cualquier protección de replay permanecen fuera de G2P-B y detrás del gate G2C.
+
 ---
 
 ## 11. Decisión candidata D6 — ownership preservado
@@ -329,7 +360,21 @@ future protected durable write
 -> side effect separado y todavía no autorizado
 ```
 
-La composición de una request no concede autoridad a Memory.
+La composición solo puede ocurrir como retorno a una invocación autorizada proveniente de un caller/upstream competente.
+
+```text
+authorized upstream caller
+-> invokes Memory composer
+-> receives AuthorizationRequest as data
+
+Memory composer
+!= initiates authorization upstream
+!= calls Governance
+!= uses events as authorization commands
+!= transfers authority
+```
+
+La composición de una request no concede autoridad a Memory ni crea control ascendente.
 
 ---
 
@@ -624,6 +669,9 @@ Delta Kernel esperado: `0`.
 - [ ] No existe side effect durable.
 - [ ] `permission to persist != permission to rely` permanece explícito.
 - [ ] G2C continúa en STOP.
+- [ ] Memory no inicia autorización ni control ascendente; solo devuelve la request como dato a un caller autorizado.
+- [ ] `request_id` no se interpreta como idempotency key, anti-replay token ni autoridad.
+- [ ] Composición exitosa o futuro PDP `ALLOW` no prueban freshness suficiente para durable write.
 - [ ] La futura implementación queda sujeta a TDD RED/GREEN y FULL 4R.
 - [ ] Se requiere aprobación humana explícita antes de crear tests o runtime.
 
