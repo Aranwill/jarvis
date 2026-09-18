@@ -455,3 +455,76 @@ def test_e0_red_c32_blob_content_must_match_reported_blob_sha(
 
     with pytest.raises(RuntimeError):
         reader.read_text("a.txt")
+
+
+
+@pytest.mark.parametrize("query", ["x" * 4097, "á" * 2049])
+def test_e0_red_c33_search_query_has_a_hard_utf8_byte_bound(
+    tmp_path: Path,
+    query: str,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    reader = reader_class()(repo)
+
+    with pytest.raises(ValueError):
+        reader.search_text(query)
+
+
+def test_e0_red_c34_search_blob_reads_have_a_hard_bound(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    module = import_module("malak.infrastructure.repository_reader")
+    monkeypatch.setattr(module, "_MAX_SEARCH_BLOBS", 2)
+
+    reader = module.GitRepositoryReader(repo)
+
+    with pytest.raises(RuntimeError):
+        reader.search_text("needle")
+
+
+def test_e0_red_c35_search_output_bytes_are_bounded_and_signal_truncation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    module = import_module("malak.infrastructure.repository_reader")
+    monkeypatch.setattr(module, "_MAX_SEARCH_OUTPUT_BYTES", 10)
+
+    reader = module.GitRepositoryReader(repo)
+    result = reader.search_text("needle")
+
+    assert [(match.path, match.line) for match in result.matches] == [
+        ("a.txt", "needle one"),
+    ]
+    assert result.truncated is True
+
+
+def test_e0_red_c36_git_environment_drops_untrusted_ambient_git_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = import_module("malak.infrastructure.repository_reader")
+    monkeypatch.setenv("GIT_PREFIX", "redirect")
+    monkeypatch.setenv("GIT_LITERAL_PATHSPECS", "1")
+    monkeypatch.setenv("GIT_SSH_COMMAND", "unexpected-command")
+
+    env = module._git_environment()
+
+    assert "GIT_PREFIX" not in env
+    assert "GIT_LITERAL_PATHSPECS" not in env
+    assert "GIT_SSH_COMMAND" not in env
+    assert env["GIT_CONFIG_NOSYSTEM"] == "1"
+    assert env["GIT_NO_REPLACE_OBJECTS"] == "1"
+
+
+@pytest.mark.parametrize("query", ["needle\x01", "\t"])
+def test_e0_red_c37_search_query_rejects_control_characters(
+    tmp_path: Path,
+    query: str,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    reader = reader_class()(repo)
+
+    with pytest.raises(ValueError):
+        reader.search_text(query)
