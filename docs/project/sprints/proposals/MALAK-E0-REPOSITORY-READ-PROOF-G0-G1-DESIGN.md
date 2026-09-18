@@ -78,11 +78,14 @@ alcance.
 8. No existe ninguna operación de escritura.
 9. Lectura textual: UTF-8 estricto y límite interno de 256 KiB por blob.
 10. Los límites configurables deben ser enteros positivos.
-11. Búsqueda: literal, determinista y bounded; blobs oversized, binarios o no
-    textuales se omiten de la búsqueda sin invalidar el resto del snapshot.
-12. El resultado conserva procedencia suficiente para vincular contenido con
+11. Búsqueda: literal, por línea, determinista y bounded; consultas multilinea se
+    rechazan y blobs oversized, binarios o no textuales se omiten sin invalidar
+    el resto del snapshot.
+12. El inventario Git debe usar una representación no ambigua de paths (NUL-delimited)
+    y preservar nombres Unicode y espacios sin depender de quoting humano.
+13. El resultado conserva procedencia suficiente para vincular contenido con
     baseline y path.
-13. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
+14. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
     convierten silenciosamente en evidencia válida.
 
 ## 6. API mínima candidata
@@ -193,7 +196,9 @@ El RED debe demostrar al menos:
 - backslash y paths no canónicos se rechazan;
 - límites no positivos se rechazan;
 - búsqueda omite blobs no UTF-8 y oversized de forma determinista;
-- symlink blob no se dereferencia ni se trata como documento.
+- symlink blob no se dereferencia ni se trata como documento;
+- consultas multilinea se rechazan;
+- paths Unicode y con espacios se preservan sin ambigüedad.
 
 RED válido:
 
