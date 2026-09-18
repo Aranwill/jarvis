@@ -338,17 +338,17 @@ def test_e0_red_c25_unicode_and_space_paths_are_preserved(tmp_path: Path) -> Non
 
 def test_e0_red_c26_utf8_with_nul_is_rejected_as_binary(tmp_path: Path) -> None:
     repo, _ = make_repo(tmp_path)
-    (repo / "nul.bin").write_bytes(b"valid\x00text")
-    git(repo, "add", "nul.bin")
+    (repo / "contains-nul.bin").write_bytes(b"valid\x00text")
+    git(repo, "add", "contains-nul.bin")
     git(repo, "commit", "--no-gpg-sign", "-m", "nul")
 
     reader = reader_class()(repo)
 
     with pytest.raises(ValueError):
-        reader.read_text("nul.bin")
+        reader.read_text("contains-nul.bin")
 
     result = reader.search_text("valid")
-    assert all(match.path != "nul.bin" for match in result.matches)
+    assert all(match.path != "contains-nul.bin" for match in result.matches)
 
 
 @pytest.mark.parametrize(
