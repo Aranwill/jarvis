@@ -410,3 +410,48 @@ def test_e0_red_c29_replace_refs_cannot_change_blob_evidence(
 
     assert document.blob_sha == original_blob
     assert document.content == "alpha\nneedle one\n"
+
+
+def test_e0_red_c30_tracked_blob_count_has_a_hard_snapshot_bound(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    module = import_module("malak.infrastructure.repository_reader")
+    monkeypatch.setattr(module, "_MAX_TRACKED_BLOBS", 2)
+
+    with pytest.raises(RuntimeError):
+        module.GitRepositoryReader(repo)
+
+
+def test_e0_red_c31_searchable_snapshot_bytes_have_a_hard_bound(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    module = import_module("malak.infrastructure.repository_reader")
+    monkeypatch.setattr(module, "_MAX_SEARCHABLE_BYTES", 8)
+
+    reader = module.GitRepositoryReader(repo)
+
+    with pytest.raises(RuntimeError):
+        reader.search_text("needle")
+
+
+def test_e0_red_c32_blob_content_must_match_reported_blob_sha(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    reader = reader_class()(repo)
+    original_git_bytes = reader._git_bytes
+
+    def tampered_git_bytes(*args: str) -> bytes:
+        if args[:2] == ("cat-file", "blob"):
+            return b"omega\nneedle two\n"
+        return original_git_bytes(*args)
+
+    monkeypatch.setattr(reader, "_git_bytes", tampered_git_bytes)
+
+    with pytest.raises(RuntimeError):
+        reader.read_text("a.txt")
