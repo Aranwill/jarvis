@@ -334,3 +334,35 @@ def test_e0_red_c25_unicode_and_space_paths_are_preserved(tmp_path: Path) -> Non
 
     assert "docs/dátá file.md" in reader.list_tracked_files()
     assert reader.read_text("docs/dátá file.md").content == "unicode needle\n"
+
+
+def test_e0_red_c26_utf8_with_nul_is_rejected_as_binary(tmp_path: Path) -> None:
+    repo, _ = make_repo(tmp_path)
+    (repo / "nul.bin").write_bytes(b"valid\x00text")
+    git(repo, "add", "nul.bin")
+    git(repo, "commit", "--no-gpg-sign", "-m", "nul")
+
+    reader = reader_class()(repo)
+
+    with pytest.raises(ValueError):
+        reader.read_text("nul.bin")
+
+    result = reader.search_text("valid")
+    assert all(match.path != "nul.bin" for match in result.matches)
+
+
+@pytest.mark.parametrize(
+    ("kwargs",),
+    [
+        ({"max_text_bytes": (256 * 1024) + 1},),
+        ({"max_search_results": 101},),
+    ],
+)
+def test_e0_red_c27_hard_bounds_cannot_be_raised(
+    tmp_path: Path,
+    kwargs: dict[str, int],
+) -> None:
+    repo, _ = make_repo(tmp_path)
+
+    with pytest.raises(ValueError):
+        reader_class()(repo, **kwargs)
