@@ -78,7 +78,9 @@ alcance.
 8. No existe ninguna operación de escritura.
 9. Lectura textual: UTF-8 estricto, sin NUL y con techo absoluto de 256 KiB por blob.
 10. Los límites configurables deben ser enteros positivos y solo pueden reducir los
-    techos E0: 256 KiB por texto y 100 resultados de búsqueda.
+    techos E0: 256 KiB por texto y 100 resultados de búsqueda. El snapshot queda
+    además acotado a 4096 blobs trackeados y 16 MiB agregados de contenido elegible
+    para búsqueda; superar esos límites obliga a reevaluar E0, no a crecer implícitamente.
 11. Búsqueda: literal, por línea, determinista y bounded; consultas multilinea se
     rechazan y blobs oversized, binarios o no textuales se omiten sin invalidar
     el resto del snapshot.
@@ -86,9 +88,11 @@ alcance.
     y preservar nombres Unicode y espacios sin depender de quoting humano.
 13. La inspección Git no puede heredar variables de entorno capaces de redirigir
     repository/worktree/index/object database, y debe deshabilitar replace refs.
-14. El resultado conserva procedencia suficiente para vincular contenido con
+14. Cada blob leído debe revalidar localmente su identidad Git SHA-1 sobre el
+    contenido recibido antes de convertirse en evidencia.
+15. El resultado conserva procedencia suficiente para vincular contenido con
     baseline y path.
-15. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
+16. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
     convierten silenciosamente en evidencia válida.
 
 ## 6. API mínima candidata
@@ -206,7 +210,9 @@ El RED debe demostrar al menos:
 - los hard bounds E0 no pueden elevarse por configuración;
 - variables `GIT_DIR` / `GIT_WORK_TREE` / `GIT_INDEX_FILE` y equivalentes no pueden
   redirigir el snapshot;
-- `refs/replace` no puede alterar el contenido leído para un blob identificado.
+- `refs/replace` no puede alterar el contenido leído para un blob identificado;
+- el snapshot no puede exceder 4096 blobs trackeados ni 16 MiB elegibles de búsqueda;
+- el contenido retornado debe volver a hashearse y coincidir con su `blob_sha`.
 
 RED válido:
 
