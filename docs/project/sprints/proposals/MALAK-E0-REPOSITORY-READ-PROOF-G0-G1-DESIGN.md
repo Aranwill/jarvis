@@ -81,8 +81,9 @@ alcance.
 9. Lectura textual: UTF-8 estricto, sin NUL y con techo absoluto de 256 KiB por blob.
 10. Los límites configurables deben ser enteros positivos y solo pueden reducir los
     techos E0: 256 KiB por texto y 100 resultados de búsqueda. El snapshot queda
-    además acotado a 4096 blobs trackeados y 16 MiB agregados de contenido elegible
-    para búsqueda; superar esos límites obliga a reevaluar E0, no a crecer implícitamente.
+    además acotado a 4096 entries de árbol, 4096 blobs trackeados, paths de hasta
+    1024 bytes UTF-8 y 16 MiB agregados de contenido elegible para búsqueda;
+    superar esos límites obliga a reevaluar E0, no a crecer implícitamente.
 11. Búsqueda: literal, por línea, determinista y bounded. La consulta queda limitada
     a 4096 bytes UTF-8, no admite controles ni múltiples líneas, y cada búsqueda puede
     leer como máximo 512 blobs elegibles y devolver como máximo 256 KiB de texto de
@@ -219,7 +220,8 @@ El RED debe demostrar al menos:
 - variables `GIT_DIR` / `GIT_WORK_TREE` / `GIT_INDEX_FILE` y equivalentes no pueden
   redirigir el snapshot;
 - `refs/replace` no puede alterar el contenido leído para un blob identificado;
-- el snapshot no puede exceder 4096 blobs trackeados ni 16 MiB elegibles de búsqueda;
+- el snapshot no puede exceder 4096 entries de árbol, 4096 blobs trackeados,
+  paths de 1024 bytes UTF-8 ni 16 MiB elegibles de búsqueda;
 - la query no puede superar 4096 bytes UTF-8 ni contener controles;
 - una búsqueda no puede leer más de 512 blobs elegibles;
 - el texto agregado devuelto por una búsqueda no puede superar 256 KiB y debe
