@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from dataclasses import dataclass
@@ -8,6 +9,21 @@ from pathlib import Path, PurePosixPath
 _MAX_TEXT_BYTES = 256 * 1024
 _MAX_SEARCH_RESULTS = 100
 _GIT_TIMEOUT_SECONDS = 5.0
+_GIT_ENV_REDIRECTORS = {
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_COMMON_DIR",
+    "GIT_NAMESPACE",
+    "GIT_CEILING_DIRECTORIES",
+    "GIT_DISCOVERY_ACROSS_FILESYSTEM",
+    "GIT_EXEC_PATH",
+    "GIT_REPLACE_REF_BASE",
+    "GIT_SHALLOW_FILE",
+    "GIT_GRAFT_FILE",
+}
 _SHA1_RE = re.compile(r"^[0-9a-f]{40}$")
 _WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:/")
 
@@ -224,6 +240,11 @@ class GitRepositoryReader:
             except UnicodeDecodeError as exc:
                 raise RuntimeError("Git tree contains unsupported non-UTF-8 metadata or path") from exc
 
+            try:
+                _validate_logical_path(path)
+            except (TypeError, ValueError) as exc:
+                raise RuntimeError("Git tree contains a path unsupported by E0") from exc
+
             if not _SHA1_RE.fullmatch(object_sha):
                 raise RuntimeError("Git tree contains an unsupported object identifier")
 
@@ -259,7 +280,13 @@ class GitRepositoryReader:
             raise RuntimeError("Git returned non-UTF-8 command output") from exc
 
     def _git_bytes(self, *args: str) -> bytes:
-        command = ["git", "-C", str(self._repo_root), *args]
+        command = [
+            "git",
+            "--no-replace-objects",
+            "-C",
+            str(self._repo_root),
+            *args,
+        ]
         try:
             completed = subprocess.run(
                 command,
@@ -267,6 +294,7 @@ class GitRepositoryReader:
                 stdin=subprocess.DEVNULL,
                 capture_output=True,
                 timeout=_GIT_TIMEOUT_SECONDS,
+                env=_git_environment(),
             )
         except FileNotFoundError as exc:
             raise RuntimeError("Git executable is unavailable") from exc
@@ -300,7 +328,7 @@ def _validate_logical_path(path: str) -> str:
         raise TypeError("repository path must be a string")
     if not path:
         raise ValueError("repository path cannot be empty")
-    if "\x00" in path or "\r" in path or "\n" in path:
+    if any(ord(character) < 32 or ord(character) == 127 for character in path):
         raise ValueError("repository path contains forbidden control characters")
     if "\\" in path:
         raise ValueError("repository path must use POSIX separators")
@@ -325,3 +353,21 @@ def _validate_query(query: str) -> None:
         raise ValueError("search query cannot be empty")
     if "\x00" in query or "\r" in query or "\n" in query:
         raise ValueError("search query must be a single text line")
+
+
+
+def _git_environment() -> dict[str, str]:
+    env = os.environ.copy()
+
+    for key in tuple(env):
+        if key in _GIT_ENV_REDIRECTORS or key.startswith("GIT_CONFIG_"):
+            env.pop(key, None)
+
+    env["GIT_CONFIG_NOSYSTEM"] = "1"
+    env["GIT_CONFIG_GLOBAL"] = os.devnull
+    env["GIT_NO_REPLACE_OBJECTS"] = "1"
+    env["GIT_OPTIONAL_LOCKS"] = "0"
+    env["GIT_TERMINAL_PROMPT"] = "0"
+    env["GIT_PAGER"] = "cat"
+
+    return env
