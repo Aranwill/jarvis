@@ -10,6 +10,8 @@ from pathlib import Path, PurePosixPath
 _MAX_TEXT_BYTES = 256 * 1024
 _MAX_SEARCH_RESULTS = 100
 _MAX_TRACKED_BLOBS = 4096
+_MAX_TREE_ENTRIES = 4096
+_MAX_PATH_BYTES = 1024
 _MAX_SEARCHABLE_BYTES = 16 * 1024 * 1024
 _MAX_SEARCH_BLOBS = 512
 _MAX_SEARCH_OUTPUT_BYTES = 256 * 1024
@@ -245,9 +247,16 @@ class GitRepositoryReader:
 
         entries: dict[str, _TreeEntry] = {}
         tracked_blobs = 0
+        tree_entries = 0
         for record in raw.split(b"\x00"):
             if not record:
                 continue
+
+            tree_entries += 1
+            if tree_entries > _MAX_TREE_ENTRIES:
+                raise RuntimeError(
+                    "captured snapshot exceeds the hard E0 tree-entry limit"
+                )
 
             try:
                 metadata, raw_path = record.split(b"\t", 1)
@@ -360,6 +369,10 @@ def _validate_logical_path(path: str) -> str:
         raise ValueError("repository path cannot be empty")
     if any(ord(character) < 32 or ord(character) == 127 for character in path):
         raise ValueError("repository path contains forbidden control characters")
+    if len(path.encode("utf-8")) > _MAX_PATH_BYTES:
+        raise ValueError(
+            f"repository path cannot exceed {_MAX_PATH_BYTES} UTF-8 bytes"
+        )
     if "\\" in path:
         raise ValueError("repository path must use POSIX separators")
     if path.startswith("/") or _WINDOWS_DRIVE_RE.match(path):
