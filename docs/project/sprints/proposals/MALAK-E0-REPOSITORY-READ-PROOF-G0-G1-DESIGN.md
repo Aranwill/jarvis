@@ -76,8 +76,9 @@ alcance.
    ni se interpretan como documentos de texto; submodules no son documentos E0.
 7. No existe API pública de shell, comando Git arbitrario ni subprocess arbitrario.
 8. No existe ninguna operación de escritura.
-9. Lectura textual: UTF-8 estricto y límite interno de 256 KiB por blob.
-10. Los límites configurables deben ser enteros positivos.
+9. Lectura textual: UTF-8 estricto, sin NUL y con techo absoluto de 256 KiB por blob.
+10. Los límites configurables deben ser enteros positivos y solo pueden reducir los
+    techos E0: 256 KiB por texto y 100 resultados de búsqueda.
 11. Búsqueda: literal, por línea, determinista y bounded; consultas multilinea se
     rechazan y blobs oversized, binarios o no textuales se omiten sin invalidar
     el resto del snapshot.
@@ -198,7 +199,9 @@ El RED debe demostrar al menos:
 - búsqueda omite blobs no UTF-8 y oversized de forma determinista;
 - symlink blob no se dereferencia ni se trata como documento;
 - consultas multilinea se rechazan;
-- paths Unicode y con espacios se preservan sin ambigüedad.
+- paths Unicode y con espacios se preservan sin ambigüedad;
+- UTF-8 con NUL se trata como binario y se rechaza/omite;
+- los hard bounds E0 no pueden elevarse por configuración.
 
 RED válido:
 
