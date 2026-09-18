@@ -309,3 +309,28 @@ def test_e0_red_c23_symlink_blob_is_not_interpreted_as_text_document(
 
     result = reader.search_text("target.txt")
     assert all(match.path != "link" for match in result.matches)
+
+
+@pytest.mark.parametrize("query", ["\n", "needle\nsecond", "needle\rsecond"])
+def test_e0_red_c24_multiline_search_query_is_rejected(
+    tmp_path: Path,
+    query: str,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    reader = reader_class()(repo)
+
+    with pytest.raises(ValueError):
+        reader.search_text(query)
+
+
+def test_e0_red_c25_unicode_and_space_paths_are_preserved(tmp_path: Path) -> None:
+    repo, _ = make_repo(tmp_path)
+    path = repo / "docs" / "dátá file.md"
+    path.write_text("unicode needle\n", encoding="utf-8")
+    git(repo, "add", "docs/dátá file.md")
+    git(repo, "commit", "--no-gpg-sign", "-m", "unicode path")
+
+    reader = reader_class()(repo)
+
+    assert "docs/dátá file.md" in reader.list_tracked_files()
+    assert reader.read_text("docs/dátá file.md").content == "unicode needle\n"
