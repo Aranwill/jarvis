@@ -84,9 +84,11 @@ alcance.
     el resto del snapshot.
 12. El inventario Git debe usar una representación no ambigua de paths (NUL-delimited)
     y preservar nombres Unicode y espacios sin depender de quoting humano.
-13. El resultado conserva procedencia suficiente para vincular contenido con
+13. La inspección Git no puede heredar variables de entorno capaces de redirigir
+    repository/worktree/index/object database, y debe deshabilitar replace refs.
+14. El resultado conserva procedencia suficiente para vincular contenido con
     baseline y path.
-14. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
+15. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
     convierten silenciosamente en evidencia válida.
 
 ## 6. API mínima candidata
@@ -201,7 +203,10 @@ El RED debe demostrar al menos:
 - consultas multilinea se rechazan;
 - paths Unicode y con espacios se preservan sin ambigüedad;
 - UTF-8 con NUL se trata como binario y se rechaza/omite;
-- los hard bounds E0 no pueden elevarse por configuración.
+- los hard bounds E0 no pueden elevarse por configuración;
+- variables `GIT_DIR` / `GIT_WORK_TREE` / `GIT_INDEX_FILE` y equivalentes no pueden
+  redirigir el snapshot;
+- `refs/replace` no puede alterar el contenido leído para un blob identificado.
 
 RED válido:
 
