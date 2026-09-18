@@ -212,3 +212,100 @@ def test_e0_red_c16_non_git_directory_fails_explicitly(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError):
         reader_class()(repo)
+
+
+def test_e0_red_c17_repository_root_must_be_exact_git_toplevel(
+    tmp_path: Path,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+
+    with pytest.raises(ValueError):
+        reader_class()(repo / "docs")
+
+
+def test_e0_red_c18_backslash_path_is_rejected_as_ambiguous(
+    tmp_path: Path,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    reader = reader_class()(repo)
+
+    with pytest.raises(ValueError):
+        reader.read_text("docs\\c.md")
+
+
+def test_e0_red_c19_noncanonical_path_is_rejected(tmp_path: Path) -> None:
+    repo, _ = make_repo(tmp_path)
+    reader = reader_class()(repo)
+
+    with pytest.raises(ValueError):
+        reader.read_text("docs/./c.md")
+
+
+@pytest.mark.parametrize(
+    ("kwargs",),
+    [
+        ({"max_text_bytes": 0},),
+        ({"max_text_bytes": -1},),
+        ({"max_search_results": 0},),
+        ({"max_search_results": -1},),
+    ],
+)
+def test_e0_red_c20_nonpositive_limits_are_rejected(
+    tmp_path: Path,
+    kwargs: dict[str, int],
+) -> None:
+    repo, _ = make_repo(tmp_path)
+
+    with pytest.raises(ValueError):
+        reader_class()(repo, **kwargs)
+
+
+def test_e0_red_c21_search_skips_non_utf8_blob(tmp_path: Path) -> None:
+    repo, _ = make_repo(tmp_path)
+    (repo / "binary.bin").write_bytes(b"\xff\xfe\xfdneedle")
+    git(repo, "add", "binary.bin")
+    git(repo, "commit", "--no-gpg-sign", "-m", "binary")
+
+    reader = reader_class()(repo)
+    result = reader.search_text("needle")
+
+    assert [match.path for match in result.matches] == [
+        "a.txt",
+        "b.txt",
+        "docs/c.md",
+    ]
+
+
+def test_e0_red_c22_search_skips_oversized_blob(tmp_path: Path) -> None:
+    repo, _ = make_repo(tmp_path)
+    (repo / "small.txt").write_text("needle\n", encoding="utf-8")
+    (repo / "large.txt").write_text("needle too large\n", encoding="utf-8")
+    git(repo, "add", "small.txt", "large.txt")
+    git(repo, "commit", "--no-gpg-sign", "-m", "sizes")
+
+    reader = reader_class()(repo, max_text_bytes=8)
+    result = reader.search_text("needle")
+
+    assert [match.path for match in result.matches] == ["small.txt"]
+    assert result.truncated is False
+
+
+def test_e0_red_c23_symlink_blob_is_not_interpreted_as_text_document(
+    tmp_path: Path,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    (repo / "target.txt").write_text("target secret\n", encoding="utf-8")
+    (repo / "link").write_text("target.txt", encoding="utf-8")
+    git(repo, "add", "target.txt", "link")
+    blob_sha = git(repo, "hash-object", "link")
+    git(repo, "update-index", "--add", "--cacheinfo", f"120000,{blob_sha},link")
+    git(repo, "commit", "--no-gpg-sign", "-m", "symlink-mode")
+
+    reader = reader_class()(repo)
+
+    assert "link" in reader.list_tracked_files()
+    with pytest.raises(ValueError):
+        reader.read_text("link")
+
+    result = reader.search_text("target.txt")
+    assert all(match.path != "link" for match in result.matches)
