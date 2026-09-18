@@ -528,3 +528,23 @@ def test_e0_red_c37_search_query_rejects_control_characters(
 
     with pytest.raises(ValueError):
         reader.search_text(query)
+
+
+
+def test_e0_red_c38_repository_path_has_a_hard_utf8_byte_bound() -> None:
+    module = import_module("malak.infrastructure.repository_reader")
+
+    with pytest.raises(ValueError):
+        module._validate_logical_path("a" * 1025)
+
+
+def test_e0_red_c39_git_tree_entry_count_has_a_hard_bound(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    module = import_module("malak.infrastructure.repository_reader")
+    monkeypatch.setattr(module, "_MAX_TREE_ENTRIES", 2)
+
+    with pytest.raises(RuntimeError):
+        module.GitRepositoryReader(repo)
