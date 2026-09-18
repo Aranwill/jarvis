@@ -1,12 +1,14 @@
 ---
 title: Malāk E0 — Repository Read Proof — G0/G1 Design
-status: proposed
+status: accepted
 authority: non_normative
 document_role: implementation design
 language: es
 created: 2026-09-18
 baseline_commit: 39366da01f793cf8f5d3856c47457954ee758925
-implementation_authorized: false
+implementation_authorized: true
+authorized_by: owner
+authorized_at: 2026-09-18
 risk_class: 2
 ---
 
@@ -81,18 +83,24 @@ alcance.
     techos E0: 256 KiB por texto y 100 resultados de búsqueda. El snapshot queda
     además acotado a 4096 blobs trackeados y 16 MiB agregados de contenido elegible
     para búsqueda; superar esos límites obliga a reevaluar E0, no a crecer implícitamente.
-11. Búsqueda: literal, por línea, determinista y bounded; consultas multilinea se
-    rechazan y blobs oversized, binarios o no textuales se omiten sin invalidar
-    el resto del snapshot.
-12. El inventario Git debe usar una representación no ambigua de paths (NUL-delimited)
+11. Búsqueda: literal, por línea, determinista y bounded. La consulta queda limitada
+    a 4096 bytes UTF-8, no admite controles ni múltiples líneas, y cada búsqueda puede
+    leer como máximo 512 blobs elegibles y devolver como máximo 256 KiB de texto de
+    matches. Si el siguiente match excede el budget de salida se detiene con
+    `truncated = true`; si el snapshot elegible supera 512 blobs, la búsqueda falla
+    explícitamente antes de iniciar lecturas parciales.
+12. Blobs oversized, binarios o no textuales se omiten de búsqueda sin invalidar el
+    resto del snapshot.
+13. El inventario Git debe usar una representación no ambigua de paths (NUL-delimited)
     y preservar nombres Unicode y espacios sin depender de quoting humano.
-13. La inspección Git no puede heredar variables de entorno capaces de redirigir
-    repository/worktree/index/object database, y debe deshabilitar replace refs.
-14. Cada blob leído debe revalidar localmente su identidad Git SHA-1 sobre el
+14. La inspección Git no hereda estado `GIT_*` del proceso llamador: elimina todas
+    las variables `GIT_*` ambientales y establece únicamente controles seguros
+    definidos por E0. También deshabilita replace refs.
+15. Cada blob leído debe revalidar localmente su identidad Git SHA-1 sobre el
     contenido recibido antes de convertirse en evidencia.
-15. El resultado conserva procedencia suficiente para vincular contenido con
+16. El resultado conserva procedencia suficiente para vincular contenido con
     baseline y path.
-16. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
+17. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
     convierten silenciosamente en evidencia válida.
 
 ## 6. API mínima candidata
@@ -131,7 +139,7 @@ docs/project/sprints/proposals/MALAK-E0-REPOSITORY-READ-PROOF-G0-G1-DESIGN.md
 tests/test_repository_reader.py
 ```
 
-### GREEN futuro, solo tras aprobación humana
+### GREEN autorizado por el Owner el 2026-09-18
 
 ```text
 src/malak/infrastructure/repository_reader.py
@@ -212,6 +220,11 @@ El RED debe demostrar al menos:
   redirigir el snapshot;
 - `refs/replace` no puede alterar el contenido leído para un blob identificado;
 - el snapshot no puede exceder 4096 blobs trackeados ni 16 MiB elegibles de búsqueda;
+- la query no puede superar 4096 bytes UTF-8 ni contener controles;
+- una búsqueda no puede leer más de 512 blobs elegibles;
+- el texto agregado devuelto por una búsqueda no puede superar 256 KiB y debe
+  señalar `truncated` cuando el siguiente match excedería el budget;
+- ninguna variable `GIT_*` ambiental no autorizada sobrevive al entorno saneado;
 - el contenido retornado debe volver a hashearse y coincidir con su `blob_sha`.
 
 RED válido:
@@ -259,5 +272,5 @@ RED evidence != approval
 GREEN tests != authority
 ```
 
-La implementación productiva permanece bloqueada hasta aprobación humana explícita
-del Owner sobre este design/RED scope.
+El Owner aprobó explícitamente este design/RED scope y autorizó la implementación
+GREEN de E0 el 2026-09-18. Esta autorización no amplía el scope ni autoriza E1+.
