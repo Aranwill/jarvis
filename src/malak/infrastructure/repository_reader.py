@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import subprocess
@@ -8,6 +9,8 @@ from pathlib import Path, PurePosixPath
 
 _MAX_TEXT_BYTES = 256 * 1024
 _MAX_SEARCH_RESULTS = 100
+_MAX_TRACKED_BLOBS = 4096
+_MAX_SEARCHABLE_BYTES = 16 * 1024 * 1024
 _GIT_TIMEOUT_SECONDS = 5.0
 _GIT_ENV_REDIRECTORS = {
     "GIT_DIR",
@@ -140,6 +143,18 @@ class GitRepositoryReader:
     def search_text(self, query: str) -> RepositorySearchResult:
         _validate_query(query)
 
+        searchable_bytes = sum(
+            entry.size
+            for entry in self._entries.values()
+            if entry.is_regular_file
+            and entry.size is not None
+            and entry.size <= self._max_text_bytes
+        )
+        if searchable_bytes > _MAX_SEARCHABLE_BYTES:
+            raise RuntimeError(
+                "captured snapshot exceeds the hard E0 searchable-byte limit"
+            )
+
         matches: list[RepositoryTextMatch] = []
         truncated = False
 
@@ -203,6 +218,12 @@ class GitRepositoryReader:
         raw = self._git_bytes("cat-file", "blob", entry.object_sha)
         if len(raw) != entry.size:
             raise RuntimeError(f"Git blob size mismatch for captured path: {entry.path}")
+
+        git_object = f"blob {len(raw)}\0".encode("ascii") + raw
+        actual_sha = hashlib.sha1(git_object, usedforsecurity=False).hexdigest()
+        if actual_sha != entry.object_sha:
+            raise RuntimeError(f"Git blob identity mismatch for captured path: {entry.path}")
+
         if b"\x00" in raw:
             raise ValueError(f"tracked blob is not textual content: {entry.path}")
 
@@ -222,6 +243,7 @@ class GitRepositoryReader:
         )
 
         entries: dict[str, _TreeEntry] = {}
+        tracked_blobs = 0
         for record in raw.split(b"\x00"):
             if not record:
                 continue
@@ -261,6 +283,13 @@ class GitRepositoryReader:
 
             if path in entries:
                 raise RuntimeError(f"Git tree contains a duplicate path: {path}")
+
+            if object_type == "blob":
+                tracked_blobs += 1
+                if tracked_blobs > _MAX_TRACKED_BLOBS:
+                    raise RuntimeError(
+                        "captured snapshot exceeds the hard E0 tracked-blob limit"
+                    )
 
             entries[path] = _TreeEntry(
                 mode=mode,
