@@ -11,22 +11,10 @@ _MAX_TEXT_BYTES = 256 * 1024
 _MAX_SEARCH_RESULTS = 100
 _MAX_TRACKED_BLOBS = 4096
 _MAX_SEARCHABLE_BYTES = 16 * 1024 * 1024
+_MAX_SEARCH_BLOBS = 512
+_MAX_SEARCH_OUTPUT_BYTES = 256 * 1024
+_MAX_QUERY_BYTES = 4096
 _GIT_TIMEOUT_SECONDS = 5.0
-_GIT_ENV_REDIRECTORS = {
-    "GIT_DIR",
-    "GIT_WORK_TREE",
-    "GIT_INDEX_FILE",
-    "GIT_OBJECT_DIRECTORY",
-    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
-    "GIT_COMMON_DIR",
-    "GIT_NAMESPACE",
-    "GIT_CEILING_DIRECTORIES",
-    "GIT_DISCOVERY_ACROSS_FILESYSTEM",
-    "GIT_EXEC_PATH",
-    "GIT_REPLACE_REF_BASE",
-    "GIT_SHALLOW_FILE",
-    "GIT_GRAFT_FILE",
-}
 _SHA1_RE = re.compile(r"^[0-9a-f]{40}$")
 _WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:/")
 
@@ -143,28 +131,33 @@ class GitRepositoryReader:
     def search_text(self, query: str) -> RepositorySearchResult:
         _validate_query(query)
 
-        searchable_bytes = sum(
-            entry.size
-            for entry in self._entries.values()
-            if entry.is_regular_file
-            and entry.size is not None
-            and entry.size <= self._max_text_bytes
+        eligible_entries = tuple(
+            sorted(
+                (
+                    entry
+                    for entry in self._entries.values()
+                    if entry.is_regular_file
+                    and entry.size is not None
+                    and entry.size <= self._max_text_bytes
+                ),
+                key=lambda entry: entry.path,
+            )
         )
+        if len(eligible_entries) > _MAX_SEARCH_BLOBS:
+            raise RuntimeError(
+                "captured snapshot exceeds the hard E0 searchable-blob limit"
+            )
+
+        searchable_bytes = sum(entry.size for entry in eligible_entries)
         if searchable_bytes > _MAX_SEARCHABLE_BYTES:
             raise RuntimeError(
                 "captured snapshot exceeds the hard E0 searchable-byte limit"
             )
 
         matches: list[RepositoryTextMatch] = []
-        truncated = False
+        output_bytes = 0
 
-        for path in self.list_tracked_files():
-            entry = self._entries[path]
-            if not entry.is_regular_file:
-                continue
-            if entry.size is None or entry.size > self._max_text_bytes:
-                continue
-
+        for entry in eligible_entries:
             try:
                 content = self._read_entry_text(entry)
             except ValueError:
@@ -175,11 +168,18 @@ class GitRepositoryReader:
                     continue
 
                 if len(matches) >= self._max_search_results:
-                    truncated = True
                     return RepositorySearchResult(
                         baseline_commit=self._baseline_commit,
                         matches=tuple(matches),
-                        truncated=truncated,
+                        truncated=True,
+                    )
+
+                line_bytes = len(line.encode("utf-8"))
+                if output_bytes + line_bytes > _MAX_SEARCH_OUTPUT_BYTES:
+                    return RepositorySearchResult(
+                        baseline_commit=self._baseline_commit,
+                        matches=tuple(matches),
+                        truncated=True,
                     )
 
                 matches.append(
@@ -191,11 +191,12 @@ class GitRepositoryReader:
                         line=line,
                     )
                 )
+                output_bytes += line_bytes
 
         return RepositorySearchResult(
             baseline_commit=self._baseline_commit,
             matches=tuple(matches),
-            truncated=truncated,
+            truncated=False,
         )
 
     def _entry_for_path(self, path: str) -> _TreeEntry:
@@ -380,8 +381,12 @@ def _validate_query(query: str) -> None:
         raise TypeError("search query must be a string")
     if not query:
         raise ValueError("search query cannot be empty")
-    if "\x00" in query or "\r" in query or "\n" in query:
-        raise ValueError("search query must be a single text line")
+    if any(ord(character) < 32 or ord(character) == 127 for character in query):
+        raise ValueError("search query contains forbidden control characters")
+    if len(query.encode("utf-8")) > _MAX_QUERY_BYTES:
+        raise ValueError(
+            f"search query cannot exceed {_MAX_QUERY_BYTES} UTF-8 bytes"
+        )
 
 
 
@@ -389,7 +394,7 @@ def _git_environment() -> dict[str, str]:
     env = os.environ.copy()
 
     for key in tuple(env):
-        if key in _GIT_ENV_REDIRECTORS or key.startswith("GIT_CONFIG_"):
+        if key.startswith("GIT_"):
             env.pop(key, None)
 
     env["GIT_CONFIG_NOSYSTEM"] = "1"
