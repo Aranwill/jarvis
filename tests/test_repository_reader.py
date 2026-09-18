@@ -366,3 +366,47 @@ def test_e0_red_c27_hard_bounds_cannot_be_raised(
 
     with pytest.raises(ValueError):
         reader_class()(repo, **kwargs)
+
+
+def test_e0_red_c28_git_environment_cannot_redirect_repository(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, baseline = make_repo(tmp_path)
+
+    other = tmp_path / "other"
+    other.mkdir()
+    git(other, "init")
+    git(other, "config", "user.email", "test@example.com")
+    git(other, "config", "user.name", "Malak Test")
+    git(other, "config", "commit.gpgsign", "false")
+    (other / "other.txt").write_text("other\n", encoding="utf-8")
+    git(other, "add", "other.txt")
+    git(other, "commit", "--no-gpg-sign", "-m", "other")
+
+    monkeypatch.setenv("GIT_DIR", str(other / ".git"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(other))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(other / ".git" / "index"))
+
+    reader = reader_class()(repo)
+
+    assert reader.baseline_commit == baseline
+    assert reader.list_tracked_files() == ("a.txt", "b.txt", "docs/c.md")
+
+
+def test_e0_red_c29_replace_refs_cannot_change_blob_evidence(
+    tmp_path: Path,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    original_blob = git(repo, "rev-parse", "HEAD:a.txt")
+
+    replacement = repo / "replacement.txt"
+    replacement.write_text("omega\nneedle two\n", encoding="utf-8")
+    replacement_blob = git(repo, "hash-object", "-w", "replacement.txt")
+    git(repo, "replace", original_blob, replacement_blob)
+
+    reader = reader_class()(repo)
+    document = reader.read_text("a.txt")
+
+    assert document.blob_sha == original_blob
+    assert document.content == "alpha\nneedle one\n"
