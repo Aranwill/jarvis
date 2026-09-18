@@ -66,17 +66,23 @@ alcance.
 ## 5. Invariantes E0
 
 1. El reader queda ligado a un commit exacto capturado al inicializarse.
-2. Toda lectura posterior utiliza objetos Git de ese snapshot, no el working tree.
-3. Working-tree changes, staged changes y untracked files no alteran la evidencia.
-4. Solo se aceptan paths lógicos relativos al repositorio y trackeados en el
-   snapshot capturado.
-5. No existe API pública de shell, comando Git arbitrario ni subprocess arbitrario.
-6. No existe ninguna operación de escritura.
-7. Lectura textual: UTF-8 estricto y límite interno de 256 KiB por blob.
-8. Búsqueda: literal, determinista y bounded.
-9. El resultado conserva procedencia suficiente para vincular contenido con
-   baseline y path.
-10. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
+2. `repo_root` debe resolver exactamente al Git top-level; una subcarpeta no puede
+   ampliar silenciosamente el scope al repositorio completo.
+3. Toda lectura posterior utiliza objetos Git de ese snapshot, no el working tree.
+4. Working-tree changes, staged changes y untracked files no alteran la evidencia.
+5. Solo se aceptan paths lógicos POSIX, relativos, canónicos y trackeados en el
+   snapshot capturado; backslashes, rutas absolutas y segmentos ambiguos se rechazan.
+6. Symlinks trackeados pueden identificarse como entries, pero no se dereferencian
+   ni se interpretan como documentos de texto; submodules no son documentos E0.
+7. No existe API pública de shell, comando Git arbitrario ni subprocess arbitrario.
+8. No existe ninguna operación de escritura.
+9. Lectura textual: UTF-8 estricto y límite interno de 256 KiB por blob.
+10. Los límites configurables deben ser enteros positivos.
+11. Búsqueda: literal, determinista y bounded; blobs oversized, binarios o no
+    textuales se omiten de la búsqueda sin invalidar el resto del snapshot.
+12. El resultado conserva procedencia suficiente para vincular contenido con
+    baseline y path.
+13. Fallos de repositorio, path, tamaño o contenido deben ser explícitos; no se
     convierten silenciosamente en evidencia válida.
 
 ## 6. API mínima candidata
@@ -182,7 +188,12 @@ El RED debe demostrar al menos:
 - búsqueda literal devuelve path + línea + baseline;
 - búsqueda permanece snapshot-bound;
 - límite de resultados produce señal `truncated`;
-- repositorio Git inválido falla explícitamente.
+- repositorio Git inválido falla explícitamente;
+- repo root distinto del Git top-level se rechaza;
+- backslash y paths no canónicos se rechazan;
+- límites no positivos se rechazan;
+- búsqueda omite blobs no UTF-8 y oversized de forma determinista;
+- symlink blob no se dereferencia ni se trata como documento.
 
 RED válido:
 
