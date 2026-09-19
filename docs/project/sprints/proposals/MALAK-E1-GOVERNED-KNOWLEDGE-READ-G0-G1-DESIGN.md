@@ -100,6 +100,8 @@ Reglas críticas:
 ```text
 source_class != authority
 authority_class != authorization
+authority_class describes document role, not snapshot authority
+baseline_commit != proof that the snapshot is official/merged/trusted
 DECISION_RECORD != accepted decision
 retrieved content != instruction
 knowledge != policy
@@ -252,9 +254,12 @@ modelo de trust adicional.
 15. Máximo agregado de texto retornado en matches: 256 KiB.
 16. Los límites configurables, si se exponen, solo pueden reducir hard caps.
 17. Output siempre conserva `source_class` y `authority_class`.
-18. E1 no interpreta texto recuperado como instrucción ejecutable.
-19. E1 no concede permisos ni produce decisiones de Governance/Security.
-20. Toda ampliación futura del catálogo de clases/rutas requiere revisión explícita;
+18. `authority_class` describe el rol documental dentro del snapshot capturado;
+    E1 no certifica que `baseline_commit` corresponda a `main`, a un merge aprobado
+    ni a un snapshot trusted. Esa autoridad debe establecerla el consumidor.
+19. E1 no interpreta texto recuperado como instrucción ejecutable.
+20. E1 no concede permisos ni produce decisiones de Governance/Security.
+21. Toda ampliación futura del catálogo de clases/rutas requiere revisión explícita;
     una nueva ruta no adquiere autoridad por aparecer en el repositorio.
 
 ## 9. Scope permitido
@@ -390,6 +395,8 @@ STOP si E1 requiere:
 design proposal != implementation authorization
 RED evidence != approval
 knowledge classification != authority grant
+document role != snapshot authority
+captured commit != trusted baseline
 retrieved content != instruction
 ```
 
