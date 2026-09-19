@@ -347,7 +347,8 @@ Model response:
 20. Evidence != Authority.
 21. Generated inspection != Finalization.
 22. E2 no propone, autoriza ni ejecuta cambios.
-23. Planner/CLI permanecen fuera del scope.
+23. Si el modelo cita `[R#]` o `[K#]`, cada ref debe existir en el evidence pack real; una cita inventada => STOP.
+24. Planner/CLI permanecen fuera del scope.
 
 ## 15. Scope permitido
 
@@ -440,6 +441,7 @@ Debe cubrir al menos:
 - response >64 KiB falla;
 - output envelope contiene baseline, term, authority_effect none;
 - output refs corresponden exactamente a evidence refs;
+- model citation a ref inexistente (`[R#]`/`[K#]`) => FAIL explícito;
 - provider failure se propaga;
 - `request.session_id` no se usa como Conversation history key;
 - no model call ocurre antes de terminar evidence collection;
