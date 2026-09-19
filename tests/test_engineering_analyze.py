@@ -601,3 +601,48 @@ def test_e3_hardening_c35_system_prompt_states_document_role_boundaries(
     assert "status_dependent" in system_prompt
     assert "non_normative" in system_prompt
     assert "UNRESOLVED" in system_prompt
+
+
+
+def test_e3_hardening_c36_grounded_analysis_requires_at_least_one_finding(
+    tmp_path: Path,
+) -> None:
+    payload = {
+        "summary": "No concrete finding emitted.",
+        "findings": [],
+        "uncertainties": [],
+    }
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("summary", "forged [R999]"),
+        ("statement", "forged [K999]"),
+        ("rationale", "forged [A1]"),
+        ("uncertainty", "forged [R1]"),
+    ],
+)
+def test_e3_hardening_c37_generated_text_cannot_inject_reserved_ref_tokens(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    payload = json.loads(valid_json())
+    if field == "summary":
+        payload["summary"] = value
+    elif field == "uncertainty":
+        payload["uncertainties"] = [value]
+    else:
+        payload["findings"][0][field] = value
+
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+
+    with pytest.raises(RuntimeError):
+        execute(capability)
