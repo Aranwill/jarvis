@@ -158,8 +158,8 @@ src/malak/security/**
 src/malak/core/**
 src/malak/services/**
 src/malak/capabilities/**
-Vault
-Sync Agent
+external derived record
+external reconciliation process
 ```
 
 `candidate_content_identity.py` es dependencia estable y única dueña de la
