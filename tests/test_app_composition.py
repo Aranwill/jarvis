@@ -161,3 +161,61 @@ def test_build_engineering_kernel_set_rejects_implicit_cwd_contract(
         raise AssertionError(
             "Engineering composition must require explicit repository_root"
         )
+
+
+def test_build_engineering_kernel_set_exposes_same_readers_to_explorer_and_e2_e4(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    repo = tmp_path / "repo"
+    baseline = _create_repository(repo)
+    captured: dict[str, dict[str, object]] = {}
+
+    class FakeCapability:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+    def capability_factory(action: str, name: str):
+        def build(**kwargs: object):
+            captured[action] = kwargs
+            return FakeCapability(name)
+
+        return build
+
+    monkeypatch.setattr(
+        composition,
+        "EngineeringInspectCapability",
+        capability_factory("inspect", "engineering_inspect"),
+    )
+    monkeypatch.setattr(
+        composition,
+        "EngineeringAnalyzeCapability",
+        capability_factory("analyze", "engineering_analyze"),
+    )
+    monkeypatch.setattr(
+        composition,
+        "EngineeringProposeCapability",
+        capability_factory("propose", "engineering_propose"),
+    )
+
+    engineering = composition.build_engineering_kernel_set(
+        repository_root=repo,
+        service=build_service(),
+        provider_name="mock",
+    )
+
+    repository_reader = engineering.repository_reader
+    knowledge_reader = engineering.knowledge_reader
+
+    assert engineering.baseline_commit == baseline
+    assert repository_reader.baseline_commit == baseline
+    assert knowledge_reader.baseline_commit == baseline
+
+    for action in ("inspect", "analyze", "propose"):
+        assert captured[action]["repository_reader"] is repository_reader
+        assert captured[action]["knowledge_reader"] is knowledge_reader
+
+    later_head = _commit_repository_change(repo)
+    assert later_head != baseline
+    assert repository_reader.baseline_commit == baseline
+    assert knowledge_reader.baseline_commit == baseline

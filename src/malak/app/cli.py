@@ -32,6 +32,8 @@ Comandos disponibles:
   new     Inicia una nueva conversación.
   /engineering help
           Muestra los comandos Engineering disponibles.
+  /explore help
+          Muestra los comandos read-only Explorer disponibles.
   exit    Finaliza la sesión.
 """.strip()
 
@@ -40,6 +42,16 @@ Comandos Engineering:
   /engineering inspect <subject>
   /engineering analyze <subject>
   /engineering propose <subject>
+""".strip()
+
+EXPLORE_HELP_MESSAGE = """
+Comandos Explorer:
+  /explore repo list [prefix]
+  /explore repo read <path>
+  /explore repo search <text>
+  /explore knowledge list
+  /explore knowledge read <path>
+  /explore knowledge search <text>
 """.strip()
 
 _ENGINEERING_ACTIONS = frozenset({"inspect", "analyze", "propose"})
@@ -182,6 +194,104 @@ def _engineering_command(
     return action, subject
 
 
+def _explore_command(
+    prompt: str,
+) -> tuple[str, str, str | None] | None:
+    parts = prompt.split(maxsplit=3)
+
+    if not parts or parts[0].lower() != "/explore":
+        return None
+
+    if len(parts) == 2 and parts[1].lower() == "help":
+        return "help", "", None
+
+    if len(parts) < 3:
+        return "", "", None
+
+    domain = parts[1].lower()
+    action = parts[2].lower()
+    argument = parts[3].strip() if len(parts) == 4 else None
+
+    return domain, action, argument
+
+
+def _run_explore(
+    *,
+    domain: str,
+    action: str,
+    argument: str | None,
+    engineering: EngineeringKernelSet,
+    output_fn: Callable[[str], None],
+) -> None:
+    if domain == "repo":
+        reader = engineering.repository_reader
+
+        if action == "list":
+            paths = reader.list_tracked_files()
+            if argument is not None:
+                paths = tuple(
+                    path for path in paths
+                    if path.startswith(argument)
+                )
+
+            output_fn("Malāk [explore/repo/list]")
+            for path in paths:
+                output_fn(path)
+            return
+
+        if action == "read":
+            document = reader.read_text(argument)
+            output_fn("Malāk [explore/repo/read]")
+            output_fn(f"baseline_commit: {document.baseline_commit}")
+            output_fn(f"path: {document.path}")
+            output_fn(f"blob_sha: {document.blob_sha}")
+            output_fn(document.content)
+            return
+
+        result = reader.search_text(argument)
+        output_fn("Malāk [explore/repo/search]")
+        output_fn(f"baseline_commit: {result.baseline_commit}")
+        for match in result.matches:
+            output_fn(
+                f"{match.path}:{match.line_number}: {match.line}"
+            )
+            output_fn(f"blob_sha: {match.blob_sha}")
+        output_fn(f"truncated: {str(result.truncated).lower()}")
+        return
+
+    reader = engineering.knowledge_reader
+
+    if action == "list":
+        output_fn("Malāk [explore/knowledge/list]")
+        for source in reader.list_sources():
+            output_fn(source.path)
+            output_fn(f"source_class: {source.source_class}")
+            output_fn(f"authority_class: {source.authority_class}")
+        return
+
+    if action == "read":
+        document = reader.read(argument)
+        output_fn("Malāk [explore/knowledge/read]")
+        output_fn(f"baseline_commit: {document.baseline_commit}")
+        output_fn(f"path: {document.path}")
+        output_fn(f"blob_sha: {document.blob_sha}")
+        output_fn(f"source_class: {document.source_class}")
+        output_fn(f"authority_class: {document.authority_class}")
+        output_fn(document.content)
+        return
+
+    result = reader.search_text(argument)
+    output_fn("Malāk [explore/knowledge/search]")
+    output_fn(f"baseline_commit: {result.baseline_commit}")
+    for match in result.matches:
+        output_fn(f"path: {match.path}")
+        output_fn(f"blob_sha: {match.blob_sha}")
+        output_fn(f"source_class: {match.source_class}")
+        output_fn(f"authority_class: {match.authority_class}")
+        output_fn(f"{match.line_number}: {match.line}")
+    output_fn(f"truncated: {str(result.truncated).lower()}")
+
+
 def _run_engineering(
     *,
     action: str,
@@ -315,10 +425,15 @@ def run_cli(
             )
             if engineering is None:
                 output_fn("Engineering: unavailable")
+                output_fn("Explorer: unavailable")
             else:
                 output_fn("Engineering: available")
                 output_fn(
                     f"Engineering baseline: {engineering.baseline_commit}"
+                )
+                output_fn("Explorer: available")
+                output_fn(
+                    f"Explorer baseline: {engineering.baseline_commit}"
                 )
             continue
 
@@ -326,6 +441,62 @@ def run_cli(
             conversation_service.reset_context(session_id)
             session_id = str(uuid.uuid4())
             output_fn("Nueva conversación iniciada.")
+            continue
+
+        explore_command = _explore_command(prompt)
+        if explore_command is not None:
+            domain, action, argument = explore_command
+
+            if domain == "help":
+                output_fn(EXPLORE_HELP_MESSAGE)
+                continue
+
+            valid_command = (
+                (
+                    domain == "repo"
+                    and action == "list"
+                )
+                or (
+                    domain == "repo"
+                    and action in {"read", "search"}
+                    and bool(argument)
+                )
+                or (
+                    domain == "knowledge"
+                    and action == "list"
+                    and argument is None
+                )
+                or (
+                    domain == "knowledge"
+                    and action in {"read", "search"}
+                    and bool(argument)
+                )
+            )
+
+            if not valid_command:
+                output_fn(
+                    "Comando Explorer inválido. "
+                    "Usa /explore help."
+                )
+                continue
+
+            if engineering is None:
+                output_fn(
+                    "Explorer no disponible: configura "
+                    "MALAK_REPOSITORY_ROOT."
+                )
+                continue
+
+            try:
+                _run_explore(
+                    domain=domain,
+                    action=action,
+                    argument=argument,
+                    engineering=engineering,
+                    output_fn=output_fn,
+                )
+            except Exception as exc:
+                output_fn(f"Error controlado Explorer: {exc}")
             continue
 
         engineering_command = _engineering_command(prompt)
