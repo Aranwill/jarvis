@@ -76,10 +76,10 @@ Estado cross-repository verificado antes de abrir G1:
 Malāk main:
 42bc41687a99d236b8ee59bae670bef2d37858e1
 
-Project Vault main:
+external derived record main:
 c8761523bc0176a06c1668b2ce5cf329f1d52b96
 
-Vault Sync Agent main:
+external reconciliation process main:
 71b21e0a192017353075954e06e2b55f5f8e2255
 
 post-reconciliation dry-run:
@@ -726,7 +726,7 @@ Detener y volver al Owner si G2 o una implementación futura requiere:
 ```text
 G2 candidate specification approved
 exact implementation baseline reverified
-Project Vault reconciled
+external derived record reconciled
 TDD scenarios frozen
 file/change budget frozen
 FULL 4R plan frozen
@@ -753,7 +753,7 @@ retrieval authorized: false
 knowledge authorized: false
 sprint 7.12 authorized: false
 rdd stage 2 authorized: false
-vault reconciliation required before implementation: true
+external derived record reconciliation required before implementation: true
 ```
 
 Próximo paso permitido únicamente mediante nueva autorización del Owner:
