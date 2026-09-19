@@ -40,24 +40,24 @@ def make_repo(tmp_path: Path) -> tuple[Path, str]:
     git(repo, "config", "user.name", "Malak Test")
     git(repo, "config", "commit.gpgsign", "false")
 
-    write(repo, "src/malak/component.py", 'VALUE = "needle implementation repo-only"\\n')
-    write(repo, "README.md", "needle repository-reference\\n")
+    write(repo, "src/malak/component.py", 'VALUE = "needle implementation repo-only"\n')
+    write(repo, "README.md", "needle repository-reference\n")
     write(
         repo,
         "docs/governance/cognitive_constitution.md",
-        "needle governing-context knowledge-only\\n",
+        "needle governing-context knowledge-only\n",
     )
-    write(repo, "docs/architecture/blueprint.md", "needle architecture-context\\n")
-    write(repo, "SECURITY.md", "needle security-context\\n")
+    write(repo, "docs/architecture/blueprint.md", "needle architecture-context\n")
+    write(repo, "SECURITY.md", "needle security-context\n")
     write(
         repo,
         "docs/architecture/adr/ADR-007-example.md",
-        "---\\nstatus: proposed\\n---\\nneedle proposed-decision\\n",
+        "---\nstatus: proposed\n---\nneedle proposed-decision\n",
     )
     write(
         repo,
         "documents/projects/jarvis/ideas.md",
-        "needle non-normative-context\\n",
+        "needle non-normative-context\n",
     )
     git(repo, "add", ".")
     git(repo, "commit", "--no-gpg-sign", "-m", "baseline")
@@ -145,7 +145,7 @@ def test_e3_red_c02_baseline_mismatch_fails(tmp_path: Path) -> None:
     right.mkdir()
     repo_a, _ = make_repo(left)
     repo_b, _ = make_repo(right)
-    write(repo_b, "extra.txt", "different\\n")
+    write(repo_b, "extra.txt", "different\n")
     git(repo_b, "add", "extra.txt")
     git(repo_b, "commit", "--no-gpg-sign", "-m", "different")
 
@@ -158,7 +158,7 @@ def test_e3_red_c02_baseline_mismatch_fails(tmp_path: Path) -> None:
         )
 
 
-@pytest.mark.parametrize("subject", ["", "   ", "\\n", "needle\\nnext", "\\t"])
+@pytest.mark.parametrize("subject", ["", "   ", "\n", "needle\nnext", "\t"])
 def test_e3_red_c03_invalid_subject(tmp_path: Path, subject: str) -> None:
     *_, capability = build(tmp_path)
     with pytest.raises(ValueError):
@@ -247,7 +247,7 @@ def test_e3_red_c09_roles_preserved(tmp_path: Path) -> None:
     assert ("NON_NORMATIVE_IDEA", "non_normative") in roles
 
 
-@pytest.mark.parametrize("content", ["{not-json", "~~~json\\n{}\\n~~~"])
+@pytest.mark.parametrize("content", ["{not-json", "~~~json\n{}\n~~~"])
 def test_e3_red_c10_invalid_json_shape_rejected(tmp_path: Path, content: str) -> None:
     provider = RecordingProvider(content)
     *_, capability = build(tmp_path, provider)
@@ -312,7 +312,7 @@ def test_e3_red_c16_unresolved_allows_real_grounded_refs(
 def test_e3_red_c17_envelope_is_non_authoritative(tmp_path: Path) -> None:
     _, baseline, _, _, _, capability = build(tmp_path)
     result = execute(capability)
-    assert result.startswith("ENGINEERING_ANALYSIS\\n")
+    assert result.startswith("ENGINEERING_ANALYSIS\n")
     assert f"baseline_commit: {baseline}" in result
     assert "status: GROUNDED" in result
     assert "authority_effect: none" in result
