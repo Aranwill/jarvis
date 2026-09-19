@@ -643,3 +643,98 @@ def test_e2_red_c30_execute_does_not_mutate_repository_worktree(
 
     after = git(repo, "status", "--porcelain=v1", "--untracked-files=all")
     assert after == before == ""
+
+
+
+def test_e2_red_c31_knowledge_search_result_baseline_misbinding_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    *_, knowledge_reader, provider, capability = build_capability(tmp_path)
+    module = import_module("malak.knowledge.knowledge_reader")
+
+    monkeypatch.setattr(
+        knowledge_reader,
+        "search_text",
+        lambda _: module.KnowledgeSearchResult(
+            baseline_commit="0" * 40,
+            matches=(),
+            truncated=False,
+        ),
+    )
+
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+    assert provider.calls == 0
+
+
+def test_e2_red_c32_knowledge_match_role_misbinding_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    *_, knowledge_reader, provider, capability = build_capability(tmp_path)
+    module = import_module("malak.knowledge.knowledge_reader")
+    source = next(
+        item
+        for item in knowledge_reader.list_sources()
+        if item.path == "documents/projects/jarvis/ideas.md"
+    )
+
+    monkeypatch.setattr(
+        knowledge_reader,
+        "search_text",
+        lambda _: module.KnowledgeSearchResult(
+            baseline_commit=knowledge_reader.baseline_commit,
+            matches=(
+                module.KnowledgeTextMatch(
+                    baseline_commit=knowledge_reader.baseline_commit,
+                    path=source.path,
+                    blob_sha="a" * 40,
+                    source_class="GOVERNING",
+                    authority_class="normative",
+                    line_number=1,
+                    line="needle forged role",
+                ),
+            ),
+            truncated=False,
+        ),
+    )
+
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+    assert provider.calls == 0
+
+
+def test_e2_red_c33_unknown_knowledge_match_path_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    *_, knowledge_reader, provider, capability = build_capability(tmp_path)
+    module = import_module("malak.knowledge.knowledge_reader")
+
+    monkeypatch.setattr(
+        knowledge_reader,
+        "search_text",
+        lambda _: module.KnowledgeSearchResult(
+            baseline_commit=knowledge_reader.baseline_commit,
+            matches=(
+                module.KnowledgeTextMatch(
+                    baseline_commit=knowledge_reader.baseline_commit,
+                    path="src/malak/component.py",
+                    blob_sha="a" * 40,
+                    source_class="GOVERNING",
+                    authority_class="normative",
+                    line_number=1,
+                    line="needle forged source",
+                ),
+            ),
+            truncated=False,
+        ),
+    )
+
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+    assert provider.calls == 0
