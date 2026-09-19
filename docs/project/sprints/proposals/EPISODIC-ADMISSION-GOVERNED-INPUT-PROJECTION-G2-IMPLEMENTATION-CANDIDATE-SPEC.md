@@ -77,7 +77,7 @@ Estado cross-repository al iniciar G2:
 Malāk main:
 84a7bc2f785751d478d8a1341f993d861cb2f208
 
-Project Vault main:
+external derived record main:
 cbd5f74070176e5c20d300b811153e73d95f9d3f
 
 post-reconciliation dry-run:
@@ -96,7 +96,7 @@ G0 PASS / ADAPT
 G1 PASS + integrated
 Assessment Provenance G3 integrated
 Assessment Producer Authorization G3 integrated
-Vault reconciliation PASS
+external derived record reconciliation PASS
 drift = 0
 ```
 
@@ -123,7 +123,7 @@ Candidate-Bound Evidence / RDD Stage 1
   ↓
 Human Governance
   ↓
-Vault reconciliation
+external derived record reconciliation
 ```
 
 Invariantes:
@@ -1051,7 +1051,7 @@ RDD Stage 2:
 NOT AUTHORIZED
 ```
 
-La siguiente transición posible, después de merge humano y reconciliación del Vault, es una autorización separada para:
+La siguiente transición posible, después de merge humano y reconciliación del external derived record, es una autorización separada para:
 
 ```text
 G3 — isolated TDD implementation candidate
