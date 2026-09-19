@@ -141,6 +141,26 @@ def test_build_conversation_service_accepts_injected_runtime() -> None:
     assert response.provider == "runtime"
 
 
+def test_build_conversation_service_supports_stateless_engineering_use() -> None:
+    runtime = RecordingRuntime()
+
+    service = build_conversation_service(
+        runtime=runtime,
+        provider_name="mock",
+        with_context=False,
+    )
+
+    response = service.generate(
+        request=ConversationRequest(prompt="Inspect Memory"),
+        provider="mock",
+    )
+
+    assert response.content == "Respuesta controlada"
+    assert runtime.last_request is not None
+    assert runtime.last_request.prompt == "Inspect Memory"
+    assert runtime.last_request.history == ()
+
+
 def test_build_runtime_defaults_to_mock() -> None:
     runtime = build_runtime()
 
@@ -687,6 +707,57 @@ def test_main_composes_engineering_only_from_explicit_repository_root(
     assert len(builder_calls) == 1
     assert builder_calls[0]["repository_root"] == "D:/Ollama/jarvis"
     assert captured["engineering"] is engineering
+
+
+def test_main_uses_separate_stateless_service_for_engineering(
+    monkeypatch,
+) -> None:
+    service_builds: list[tuple[bool, object]] = []
+    captured_cli: dict[str, object] = {}
+    captured_engineering: dict[str, object] = {}
+
+    def fake_build_conversation_service(
+        runtime=None,
+        provider_name="mock",
+        *,
+        with_context=True,
+    ):
+        service = object()
+        service_builds.append((with_context, service))
+        return service
+
+    def fake_build_engineering_kernel_set(**kwargs: object):
+        captured_engineering.update(kwargs)
+        return EngineeringKernelSetStub()
+
+    def fake_run_cli(**kwargs: object) -> None:
+        captured_cli.update(kwargs)
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_service",
+        fake_build_conversation_service,
+    )
+    monkeypatch.setattr(
+        "malak.app.cli.build_engineering_kernel_set",
+        fake_build_engineering_kernel_set,
+    )
+    monkeypatch.setattr("malak.app.cli.run_cli", fake_run_cli)
+    monkeypatch.setattr(
+        "malak.app.cli.environ",
+        {"MALAK_REPOSITORY_ROOT": "D:/Ollama/jarvis"},
+    )
+
+    main()
+
+    assert [with_context for with_context, _ in service_builds] == [
+        True,
+        False,
+    ]
+    conversation_service = service_builds[0][1]
+    engineering_service = service_builds[1][1]
+    assert conversation_service is not engineering_service
+    assert captured_cli["service"] is conversation_service
+    assert captured_engineering["service"] is engineering_service
 
 
 def test_main_does_not_use_current_working_directory_as_repository_root(
