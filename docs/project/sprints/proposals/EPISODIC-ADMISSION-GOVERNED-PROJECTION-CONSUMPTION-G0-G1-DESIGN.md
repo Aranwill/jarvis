@@ -106,7 +106,7 @@ Por tanto:
 
 ```text
 PRODUCT CODE DRIFT SINCE PR #88 = 0
-DOCUMENTARY VAULT RECONCILIATION AFTER PR #89 = PENDING
+DOCUMENTARY RECONCILIATION AFTER PR #89 = PENDING
 ```
 
 La diferencia documental del external derived record no altera el análisis técnico de G0/G1, pero **debe resolverse antes de G2 o de cualquier implementación posterior**.
