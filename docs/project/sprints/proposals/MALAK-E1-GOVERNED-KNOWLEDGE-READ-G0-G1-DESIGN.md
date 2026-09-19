@@ -240,11 +240,14 @@ modelo de trust adicional.
 8. `search_text()` solo lee fuentes clasificadas; nunca escanea código u otros
    archivos y filtra después.
 9. Si una fuente clasificada no puede leerse como texto válido, la búsqueda falla
-   explícitamente; no se omiten silenciosamente fuentes gobernantes.
+   explícitamente; no se omiten silenciosamente fuentes reconocidas. Toda fuente
+   reconocida se prevalida antes de aplicar truncation por cantidad/bytes de matches.
 10. Búsqueda literal, line-based, single-line y bounded.
 11. Query máxima: 4096 bytes UTF-8, sin caracteres de control.
 12. Máximo de fuentes clasificadas: 256.
-13. Máximo agregado de contenido leído por búsqueda: 8 MiB.
+13. Máximo agregado de contenido aceptado/procesado por búsqueda: 8 MiB. Como E1
+    consume E0, cada lectura individual ya está limitada a 256 KiB; por lo tanto
+    el máximo físico antes de detectar un exceso es 8 MiB + un blob E0 (256 KiB).
 14. Máximo de resultados: 100.
 15. Máximo agregado de texto retornado en matches: 256 KiB.
 16. Los límites configurables, si se exponen, solo pueden reducir hard caps.
@@ -338,7 +341,8 @@ El RED deberá cubrir al menos:
 - aggregate searchable-byte hard bound;
 - result-count hard bound + `truncated`;
 - output-byte hard bound + `truncated`;
-- fuente clasificada binaria/no-UTF8 provoca fallo explícito, no silent omission;
+- fuente clasificada binaria/no-UTF8 provoca fallo explícito, incluso si el output
+  habría quedado truncado antes de alcanzarla;
 - nueva ruta desconocida no adquiere clasificación implícita;
 - ADR propuesto sigue siendo `status_dependent`, no `accepted` inferido.
 
