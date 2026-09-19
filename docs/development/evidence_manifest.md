@@ -378,11 +378,9 @@ RDD-M1 no depende de:
 ```text
 src/malak/security/audit.py
 src/malak/observability/**
-infraestructura externa de soporte
 ```
 
-Los dos primeros pertenecen al runtime. La infraestructura externa de soporte
-queda fuera del contrato y no se introduce como dependencia upstream.
+Ambos pertenecen al runtime y quedan fuera de este contrato.
 
 ---
 
@@ -426,7 +424,6 @@ PASS/FAIL/INCONCLUSIVE only          PASS
 result anti-greenwashing             PASS
 historical auditability              PASS
 runtime dependency                   0
-external support dependency          0
 new external dependencies            0
 Kernel delta                         0
 ```
