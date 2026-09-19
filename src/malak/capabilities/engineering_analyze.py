@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import unicodedata
 from dataclasses import dataclass
 
 from malak.capabilities._engineering_evidence import collect_engineering_evidence
@@ -218,7 +219,7 @@ def _parse_analysis(
             object_pairs_hook=_reject_duplicate_keys,
             parse_constant=_reject_nonfinite_json,
         )
-    except (json.JSONDecodeError, ValueError, TypeError) as exc:
+    except (json.JSONDecodeError, ValueError, TypeError, RecursionError) as exc:
         raise RuntimeError("engineering analysis model response is not strict JSON") from exc
 
     if not isinstance(payload, dict):
@@ -371,6 +372,11 @@ def _bounded_nonempty_string(
 ) -> str:
     if not isinstance(value, str) or not value.strip():
         raise RuntimeError(f"{field} must be a non-empty string")
+    if any(
+        unicodedata.category(character) in {"Cc", "Cf", "Zl", "Zp"}
+        for character in value
+    ):
+        raise RuntimeError(f"{field} contains forbidden control or format characters")
     if len(value.encode("utf-8")) > max_bytes:
         raise RuntimeError(f"{field} exceeds hard E3 UTF-8 byte limit")
     return value
