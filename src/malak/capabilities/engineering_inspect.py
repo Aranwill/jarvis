@@ -86,6 +86,7 @@ class EngineeringInspectCapability(Capability):
         ) = self._collect_repository_evidence(term)
 
         knowledge_result = self._knowledge_reader.search_text(term)
+        self._validate_knowledge_evidence(knowledge_result)
         knowledge_evidence, knowledge_context_truncated = _knowledge_context(
             knowledge_result.matches,
             source_truncated=knowledge_result.truncated,
@@ -239,6 +240,42 @@ class EngineeringInspectCapability(Capability):
             context_truncated = True
 
         return evidence, match_count, skipped_unreadable, context_truncated
+
+
+    def _validate_knowledge_evidence(self, result) -> None:
+        if result.baseline_commit != self._baseline_commit:
+            raise RuntimeError(
+                "knowledge search baseline binding changed unexpectedly"
+            )
+
+        source_catalog = {
+            source.path: source
+            for source in self._knowledge_reader.list_sources()
+        }
+        for source in source_catalog.values():
+            if source.baseline_commit != self._baseline_commit:
+                raise RuntimeError(
+                    "knowledge source baseline binding changed unexpectedly"
+                )
+
+        for match in result.matches:
+            if match.baseline_commit != self._baseline_commit:
+                raise RuntimeError(
+                    "knowledge match baseline binding changed unexpectedly"
+                )
+
+            source = source_catalog.get(match.path)
+            if source is None:
+                raise RuntimeError(
+                    "knowledge match path is not present in the governed source catalog"
+                )
+            if (
+                match.source_class != source.source_class
+                or match.authority_class != source.authority_class
+            ):
+                raise RuntimeError(
+                    "knowledge match documentary-role binding changed unexpectedly"
+                )
 
 
 def _knowledge_context(
