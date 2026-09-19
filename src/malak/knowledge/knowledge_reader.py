@@ -111,6 +111,8 @@ class GovernedKnowledgeReader:
         document = self._repository_reader.read_text(path)
         if document.baseline_commit != self._baseline_commit:
             raise RuntimeError("repository reader baseline changed unexpectedly")
+        if document.path != source.path:
+            raise RuntimeError("repository reader path binding changed unexpectedly")
 
         return KnowledgeDocument(
             baseline_commit=document.baseline_commit,
