@@ -69,7 +69,7 @@ commit: 69cccf23b773c89c31b47a2ef1cad75ebf76b237
 Estado downstream observado antes de abrir esta unidad:
 
 ```text
-Project Vault reconciled
+external derived record reconciled
 accepted source = 69cccf23b773c89c31b47a2ef1cad75ebf76b237
 base_commit == head_commit
 changed_files = 0
@@ -754,7 +754,7 @@ human commit / push / PR / merge
         ↓
 post-merge validation
         ↓
-Vault reconciliation
+external derived record reconciliation
 ```
 
 Y aun después de una eventual activación:

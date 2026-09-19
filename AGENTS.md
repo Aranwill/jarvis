@@ -76,46 +76,29 @@ Los documentos derivados pueden resumir evidencia, pero no pueden establecer arq
 
 Los snapshots históricos de release describen el estado certificado en su fecha original. No deben reescribirse silenciosamente para coincidir con un HEAD posterior.
 
-## Recuperación de contexto: Vault-first
+## Recuperación de contexto: repository-first
 
-Para consultas ordinarias de contexto, continuidad, estado general, roadmap,
-decisiones, arquitectura conocida o referencias conceptuales de Malāk, utiliza
-el Malāk Project Vault como punto de entrada de recuperación de contexto.
+Toda recuperación de contexto de Malāk parte del propio repositorio oficial y de
+sus fuentes internas clasificadas por autoridad.
 
 Secuencia predeterminada:
 
 ```text
-08-session-context/MALAK_SESSION_CONTEXT.md
+CURRENT_STATE interno aplicable
         ↓
-documento especializado del Vault cuando sea necesario
+fuente normativa / arquitectónica / conceptual correspondiente
         ↓
-respuesta basada en contexto derivado vigente
+código + tests + evidencia cuando la pregunta lo requiera
 ```
 
-La fuente de autoridad y la fuente de recuperación de contexto son conceptos
-distintos. `Aranwill/jarvis/main` continúa siendo la fuente de verdad; el Vault
-es la fuente derivada preferida para recuperar contexto de forma eficiente.
+Malāk debe permanecer autosuficiente respecto de infraestructura externa de
+contexto, observación o reconciliación. Ningún servicio, repositorio o proceso
+externo puede ser requisito para comprender, planificar, validar, ejecutar o
+cerrar una unidad de trabajo dentro de Malāk.
 
-No realices por defecto una revisión transversal de Malāk, Vault y Sync Agent
-para una consulta ordinaria si el Vault aporta contexto suficiente y coherente.
-
-Escala a las fuentes oficiales de Malāk cuando:
-
-- la tarea vaya a modificar código o documentación oficial de Malāk;
-- se requiera evidencia exacta de implementación, tests o estado operativo;
-- se requiera autoridad normativa, arquitectónica, de seguridad o gobernanza;
-- el Vault presente contradicciones, gaps, drift o estado no reconciliado;
-- la información necesaria no esté disponible o sea incierta en el Vault;
-- se solicite una auditoría, certificación o revisión independiente desde fuente;
-- el propietario solicite explícitamente revisar directamente el repositorio.
-
-Consulta el Vault Sync Agent únicamente cuando la tarea involucre sincronización,
-mapping, cobertura, reconciliación, propuestas de sync o un fallo reportado por
-ese mecanismo.
-
-El `Minimum Review Set` transversal definido a continuación aplica a revisiones
-integrales, auditorías, reconciliaciones y detección de drift; no constituye el
-procedimiento predeterminado para recuperación ordinaria de contexto.
+Las fuentes externas no forman parte del Minimum Review Set de Malāk y no deben
+ser consultadas como dependencia arquitectónica, runtime, Memory, Knowledge,
+autoridad o condición de admisión.
 
 ## Revisión integral del proyecto y detección de drift
 
@@ -154,23 +137,6 @@ Malāk — source of truth
 ├── código afectado
 └── tests y evidencia aplicables
 
-Project Vault — proyección derivada
-├── CURRENT_BASELINE.md
-├── CURRENT_COMPONENTS_MAP.md
-├── IMPLEMENTATION_ROADMAP.md
-├── PENDING_DECISIONS.md
-├── MALAK_SESSION_CONTEXT.md
-├── CONCEPTUAL_FOUNDATIONS.md
-└── KNOWLEDGE_INDEX.md
-
-Vault Sync Agent — mecanismo de reconciliación
-├── baseline / HEAD vigente
-├── reglas de candidate mapping
-├── cobertura de rutas fuente
-├── rutas no mapeadas
-├── estado de sincronización
-├── propuestas pendientes
-└── evidencia de reconciliación
 ```
 
 ### Cobertura exhaustiva obligatoria
@@ -392,35 +358,15 @@ NO convierte una idea en baseline
 En caso de conflicto, deberán prevalecer las fuentes normativas y las decisiones
 aprobadas según la jerarquía documental de este archivo.
 
-### Revisión transversal entre repositorios
+### Frontera de autosuficiencia del repositorio
 
-Cuando la tarea implique estado global del proyecto, reconciliación o detección
-de inconsistencias, deberá contrastarse, cuando estén accesibles:
+Las revisiones de Malāk deben cerrarse con evidencia disponible dentro del
+repositorio oficial: documentación, código, tests, Git y artefactos internos
+admitidos por su jerarquía documental.
 
-```text
-Aranwill/jarvis
-        ↓
-source of truth
-
-Aranwill/malak-project-vault
-        ↓
-proyección derivada
-
-Aranwill/malak-vault-sync-agent
-        ↓
-mecanismo determinista de detección y propuesta
-```
-
-Cuando existan instrucciones locales (`AGENTS.md`) en cualquiera de los tres
-repositorios, deberán leerse y aplicarse para el trabajo realizado dentro de ese
-repositorio. Las reglas locales no pueden elevar la autoridad del Vault ni del
-Sync Agent sobre Malāk.
-
-El Vault y el Sync Agent no pueden corregir, reinterpretar ni superar la
-autoridad documental del repositorio oficial de Malāk.
-
-Una coincidencia entre documentos derivados tampoco convierte una afirmación en
-verdad si contradice la fuente oficial.
+No se permite elevar infraestructura externa de observación, contexto o
+reconciliación a componente arquitectónico, fuente de verdad, requisito de
+review o condición de cierre.
 
 ### Taxonomía mínima de drift
 
@@ -434,9 +380,6 @@ BASELINE_DRIFT
 ARCHITECTURE_DRIFT
 DOCUMENTATION_DRIFT
 CONCEPTUAL_DRIFT
-PROJECTION_DRIFT
-SYNC_DRIFT
-COVERAGE_DRIFT
 ENCODING_DRIFT
 STATE_DRIFT
 ```
@@ -444,29 +387,13 @@ STATE_DRIFT
 Ejemplos:
 
 ```text
-BASELINE_DRIFT
-→ Vault describe un HEAD anterior al baseline oficial.
-
 CONCEPTUAL_DRIFT
-→ una referencia conceptual importante existe en Malāk pero no está proyectada
-  o relacionada correctamente en el índice conceptual derivado.
-
-PROJECTION_DRIFT
-→ el Vault resume de forma incompleta o contradictoria una fuente oficial.
-
-SYNC_DRIFT
-→ el Sync Agent no refleja correctamente un cambio que su mapping debería
-  detectar.
-
-COVERAGE_DRIFT
-→ aparece una ruta fuente relevante que no está cubierta por las reglas de
-  sincronización.
-
-ENCODING_DRIFT
-→ el contenido persistido presenta corrupción o transformación de caracteres.
+→ una referencia conceptual interna contradice, omite o desalinéa la visión
+  documentada vigente de Malāk.
 
 STATE_DRIFT
-→ el estado persistido, propuesta pendiente o cursor no representan de forma coherente la realidad verificable.
+→ un estado persistido interno no representa de forma coherente la realidad
+  verificable del propio repositorio o runtime.
 ```
 
 Todo finding de drift deberá, cuando sea posible, indicar:
@@ -486,28 +413,12 @@ La corrección deberá respetar alcance, riesgo, revisión humana y disciplina G
 
 ### Cobertura de nuevas rutas
 
-Cuando aparezca una nueva carpeta o familia documental relevante en Malāk,
-deberá verificarse si el Sync Agent la reconoce.
+Toda nueva carpeta o familia documental relevante debe incorporarse al inventario
+interno y recibir clasificación explícita según su rol y autoridad.
 
-Una ruta nueva no deberá considerarse correctamente integrada únicamente porque
-exista en Git.
-
-Cuando corresponda deberá comprobarse:
-
-```text
-source path
-    ↓
-mapping rule
-    ↓
-Vault candidate
-    ↓
-human review / reconciliation
-```
-
-Si una ruta relevante no está cubierta por ninguna regla y no está
-explícitamente ignorada, deberá reportarse como `COVERAGE_DRIFT`.
-
-No se deberá ampliar automáticamente el mapping para silenciar el finding.
+Una ruta nueva no se considera integrada sólo por existir en Git: debe quedar
+cubierta por los contratos, tests, documentación o reglas internas que
+correspondan a su responsabilidad.
 
 ## Fuente rechazada
 
@@ -1051,7 +962,7 @@ Una revisión integral no podrá declararse completa hasta que:
 2. se identifiquen las fuentes CURRENT_STATE aplicables;
 3. se contrasten entre sí y contra código/tests cuando corresponda;
 4. las referencias antiguas encontradas sean clasificadas explícitamente como estado vigente, histórico, legacy o drift;
-5. se contrasten Project Vault y Sync Agent cuando el alcance sea global;
+5. se contrasten todas las fuentes internas aplicables cuando el alcance sea global;
 6. se registren findings pendientes, si existen;
 7. se cierre primero el inventario de drift antes de iniciar correcciones.
 
@@ -1063,21 +974,19 @@ El patrón requerido será:
 
 inventario → clasificación → corrective packet → validación → cierre.
 
-### Reconciliación derivada después de merge
+### Cierre post-merge interno
 
-Después de integrar un cambio en `Aranwill/jarvis/main`, debe evaluarse si las rutas modificadas están observadas o mapeadas por el Malāk Vault Synchronization Agent.
+Después de integrar un cambio en `main`, el cierre debe verificar únicamente
+el estado oficial de Malāk:
 
-Cuando corresponda, el Project Vault debe reconciliarse mediante el flujo gobernado del Sync Agent antes de utilizar la proyección derivada como base de una nueva admission review.
+- HEAD integrado exacto;
+- código y tests aplicables;
+- documentación `CURRENT_STATE` afectada;
+- gates, ADR y decisiones pertinentes;
+- ausencia de drift interno conocido no resuelto.
 
-La reconciliación downstream:
-
-```text
-NO reabre el sprint ya cerrado
-NO convierte el Vault en source of truth
-NO concede autoridad al Sync Agent
-```
-
-Si existe `BASELINE_DRIFT`, `PROJECTION_DRIFT`, `STATE_DRIFT` o drift semántico downstream relevante, la siguiente admission review debe esperar a que el finding sea reconciliado, resuelto o aceptado explícitamente como riesgo documentado.
+El cierre de Malāk no depende de infraestructura externa de contexto,
+observación o reconciliación.
 
 ### Auditoría completa vs revisión incremental
 
@@ -1087,7 +996,7 @@ concreto, entre ellos:
 - cierre o promoción material de baseline;
 - cambio de arquitectura o gobernanza;
 - nueva familia documental relevante;
-- cambio de mapping del Sync Agent;
+- cambio material de reglas internas de cobertura o clasificación;
 - evidencia de drift sistémico;
 - solicitud explícita del propietario.
 

@@ -299,7 +299,7 @@ Kernel
 Planner
 Ollama
 SecurityContext
-Vault
+external derived record
 filesystem
 database
 Memory
@@ -748,7 +748,7 @@ Después:
 - PR;
 - revisión;
 - merge a main;
-- reconciliación posterior mediante Vault Sync Agent.
+- reconciliación posterior mediante external reconciliation process.
 
 ---
 
@@ -851,7 +851,7 @@ El historial:
 - desaparece al finalizar el proceso;
 - puede limpiarse explícitamente;
 - no deberá escribirse automáticamente en logs;
-- no deberá enviarse al Vault;
+- no deberá enviarse al external derived record;
 - no deberá persistirse como evidencia;
 - no deberá convertirse en dataset.
 
@@ -972,9 +972,9 @@ rollback
 
 ---
 
-## Reconciliación con Project Vault
+## Reconciliación con external derived record
 
-No se realizará sincronización manual del Vault durante los gates internos.
+No se realizará sincronización manual del external derived record durante los gates internos.
 
 Secuencia esperada:
 
@@ -984,13 +984,13 @@ Sprint branch
 → final review
 → PR
 → merge a main
-→ Vault Sync Agent
+→ external reconciliation process
 → proposal
 → human review
-→ Vault merge
+→ external derived record merge
 ```
 
-El Project Vault continúa siendo una proyección derivada.
+El external derived record continúa siendo una proyección derivada.
 
 No sustituye la autoridad del repositorio oficial.
 

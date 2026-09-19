@@ -87,7 +87,7 @@ docs/project/sprints/proposals/
 EPISODIC-ADMISSION-ASSESSMENT-PROVENANCE-G0-G1-DESIGN.md
 ```
 
-El drift downstream que G0/G1 aceptaron temporalmente fue posteriormente reconciliado mediante el flujo gobernado del Vault Sync Agent.
+El drift downstream que G0/G1 aceptaron temporalmente fue posteriormente reconciliado mediante el flujo gobernado del external reconciliation process.
 
 Estado verificado antes de abrir G2:
 
@@ -95,10 +95,10 @@ Estado verificado antes de abrir G2:
 Malāk main:
 684927a1e429e530da8f9831f374551c22b48d8f
 
-Project Vault main:
+external derived record main:
 155172f1c258fe40c1a25fbf97a537022859064f
 
-Vault Sync Agent main:
+external reconciliation process main:
 71b21e0a192017353075954e06e2b55f5f8e2255
 
 post-reconciliation dry-run:
@@ -1001,7 +1001,7 @@ Antes de autorizar código deberán verificarse nuevamente:
 
 ```text
 exact main baseline unchanged or explicitly re-reviewed
-Vault relevant drift = 0
+external derived record relevant drift = 0
 file budget still sufficient
 TDD scenarios AP2-01 .. AP2-18 preserved
 no new runtime dependency discovered
@@ -1033,7 +1033,7 @@ Knowledge: 0
 implementation authorized: false
 sprint 7.12 authorized: false
 rdd stage 2 authorized: false
-relevant Vault drift: 0
+relevant external derived record drift: 0
 ```
 
 Próximo paso permitido únicamente mediante nueva autorización del Owner:

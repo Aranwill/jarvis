@@ -78,10 +78,10 @@ Estado verificado al iniciar G1:
 Malāk main:
 b96e1802c47e447699f06f4a019241d119f747ef
 
-Project Vault main:
+external derived record main:
 4bf73bd1ef1bfb6929f0562ee851cfebd2cdef6e
 
-Vault Sync Agent main:
+external reconciliation process main:
 71b21e0a192017353075954e06e2b55f5f8e2255
 
 post-reconciliation dry-run:
@@ -101,7 +101,7 @@ PROJECTION_DRIFT = 0
 STATE_DRIFT = 0
 ```
 
-Si este design record se integra, el Vault deberá reconciliarse otra vez antes de cualquier implementación posterior.
+Si este design record se integra, el external derived record deberá reconciliarse otra vez antes de cualquier implementación posterior.
 
 ---
 
@@ -718,7 +718,7 @@ retrieval authorized: false
 knowledge authorized: false
 sprint 7.12 authorized: false
 rdd stage 2 authorized: false
-vault reconciliation required before implementation: true
+external derived record reconciliation required before implementation: true
 ```
 
 Próximo paso permitido únicamente mediante nueva autorización del Owner:

@@ -209,17 +209,6 @@ conversacionales, que permanecen intactos.
 - completar la documentación;
 - preparar PR y cierre gobernado.
 
-### Incremento 8 — Sincronización gobernada del Vault
-
-Después del merge aprobado en `main`:
-
-- ejecutar manualmente el Vault Synchronization Agent;
-- revisar la evidencia producida;
-- proponer los documentos del Vault que deban actualizarse;
-- esperar aprobación antes de escribir;
-- crear un nuevo snapshot si cambió el baseline;
-- preservar todos los snapshots históricos.
-
 ## Archivos previstos
 
 La lista se confirmará antes de cada incremento:

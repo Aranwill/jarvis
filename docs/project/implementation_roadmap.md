@@ -86,20 +86,6 @@ La validación candidate-bound final de E4 quedó registrada en Validation #330
 con `1168 passed` en Ubuntu y Windows, además de `compileall`, candidate
 identity y candidate diff en PASS.
 
-El Project Vault fue reconciliado posteriormente mediante PR #125:
-
-```text
-Malāk source of truth:
-14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
-
-Vault main:
-a813d253c2375195742b1695df4980987dd9a5b1
-```
-
-Esta reconciliación documental D1 corrige estado derivado. No constituye
-autorización para E5, Sprint 7.12, RDD Stage 2, Memory persistente, agents,
-tools, Sandbox, writes ni ampliación de autoridad.
-
 ---
 
 ---
@@ -434,10 +420,6 @@ independent validation: PASS
 - Conversation G2B permanece bloqueado y no autorizado.
 - Sprint 7.12 no está autorizado.
 - RDD Stage 1 está adoptado; RDD Stage 2 no está autorizado.
-- La última reconciliación de contenido aceptada del Vault representa Malāk
-  `cd50c308e1f5a1481851d6402ae4435341410d27` mediante Vault PR #101 y merge
-  `29c4253c80373491453173c1cfcd429d2dfcbf6b`; PR #120 y esta reconciliación
-  generan el siguiente delta derivado.
 
 Como referencia histórica, Sprint 7.9 cerró con candidato funcional:
 
@@ -728,10 +710,6 @@ RDD Stage 2:
 no autorizado
 ```
 
-La última reconciliación de contenido aceptada del Malāk Project Vault representa
-Malāk `cd50c308e1f5a1481851d6402ae4435341410d27` mediante Vault PR #101. PR #120
-y este corrective packet deben reconciliarse downstream antes de cualquier gate
-que exija drift cero.
 ---
 
 # 8. Estado de sprints del bloque 7.x
@@ -742,7 +720,7 @@ que exija drift cero.
 | 7.1 | Cerrado | Composición de CLI con `OllamaRuntime` mediante configuración externa |
 | 7.2 | Cerrado | Contrato estructural `RuntimeMetricSink` de solo escritura |
 | 7.3 | Cerrado | Estabilización de la frontera de `ConversationProvider` |
-| 7.4 | Cerrado | Consolidación de logs, métricas y auditoría; sincronización gobernada del Vault |
+| 7.4 | Cerrado | Consolidación de logs, métricas y auditoría |
 | 7.5 | Cerrado | Security Control Plane Foundation; autorización, PDP, PEP y auditoría |
 | 7.6 | Cerrado | Secure Context Lifecycle Foundation |
 | 7.7 | Cerrado | Validación integral y certificación interna del baseline |
@@ -861,9 +839,6 @@ No está autorizado:
 - Sandbox;
 - navegación;
 - ampliación de autoridad.
-
-La sincronización del Vault puede continuar como reconciliación derivada del
-baseline integrado, pero no constituye un nuevo sprint ni una autorización.
 
 Cualquier unidad posterior deberá atravesar nuevamente el proceso completo de
 admisión y aprobación.
@@ -1690,9 +1665,6 @@ ubuntu-latest / windows-latest
 
 E4 CANDIDATE VALIDATION
 Validation #330 / 1168 passed Ubuntu + Windows / PASS
-
-VAULT CONTENT RECONCILIATION
-REPRESENTS MALAK@14122dd2; VAULT MAIN@a813d253
 
 LEGACY ROADMAP
 DISPOSITION REGISTERED

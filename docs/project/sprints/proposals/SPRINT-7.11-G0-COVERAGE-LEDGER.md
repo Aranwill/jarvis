@@ -31,7 +31,7 @@ oficial `Aranwill/jarvis` en el baseline exacto:
 deb759ee9855737a24b169e03bde2028c7db7f33
 ```
 
-El Project Vault y el Vault Sync Agent se consultaron como contexto downstream
+El external derived record y el external reconciliation process se consultaron como contexto downstream
 de reconciliación y cobertura. No forman parte del scope de implementación de
 Sprint 7.11 y no reciben cambios por esta admisión.
 
@@ -304,9 +304,9 @@ no justifican agentes, sandbox, dataset ni nuevas capacidades en este sprint.
 
 # Downstream review
 
-## Project Vault
+## external derived record
 
-El Vault reconciliado observa:
+El external derived record reconciliado observa:
 
 ```text
 official HEAD = deb759ee9855737a24b169e03bde2028c7db7f33
@@ -314,7 +314,7 @@ official HEAD = deb759ee9855737a24b169e03bde2028c7db7f33
 
 No se detecta baseline drift bloqueante para iniciar esta admisión.
 
-## Vault Sync Agent
+## external reconciliation process
 
 La regla vigente:
 
@@ -335,11 +335,11 @@ Resultado:
 
 ```text
 new source family = 0
-Sync Agent mapping delta = 0
-Sync Agent code delta = 0
+external reconciliation process mapping delta = 0
+external reconciliation process code delta = 0
 ```
 
-El CI existente del Sync Agent se utiliza solo como referencia comprobada de
+El CI existente del external reconciliation process se utiliza solo como referencia comprobada de
 que GitHub Actions funciona en el ecosistema Malāk. No se copiará su matriz
 Ubuntu/Windows, cache ni `.[dev]` por defecto porque Malāk no ha demostrado esa
 necesidad.
@@ -372,7 +372,7 @@ Estado:
 RESOLVED BY SCOPE
 ```
 
-El Sync Agent posee CI con matriz Ubuntu/Windows, cache pip y extra `.[dev]`.
+El external reconciliation process posee CI con matriz Ubuntu/Windows, cache pip y extra `.[dev]`.
 Sprint 7.11 no hereda esos elementos sin evidencia propia.
 
 ## G0-F003 — infraestructura externa sin autoridad

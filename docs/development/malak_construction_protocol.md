@@ -123,19 +123,14 @@ La profundidad de lectura puede ser proporcional al rol y al problema, pero la c
 
 Un archivo expresamente prohibido por las instrucciones vigentes debe aparecer en el inventario con `REJECTED_DO_NOT_READ` y no debe abrirse ni procesarse.
 
-## 3.3 Revisión transversal
+## 3.3 Revisión integral interna
 
-Cuando el estado global de Malāk forme parte de la decisión, el inventario debe abarcar, según disponibilidad:
+Cuando el estado global de Malāk forme parte de la decisión, el inventario debe
+abarcar el repositorio oficial y todas las fuentes internas aplicables.
 
-```text
-Aranwill/jarvis
-Aranwill/malak-project-vault
-Aranwill/malak-vault-sync-agent
-```
-
-La fuente oficial continúa siendo `Aranwill/jarvis/main`.
-
-El Vault es una proyección derivada y el Sync Agent un mecanismo determinista de observación y propuesta.
+La revisión no depende de infraestructura externa de observación, contexto o
+reconciliación. Ningún repositorio o servicio externo puede elevarse a source
+of truth, gate, prerequisite o autoridad sobre Malāk.
 
 ## 3.4 Contexto de decisión activo
 
@@ -621,60 +616,46 @@ Una corrección que exceda su budget debe escalar en lugar de ampliar silenciosa
 
 ---
 
-# 10. Reconciliación derivada post-merge
+# 10. Cierre interno post-merge
 
 ## 10.1 Trigger
 
-Después de integrar un cambio en `Aranwill/jarvis/main`, debe evaluarse si las rutas modificadas están observadas o mapeadas por el Malāk Vault Synchronization Agent.
-
-Cuando corresponda, la reconciliación del Project Vault debe ejecutarse mediante el flujo gobernado del Sync Agent.
+Después de integrar un cambio en `main`, debe verificarse si el cambio afecta
+fuentes `CURRENT_STATE`, contratos, arquitectura, seguridad, roadmap o tests
+del propio repositorio.
 
 ## 10.2 Autoridad
 
-La reconciliación del Vault:
-
-```text
-NO reabre un Sprint ya cerrado
-NO modifica la autoridad de jarvis/main
-NO convierte el Vault en source of truth
-NO permite al Sync Agent aprobar cambios
-```
-
-Si el Sync Agent falla, `jarvis/main` continúa siendo la fuente oficial y el drift debe permanecer visible.
+El cierre utiliza únicamente evidencia interna oficial. Ninguna infraestructura
+externa de observación, contexto o reconciliación constituye prerequisite,
+source of truth o autoridad de cierre.
 
 ## 10.3 Gate antes de la siguiente admisión
 
-No debe iniciarse la admisión formal de una nueva unidad de trabajo mientras exista `BASELINE_DRIFT`, `PROJECTION_DRIFT`, `STATE_DRIFT` o drift semántico downstream relevante conocido sin:
+No debe iniciarse una nueva unidad formal mientras exista drift interno
+relevante conocido sin:
 
-1. reconciliación;
-2. resolución explícita;
-3. o aceptación humana documentada del riesgo y su impacto sobre la decisión.
-
-Esto protege la calidad del contexto usado para planificar sin convertir al Vault en autoridad de cierre del Sprint anterior.
+1. resolución;
+2. reconciliación interna;
+3. o aceptación humana documentada del riesgo.
 
 ---
 
-# 11. Revisión de cierre cross-repository
+# 11. Revisión de cierre
 
-Cuando el cambio afecte estado proyectado, el cierre debe comprobar:
+El cierre debe comprobar:
 
 ```text
-jarvis/main
+main integrado exacto
         ↓
-source candidate exacto
-
-Sync Agent
+documentación oficial aplicable
         ↓
-observación / estado reconciliado
-
-Project Vault
+código / tests / evidencia
         ↓
-proyección coherente con la fuente
+drift interno clasificado
+        ↓
+estado listo para siguiente admission review
 ```
-
-Findings relevantes deben clasificarse mediante la taxonomía de drift vigente.
-
----
 
 # 12. Frontera de modificación de documentos de ley
 

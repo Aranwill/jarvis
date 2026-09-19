@@ -104,7 +104,7 @@ Describa brevemente el objetivo de este Pull Request.
 
 \- \[ ] Las referencias históricas/legacy no fueron reinterpretadas como estado vigente.
 
-\- \[ ] Nuevas rutas documentales relevantes están cubiertas por el Sync Agent o su exclusión está justificada.
+\- \[ ] Nuevas rutas documentales relevantes tienen clasificación, owner y cobertura interna explícitos.
 
 
 

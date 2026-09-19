@@ -45,7 +45,7 @@ Episodic Candidate Content Identity Propagation & Binding Boundary
 
 La autorización parte del cierre completo de `Episodic Candidate Content Identity G2`,
 con implementación integrada en `main`, validación post-merge y reconciliación del
-Project Vault sin drift.
+external derived record sin drift.
 
 Esta unidad responde solamente:
 
@@ -111,15 +111,15 @@ commit:     0466e18075fd6bce6243e03f701a377fd34469dd
 
 Ese commit integra PR #123 — implementación de `Episodic Candidate Content Identity G2`.
 
-Project Vault reconciliado al inicio:
+external derived record reconciliado al inicio:
 
 ```text
-repository: Aranwill/malak-project-vault
+repository: [external-reference-removed]
 branch:     main
 commit:     62c56b06ffc4e4172e574a3af116c7be1605e55e
 ```
 
-El Sync Agent reportó posteriormente para Malāk:
+El external reconciliation process reportó posteriormente para Malāk:
 
 ```text
 base_commit == head_commit == 0466e18075fd6bce6243e03f701a377fd34469dd
@@ -1473,8 +1473,8 @@ src/malak/security/**
 src/malak/core/**
 src/malak/services/**
 src/malak/capabilities/**
-Vault
-Sync Agent
+external derived record
+external reconciliation process
 ```
 
 `candidate_content_identity.py` se consume como dependencia estable; no se modifica

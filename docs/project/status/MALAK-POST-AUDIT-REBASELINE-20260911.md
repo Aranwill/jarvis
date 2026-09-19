@@ -7,9 +7,9 @@ as_of_date: 2026-09-11
 source_repository: Aranwill/jarvis
 source_branch: main
 source_commit: 5865da6a5e502fe71e35e2e38bc4cceaab9b3600
-vault_repository: Aranwill/malak-project-vault
+vault_repository: [external-reference-removed]
 vault_commit: 34f0416a8d312f4f27b9b36c3733cc2703772364
-sync_agent_repository: Aranwill/malak-vault-sync-agent
+sync_agent_repository: [external-reference-removed]
 sync_agent_commit: f6eb42715dd7771f3bcf7909a99f7e4e7db465c1
 implementation_authorized: false
 sprint_7_12_authorized: false
@@ -22,7 +22,7 @@ rdd_stage_2_authorized: false
 
 Este documento registra el estado derivado observado inmediatamente después del cierre de los fixes asociados a la auditoría `ASTRA-AUDIT-BASELINE-20260910-A1`.
 
-Su función es eliminar ambigüedad entre el baseline documental previo y el estado efectivo de los tres repositorios después de integrar los fixes y completar la reconciliación del Vault.
+Su función es eliminar ambigüedad entre el baseline documental previo y el estado efectivo de los tres repositorios después de integrar los fixes y completar la reconciliación del external derived record.
 
 Este documento es informativo y no normativo.
 
@@ -55,21 +55,21 @@ change: fix(runtime): acotar payloads del transporte Ollama
 Validation on HEAD: success
 ```
 
-### Malāk Project Vault
+### external derived record
 
 ```text
-repository: Aranwill/malak-project-vault
+repository: [external-reference-removed]
 branch: main
 HEAD: 34f0416a8d312f4f27b9b36c3733cc2703772364
 latest merge: PR #98
-change: docs(vault): synchronize Malak 5865da6a
+change: docs(external derived record): synchronize Malak 5865da6a
 Validation on HEAD: success
 ```
 
-### Vault Sync Agent
+### external reconciliation process
 
 ```text
-repository: Aranwill/malak-vault-sync-agent
+repository: [external-reference-removed]
 branch: main
 HEAD: f6eb42715dd7771f3bcf7909a99f7e4e7db465c1
 latest merge: PR #28
@@ -92,29 +92,29 @@ docs/project/implementation_roadmap.md
 
 conservan metadata y narrativa fechadas antes de la integración final de los fixes de auditoría.
 
-En particular, referencias que todavía indiquen que el Vault representa únicamente el estado post-PR #92 o que los cambios desde PR #93 permanecen pendientes de reconciliación downstream deben considerarse **históricas/stale respecto del estado operativo actual**.
+En particular, referencias que todavía indiquen que el external derived record representa únicamente el estado post-PR #92 o que los cambios desde PR #93 permanecen pendientes de reconciliación downstream deben considerarse **históricas/stale respecto del estado operativo actual**.
 
 El estado observado post-auditoría es:
 
 ```text
 Malāk main@5865da6a5e502fe71e35e2e38bc4cceaab9b3600
         ↓
-Vault reconciliado en
+external derived record reconciliado en
 main@34f0416a8d312f4f27b9b36c3733cc2703772364
         ↓
-Sync Agent estable en
+external reconciliation process estable en
 main@f6eb42715dd7771f3bcf7909a99f7e4e7db465c1
 ```
 
 Por tanto:
 
 ```text
-post-PR #92 vault state
+post-PR #92 external derived record state
 !=
-current vault state
+current external derived record state
 ```
 
-Este documento no reescribe snapshots históricos ni concede autoridad al Vault sobre el repositorio oficial.
+Este documento no reescribe snapshots históricos ni concede autoridad al external derived record sobre el repositorio oficial.
 
 ---
 
@@ -225,7 +225,7 @@ El baseline post-auditoría queda descrito como:
 three repositories stable
 main heads identified
 CI/Validation successful
-Vault reconciled to current Malāk HEAD
+external derived record reconciled to current Malāk HEAD
 no Sprint 7.12 authorized
 no runtime assurance implementation authorized
 ready for next explicit gate

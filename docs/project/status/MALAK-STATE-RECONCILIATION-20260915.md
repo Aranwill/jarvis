@@ -38,10 +38,10 @@ open PRs at inspection: none
 Validation main@e9cf3f90: success
 ```
 
-Malāk Project Vault observado:
+external derived record observado:
 
 ```text
-repository: Aranwill/malak-project-vault
+repository: [external-reference-removed]
 branch: main
 HEAD: 7bf8331324ac5dcb2c0c9e75979ccc887cd26890
 last synchronization PR: #112
@@ -49,7 +49,7 @@ represented Malāk HEAD: e9cf3f901fb492cdf4383843a64c6a89d0065d50
 Validation: success
 ```
 
-Por SHA observado, el Vault estaba sincronizado con el HEAD de Malāk. El drift
+Por SHA observado, el external derived record estaba sincronizado con el HEAD de Malāk. El drift
 detectado era semántico/documental dentro de copias narrativas derivadas, no un
 desfase Git entre repositorios.
 
@@ -202,7 +202,7 @@ Ejemplos de afirmaciones superseded:
 
 - Candidate Content Identity G2 como no autorizado;
 - propagation como no autorizada;
-- última reconciliación del Vault en `cd50c308...`;
+- última reconciliación del external derived record en `cd50c308...`;
 - HEAD integrado `3690d5f...` como estado actual.
 
 Disposición:
@@ -258,18 +258,18 @@ RDD Stage 2                        NO CHANGE
 ## Gate de continuidad
 
 Hasta que este corrective packet sea revisado/mergeado y su delta sea proyectado
-nuevamente al Vault, el siguiente gate funcional permanece:
+nuevamente al external derived record, el siguiente gate funcional permanece:
 
 ```text
 HOLD
 ```
 
-Después de merge y Vault sync debe repetirse el drift check.
+Después de merge y external derived record sync debe repetirse el drift check.
 
 El objetivo del siguiente check es:
 
 ```text
-Malāk HEAD represented by Vault     PASS
+Malāk HEAD represented by external derived record     PASS
 open branch/PR residue              PASS
 CI                                  PASS
 authority drift                     PASS
@@ -320,5 +320,5 @@ newer derived narrative != authority
 ```
 
 El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad
-de Malāk. El Vault continúa siendo una proyección derivada sin autoridad
+de Malāk. El external derived record continúa siendo una proyección derivada sin autoridad
 operativa.

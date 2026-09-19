@@ -839,8 +839,8 @@ CLI
 runtime/model adapters
 src/malak/memory/**
 storage/database/filesystem
-Vault
-Sync Agent
+external derived record
+external reconciliation process
 Persistent Memory
 Durable Reliance runtime
 ```

@@ -91,13 +91,13 @@ Estado cross-repository verificado al iniciar G2:
 Malāk main:
 aaabae65fcd989ed698704fa1bc735c3896c3903
 
-Project Vault main:
+external derived record main:
 4b504f258d110b646fe062e846abe6893e0749a1
 
-Vault refleja Malāk HEAD:
+external derived record refleja Malāk HEAD:
 aaabae65fcd989ed698704fa1bc735c3896c3903
 
-Vault Sync Agent main:
+external reconciliation process main:
 71b21e0a192017353075954e06e2b55f5f8e2255
 ```
 
@@ -117,13 +117,13 @@ Precondiciones:
 ```text
 G0 PASS / ADAPT
 G1 PASS + integrated
-Vault reconciliation PASS
+external derived record reconciliation PASS
 BASELINE_DRIFT = 0
 PROJECTION_DRIFT = 0
 STATE_DRIFT = 0
 ```
 
-Si este G2 se integra, el Vault deberá reconciliarse nuevamente antes de una futura implementación G3.
+Si este G2 se integra, el external derived record deberá reconciliarse nuevamente antes de una futura implementación G3.
 
 ---
 
@@ -158,7 +158,7 @@ Draft PR
   ↓
 Human review / Ready / merge
   ↓
-Vault reconciliation
+external derived record reconciliation
 ```
 
 Invariantes:
@@ -1127,7 +1127,7 @@ Detener inmediatamente si la implementación requiere:
 - universal trust manager;
 - Sprint 7.12;
 - RDD Stage 2;
-- implementación antes de reconciliar nuevamente el Project Vault tras integrar G2.
+- implementación antes de reconciliar nuevamente el external derived record tras integrar G2.
 
 ---
 
@@ -1215,7 +1215,7 @@ RDD Stage 2 authorized: false
 
 ## 35. Próximo gate permitido
 
-Después de revisión humana, integración de este G2 y nueva reconciliación del Vault, el siguiente gate posible será únicamente:
+Después de revisión humana, integración de este G2 y nueva reconciliación del external derived record, el siguiente gate posible será únicamente:
 
 ```text
 G3 — TDD Implementation Candidate

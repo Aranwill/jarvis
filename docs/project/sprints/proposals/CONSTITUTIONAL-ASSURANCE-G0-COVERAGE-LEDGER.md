@@ -77,11 +77,11 @@ main
 Estado downstream observado antes de esta admisión:
 
 ```text
-Aranwill/malak-project-vault/main
+[external-reference-removed]/main
 42a9c29561b856e731303cd563687d366b9b2048
-merge message: docs(vault): synchronize Malak 5fa2ae25
+merge message: docs(external derived record): synchronize Malak 5fa2ae25
 
-Aranwill/malak-vault-sync-agent/main
+[external-reference-removed]/main
 e77e276b6bb913f0814b990be9ff5ec1c9542693
 ```
 

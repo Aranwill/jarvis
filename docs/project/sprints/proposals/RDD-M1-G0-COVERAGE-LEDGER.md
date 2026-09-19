@@ -29,10 +29,10 @@ Las tres respuestas declararon `truncated: false`.
 Aranwill/jarvis
   e8c1e5c14ee1b844fa23ca5cb342237f7aaaa8f0
 
-Aranwill/malak-project-vault
+[external-reference-removed]
   4024d4fad5570ba20e835bfaf3937a89c5a2e963
 
-Aranwill/malak-vault-sync-agent
+[external-reference-removed]
   e77e276b6bb913f0814b990be9ff5ec1c9542693
 ```
 
@@ -133,7 +133,7 @@ RDD-M1 remains development tooling outside src/malak
 
 ---
 
-## Project Vault — derived projection
+## external derived record — derived projection
 
 ### TARGETED / GENERATED_OR_DERIVED
 
@@ -163,21 +163,21 @@ remaining root files
 Finding V-001:
 
 ```text
-Vault observed official HEAD = e8c1e5c14ee1b844fa23ca5cb342237f7aaaa8f0
+external derived record observed official HEAD = e8c1e5c14ee1b844fa23ca5cb342237f7aaaa8f0
 blocking baseline drift = none detected
 ```
 
-El Vault permanece derivado y no autoriza RDD-M1.
+El external derived record permanece derivado y no autoriza RDD-M1.
 
 ---
 
-## Vault Sync Agent — downstream reconciliation
+## external reconciliation process — downstream reconciliation
 
 ### FULL / TARGETED
 
 ```text
 AGENTS.md
-config/vault-sync.example.yaml
+config/external derived record-sync.example.yaml
 src/malak_vault_sync/candidate_resolver.py
 src/malak_vault_sync/evidence.py
 src/malak_vault_sync/git_inspector.py
@@ -197,21 +197,21 @@ remaining root files
 
 ### Finding S-001 — adapt patterns, do not import components
 
-El Sync Agent ya tiene candidate/evidence/git tooling, pero su relación es:
+El external reconciliation process ya tiene candidate/evidence/git tooling, pero su relación es:
 
 ```text
 Malāk source of truth
         ↓
-Sync Agent
+external reconciliation process
         ↓
-Project Vault
+external derived record
 ```
 
 Por tanto:
 
 ```text
 ADAPT deterministic patterns
-DO NOT create upstream dependency on Sync Agent
+DO NOT create upstream dependency on external reconciliation process
 ```
 
 ### Finding S-002 — no nueva familia documental
@@ -230,8 +230,8 @@ Resultado:
 
 ```text
 new source families = 0
-Sync Agent mapping changes = 0
-Sync Agent code delta = 0
+external reconciliation process mapping changes = 0
+external reconciliation process code delta = 0
 ```
 
 ---
@@ -259,7 +259,7 @@ G0 autoriza únicamente:
 ```
 
 No se justifican componentes arquitectónicos, runtime components, stores,
-dependencias externas ni cambios al Sync Agent.
+dependencias externas ni cambios al external reconciliation process.
 
 ---
 

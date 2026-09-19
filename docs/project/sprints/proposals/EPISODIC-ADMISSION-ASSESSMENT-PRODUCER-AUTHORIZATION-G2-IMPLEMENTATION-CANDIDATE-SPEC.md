@@ -78,10 +78,10 @@ Estado cross-repository al iniciar G2:
 Malāk main:
 4953532addef9a5e4c0dd8e9e03531ab7c77ce51
 
-Project Vault main:
+external derived record main:
 adf60ff908db41ecf80bde7980a590134f68ab10
 
-Vault Sync Agent main:
+external reconciliation process main:
 71b21e0a192017353075954e06e2b55f5f8e2255
 
 post-reconciliation dry-run:
@@ -98,7 +98,7 @@ Precondiciones G2:
 ```text
 G0 PASS
 G1 PASS + integrated
-Vault reconciliation PASS
+external derived record reconciliation PASS
 Security Control Plane available
 Assessment Provenance G3 integrated
 ```
@@ -126,7 +126,7 @@ Candidate-Bound Evidence / RDD Stage 1
   ↓
 Human Governance
   ↓
-Vault reconciliation
+external derived record reconciliation
 ```
 
 Invariantes metodológicas:
@@ -1046,7 +1046,7 @@ knowledge: 0
 implementation authorized: false
 sprint 7.12 authorized: false
 rdd stage 2 authorized: false
-vault reconciliation required before implementation: true
+external derived record reconciliation required before implementation: true
 ```
 
 Próximo paso permitido únicamente mediante nueva autorización explícita del Owner:
