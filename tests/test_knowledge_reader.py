@@ -458,3 +458,29 @@ def test_e1_red_c23_read_of_valid_source_propagates_e0_text_failure(
 
     with pytest.raises(ValueError):
         reader.read("docs/project/concepts/BINARY.md")
+
+
+
+def test_e1_red_c24_truncation_cannot_hide_later_unreadable_source(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    path = repo / "docs" / "project" / "concepts" / "ZZZ-BINARY.md"
+    path.write_bytes(b"\xff\xfe\xfd")
+    git(repo, "add", "docs/project/concepts/ZZZ-BINARY.md")
+    git(repo, "commit", "--no-gpg-sign", "-m", "late binary knowledge")
+
+    module = knowledge_module()
+    monkeypatch.setattr(module, "_MAX_SEARCH_RESULTS", 1)
+    reader = module.GovernedKnowledgeReader(GitRepositoryReader(repo))
+
+    with pytest.raises(ValueError):
+        reader.search_text("shared-token")
+
+
+def test_e1_red_c25_read_rejects_non_string_path_explicitly(tmp_path: Path) -> None:
+    _, _, _, reader = make_reader(tmp_path)
+
+    with pytest.raises(TypeError):
+        reader.read(123)  # type: ignore[arg-type]
