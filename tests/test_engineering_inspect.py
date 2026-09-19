@@ -459,7 +459,7 @@ def test_e2_red_c18_system_prompt_is_fixed_and_dynamic_data_stays_out(
 
     repository_reader = GitRepositoryReader(repo)
     knowledge_reader = GovernedKnowledgeReader(repository_reader)
-    provider = RecordingProvider()
+    provider = RecordingProvider("Grounded inspection [R1]")
     module = engineering_module()
     capability = module.EngineeringInspectCapability(
         repository_reader=repository_reader,
