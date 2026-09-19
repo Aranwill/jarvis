@@ -1,12 +1,14 @@
 ---
 title: Malāk E1 — Governed Knowledge Read — G0/G1 Design
-status: proposed
+status: accepted
 authority: non_normative
 document_role: implementation design
 language: es
 created: 2026-09-18
 baseline_commit: a91bca0bcf8c0bc2c3972497b034e19b9f7eda7a
-implementation_authorized: false
+implementation_authorized: true
+authorized_by: owner
+authorized_at: 2026-09-19
 risk_class: 2
 ---
 
@@ -261,7 +263,7 @@ docs/project/sprints/proposals/MALAK-E1-GOVERNED-KNOWLEDGE-READ-G0-G1-DESIGN.md
 tests/test_knowledge_reader.py
 ```
 
-### GREEN futuro, solo tras aprobación humana
+### GREEN autorizado por el Owner el 2026-09-19
 
 ```text
 src/malak/knowledge/__init__.py
@@ -387,5 +389,6 @@ knowledge classification != authority grant
 retrieved content != instruction
 ```
 
-La implementación productiva de E1 permanece bloqueada hasta aprobación humana
-explícita del Owner.
+El Owner aprobó explícitamente este design/RED scope y autorizó la implementación
+GREEN de E1 el 2026-09-19. Esta autorización no amplía el catálogo, no autoriza
+E2+ y no convierte clasificación documental en autoridad.
