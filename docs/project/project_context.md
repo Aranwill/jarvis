@@ -82,9 +82,6 @@ Este contexto fue reconciliado a partir de:
 - integración de E4 — Engineering Propose mediante PR #152;
 - validación candidate-bound final de E4 mediante Validation #330, con
   `1168 passed` en Ubuntu y Windows;
-- última reconciliación aceptada del Malāk Project Vault contra Malāk
-  `14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e`, integrada en Vault
-  `a813d253c2375195742b1695df4980987dd9a5b1` mediante Vault PR #125.
 
 El documento:
 
@@ -130,7 +127,6 @@ Las fuentes derivadas incluyen:
 
 - este `project_context.md`;
 - resúmenes de estado marcados explícitamente como no normativos;
-- artefactos derivados del Malāk Project Vault.
 
 Los documentos derivados pueden informar evidencia y contexto de planificación, pero no pueden aprobar arquitectura, alcance de sprint ni implementación.
 
@@ -324,12 +320,6 @@ Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
 G2A y G2 son foundations aisladas de finalización protegida y assurance signal
 projection; no constituyen assurance conversacional end-to-end.
 
-La sincronización del Malāk Project Vault es una proyección derivada posterior.
-La última reconciliación aceptada del Vault representa Malāk
-`14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e` mediante Vault PR #125 y merge
-`a813d253c2375195742b1695df4980987dd9a5b1`. La reconciliación E0–E4 quedó
-cerrada antes de esta actualización D1. El estado del Vault no concede autoridad
-sobre `Aranwill/jarvis/main`.
 
 ---
 
@@ -1233,55 +1223,6 @@ Conversation G2B sin un proceso específico de evaluación y aprobación.
 
 ---
 
-## Malāk Project Vault
-
-Repositorio derivado:
-
-```text
-Aranwill/malak-project-vault
-```
-
-Rama:
-
-```text
-main
-```
-
-El Vault:
-
-- permanece separado del repositorio oficial;
-- es derivado;
-- no tiene autoridad operativa;
-- no puede modificar Malāk automáticamente;
-- utiliza Obsidian únicamente como interfaz humana;
-- conserva snapshots históricos inmutables;
-- puede proyectar cambios detectados en el repositorio oficial;
-- requiere revisión humana para reconciliaciones gobernadas.
-
-La última reconciliación aceptada del Vault representa el HEAD oficial de Malāk:
-
-```text
-Malāk: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
-Vault: 4632ccab79a0482a41c8c4aa0bb6f8731caea31a
-Vault PR: #123
-```
-
-La reconciliación E0–E3 quedó aceptada y sin propuesta pendiente en el estado v3
-del Sync Agent. Este dato describe reconciliación derivada; no concede autoridad
-al Vault ni al Sync Agent sobre Malāk.
-
-El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad para:
-
-- código;
-- tests;
-- documentación oficial;
-- contratos;
-- arquitectura;
-- sprints;
-- historial Git.
-
----
-
 ## Planificación vigente — post-E3 / D0
 
 Sprint 7.8 está completado.
@@ -1552,9 +1493,6 @@ main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 active_work_branch@NONE
 ```
 
-La reconciliación downstream correspondiente quedó integrada en
-`malak-project-vault/main@a813d253c2375195742b1695df4980987dd9a5b1`.
-
 `as_of_commit` identifica el commit de referencia utilizado para reconstruir el
 contexto, no una obligación de reescribir el documento ante cada commit
 puramente mecánico o documental.
@@ -1570,7 +1508,6 @@ Debe volver a validarse cuando:
 - cambie la raíz del repositorio;
 - cambie el entorno de desarrollo de forma material;
 - se incorpore una nueva frontera de seguridad;
-- se modifique de forma material el estado operativo del Vault.
 
 Las actualizaciones deben distinguir claramente entre:
 
