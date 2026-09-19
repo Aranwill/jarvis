@@ -3,7 +3,7 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-09-19
-as_of_commit: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+as_of_commit: 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -79,11 +79,12 @@ Este contexto fue reconciliado a partir de:
 - integración de E1 — Governed Knowledge Read mediante PR #148;
 - integración de E2 — Engineering Inspect mediante PR #149;
 - integración de E3 — Engineering Analyze mediante PR #150;
-- validación candidate-bound final de E3 mediante workflow `35445357957`, con
-  `1114 passed` en Ubuntu y Windows;
+- integración de E4 — Engineering Propose mediante PR #152;
+- validación candidate-bound final de E4 mediante Validation #330, con
+  `1168 passed` en Ubuntu y Windows;
 - última reconciliación aceptada del Malāk Project Vault contra Malāk
-  `c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8`, integrada en Vault
-  `4632ccab79a0482a41c8c4aa0bb6f8731caea31a` mediante Vault PR #123.
+  `14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e`, integrada en Vault
+  `a813d253c2375195742b1695df4980987dd9a5b1` mediante Vault PR #125.
 
 El documento:
 
@@ -142,19 +143,19 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+HEAD integrado actual:             14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Última unidad de código integrada: Engineering Analyze — E3
+Última unidad de código integrada: Engineering Propose — E4
 Última foundation previa:          Assurance Signal Authority & Projection Foundation — G2
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
 Última unidad de assurance:        Assurance Signal Boundary G2 — integrada / aislada
-Engineering Intelligence:          E0–E3 integrados; E4/E5 no autorizados
+Engineering Intelligence:          E0–E4 integrados; E5 no autorizado
 Sprint activo autorizado:          ninguno
 Rama de implementación activa:     ninguna
-Candidato E3:                      79fca79d24e1ee30c96aacd470e3267802aa1f77
-Merge E3:                          c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
-Validación E3:                     workflow 35445357957 / 1114 passed Ubuntu + Windows
+Candidato E4:                      3463f1c391f6a11de70a0d6ecfc37c4127da21cb
+Merge E4:                          14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+Validación E4:                     Validation #330 / 1168 passed Ubuntu + Windows
 Sprint posterior autorizado:       ninguno
 Signal Boundary G2:                integrado / aislado
 Conversation G2B:                  bloqueado / no autorizado
@@ -325,9 +326,9 @@ projection; no constituyen assurance conversacional end-to-end.
 
 La sincronización del Malāk Project Vault es una proyección derivada posterior.
 La última reconciliación aceptada del Vault representa Malāk
-`c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8` mediante Vault PR #123 y merge
-`4632ccab79a0482a41c8c4aa0bb6f8731caea31a`. La reconciliación E0–E3 quedó
-cerrada antes de esta actualización D0. El estado del Vault no concede autoridad
+`14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e` mediante Vault PR #125 y merge
+`a813d253c2375195742b1695df4980987dd9a5b1`. La reconciliación E0–E4 quedó
+cerrada antes de esta actualización D1. El estado del Vault no concede autoridad
 sobre `Aranwill/jarvis/main`.
 
 ---
@@ -385,10 +386,10 @@ D:\Ollama\jarvis
 
 ## Arquitectura implementada actual
 
-### Engineering Intelligence — E0–E3
+### Engineering Intelligence — E0–E4
 
-El primer vertical read-only de Engineering Intelligence está integrado en
-`main@c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8`:
+El vertical bounded de Engineering Intelligence está integrado en
+`main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e`:
 
 ```text
 E0 Repository Read          PR #147  INTEGRATED
@@ -397,23 +398,36 @@ E1 Governed Knowledge Read  PR #148  INTEGRATED
         ↓
 shared bounded evidence
         ├── E2 Engineering Inspect  PR #149  INTEGRATED
-        └── E3 Engineering Analyze  PR #150  INTEGRATED
-                                  ↓
-                                Owner
+        └── structured analysis
+              ├── E3 Engineering Analyze  PR #150  INTEGRATED
+              └── E4 Engineering Propose  PR #152  INTEGRATED
+                                                ↓
+                                              Owner
 
-E4 Engineering Propose      NOT AUTHORIZED
 E5 Engineering CLI          NOT AUTHORIZED
 ```
 
-E0–E3 permanecen read-only. No introducen writes, tools, agents, sandbox,
-Planner/CLI routing ni autoridad operacional. E3 produce findings grounded;
-`analysis != decision`, `finding != authorization` y
-`evidence != authority`.
+E0–E4 permanecen read-only. No introducen writes, tools, agents, sandbox,
+Planner/CLI routing ni autoridad operacional. E3 produce findings grounded y E4
+transforma únicamente findings elegibles en propuestas bounded para revisión
+humana.
 
-La validación final de E3 utilizó candidate
-`79fca79d24e1ee30c96aacd470e3267802aa1f77`, workflow
-`35445357957`, con `1114 passed` en Ubuntu y Windows. El merge de PR #150
-produjo `c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8`.
+Se preserva:
+
+```text
+analysis != decision
+finding != authorization
+proposal != decision
+proposal != authorization
+proposal != implementation
+proposal != execution
+evidence != authority
+```
+
+La validación final de E4 utilizó candidate
+`3463f1c391f6a11de70a0d6ecfc37c4127da21cb`, Validation #330, con
+`1168 passed` en Ubuntu y Windows. El merge de PR #152 produjo
+`14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e`.
 
 ### Flujo Kernel–Planner–Capability
 
@@ -1531,15 +1545,15 @@ baseline resultante y obtener aprobación explícita.
 ## Política de actualización
 
 Este documento fue reconciliado contra el estado material observado después de
-integrar E0–E3, culminando en PR #150 — `feat(e3): add grounded engineering analyze capability`:
+integrar E0–E4, culminando en PR #152 — `feat(e4): add grounded Engineering Propose capability`:
 
 ```text
-main@c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 active_work_branch@NONE
 ```
 
 La reconciliación downstream correspondiente quedó integrada en
-`malak-project-vault/main@4632ccab79a0482a41c8c4aa0bb6f8731caea31a`.
+`malak-project-vault/main@a813d253c2375195742b1695df4980987dd9a5b1`.
 
 `as_of_commit` identifica el commit de referencia utilizado para reconstruir el
 contexto, no una obligación de reescribir el documento ante cada commit
