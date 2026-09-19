@@ -358,7 +358,7 @@ No se autoriza su implementación por este documento.
 Se considera una evolución coherente de:
 
 ```text
-Project Vault
+external derived record
 +
 AKS
 +
@@ -392,7 +392,7 @@ Podrá combinar:
 
 ```text
 Cognitive Core
-Project Vault
+external derived record
 AKS
 Telemetry
 Sandbox
@@ -442,7 +442,7 @@ Repository
 +
 AKS
 +
-Vault
+external derived record
 +
 Runtime evidence
 ```
