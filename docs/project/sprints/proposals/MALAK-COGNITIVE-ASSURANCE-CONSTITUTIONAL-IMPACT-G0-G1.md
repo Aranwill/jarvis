@@ -74,7 +74,7 @@ c16c23e14cbd2e34c3abdba085a113dd0a37e0f5
 Estado downstream observado antes de esta unidad:
 
 ```text
-Project Vault reconciled to Malāk c16c23e1...
+external derived record reconciled to Malāk c16c23e1...
 final sync run: base == head
 changed_files = 0
 document_candidates = 0
@@ -83,7 +83,7 @@ conclusion = pass
 proposal_created = false
 ```
 
-La reconciliación del Vault no concede autoridad normativa; únicamente elimina
+La reconciliación del external derived record no concede autoridad normativa; únicamente elimina
 drift downstream antes del review.
 
 ---
