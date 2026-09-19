@@ -241,7 +241,7 @@ pilot manifest
   docs/project/sprints/proposals/RDD-M1-EVIDENCE-MANIFEST.json
 ```
 
-Estas familias ya son observadas por el Sync Agent, por lo que RDD-M1 no requiere
+Estas familias ya son observadas por el external reconciliation process, por lo que RDD-M1 no requiere
 modificar mappings downstream.
 
 ---
