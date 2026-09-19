@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 from malak.contracts.capability import Capability
 from malak.core.conversation import ConversationRequest
@@ -144,6 +145,12 @@ class EngineeringInspectCapability(Capability):
             raise RuntimeError(
                 "engineering inspection model response exceeds hard UTF-8 byte limit"
             )
+
+        _validate_model_evidence_refs(
+            analysis,
+            repository_evidence=repository_evidence,
+            knowledge_evidence=knowledge_evidence,
+        )
 
         return _render_grounded(
             baseline_commit=self._baseline_commit,
@@ -346,6 +353,26 @@ def _truncate_utf8(value: str, max_bytes: int) -> tuple[str, bool]:
             bounded = bounded[:-1]
 
     return "", True
+
+
+def _validate_model_evidence_refs(
+    analysis: str,
+    *,
+    repository_evidence: list[dict[str, object]],
+    knowledge_evidence: list[dict[str, object]],
+) -> None:
+    allowed_refs = {
+        str(item["ref"])
+        for item in (*repository_evidence, *knowledge_evidence)
+    }
+    cited_refs = set(re.findall(r"\[([RK][0-9]+)\]", analysis))
+
+    unknown_refs = sorted(cited_refs - allowed_refs)
+    if unknown_refs:
+        joined = ", ".join(unknown_refs)
+        raise RuntimeError(
+            f"engineering inspection model cited unknown evidence refs: {joined}"
+        )
 
 
 def _render_unconfirmed(
