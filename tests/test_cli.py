@@ -1040,3 +1040,452 @@ def test_run_cli_engineering_kernel_failure_emits_failed_event() -> None:
     ]
     assert sink.events[0].request_id == sink.events[1].request_id
     assert "Error controlado: fallo engineering" in outputs
+
+
+class RepositoryDocumentStub:
+    def __init__(self, path: str, content: str) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.path = path
+        self.blob_sha = "a" * 40
+        self.content = content
+
+
+class RepositoryMatchStub:
+    def __init__(self) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.path = "src/malak/app/cli.py"
+        self.blob_sha = "b" * 40
+        self.line_number = 42
+        self.line = "needle in repository"
+
+
+class RepositorySearchResultStub:
+    def __init__(self, *, truncated: bool = False) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.matches = (RepositoryMatchStub(),)
+        self.truncated = truncated
+
+
+class RepositoryReaderStub:
+    def __init__(self) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.list_calls = 0
+        self.read_paths: list[str] = []
+        self.search_queries: list[str] = []
+
+    def list_tracked_files(self):
+        self.list_calls += 1
+        return (
+            "README.md",
+            "docs/governance/cognitive_constitution.md",
+            "src/malak/app/cli.py",
+        )
+
+    def read_text(self, path: str):
+        self.read_paths.append(path)
+        return RepositoryDocumentStub(
+            path,
+            "repository document body",
+        )
+
+    def search_text(self, query: str):
+        self.search_queries.append(query)
+        return RepositorySearchResultStub(truncated=True)
+
+
+class KnowledgeSourceStub:
+    def __init__(
+        self,
+        path: str,
+        source_class: str,
+        authority_class: str,
+    ) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.path = path
+        self.source_class = source_class
+        self.authority_class = authority_class
+
+
+class KnowledgeDocumentStub(KnowledgeSourceStub):
+    def __init__(
+        self,
+        path: str,
+        source_class: str,
+        authority_class: str,
+        content: str,
+    ) -> None:
+        super().__init__(path, source_class, authority_class)
+        self.blob_sha = "c" * 40
+        self.content = content
+
+
+class KnowledgeMatchStub(KnowledgeSourceStub):
+    def __init__(self) -> None:
+        super().__init__(
+            "docs/governance/cognitive_constitution.md",
+            "GOVERNING",
+            "normative",
+        )
+        self.blob_sha = "d" * 40
+        self.line_number = 7
+        self.line = "evidence before authority"
+
+
+class KnowledgeSearchResultStub:
+    def __init__(self) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.matches = (KnowledgeMatchStub(),)
+        self.truncated = False
+
+
+class KnowledgeReaderStub:
+    def __init__(self) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.read_paths: list[str] = []
+        self.search_queries: list[str] = []
+
+    def list_sources(self):
+        return (
+            KnowledgeSourceStub(
+                "docs/governance/cognitive_constitution.md",
+                "GOVERNING",
+                "normative",
+            ),
+            KnowledgeSourceStub(
+                "docs/project/project_context.md",
+                "DERIVED_STATE",
+                "derived",
+            ),
+        )
+
+    def read(self, path: str):
+        self.read_paths.append(path)
+        return KnowledgeDocumentStub(
+            path,
+            "GOVERNING",
+            "normative",
+            "knowledge document body",
+        )
+
+    def search_text(self, query: str):
+        self.search_queries.append(query)
+        return KnowledgeSearchResultStub()
+
+
+class ExplorerEngineeringKernelSetStub(EngineeringKernelSetStub):
+    def __init__(self) -> None:
+        super().__init__()
+        self.repository_reader = RepositoryReaderStub()
+        self.knowledge_reader = KnowledgeReaderStub()
+
+
+def test_run_cli_explore_help_is_deterministic_and_side_effect_free(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(["/explore help", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    rendered = "\n".join(outputs).lower()
+    assert "/explore repo list" in rendered
+    assert "/explore repo read" in rendered
+    assert "/explore repo search" in rendered
+    assert "/explore knowledge list" in rendered
+    assert "/explore knowledge read" in rendered
+    assert "/explore knowledge search" in rendered
+    assert conversation_kernel.requests == []
+    assert all(
+        kernel.requests == []
+        for kernel in engineering.kernels.values()
+    )
+
+
+def test_run_cli_explore_repo_list_and_prefix_filter(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                "/explore repo list docs/",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    rendered = "\n".join(outputs)
+    assert "docs/governance/cognitive_constitution.md" in rendered
+    assert "src/malak/app/cli.py" not in rendered
+    assert "README.md" not in rendered
+    assert engineering.repository_reader.list_calls == 1
+    assert conversation_kernel.requests == []
+
+
+def test_run_cli_explore_repo_read_uses_existing_reader(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    path = "docs/governance/cognitive_constitution.md"
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                f"/explore repo read {path}",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert engineering.repository_reader.read_paths == [path]
+    rendered = "\n".join(outputs)
+    assert path in rendered
+    assert "repository document body" in rendered
+    assert engineering.baseline_commit in rendered
+    assert conversation_kernel.requests == []
+
+
+def test_run_cli_explore_repo_search_preserves_query_and_truncation(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                "/explore repo search Evidence Bound",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert engineering.repository_reader.search_queries == [
+        "Evidence Bound"
+    ]
+    rendered = "\n".join(outputs)
+    assert "src/malak/app/cli.py" in rendered
+    assert "42" in rendered
+    assert "needle in repository" in rendered
+    assert "truncated: true" in rendered.lower()
+    assert conversation_kernel.requests == []
+
+
+def test_run_cli_explore_knowledge_list_preserves_document_authority(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                "/explore knowledge list",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    rendered = "\n".join(outputs)
+    assert "docs/governance/cognitive_constitution.md" in rendered
+    assert "GOVERNING" in rendered
+    assert "normative" in rendered
+    assert "docs/project/project_context.md" in rendered
+    assert "DERIVED_STATE" in rendered
+    assert "derived" in rendered
+    assert conversation_kernel.requests == []
+
+
+def test_run_cli_explore_knowledge_read_preserves_metadata(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+    path = "docs/governance/cognitive_constitution.md"
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                f"/explore knowledge read {path}",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert engineering.knowledge_reader.read_paths == [path]
+    rendered = "\n".join(outputs)
+    assert path in rendered
+    assert "GOVERNING" in rendered
+    assert "normative" in rendered
+    assert "knowledge document body" in rendered
+    assert engineering.baseline_commit in rendered
+    assert conversation_kernel.requests == []
+
+
+def test_run_cli_explore_knowledge_search_preserves_grounded_match(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                "/explore knowledge search evidence before authority",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert engineering.knowledge_reader.search_queries == [
+        "evidence before authority"
+    ]
+    rendered = "\n".join(outputs)
+    assert "docs/governance/cognitive_constitution.md" in rendered
+    assert "GOVERNING" in rendered
+    assert "normative" in rendered
+    assert "7" in rendered
+    assert "evidence before authority" in rendered
+    assert conversation_kernel.requests == []
+
+
+def test_run_cli_invalid_explore_command_never_falls_back_to_conversation(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = ExplorerEngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                "/explore repo unknown",
+                "/explore knowledge",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert conversation_kernel.requests == []
+    assert all(
+        kernel.requests == []
+        for kernel in engineering.kernels.values()
+    )
+    assert "/explore help" in "\n".join(outputs)
+
+
+def test_run_cli_explore_is_unavailable_without_repository_root(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=None,
+        input_fn=make_input(
+            [
+                "/explore repo list",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert "Explorer no disponible" in "\n".join(outputs)
+    assert conversation_kernel.requests == []
