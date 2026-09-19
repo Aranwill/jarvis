@@ -52,21 +52,21 @@ main
 
 La fuente de verdad continúa siendo `Aranwill/jarvis/main`.
 
-## 3. Riesgo temporal de Project Vault aceptado por el Owner
+## 3. Riesgo temporal de external derived record aceptado por el Owner
 
-Existe drift downstream conocido entre el último estado reconciliado del Project Vault y este baseline. El Owner aceptó explícitamente ese drift **solo como riesgo temporal de contexto derivado para cerrar G0/G1 contra `jarvis/main`**.
+Existe drift downstream conocido entre el último estado reconciliado del external derived record y este baseline. El Owner aceptó explícitamente ese drift **solo como riesgo temporal de contexto derivado para cerrar G0/G1 contra `jarvis/main`**.
 
-Esta aceptación no declara reconciliado el Vault, no elimina el finding, no autoriza implementación y no permite usar una proyección stale para certificar código futuro.
+Esta aceptación no declara reconciliado el external derived record, no elimina el finding, no autoriza implementación y no permite usar una proyección stale para certificar código futuro.
 
 Condición obligatoria:
 
 ```text
-Vault reconciliation
+external derived record reconciliation
 must complete
 before any implementation authorization for this unit
 ```
 
-La reconciliación deberá ejecutarse mediante el flujo gobernado del Malāk Vault Synchronization Agent y conservar revisión humana.
+La reconciliación deberá ejecutarse mediante el flujo gobernado del external reconciliation process y conservar revisión humana.
 
 ## 4. Resultado formal G0
 
@@ -292,7 +292,7 @@ Detener y volver al Owner si la solución requiere cambios en Kernel, Constituci
 
 ```text
 G2 candidate specification approved
-Project Vault reconciled through governed Sync Agent flow
+external derived record reconciled through governed external reconciliation process flow
 exact implementation baseline reverified
 TDD scenarios defined
 file/change budget defined
@@ -315,7 +315,7 @@ retrieval authorized: false
 knowledge authorized: false
 sprint 7.12 authorized: false
 rdd stage 2 authorized: false
-vault reconciliation required before implementation: true
+external derived record reconciliation required before implementation: true
 ```
 
 Próximo paso permitido únicamente mediante nueva autorización del Owner:
