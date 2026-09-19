@@ -1,12 +1,14 @@
 ---
 title: Malāk E2 — Engineering Inspect — G0/G1 Design
-status: proposed
+status: accepted
 authority: non_normative
 document_role: implementation design
 language: es
 created: 2026-09-19
 baseline_commit: 50a80babeca4367a20dd7f730ef2c536c87a9d08
-implementation_authorized: false
+implementation_authorized: true
+authorized_by: owner
+authorized_at: 2026-09-19
 risk_class: 2
 ---
 
@@ -355,7 +357,7 @@ docs/project/sprints/proposals/MALAK-E2-ENGINEERING-INSPECT-G0-G1-DESIGN.md
 tests/test_engineering_inspect.py
 ```
 
-### GREEN futuro, solo tras autorización humana
+### GREEN autorizado por el Owner el 2026-09-19
 
 ```text
 src/malak/capabilities/engineering_inspect.py
@@ -492,5 +494,6 @@ GREEN != approval
 candidate != baseline
 ```
 
-La implementación productiva E2 permanece bloqueada hasta autorización explícita
-del Owner sobre este design + RED.
+El Owner aprobó explícitamente este design + RED y autorizó la implementación
+GREEN de E2 el 2026-09-19. Esta autorización no incluye E3 Analyze, E4 Propose,
+E5 CLI ni ninguna capacidad de ejecución o escritura.
