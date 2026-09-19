@@ -170,4 +170,3 @@ principalmente `IDEA-001`, `IDEA-003`, `IDEA-020` e `IDEA-024`.
 Estado:
 
 `concept / non_normative / conceptual_reference`
-
