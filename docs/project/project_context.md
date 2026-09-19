@@ -971,7 +971,7 @@ Resultado:
 - consolidación de eventos operativos;
 - correlación desde CLI;
 - separación entre métricas, eventos y auditoría;
-- sincronización gobernada del Vault.
+- sincronización gobernada del external derived record.
 
 ### Sprint 7.5
 
