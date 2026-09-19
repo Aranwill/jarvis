@@ -195,6 +195,20 @@ por inferencia.
 
 La ausencia literal puede informar incertidumbre, no demostrar ausencia semántica.
 
+Además:
+
+```text
+context_truncated == true
+        ↓
+NO MODEL CALL
+        ↓
+status: UNCONFIRMED
+reason: analysis requires complete untruncated evidence
+```
+
+Analyze no emite relaciones arquitectónicas a partir de una muestra conocida como
+incompleta.
+
 ## 8. Jerarquía y autoridad documental
 
 E3 no implementa un ranking universal.
@@ -279,9 +293,14 @@ uncertainty item                   4 KiB
 
 Strings vacíos se rechazan.
 
+Campos de texto renderizados rechazan caracteres de control, formato invisible,
+bidi y separadores de línea/párrafo que puedan volver ambiguo el envelope.
+
 Campos extra se rechazan.
 
 Tipos incorrectos se rechazan.
+
+Duplicate JSON keys y constantes no finitas se rechazan.
 
 Clasificaciones desconocidas se rechazan.
 
@@ -335,7 +354,10 @@ Además valida después de inferencia:
 - un finding `GAP` no autoriza implementación;
 - `ALIGNED` no certifica arquitectura ni baseline;
 - `summary` no puede convertirse en finalización;
-- evidence refs no pueden incluir metadata inexistente.
+- evidence refs no pueden incluir metadata inexistente;
+- una muestra truncada nunca entra al modelo;
+- el texto generado no puede inyectar visualmente nuevos campos/secciones del
+  envelope mediante controles o format characters.
 
 ## 13. Output envelope E3
 
@@ -463,6 +485,7 @@ Debe cubrir al menos:
 - subject validation/bounds;
 - no repository evidence => UNCONFIRMED / zero provider calls;
 - no knowledge evidence => UNCONFIRMED / zero provider calls;
+- context truncation => UNCONFIRMED / zero provider calls;
 - both surfaces => exactly one provider call;
 - history vacío / no session propagation;
 - E3 fixed system prompt;
