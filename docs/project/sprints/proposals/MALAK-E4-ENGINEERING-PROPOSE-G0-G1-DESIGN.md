@@ -6,9 +6,11 @@ document_role: implementation design
 language: es
 created: 2026-09-19
 baseline_commit: f0362ef77d06ce7852851345295f374c57f4ddd3
-implementation_authorized: false
+implementation_authorized: true
 authorized_by: owner
 authorized_at: 2026-09-19
+green_authorized_by: owner
+green_authorized_at: 2026-09-19
 risk_class: 2
 ---
 
@@ -463,9 +465,9 @@ docs/project/sprints/proposals/MALAK-E4-ENGINEERING-PROPOSE-G0-G1-DESIGN.md
 tests/test_engineering_propose.py
 ```
 
-### GREEN futuro — NO AUTORIZADO
+### GREEN autorizado por el Owner el 2026-09-19
 
-Scope candidato, sujeto a revisión y autorización separadas:
+Scope autorizado:
 
 ```text
 src/malak/capabilities/_engineering_analysis.py
@@ -633,5 +635,4 @@ proposal != execution
 evidence != authority
 ```
 
-El Owner aprobó explícitamente únicamente este G0/G1 + RED el 2026-09-19.
-GREEN permanece NO AUTORIZADO.
+El Owner aprobó G0/G1 + RED y posteriormente autorizó explícitamente GREEN de E4 el 2026-09-19. La autorización GREEN permanece limitada a los tres archivos runtime definidos en la sección 16; no autoriza E5, Planner/CLI, tools, writes, Git operations, sandbox, agents, Implementation Packet ni ejecución.
