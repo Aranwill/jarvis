@@ -1,12 +1,14 @@
 ---
 title: Malāk E3 — Engineering Analyze — G0/G1 Design
-status: proposed
+status: accepted
 authority: non_normative
 document_role: implementation design
 language: es
 created: 2026-09-19
 baseline_commit: d0e205d3e19acf80ba8f110a2ea76c77bd6c0581
-implementation_authorized: false
+implementation_authorized: true
+authorized_by: owner
+authorized_at: 2026-09-19
 risk_class: 2
 ---
 
@@ -396,7 +398,7 @@ docs/project/sprints/proposals/MALAK-E3-ENGINEERING-ANALYZE-G0-G1-DESIGN.md
 tests/test_engineering_analyze.py
 ```
 
-### GREEN futuro, solo tras autorización humana
+### GREEN autorizado por el Owner el 2026-09-19
 
 ```text
 src/malak/capabilities/_engineering_evidence.py
@@ -539,5 +541,7 @@ model output != finalization
 evidence != authority
 ```
 
-La implementación productiva E3 permanece bloqueada hasta autorización explícita
-del Owner sobre este design + RED.
+El Owner aprobó explícitamente este design + RED y autorizó la implementación
+GREEN de E3 el 2026-09-19. Esta autorización permite únicamente el helper privado
+compartido, el refactor compatible de E2 y Engineering Analyze; no autoriza E4,
+E5, tools, writes, agentes ni ejecución.
