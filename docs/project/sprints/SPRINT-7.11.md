@@ -303,5 +303,5 @@ RDD Stage 2:                  no autorizado
 merge authority:              HUMAN-ONLY
 ```
 
-La reconciliación documental y del Project Vault posterior al merge es trabajo
+La reconciliación documental y del external derived record posterior al merge es trabajo
 derivado. No reabre Sprint 7.11 ni concede autoridad para la siguiente unidad.
