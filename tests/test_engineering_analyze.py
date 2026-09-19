@@ -568,3 +568,36 @@ def test_e3_hardening_c33_contextful_service_fails_closed_without_session(
 
     assert provider.calls == 0
     assert context.snapshot("session-A") == ()
+
+
+
+def test_e3_hardening_c34_truncated_context_is_unconfirmed_without_model(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    m = module()
+    monkeypatch.setattr(m, "_MAX_CONTEXT_MATCHES_PER_KIND", 1)
+    *_, provider, capability = build(tmp_path)
+
+    result = execute(capability)
+
+    assert provider.calls == 0
+    assert "status: UNCONFIRMED" in result
+    assert "context_truncated: true" in result
+    assert "analysis requires complete untruncated evidence" in result
+
+
+def test_e3_hardening_c35_system_prompt_states_document_role_boundaries(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build(tmp_path)
+
+    execute(capability)
+    system_prompt = provider.requests[-1].system_prompt or ""
+
+    assert "GOVERNING" in system_prompt
+    assert "normative" in system_prompt
+    assert "protected_subordinate" in system_prompt
+    assert "status_dependent" in system_prompt
+    assert "non_normative" in system_prompt
+    assert "UNRESOLVED" in system_prompt
