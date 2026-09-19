@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-19
-as_of_commit: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+as_of_commit: 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -40,12 +40,12 @@ gobernanza o contrato aprobado.
 ## Estado CURRENT reconciliado — 2026-09-19
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8`.
+`Aranwill/jarvis/main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e`.
 
-Los snapshots post-PR #120 conservados más abajo son registros históricos y no
-deben utilizarse como sustituto de este estado CURRENT.
+Los snapshots históricos conservados más abajo no deben utilizarse como
+sustituto de este estado CURRENT.
 
-Engineering Intelligence alcanzó el primer vertical read-only integrado:
+Engineering Intelligence alcanzó un vertical bounded read-only hasta proposal:
 
 ```text
 E0 — Repository Read
@@ -73,29 +73,34 @@ merge     c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 status    INTEGRATED
 
 E4 — Engineering Propose
-status    NOT AUTHORIZED
+PR #152
+candidate 3463f1c391f6a11de70a0d6ecfc37c4127da21cb
+merge     14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+status    INTEGRATED
 
 E5 — Engineering CLI
 status    NOT AUTHORIZED
 ```
 
-La validación candidate-bound final de E3 quedó registrada en el workflow
-`35445357957` con `1114 passed` en Ubuntu y Windows, además de `compileall`,
-diff check y candidate identity en PASS.
+La validación candidate-bound final de E4 quedó registrada en Validation #330
+con `1168 passed` en Ubuntu y Windows, además de `compileall`, candidate
+identity y candidate diff en PASS.
 
-El Project Vault fue reconciliado posteriormente mediante PR #123:
+El Project Vault fue reconciliado posteriormente mediante PR #125:
 
 ```text
 Malāk source of truth:
-c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 
 Vault main:
-4632ccab79a0482a41c8c4aa0bb6f8731caea31a
+a813d253c2375195742b1695df4980987dd9a5b1
 ```
 
-Esta reconciliación documental D0 corrige estado derivado. No constituye
-autorización para E4, E5, Sprint 7.12, RDD Stage 2, Memory persistente, agents,
+Esta reconciliación documental D1 corrige estado derivado. No constituye
+autorización para E5, Sprint 7.12, RDD Stage 2, Memory persistente, agents,
 tools, Sandbox, writes ni ampliación de autoridad.
+
+---
 
 ---
 
@@ -770,7 +775,7 @@ ENGINEERING INTELLIGENCE E0 — REPOSITORY READ INTEGRADO
 ENGINEERING INTELLIGENCE E1 — GOVERNED KNOWLEDGE READ INTEGRADO
 ENGINEERING INTELLIGENCE E2 — ENGINEERING INSPECT INTEGRADO
 ENGINEERING INTELLIGENCE E3 — ENGINEERING ANALYZE INTEGRADO
-ENGINEERING INTELLIGENCE E4 — PROPOSE NO AUTORIZADO
+ENGINEERING INTELLIGENCE E4 — ENGINEERING PROPOSE INTEGRADO
 ENGINEERING INTELLIGENCE E5 — CLI NO AUTORIZADO
 CONVERSATION G2B BLOQUEADO / NO AUTORIZADO
 SPRINT 7.12 NO AUTORIZADO
@@ -1603,10 +1608,10 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 
 CURRENT MATERIAL COGNITIVE HEAD
-c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 
 CURRENT EPISODIC PRODUCT HEAD
 9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
@@ -1627,7 +1632,7 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST CODE UNIT
-Engineering Analyze — E3
+Engineering Propose — E4
 
 LATEST EPISODIC PRODUCT UNIT
 Episodic Admission Governed Projection Consumption Boundary
@@ -1660,7 +1665,7 @@ ENGINEERING INTELLIGENCE E3
 INTEGRATED
 
 ENGINEERING INTELLIGENCE E4
-NOT AUTHORIZED
+INTEGRATED
 
 ENGINEERING INTELLIGENCE E5
 NOT AUTHORIZED
@@ -1683,11 +1688,11 @@ NOT AUTHORIZED
 CURRENT CI MATRIX
 ubuntu-latest / windows-latest
 
-E3 CANDIDATE VALIDATION
-workflow 35445357957 / 1114 passed Ubuntu + Windows / PASS
+E4 CANDIDATE VALIDATION
+Validation #330 / 1168 passed Ubuntu + Windows / PASS
 
 VAULT CONTENT RECONCILIATION
-REPRESENTS MALAK@c48b72b7; VAULT MAIN@4632ccab
+REPRESENTS MALAK@14122dd2; VAULT MAIN@a813d253
 
 LEGACY ROADMAP
 DISPOSITION REGISTERED
