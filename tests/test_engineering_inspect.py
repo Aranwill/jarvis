@@ -738,3 +738,54 @@ def test_e2_red_c33_unknown_knowledge_match_path_fails_closed(
         execute(capability)
 
     assert provider.calls == 0
+
+
+
+def test_e2_red_c34_knowledge_match_baseline_misbinding_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    *_, knowledge_reader, provider, capability = build_capability(tmp_path)
+    module = import_module("malak.knowledge.knowledge_reader")
+    source = next(
+        item
+        for item in knowledge_reader.list_sources()
+        if item.path == "docs/governance/cognitive_constitution.md"
+    )
+
+    monkeypatch.setattr(
+        knowledge_reader,
+        "search_text",
+        lambda _: module.KnowledgeSearchResult(
+            baseline_commit=knowledge_reader.baseline_commit,
+            matches=(
+                module.KnowledgeTextMatch(
+                    baseline_commit="0" * 40,
+                    path=source.path,
+                    blob_sha="a" * 40,
+                    source_class=source.source_class,
+                    authority_class=source.authority_class,
+                    line_number=1,
+                    line="needle misbound baseline",
+                ),
+            ),
+            truncated=False,
+        ),
+    )
+
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+    assert provider.calls == 0
+
+
+@pytest.mark.parametrize("content", ["claim [R999]", "claim [K999]", "claim [R0] [K0]"])
+def test_e2_red_c35_model_cannot_cite_unknown_evidence_refs(
+    tmp_path: Path,
+    content: str,
+) -> None:
+    provider = RecordingProvider(content)
+    *_, capability = build_capability(tmp_path, provider=provider)
+
+    with pytest.raises(RuntimeError):
+        execute(capability)
