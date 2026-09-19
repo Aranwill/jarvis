@@ -141,6 +141,26 @@ def test_build_conversation_service_accepts_injected_runtime() -> None:
     assert response.provider == "runtime"
 
 
+def test_build_conversation_service_supports_stateless_engineering_use() -> None:
+    runtime = RecordingRuntime()
+
+    service = build_conversation_service(
+        runtime=runtime,
+        provider_name="mock",
+        with_context=False,
+    )
+
+    response = service.generate(
+        request=ConversationRequest(prompt="Inspect Memory"),
+        provider="mock",
+    )
+
+    assert response.content == "Respuesta controlada"
+    assert runtime.last_request is not None
+    assert runtime.last_request.prompt == "Inspect Memory"
+    assert runtime.last_request.history == ()
+
+
 def test_build_runtime_defaults_to_mock() -> None:
     runtime = build_runtime()
 
@@ -608,3 +628,415 @@ def test_run_cli_new_rotates_session_id(monkeypatch) -> None:
         kernel.requests[0].session_id
         != kernel.requests[1].session_id
     )
+
+
+class RecordingEngineeringKernel:
+    def __init__(self, action: str) -> None:
+        self.action = action
+        self.requests = []
+
+    def receive(self, request):
+        self.requests.append(request)
+
+        return Response(
+            content=f"{self.action}-payload",
+            source=f"engineering_{self.action}",
+        )
+
+
+class FailingEngineeringKernel(RecordingEngineeringKernel):
+    def receive(self, request):
+        self.requests.append(request)
+        raise RuntimeError("fallo engineering")
+
+
+class EngineeringKernelSetStub:
+    def __init__(self) -> None:
+        self.baseline_commit = (
+            "0123456789abcdef0123456789abcdef01234567"
+        )
+        self.kernels = {
+            action: RecordingEngineeringKernel(action)
+            for action in ("inspect", "analyze", "propose")
+        }
+
+
+def test_build_cli_configuration_preserves_explicit_repository_root() -> None:
+    configuration = build_cli_configuration(
+        {
+            "MALAK_REPOSITORY_ROOT": "D:/Ollama/jarvis",
+        }
+    )
+
+    assert configuration.repository_root == "D:/Ollama/jarvis"
+
+
+def test_build_cli_configuration_does_not_infer_repository_root() -> None:
+    configuration = build_cli_configuration({})
+
+    assert configuration.repository_root is None
+
+
+def test_main_composes_engineering_only_from_explicit_repository_root(
+    monkeypatch,
+) -> None:
+    captured: dict[str, object] = {}
+    builder_calls: list[dict[str, object]] = []
+    engineering = EngineeringKernelSetStub()
+
+    def fake_run_cli(**kwargs: object) -> None:
+        captured.update(kwargs)
+
+    def fake_build_engineering_kernel_set(**kwargs: object):
+        builder_calls.append(kwargs)
+        return engineering
+
+    monkeypatch.setattr("malak.app.cli.run_cli", fake_run_cli)
+    monkeypatch.setattr(
+        "malak.app.cli.build_engineering_kernel_set",
+        fake_build_engineering_kernel_set,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        "malak.app.cli.environ",
+        {"MALAK_REPOSITORY_ROOT": "D:/Ollama/jarvis"},
+    )
+
+    main()
+
+    assert len(builder_calls) == 1
+    assert builder_calls[0]["repository_root"] == "D:/Ollama/jarvis"
+    assert captured["engineering"] is engineering
+
+
+def test_main_uses_separate_stateless_service_for_engineering(
+    monkeypatch,
+) -> None:
+    service_builds: list[tuple[bool, object]] = []
+    captured_cli: dict[str, object] = {}
+    captured_engineering: dict[str, object] = {}
+
+    def fake_build_conversation_service(
+        runtime=None,
+        provider_name="mock",
+        *,
+        with_context=True,
+    ):
+        service = object()
+        service_builds.append((with_context, service))
+        return service
+
+    def fake_build_engineering_kernel_set(**kwargs: object):
+        captured_engineering.update(kwargs)
+        return EngineeringKernelSetStub()
+
+    def fake_run_cli(**kwargs: object) -> None:
+        captured_cli.update(kwargs)
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_service",
+        fake_build_conversation_service,
+    )
+    monkeypatch.setattr(
+        "malak.app.cli.build_engineering_kernel_set",
+        fake_build_engineering_kernel_set,
+    )
+    monkeypatch.setattr("malak.app.cli.run_cli", fake_run_cli)
+    monkeypatch.setattr(
+        "malak.app.cli.environ",
+        {"MALAK_REPOSITORY_ROOT": "D:/Ollama/jarvis"},
+    )
+
+    main()
+
+    assert [with_context for with_context, _ in service_builds] == [
+        True,
+        False,
+    ]
+    conversation_service = service_builds[0][1]
+    engineering_service = service_builds[1][1]
+    assert conversation_service is not engineering_service
+    assert captured_cli["service"] is conversation_service
+    assert captured_engineering["service"] is engineering_service
+
+
+def test_main_does_not_use_current_working_directory_as_repository_root(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    captured: dict[str, object] = {}
+    builder_calls: list[dict[str, object]] = []
+
+    def fake_run_cli(**kwargs: object) -> None:
+        captured.update(kwargs)
+
+    def fake_build_engineering_kernel_set(**kwargs: object):
+        builder_calls.append(kwargs)
+        return EngineeringKernelSetStub()
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("malak.app.cli.run_cli", fake_run_cli)
+    monkeypatch.setattr(
+        "malak.app.cli.build_engineering_kernel_set",
+        fake_build_engineering_kernel_set,
+        raising=False,
+    )
+    monkeypatch.setattr("malak.app.cli.environ", {})
+
+    main()
+
+    assert builder_calls == []
+    assert captured["engineering"] is None
+
+
+def test_run_cli_engineering_help_is_deterministic_and_side_effect_free(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = EngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(["/engineering help", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    rendered = "\n".join(outputs).lower()
+    assert "inspect" in rendered
+    assert "analyze" in rendered
+    assert "propose" in rendered
+    assert conversation_kernel.requests == []
+    assert all(
+        kernel.requests == []
+        for kernel in engineering.kernels.values()
+    )
+
+
+def test_run_cli_routes_engineering_commands_to_exact_kernel_and_preserves_subject(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = EngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                "/EnGiNeErInG InSpEcT   Memory  Layer",
+                "/engineering analyze Blueprint",
+                "/engineering propose Security",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert conversation_kernel.requests == []
+
+    inspect = engineering.kernels["inspect"]
+    analyze = engineering.kernels["analyze"]
+    propose = engineering.kernels["propose"]
+
+    assert [request.content for request in inspect.requests] == [
+        "Memory  Layer"
+    ]
+    assert [request.content for request in analyze.requests] == [
+        "Blueprint"
+    ]
+    assert [request.content for request in propose.requests] == [
+        "Security"
+    ]
+
+    rendered = "\n".join(outputs)
+    for action in ("inspect", "analyze", "propose"):
+        assert f"[engineering/{action}]" in rendered
+        assert f"{action}-payload" in rendered
+
+
+def test_run_cli_invalid_engineering_command_never_falls_back_to_conversation(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = EngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(
+            [
+                "/engineering unknown Memory",
+                "/engineering inspect",
+                "exit",
+            ]
+        ),
+        output_fn=outputs.append,
+    )
+
+    assert conversation_kernel.requests == []
+    assert all(
+        kernel.requests == []
+        for kernel in engineering.kernels.values()
+    )
+    assert "/engineering help" in "\n".join(outputs)
+
+
+def test_run_cli_non_command_engineering_text_remains_conversation(
+    monkeypatch,
+) -> None:
+    outputs: list[str] = []
+    conversation_kernel = RecordingKernel()
+    engineering = EngineeringKernelSetStub()
+
+    monkeypatch.setattr(
+        "malak.app.cli.build_conversation_kernel",
+        lambda **_: conversation_kernel,
+    )
+
+    run_cli(
+        service=build_conversation_service(),
+        engineering=engineering,
+        input_fn=make_input(["engineering inspect Memory", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert [
+        request.content for request in conversation_kernel.requests
+    ] == ["engineering inspect Memory"]
+    assert all(
+        kernel.requests == []
+        for kernel in engineering.kernels.values()
+    )
+
+
+def test_run_cli_status_reports_engineering_availability_and_baseline() -> None:
+    outputs: list[str] = []
+    engineering = EngineeringKernelSetStub()
+
+    run_cli(
+        engineering=engineering,
+        input_fn=make_input(["status", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    rendered = "\n".join(outputs)
+    assert "Engineering: available" in rendered
+    assert engineering.baseline_commit in rendered
+
+
+def test_run_cli_status_reports_engineering_unavailable_without_repository() -> None:
+    outputs: list[str] = []
+
+    run_cli(
+        input_fn=make_input(["status", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Engineering: unavailable" in "\n".join(outputs)
+
+
+def test_run_cli_engineering_emits_correlated_operational_events() -> None:
+    outputs: list[str] = []
+    sink = RecordingOperationalEventSink()
+    engineering = EngineeringKernelSetStub()
+
+    run_cli(
+        engineering=engineering,
+        input_fn=make_input(["/engineering inspect Memory", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert [event.event_name for event in sink.events] == [
+        "engineering.inspect.started",
+        "engineering.inspect.succeeded",
+    ]
+    assert sink.events[0].request_id == sink.events[1].request_id
+    assert sink.events[0].request_id is not None
+
+
+def test_run_cli_engineering_started_event_failure_blocks_kernel() -> None:
+    outputs: list[str] = []
+    sink = FailingOperationalEventSink(
+        event_name="engineering.inspect.started",
+    )
+    engineering = EngineeringKernelSetStub()
+
+    run_cli(
+        engineering=engineering,
+        input_fn=make_input(["/engineering inspect Memory", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert engineering.kernels["inspect"].requests == []
+    assert sink.attempted_event_names == [
+        "engineering.inspect.started",
+    ]
+    assert (
+        "Error controlado de observabilidad: sink no disponible"
+        in outputs
+    )
+
+
+def test_run_cli_engineering_final_event_failure_preserves_response() -> None:
+    outputs: list[str] = []
+    sink = FailingOperationalEventSink(
+        event_name="engineering.inspect.succeeded",
+    )
+    engineering = EngineeringKernelSetStub()
+
+    run_cli(
+        engineering=engineering,
+        input_fn=make_input(["/engineering inspect Memory", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    rendered = "\n".join(outputs)
+    assert "inspect-payload" in rendered
+    assert sink.attempted_event_names == [
+        "engineering.inspect.started",
+        "engineering.inspect.succeeded",
+    ]
+    assert "engineering.inspect.failed" not in sink.attempted_event_names
+
+
+def test_run_cli_engineering_kernel_failure_emits_failed_event() -> None:
+    outputs: list[str] = []
+    sink = RecordingOperationalEventSink()
+    engineering = EngineeringKernelSetStub()
+    engineering.kernels["inspect"] = FailingEngineeringKernel("inspect")
+
+    run_cli(
+        engineering=engineering,
+        input_fn=make_input(["/engineering inspect Memory", "exit"]),
+        output_fn=outputs.append,
+        operational_event_sink=sink,
+    )
+
+    assert [event.event_name for event in sink.events] == [
+        "engineering.inspect.started",
+        "engineering.inspect.failed",
+    ]
+    assert sink.events[0].request_id == sink.events[1].request_id
+    assert "Error controlado: fallo engineering" in outputs
