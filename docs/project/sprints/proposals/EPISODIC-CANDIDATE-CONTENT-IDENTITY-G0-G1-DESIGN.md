@@ -134,7 +134,7 @@ working tree: clean
 La evidencia local anterior es evidencia observada/reportada por el Owner; este
 documento no la reinterpreta como ejecución realizada por un agente remoto.
 
-El Project Vault fue reconciliado mediante el workflow manual-on-demand del Sync
+El external derived record fue reconciliado mediante el workflow manual-on-demand del Sync
 Agent y su dry-run final reportó drift cero para el mismo HEAD.
 
 ---
@@ -694,7 +694,7 @@ Antes de G2 deberán cumplirse todos estos gates:
 ```text
 1. human review / merge de este design record
 2. reconciliación de canonical derived docs post-PR #92
-3. Project Vault reconciliado al nuevo HEAD resultante
+3. external derived record reconciliado al nuevo HEAD resultante
 4. baseline main verificado
 5. Owner authorization explícita para G2
 ```
@@ -761,7 +761,7 @@ RDD_Stage_2_authorized: false
 
 La siguiente acción permitida después de revisión humana de este record es
 reconciliar el drift documental derivado post-PR #92 y, únicamente después de
-cerrar ese gate y el Vault correspondiente, evaluar autorización separada de G2.
+cerrar ese gate y el external derived record correspondiente, evaluar autorización separada de G2.
 
 ---
 
