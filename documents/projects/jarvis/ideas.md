@@ -23,7 +23,7 @@ Su función es:
 - distinguir con claridad una idea de una decisión, un elemento del roadmap o una implementación;
 - facilitar su revisión, promoción, aplazamiento o descarte;
 - mantener trazabilidad hacia los documentos de mayor autoridad;
-- servir como entrada gobernada para la futura sincronización del Malāk Project Vault.
+- servir como entrada gobernada para la futura sincronización del external derived record.
 
 Este documento puede crecer de forma incremental. No es necesario diseñar por completo una iniciativa para registrarla, pero toda entrada debe indicar su estado y evitar presentar arquitectura futura como arquitectura implementada.
 
@@ -280,7 +280,7 @@ Gobernar la selección, validación, compatibilidad, integridad, licencia, conse
 
 - Model Archive;
 - Metadata Registry;
-- License and Tokenizer Vault;
+- License and Tokenizer external derived record;
 - Prompt Library;
 - Benchmark Registry;
 - Capability Tests;
@@ -492,15 +492,15 @@ La relación específica con la observabilidad del Sprint 7.4 es la siguiente:
 - la cadena de pensamiento no será evidencia canónica de auditoría;
 - el sandbox y los planos de control deberán demostrar externamente lo ocurrido.
 
-## Sincronización gobernada con el Malāk Project Vault
+## Sincronización gobernada con el external derived record
 
-En la próxima actualización gobernada del Vault deberá proponerse la incorporación de este registro o de una proyección documental equivalente.
+En la próxima actualización gobernada del external derived record deberá proponerse la incorporación de este registro o de una proyección documental equivalente.
 
 La sincronización deberá:
 
 - conservar al repositorio oficial como fuente de verdad;
 - presentar este documento como contexto derivado y no normativo;
-- reflejar `IDEA-001` en el roadmap futuro del Vault;
+- reflejar `IDEA-001` en el roadmap futuro del external derived record;
 - reflejar las dependencias entre seguridad, sandbox, simulaciones y mejora controlada;
 - actualizar el contexto de sesión cuando corresponda;
 - registrar decisiones pendientes únicamente si existen preguntas todavía abiertas;
@@ -508,7 +508,7 @@ La sincronización deberá:
 - no editar snapshots históricos;
 - esperar aprobación humana antes de escribir.
 
-La ubicación exacta y los archivos afectados en el Vault se decidirán durante esa sincronización, después de inspeccionar su estructura vigente. Este documento no autoriza escrituras automáticas sobre el Vault.
+La ubicación exacta y los archivos afectados en el external derived record se decidirán durante esa sincronización, después de inspeccionar su estructura vigente. Este documento no autoriza escrituras automáticas sobre el external derived record.
 
 ## Plantilla para nuevas ideas
 
@@ -551,7 +551,7 @@ Acción necesaria para evaluar, promover, diferir o rechazar la idea.
 
 **Intención**
 
-Formalizar un método de diseño, aprobación, implementación, validación y entrega basado en paquetes pequeños, trazables y reversibles, preservando Human in Control y la separación entre repositorio oficial, Vault y agente de sincronización.
+Formalizar un método de diseño, aprobación, implementación, validación y entrega basado en paquetes pequeños, trazables y reversibles, preservando Human in Control y la separación entre repositorio oficial, external derived record y agente de sincronización.
 
 **Valor esperado**
 
@@ -573,7 +573,7 @@ Formalizar un método de diseño, aprobación, implementación, validación y en
 - toda desviación de arquitectura, seguridad, dependencias o alcance detiene la ejecución;
 - los cambios críticos se marcan `DEEP REVIEW REQUIRED`;
 - el merge permanece reservado al propietario;
-- el Vault se actualiza únicamente después del merge mediante una propuesta separada del agente controlado;
+- el external derived record se actualiza únicamente después del merge mediante una propuesta separada del agente controlado;
 - las validaciones deben ser independientes de una plataforma, lenguaje, proveedor o tecnología concreta;
 - los marcos externos de seguridad se utilizan como referencias de aplicabilidad y no como autoridad superior a los documentos de ley de Malāk.
 
@@ -596,7 +596,7 @@ Su incorporación deberá respetar estas reglas:
 - `Sandbox Containment & Evaluation Evidence Foundation`;
 - `Constitutional Assurance Foundation`;
 - `Resource Governance Foundation`;
-- flujo gobernado del `malak-vault-sync-agent`.
+- flujo gobernado del `external-reconciliation-process`.
 
 **Próximo paso gobernado**
 
@@ -628,7 +628,7 @@ Convertir principios arquitectónicos y constitucionales objetivos de Malāk en 
 - validaciones de ausencia de importaciones o acoplamientos prohibidos;
 - pruebas de denegación segura;
 - comprobación de que ningún LLM decide autorizaciones;
-- comprobación de que el agente del Vault no puede modificar Malāk, aprobar o fusionar PR;
+- comprobación de que el agente del external derived record no puede modificar Malāk, aprobar o fusionar PR;
 - validación de que documentos derivados no reemplazan fuentes normativas;
 - evidencia reproducible asociada al commit evaluado.
 
@@ -1017,7 +1017,7 @@ La transición de un nivel a otro requiere evidencia verificable, política pred
 **Restricciones**
 
 - no usar datos reales como cebo;
-- no conectar honeypots con producción, repositorios, Vault o redes domésticas;
+- no conectar honeypots con producción, repositorios, external derived record o redes domésticas;
 - egress denegado por defecto;
 - no perseguir ni comprometer al atacante fuera de la infraestructura controlada;
 - no conservar malware operativo fuera de cuarentena aprobada;
@@ -1281,7 +1281,7 @@ El diagnóstico podrá verificar, cuando corresponda:
 - métricas y eventos;
 - configuración;
 - dependencias críticas;
-- conectividad autorizada con Vault o servicios auxiliares.
+- conectividad autorizada con external derived record o servicios auxiliares.
 
 Los health checks deberán ser deterministas siempre que sea posible y no depender de un LLM para declarar que un componente crítico funciona correctamente.
 
@@ -1362,7 +1362,7 @@ El acceso deberá:
 
 - requerir identidad del propietario y autorización reforzada;
 - abrir un entorno aislado y separado del runtime ordinario;
-- no heredar por defecto Memory, Vault, secretos, repositorios ni credenciales personales;
+- no heredar por defecto Memory, external derived record, secretos, repositorios ni credenciales personales;
 - mantener egress denegado por defecto salvo perfil expresamente aprobado;
 - utilizar targets propios, sintéticos o explícitamente autorizados;
 - producir evidencia y reportes separados;
@@ -1459,20 +1459,20 @@ Revisar esta idea cuando el primer vertical slice operativo de Malāk esté esta
 ---
 
 
-### IDEA-022 — Vault Sync Agent Operational CLI & Assurance Interface
+### IDEA-022 — external reconciliation process Operational CLI & Assurance Interface
 
 **Estado:** `capturada`
 
 **Intención**
 
-Evolucionar la interfaz del `malak-vault-sync-agent` hacia una CLI operacional orientada a observación, diagnóstico, informes, comparación histórica, auditoría, verificación y propuestas gobernadas, sin ampliar su autoridad sobre Malāk ni sobre `main`.
+Evolucionar la interfaz del `external-reconciliation-process` hacia una CLI operacional orientada a observación, diagnóstico, informes, comparación histórica, auditoría, verificación y propuestas gobernadas, sin ampliar su autoridad sobre Malāk ni sobre `main`.
 
 La CLI deberá hacer más accesible el funcionamiento interno y la evidencia del agente, no convertirlo en un agente autónomo con permisos adicionales.
 
 **Áreas funcionales candidatas**
 
 ```text
-malak-vault-agent
+malak-external derived record-agent
 |
 +-- status
 +-- doctor
@@ -1486,14 +1486,14 @@ malak-vault-agent
 |    +-- export <id>
 |
 +-- audit
-|    +-- vault
+|    +-- external derived record
 |    +-- agent
 |    +-- consistency
 |    +-- integrity
 |    +-- full
 |
 +-- diff
-|    +-- repo-vault
+|    +-- repo-external derived record
 |    +-- current-baseline
 |    +-- since <commit-or-run>
 |
@@ -1518,7 +1518,7 @@ malak-vault-agent
 +-- diagnostics
      +-- config
      +-- git
-     +-- vault-paths
+     +-- external derived record-paths
      +-- permissions
 ```
 
@@ -1532,7 +1532,7 @@ Posibles dimensiones de comparación:
 
 - baseline inspeccionado;
 - commit de Malāk;
-- commit del Vault;
+- commit del external derived record;
 - run ID;
 - hallazgos nuevos;
 - hallazgos resueltos;
@@ -1547,12 +1547,12 @@ Posibles dimensiones de comparación:
 
 La comparación deberá basarse en datos estructurados y reproducibles cuando existan, no en resúmenes narrativos como única evidencia.
 
-**Auditorías del Vault y del agente**
+**Auditorías del external derived record y del agente**
 
 Evaluar auditorías independientes para:
 
-- integridad del Vault;
-- consistencia repo ↔ Vault;
+- integridad del external derived record;
+- consistencia repo ↔ external derived record;
 - snapshots históricos e inmutabilidad;
 - autoridad documental;
 - estado persistente del agente;
@@ -1574,7 +1574,7 @@ Evaluar un `doctor` determinista para comprobar:
 - configuración válida;
 - acceso esperado a repositorios;
 - rama base correcta;
-- estado del Vault;
+- estado del external derived record;
 - state schema compatible;
 - lock de ejecución;
 - backups del state cuando correspondan;
@@ -1626,12 +1626,12 @@ Cada operación que cambie estado del agente o genere una propuesta deberá cons
 
 **Relación con assurance futuro**
 
-La CLI podrá ser una superficie útil para futuros dominios de assurance, pero el agente del Vault no deberá convertirse por expansión incremental en un auditor universal de Malāk.
+La CLI podrá ser una superficie útil para futuros dominios de assurance, pero el agente del external derived record no deberá convertirse por expansión incremental en un auditor universal de Malāk.
 
 Separar conceptualmente:
 
 ```text
-Vault Sync Domain
+external derived record Sync Domain
 External Assurance Domain
 Malāk Runtime / Security Domain
 ```
@@ -1656,7 +1656,7 @@ Si en el futuro existe un auditor externo de arquitectura o seguridad, su autori
 
 **Dependencias y relaciones**
 
-- baseline real de `malak-vault-sync-agent`;
+- baseline real de `external-reconciliation-process`;
 - `Malāk Validation & Delivery Protocol`;
 - `Development Tooling Foundation` cuando aplique al agente;
 - `Constitutional Assurance Foundation` para invariantes de autoridad;
@@ -1665,7 +1665,7 @@ Si en el futuro existe un auditor externo de arquitectura o seguridad, su autori
 
 **Próximo paso gobernado**
 
-Antes de diseñar comandos finales, inspeccionar el estado vigente de `malak-vault-sync-agent`, identificar qué capacidades ya existen, qué informes y state schemas son reales y qué necesidades operativas aparecen durante el uso. Implementar primero operaciones de lectura, diagnóstico y comparación; mantener sync/proposals dentro de las fronteras de autoridad actuales.
+Antes de diseñar comandos finales, inspeccionar el estado vigente de `external-reconciliation-process`, identificar qué capacidades ya existen, qué informes y state schemas son reales y qué necesidades operativas aparecen durante el uso. Implementar primero operaciones de lectura, diagnóstico y comparación; mantener sync/proposals dentro de las fronteras de autoridad actuales.
 
 ---
 
@@ -2761,7 +2761,7 @@ Preservar como objetivo futuro la capacidad de desviar actividad maliciosa dentr
 - canary resources;
 - rutas controladas de redireccion defensiva.
 
-Los objetivos de deception no contendran secretos, credenciales validas, datos personales reales, acceso al Vault, repositorios, Kernel, produccion o red domestica. El atacante no debera obtener autoridad adicional como consecuencia de interactuar con un senzuelo.
+Los objetivos de deception no contendran secretos, credenciales validas, datos personales reales, acceso al external derived record, repositorios, Kernel, produccion o red domestica. El atacante no debera obtener autoridad adicional como consecuencia de interactuar con un senzuelo.
 
 **Security Regression Learning**
 
@@ -3502,7 +3502,7 @@ lab / recovery / emergency
 
 Cada grupo de comandos deberá aparecer porque existe una capacidad real que necesita operación, observación o control, no para anticipar subsistemas todavía inexistentes.
 
-La CLI del Vault Sync Agent deberá seguir la misma regla: incorporar primero funciones que operen sobre capacidades actuales del agente —por ejemplo `status`, `doctor`, `reports`, `history`, `audit`, `diff` y `verify`— y añadir operaciones más sensibles únicamente cuando el agente y su modelo de autoridad las soporten de forma explícita.
+La CLI del external reconciliation process deberá seguir la misma regla: incorporar primero funciones que operen sobre capacidades actuales del agente —por ejemplo `status`, `doctor`, `reports`, `history`, `audit`, `diff` y `verify`— y añadir operaciones más sensibles únicamente cuando el agente y su modelo de autoridad las soporten de forma explícita.
 
 **Próximo paso gobernado**
 
@@ -3786,7 +3786,7 @@ Esto puede aplicarse en el futuro a:
 - CLI administrativa;
 - Engineering Sessions;
 - auditorías;
-- sincronización del Vault;
+- sincronización del external derived record;
 - operaciones de sandbox;
 - runtime/model lifecycle;
 - incident response;
@@ -3863,7 +3863,7 @@ Relaciones:
 
 ### Patrón candidato 9 — Spec Exploration Without New Authority
 
-De OpenSpec se rescata la utilidad de separar exploración, propuesta, aplicación, verificación y archivo, pero Malāk no deberá incorporar OpenSpec como una nueva fuente de autoridad documental mientras ya existan Blueprint, Constituciones, ADR, AKS, Sprints, Implementation Packets y Vault.
+De OpenSpec se rescata la utilidad de separar exploración, propuesta, aplicación, verificación y archivo, pero Malāk no deberá incorporar OpenSpec como una nueva fuente de autoridad documental mientras ya existan Blueprint, Constituciones, ADR, AKS, Sprints, Implementation Packets y external derived record.
 
 Aplicación conceptual:
 
@@ -4426,4 +4426,4 @@ No establecer una frecuencia rígida todavía. Realizar una nueva revisión cuan
 - se consolidan ideas y visiones previamente distribuidas;
 - se registra `Sandbox Containment & Evaluation Evidence Foundation`;
 - se preserva la separación entre idea, decisión, roadmap e implementación;
-- se incorpora la obligación de proponer su reflejo en la próxima sincronización gobernada del Vault.
+- se incorpora la obligación de proponer su reflejo en la próxima sincronización gobernada del external derived record.
