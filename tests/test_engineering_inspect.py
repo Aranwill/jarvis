@@ -177,8 +177,12 @@ def test_e2_red_c01_capability_name_is_exact(tmp_path: Path) -> None:
 def test_e2_red_c02_baseline_mismatch_between_e0_and_e1_fails_closed(
     tmp_path: Path,
 ) -> None:
-    repo_a, _ = make_repo(tmp_path / "a")
-    repo_b, _ = make_repo(tmp_path / "b")
+    root_a = tmp_path / "a"
+    root_b = tmp_path / "b"
+    root_a.mkdir()
+    root_b.mkdir()
+    repo_a, _ = make_repo(root_a)
+    repo_b, _ = make_repo(root_b)
     write(repo_b, "extra.txt", "second baseline\n")
     git(repo_b, "add", "extra.txt")
     git(repo_b, "commit", "--no-gpg-sign", "-m", "second")
