@@ -378,12 +378,11 @@ RDD-M1 no depende de:
 ```text
 src/malak/security/audit.py
 src/malak/observability/**
-Aranwill/malak-vault-sync-agent
+infraestructura externa de soporte
 ```
 
-Los dos primeros pertenecen al runtime. El Sync Agent es downstream. Se adaptan
-patrones deterministas cuando aportan valor, nunca se introduce una dependencia
-upstream hacia ellos.
+Los dos primeros pertenecen al runtime. La infraestructura externa de soporte
+queda fuera del contrato y no se introduce como dependencia upstream.
 
 ---
 
@@ -398,8 +397,7 @@ historical copy: opcional en docs/project/sprints/proposals/**
 ```
 
 Una copia histórica in-repo conserva provenance del candidato que describe y no
-certifica el commit que la contiene. No se crea `docs/project/evidence/**` ni se
-modifica el Sync Agent.
+certifica el commit que la contiene. No se crea `docs/project/evidence/**` ni se introduce dependencia externa.
 
 ---
 
@@ -428,7 +426,7 @@ PASS/FAIL/INCONCLUSIVE only          PASS
 result anti-greenwashing             PASS
 historical auditability              PASS
 runtime dependency                   0
-Sync Agent dependency                0
+external support dependency          0
 new external dependencies            0
 Kernel delta                         0
 ```
