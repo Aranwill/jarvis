@@ -96,7 +96,7 @@ main@0bf4f839f73de075589129886b044918622b53e7
 Estado downstream observado antes de abrir esta unidad:
 
 ```text
-Project Vault reconciled
+external derived record reconciled
 base_commit == head_commit == 0bf4f839...
 changed_files = 0
 document_candidates = 0
