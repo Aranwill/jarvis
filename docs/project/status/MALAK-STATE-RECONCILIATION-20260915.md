@@ -38,18 +38,6 @@ open PRs at inspection: none
 Validation main@e9cf3f90: success
 ```
 
-
-```text
-branch: main
-HEAD: 7bf8331324ac5dcb2c0c9e75979ccc887cd26890
-last synchronization PR: #112
-represented Malāk HEAD: e9cf3f901fb492cdf4383843a64c6a89d0065d50
-Validation: success
-```
-
-detectado era semántico/documental dentro de copias narrativas derivadas, no un
-desfase Git entre repositorios.
-
 ---
 
 ## Estado vigente verificado
@@ -253,14 +241,7 @@ RDD Stage 2                        NO CHANGE
 
 ## Gate de continuidad
 
-Hasta que este corrective packet sea revisado/mergeado y su delta sea proyectado
-
-```text
-HOLD
-```
-
-
-El objetivo del siguiente check es:
+Antes de analizar una nueva unidad funcional, el baseline debe conservar:
 
 ```text
 open branch/PR residue              PASS
@@ -269,7 +250,7 @@ authority drift                     PASS
 active semantic state ambiguity     PASS
 ```
 
-Solo después de ese cierre corresponde analizar una nueva unidad funcional.
+Después de cada merge relevante debe repetirse el drift check correspondiente.
 
 ---
 
@@ -313,4 +294,4 @@ newer derived narrative != authority
 ```
 
 El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad
-operativa.
+de Malāk.

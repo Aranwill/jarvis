@@ -657,3 +657,4 @@ RDD Stage 2: NOT AUTHORIZED
 
 Este documento no modifica autoridad ni baseline por sí mismo.
 
+Antes de cualquier promoción deberá reevaluarse contra el `main` vigente, `SECURITY.md`, Blueprint, Constituciones, Architecture Quality Gates y las fronteras cognitivas realmente implementadas en ese momento.

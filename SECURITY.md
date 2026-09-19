@@ -387,6 +387,7 @@ La visión defensiva de Malāk permite, cuando existan las capacidades aprobadas
 - producir findings y propuestas de hardening;
 - convertir incidentes reproducibles en candidatos de pruebas de regresión.
 
+Los entornos de deception no deben contener secretos reales, credenciales válidas, datos personales reales, acceso al Kernel, repositorios productivos o redes no autorizadas.
 
 El egress debe permanecer denegado por defecto cuando corresponda.
 

@@ -25,8 +25,6 @@ implementation code touched: 0
 El árbol Git recursivo del baseline oficial
 `a33aba233115830e002c6a6646aa1a701f77aa8d` declaró `truncated: false`.
 
-`50e64b2137d5ec1a53bf3cc47bca0fcbb9e21874`.
-
 No se detectó el archivo expresamente rechazado
 `PROJECT - MANIFIESTO MALAK (1).docx`. Si reaparece deberá clasificarse
 `REJECTED_DO_NOT_READ` y no abrirse.

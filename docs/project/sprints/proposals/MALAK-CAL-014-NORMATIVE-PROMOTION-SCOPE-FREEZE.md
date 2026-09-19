@@ -55,7 +55,7 @@ Esta unidad prepara una futura decisión humana. No activa CAL-014.
 
 ---
 
-## 2. Baseline y estado downstream
+## 2. Baseline congelado
 
 Fuente oficial congelada:
 
@@ -64,20 +64,6 @@ repository: Aranwill/jarvis
 branch: main
 commit: 69cccf23b773c89c31b47a2ef1cad75ebf76b237
 ```
-
-Estado downstream observado antes de abrir esta unidad:
-
-```text
-accepted source = 69cccf23b773c89c31b47a2ef1cad75ebf76b237
-base_commit == head_commit
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
-El drift cero estabiliza el contexto de decisión. No concede autoridad normativa.
 
 ---
 
@@ -751,7 +737,6 @@ candidate-bound evidence
 human commit / push / PR / merge
         ↓
 post-merge validation
-        ↓
 ```
 
 Y aun después de una eventual activación:

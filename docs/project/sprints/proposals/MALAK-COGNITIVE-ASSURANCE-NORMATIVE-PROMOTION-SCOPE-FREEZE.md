@@ -307,3 +307,4 @@ RDD Stage 2
 Sprint 7.12
 ```
 
+La reconciliación de documentos derivados ocurre después de una eventual integración humana del activation candidate.

@@ -64,11 +64,6 @@ D1 E4 state reconciliation    CLOSED
 E5 Engineering CLI            NOT AUTHORIZED before this design
 ```
 
-Downstream observado:
-
-```text
-```
-
 G0 exhaustivo:
 
 ```text

@@ -42,7 +42,7 @@ Episodic Candidate Content Identity Propagation & Binding Boundary
 ```
 
 La autorización parte del cierre completo de `Episodic Candidate Content Identity G2`,
-con implementación integrada en `main`, validación post-merge y reconciliación del
+con implementación integrada en `main` y validación post-merge.
 
 Esta unidad responde solamente:
 
@@ -107,24 +107,6 @@ commit:     0466e18075fd6bce6243e03f701a377fd34469dd
 ```
 
 Ese commit integra PR #123 — implementación de `Episodic Candidate Content Identity G2`.
-
-
-```text
-branch:     main
-commit:     62c56b06ffc4e4172e574a3af116c7be1605e55e
-```
-
-
-```text
-base_commit == head_commit == 0466e18075fd6bce6243e03f701a377fd34469dd
-changed_files: 0
-document_candidates: 0
-validation_findings: 0
-conclusion: pass
-proposal_created: false
-```
-
-Por tanto, este diseño no se abre sobre drift conocido ni sobre una propuesta pendiente.
 
 ---
 

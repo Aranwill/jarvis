@@ -358,7 +358,6 @@ No se autoriza su implementación por este documento.
 Se considera una evolución coherente de:
 
 ```text
-+
 AKS
 +
 Architecture Auditor
@@ -439,7 +438,6 @@ de:
 Repository
 +
 AKS
-+
 +
 Runtime evidence
 ```

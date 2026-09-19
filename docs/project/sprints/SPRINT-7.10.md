@@ -42,8 +42,6 @@ git diff --check: PASS
 working tree: clean
 ```
 
-downstream y no condiciona el cierre del sprint en la fuente oficial.
-
 Este sprint no autoriza automáticamente ninguna unidad posterior.
 
 ---
@@ -570,9 +568,6 @@ PASS
 git diff --check:
 PASS
 ```
-
-proyección derivada del repositorio oficial. Un fallo o rechazo de esa proyección
-no reabre automáticamente el sprint ni modifica la autoridad de `main`.
 
 No se autoriza automáticamente ningún Sprint 7.11.
 

@@ -208,14 +208,6 @@ conversacionales, que permanecen intactos.
 - completar la documentación;
 - preparar PR y cierre gobernado.
 
-
-Después del merge aprobado en `main`:
-
-- revisar la evidencia producida;
-- esperar aprobación antes de escribir;
-- crear un nuevo snapshot si cambió el baseline;
-- preservar todos los snapshots históricos.
-
 ## Archivos previstos
 
 La lista se confirmará antes de cada incremento:
@@ -490,19 +482,10 @@ Incremento 7 — Validación y cierre:
   fuera del alcance del Sprint 7.4;
 - rama validada y posteriormente integrada mediante el flujo gobernado.
 
-- completado después del merge aprobado en `main`;
-- ejecución manual registrada como VSYNC-20260726-005;
-- resultado del agente: completed/pass;
-- repositorio oficial conservado como fuente de verdad operativa;
-- snapshots históricos preservados;
-- sin modificación automática de Malāk;
-- no constituye implementación operativa dentro de Malāk.
-
 Cierre formal:
 - Sprint 7.4 cerrado;
 - baseline integrado en `main` mediante 7cd7fcc;
 - validaciones técnicas preservadas: 94 pruebas específicas,
   121 pruebas totales, compileall PASS y git diff --check PASS;
-- sincronización gobernada posterior completada;
 - no quedan incrementos pendientes dentro de este sprint.
 ```

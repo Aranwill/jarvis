@@ -92,20 +92,6 @@ Aranwill/jarvis
 main@0bf4f839f73de075589129886b044918622b53e7
 ```
 
-Estado downstream observado antes de abrir esta unidad:
-
-```text
-base_commit == head_commit == 0bf4f839...
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
-El drift cero elimina ambigüedad operativa downstream; no concede autoridad
-normativa.
-
 ---
 
 ## 3. Por qué CAL-014 fue diferida

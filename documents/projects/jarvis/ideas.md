@@ -22,7 +22,7 @@ Su función es:
 - conservar su intención y sus restricciones principales;
 - distinguir con claridad una idea de una decisión, un elemento del roadmap o una implementación;
 - facilitar su revisión, promoción, aplazamiento o descarte;
-- mantener trazabilidad hacia los documentos de mayor autoridad;
+- mantener trazabilidad hacia los documentos de mayor autoridad.
 
 Este documento puede crecer de forma incremental. No es necesario diseñar por completo una iniciativa para registrarla, pero toda entrada debe indicar su estado y evitar presentar arquitectura futura como arquitectura implementada.
 
@@ -492,19 +492,6 @@ La relación específica con la observabilidad del Sprint 7.4 es la siguiente:
 - el sandbox y los planos de control deberán demostrar externamente lo ocurrido.
 
 
-
-La sincronización deberá:
-
-- conservar al repositorio oficial como fuente de verdad;
-- presentar este documento como contexto derivado y no normativo;
-- reflejar las dependencias entre seguridad, sandbox, simulaciones y mejora controlada;
-- actualizar el contexto de sesión cuando corresponda;
-- registrar decisiones pendientes únicamente si existen preguntas todavía abiertas;
-- crear un snapshot nuevo solo cuando cambie el baseline oficial;
-- no editar snapshots históricos;
-- esperar aprobación humana antes de escribir.
-
-
 ## Plantilla para nuevas ideas
 
 ```markdown
@@ -546,6 +533,7 @@ Acción necesaria para evaluar, promover, diferir o rechazar la idea.
 
 **Intención**
 
+Formalizar un método de diseño, aprobación, implementación, validación y entrega basado en paquetes pequeños, trazables y reversibles, preservando Human in Control y la separación entre propuesta, aprobación, implementación y merge.
 
 **Valor esperado**
 
@@ -588,7 +576,7 @@ Su incorporación deberá respetar estas reglas:
 - `Development Tooling Foundation`;
 - `Sandbox Containment & Evaluation Evidence Foundation`;
 - `Constitutional Assurance Foundation`;
-- `Resource Governance Foundation`;
+- `Resource Governance Foundation`.
 
 **Próximo paso gobernado**
 
@@ -1008,6 +996,7 @@ La transición de un nivel a otro requiere evidencia verificable, política pred
 **Restricciones**
 
 - no usar datos reales como cebo;
+- no conectar honeypots con producción, repositorios o redes domésticas;
 - egress denegado por defecto;
 - no perseguir ni comprometer al atacante fuera de la infraestructura controlada;
 - no conservar malware operativo fuera de cuarentena aprobada;
@@ -1271,6 +1260,7 @@ El diagnóstico podrá verificar, cuando corresponda:
 - métricas y eventos;
 - configuración;
 - dependencias críticas;
+- conectividad autorizada con servicios auxiliares.
 
 Los health checks deberán ser deterministas siempre que sea posible y no depender de un LLM para declarar que un componente crítico funciona correctamente.
 
@@ -1351,6 +1341,7 @@ El acceso deberá:
 
 - requerir identidad del propietario y autorización reforzada;
 - abrir un entorno aislado y separado del runtime ordinario;
+- no heredar por defecto Memory, secretos, repositorios ni credenciales personales;
 - mantener egress denegado por defecto salvo perfil expresamente aprobado;
 - utilizar targets propios, sintéticos o explícitamente autorizados;
 - producir evidencia y reportes separados;
@@ -1443,202 +1434,6 @@ Esta secuencia es únicamente una hipótesis de diseño y no constituye roadmap 
 **Próximo paso gobernado**
 
 Revisar esta idea cuando el primer vertical slice operativo de Malāk esté estable y exista evidencia real sobre las necesidades de operación y diagnóstico. Diseñar primero una CLI mínima de lectura e interacción; introducir operaciones privilegiadas solamente después de identidad, contexto, autorización, auditoría y rollback suficientes.
-
----
-
-
-
-**Estado:** `capturada`
-
-**Intención**
-
-
-La CLI deberá hacer más accesible el funcionamiento interno y la evidencia del agente, no convertirlo en un agente autónomo con permisos adicionales.
-
-**Áreas funcionales candidatas**
-
-```text
-|
-+-- status
-+-- doctor
-+-- health
-|
-+-- reports
-|    +-- list
-|    +-- show <id>
-|    +-- latest
-|    +-- compare <id-a> <id-b>
-|    +-- export <id>
-|
-+-- audit
-|    +-- agent
-|    +-- consistency
-|    +-- integrity
-|    +-- full
-|
-+-- diff
-|    +-- current-baseline
-|    +-- since <commit-or-run>
-|
-+-- verify
-|    +-- state
-|    +-- hashes
-|    +-- snapshots
-|    +-- authority
-|    +-- permissions
-|
-+-- sync
-|    +-- dry-run
-|    +-- propose
-|    +-- status
-|
-+-- history
-|    +-- runs
-|    +-- proposals
-|    +-- reconciliations
-|    +-- failures
-|
-+-- diagnostics
-     +-- config
-     +-- git
-     +-- permissions
-```
-
-Los nombres y jerarquías son conceptuales y deberán validarse contra la CLI y contratos reales del agente antes de cualquier implementación.
-
-**Informes y comparación histórica**
-
-La CLI deberá permitir consultar informes recientes y antiguos y comparar ejecuciones o estados verificables.
-
-Posibles dimensiones de comparación:
-
-- baseline inspeccionado;
-- commit de Malāk;
-- run ID;
-- hallazgos nuevos;
-- hallazgos resueltos;
-- referencias rotas;
-- drift documental;
-- conflictos de autoridad;
-- cambios no reconciliados;
-- errores de integridad;
-- duración;
-- resultado de validaciones;
-- versión del agente y schema utilizado.
-
-La comparación deberá basarse en datos estructurados y reproducibles cuando existan, no en resúmenes narrativos como única evidencia.
-
-
-Evaluar auditorías independientes para:
-
-- snapshots históricos e inmutabilidad;
-- autoridad documental;
-- estado persistente del agente;
-- configuración;
-- rutas locales autorizadas;
-- permisos;
-- identidad del repositorio remoto;
-- límites de comandos Git;
-- hashes y evidencia;
-- propuestas pendientes y reconciliación humana;
-- cumplimiento de las fronteras que impiden modificar Malāk o aprobar/mergear PRs.
-
-Un comando conceptual `audit full` podrá orquestar estos chequeos, pero no deberá fusionar sus responsabilidades ni ocultar cuál control produjo cada hallazgo.
-
-**Doctor y health checks**
-
-Evaluar un `doctor` determinista para comprobar:
-
-- configuración válida;
-- acceso esperado a repositorios;
-- rama base correcta;
-- state schema compatible;
-- lock de ejecución;
-- backups del state cuando correspondan;
-- integridad de rutas;
-- Git disponible y comandos permitidos;
-- capacidad de producir evidencia;
-- ausencia de permisos inesperados.
-
-Los diagnósticos deberán distinguir claramente `PASS`, `WARN`, `FAIL` y `NOT_APPLICABLE` o equivalentes cuando sea útil.
-
-**Sync y propuestas**
-
-Preservar la separación entre:
-
-```text
-observe
- -> compare
- -> validate
- -> propose
- -> human review
- -> human merge / reconciliation
-```
-
-La CLI podrá simplificar la ejecución de `dry-run`, generación de propuestas y consulta de estado, pero no deberá:
-
-- escribir directamente sobre `main`;
-- mergear PRs;
-- aceptar sus propias propuestas;
-- modificar Malāk;
-- alterar snapshots históricos;
-- ignorar un estado pendiente de reconciliación humana;
-- ejecutar auto-fix generalizado.
-
-**Trazabilidad**
-
-Cada operación que cambie estado del agente o genere una propuesta deberá conservar, según el diseño aprobado:
-
-- run ID;
-- timestamps UTC;
-- commits origen/destino;
-- versión del agente;
-- configuración relevante no sensible;
-- comandos ejecutados o acciones normalizadas;
-- hashes aplicables;
-- resultado;
-- findings;
-- errores;
-- vínculo con propuesta o PR cuando exista.
-
-**Relación con assurance futuro**
-
-
-Separar conceptualmente:
-
-```text
-External Assurance Domain
-Malāk Runtime / Security Domain
-```
-
-Si en el futuro existe un auditor externo de arquitectura o seguridad, su autoridad, identidad, sandbox, permisos y evidencias deberán diseñarse por separado.
-
-**Restricciones**
-
-- CLI como adapter, no como nueva fuente de autoridad;
-- no LLM requerido para decisiones operativas del agente;
-- tipado y schemas estables cuando se formalice la interfaz;
-- exit codes claros;
-- `dry-run` real para operaciones que lo permitan;
-- idempotencia donde corresponda;
-- fail-closed;
-- allowlists de comandos y rutas;
-- redacción de secretos;
-- logs estructurados;
-- ningún `automerge`;
-- ningún `auto-fix` general;
-- no reutilizar la CLI para ampliar implícitamente permisos del agente.
-
-**Dependencias y relaciones**
-
-- `Malāk Validation & Delivery Protocol`;
-- `Development Tooling Foundation` cuando aplique al agente;
-- `Constitutional Assurance Foundation` para invariantes de autoridad;
-- Project Context & Knowledge Governance Foundation;
-- futuras capacidades de External Assurance, si son aprobadas por separado.
-
-**Próximo paso gobernado**
-
 
 ---
 
@@ -2734,6 +2529,7 @@ Preservar como objetivo futuro la capacidad de desviar actividad maliciosa dentr
 - canary resources;
 - rutas controladas de redireccion defensiva.
 
+Los objetivos de deception no contendran secretos, credenciales validas, datos personales reales, acceso a repositorios, Kernel, produccion o red domestica. El atacante no debera obtener autoridad adicional como consecuencia de interactuar con un senzuelo.
 
 **Security Regression Learning**
 
@@ -3474,10 +3270,9 @@ lab / recovery / emergency
 
 Cada grupo de comandos deberá aparecer porque existe una capacidad real que necesita operación, observación o control, no para anticipar subsistemas todavía inexistentes.
 
-
 **Próximo paso gobernado**
 
-En la próxima reconciliación con el repositorio oficial, incorporar este criterio como extensión no normativa de `ideas.md` y evaluar si debe permanecer como criterio transversal de IDEA-014 o convertirse en una sección explícita del futuro Validation & Delivery Protocol. No crear un subsistema de scoring ni una capa nueva solo para materializar este criterio.
+En una futura revisión de `ideas.md`, evaluar si este criterio debe permanecer como criterio transversal de IDEA-014 o convertirse en una sección explícita del futuro Validation & Delivery Protocol. No crear un subsistema de scoring ni una capa nueva solo para materializar este criterio.
 
 
 ## External Architecture Pattern Review — Agentic Development Systems
@@ -3833,6 +3628,7 @@ Relaciones:
 
 ### Patrón candidato 9 — Spec Exploration Without New Authority
 
+De OpenSpec se rescata la utilidad de separar exploración, propuesta, aplicación, verificación y archivo, pero Malāk no deberá incorporar OpenSpec como una nueva fuente de autoridad documental mientras ya existan Blueprint, Constituciones, ADR, AKS, Sprints e Implementation Packets.
 
 Aplicación conceptual:
 
@@ -4394,4 +4190,4 @@ No establecer una frecuencia rígida todavía. Realizar una nueva revisión cuan
 - se formaliza el archivo vacío como anexo documental del Sprint 7.4;
 - se consolidan ideas y visiones previamente distribuidas;
 - se registra `Sandbox Containment & Evaluation Evidence Foundation`;
-- se preserva la separación entre idea, decisión, roadmap e implementación;
+- se preserva la separación entre idea, decisión, roadmap e implementación.

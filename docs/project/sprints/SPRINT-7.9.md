@@ -969,25 +969,6 @@ rollback
 
 ---
 
-
-
-Secuencia esperada:
-
-```text
-Sprint branch
-→ gates
-→ final review
-→ PR
-→ merge a main
-→ proposal
-→ human review
-```
-
-
-No sustituye la autoridad del repositorio oficial.
-
----
-
 ## Evidencia de implementación y validación
 
 ### Candidato final evaluado

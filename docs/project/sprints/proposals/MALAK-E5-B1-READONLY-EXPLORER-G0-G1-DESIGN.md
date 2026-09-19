@@ -43,8 +43,6 @@ Pregunta de aceptación:
 Malāk main
 a33aba233115830e002c6a6646aa1a701f77aa8d
 
-50e64b2137d5ec1a53bf3cc47bca0fcbb9e21874
-
 E0 Repository Read            INTEGRATED
 E1 Governed Knowledge Read    INTEGRATED
 E2 Engineering Inspect        INTEGRATED

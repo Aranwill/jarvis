@@ -132,8 +132,6 @@ working tree: clean
 La evidencia local anterior es evidencia observada/reportada por el Owner; este
 documento no la reinterpreta como ejecución realizada por un agente remoto.
 
-Agent y su dry-run final reportó drift cero para el mismo HEAD.
-
 ---
 
 ## 3. Finding documental no funcional
@@ -691,8 +689,8 @@ Antes de G2 deberán cumplirse todos estos gates:
 ```text
 1. human review / merge de este design record
 2. reconciliación de canonical derived docs post-PR #92
-4. baseline main verificado
-5. Owner authorization explícita para G2
+3. baseline main verificado
+4. Owner authorization explícita para G2
 ```
 
 G2 deberá congelar, como mínimo:
@@ -757,6 +755,7 @@ RDD_Stage_2_authorized: false
 
 La siguiente acción permitida después de revisión humana de este record es
 reconciliar el drift documental derivado post-PR #92 y, únicamente después de
+cerrar ese gate, evaluar autorización separada de G2.
 
 ---
 

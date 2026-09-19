@@ -18,6 +18,7 @@ rdd_stage_2_authorized: false
 
 Este documento registra el estado derivado observado inmediatamente después del cierre de los fixes asociados a la auditoría `ASTRA-AUDIT-BASELINE-20260910-A1`.
 
+Su función es eliminar ambigüedad entre el baseline documental previo y el estado efectivo de Malāk después de integrar los fixes.
 
 Este documento es informativo y no normativo.
 
@@ -50,24 +51,8 @@ change: fix(runtime): acotar payloads del transporte Ollama
 Validation on HEAD: success
 ```
 
-
-```text
-branch: main
-HEAD: 34f0416a8d312f4f27b9b36c3733cc2703772364
-latest merge: PR #98
-Validation on HEAD: success
-```
-
-
-```text
-branch: main
-HEAD: f6eb42715dd7771f3bcf7909a99f7e4e7db465c1
-latest merge: PR #28
-change: docs(assurance): aclarar límite de contenido en reconciliación
-CI on HEAD: success
-```
-
-El cierre operativo observado conserva los tres repositorios en `main`, sin PR abiertos en `Aranwill/jarvis` al momento de esta reconciliación.
+El cierre operativo observado conserva Malāk en `main`, sin PR abiertos en
+`Aranwill/jarvis` al momento de este rebaseline.
 
 ---
 
@@ -80,25 +65,14 @@ docs/project/project_context.md
 docs/project/implementation_roadmap.md
 ```
 
-conservan metadata y narrativa fechadas antes de la integración final de los fixes de auditoría.
+conservan metadata y narrativa fechadas antes de la integración final de los
+fixes de auditoría.
 
+Las afirmaciones mutables que describan un baseline previo deben considerarse
+**históricas/stale respecto del estado operativo observado en este rebaseline**.
 
-El estado observado post-auditoría es:
-
-```text
-Malāk main@5865da6a5e502fe71e35e2e38bc4cceaab9b3600
-        ↓
-main@34f0416a8d312f4f27b9b36c3733cc2703772364
-        ↓
-main@f6eb42715dd7771f3bcf7909a99f7e4e7db465c1
-```
-
-Por tanto:
-
-```text
-!=
-```
-
+Este documento no reescribe snapshots históricos ni les concede autoridad sobre
+el repositorio oficial.
 
 ---
 
@@ -187,7 +161,7 @@ Candidate Content Identity G2 permanece como frontera posterior independiente y 
 
 ## 7. Deuda de gobernanza de infraestructura observada
 
-Los repositorios observados no presentan branch protection activa sobre `main` en la evidencia GitHub consultada.
+El repositorio oficial observado no presenta branch protection activa sobre `main` en la evidencia GitHub consultada.
 
 Esto no invalida las integraciones existentes, que se realizaron mediante PR + CI, pero deja una diferencia entre:
 
@@ -206,9 +180,9 @@ La activación de reglas de protección/rulesets debe tratarse como una mejora d
 El baseline post-auditoría queda descrito como:
 
 ```text
-three repositories stable
-main heads identified
-CI/Validation successful
+Malāk repository stable
+main HEAD identified
+Validation successful
 no Sprint 7.12 authorized
 no runtime assurance implementation authorized
 ready for next explicit gate

@@ -68,25 +68,6 @@ main
 4953532addef9a5e4c0dd8e9e03531ab7c77ce51
 ```
 
-Estado cross-repository al iniciar G2:
-
-```text
-Malāk main:
-4953532addef9a5e4c0dd8e9e03531ab7c77ce51
-
-adf60ff908db41ecf80bde7980a590134f68ab10
-
-71b21e0a192017353075954e06e2b55f5f8e2255
-
-post-reconciliation dry-run:
-base_commit == head_commit == 4953532a...
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
 Precondiciones G2:
 
 ```text
@@ -118,7 +99,6 @@ Independent Validation
 Candidate-Bound Evidence / RDD Stage 1
   ↓
 Human Governance
-  ↓
 ```
 
 Invariantes metodológicas:

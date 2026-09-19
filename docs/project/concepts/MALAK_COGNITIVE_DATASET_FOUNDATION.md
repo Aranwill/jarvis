@@ -7,7 +7,8 @@ language: es
 created: 2026-08-14
 purpose: >
   Preservar el diseño conceptual inicial del dataset cognitivo de Malāk para
-  retomarlo en una futura sesión después de relevar el repositorio oficial,
+  retomarlo en una futura sesión después de relevar el repositorio oficial
+  y la documentación vigente.
 ---
 
 # Malāk Cognitive Dataset Foundation
@@ -25,6 +26,7 @@ Su función es servir como:
 - registro de criterios cognitivos;
 - punto de partida para evaluar modelos candidatos;
 - posible fundamento de futuros procesos SFT, LoRA o preference training;
+- documento de reentrada para retomar el trabajo después de relevar el repositorio oficial y la documentación vigente.
 
 Principio rector:
 
@@ -865,32 +867,6 @@ Principio:
 
 ---
 
-
-
-- especificaciones del dataset;
-- versiones;
-- provenance;
-- resultados de benchmarks;
-- decisiones de aceptación/rechazo;
-- dataset cards;
-- modelos candidatos;
-- historial de adaptaciones;
-- experimentos;
-- evaluaciones;
-- referencias externas.
-
-Sin embargo:
-
-```text
-≠
-Training Authority
-```
-
-
-La Gobernanza y el propietario autorizan cambios.
-
----
-
 # 18. Relación con AKS y Knowledge Steward
 
 El Architecture & Knowledge Steward podrá ayudar a:
@@ -977,13 +953,13 @@ Procedimiento recomendado:
 6. Leer Gobernanza
 7. Leer roadmap
 8. Leer decisiones pendientes
-10. Relevar ideas.md vigente
-11. Verificar estado real del Cognitive Core / Memory / AKS / Model Registry
-12. Comparar este documento contra la arquitectura vigente
-13. Identificar qué partes siguen siendo válidas
-14. Marcar conflictos o elementos superseded
-15. Proponer un alcance pequeño y gobernado
-16. Esperar aprobación antes de implementar
+9. Relevar ideas.md vigente
+10. Verificar estado real del Cognitive Core / Memory / AKS / Model Registry
+11. Comparar este documento contra la arquitectura vigente
+12. Identificar qué partes siguen siendo válidas
+13. Marcar conflictos o elementos superseded
+14. Proponer un alcance pequeño y gobernado
+15. Esperar aprobación antes de implementar
 ```
 
 Este documento es un **precedente conceptual**, no una autorización de sprint.

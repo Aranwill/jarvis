@@ -43,12 +43,6 @@ E3 — Engineering Analyze        integrated
 D0 — Current-State Reconciliation closed
 ```
 
-
-```text
-Malāk main: f0362ef77d06ce7852851345295f374c57f4ddd3
-Sync state last_reconciled_commit: f0362ef77d06ce7852851345295f374c57f4ddd3
-```
-
 ## 3. Posición en la ruta
 
 ```text

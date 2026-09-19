@@ -32,8 +32,6 @@ oficial `Aranwill/jarvis` en el baseline exacto:
 El árbol Git recursivo utilizado declaró `truncated: false`. Ningún blob
 trackeado quedó fuera del inventario por no coincidir con una búsqueda textual.
 
-`c1d61e264113ec396760b39dc5e027252eefe2f7`, integrado mediante PR #126.
-
 ---
 
 ## Inventario por familia

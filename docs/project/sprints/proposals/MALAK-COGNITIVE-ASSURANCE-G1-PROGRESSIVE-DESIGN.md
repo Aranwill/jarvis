@@ -899,7 +899,6 @@ Ruta recomendada:
 ```text
 G1 design integrated
         ↓
-        ↓
 separate Constitutional Impact Review
         ↓
 ADR / Blueprint / Cognitive Constitution path

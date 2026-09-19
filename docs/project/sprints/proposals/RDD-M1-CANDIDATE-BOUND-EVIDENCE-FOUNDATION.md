@@ -241,8 +241,6 @@ pilot manifest
   docs/project/sprints/proposals/RDD-M1-EVIDENCE-MANIFEST.json
 ```
 
-modificar mappings downstream.
-
 ---
 
 ## Gates

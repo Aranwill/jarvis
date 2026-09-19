@@ -50,17 +50,6 @@ main
 
 La fuente de verdad continúa siendo `Aranwill/jarvis/main`.
 
-
-
-
-Condición obligatoria:
-
-```text
-must complete
-before any implementation authorization for this unit
-```
-
-
 ## 4. Resultado formal G0
 
 ```text
@@ -292,7 +281,6 @@ FULL 4R plan defined
 Owner implementation authorization explicit
 ```
 
-La aceptación temporal del drift en G0/G1 no satisface la precondición de reconciliación para implementación.
 
 ## 18. Resultado G1
 

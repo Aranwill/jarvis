@@ -320,8 +320,6 @@ Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
 G2A y G2 son foundations aisladas de finalización protegida y assurance signal
 projection; no constituyen assurance conversacional end-to-end.
 
-`a813d253c2375195742b1695df4980987dd9a5b1`. La reconciliación E0–E4 quedó
-sobre `Aranwill/jarvis/main`.
 
 ---
 
@@ -1224,47 +1222,6 @@ Conversation G2B sin un proceso específico de evaluación y aprobación.
 
 ---
 
-
-Repositorio derivado:
-
-```text
-```
-
-Rama:
-
-```text
-main
-```
-
-
-- permanece separado del repositorio oficial;
-- es derivado;
-- no tiene autoridad operativa;
-- no puede modificar Malāk automáticamente;
-- utiliza Obsidian únicamente como interfaz humana;
-- conserva snapshots históricos inmutables;
-- puede proyectar cambios detectados en el repositorio oficial;
-- requiere revisión humana para reconciliaciones gobernadas.
-
-
-```text
-Malāk: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
-```
-
-La reconciliación E0–E3 quedó aceptada y sin propuesta pendiente en el estado v3
-
-El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad para:
-
-- código;
-- tests;
-- documentación oficial;
-- contratos;
-- arquitectura;
-- sprints;
-- historial Git.
-
----
-
 ## Planificación vigente — post-E3 / D0
 
 Sprint 7.8 está completado.
@@ -1534,8 +1491,6 @@ integrar E0–E4, culminando en PR #152 — `feat(e4): add grounded Engineering 
 main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 active_work_branch@NONE
 ```
-
-La reconciliación downstream correspondiente quedó integrada en
 
 `as_of_commit` identifica el commit de referencia utilizado para reconstruir el
 contexto, no una obligación de reescribir el documento ante cada commit

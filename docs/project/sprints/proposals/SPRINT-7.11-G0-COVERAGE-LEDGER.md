@@ -29,9 +29,6 @@ oficial `Aranwill/jarvis` en el baseline exacto:
 deb759ee9855737a24b169e03bde2028c7db7f33
 ```
 
-de reconciliación y cobertura. No forman parte del scope de implementación de
-Sprint 7.11 y no reciben cambios por esta admisión.
-
 ---
 
 ## Inventario por familia
@@ -299,44 +296,6 @@ no justifican agentes, sandbox, dataset ni nuevas capacidades en este sprint.
 
 ---
 
-# Downstream review
-
-
-
-```text
-official HEAD = deb759ee9855737a24b169e03bde2028c7db7f33
-```
-
-No se detecta baseline drift bloqueante para iniciar esta admisión.
-
-
-La regla vigente:
-
-```text
-operational-tooling-change
-source_patterns:
-  - .github/**
-  - .gitignore
-  - configs/**
-  - docs/development/**
-  - examples/**
-  - scripts/**
-```
-
-ya cubre un eventual `.github/workflows/**`.
-
-Resultado:
-
-```text
-new source family = 0
-```
-
-que GitHub Actions funciona en el ecosistema Malāk. No se copiará su matriz
-Ubuntu/Windows, cache ni `.[dev]` por defecto porque Malāk no ha demostrado esa
-necesidad.
-
----
-
 # Findings G0
 
 ## G0-F001 — `git diff --check` no puede ser un no-op
@@ -355,7 +314,7 @@ G1 deberá definir semántica exacta y reproducible, candidate-bound, por ejempl
 sobre el commit o rango explícitamente seleccionado. No se aprueba aquí un
 comando definitivo.
 
-## G0-F002 — no copiar CI downstream por conveniencia
+## G0-F002 — no incorporar configuración de CI por conveniencia
 
 Estado:
 
@@ -363,7 +322,8 @@ Estado:
 RESOLVED BY SCOPE
 ```
 
-Sprint 7.11 no hereda esos elementos sin evidencia propia.
+Sprint 7.11 no incorpora matriz Ubuntu/Windows, cache pip ni extra `.[dev]`
+sin evidencia propia.
 
 ## G0-F003 — infraestructura externa sin autoridad
 

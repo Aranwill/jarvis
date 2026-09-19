@@ -302,5 +302,3 @@ rama de implementación activa: ninguna
 RDD Stage 2:                  no autorizado
 merge authority:              HUMAN-ONLY
 ```
-
-derivado. No reabre Sprint 7.11 ni concede autoridad para la siguiente unidad.

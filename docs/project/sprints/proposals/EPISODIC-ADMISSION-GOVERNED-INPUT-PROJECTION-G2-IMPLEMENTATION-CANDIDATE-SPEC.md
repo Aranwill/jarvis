@@ -68,23 +68,6 @@ main
 84a7bc2f785751d478d8a1341f993d861cb2f208
 ```
 
-Estado cross-repository al iniciar G2:
-
-```text
-Malāk main:
-84a7bc2f785751d478d8a1341f993d861cb2f208
-
-cbd5f74070176e5c20d300b811153e73d95f9d3f
-
-post-reconciliation dry-run:
-base_commit == head_commit == 84a7bc2f...
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
 Precondiciones:
 
 ```text
@@ -117,7 +100,6 @@ Independent Validation
 Candidate-Bound Evidence / RDD Stage 1
   ↓
 Human Governance
-  ↓
 ```
 
 Invariantes:
@@ -1045,6 +1027,7 @@ RDD Stage 2:
 NOT AUTHORIZED
 ```
 
+La siguiente transición posible, después de merge humano, es una autorización separada para:
 
 ```text
 G3 — isolated TDD implementation candidate

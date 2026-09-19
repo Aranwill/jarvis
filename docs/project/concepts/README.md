@@ -170,12 +170,3 @@ principalmente `IDEA-001`, `IDEA-003`, `IDEA-020` e `IDEA-024`.
 Estado:
 
 `concept / non_normative / conceptual_reference`
-
-
-El repositorio oficial conserva estos documentos como referencia conceptual.
-
-navegación, recuperación y continuidad.
-
-Estas proyecciones son derivadas y no alteran la autoridad del repositorio oficial.
-
-documentos.

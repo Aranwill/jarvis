@@ -72,27 +72,6 @@ main
 5fa2ae2586aec3498710f6722407e371b3e58d1f
 ```
 
-Estado downstream observado antes de esta admisión:
-
-```text
-42a9c29561b856e731303cd563687d366b9b2048
-
-e77e276b6bb913f0814b990be9ff5ec1c9542693
-```
-
-La ejecución `run-once` aportada por el operador contra `5fa2ae25` concluyó:
-
-```text
-base_commit == head_commit
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
-Por tanto no existe drift downstream conocido que bloquee esta admisión.
-
 ---
 
 # 2. Inventario exhaustivo del repositorio fuente

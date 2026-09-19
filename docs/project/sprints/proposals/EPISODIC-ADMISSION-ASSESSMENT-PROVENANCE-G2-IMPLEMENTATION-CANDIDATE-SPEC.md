@@ -67,7 +67,7 @@ Evidence != Authority
 
 ---
 
-## 2. Binding a G1, baseline y reconciliación cross-repository
+## 2. Binding a G1 y baseline
 
 Baseline congelado para G2:
 
@@ -83,36 +83,6 @@ G1 aprobado e integrado:
 docs/project/sprints/proposals/
 EPISODIC-ADMISSION-ASSESSMENT-PROVENANCE-G0-G1-DESIGN.md
 ```
-
-
-Estado verificado antes de abrir G2:
-
-```text
-Malāk main:
-684927a1e429e530da8f9831f374551c22b48d8f
-
-155172f1c258fe40c1a25fbf97a537022859064f
-
-71b21e0a192017353075954e06e2b55f5f8e2255
-
-post-reconciliation dry-run:
-base_commit == head_commit == 684927a1...
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
-Por tanto:
-
-```text
-BASELINE_DRIFT = 0
-PROJECTION_DRIFT = 0
-STATE_DRIFT = 0
-```
-
-La aceptación temporal de drift registrada en G1 permanece como hecho histórico de aquella revisión; ya no constituye riesgo abierto para G2.
 
 ---
 

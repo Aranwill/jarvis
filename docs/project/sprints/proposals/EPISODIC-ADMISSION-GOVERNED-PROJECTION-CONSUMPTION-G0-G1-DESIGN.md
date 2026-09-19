@@ -67,7 +67,7 @@ Evidence != Authority
 
 ---
 
-## 2. Baseline exacto y estado cross-repository
+## 2. Baseline exacto
 
 Baseline fuente congelado para G0/G1:
 
@@ -79,31 +79,7 @@ main
 
 Ese commit corresponde al merge de PR #89, corrective packet documental post-PR #88.
 
-Estado observado al iniciar G1:
-
-```text
-Malāk main:
-8638015a3ec8750901a1762ad51f60e7fb4a0240
-
-d7d4e2d7b60982c999017b0a6cfd5b9ee0619be5
-
-2e8c5d7318678caeb67c8906c951935832760003
-
-71b21e0a192017353075954e06e2b55f5f8e2255
-```
-
 PR #89 modificó exclusivamente documentación derivada/no normativa. El código productivo de Memory observado por este G0/G1 continúa siendo el integrado por PR #88.
-
-Por tanto:
-
-```text
-PRODUCT CODE DRIFT SINCE PR #88 = 0
-```
-
-
-```text
-G2 PRECONDITION:
-```
 
 ---
 
@@ -1261,6 +1237,7 @@ implementation authorized: false
 G2 authorized by this document: false
 ```
 
+El siguiente gate, si el Owner lo autoriza después de revisar e integrar este design record, es:
 
 ```text
 G2 — Implementation Candidate Specification

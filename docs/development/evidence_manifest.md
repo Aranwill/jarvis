@@ -380,8 +380,7 @@ src/malak/security/audit.py
 src/malak/observability/**
 ```
 
-patrones deterministas cuando aportan valor, nunca se introduce una dependencia
-upstream hacia ellos.
+Ambos pertenecen al runtime y quedan fuera de este contrato.
 
 ---
 
@@ -396,7 +395,7 @@ historical copy: opcional en docs/project/sprints/proposals/**
 ```
 
 Una copia histórica in-repo conserva provenance del candidato que describe y no
-certifica el commit que la contiene. No se crea `docs/project/evidence/**` ni se
+certifica el commit que la contiene. No se crea `docs/project/evidence/**` ni se introduce dependencia externa.
 
 ---
 

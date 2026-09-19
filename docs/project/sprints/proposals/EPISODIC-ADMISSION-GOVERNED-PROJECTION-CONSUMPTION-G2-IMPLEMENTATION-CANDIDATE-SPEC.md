@@ -80,40 +80,12 @@ aaabae65fcd989ed698704fa1bc735c3896c3903
 
 Ese commit integra PR #90 — G0/G1 de esta misma unidad.
 
-Estado cross-repository verificado al iniciar G2:
-
-```text
-Malāk main:
-aaabae65fcd989ed698704fa1bc735c3896c3903
-
-4b504f258d110b646fe062e846abe6893e0749a1
-
-aaabae65fcd989ed698704fa1bc735c3896c3903
-
-71b21e0a192017353075954e06e2b55f5f8e2255
-```
-
-La reconciliación fue aceptada explícitamente por el Owner y el dry-run posterior reportó:
-
-```text
-base_commit == head_commit == aaabae65fcd989ed698704fa1bc735c3896c3903
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
 Precondiciones:
 
 ```text
 G0 PASS / ADAPT
 G1 PASS + integrated
-BASELINE_DRIFT = 0
-PROJECTION_DRIFT = 0
-STATE_DRIFT = 0
 ```
-
 
 ---
 
@@ -147,7 +119,6 @@ Candidate-Bound Evidence / RDD Stage 1
 Draft PR
   ↓
 Human review / Ready / merge
-  ↓
 ```
 
 Invariantes:
@@ -1203,6 +1174,7 @@ RDD Stage 2 authorized: false
 
 ## 35. Próximo gate permitido
 
+Después de revisión humana e integración de este G2, el siguiente gate posible será únicamente:
 
 ```text
 G3 — TDD Implementation Candidate

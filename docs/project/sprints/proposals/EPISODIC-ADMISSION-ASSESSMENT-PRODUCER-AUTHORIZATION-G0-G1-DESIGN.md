@@ -56,7 +56,7 @@ Evidence != Authority
 
 ---
 
-## 2. Binding al baseline y estado cross-repository
+## 2. Binding al baseline
 
 Baseline fuente congelado para G0/G1:
 
@@ -65,35 +65,6 @@ Aranwill/jarvis
 main
 42bc41687a99d236b8ee59bae670bef2d37858e1
 ```
-
-Estado cross-repository verificado antes de abrir G1:
-
-```text
-Malāk main:
-42bc41687a99d236b8ee59bae670bef2d37858e1
-
-c8761523bc0176a06c1668b2ce5cf329f1d52b96
-
-71b21e0a192017353075954e06e2b55f5f8e2255
-
-post-reconciliation dry-run:
-base_commit == head_commit == 42bc4168...
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
-Por tanto al inicio de esta unidad:
-
-```text
-BASELINE_DRIFT = 0
-PROJECTION_DRIFT = 0
-STATE_DRIFT = 0
-```
-
-Si este design record se integra, la proyección downstream deberá reconciliarse otra vez antes de cualquier implementación posterior.
 
 ---
 

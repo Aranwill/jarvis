@@ -58,7 +58,7 @@ Evidence != Authority
 
 ---
 
-## 2. Baseline y estado cross-repository
+## 2. Baseline
 
 Baseline fuente congelado para G0/G1:
 
@@ -67,34 +67,6 @@ Aranwill/jarvis
 main
 b96e1802c47e447699f06f4a019241d119f747ef
 ```
-
-Estado verificado al iniciar G1:
-
-```text
-Malāk main:
-b96e1802c47e447699f06f4a019241d119f747ef
-
-4bf73bd1ef1bfb6929f0562ee851cfebd2cdef6e
-
-71b21e0a192017353075954e06e2b55f5f8e2255
-
-post-reconciliation dry-run:
-base_commit == head_commit == b96e1802...
-changed_files = 0
-document_candidates = 0
-validation_findings = 0
-conclusion = pass
-proposal_created = false
-```
-
-Por tanto:
-
-```text
-BASELINE_DRIFT = 0
-PROJECTION_DRIFT = 0
-STATE_DRIFT = 0
-```
-
 
 ---
 
