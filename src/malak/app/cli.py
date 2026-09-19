@@ -11,10 +11,6 @@ from malak.app.composition import (
     build_conversation_kernel,
     build_engineering_kernel_set,
 )
-from malak.core.conversation import (
-    ConversationRequest,
-    ConversationResponse,
-)
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.llm_runtime import LLMRuntime
 from malak.core.request import Request
@@ -130,9 +126,11 @@ def build_runtime(
 def build_conversation_service(
     runtime: LLMRuntime | None = None,
     provider_name: str = DEFAULT_PROVIDER,
+    *,
+    with_context: bool = True,
 ) -> ConversationService:
     """
-    Build the minimal conversation service used by the development CLI.
+    Build a conversation service for either contextual chat or stateless use.
     """
     selected_runtime = runtime if runtime is not None else MockLLMRuntime()
     provider = RuntimeConversationProvider(selected_runtime)
@@ -140,7 +138,7 @@ def build_conversation_service(
     registry = ConversationProviderRegistry()
     registry.register(provider_name, provider)
 
-    context = InMemoryConversationContext()
+    context = InMemoryConversationContext() if with_context else None
 
     return ConversationService(
         registry,
@@ -432,13 +430,19 @@ def main() -> None:
     service = build_conversation_service(
         runtime=runtime,
         provider_name=configuration.provider_name,
+        with_context=True,
     )
 
     engineering = None
     if configuration.repository_root is not None:
+        engineering_service = build_conversation_service(
+            runtime=runtime,
+            provider_name=configuration.provider_name,
+            with_context=False,
+        )
         engineering = build_engineering_kernel_set(
             repository_root=configuration.repository_root,
-            service=service,
+            service=engineering_service,
             provider_name=configuration.provider_name,
             model=configuration.model,
         )
