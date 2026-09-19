@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 
+from malak.capabilities._engineering_evidence import collect_engineering_evidence
 from malak.contracts.capability import Capability
 from malak.core.conversation import ConversationRequest
 from malak.core.request import Request
@@ -78,32 +79,27 @@ class EngineeringInspectCapability(Capability):
 
     def execute(self, request: Request) -> str:
         term = _validate_inspection_term(request.content)
-
-        (
-            repository_evidence,
-            repository_match_count,
-            repository_skipped_unreadable,
-            repository_context_truncated,
-        ) = self._collect_repository_evidence(term)
-
-        knowledge_result = self._knowledge_reader.search_text(term)
-        self._validate_knowledge_evidence(knowledge_result)
-        knowledge_evidence, knowledge_context_truncated = _knowledge_context(
-            knowledge_result.matches,
-            source_truncated=knowledge_result.truncated,
+        bundle = collect_engineering_evidence(
+            repository_reader=self._repository_reader,
+            knowledge_reader=self._knowledge_reader,
+            subject=term,
+            max_repository_files=_MAX_REPOSITORY_FILES,
+            max_repository_bytes=_MAX_REPOSITORY_BYTES,
+            max_repository_matches=_MAX_REPOSITORY_MATCHES,
+            max_context_matches_per_kind=_MAX_CONTEXT_MATCHES_PER_KIND,
+            max_evidence_line_bytes=_MAX_EVIDENCE_LINE_BYTES,
+            error_scope="E2",
         )
 
-        context_truncated = (
-            repository_context_truncated
-            or knowledge_context_truncated
-        )
+        repository_evidence = list(bundle.repository_evidence)
+        knowledge_evidence = list(bundle.knowledge_evidence)
 
-        if repository_match_count == 0 and not knowledge_result.matches:
+        if bundle.repository_match_count == 0 and bundle.knowledge_match_count == 0:
             return _render_unconfirmed(
                 baseline_commit=self._baseline_commit,
                 inspection_term=term,
-                repository_skipped_unreadable=repository_skipped_unreadable,
-                context_truncated=context_truncated,
+                repository_skipped_unreadable=bundle.repository_skipped_unreadable,
+                context_truncated=bundle.context_truncated,
             )
 
         packet = {
@@ -112,8 +108,8 @@ class EngineeringInspectCapability(Capability):
             "repository_evidence": repository_evidence,
             "knowledge_evidence": knowledge_evidence,
             "limitations": {
-                "repository_skipped_unreadable": repository_skipped_unreadable,
-                "context_truncated": context_truncated,
+                "repository_skipped_unreadable": bundle.repository_skipped_unreadable,
+                "context_truncated": bundle.context_truncated,
                 "authority_effect": "none",
             },
         }
@@ -158,170 +154,9 @@ class EngineeringInspectCapability(Capability):
             analysis=analysis,
             repository_evidence=repository_evidence,
             knowledge_evidence=knowledge_evidence,
-            repository_skipped_unreadable=repository_skipped_unreadable,
-            context_truncated=context_truncated,
+            repository_skipped_unreadable=bundle.repository_skipped_unreadable,
+            context_truncated=bundle.context_truncated,
         )
-
-    def _collect_repository_evidence(
-        self,
-        term: str,
-    ) -> tuple[list[dict[str, object]], int, int, bool]:
-        knowledge_paths = {
-            source.path for source in self._knowledge_reader.list_sources()
-        }
-        candidate_paths = tuple(
-            path
-            for path in self._repository_reader.list_tracked_files()
-            if path not in knowledge_paths
-        )
-
-        if len(candidate_paths) > _MAX_REPOSITORY_FILES:
-            raise RuntimeError(
-                "captured snapshot exceeds the hard E2 repository-file limit"
-            )
-
-        evidence: list[dict[str, object]] = []
-        processed_bytes = 0
-        match_count = 0
-        skipped_unreadable = 0
-        context_truncated = False
-
-        for path in candidate_paths:
-            try:
-                document = self._repository_reader.read_text(path)
-            except ValueError:
-                skipped_unreadable += 1
-                continue
-
-            if document.baseline_commit != self._baseline_commit:
-                raise RuntimeError(
-                    "repository evidence baseline binding changed unexpectedly"
-                )
-            if document.path != path:
-                raise RuntimeError(
-                    "repository evidence path binding changed unexpectedly"
-                )
-
-            processed_bytes += len(document.content.encode("utf-8"))
-            if processed_bytes > _MAX_REPOSITORY_BYTES:
-                raise RuntimeError(
-                    "captured snapshot exceeds the hard E2 repository-byte limit"
-                )
-
-            for line_number, line in enumerate(
-                document.content.splitlines(),
-                start=1,
-            ):
-                if term not in line:
-                    continue
-
-                match_count += 1
-                if match_count > _MAX_REPOSITORY_MATCHES:
-                    raise RuntimeError(
-                        "captured snapshot exceeds the hard E2 repository-match limit"
-                    )
-
-                if len(evidence) >= _MAX_CONTEXT_MATCHES_PER_KIND:
-                    context_truncated = True
-                    continue
-
-                bounded_line, line_truncated = _truncate_utf8(
-                    line,
-                    _MAX_EVIDENCE_LINE_BYTES,
-                )
-                if line_truncated:
-                    context_truncated = True
-
-                evidence.append(
-                    {
-                        "ref": f"R{len(evidence) + 1}",
-                        "path": document.path,
-                        "blob_sha": document.blob_sha,
-                        "line_number": line_number,
-                        "line": bounded_line,
-                        "line_truncated": line_truncated,
-                    }
-                )
-
-        if match_count > len(evidence):
-            context_truncated = True
-
-        return evidence, match_count, skipped_unreadable, context_truncated
-
-
-    def _validate_knowledge_evidence(self, result) -> None:
-        if result.baseline_commit != self._baseline_commit:
-            raise RuntimeError(
-                "knowledge search baseline binding changed unexpectedly"
-            )
-
-        source_catalog = {
-            source.path: source
-            for source in self._knowledge_reader.list_sources()
-        }
-        for source in source_catalog.values():
-            if source.baseline_commit != self._baseline_commit:
-                raise RuntimeError(
-                    "knowledge source baseline binding changed unexpectedly"
-                )
-
-        for match in result.matches:
-            if match.baseline_commit != self._baseline_commit:
-                raise RuntimeError(
-                    "knowledge match baseline binding changed unexpectedly"
-                )
-
-            source = source_catalog.get(match.path)
-            if source is None:
-                raise RuntimeError(
-                    "knowledge match path is not present in the governed source catalog"
-                )
-            if (
-                match.source_class != source.source_class
-                or match.authority_class != source.authority_class
-            ):
-                raise RuntimeError(
-                    "knowledge match documentary-role binding changed unexpectedly"
-                )
-
-
-def _knowledge_context(
-    matches,
-    *,
-    source_truncated: bool,
-) -> tuple[list[dict[str, object]], bool]:
-    evidence: list[dict[str, object]] = []
-    context_truncated = source_truncated
-
-    for match in matches:
-        if len(evidence) >= _MAX_CONTEXT_MATCHES_PER_KIND:
-            context_truncated = True
-            continue
-
-        bounded_line, line_truncated = _truncate_utf8(
-            match.line,
-            _MAX_EVIDENCE_LINE_BYTES,
-        )
-        if line_truncated:
-            context_truncated = True
-
-        evidence.append(
-            {
-                "ref": f"K{len(evidence) + 1}",
-                "path": match.path,
-                "blob_sha": match.blob_sha,
-                "source_class": match.source_class,
-                "authority_class": match.authority_class,
-                "line_number": match.line_number,
-                "line": bounded_line,
-                "line_truncated": line_truncated,
-            }
-        )
-
-    if len(matches) > len(evidence):
-        context_truncated = True
-
-    return evidence, context_truncated
 
 
 def _validate_inspection_term(content: str) -> str:
@@ -338,21 +173,6 @@ def _validate_inspection_term(content: str) -> str:
             "inspection term exceeds the hard E2 UTF-8 byte limit"
         )
     return term
-
-
-def _truncate_utf8(value: str, max_bytes: int) -> tuple[str, bool]:
-    raw = value.encode("utf-8")
-    if len(raw) <= max_bytes:
-        return value, False
-
-    bounded = raw[:max_bytes]
-    while bounded:
-        try:
-            return bounded.decode("utf-8"), True
-        except UnicodeDecodeError:
-            bounded = bounded[:-1]
-
-    return "", True
 
 
 def _validate_model_evidence_refs(
