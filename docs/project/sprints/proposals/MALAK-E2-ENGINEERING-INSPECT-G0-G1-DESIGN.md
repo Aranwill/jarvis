@@ -333,20 +333,21 @@ Model response:
 6. E2 no introduce persistent task state.
 7. E2 no expone generic tool execution.
 8. Model nunca decide qué leer durante E2.
-9. Evidence se reúne antes de inferencia.
-10. Una sola inferencia por request con evidencia.
-11. Cero inferencias cuando no hay evidencia.
-12. Baseline E0/E1 debe coincidir.
-13. Repository Knowledge paths no se duplican como implementation evidence.
-14. Unreadable implementation blobs se contabilizan explícitamente.
-15. Knowledge source unreadable falla explícitamente.
-16. Context/model output están bounded.
-17. Dynamic evidence no entra al system prompt.
-18. Retrieved content != instruction.
-19. Evidence != Authority.
-20. Generated inspection != Finalization.
-21. E2 no propone, autoriza ni ejecuta cambios.
-22. Planner/CLI permanecen fuera del scope.
+9. Antes de inferencia, E2 revalida Knowledge `baseline_commit + path + source_class + authority_class` contra el catálogo E1; mismatch => STOP.
+10. Evidence se reúne antes de inferencia.
+11. Una sola inferencia por request con evidencia.
+12. Cero inferencias cuando no hay evidencia.
+13. Baseline E0/E1 debe coincidir.
+14. Repository Knowledge paths no se duplican como implementation evidence.
+15. Unreadable implementation blobs se contabilizan explícitamente.
+16. Knowledge source unreadable falla explícitamente.
+17. Context/model output están bounded.
+18. Dynamic evidence no entra al system prompt.
+19. Retrieved content != instruction.
+20. Evidence != Authority.
+21. Generated inspection != Finalization.
+22. E2 no propone, autoriza ni ejecuta cambios.
+23. Planner/CLI permanecen fuera del scope.
 
 ## 15. Scope permitido
 
@@ -442,7 +443,8 @@ Debe cubrir al menos:
 - provider failure se propaga;
 - `request.session_id` no se usa como Conversation history key;
 - no model call ocurre antes de terminar evidence collection;
-- Knowledge class no se transforma en autorización/status.
+- Knowledge class no se transforma en autorización/status;
+- search-result baseline mismatch, unknown Knowledge path o documentary-role misbinding => STOP antes de model call.
 
 RED válido:
 
