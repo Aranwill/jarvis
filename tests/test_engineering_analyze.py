@@ -13,6 +13,7 @@ from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.request import Request
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
+from malak.services.conversation_context import InMemoryConversationContext
 from malak.services.conversation_service import ConversationService
 
 
@@ -100,10 +101,14 @@ class RecordingProvider(ConversationProvider):
         )
 
 
-def service(provider: ConversationProvider) -> ConversationService:
+def service(
+    provider: ConversationProvider,
+    *,
+    context: InMemoryConversationContext | None = None,
+) -> ConversationService:
     registry = ConversationProviderRegistry()
     registry.register("recording", provider)
-    return ConversationService(registry)
+    return ConversationService(registry, context=context)
 
 
 def module():
@@ -326,3 +331,240 @@ def test_e3_red_c18_no_repository_mutation(tmp_path: Path) -> None:
     execute(capability)
     after = git(repo, "status", "--porcelain=v1", "--untracked-files=all")
     assert after == before == ""
+
+
+
+class FailingProvider(ConversationProvider):
+    def generate(self, request: ConversationRequest) -> ConversationResponse:
+        raise RuntimeError("provider failure")
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("summary", "safe\nforged"),
+        ("statement", "safe\tforged"),
+        ("rationale", "safe\u202eforged"),
+        ("uncertainty", "safe\u2028forged"),
+    ],
+)
+def test_e3_hardening_c19_rendered_text_rejects_control_or_format_characters(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    payload = json.loads(valid_json())
+    if field == "summary":
+        payload["summary"] = value
+    elif field == "uncertainty":
+        payload["uncertainties"] = [value]
+    else:
+        payload["findings"][0][field] = value
+
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+@pytest.mark.parametrize("missing", ["summary", "findings", "uncertainties"])
+def test_e3_hardening_c20_missing_top_level_fields_are_rejected(
+    tmp_path: Path,
+    missing: str,
+) -> None:
+    payload = json.loads(valid_json())
+    payload.pop(missing)
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [("summary", []), ("findings", {}), ("uncertainties", {})],
+)
+def test_e3_hardening_c21_wrong_top_level_types_are_rejected(
+    tmp_path: Path,
+    field: str,
+    value,
+) -> None:
+    payload = json.loads(valid_json())
+    payload[field] = value
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c22_extra_finding_field_is_rejected(tmp_path: Path) -> None:
+    payload = json.loads(valid_json())
+    payload["findings"][0]["accepted"] = True
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+@pytest.mark.parametrize("field", ["summary", "statement", "rationale"])
+def test_e3_hardening_c23_empty_required_text_is_rejected(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    payload = json.loads(valid_json())
+    if field == "summary":
+        payload["summary"] = "   "
+    else:
+        payload["findings"][0][field] = "   "
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c24_duplicate_json_keys_are_rejected(tmp_path: Path) -> None:
+    raw = (
+        '{"summary":"one","summary":"two","findings":[],"uncertainties":[]}'
+    )
+    provider = RecordingProvider(raw)
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c25_nonfinite_json_is_rejected(tmp_path: Path) -> None:
+    raw = '{"summary":NaN,"findings":[],"uncertainties":[]}'
+    provider = RecordingProvider(raw)
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c26_finding_count_is_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    m = module()
+    monkeypatch.setattr(m, "_MAX_FINDINGS", 1)
+    payload = json.loads(valid_json())
+    payload["findings"].append(dict(payload["findings"][0]))
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c27_uncertainty_count_is_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    m = module()
+    monkeypatch.setattr(m, "_MAX_UNCERTAINTIES", 1)
+    payload = json.loads(valid_json())
+    payload["uncertainties"] = ["one", "two"]
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+@pytest.mark.parametrize(
+    "constant,field",
+    [
+        ("_MAX_SUMMARY_BYTES", "summary"),
+        ("_MAX_STATEMENT_BYTES", "statement"),
+        ("_MAX_RATIONALE_BYTES", "rationale"),
+        ("_MAX_UNCERTAINTY_BYTES", "uncertainty"),
+    ],
+)
+def test_e3_hardening_c28_text_fields_are_byte_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    constant: str,
+    field: str,
+) -> None:
+    m = module()
+    monkeypatch.setattr(m, constant, 8)
+    payload = json.loads(valid_json())
+    if field == "summary":
+        payload["summary"] = "x" * 16
+    elif field == "uncertainty":
+        payload["uncertainties"] = ["x" * 16]
+    else:
+        payload["findings"][0][field] = "x" * 16
+
+    provider = RecordingProvider(json.dumps(payload))
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c29_evidence_ref_count_is_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    m = module()
+    monkeypatch.setattr(m, "_MAX_EVIDENCE_REFS_PER_FINDING", 1)
+    provider = RecordingProvider(valid_json())
+    *_, capability = build(tmp_path, provider)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c30_prompt_is_byte_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    m = module()
+    monkeypatch.setattr(m, "_MAX_PROMPT_BYTES", 32)
+    *_, provider, capability = build(tmp_path)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+    assert provider.calls == 0
+
+
+def test_e3_hardening_c31_model_output_is_byte_bounded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    m = module()
+    monkeypatch.setattr(m, "_MAX_MODEL_OUTPUT_BYTES", 16)
+    *_, capability = build(tmp_path)
+    with pytest.raises(RuntimeError):
+        execute(capability)
+
+
+def test_e3_hardening_c32_provider_failure_propagates(tmp_path: Path) -> None:
+    repo, _ = make_repo(tmp_path)
+    repository_reader = GitRepositoryReader(repo)
+    knowledge_reader = GovernedKnowledgeReader(repository_reader)
+    capability = module().EngineeringAnalyzeCapability(
+        repository_reader=repository_reader,
+        knowledge_reader=knowledge_reader,
+        conversation_service=service(FailingProvider()),
+        provider_name="recording",
+    )
+    with pytest.raises(RuntimeError, match="provider failure"):
+        execute(capability)
+
+
+def test_e3_hardening_c33_contextful_service_fails_closed_without_session(
+    tmp_path: Path,
+) -> None:
+    repo, _ = make_repo(tmp_path)
+    repository_reader = GitRepositoryReader(repo)
+    knowledge_reader = GovernedKnowledgeReader(repository_reader)
+    provider = RecordingProvider()
+    context = InMemoryConversationContext()
+    capability = module().EngineeringAnalyzeCapability(
+        repository_reader=repository_reader,
+        knowledge_reader=knowledge_reader,
+        conversation_service=service(provider, context=context),
+        provider_name="recording",
+    )
+
+    with pytest.raises(ValueError, match="session_id is required"):
+        execute(capability)
+
+    assert provider.calls == 0
+    assert context.snapshot("session-A") == ()
