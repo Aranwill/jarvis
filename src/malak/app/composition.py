@@ -19,6 +19,8 @@ from malak.services.planner import Planner
 class EngineeringKernelSet:
     baseline_commit: str
     kernels: dict[str, Kernel]
+    repository_reader: GitRepositoryReader
+    knowledge_reader: GovernedKnowledgeReader
 
 
 def _build_fixed_kernel(capability) -> Kernel:
@@ -103,4 +105,6 @@ def build_engineering_kernel_set(
             action: _build_fixed_kernel(capability)
             for action, capability in capabilities.items()
         },
+        repository_reader=repository_reader,
+        knowledge_reader=knowledge_reader,
     )
