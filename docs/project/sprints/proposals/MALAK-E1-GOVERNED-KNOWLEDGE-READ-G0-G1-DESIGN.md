@@ -238,7 +238,8 @@ modelo de trust adicional.
 4. Paths no clasificados se rechazan; nunca caen en una categoría default.
 5. Templates explícitos no se presentan como knowledge operativo.
 6. `list_sources()` es determinista y no lee contenido.
-7. `read()` preserva baseline/path/blob SHA de E0.
+7. `read()` preserva baseline/path/blob SHA de E0 y valida binding exacto de
+   `baseline_commit + requested path` antes de aplicar `source_class`.
 8. `search_text()` solo lee fuentes clasificadas; nunca escanea código u otros
    archivos y filtra después.
 9. Si una fuente clasificada no puede leerse como texto válido, la búsqueda falla
@@ -336,6 +337,7 @@ El RED deberá cubrir al menos:
 - `docs/knowledge/templates/**` excluido;
 - código `src/**` no clasificado;
 - `read()` de fuente válida conserva baseline/path/blob/source/authority;
+- baseline/path misbinding desde E0 provoca STOP explícito antes de clasificar;
 - `read()` de path no clasificado falla;
 - working-tree mutation sigue invisible por composición con E0;
 - search solo ve fuentes clasificadas, no código con la misma query;
