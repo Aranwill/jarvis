@@ -484,3 +484,46 @@ def test_e1_red_c25_read_rejects_non_string_path_explicitly(tmp_path: Path) -> N
 
     with pytest.raises(TypeError):
         reader.read(123)  # type: ignore[arg-type]
+
+
+
+def test_e1_red_c26_read_rejects_repository_path_misbinding(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, baseline, repository_reader, reader = make_reader(tmp_path)
+    module = import_module("malak.infrastructure.repository_reader")
+
+    def wrong_path(_: str):
+        return module.RepositoryTextDocument(
+            baseline_commit=baseline,
+            path="documents/projects/jarvis/ideas.md",
+            blob_sha="a" * 40,
+            content="misbound content",
+        )
+
+    monkeypatch.setattr(repository_reader, "read_text", wrong_path)
+
+    with pytest.raises(RuntimeError):
+        reader.read("docs/governance/cognitive_constitution.md")
+
+
+def test_e1_red_c27_read_rejects_repository_baseline_misbinding(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, _, repository_reader, reader = make_reader(tmp_path)
+    module = import_module("malak.infrastructure.repository_reader")
+
+    def wrong_baseline(path: str):
+        return module.RepositoryTextDocument(
+            baseline_commit="0" * 40,
+            path=path,
+            blob_sha="a" * 40,
+            content="misbound content",
+        )
+
+    monkeypatch.setattr(repository_reader, "read_text", wrong_baseline)
+
+    with pytest.raises(RuntimeError):
+        reader.read("docs/governance/cognitive_constitution.md")
