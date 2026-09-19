@@ -293,8 +293,14 @@ uncertainty item                   4 KiB
 
 Strings vacíos se rechazan.
 
+Un análisis `GROUNDED` exige al menos un finding estructurado. Un summary sin
+findings no puede presentarse como análisis grounded.
+
 Campos de texto renderizados rechazan caracteres de control, formato invisible,
 bidi y separadores de línea/párrafo que puedan volver ambiguo el envelope.
+También rechazan tokens reservados `[R#]`, `[K#]` y `[A#]`; las evidence refs
+solo pueden declararse en `evidence_refs`, donde son validadas contra el paquete
+real, y los IDs `A#` son emitidos únicamente por el renderer determinista.
 
 Campos extra se rechazan.
 
@@ -507,6 +513,8 @@ Debe cubrir al menos:
 - UNRESOLVED accepts grounded one-sided refs;
 - provider failure propagates;
 - output envelope deterministic;
+- GROUNDED sin findings => FAIL;
+- texto libre generado no puede inyectar tokens reservados `[R#]`, `[K#]`, `[A#]`;
 - `A#` findings listed separately from R/K evidence;
 - model cannot promote DECISION_RECORD to Accepted metadata;
 - model output cannot trigger write or tool call;
