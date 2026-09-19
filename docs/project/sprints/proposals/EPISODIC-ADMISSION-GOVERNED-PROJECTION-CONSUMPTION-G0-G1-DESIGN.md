@@ -90,13 +90,13 @@ Estado observado al iniciar G1:
 Malāk main:
 8638015a3ec8750901a1762ad51f60e7fb4a0240
 
-Project Vault main:
+external derived record main:
 d7d4e2d7b60982c999017b0a6cfd5b9ee0619be5
 
-último HEAD de Malāk reflejado por Vault:
+último HEAD de Malāk reflejado por external derived record:
 2e8c5d7318678caeb67c8906c951935832760003
 
-Vault Sync Agent main:
+external reconciliation process main:
 71b21e0a192017353075954e06e2b55f5f8e2255
 ```
 
@@ -109,11 +109,11 @@ PRODUCT CODE DRIFT SINCE PR #88 = 0
 DOCUMENTARY VAULT RECONCILIATION AFTER PR #89 = PENDING
 ```
 
-La diferencia documental del Vault no altera el análisis técnico de G0/G1, pero **debe resolverse antes de G2 o de cualquier implementación posterior**.
+La diferencia documental del external derived record no altera el análisis técnico de G0/G1, pero **debe resolverse antes de G2 o de cualquier implementación posterior**.
 
 ```text
 G2 PRECONDITION:
-Vault reconciliation == PASS
+external derived record reconciliation == PASS
 ```
 
 ---
@@ -1234,7 +1234,7 @@ Detener y volver al Owner si G2 o una implementación futura requiere:
 - universal trust manager;
 - Sprint 7.12;
 - RDD Stage 2;
-- implementación antes de reconciliar Project Vault.
+- implementación antes de reconciliar external derived record.
 
 ---
 
@@ -1273,7 +1273,7 @@ implementation authorized: false
 G2 authorized by this document: false
 ```
 
-El siguiente gate, si el Owner lo autoriza después de revisar e integrar este design record y reconciliar el Vault, es:
+El siguiente gate, si el Owner lo autoriza después de revisar e integrar este design record y reconciliar el external derived record, es:
 
 ```text
 G2 — Implementation Candidate Specification
