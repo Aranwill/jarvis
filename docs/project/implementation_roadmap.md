@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-12
-as_of_commit: 3690d5f50183eec51d7edde2eb5e0954582f1f3a
+as_of_date: 2026-09-19
+as_of_commit: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -36,6 +36,64 @@ Este documento es deliberadamente **derivado y no normativo**.
 
 No reemplaza ni modifica ninguna fuente de ley, arquitectura, seguridad,
 gobernanza o contrato aprobado.
+
+## Estado CURRENT reconciliado — 2026-09-19
+
+Esta sección representa el estado material vigente reconciliado contra
+`Aranwill/jarvis/main@c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8`.
+
+Los snapshots post-PR #120 conservados más abajo son registros históricos y no
+deben utilizarse como sustituto de este estado CURRENT.
+
+Engineering Intelligence alcanzó el primer vertical read-only integrado:
+
+```text
+E0 — Repository Read
+PR #147
+candidate 31a33d13623298cc70c534d5f8352bbf0a58ca25
+merge     a91bca0bcf8c0bc2c3972497b034e19b9f7eda7a
+status    INTEGRATED
+
+E1 — Governed Knowledge Read
+PR #148
+candidate 6cf561d9fc5d9471efa97aeffd444fe8ee92e418
+merge     50a80babeca4367a20dd7f730ef2c536c87a9d08
+status    INTEGRATED
+
+E2 — Engineering Inspect
+PR #149
+candidate 91412656b0c6bcbda8a84b3ab6642d0e2a5760e1
+merge     d0e205d3e19acf80ba8f110a2ea76c77bd6c0581
+status    INTEGRATED
+
+E3 — Engineering Analyze
+PR #150
+candidate 79fca79d24e1ee30c96aacd470e3267802aa1f77
+merge     c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+status    INTEGRATED
+
+E4 — Engineering Propose
+status    NOT AUTHORIZED
+
+E5 — Engineering CLI
+status    NOT AUTHORIZED
+```
+
+La validación candidate-bound final de E3 quedó registrada en el workflow
+`35445357957` con `1114 passed` en Ubuntu y Windows, además de `compileall`,
+diff check y candidate identity en PASS.
+
+
+```text
+Malāk source of truth:
+c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+
+4632ccab79a0482a41c8c4aa0bb6f8731caea31a
+```
+
+Esta reconciliación documental D0 corrige estado derivado. No constituye
+autorización para E4, E5, Sprint 7.12, RDD Stage 2, Memory persistente, agents,
+tools, Sandbox, writes ni ampliación de autoridad.
 
 ---
 
@@ -223,7 +281,14 @@ No deben actuar como segundo roadmap.
 
 ---
 
-# 5. Estado de referencia
+# 5. Snapshot histórico de referencia — post-PR #120
+
+> **HISTÓRICO / SUPERSEDED AS CURRENT STATE**
+>
+> Esta sección conserva el estado observado después de PR #120. Sus commits y
+> resultados permanecen válidos como evidencia histórica, pero ya no representan
+> el estado CURRENT. Para estado vigente utilizar el bloque reconciliado al inicio
+> de este documento.
 
 - Repositorio: `Aranwill/jarvis`.
 - Rama permanente: `main`.
@@ -543,7 +608,12 @@ de autoridad.
 
 ---
 
-# 7. Estado del baseline actual
+# 7. Snapshot histórico del baseline — post-PR #120
+
+> **HISTÓRICO / SUPERSEDED AS CURRENT STATE**
+>
+> El siguiente bloque preserva el snapshot post-PR #120 y no debe interpretarse
+> como baseline CURRENT después de E0–E3.
 
 Estado verificado después de integrar PR #120:
 
@@ -689,6 +759,12 @@ PROGRESSIVE COGNITIVE ASSURANCE G0/G1 / IMPACT REVIEW COMPLETADO
 G2A — PROTECTED FINALIZATION FOUNDATION INTEGRADO EN AISLAMIENTO
 ASSURANCE SIGNAL AUTHORITY G0/G1 INTEGRADO
 ASSURANCE SIGNAL AUTHORITY & PROJECTION G2 INTEGRADO EN AISLAMIENTO
+ENGINEERING INTELLIGENCE E0 — REPOSITORY READ INTEGRADO
+ENGINEERING INTELLIGENCE E1 — GOVERNED KNOWLEDGE READ INTEGRADO
+ENGINEERING INTELLIGENCE E2 — ENGINEERING INSPECT INTEGRADO
+ENGINEERING INTELLIGENCE E3 — ENGINEERING ANALYZE INTEGRADO
+ENGINEERING INTELLIGENCE E4 — PROPOSE NO AUTORIZADO
+ENGINEERING INTELLIGENCE E5 — CLI NO AUTORIZADO
 CONVERSATION G2B BLOQUEADO / NO AUTORIZADO
 SPRINT 7.12 NO AUTORIZADO
 RDD STAGE 2 NO AUTORIZADO
@@ -766,7 +842,8 @@ No está autorizado:
 - Conversation Protected Finalization Integration / G2B;
 - RDD Stage 2;
 - Memory persistente;
-- nuevas capabilities;
+- E4 Engineering Propose y E5 CLI;
+- cualquier nueva capability adicional sin admission review y autorización separadas;
 - agentes;
 - tools;
 - Sandbox;
@@ -1518,10 +1595,10 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-3690d5f50183eec51d7edde2eb5e0954582f1f3a
+c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 
 CURRENT MATERIAL COGNITIVE HEAD
-cd50c308e1f5a1481851d6402ae4435341410d27
+c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 
 CURRENT EPISODIC PRODUCT HEAD
 9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
@@ -1541,8 +1618,8 @@ v0.6.0-alpha
 LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
-LATEST CODE FOUNDATION
-Assurance Signal Authority & Projection Foundation — G2
+LATEST CODE UNIT
+Engineering Analyze — E3
 
 LATEST EPISODIC PRODUCT UNIT
 Episodic Admission Governed Projection Consumption Boundary
@@ -1562,6 +1639,24 @@ INTEGRATED / ISOLATED / VALIDATED
 SIGNAL BOUNDARY G2
 INTEGRATED / ISOLATED / VALIDATED
 
+ENGINEERING INTELLIGENCE E0
+INTEGRATED
+
+ENGINEERING INTELLIGENCE E1
+INTEGRATED
+
+ENGINEERING INTELLIGENCE E2
+INTEGRATED
+
+ENGINEERING INTELLIGENCE E3
+INTEGRATED
+
+ENGINEERING INTELLIGENCE E4
+NOT AUTHORIZED
+
+ENGINEERING INTELLIGENCE E5
+NOT AUTHORIZED
+
 CONVERSATION G2B
 BLOCKED / NOT AUTHORIZED
 
@@ -1569,9 +1664,6 @@ ACTIVE SPRINT
 NONE
 
 SPRINT 7.12
-NONE AUTHORIZED
-
-IMPLEMENTATION AFTER G2
 NONE AUTHORIZED
 
 CANDIDATE CONTENT IDENTITY G2
@@ -1583,10 +1675,9 @@ NOT AUTHORIZED
 CURRENT CI MATRIX
 ubuntu-latest / windows-latest
 
-POST-MERGE CI main@3690d5f
-PASS
+E3 CANDIDATE VALIDATION
+workflow 35445357957 / 1114 passed Ubuntu + Windows / PASS
 
-REPRESENTS MALAK@cd50c308; PR #120 + POST-G2 RECONCILIATION PENDING
 
 LEGACY ROADMAP
 DISPOSITION REGISTERED

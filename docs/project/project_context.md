@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-12
-as_of_commit: 3690d5f50183eec51d7edde2eb5e0954582f1f3a
+as_of_date: 2026-09-19
+as_of_commit: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -75,7 +75,12 @@ Este contexto fue reconciliado a partir de:
 - specification endurecida de G2 mediante PR #117 e implementación aislada de
   Assurance Signal Authority & Projection Foundation mediante PR #118;
 - integración del Evidence Map externo como input futuro mediante PR #120;
-  `29c4253c80373491453173c1cfcd429d2dfcbf6b`.
+- integración de E0 — Repository Read mediante PR #147;
+- integración de E1 — Governed Knowledge Read mediante PR #148;
+- integración de E2 — Engineering Inspect mediante PR #149;
+- integración de E3 — Engineering Analyze mediante PR #150;
+- validación candidate-bound final de E3 mediante workflow `35445357957`, con
+  `1114 passed` en Ubuntu y Windows;
 
 El documento:
 
@@ -133,16 +138,19 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             3690d5f50183eec51d7edde2eb5e0954582f1f3a
+HEAD integrado actual:             c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 Baseline nominal:                  v0.6.0-alpha
-Último sprint integrado:           Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Última foundation de código:       Assurance Signal Authority & Projection Foundation — G2
+Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
+Última unidad de código integrada: Engineering Analyze — E3
+Última foundation previa:          Assurance Signal Authority & Projection Foundation — G2
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
 Última unidad de assurance:        Assurance Signal Boundary G2 — integrada / aislada
+Engineering Intelligence:          E0–E3 integrados; E4/E5 no autorizados
 Sprint activo autorizado:          ninguno
 Rama de implementación activa:     ninguna
-Candidato Sprint 7.11:             59f592e2e36d11bbd14f7d9d93b1dac4f442c108
-Estado Sprint 7.11:                completado e integrado
+Candidato E3:                      79fca79d24e1ee30c96aacd470e3267802aa1f77
+Merge E3:                          c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+Validación E3:                     workflow 35445357957 / 1114 passed Ubuntu + Windows
 Sprint posterior autorizado:       ninguno
 Signal Boundary G2:                integrado / aislado
 Conversation G2B:                  bloqueado / no autorizado
@@ -311,9 +319,8 @@ Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
 G2A y G2 son foundations aisladas de finalización protegida y assurance signal
 projection; no constituyen assurance conversacional end-to-end.
 
-`29c4253c80373491453173c1cfcd429d2dfcbf6b`. PR #120 introdujo un nuevo delta
-conceptual que deberá proyectarse downstream junto con esta reconciliación antes
-autoridad sobre `Aranwill/jarvis/main`.
+`4632ccab79a0482a41c8c4aa0bb6f8731caea31a`. La reconciliación E0–E3 quedó
+sobre `Aranwill/jarvis/main`.
 
 ---
 
@@ -369,6 +376,36 @@ D:\Ollama\jarvis
 ---
 
 ## Arquitectura implementada actual
+
+### Engineering Intelligence — E0–E3
+
+El primer vertical read-only de Engineering Intelligence está integrado en
+`main@c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8`:
+
+```text
+E0 Repository Read          PR #147  INTEGRATED
+        +
+E1 Governed Knowledge Read  PR #148  INTEGRATED
+        ↓
+shared bounded evidence
+        ├── E2 Engineering Inspect  PR #149  INTEGRATED
+        └── E3 Engineering Analyze  PR #150  INTEGRATED
+                                  ↓
+                                Owner
+
+E4 Engineering Propose      NOT AUTHORIZED
+E5 Engineering CLI          NOT AUTHORIZED
+```
+
+E0–E3 permanecen read-only. No introducen writes, tools, agents, sandbox,
+Planner/CLI routing ni autoridad operacional. E3 produce findings grounded;
+`analysis != decision`, `finding != authorization` y
+`evidence != authority`.
+
+La validación final de E3 utilizó candidate
+`79fca79d24e1ee30c96aacd470e3267802aa1f77`, workflow
+`35445357957`, con `1114 passed` en Ubuntu y Windows. El merge de PR #150
+produjo `c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8`.
 
 ### Flujo Kernel–Planner–Capability
 
@@ -1130,7 +1167,7 @@ Estado reconciliado:
 
 ```text
 rama permanente: main
-HEAD integrado de referencia: 3690d5f50183eec51d7edde2eb5e0954582f1f3a
+HEAD integrado de referencia: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
 Sprint 7.7: cerrado
 Sprint 7.8: completado
@@ -1138,10 +1175,19 @@ Sprint 7.9: completado
 Sprint 7.10: completado
 Sprint 7.11: completado e integrado
 última ruta conversacional/runtime: Sprint 7.10
-última foundation de código integrada: Assurance Signal Authority & Projection Foundation — G2
+última foundation previa: Assurance Signal Authority & Projection Foundation — G2
+última unidad de código integrada: Engineering Analyze — E3
+Engineering Intelligence E0: integrado
+Engineering Intelligence E1: integrado
+Engineering Intelligence E2: integrado
+Engineering Intelligence E3: integrado
+Engineering Intelligence E4: no autorizado
+Engineering Intelligence E5: no autorizado
 último diseño Memory: Episodic Candidate Content Identity G0/G1
-última unidad cognitiva integrada: Assurance Signal Boundary G2
-candidato final Sprint 7.11: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+última unidad cognitiva de assurance: Assurance Signal Boundary G2
+candidate E3: 79fca79d24e1ee30c96aacd470e3267802aa1f77
+merge E3: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
+validation E3: workflow 35445357957 / 1114 passed Ubuntu + Windows
 certification branch activa: no
 release promovida adicional: no
 sprint actualmente autorizado: ninguno
@@ -1188,10 +1234,10 @@ main
 
 
 ```text
-Malāk: cd50c308e1f5a1481851d6402ae4435341410d27
+Malāk: c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 ```
 
-PR #120 y esta reconciliación generan el siguiente delta derivado que debe pasar
+La reconciliación E0–E3 quedó aceptada y sin propuesta pendiente en el estado v3
 
 El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verdad para:
 
@@ -1205,7 +1251,7 @@ El repositorio oficial `Aranwill/jarvis/main` continúa siendo la fuente de verd
 
 ---
 
-## Planificación vigente — post-PR #120
+## Planificación vigente — post-E3 / D0
 
 Sprint 7.8 está completado.
 
@@ -1237,7 +1283,18 @@ Sprint 7.11 — Reproducible Validation Pipeline Foundation
 LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
 
-LATEST INTEGRATED CODE FOUNDATION
+LATEST INTEGRATED CODE UNIT
+Engineering Analyze — E3
+
+ENGINEERING INTELLIGENCE
+E0 INTEGRATED
+E1 INTEGRATED
+E2 INTEGRATED
+E3 INTEGRATED
+E4 NOT AUTHORIZED
+E5 NOT AUTHORIZED
+
+LATEST PRE-E0/E3 CODE FOUNDATION
 Assurance Signal Authority & Projection Foundation — G2
 
 LATEST MEMORY DESIGN UNIT
@@ -1456,13 +1513,15 @@ baseline resultante y obtener aprobación explícita.
 
 ## Política de actualización
 
-Este documento fue reconciliado contra el estado observado después de integrar
-PR #120 — `docs(research): preservar evidence map como input futuro`:
+Este documento fue reconciliado contra el estado material observado después de
+integrar E0–E3, culminando en PR #150 — `feat(e3): add grounded engineering analyze capability`:
 
 ```text
-main@3690d5f50183eec51d7edde2eb5e0954582f1f3a
+main@c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8
 active_work_branch@NONE
 ```
+
+La reconciliación downstream correspondiente quedó integrada en
 
 `as_of_commit` identifica el commit de referencia utilizado para reconstruir el
 contexto, no una obligación de reescribir el documento ante cada commit
