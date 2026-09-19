@@ -43,9 +43,14 @@ Use only the supplied evidence for claims about the captured repository snapshot
 Do not infer semantic absence merely because a literal match is absent. Expose
 uncertainty and unresolved precedence instead of inventing a conclusion.
 
-Respect source_class and authority_class only as documentary roles. Do not infer
-that a DECISION_RECORD is Accepted. Do not elevate non-normative or derived
-content over higher-authority applicable sources.
+Respect source_class and authority_class only as documentary roles:
+- GOVERNING / normative is normative within the captured snapshot.
+- SECURITY_POLICY / protected_subordinate is protected but does not override GOVERNING.
+- DECISION_RECORD / status_dependent must not be treated as Accepted.
+- reference, process_reference, curated_reference, derived, and non_normative
+  provide context and do not override applicable normative/protected sources.
+If required precedence is not explicitly established by the supplied evidence,
+classify the finding as UNRESOLVED.
 
 Do not propose changes. Do not authorize changes. Do not execute anything.
 Return strict JSON only, with exactly these top-level fields:
@@ -135,6 +140,20 @@ class EngineeringAnalyzeCapability(Capability):
                 knowledge_evidence_count=len(knowledge_evidence),
                 repository_skipped_unreadable=bundle.repository_skipped_unreadable,
                 context_truncated=bundle.context_truncated,
+                reason=(
+                    "analysis requires both implementation and governed knowledge evidence"
+                ),
+            )
+
+        if bundle.context_truncated:
+            return _render_unconfirmed(
+                baseline_commit=self._baseline_commit,
+                analysis_subject=subject,
+                repository_evidence_count=len(repository_evidence),
+                knowledge_evidence_count=len(knowledge_evidence),
+                repository_skipped_unreadable=bundle.repository_skipped_unreadable,
+                context_truncated=True,
+                reason="analysis requires complete untruncated evidence",
             )
 
         packet = {
@@ -390,6 +409,7 @@ def _render_unconfirmed(
     knowledge_evidence_count: int,
     repository_skipped_unreadable: int,
     context_truncated: bool,
+    reason: str,
 ) -> str:
     return "\n".join(
         (
@@ -402,7 +422,7 @@ def _render_unconfirmed(
             f"repository_skipped_unreadable: {repository_skipped_unreadable}",
             f"context_truncated: {str(context_truncated).lower()}",
             "authority_effect: none",
-            "reason: analysis requires both implementation and governed knowledge evidence",
+            f"reason: {reason}",
             "",
             "FINDINGS",
             "(none)",
