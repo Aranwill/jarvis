@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import unicodedata
 from dataclasses import dataclass
 
@@ -259,6 +260,8 @@ def _parse_analysis(
     findings_raw = payload["findings"]
     if not isinstance(findings_raw, list):
         raise RuntimeError("findings must be a list")
+    if not findings_raw:
+        raise RuntimeError("grounded analysis requires at least one finding")
     if len(findings_raw) > _MAX_FINDINGS:
         raise RuntimeError("finding count exceeds hard E3 limit")
 
@@ -396,6 +399,8 @@ def _bounded_nonempty_string(
         for character in value
     ):
         raise RuntimeError(f"{field} contains forbidden control or format characters")
+    if re.search(r"\[[RKA][0-9]+\]", value):
+        raise RuntimeError(f"{field} contains reserved evidence or analysis ref token")
     if len(value.encode("utf-8")) > max_bytes:
         raise RuntimeError(f"{field} exceeds hard E3 UTF-8 byte limit")
     return value
