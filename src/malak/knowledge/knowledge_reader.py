@@ -101,6 +101,9 @@ class GovernedKnowledgeReader:
         return tuple(self._sources[path] for path in sorted(self._sources))
 
     def read(self, path: str) -> KnowledgeDocument:
+        if not isinstance(path, str):
+            raise TypeError("knowledge path must be a string")
+
         source = self._sources.get(path)
         if source is None:
             raise ValueError(f"path is not a recognized E1 knowledge source: {path}")
@@ -121,9 +124,8 @@ class GovernedKnowledgeReader:
     def search_text(self, query: str) -> KnowledgeSearchResult:
         _validate_query(query)
 
-        matches: list[KnowledgeTextMatch] = []
+        documents: list[tuple[KnowledgeSource, KnowledgeDocument]] = []
         searchable_bytes = 0
-        output_bytes = 0
 
         for source in self.list_sources():
             document = self.read(source.path)
@@ -132,7 +134,12 @@ class GovernedKnowledgeReader:
                 raise RuntimeError(
                     "captured snapshot exceeds the hard E1 searchable-byte limit"
                 )
+            documents.append((source, document))
 
+        matches: list[KnowledgeTextMatch] = []
+        output_bytes = 0
+
+        for source, document in documents:
             for line_number, line in enumerate(document.content.splitlines(), start=1):
                 if query not in line:
                     continue
