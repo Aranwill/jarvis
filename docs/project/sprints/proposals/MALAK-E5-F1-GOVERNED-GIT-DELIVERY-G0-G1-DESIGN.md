@@ -20,35 +20,26 @@ risk_class: 3
 
 ## 1. Propósito
 
-Incorporar a la Terminal Adaptativa un flujo natural para cerrar una
-implementación sin depender de bloques PowerShell repetitivos, preservando
-seguridad, Human in Control y trazabilidad.
-
-Intención del Owner:
+Incorporar a la Terminal Adaptativa un cierre natural de implementación:
 
 ```text
 implementation
-  ↓
-validation
-  ↓
-push
-  ↓
-human PR / merge
-  ↓
-safe branch cleanup
+→ validation
+→ push
+→ human PR / merge
+→ safe branch cleanup
 ```
 
 E5-F1 no crea un shell Git genérico.
 
-Pregunta de aceptación:
+Objetivo:
 
-> ¿Puede Malāk facilitar push y limpieza post-merge mediante operaciones Git
-> explícitas, acotadas y verificables, sin permitir comandos arbitrarios ni
-> saltar PDP/PEP, confirmación humana o auditoría?
+> Facilitar push y limpieza post-merge mediante operaciones Git explícitas,
+> acotadas y verificables, sin saltar PDP/PEP, confirmación humana ni auditoría.
 
 ---
 
-## 2. Baseline
+## 2. Baseline y admisión
 
 ```text
 Malāk main
@@ -73,47 +64,31 @@ design admission          PASS
 Git write implementation BLOCKED
 ```
 
+Las cuatro preguntas de ley pasan para diseño. Kernel y Planner permanecen sin
+cambios.
+
 ---
 
-## 3. Cuatro preguntas de ley
+## 3. Frontera obligatoria
 
-```text
-Blueprint                  PASS FOR DESIGN
-Cognitive Constitution     PASS FOR DESIGN
-Governance Constitution    PASS FOR DESIGN
-Kernel complexity          NO DELTA
-```
-
-Condición obligatoria:
-
-Git writes sólo pueden pasar a implementación cuando la ruta sea:
+Una operación Git con side effects sólo puede seguir esta ruta:
 
 ```text
 CLI intent
-  ↓
-deterministic preflight
-  ↓
-AuthorizationRequest + exact operation binding
-  ↓
-PDP
-  ↓
-human confirmation when required
-  ↓
-PEP
-  ↓
-protected Git operation
-  ↓
-verification
-  ↓
-audit evidence
+→ deterministic preflight
+→ AuthorizationRequest + operation binding
+→ PDP
+→ governed human confirmation
+→ PEP
+→ protected Git operation
+→ deterministic verification
+→ audit evidence
 ```
 
-Nunca:
+Prohibido:
 
 ```text
-CLI
-  ↓
-subprocess git push/delete
+CLI → subprocess git write
 ```
 
 ---
@@ -121,50 +96,29 @@ subprocess git push/delete
 ## 4. Partición adaptativa
 
 ```text
-E5-F1-A — Git Delivery Preflight
-  status / plan / eligibility
+F1-A Git Delivery Preflight
   READ-ONLY
-  ADMISSIBLE
+  READY FOR RED AUTHORIZATION
 
-E5-F1-B — Governed Push
-  protected external write
+F1-B Governed Push
   DESIGN COMPLETE
   IMPLEMENTATION BLOCKED
 
-E5-F1-C — Governed Branch Cleanup
-  protected local/remote deletion
+F1-C Governed Branch Cleanup
   DESIGN COMPLETE
   IMPLEMENTATION BLOCKED
 ```
 
-Los blockers de B/C son:
+Blockers de B/C:
 
-1. Security Control Plane no compuesto en la CLI.
-2. No existe HumanConfirmationVerifier concreto de producción.
+1. la CLI aún no compone un SecurityContext/PDP/PEP operacional;
+2. no existe HumanConfirmationVerifier concreto de producción.
 
-No se resolverán mediante bypass local.
+No se resuelven con bypass local.
 
 ---
 
 ## 5. Namespace curado
-
-Namespace:
-
-```text
-/git
-```
-
-No existe passthrough.
-
-Prohibido:
-
-```text
-/git <arbitrary shell text>
-/git exec ...
-/git raw ...
-```
-
-F1-A V0:
 
 ```text
 /git help
@@ -173,15 +127,22 @@ F1-A V0:
 /git plan cleanup <branch>
 ```
 
-F1-B/C futuros:
+Futuro, cuando seguridad esté compuesta:
 
 ```text
 /git push <branch>
 /git cleanup <branch>
 ```
 
-Estos comandos futuros inician una operación protegida; no implican ejecución
-sin autorización.
+Nunca:
+
+```text
+/git exec ...
+/git raw ...
+/git <arbitrary shell text>
+```
+
+No se aceptan opciones Git arbitrarias.
 
 ---
 
@@ -189,38 +150,30 @@ sin autorización.
 
 E0 permanece snapshot-bound y read-only.
 
-E5-F1 necesita observar estado operacional vivo:
+F1 necesita estado operacional vivo, por lo que el owner candidato es un
+`GitDeliveryInspector` separado, read-only y determinista.
 
+Debe observar:
+
+- repository identity;
 - current branch;
 - HEAD;
 - worktree cleanliness;
-- remote names;
-- remote URL identity;
+- remote identity;
 - upstream;
 - ahead/behind;
 - default branch;
-- local branch existence;
-- remote branch existence;
-- ancestry/merge eligibility.
+- branch existence;
+- merge ancestry.
 
-Por lo tanto:
+Reglas:
 
-```text
-GitRepositoryReader != GitDeliveryInspector
-```
-
-El futuro `GitDeliveryInspector`:
-
-- es read-only;
-- vive fuera de E0;
-- usa comandos Git allowlisted;
-- usa argv explícito;
-- usa `shell=False`;
-- no modifica refs;
-- no hace fetch/pull automáticamente;
-- no escribe red.
-
-No se crea en G0/G1.
+- argv explícito;
+- `shell=False`;
+- comandos Git allowlisted;
+- no fetch/pull automático;
+- no write durante preflight;
+- no cwd implícito.
 
 ---
 
@@ -228,16 +181,14 @@ No se crea en G0/G1.
 
 ### /git status
 
-Debe presentar al menos:
+Salida mínima:
 
 ```text
-repository_root
 repository_identity
 current_branch
 head_sha
 worktree_clean
-remote_name
-remote_identity
+remote
 upstream
 ahead
 behind
@@ -246,34 +197,28 @@ delivery_ready
 reasons[]
 ```
 
-No imprime credenciales embebidas en remote URLs.
+Remote URLs con secretos nunca se imprimen completas.
 
 ### /git plan push <branch>
 
-Debe fallar cerrado salvo que:
+Elegible sólo si:
 
-- repository root sea explícito;
-- repo identity coincida con configuración;
-- remote exacto sea permitido;
-- branch sea sintácticamente válida;
-- branch sea explícita;
-- HEAD no esté detached;
+- repo/remoto coinciden con configuración;
+- branch explícita y válida;
+- HEAD no detached;
 - current branch == requested branch;
 - branch != default branch;
-- worktree esté limpio;
-- no exista operación Git conflictiva;
-- upstream/divergence sea compatible con push no forzado;
-- HEAD SHA quede capturado en el plan.
+- worktree limpio;
+- no divergence incompatible;
+- HEAD exacto queda capturado.
 
 Salida:
 
 ```text
-action: push
-eligible: true|false
+eligible
 branch
 head_sha
 remote
-upstream
 ahead
 behind
 reasons[]
@@ -282,73 +227,26 @@ operation_fingerprint
 
 ### /git plan cleanup <branch>
 
-Debe fallar cerrado salvo que:
+Elegible sólo si:
 
-- branch sea explícita y válida;
+- branch explícita, válida y sin wildcard;
 - branch != default branch;
-- branch no sea wildcard;
-- current branch != target branch;
-- worktree esté limpio;
-- target commit exista;
-- default branch remota observada sea coherente;
-- target commit sea ancestor del default branch verificado;
-- local/remote presence quede declarada;
-- no exista incertidumbre de ancestry.
-
-Salida:
-
-```text
-action: cleanup
-eligible: true|false
-branch
-target_sha
-default_branch
-default_head_sha
-local_present
-remote_present
-merged_verified
-reasons[]
-operation_fingerprint
-```
+- current branch != target;
+- worktree limpio;
+- target SHA conocido;
+- ancestry contra default branch verificable;
+- target está efectivamente mergeado;
+- presencia local/remota declarada.
 
 No borra nada.
 
 ---
 
-## 8. Repository / remote identity
+## 8. Operation binding
 
-F1 no confía en el cwd.
+Toda write futura usa `AuthorizationOperationBinding`.
 
-Debe existir configuración explícita de identidad operacional.
-
-Conceptualmente:
-
-```text
-repository_root
-expected_repository_identity
-remote_name
-expected_remote_identity
-```
-
-Remote identity debe normalizar URL sin exponer secretos.
-
-Si la URL contiene credentials/tokens:
-
-- se usan sólo para Git;
-- nunca se muestran completas;
-- nunca entran en audit;
-- nunca forman parte textual de errores.
-
-La comparación de identidad debe basarse en una forma canónica segura.
-
----
-
-## 9. Protected operation binding
-
-Cada write futuro debe quedar ligado a una operación exacta mediante
-`AuthorizationOperationBinding`.
-
-Payload conceptual de push:
+Push liga como mínimo:
 
 ```text
 operation = git.push
@@ -356,11 +254,10 @@ repository_identity
 remote_identity
 branch
 head_sha
-expected_upstream
 force = false
 ```
 
-Payload conceptual de cleanup:
+Cleanup liga como mínimo:
 
 ```text
 operation = git.cleanup
@@ -370,358 +267,208 @@ branch
 target_sha
 default_branch
 verified_default_head_sha
-local_delete
-remote_delete
 force = false
 ```
 
-Se serializa canónicamente y se liga por digest.
-
-Si cualquier campo cambia:
+Si cambia repo, remote, branch o SHA:
 
 ```text
-operation binding changes
-→ previous confirmation invalid
-→ re-preflight required
+binding changes
+→ confirmation invalid
+→ new preflight required
 ```
 
 ---
 
-## 10. F1-B — Governed Push
+## 9. F1-B — Governed Push
 
-Cuando los blockers de seguridad estén resueltos:
+Ruta futura:
 
 ```text
 /git push <branch>
-  ↓
-fresh preflight
-  ↓
-eligible?
-  ├─ no → DENY
-  └─ yes
-       ↓
-AuthorizationRequest
-       ↓
-PDP
-       ↓
-human confirmation
-       ↓
-PEP
-       ↓
-ProtectedGitPush.execute()
-       ↓
-verify remote ref == expected HEAD
-       ↓
-audit
+→ fresh preflight
+→ AuthorizationRequest
+→ PDP
+→ human confirmation
+→ PEP
+→ ProtectedGitPush
+→ verify remote ref == expected HEAD
+→ audit
 ```
 
-Reglas V0:
+V0:
 
 - sólo remote configurado;
 - sólo branch explícita;
 - no default branch;
-- no tags;
+- no tags/refspec libre;
 - no wildcard;
-- no refspec libre;
-- no `--force`;
-- no `--force-with-lease`;
+- no force / force-with-lease;
 - no delete;
-- no arbitrary options;
-- no push múltiple.
+- una rama por operación.
 
-Initial upstream puede admitirse únicamente como forma fija equivalente a
-`push --set-upstream <remote> <branch>`.
+Un push ya satisfecho puede devolver `NO_OP`.
 
 ---
 
-## 11. F1-C — Governed Branch Cleanup
+## 10. F1-C — Governed Branch Cleanup
 
-Objetivo: limpiar una rama después de merge humano verificado.
-
-El comando conceptual:
+Ruta futura:
 
 ```text
 /git cleanup <branch>
+→ fresh cleanup preflight
+→ merged eligibility verified
+→ AuthorizationRequest
+→ human confirmation
+→ PEP
+→ safe deletion
+→ verify absence
+→ audit
 ```
 
-no significa "borrar porque el usuario escribió el nombre".
-
-Ruta:
-
-```text
-fresh cleanup preflight
-  ↓
-target merged into verified default branch?
-  ├─ no / unknown → DENY
-  └─ yes
-       ↓
-AuthorizationRequest
-       ↓
-human confirmation
-       ↓
-PEP
-       ↓
-delete eligible refs
-       ↓
-verify absence
-       ↓
-audit
-```
-
-Reglas:
+V0:
 
 - default branch jamás elegible;
 - current branch jamás elegible;
-- protected names configurables;
-- no wildcard;
-- no pattern deletion;
-- no `git branch -D` en V0;
+- protected names jamás elegibles;
+- no wildcard/pattern deletion;
+- no `git branch -D`;
 - local delete usa semántica segura equivalente a `git branch -d`;
-- remote delete, si se admite, es operación explícitamente ligada;
-- remote already absent no convierte local cleanup en fallo;
-- local already absent no autoriza remote delete por sí mismo.
+- remote delete, si existe, queda ligado explícitamente;
+- ausencia local/remota se informa, no amplía autoridad.
+
+Antes de borrar se conserva target SHA en evidencia.
 
 ---
 
-## 12. Human confirmation
+## 11. Seguridad y confirmación humana
 
-Una simple pregunta `[y/N]` no sustituye el Security Control Plane.
-
-Antes de habilitar writes debe existir una implementación concreta de
-`HumanConfirmationVerifier`.
-
-La UX puede ser interactiva, pero la evidencia deberá quedar ligada a:
-
-- subject;
-- permission;
-- original request;
-- new request;
-- operation binding;
-- timestamp;
-- confirmer.
-
-La confirmación no es reutilizable después de cambios de branch/SHA/remote.
-
----
-
-## 13. Permission scopes
-
-Scopes conceptuales separados:
+Scopes separados:
 
 ```text
-resource: git.delivery
-action: push
-
-resource: git.delivery
-action: cleanup_branch
-```
-
-No usar:
-
-```text
-resource: git
-action: *
+git.delivery / push
+git.delivery / cleanup_branch
 ```
 
 No wildcards.
 
-Push y cleanup requieren reglas distintas.
+Una pregunta `[y/N]` por sí sola no sustituye el Security Control Plane.
 
----
+Antes de writes debe existir HumanConfirmationVerifier concreto y evidencia
+ligada a:
 
-## 14. Auditoría
+- subject;
+- permission;
+- request;
+- operation binding;
+- confirmer;
+- timestamp.
 
 Git writes deben pasar por `StrictPolicyEnforcementPoint`.
 
-Audit mínimo:
-
-- request_id;
-- subject_id;
-- permission;
-- outcome;
-- reason_code;
-- operation binding digest;
-- protected operation binding;
-- protected operation permission.
-
-Además, una ejecución exitosa debe producir evidencia operacional no secreta:
-
-```text
-action
-repository identity
-branch
-before_sha
-after/verified_sha
-remote identity
-verification result
-```
-
-Nunca tokens, passwords o remote URLs con credentials.
-
 ---
 
-## 15. Failure semantics
-
-Todo fallo sensible es fail-closed.
+## 12. Fail-closed
 
 Ejemplos:
 
 ```text
-dirty worktree                   → DENY
-detached HEAD                    → DENY
-branch mismatch                  → DENY
-default branch target            → DENY
-remote mismatch                  → DENY
-ahead/behind uncertainty         → DENY
-operation binding mismatch       → DENY
-confirmation unavailable         → DENY
-audit unavailable before write   → DENY
-merge ancestry unknown           → DENY cleanup
-remote verification failed       → FAIL / evidence
+dirty worktree               → DENY
+detached HEAD                → DENY
+branch mismatch              → DENY
+default branch target        → DENY
+remote mismatch              → DENY
+divergence uncertainty       → DENY
+binding mismatch             → DENY
+confirmation unavailable     → DENY
+audit unavailable            → DENY before write
+merge ancestry unknown       → DENY cleanup
 ```
 
-No hay fallback a shell manual dentro del mismo comando.
+Credenciales nunca se incluyen en logs/auditoría.
 
 ---
 
-## 16. Rollback / recovery
+## 13. Scope futuro
 
-### Push
-
-Un push normal no debe "rollbackearse" automáticamente mediante force-push.
-
-Si se subió una rama equivocada por un fallo imposible de prevenir,
-la remediación requiere flujo humano separado.
-
-### Cleanup
-
-Antes de local deletion debe conservarse el target SHA en evidencia.
-
-Una rama local eliminada puede recrearse manualmente desde SHA si sigue
-disponible.
-
-Remote branch deletion no se revierte automáticamente.
-
-Esta irreversibilidad justifica confirmación humana y FULL 4R.
-
----
-
-## 17. No-op y idempotencia
-
-F1-A siempre es read-only.
-
-F1-B:
-
-- push cuando remote ref ya == HEAD puede devolver `NO_OP`;
-- no debe crear un segundo efecto.
-
-F1-C:
-
-- local/remote branch ya ausente se reporta de forma explícita;
-- ausencia no habilita acciones adicionales;
-- cleanup debe ser convergente sin usar force.
-
----
-
-## 18. Scope futuro
-
-### F1-A RED candidato
+F1-A RED candidato:
 
 ```text
 tests/test_git_delivery.py
 tests/test_cli.py
 ```
 
-### F1-A GREEN candidato
+F1-A GREEN candidato:
 
 ```text
 src/malak/infrastructure/git_delivery.py
 src/malak/app/cli.py
 ```
 
-No security core changes.
-
-### F1-B/C
-
-No se autoriza scope hasta resolver:
-
-- CLI SecurityContext composition;
-- HumanConfirmationVerifier de producción;
-- protected operation composition.
-
-Cualquier propuesta de write que llame subprocess desde CLI directamente
-produce STOP.
+F1-B/C no reciben scope de implementación hasta resolver los blockers de
+seguridad.
 
 ---
 
-## 19. RED futuro F1-A
+## 14. RED futuro F1-A
 
-Cuando Owner autorice:
+Debe cubrir al menos:
 
-- status con repo/branch/HEAD/worktree/remotes;
-- credentials redacted;
-- explicit repository identity;
+- status repo/branch/HEAD/worktree/remotes;
+- secrets redacted;
 - no cwd fallback;
 - plan push exact branch;
-- default branch push denied;
-- dirty worktree denied;
-- detached HEAD denied;
-- divergence denied;
-- no force option;
-- plan cleanup default branch denied;
-- current branch cleanup denied;
-- wildcard denied;
-- unmerged/unknown ancestry denied;
-- eligible merged branch accepted;
+- default-branch push denied;
+- dirty/detached/diverged denied;
+- no force;
+- cleanup default/current/wildcard denied;
+- unknown/unmerged ancestry denied;
+- merged eligible branch accepted;
 - zero mutations;
 - zero network writes;
 - zero LLM;
-- existing E5 regressions green.
+- E5 regressions green.
 
 ---
 
-## 20. Stop conditions
+## 15. Stop conditions
 
-STOP si F1 intenta:
+STOP si se intenta:
 
-- modificar E0 para convertirlo en writer;
+- convertir E0 en writer;
 - ejecutar shell libre;
-- aceptar Git options del usuario;
+- aceptar opciones Git arbitrarias;
 - force-push;
 - borrar default branch;
-- wildcard deletion;
+- wildcard delete;
 - bypass PDP/PEP;
 - usar confirmación textual como autoridad sin verifier;
 - registrar secretos;
-- inferir merge sólo por branch name;
+- inferir merge por nombre de rama;
 - auto-merge PR;
-- ampliar Kernel/Planner;
-- agregar dependencia innecesaria.
+- ampliar Kernel/Planner.
 
 ---
 
-## 21. Resultado
+## 16. Resultado
 
 ```text
 E5-F1 Governed Git Delivery
 
-G0 design admission          PASS
-G1 design                    COMPLETE
+G0 design admission      PASS
+G1 design                COMPLETE
 
-F1-A Git Preflight           READY FOR RED AUTHORIZATION
-F1-B Governed Push           IMPLEMENTATION BLOCKED
-F1-C Branch Cleanup          IMPLEMENTATION BLOCKED
+F1-A Git Preflight       READY FOR RED AUTHORIZATION
+F1-B Governed Push       IMPLEMENTATION BLOCKED
+F1-C Branch Cleanup      IMPLEMENTATION BLOCKED
 
-Blockers:
-- CLI security composition
-- concrete HumanConfirmationVerifier
-
-RED                          NOT AUTHORIZED
-GREEN                        NOT AUTHORIZED
-Git writes                   NOT AUTHORIZED
+RED                      NOT AUTHORIZED
+GREEN                    NOT AUTHORIZED
+Git writes               NOT AUTHORIZED
 ```
 
-Principio final:
+Principio:
 
 ```text
 Convenience != Authority
@@ -729,5 +476,4 @@ Git command != shell
 Preflight before permission
 Permission before execution
 Verification after execution
-Evidence after effect
 ```
