@@ -325,11 +325,10 @@ projection; no constituyen assurance conversacional end-to-end.
 
 La sincronización del Malāk Project Vault es una proyección derivada posterior.
 La última reconciliación aceptada del Vault representa Malāk
-`cd50c308e1f5a1481851d6402ae4435341410d27` mediante Vault PR #101 y merge
-`29c4253c80373491453173c1cfcd429d2dfcbf6b`. PR #120 introdujo un nuevo delta
-conceptual que deberá proyectarse downstream junto con esta reconciliación antes
-del siguiente gate que requiera drift cero. El estado del Vault no concede
-autoridad sobre `Aranwill/jarvis/main`.
+`c48b72b7af95f1edc9bcd357f64aeb9d5a34f5c8` mediante Vault PR #123 y merge
+`4632ccab79a0482a41c8c4aa0bb6f8731caea31a`. La reconciliación E0–E3 quedó
+cerrada antes de esta actualización D0. El estado del Vault no concede autoridad
+sobre `Aranwill/jarvis/main`.
 
 ---
 
