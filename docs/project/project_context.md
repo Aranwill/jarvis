@@ -319,9 +319,8 @@ Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
 G2A y G2 son foundations aisladas de finalización protegida y assurance signal
 projection; no constituyen assurance conversacional end-to-end.
 
-`29c4253c80373491453173c1cfcd429d2dfcbf6b`. PR #120 introdujo un nuevo delta
-conceptual que deberá proyectarse downstream junto con esta reconciliación antes
-autoridad sobre `Aranwill/jarvis/main`.
+`4632ccab79a0482a41c8c4aa0bb6f8731caea31a`. La reconciliación E0–E3 quedó
+sobre `Aranwill/jarvis/main`.
 
 ---
 
