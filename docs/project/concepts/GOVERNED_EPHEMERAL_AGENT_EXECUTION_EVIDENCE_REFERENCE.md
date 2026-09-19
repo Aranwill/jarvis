@@ -244,7 +244,7 @@ No deberá recibir por defecto:
 
 ```text
 complete Memory
-complete Project Vault
+complete external derived record
 all conversations
 unrestricted filesystem
 all tools
