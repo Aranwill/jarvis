@@ -8,7 +8,7 @@ created: 2026-08-14
 purpose: >
   Preservar el diseño conceptual inicial del dataset cognitivo de Malāk para
   retomarlo en una futura sesión después de relevar el repositorio oficial,
-  Project Vault y documentación vigente.
+  external derived record y documentación vigente.
 ---
 
 # Malāk Cognitive Dataset Foundation
@@ -26,7 +26,7 @@ Su función es servir como:
 - registro de criterios cognitivos;
 - punto de partida para evaluar modelos candidatos;
 - posible fundamento de futuros procesos SFT, LoRA o preference training;
-- documento de reentrada para retomar el trabajo después de relevar el repositorio oficial y el Project Vault.
+- documento de reentrada para retomar el trabajo después de relevar el repositorio oficial y el external derived record.
 
 Principio rector:
 
@@ -95,7 +95,7 @@ Este conocimiento cambia con frecuencia.
 Por lo tanto, deberá obtenerse preferentemente mediante:
 
 ```text
-Project Vault
+external derived record
 AKS
 RAG
 Self Model
@@ -418,7 +418,7 @@ Será una colección curada de casos sobre preguntas fundacionales como:
 ¿Por qué Memory y Knowledge no son lo mismo?
 ¿Por qué Human in Control?
 ¿Por qué los agentes no crean otros agentes libremente?
-¿Por qué el Vault es derivado?
+¿Por qué el external derived record es derivado?
 ¿Por qué evidencia antes que afirmaciones?
 ¿Por qué External Knowledge se trata como no confiable?
 ¿Por qué Malāk no debe depender de un proveedor?
@@ -609,7 +609,7 @@ Blueprint
 Governance
 ADRs
 ideas.md
-Project Vault
+external derived record
 Architecture docs
 Tests / Incidents / Evidence
         ↓
@@ -870,9 +870,9 @@ Principio:
 
 ---
 
-# 17. Relación con Project Vault / Second Brain
+# 17. Relación con external derived record / Second Brain
 
-El Vault podrá conservar:
+El external derived record podrá conservar:
 
 - especificaciones del dataset;
 - versiones;
@@ -889,12 +889,12 @@ El Vault podrá conservar:
 Sin embargo:
 
 ```text
-Vault
+external derived record
 ≠
 Training Authority
 ```
 
-El Vault mantiene conocimiento.
+El external derived record mantiene conocimiento.
 
 La Gobernanza y el propietario autorizan cambios.
 
@@ -986,7 +986,7 @@ Procedimiento recomendado:
 6. Leer Gobernanza
 7. Leer roadmap
 8. Leer decisiones pendientes
-9. Relevar Project Vault
+9. Relevar external derived record
 10. Relevar ideas.md vigente
 11. Verificar estado real del Cognitive Core / Memory / AKS / Model Registry
 12. Comparar este documento contra la arquitectura vigente
