@@ -42,7 +42,7 @@ git diff --check: PASS
 working tree: clean
 ```
 
-La sincronización posterior del Malāk Project Vault es una proyección derivada
+La sincronización posterior del external derived record es una proyección derivada
 downstream y no condiciona el cierre del sprint en la fuente oficial.
 
 Este sprint no autoriza automáticamente ninguna unidad posterior.
@@ -572,7 +572,7 @@ git diff --check:
 PASS
 ```
 
-La reconciliación del Malāk Project Vault se ejecuta después del cierre como
+La reconciliación del external derived record se ejecuta después del cierre como
 proyección derivada del repositorio oficial. Un fallo o rechazo de esa proyección
 no reabre automáticamente el sprint ni modifica la autoridad de `main`.
 
