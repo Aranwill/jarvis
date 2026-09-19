@@ -43,8 +43,8 @@ Cuando el trabajo sea una revisión integral, auditoría, certificación, reconc
 - [ ] Cada archivo inventariado recibió una clasificación o disposición explícita; archivos omitidos silenciosamente: `0`.
 - [ ] La profundidad de lectura fue proporcional al rol del artefacto y al problema, sin utilizar búsquedas textuales como sustituto del inventario.
 - [ ] Los archivos protegidos o expresamente prohibidos fueron identificados sin abrirse ni procesarse y quedaron clasificados con la razón correspondiente.
-- [ ] Cuando el alcance fue global, se contrastaron `Aranwill/jarvis`, `Aranwill/malak-project-vault` y `Aranwill/malak-vault-sync-agent` según disponibilidad y autoridad.
-- [ ] Los findings distinguen fuente oficial, proyección derivada y mecanismo de sincronización.
+- [ ] Cuando el alcance fue global, se contrastaron todas las fuentes internas aplicables del repositorio oficial.
+- [ ] Los findings distinguen fuente normativa, estado actual, evidencia, histórico y referencia conceptual.
 
 ---
 
@@ -253,17 +253,15 @@ Validar:
 
 ---
 
-# Reconciliación derivada post-merge
+# Cierre interno post-merge
 
-Después de integrar un cambio en `Aranwill/jarvis/main`, validar:
+Después de integrar un cambio en `main`, validar:
 
-- [ ] Se evaluó si las rutas modificadas están observadas o mapeadas por el Malāk Vault Synchronization Agent.
-- [ ] Se verificó explícitamente la cobertura de nuevas referencias obligatorias o rutas relevantes introducidas en `AGENTS.md`, `SECURITY.md` y `docs/project/concepts/**`.
-- [ ] Cuando correspondía, el Project Vault fue reconciliado mediante el flujo gobernado del Sync Agent.
-- [ ] El Vault y el Sync Agent permanecieron explícitamente subordinados a `Aranwill/jarvis/main` como fuente de verdad.
-- [ ] Un fallo de sincronización dejó el drift visible y no fue presentado como reconciliación exitosa.
-- [ ] Antes de admitir una nueva unidad de trabajo no permanecía `BASELINE_DRIFT`, `PROJECTION_DRIFT`, `STATE_DRIFT` o drift semántico downstream relevante sin resolver, reconciliar o aceptar explícitamente como riesgo documentado.
-- [ ] La reconciliación downstream no fue interpretada como condición para reabrir un Sprint ya cerrado ni como autoridad sobre el baseline oficial.
+- [ ] El HEAD integrado coincide con el candidate aprobado.
+- [ ] Código, tests y documentación `CURRENT_STATE` aplicables quedaron coherentes.
+- [ ] Nuevas rutas internas relevantes tienen owner, clasificación y cobertura explícitos.
+- [ ] No permanece drift interno relevante sin resolver, aceptar o documentar.
+- [ ] El cierre no depende de repositorios, observadores o mecanismos externos.
 
 ---
 
