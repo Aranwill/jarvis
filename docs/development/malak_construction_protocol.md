@@ -616,6 +616,19 @@ RDD Candidate Conformance PASS
 != Owner approval
 ```
 
+Domain result enums pueden existir dentro del artefacto evaluado, pero no
+redefinen el enum terminal RDD.
+
+```text
+domain result (ej. INVALID)
+!= RDD validation result
+
+RDD terminal result remains:
+PASS | FAIL | INCONCLUSIVE
+```
+
+Todo mapping dominio → RDD debe ser explícito y fail-closed.
+
 RDD Stage 1 produce evidencia de construcción con autoridad cero.
 
 ---
