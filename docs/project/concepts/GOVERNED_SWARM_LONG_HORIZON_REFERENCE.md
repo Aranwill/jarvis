@@ -256,8 +256,6 @@ eventos, contratos, estados y referencias de artefactos resulten suficientes.
 
 ---
 
----
-
 ## 9. Checkpoints y recuperación
 
 Las tareas largas deberán poder:
