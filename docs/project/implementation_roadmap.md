@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-20
-as_of_commit: 37af50628fb2d56fa48113a65a53de51049bd8da
+as_of_commit: e6f2b5060131f961f1054e83203cb7da91f5302c
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -426,8 +426,9 @@ independent validation: PASS
 - `Projection READY != Admission ELIGIBLE`; el adapter de consumo integrado
   bloquea projections no consumibles y delega una vez a Admission cuando aplica,
   sin wiring conversacional/runtime, persistencia ni side effects.
-- PR #93 integró únicamente G0/G1 de Candidate Content Identity; G2,
-  implementación y propagación no están autorizados.
+- PR #93 integró G0/G1 de Candidate Content Identity; PR #123 integró G2 y
+  PR #126 integró Content Identity Propagation & Binding G2. Ninguna de esas
+  integraciones concede Persistence Authorization.
 - PR #97–#99 preservaron y diseñaron Evidence-Bound Cognition / Progressive
   Cognitive Assurance a nivel conceptual/G0/G1.
 - PR #100–#109 completaron activación normativa, trazabilidad, reconciliaciones y
@@ -441,6 +442,11 @@ independent validation: PASS
   frontera determinista same-process, sin Conversation/runtime wiring.
 - PR #120 agregó el Evidence Map externo al Research Horizon de forma aditiva y
   no autorizó implementación adicional.
+- PR #140 integró Episodic Persistence Readiness G2B como frontera aislada
+  `READY | HOLD | DENIED`, sin autorización ni durable write.
+- PR #146 integró G2P-B — Persistence Authorization Request Composition; compone
+  una `AuthorizationRequest` exacta pero no consulta PDP, no ejecuta PEP y no
+  autoriza ni persiste.
 - Signal Boundary G2 está integrado / aislado.
 - Conversation G2B permanece bloqueado y no autorizado.
 - Sprint 7.12 no está autorizado.
@@ -1353,7 +1359,7 @@ Toda selección futura deberá justificarse contra:
 |---|---|---|
 | Governed Self-Review Bootstrap Task | Concept integrado / ejecución no autorizada | Promovido por el Owner como una de las primeras tareas candidatas de autoinspección gobernada; requiere admission contra baseline exacto y autorización explícita antes de ejecutar. |
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
-| Candidate Content Identity G2 | No aprobada | G0/G1 integrado por PR #93; debe congelar canonicalización/identity semantics antes de implementación y no autoriza Persistence Authorization |
+| Candidate Content Identity G2 + Propagation/Binding | Completado / integrado | G0/G1 PR #93; G2 integrado por PR #123; propagation/binding integrado por PR #126. Content identity != Persistence Authorization. |
 | Cognitive Assurance — Constitutional Impact Review | Completado | G0/G1 completado; su promoción normativa fue aceptada mediante ADR-005, Blueprint v0.6.2-alpha y Cognitive Constitution v1.1.0 |
 | G2A — Protected Finalization Foundation | Completado | Integrado por PR #110 como foundation determinista aislada; no implica live Conversation assurance |
 | Assurance Signal Authority / Projection G2 | Completado / integrado | G0/G1 integrado por PR #111; specification endurecida por PR #117; implementación G2 integrada por PR #118 como frontera same-process aislada. No autoriza G2B. |
@@ -1612,13 +1618,13 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-37af50628fb2d56fa48113a65a53de51049bd8da
+e6f2b5060131f961f1054e83203cb7da91f5302c
 
 CURRENT MATERIAL COGNITIVE HEAD
 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 
 CURRENT EPISODIC PRODUCT HEAD
-9438c66e315faa2b4c8c3f0a99d4e1e9619992c3
+39366da01f793cf8f5d3856c47457954ee758925
 
 SPRINT 7.11 INTEGRATION REFERENCE
 3413e8ccb348440aea757d1feccde25c65be011f
@@ -1639,10 +1645,10 @@ LATEST CODE UNIT
 E5-B1 — Read-only Explorer
 
 LATEST EPISODIC PRODUCT UNIT
-Episodic Admission Governed Projection Consumption Boundary
+G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
 
-LATEST MEMORY DESIGN UNIT
-Episodic Candidate Content Identity — G0/G1 ONLY
+LATEST MEMORY CODE UNIT
+G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
 
 LATEST COGNITIVE ASSURANCE UNIT
 Assurance Signal Boundary G2 — INTEGRATED / ISOLATED
@@ -1696,6 +1702,24 @@ SPRINT 7.12
 NONE AUTHORIZED
 
 CANDIDATE CONTENT IDENTITY G2
+INTEGRATED — PR #123
+
+CONTENT IDENTITY PROPAGATION & BINDING G2
+INTEGRATED — PR #126
+
+EPISODIC PERSISTENCE READINESS G2B
+INTEGRATED / ISOLATED — PR #140
+
+PERSISTENCE AUTHORIZATION REQUEST COMPOSITION G2P-B
+INTEGRATED / ISOLATED — PR #146
+
+PERSISTENCE AUTHORIZATION DECISION / ENFORCEMENT
+NOT AUTHORIZED
+
+PROTECTED DURABLE WRITE
+NOT AUTHORIZED
+
+PERSISTENT MEMORY
 NOT AUTHORIZED
 
 RDD STAGE 2
