@@ -143,8 +143,11 @@ Para cambios materiales sobre contratos críticos, validar:
 - [ ] La secuencia aplicable quedó registrada y no dependió de memoria conversacional.
 - [ ] Se ejecutaron por separado G0/G1, hardening, cuatro preguntas de ley, Design 4R y RDD Stage 1 Design Check antes de RED.
 - [ ] RED y GREEN conservaron identidad de candidate y evidencia propia.
-- [ ] Post-GREEN se ejecutaron por separado RDD Stage 1 Candidate Conformance y Candidate FULL 4R.
+- [ ] Post-GREEN se ejecutó primero Candidate FULL 4R sobre el candidate material exacto.
+- [ ] Todo finding bloqueante de FULL 4R pasó por Bounded Correction o `ESCALATE`; no se saltó directamente a E2E/CI.
+- [ ] Toda corrección que cambió el candidate fue verificada por Fix Validator y provocó revalidación de la evidencia afectada.
 - [ ] E2E/integration, CI y validación independiente aplicable quedaron candidate-bound.
+- [ ] RDD Stage 1 Candidate Conformance se ejecutó sólo después de reunir la evidencia candidate-bound requerida y antes de human review/Ready.
 - [ ] Ninguna etapa fue considerada equivalente a otra por similitud.
 - [ ] Toda etapa `N/A` conservó razón y evidencia explícitas.
 - [ ] `tests green` no fue utilizado como sustituto del cierre integral.
@@ -285,8 +288,11 @@ Para todo cambio material sujeto a RDD Stage 1, validar los checkpoints por sepa
 - [ ] RDD Stage 2 permanece explícitamente no autorizado.
 - [ ] Un resultado distinto de PASS bloquea RED.
 
-### Post-GREEN / pre-close — RDD Stage 1 Candidate Conformance
+### Post-GREEN / after required candidate validation / pre-human-review — RDD Stage 1 Candidate Conformance
 
+- [ ] Candidate FULL 4R requerido quedó completado antes de Candidate Conformance.
+- [ ] Findings bloqueantes quedaron resueltos o escalados; las bounded corrections fueron validadas.
+- [ ] E2E/integration, CI y validación independiente requerida quedaron completados antes de Candidate Conformance.
 - [ ] El manifest/evidencia corresponde al baseline y candidate exactos.
 - [ ] El baseline es ancestro del candidate cuando aplica el manifest v1.
 - [ ] Scope, specification, gate y validations están ligados al candidate.
