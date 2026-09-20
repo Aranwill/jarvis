@@ -789,3 +789,212 @@ def test_e2_red_c35_model_cannot_cite_unknown_evidence_refs(
 
     with pytest.raises(RuntimeError):
         execute(capability)
+
+# E2 Structural Evidence Integration V0 — RED
+
+
+def build_structural_e2_capability(
+    tmp_path: Path,
+    *,
+    provider: ConversationProvider | None = None,
+    symbol_count: int = 1,
+):
+    repo, _ = make_repo(tmp_path)
+
+    classes = "\n\n".join(
+        f"class NeedleComponent{index}:\n    pass"
+        for index in range(1, symbol_count + 1)
+    )
+    write(
+        repo,
+        "src/malak/component.py",
+        "import os\n"
+        "from malak.services import planner\n\n"
+        f"{classes}\n",
+    )
+    git(repo, "add", "src/malak/component.py")
+    git(repo, "commit", "--no-gpg-sign", "-m", "structural fixture")
+
+    repository_reader = GitRepositoryReader(repo)
+    knowledge_reader = GovernedKnowledgeReader(repository_reader)
+    structure_module = import_module("malak.infrastructure.repository_structure")
+    projection = structure_module.RepositoryStructuralProjector(
+        repository_reader
+    ).project()
+
+    actual_provider = provider or RecordingProvider(
+        "Grounded structural inspection [S1]"
+    )
+    capability = engineering_module().EngineeringInspectCapability(
+        repository_reader=repository_reader,
+        knowledge_reader=knowledge_reader,
+        structural_projection=projection,
+        conversation_service=build_service(actual_provider),
+        provider_name="recording",
+        model="test-model",
+    )
+    return (
+        repo,
+        repository_reader.baseline_commit,
+        repository_reader,
+        knowledge_reader,
+        projection,
+        actual_provider,
+        capability,
+    )
+
+
+def test_e2_structural_red_c01_constructor_accepts_same_baseline_projection(
+    tmp_path: Path,
+) -> None:
+    _, baseline, _, _, projection, _, capability = build_structural_e2_capability(
+        tmp_path
+    )
+
+    assert projection.baseline_commit == baseline
+    assert capability._baseline_commit == baseline
+
+
+def test_e2_structural_red_c02_projection_baseline_mismatch_fails_closed(
+    tmp_path: Path,
+) -> None:
+    root_a = tmp_path / "a"
+    root_b = tmp_path / "b"
+    root_a.mkdir()
+    root_b.mkdir()
+
+    repo_a, _ = make_repo(root_a)
+    repo_b, _ = make_repo(root_b)
+    write(repo_b, "src/malak/extra.py", "class Extra:\n    pass\n")
+    git(repo_b, "add", "src/malak/extra.py")
+    git(repo_b, "commit", "--no-gpg-sign", "-m", "different baseline")
+
+    reader_a = GitRepositoryReader(repo_a)
+    knowledge_a = GovernedKnowledgeReader(reader_a)
+    structure_module = import_module("malak.infrastructure.repository_structure")
+    projection_b = structure_module.RepositoryStructuralProjector(
+        GitRepositoryReader(repo_b)
+    ).project()
+
+    with pytest.raises(RuntimeError):
+        engineering_module().EngineeringInspectCapability(
+            repository_reader=reader_a,
+            knowledge_reader=knowledge_a,
+            structural_projection=projection_b,
+            conversation_service=build_service(RecordingProvider()),
+            provider_name="recording",
+        )
+
+
+def test_e2_structural_red_c03_exact_symbol_adds_structural_evidence(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    execute(capability, "malak.component.NeedleComponent1")
+    packet = evidence_packet(provider)
+
+    assert packet["repository_evidence"] == []
+    assert packet["knowledge_evidence"] == []
+    assert len(packet["structural_evidence"]) == 1
+    fact = packet["structural_evidence"][0]
+    assert fact["ref"] == "S1"
+    assert fact["fact_type"] == "symbol"
+    assert fact["qualified_name"] == "malak.component.NeedleComponent1"
+    assert fact["module_name"] == "malak.component"
+    assert fact["baseline_commit"] == packet["baseline_commit"]
+    assert len(fact["blob_sha"]) == 40
+
+
+def test_e2_structural_red_c04_exact_module_adds_symbols_then_imports(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    execute(capability, "malak.component")
+    structural = evidence_packet(provider)["structural_evidence"]
+
+    assert structural[0]["fact_type"] == "symbol"
+    assert structural[0]["qualified_name"] == "malak.component.NeedleComponent1"
+    assert [item["fact_type"] for item in structural[1:]] == ["import", "import"]
+    assert [item["ref"] for item in structural] == ["S1", "S2", "S3"]
+
+
+def test_e2_structural_red_c05_substring_does_not_create_structural_match(
+    tmp_path: Path,
+) -> None:
+    provider = RecordingProvider("Grounded textual inspection [R1]")
+    *_, capability = build_structural_e2_capability(
+        tmp_path,
+        provider=provider,
+    )
+
+    execute(capability, "NeedleComponent")
+    packet = evidence_packet(provider)
+
+    assert provider.calls == 1
+    assert packet["repository_evidence"]
+    assert packet["structural_evidence"] == []
+
+
+def test_e2_structural_red_c06_structural_context_is_bounded_and_marks_truncation(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(
+        tmp_path,
+        symbol_count=13,
+    )
+
+    execute(capability, "malak.component")
+    packet = evidence_packet(provider)
+
+    assert len(packet["structural_evidence"]) == 12
+    assert packet["limitations"]["context_truncated"] is True
+
+
+def test_e2_structural_red_c07_structural_only_evidence_uses_one_model_call(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    execute(capability, "malak.component.NeedleComponent1")
+
+    assert provider.calls == 1
+
+
+def test_e2_structural_red_c08_no_r_k_or_s_remains_unconfirmed_without_model(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    result = execute(capability, "absent-structural-token")
+
+    assert provider.calls == 0
+    assert "status: UNCONFIRMED" in result
+
+
+def test_e2_structural_red_c09_unknown_structural_ref_is_rejected(
+    tmp_path: Path,
+) -> None:
+    provider = RecordingProvider("Forged structural citation [S999]")
+    *_, capability = build_structural_e2_capability(
+        tmp_path,
+        provider=provider,
+    )
+
+    with pytest.raises(RuntimeError):
+        execute(capability, "malak.component.NeedleComponent1")
+
+
+def test_e2_structural_red_c10_system_prompt_bounds_structural_evidence(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    execute(capability, "malak.component.NeedleComponent1")
+    prompt = provider.requests[-1].system_prompt.lower()
+
+    assert "structural" in prompt
+    assert "syntax" in prompt
+    assert "dependency" in prompt
+    assert "authority" in prompt

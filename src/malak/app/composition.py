@@ -8,6 +8,7 @@ from malak.capabilities.engineering_analyze import EngineeringAnalyzeCapability
 from malak.capabilities.engineering_inspect import EngineeringInspectCapability
 from malak.capabilities.engineering_propose import EngineeringProposeCapability
 from malak.infrastructure.repository_reader import GitRepositoryReader
+from malak.infrastructure.repository_structure import RepositoryStructuralProjector
 from malak.kernel.kernel import Kernel
 from malak.kernel.registry import CapabilityRegistry
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
@@ -74,11 +75,13 @@ def build_engineering_kernel_set(
 
     repository_reader = GitRepositoryReader(repository_root)
     knowledge_reader = GovernedKnowledgeReader(repository_reader)
+    structural_projection = RepositoryStructuralProjector(repository_reader).project()
 
     capabilities = {
         "inspect": EngineeringInspectCapability(
             repository_reader=repository_reader,
             knowledge_reader=knowledge_reader,
+            structural_projection=structural_projection,
             conversation_service=service,
             provider_name=provider_name,
             model=model,
