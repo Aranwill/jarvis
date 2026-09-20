@@ -923,12 +923,18 @@ def test_e2_structural_red_c04_exact_module_adds_symbols_then_imports(
 def test_e2_structural_red_c05_substring_does_not_create_structural_match(
     tmp_path: Path,
 ) -> None:
-    *_, provider, capability = build_structural_e2_capability(tmp_path)
+    provider = RecordingProvider("Grounded textual inspection [R1]")
+    *_, capability = build_structural_e2_capability(
+        tmp_path,
+        provider=provider,
+    )
 
-    result = execute(capability, "NeedleComponent")
+    execute(capability, "NeedleComponent")
+    packet = evidence_packet(provider)
 
-    assert provider.calls == 0
-    assert "status: UNCONFIRMED" in result
+    assert provider.calls == 1
+    assert packet["repository_evidence"]
+    assert packet["structural_evidence"] == []
 
 
 def test_e2_structural_red_c06_structural_context_is_bounded_and_marks_truncation(
