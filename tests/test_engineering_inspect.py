@@ -998,4 +998,3 @@ def test_e2_structural_red_c10_system_prompt_bounds_structural_evidence(
     assert "syntax" in prompt
     assert "dependency" in prompt
     assert "authority" in prompt
-
