@@ -172,7 +172,11 @@ class EngineeringInspectCapability(Capability):
                 "engineering inspection model response exceeds hard UTF-8 byte limit"
             )
 
-        _validate_model_evidence_refs(
+        (
+            repository_citation_count,
+            knowledge_citation_count,
+            structural_citation_count,
+        ) = _validate_model_evidence_refs(
             analysis,
             repository_evidence=repository_evidence,
             knowledge_evidence=knowledge_evidence,
@@ -186,6 +190,9 @@ class EngineeringInspectCapability(Capability):
             repository_evidence=repository_evidence,
             knowledge_evidence=knowledge_evidence,
             structural_evidence=structural_evidence,
+            repository_citation_count=repository_citation_count,
+            knowledge_citation_count=knowledge_citation_count,
+            structural_citation_count=structural_citation_count,
             repository_skipped_unreadable=bundle.repository_skipped_unreadable,
             context_truncated=context_truncated,
         )
@@ -271,7 +278,7 @@ def _validate_model_evidence_refs(
     repository_evidence: list[dict[str, object]],
     knowledge_evidence: list[dict[str, object]],
     structural_evidence: list[dict[str, object]],
-) -> None:
+) -> tuple[int, int, int]:
     allowed_refs = {
         str(item["ref"])
         for item in (*repository_evidence, *knowledge_evidence, *structural_evidence)
@@ -284,6 +291,12 @@ def _validate_model_evidence_refs(
         raise RuntimeError(
             f"engineering inspection model cited unknown evidence refs: {joined}"
         )
+
+    return (
+        sum(ref.startswith("R") for ref in cited_refs),
+        sum(ref.startswith("K") for ref in cited_refs),
+        sum(ref.startswith("S") for ref in cited_refs),
+    )
 
 
 def _render_unconfirmed(
@@ -301,6 +314,11 @@ def _render_unconfirmed(
             "status: UNCONFIRMED",
             "repository_evidence_count: 0",
             "knowledge_evidence_count: 0",
+            "structural_evidence_count: 0",
+            "repository_citation_count: 0",
+            "knowledge_citation_count: 0",
+            "structural_citation_count: 0",
+            "model_inference_count: 0",
             f"repository_skipped_unreadable: {repository_skipped_unreadable}",
             f"context_truncated: {str(context_truncated).lower()}",
             "authority_effect: none",
@@ -320,6 +338,9 @@ def _render_grounded(
     repository_evidence: list[dict[str, object]],
     knowledge_evidence: list[dict[str, object]],
     structural_evidence: list[dict[str, object]],
+    repository_citation_count: int,
+    knowledge_citation_count: int,
+    structural_citation_count: int,
     repository_skipped_unreadable: int,
     context_truncated: bool,
 ) -> str:
@@ -330,6 +351,11 @@ def _render_grounded(
         "status: GROUNDED",
         f"repository_evidence_count: {len(repository_evidence)}",
         f"knowledge_evidence_count: {len(knowledge_evidence)}",
+        f"structural_evidence_count: {len(structural_evidence)}",
+        f"repository_citation_count: {repository_citation_count}",
+        f"knowledge_citation_count: {knowledge_citation_count}",
+        f"structural_citation_count: {structural_citation_count}",
+        "model_inference_count: 1",
         f"repository_skipped_unreadable: {repository_skipped_unreadable}",
         f"context_truncated: {str(context_truncated).lower()}",
         "authority_effect: none",
