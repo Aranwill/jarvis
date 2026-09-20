@@ -136,6 +136,36 @@ Cuando el cambio defina o modifique una superficie crítica, validar antes de RE
 - [ ] El candidate material ejecutó FULL 4R post-GREEN/pre-close cuando correspondía.
 
 ---
+# Secuencia crítica obligatoria
+
+Para cambios materiales sobre contratos críticos, validar:
+
+- [ ] La secuencia aplicable quedó registrada y no dependió de memoria conversacional.
+- [ ] Se ejecutaron por separado G0/G1, hardening, cuatro preguntas de ley, Design 4R y RDD Stage 1 Design Check antes de RED.
+- [ ] RED y GREEN conservaron identidad de candidate y evidencia propia.
+- [ ] Post-GREEN se ejecutaron por separado RDD Stage 1 Candidate Conformance y Candidate FULL 4R.
+- [ ] E2E/integration, CI y validación independiente aplicable quedaron candidate-bound.
+- [ ] Ninguna etapa fue considerada equivalente a otra por similitud.
+- [ ] Toda etapa `N/A` conservó razón y evidencia explícitas.
+- [ ] `tests green` no fue utilizado como sustituto del cierre integral.
+- [ ] Ready y merge permanecieron bajo autoridad humana.
+
+---
+
+# Auditoría retrospectiva de implementaciones
+
+Cuando se audite la aplicación histórica del flujo, validar:
+
+- [ ] La auditoría recorre todas las unidades materiales incluidas en el alcance.
+- [ ] Cada unidad recibe una disposición explícita: `HISTORICALLY_EVIDENCED`, `CURRENT_STATE_REVALIDATED`, `PARTIALLY_EVIDENCED`, `UNCONFIRMED`, `GAP_REQUIRES_HARDENING` o `NOT_APPLICABLE_WITH_REASON`.
+- [ ] Evidencia ausente no se interpreta automáticamente como incumplimiento.
+- [ ] No se reconstruyen PASS desde memoria, inferencia o conversación.
+- [ ] No se crean manifests/receipts retroactivos para simular evidencia histórica.
+- [ ] No se reescribe historia Git para fabricar conformidad.
+- [ ] Findings actuales generan remediation candidates nuevos y gobernados.
+- [ ] La auditoría no concede autoridad ni modifica baseline por sí misma.
+
+---
 # Revisión proporcional al riesgo
 
 Cuando corresponda, validar:
