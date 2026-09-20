@@ -429,6 +429,11 @@ para:
 - construir experimentos aislados;
 - evaluar resultados.
 
+Su criterio deberá apoyarse primero en instrumentos verificables —por ejemplo tests,
+métricas, hashes, dependency/call graphs, contracts, baselines y evidencia reproducible—
+cuando éstos puedan responder la pregunta. Los modelos deberán concentrarse en
+interpretación, hipótesis y diseño donde la evidencia determinista no sea suficiente.
+
 Nunca podrá:
 
 - aprobar su propia evolución;
