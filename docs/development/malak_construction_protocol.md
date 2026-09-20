@@ -421,6 +421,87 @@ El E2E no puede omitirse silenciosamente. Cuando no exista un runtime E2E aplica
 
 ---
 
+## 5.2 Critical Contract Hardening Gate
+
+Todo cambio material que defina o modifique contratos críticos debe cerrar
+interpretaciones materiales antes de RED.
+
+Se consideran superficies críticas, entre otras:
+
+```text
+authority
+evidence
+evaluation
+knowledge
+memory
+security
+tools
+agents
+self-model
+learning
+self-improvement
+```
+
+El hardening debe revisar explícitamente:
+
+```text
+ambiguity / alternate material interpretations
+adversarial interpretation
+fail-open vs fail-closed behavior
+authority boundaries
+input/schema strictness
+candidate/evidence binding
+unknown/missing/duplicate handling
+skip/bypass paths
+resource / side-effect boundaries
+rollback / invalidation conditions
+```
+
+Regla de cierre:
+
+```text
+known material ambiguity unresolved
+→ INCONCLUSIVE
+→ RED NOT ADMISSIBLE
+```
+
+No se exige demostrar ausencia absoluta de toda ambigüedad futura. Sí se exige
+que no permanezca ninguna ambigüedad material conocida sin disposición explícita.
+
+## 5.3 Cuatro preguntas de ley != FULL 4R
+
+Los dos controles son obligatorios cuando correspondan y no se sustituyen.
+
+```text
+Cuatro preguntas de ley
+1. respeta Blueprint
+2. respeta Cognitive Constitution
+3. respeta Governance Constitution
+4. mantiene o reduce complejidad del Kernel
+
+FULL 4R
+Risk
+Readability
+Reliability
+Resilience
+```
+
+Las cuatro preguntas validan alineación arquitectónica/gobernada.
+FULL 4R revisa el candidato bajo lentes de ingeniería.
+
+```text
+law questions PASS
+!= FULL 4R executed
+
+FULL 4R PASS
+!= architectural admission
+```
+
+Para un contrato crítico, el diseño endurecido debe pasar las cuatro preguntas
+antes de RED y el candidato material debe conservar evidencia FULL 4R separada
+por lente antes del cierre.
+
+---
 # 6. Cuatro lentes obligatorios
 
 Los cuatro lentes definidos por el Engineering Method son:
