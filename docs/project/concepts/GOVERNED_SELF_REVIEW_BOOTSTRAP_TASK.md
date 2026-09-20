@@ -1,4 +1,3 @@
-
 ---
 title: Malāk Governed Self-Review Bootstrap Task
 status: concept
