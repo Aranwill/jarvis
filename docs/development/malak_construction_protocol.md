@@ -632,6 +632,125 @@ Todo mapping dominio → RDD debe ser explícito y fail-closed.
 RDD Stage 1 produce evidencia de construcción con autoridad cero.
 
 ---
+## 5.5 Secuencia crítica obligatoria y no sustituible
+
+Para todo cambio material que afecte un contrato crítico, la secuencia aplicable
+debe quedar registrada explícitamente. No puede depender de memoria del operador,
+del contexto conversacional ni de interpretación de un agente/modelo.
+
+```text
+G0 / admission
+        ↓
+G1 design
+        ↓
+Critical Contract Hardening
+        ↓
+Cuatro preguntas de ley
+        ↓
+Design 4R
+        ↓
+RDD Stage 1 Design Check
+        ↓
+RED
+        ↓
+GREEN
+        ↓
+RDD Stage 1 Candidate Conformance
+        ↓
+Candidate FULL 4R
+        ↓
+E2E / integration validation
+        ↓
+CI / candidate-bound evidence
+        ↓
+independent validation when applicable
+        ↓
+human review
+        ↓
+Owner Ready / Merge
+        ↓
+post-merge validation / reconciliation
+```
+
+Reglas:
+
+1. una etapa no sustituye a otra;
+2. una etapa omitida requiere disposición explícita y justificada;
+3. un `FAIL` o `INCONCLUSIVE` bloqueante impide avanzar;
+4. todo resultado debe referirse al candidate exacto aplicable;
+5. si cambia el candidate, se revalida la evidencia afectada;
+6. ningún agente/modelo puede auto-declarar una etapa equivalente por similitud;
+7. `tests green` no equivale a cierre del flujo;
+8. `Design 4R PASS` no equivale a `Candidate FULL 4R PASS`;
+9. `RDD Design Check PASS` no equivale a `RDD Candidate Conformance PASS`;
+10. ningún resultado concede autoridad de Ready, merge o promoción.
+
+Cuando una etapa sea realmente no aplicable, debe registrarse:
+
+```text
+stage
+disposition: N/A
+reason
+evidence
+authority_effect: none
+```
+
+`N/A` sin razón y evidencia no es válido.
+
+## 5.6 Auditoría retrospectiva del flujo de construcción
+
+Después de introducir o endurecer controles transversales del proceso de
+construcción, Malāk debe permitir una auditoría retrospectiva de las
+implementaciones existentes.
+
+El objetivo de esa auditoría no es reescribir la historia ni declarar fallos
+retroactivos por reglas que no existían todavía. Debe distinguir:
+
+```text
+HISTORICALLY_EVIDENCED
+CURRENT_STATE_REVALIDATED
+PARTIALLY_EVIDENCED
+UNCONFIRMED
+GAP_REQUIRES_HARDENING
+NOT_APPLICABLE_WITH_REASON
+```
+
+La auditoría debe evaluar, por unidad material o implementación relevante:
+
+```text
+baseline / candidate identity available
+G0/G1 or equivalent design evidence
+critical-contract classification
+hardening / ambiguity review
+four law questions
+Design 4R
+RED evidence
+GREEN evidence
+RDD Stage 1 design evidence
+RDD candidate-bound conformance
+Candidate FULL 4R
+E2E / integration validation
+CI / independent validation
+post-merge reconciliation
+authority boundaries / human merge
+```
+
+Reglas de auditoría:
+
+- evidencia ausente != evidencia de incumplimiento;
+- evidencia ausente => `UNCONFIRMED` salvo prueba contraria;
+- no reconstruir PASS desde memoria o inferencia;
+- no falsificar manifests/receipts retroactivos;
+- no reescribir commits históricos para simular conformidad;
+- findings actuales se corrigen mediante nuevos candidates gobernados;
+- la auditoría produce evidencia y deuda/hardening candidates, no autoridad;
+- cualquier remediation posterior requiere gates y autorización propios.
+
+La auditoría retrospectiva debe ejecutarse como unidad formal separada cuando
+el Owner la autorice; no se incorpora silenciosamente al sprint que introdujo
+las reglas.
+
+---
 # 6. Cuatro lentes obligatorios
 
 Los cuatro lentes definidos por el Engineering Method son:
