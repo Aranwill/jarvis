@@ -10,8 +10,13 @@ g0_result: pass
 g0_ledger: docs/project/sprints/proposals/MALAK-REPOSITORY-STRUCTURAL-PROJECTION-V0-G0-COVERAGE-LEDGER.md
 design_authorized_by: owner
 design_authorized_at: 2026-09-20
-red_authorized: false
-implementation_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-20
+red_baseline: 2e5f97aac41804461ceadd81680762b9e2313d13
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-20
 risk_class: 2
 ---
 
@@ -191,7 +196,7 @@ RED candidato:
 tests/test_repository_structure.py
 ```
 
-RED autorizado: `false`.
+RED autorizado: `true`.
 
 ## 10. Fuera de alcance
 
@@ -219,8 +224,8 @@ RDD Stage 2
 ```text
 G0                    PASS
 G1 design             ADMITTED
-RED                   NOT AUTHORIZED
-GREEN                 NOT AUTHORIZED
+RED                   AUTHORIZED
+GREEN                 AUTHORIZED
 
 Kernel delta          0
 Planner delta         0
@@ -229,4 +234,4 @@ persistent state      0
 authority delta       0
 ```
 
-El próximo gate, si el Owner lo aprueba, es RED y sólo RED.
+RED y GREEN fueron autorizados por el Owner el 2026-09-20. La aceptación y el merge continúan bajo decisión exclusiva del Owner.
