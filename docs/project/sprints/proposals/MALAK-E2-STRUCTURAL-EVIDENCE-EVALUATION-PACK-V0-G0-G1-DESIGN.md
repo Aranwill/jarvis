@@ -419,12 +419,14 @@ candidate identity strategy definida
 evaluation identity separada de authority
 ground truth provenance explícita
 ground truth reviewer separado del runner implementation actor
+Writer / Reviewer / Validator / Authority separation preservada
 case-set / runner / provider policy con binding e invalidación
 resultados limitados a PASS | FAIL | INCONCLUSIVE
 INCONCLUSIVE != PASS
 findings preservables por caso
 bounded correction sin ampliación automática
 Correction Budget explícito cuando exista un finding corregible
+independent fix validation cuando exista corrección
 authority_effect = none
 RDD Stage 2 = NOT AUTHORIZED
 ```
