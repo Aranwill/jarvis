@@ -241,7 +241,33 @@ Cuando forme parte del alcance del cambio, validar:
 
 # Perfil RDD progresivo
 
-Cuando se utilicen receipts o evidencia estructurada inspirada en Receipt-Driven Development, validar:
+Para todo cambio material sujeto a RDD Stage 1, validar los checkpoints por separado:
+
+### Pre-RED — RDD Stage 1 Design Check
+
+- [ ] Se definió cómo se liga baseline y candidate exactos.
+- [ ] Se definió provenance de evidencia y separación Writer/Reviewer/Validator/Authority.
+- [ ] Sólo se admiten `PASS`, `FAIL` o `INCONCLUSIVE`; `INCONCLUSIVE != PASS`.
+- [ ] Se definió que un cambio de candidate invalida la evidencia afectada.
+- [ ] Findings y bounded correction no pueden ampliar scope automáticamente.
+- [ ] `authority_effect` permanece `none`.
+- [ ] RDD Stage 2 permanece explícitamente no autorizado.
+- [ ] Un resultado distinto de PASS bloquea RED.
+
+### Post-GREEN / pre-close — RDD Stage 1 Candidate Conformance
+
+- [ ] El manifest/evidencia corresponde al baseline y candidate exactos.
+- [ ] El baseline es ancestro del candidate cuando aplica el manifest v1.
+- [ ] Scope, specification, gate y validations están ligados al candidate.
+- [ ] La evidencia 4R requerida está presente y corresponde al candidate.
+- [ ] Findings y correction rounds fueron preservados y son exactos.
+- [ ] Producer/validator provenance está presente y la independencia real fue demostrada cuando correspondía.
+- [ ] El resultado terminal fue agregado correctamente.
+- [ ] `authority_effect` es exactamente `none`.
+- [ ] No aparecieron estados/campos/efectos de RDD Stage 2.
+- [ ] Si el candidate cambió, se regeneró/revalidó la evidencia RDD afectada.
+
+Además, validar las invariantes transversales:
 
 - [ ] Se preservó `Evidence != Receipt != Validation != Decision != Authority`.
 - [ ] El receipt o manifest está ligado a una identidad exacta de candidato.
