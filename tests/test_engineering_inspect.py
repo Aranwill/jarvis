@@ -1126,4 +1126,3 @@ def test_e2_observability_red_c08_truncation_preserved_with_structural_count(
     assert packet["limitations"]["context_truncated"] is True
     assert "structural_evidence_count: 12" in result
     assert "context_truncated: true" in result
-
