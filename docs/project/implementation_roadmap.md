@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-20
-as_of_commit: 996a45359784efc390c3993851e8c16f12163913
+as_of_commit: 37af50628fb2d56fa48113a65a53de51049bd8da
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -40,7 +40,7 @@ gobernanza o contrato aprobado.
 ## Estado CURRENT reconciliado — 2026-09-20
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@996a45359784efc390c3993851e8c16f12163913`.
+`Aranwill/jarvis/main@37af50628fb2d56fa48113a65a53de51049bd8da`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -93,6 +93,18 @@ status    DEFERRED
 
 E5-B3 — Engineering Artifact Browser
 status    DEFERRED
+
+Construction Flow Compliance Audit V1
+PR #173
+merge     419d71f05233f98eecd849e986ae5af9a5d8a068
+status    INTEGRATED
+result    13/13 units reviewed / 0 current blocking findings
+
+Governed Self-Review Bootstrap Task
+PR #174
+merge     37af50628fb2d56fa48113a65a53de51049bd8da
+status    CONCEPT INTEGRATED / FIRST-TASK CANDIDATE
+execution NOT AUTHORIZED
 ```
 
 La validación candidate-bound final de E4 quedó registrada en Validation #330
@@ -1339,6 +1351,7 @@ Toda selección futura deberá justificarse contra:
 
 | Propuesta | Estado | Observación |
 |---|---|---|
+| Governed Self-Review Bootstrap Task | Concept integrado / ejecución no autorizada | Promovido por el Owner como una de las primeras tareas candidatas de autoinspección gobernada; requiere admission contra baseline exacto y autorización explícita antes de ejecutar. |
 | Preparación del AKS para GraphRAG | No aprobada | No implica implementar GraphRAG |
 | Candidate Content Identity G2 | No aprobada | G0/G1 integrado por PR #93; debe congelar canonicalización/identity semantics antes de implementación y no autoriza Persistence Authorization |
 | Cognitive Assurance — Constitutional Impact Review | Completado | G0/G1 completado; su promoción normativa fue aceptada mediante ADR-005, Blueprint v0.6.2-alpha y Cognitive Constitution v1.1.0 |
@@ -1599,7 +1612,7 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-996a45359784efc390c3993851e8c16f12163913
+37af50628fb2d56fa48113a65a53de51049bd8da
 
 CURRENT MATERIAL COGNITIVE HEAD
 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
@@ -1666,6 +1679,12 @@ INTEGRATED
 
 ENGINEERING INTELLIGENCE E5-B2/B3
 DEFERRED
+
+CONSTRUCTION FLOW COMPLIANCE AUDIT V1
+INTEGRATED / 13 OF 13 / 0 CURRENT BLOCKERS
+
+GOVERNED SELF-REVIEW BOOTSTRAP
+CONCEPT INTEGRATED / FIRST-TASK CANDIDATE / EXECUTION NOT AUTHORIZED
 
 CONVERSATION G2B
 BLOCKED / NOT AUTHORIZED

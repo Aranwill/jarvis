@@ -3,7 +3,7 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-09-20
-as_of_commit: 996a45359784efc390c3993851e8c16f12163913
+as_of_commit: 37af50628fb2d56fa48113a65a53de51049bd8da
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -82,6 +82,13 @@ Este contexto fue reconciliado a partir de:
 - integración de E4 — Engineering Propose mediante PR #152;
 - validación candidate-bound final de E4 mediante Validation #330, con
   `1168 passed` en Ubuntu y Windows;
+- integración de MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1 mediante PR #173,
+  con 13/13 unidades revisadas, 0 findings bloqueantes actuales y separación
+  explícita entre evidencia histórica y revalidación de estado actual;
+- integración de Governed Self-Review Bootstrap Task mediante PR #174 como
+  referencia conceptual no normativa y candidata a una de las primeras tareas
+  gobernadas de autoinspección; ejecución e implementación permanecen no
+  autorizadas;
 
 El documento:
 
@@ -139,7 +146,7 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             996a45359784efc390c3993851e8c16f12163913
+HEAD integrado actual:             37af50628fb2d56fa48113a65a53de51049bd8da
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última unidad de código integrada: E5-B1 — Read-only Explorer
@@ -158,6 +165,8 @@ Sprint posterior autorizado:       ninguno
 Signal Boundary G2:                integrado / aislado
 Conversation G2B:                  bloqueado / no autorizado
 RDD Stage 2:                       no autorizado
+Construction Flow Audit V1:        integrada / 13 de 13 / 0 blockers actuales
+Governed Self-Review Bootstrap:     concept integrado / first-task candidate / ejecución no autorizada
 ```
 
 Sprint 7.11 — `Reproducible Validation Pipeline Foundation` fue admitido,
@@ -382,7 +391,7 @@ D:\Ollama\jarvis
 
 El vertical bounded de Engineering Intelligence y sus superficies read-only está
 integrado hasta E5-B1. El HEAD reconciliado es
-`main@996a45359784efc390c3993851e8c16f12163913`:
+`main@37af50628fb2d56fa48113a65a53de51049bd8da`:
 
 ```text
 E0 Repository Read          PR #147  INTEGRATED
@@ -1186,7 +1195,7 @@ Estado reconciliado:
 
 ```text
 rama permanente: main
-HEAD integrado de referencia: 996a45359784efc390c3993851e8c16f12163913
+HEAD integrado de referencia: 37af50628fb2d56fa48113a65a53de51049bd8da
 commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
 Sprint 7.7: cerrado
 Sprint 7.8: completado
@@ -1500,7 +1509,7 @@ integrar E5-A mediante PR #155 y E5-B1 mediante PR #157, más el corrective pack
 documental de PR #161:
 
 ```text
-main@996a45359784efc390c3993851e8c16f12163913
+main@37af50628fb2d56fa48113a65a53de51049bd8da
 active_work_branch@NONE
 ```
 
