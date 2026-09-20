@@ -1,6 +1,6 @@
 # Malāk Construction Protocol
 
-Versión: 0.2.2
+Versión: 0.2.3
 
 Estado: Activo
 
@@ -79,7 +79,7 @@ Un requisito de `SECURITY.md` define una restricción o condición de seguridad;
 
 ## 3.1 Regla de inventario
 
-Toda revisión declarada `integral`, `completa`, `transversal`, de admisión de sprint, certificación, reconciliación o auditoría debe comenzar por un inventario recursivo de todos los archivos trackeados de los repositorios incluidos en el alcance.
+Toda revisión declarada `integral`, `completa`, `transversal`, de admisión de sprint, certificación, reconciliación o auditoría debe comenzar por un inventario recursivo de todos los archivos trackeados del repositorio oficial incluidos en el alcance.
 
 La revisión debe poder demostrar:
 
@@ -128,9 +128,9 @@ Un archivo expresamente prohibido por las instrucciones vigentes debe aparecer e
 Cuando el estado global de Malāk forme parte de la decisión, el inventario debe
 abarcar el repositorio oficial y todas las fuentes internas aplicables.
 
-La revisión no depende de infraestructura externa de observación, contexto o
-reconciliación. Ningún repositorio o servicio externo puede elevarse a source
-of truth, gate, prerequisite o autoridad sobre Malāk.
+Las fuentes de investigación o evidencia admitidas para la tarea pueden complementar
+la revisión, pero no sustituyen el baseline oficial ni adquieren por sí mismas
+condición de source of truth, gate, prerequisite o autoridad sobre Malāk.
 
 ## 3.4 Contexto de decisión activo
 
@@ -626,9 +626,10 @@ del propio repositorio.
 
 ## 10.2 Autoridad
 
-El cierre utiliza únicamente evidencia interna oficial. Ninguna infraestructura
-externa de observación, contexto o reconciliación constituye prerequisite,
-source of truth o autoridad de cierre.
+El cierre se determina sobre el estado oficial de Malāk y la evidencia interna
+aplicable. Las fuentes de investigación o evidencia admitidas pueden complementar
+la evaluación, pero no sustituyen el baseline oficial ni adquieren por sí mismas
+condición de source of truth o autoridad de cierre.
 
 ## 10.3 Gate antes de la siguiente admisión
 
