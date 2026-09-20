@@ -449,7 +449,22 @@ RDD Stage 1 Design Check != PASS
 → RED NOT AUTHORIZED
 ```
 
-### Post-GREEN / pre-close — RDD Stage 1 Candidate Conformance
+### Post-GREEN / after required candidate validation / pre-human-review — RDD Stage 1 Candidate Conformance
+
+Este documento no redefine el orden canónico de cierre. Para este incremento
+rige `docs/development/malak_construction_protocol.md` §5.5.
+
+Antes de Candidate Conformance deben estar completas, cuando apliquen:
+
+```text
+targeted validation
+Candidate FULL 4R
+bounded correction + Fix Validator
+affected revalidation
+E2E / integration
+CI / candidate-bound evidence
+independent validation
+```
 
 El candidate material deberá demostrar contra
 `MALAK-EVIDENCE-MANIFEST/v1` o evidencia equivalente aprobada:
@@ -534,9 +549,10 @@ Design 4R                       PASS
 RDD Stage 1 Design Check        PASS
 RED                             NOT AUTHORIZED
 GREEN                           NOT AUTHORIZED
-RDD Candidate Conformance       PENDING
 Candidate FULL 4R               PENDING
+bounded correction / Fix Validator N/A until finding
 E2E / CI candidate validation   PENDING
+RDD Candidate Conformance       PENDING
 Owner Ready / Merge             OWNER ONLY
 ```
 

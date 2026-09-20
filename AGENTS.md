@@ -76,6 +76,39 @@ Los documentos derivados pueden resumir evidencia, pero no pueden establecer arq
 
 Los snapshots históricos de release describen el estado certificado en su fecha original. No deben reescribirse silenciosamente para coincidir con un HEAD posterior.
 
+## Flujo de construcción canónico
+
+Antes de planificar, implementar, revisar o cerrar un cambio material, todo
+actor de desarrollo debe consultar `docs/development/malak_construction_protocol.md`
+y `docs/development/development_checklist.md`.
+
+La secuencia detallada de contratos críticos vive **únicamente** en
+`malak_construction_protocol.md`, sección `5.5 Secuencia crítica obligatoria y no
+sustituible`. `AGENTS.md` funciona como punto de entrada y no replica esa
+secuencia para evitar drift entre copias.
+
+Reglas:
+
+```text
+no reconstruir el flujo desde memoria
+no reconstruirlo desde conversación previa
+no sustituir una etapa por otra por similitud
+no tratar tests verdes como cierre integral
+no usar fuentes externas de soporte como autoridad del proceso
+```
+
+Si el actor no puede consultar o reconciliar el Construction Protocol aplicable:
+
+```text
+STOP
+→ INCONCLUSIVE
+→ no implementar / no promover / no cerrar
+```
+
+El orden canónico, las disposiciones `N/A`, la invalidación por cambio de
+candidate, RDD Stage 1, 4R, Bounded Correction, E2E/CI y autoridad humana se
+resuelven desde el repositorio oficial de Malāk.
+
 ## Recuperación de contexto: repository-first
 
 Toda recuperación de contexto de Malāk parte del propio repositorio oficial y de
