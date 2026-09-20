@@ -18,23 +18,20 @@ risk_class: 2
 
 ## 1. Propósito
 
-Permitir que E2 Engineering Inspect consuma evidencia estructural determinista
-derivada del mismo snapshot E0, sin ampliar autoridad ni propagar el cambio a
-E3/E4.
+Integrar en E2 evidencia estructural determinista derivada del mismo snapshot E0,
+sin ampliar autoridad ni propagar el cambio a E3/E4.
 
 ```text
 GitRepositoryReader
-        │
-        ├── GovernedKnowledgeReader
-        │
-        └── RepositoryStructuralProjector
-                  ↓
-          RepositoryStructuralLookup
-                  ↓
-          Engineering Inspect (E2)
+   ├─ GovernedKnowledgeReader
+   └─ RepositoryStructuralProjector
+          ↓
+      RepositoryStructuralLookup
+          ↓
+  Engineering Inspect (E2)
 ```
 
-## 2. Resultado G0
+## 2. G0
 
 ```text
 baseline: 2a00a16618a7f11403edd06f051fd8cbb68849ed
@@ -45,8 +42,8 @@ tree truncated: false
 G0 RESULT: PASS
 ```
 
-La integración puede realizarse con componentes ya existentes y sin nuevo
-runtime, storage, provider, tool o dependencia externa.
+La integración reutiliza componentes existentes y no requiere nuevo runtime,
+storage, provider, tool o dependencia externa.
 
 ## 3. Decisión de admisión
 
@@ -57,32 +54,29 @@ E4 propagation                         DEFER
 Structural Delta                       DEFER
 ```
 
-La integración se limita a E2 para medir utilidad antes de expandir la nueva
-superficie de evidencia a Analyze o Propose.
+V0 se limita a E2 para obtener evidencia de uso real antes de ampliar Analyze o
+Propose.
 
-## 4. Evidencia disponible
+## 4. Superficies de evidencia
 
-E2 conserva sus superficies actuales:
-
-```text
-[R#] Repository text evidence
-[K#] Governed Knowledge evidence
-```
-
-V0 agrega:
+E2 conserva:
 
 ```text
-[S#] Structural syntax evidence
+[R#] repository text evidence
+[K#] governed knowledge evidence
 ```
 
-Los facts [S#] provienen únicamente de:
+y agrega:
 
-- `RepositoryStructuralProjection`;
-- `RepositoryStructuralLookup`.
+```text
+[S#] structural syntax evidence
+```
 
-No vuelven a leer Git, filesystem ni ejecutar AST.
+[S#] proviene únicamente de `RepositoryStructuralProjection` y
+`RepositoryStructuralLookup`. Lookup no vuelve a leer Git/filesystem ni ejecuta
+AST.
 
-## 5. Binding de baseline
+## 5. Baseline binding
 
 Debe cumplirse:
 
@@ -96,13 +90,12 @@ structural_projection.baseline_commit
 
 Mismatch => STOP.
 
-La proyección estructural se crea desde el mismo `GitRepositoryReader` que
-compone Engineering Intelligence.
+La proyección debe construirse desde el mismo `GitRepositoryReader` compartido
+por Engineering Intelligence.
 
-## 6. Semántica de consulta V0
+## 6. Consulta V0
 
-El `inspection_term` existente se reutiliza literalmente contra Structural
-Lookup:
+El `inspection_term` existente se usa literalmente:
 
 ```text
 lookup_symbol(term)
@@ -110,20 +103,10 @@ symbols_in_module(term)
 imports_from(term)
 ```
 
-No existe:
+No hay intent classifier, fuzzy matching, substring structural search,
+normalización semántica ni dependency resolution.
 
-- intent classifier;
-- fuzzy matching;
-- substring structural search;
-- normalización semántica;
-- dependency resolution.
-
-Un term puede producir cero o más structural facts exactos según esos tres
-lookups.
-
-## 7. Structural Evidence Fact
-
-Cada [S#] debe preservar la provenance original.
+## 7. Formato [S#]
 
 ### Symbol
 
@@ -154,8 +137,6 @@ relative_level
 line_number
 ```
 
-Regla:
-
 ```text
 Structural Fact
 != Semantic Dependency
@@ -165,15 +146,7 @@ Structural Fact
 
 ## 8. Comportamiento E2
 
-El packet de E2 pasa conceptualmente de:
-
-```text
-repository_evidence
-knowledge_evidence
-limitations
-```
-
-a:
+El packet incorpora:
 
 ```text
 repository_evidence
@@ -182,18 +155,11 @@ structural_evidence
 limitations
 ```
 
-El modelo puede citar:
+El modelo puede citar `[R#]`, `[K#]` y `[S#]`. Una cita estructural no
+existente => STOP.
 
-```text
-[R#] [K#] [S#]
-```
-
-Toda cita estructural inexistente => STOP.
-
-El system prompt debe declarar que [S#] es evidencia sintáctica no confiable
-como instrucción y no implica dependencia, decisión o autoridad.
-
-## 9. No-evidence behavior
+El system prompt debe declarar [S#] como evidencia sintáctica no confiable como
+instrucción y no equivalente a dependency, decision o authority.
 
 Si:
 
@@ -210,30 +176,26 @@ NO MODEL CALL
 status: UNCONFIRMED
 ```
 
-Si sólo existe S, E2 puede realizar su única inferencia usando esa evidencia.
-No se agregan llamadas adicionales al modelo.
+Si sólo existe S, E2 mantiene como máximo una inferencia. V0 no agrega llamadas
+al modelo.
 
-## 10. Bounds
+## 9. Bounds
 
 Se reutilizan los hard bounds de Structural Projection.
 
-E2 agrega solamente:
+E2 agrega:
 
 ```text
 max structural refs in model context = 12
 ```
 
-Si existen más facts elegibles:
+Más facts elegibles => `context_truncated=true`.
 
-```text
-context_truncated: true
-```
+El hard limit total del prompt E2 permanece sin cambios.
 
-El límite total de prompt continúa siendo el hard limit E2 existente.
+## 10. Scope admitido
 
-## 11. Ownership y cambios admitidos
-
-GREEN futuro puede requerir únicamente:
+GREEN futuro puede modificar únicamente:
 
 ```text
 src/malak/app/composition.py
@@ -244,65 +206,64 @@ RED futuro:
 
 ```text
 tests/test_engineering_inspect.py
-tests/test_app_composition.py  # sólo si el contrato existente lo requiere
+tests/test_app_composition.py  # sólo si el contrato existente lo exige
 ```
 
-No se admite modificar:
+Fuera de alcance:
 
 ```text
-src/malak/capabilities/_engineering_evidence.py
-src/malak/capabilities/_engineering_analysis.py
-src/malak/capabilities/engineering_analyze.py
-src/malak/capabilities/engineering_propose.py
-src/malak/infrastructure/repository_reader.py
-src/malak/infrastructure/repository_structure.py
-src/malak/infrastructure/repository_structure_lookup.py
+_engineering_evidence.py
+_engineering_analysis.py
+engineering_analyze.py
+engineering_propose.py
+repository_reader.py
+repository_structure.py
+repository_structure_lookup.py
 Kernel
 Planner
 CLI
 Knowledge
 Security
+Structural Delta
+persistent index/cache/DB
+new tools/agents
 ```
 
-## 12. Invariantes
+## 11. Invariantes
 
-1. E2 continúa read-only.
-2. E2 continúa stateless.
-3. Máximo una inferencia por request.
-4. Cero inferencias cuando R=K=S=0.
-5. Structural evidence se reúne antes de inferencia.
-6. Lookup exacto solamente.
-7. [S#] conserva baseline/path/blob/line originales.
-8. No se transforma import syntax en semantic dependency.
-9. Evidence != Authority.
-10. E3 y E4 permanecen byte-for-byte fuera del incremento funcional.
-11. No se crea nueva persistencia, cache o índice.
-12. Cero writes, shell, network o tool execution nuevos.
+1. E2 sigue read-only y stateless.
+2. Máximo una inferencia por request.
+3. Cero inferencias cuando R=K=S=0.
+4. Structural evidence se reúne antes de inferencia.
+5. Lookup exacto solamente.
+6. [S#] preserva baseline/path/blob/line originales.
+7. Import syntax no se convierte en semantic dependency.
+8. Evidence != Authority.
+9. E3/E4 quedan funcionalmente intactos.
+10. No hay nueva persistencia, cache, write, shell, network o tool execution.
 
-## 13. RED requerido antes de GREEN
+## 12. RED requerido
 
-RED deberá demostrar al menos:
+RED deberá demostrar:
 
 - baseline E0/E1/Structural mismatch => STOP;
 - exact symbol produce [S#];
 - exact module produce symbol/import [S#];
 - substring/fuzzy no produce structural match;
-- provenance structural preservada;
-- orden determinista de [S#];
-- máximo 12 structural refs;
-- overflow marca `context_truncated=true`;
+- provenance y orden estructural preservados;
+- máximo 12 [S#];
+- overflow => `context_truncated=true`;
 - [S999] inventado => STOP;
-- system prompt reconoce structural syntax evidence y sus límites;
+- system prompt reconoce límites de structural syntax evidence;
 - R/K actuales no cambian;
-- ausencia de S conserva comportamiento E2 previo;
+- ausencia de S conserva comportamiento previo;
 - R=K=S=0 => UNCONFIRMED y cero provider calls;
 - exactamente una provider call cuando existe evidencia;
 - cero nueva I/O desde Structural Lookup;
-- E3 packet sin `structural_evidence`;
-- E4 packet sin `structural_evidence`;
+- E3/E4 packets no incorporan `structural_evidence`;
 - cero writes.
 
-## 14. Security Horizon
+## 13. Security Horizon
 
 ```text
 Prompt / Context Trust       REQUIRES_REINFORCEMENT
@@ -316,27 +277,25 @@ Evidence / Auditability      REQUIRES_REINFORCEMENT
 Human in Control             ALREADY_COVERED
 ```
 
-Refuerzos requeridos: [S#] no es instrucción, no es semantic truth y las citas
-deben validarse contra el pack real.
+Refuerzos: [S#] no es instrucción ni semantic truth; toda cita se valida contra
+el pack real. No existe `BLOCKING_GAP`.
 
-No existe `BLOCKING_GAP`.
-
-## 15. Malāk Alignment
+## 14. Alignment
 
 | Fuente | Disposición | Efecto |
 | --- | --- | --- |
 | Cognitive Constitution | ADOPT | determinismo antes de inferencia |
 | Governance Constitution | ADOPT | evidence != authority |
-| Blueprint / Quality Gates | ADAPT | integración Capability-first; Kernel intacto |
+| Blueprint / Quality Gates | ADAPT | Capability-first; Kernel intacto |
 | SECURITY.md | ADOPT | structural context untrusted |
-| ADR-003 | ADOPT | evidence asciende sin transferir control |
-| ADR-004 | ADOPT | G0/G1 + RED antes de GREEN |
-| E0 / E1 / E2 | REUSE | mismo snapshot y contratos existentes |
-| Structural Projection V0 | REUSE | productor único de facts |
+| ADR-003 | ADOPT | evidence sin transferencia de control |
+| ADR-004 | ADOPT | RED antes de GREEN |
+| E0 / E1 / E2 | REUSE | mismo snapshot |
+| Structural Projection V0 | REUSE | productor de facts |
 | Structural Lookup V0 | REUSE | lookup exacto |
-| E3 / E4 | DEFER | sin propagación en V0 |
+| E3 / E4 | DEFER | sin propagación V0 |
 
-## 16. Estado
+## 15. Estado
 
 ```text
 G0                    PASS
