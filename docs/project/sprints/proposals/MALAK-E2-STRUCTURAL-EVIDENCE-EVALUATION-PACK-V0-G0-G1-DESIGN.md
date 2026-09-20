@@ -78,6 +78,7 @@ case_set_digest
 runner_version
 runner_digest
 provider_policy_version
+provider_policy_digest
 ```
 
 Regla de invalidación:
@@ -89,6 +90,9 @@ OR provider-policy changes
 → evaluation identity changes
 → prior evaluation does not certify the new identity
 ```
+
+Los digests V0 son SHA-256 sobre los bytes exactos del artefacto evaluado.
+No se permite normalización implícita previa al hash.
 
 El case-set V0 usa schema cerrado y fail-closed:
 
@@ -124,6 +128,8 @@ expected_structural_facts
 expected_total_structural_count
 expected_emitted_structural_count
 expected_context_truncated
+ground_truth_source
+ground_truth_review_status
 ```
 
 Los facts esperados usan identidad sintáctica explícita:
@@ -138,6 +144,24 @@ relative_level
 ```
 
 `baseline_commit` y `blob_sha` validan binding; no son oráculo manual.
+
+El ground truth debe tener provenance explícita y revisión separada de la
+implementación del runner. Si fue generado por un agente/modelo, no puede
+auto-validarse.
+
+```text
+ground truth no revisado
+OR ground truth reviewer == runner implementation actor
+→ INCONCLUSIVE
+→ evaluation NOT EXECUTABLE
+```
+
+La revisión de ground truth produce evidencia; no concede autoridad sobre Malāk.
+
+Para structural facts, la comparación V0 es una secuencia ordenada exacta.
+Orden, multiplicidad y campos materiales deben coincidir; set-equivalence no es
+suficiente. En truncation deben distinguirse explícitamente total descubierto y
+total emitido.
 
 ## 6. Casos V0
 
