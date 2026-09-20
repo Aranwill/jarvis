@@ -117,6 +117,22 @@ Cuando el cambio sea material, validar:
 
 ---
 
+# Hardening de contratos críticos
+
+Cuando el cambio defina o modifique una superficie crítica, validar antes de RED:
+
+- [ ] Se revisaron interpretaciones materiales alternativas del contrato.
+- [ ] Se revisaron interpretaciones adversariales por agentes, modelos o tools.
+- [ ] Se definió comportamiento fail-closed para entradas/estados inválidos cuando corresponde.
+- [ ] Se cerraron límites de autoridad y side effects.
+- [ ] Inputs, schemas, enums, campos desconocidos, faltantes y duplicados tienen semántica explícita.
+- [ ] Se definieron identidad/binding e invalidación de evidencia cuando cambia el candidato relevante.
+- [ ] No existen rutas silenciosas de skip, bypass, auto-promoción o ampliación de scope.
+- [ ] Toda ambigüedad material conocida quedó resuelta o clasificada `INCONCLUSIVE`.
+- [ ] `INCONCLUSIVE` bloquea RED hasta resolución o decisión humana explícita.
+- [ ] Se aplicaron por separado las cuatro preguntas de ley y FULL 4R; una no sustituyó a la otra.
+
+---
 # Revisión proporcional al riesgo
 
 Cuando corresponda, validar:
