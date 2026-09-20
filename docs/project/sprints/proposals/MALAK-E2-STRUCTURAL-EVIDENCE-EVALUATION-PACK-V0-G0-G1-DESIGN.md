@@ -392,6 +392,23 @@ Incluso entonces, E3/E4 requieren gate separado.
 Este incremento es material porque produce evidencia que puede informar gates
 y decisiones futuras. Por lo tanto RDD Stage 1 aplica explícitamente.
 
+### Candidate identity de desarrollo
+
+RDD Stage 1 usa la identidad oficial del manifest:
+
+```text
+repository = Aranwill/jarvis
+baseline_commit = Git SHA lowercase de 40 caracteres
+candidate_commit = Git SHA lowercase de 40 caracteres
+baseline_commit must be ancestor of candidate_commit
+```
+
+Esta identidad de construcción es distinta de la `evaluation identity` interna
+del pack (case-set/runner/provider-policy). Ninguna sustituye a la otra.
+
+Para evidencia pre-RED asociada a una PR, `candidate_commit` es el HEAD exacto
+evaluado. Si el HEAD cambia, esa evidencia deja de certificar el nuevo candidate.
+
 ### Pre-RED — RDD Stage 1 Design Check
 
 El diseño debe demostrar:
@@ -407,8 +424,20 @@ resultados limitados a PASS | FAIL | INCONCLUSIVE
 INCONCLUSIVE != PASS
 findings preservables por caso
 bounded correction sin ampliación automática
+Correction Budget explícito cuando exista un finding corregible
 authority_effect = none
 RDD Stage 2 = NOT AUTHORIZED
+```
+
+`INVALID` es un estado interno del dominio de evaluación, no un resultado RDD.
+
+```text
+case_result = INVALID
+→ conformance_result = FAIL
+→ RDD checkpoint result may be FAIL
+
+RDD terminal enum remains:
+PASS | FAIL | INCONCLUSIVE
 ```
 
 Regla:
@@ -457,6 +486,7 @@ RDD Design Check
 != E2E / CI
 != Owner decision
 ```
+
 ## 18. Hardening G1 y controles separados
 
 El contrato fue endurecido antes de RED contra:
