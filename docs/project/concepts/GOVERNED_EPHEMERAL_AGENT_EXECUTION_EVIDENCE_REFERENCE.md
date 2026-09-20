@@ -352,6 +352,11 @@ La terminación de una tarea deberá producir una liberación explícita y verif
 
 La política definitiva de unload deberá pertenecer a Resource Governance y Model Governance, no a este documento.
 
+Una futura espera por dependencia podrá permitir revocar contexto temporal,
+descargar el modelo, liberar recursos y destruir el sandbox si Task State,
+checkpoints, referencias de artefactos y evidencia autorizada permanecen fuera
+del agente. `WAITING_DEPENDENCY` no deberá implicar un agente persistente.
+
 ---
 
 ## 11. Generación independiente de candidatos
