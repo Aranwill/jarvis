@@ -390,19 +390,21 @@ baseline + scope freeze
         ↓
 Candidate Identity
         ↓
-candidate-bound evidence (RDD Stage 1)
+design / admission gates aplicables
         ↓
 validación focalizada
         ↓
-FULL 4R
+4R del candidate según riesgo
         ↓
-bounded correction
+bounded correction si existen findings
         ↓
-validación independiente
+Fix Validator + revalidación afectada
         ↓
 E2E del flujo o cadena afectada
         ↓
 CI / evidencia candidate-bound
+        ↓
+RDD Stage 1 Candidate Conformance cuando aplique
         ↓
 revisión humana
         ↓
@@ -414,6 +416,11 @@ validación post-merge
         ↓
 reconciliación derivada cuando corresponda
 ```
+
+Para contratos críticos, este envelope general se especializa mediante la
+**secuencia canónica y no sustituible de §5.5**. Si existiera una lectura
+aparentemente distinta entre el envelope general y §5.5, prevalece §5.5 para el
+orden del contrato crítico.
 
 No basta con mencionar RDD, 4R o E2E en una ficha o PR. Debe existir evidencia verificable de que las etapas aplicables fueron ejecutadas sobre el candidato correcto.
 
@@ -534,7 +541,7 @@ Para cambios materiales existen dos checkpoints distintos:
 pre-RED:
 RDD Stage 1 Design Check
 
-post-GREEN / pre-close:
+post-GREEN / after required candidate validation / pre-human-review:
 RDD Stage 1 Candidate Conformance
 ```
 
@@ -571,7 +578,32 @@ RDD Stage 1 Design Check != PASS
 → RED NOT ADMISSIBLE
 ```
 
-### RDD Stage 1 Candidate Conformance — post-GREEN / pre-close
+### RDD Stage 1 Candidate Conformance — post-GREEN / after required candidate validation / pre-human-review
+
+Candidate Conformance es el chequeo terminal del paquete de evidencia del
+candidate antes de revisión humana. No es un gate temprano inmediatamente
+posterior a GREEN.
+
+Precondiciones cuando sean aplicables:
+
+```text
+targeted validation complete
+Candidate FULL 4R complete
+blocking findings resolved
+bounded corrections validated
+affected evidence revalidated
+E2E / integration complete
+CI / candidate-bound evidence complete
+independent validation complete when required
+```
+
+Si falta una precondición requerida:
+
+```text
+RDD Stage 1 Candidate Conformance
+→ INCONCLUSIVE
+→ human Ready NOT ADMISSIBLE
+```
 
 Debe verificar el candidato material exacto contra
 `MALAK-EVIDENCE-MANIFEST/v1` o evidencia estructurada equivalente
@@ -655,15 +687,34 @@ RED
         ↓
 GREEN
         ↓
-RDD Stage 1 Candidate Conformance
+targeted validation
         ↓
 Candidate FULL 4R
+        ↓
+blocking findings?
+   ┌────┴────┐
+   │ NO      │ YES
+   │         ↓
+   │   Bounded Correction
+   │         ↓
+   │   Fix Validator
+   │         ↓
+   │   affected revalidation
+   │         ↓
+   │   Candidate FULL 4R
+   │   on corrected candidate
+   │         ↓
+   └─────── loop until PASS,
+           INCONCLUSIVE/FAIL stop,
+           or Correction Budget exhaustion → ESCALATE
         ↓
 E2E / integration validation
         ↓
 CI / candidate-bound evidence
         ↓
 independent validation when applicable
+        ↓
+RDD Stage 1 Candidate Conformance
         ↓
 human review
         ↓
@@ -683,7 +734,13 @@ Reglas:
 7. `tests green` no equivale a cierre del flujo;
 8. `Design 4R PASS` no equivale a `Candidate FULL 4R PASS`;
 9. `RDD Design Check PASS` no equivale a `RDD Candidate Conformance PASS`;
-10. ningún resultado concede autoridad de Ready, merge o promoción.
+10. ningún resultado concede autoridad de Ready, merge o promoción;
+11. RDD Candidate Conformance no puede ejecutarse antes de reunir la evidencia
+    candidate-bound requerida, incluida 4R y validaciones aplicables;
+12. un finding bloqueante de Candidate FULL 4R obliga a Bounded Correction o
+    ESCALATE; nunca puede saltarse directamente a E2E/CI;
+13. toda corrección que cambie el candidate invalida la evidencia afectada y
+    obliga a revalidar el candidate corregido antes de continuar.
 
 Cuando una etapa sea realmente no aplicable, debe registrarse:
 
