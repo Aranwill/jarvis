@@ -9,7 +9,7 @@ source_baseline: e14787431f864f74226706ad8655a348ee102d77
 language: es
 ---
 
-# Malāk Repository Structural Projection V0 — G0 File Coverage Ledger
+# Repository Structural Projection V0 — G0 Coverage
 
 ## Resultado
 
@@ -22,17 +22,11 @@ silently omitted files: 0
 implementation code touched: 0
 ```
 
-El árbol Git recursivo del baseline oficial
-`e14787431f864f74226706ad8655a348ee102d77` declaró
-`truncated: false`.
+El árbol Git recursivo del baseline declaró `truncated: false`.
+El archivo rechazado `PROJECT - MANIFIESTO MALAK (1).docx` no estaba presente;
+si reaparece debe clasificarse `REJECTED_DO_NOT_READ`.
 
-El archivo expresamente rechazado
-`PROJECT - MANIFIESTO MALAK (1).docx` no estaba presente en el baseline.
-Si reaparece deberá clasificarse `REJECTED_DO_NOT_READ` y no abrirse.
-
----
-
-## Inventario por familia
+## Cobertura
 
 ```text
 .github/**          2
@@ -43,11 +37,7 @@ src/**             74
 tests/**           50
 ---------------------
 tracked blobs     262
-classified blobs  262
-silently omitted    0
 ```
-
-Disposiciones aplicadas:
 
 ```text
 FULL_READ                    19
@@ -57,169 +47,85 @@ HISTORICAL_REFERENCE         58
 NOT_APPLICABLE_WITH_REASON   38
 ```
 
-La cobertura exhaustiva se realizó por inventario Git completo, clasificación
-por rol y lectura proporcional al riesgo. Ningún archivo quedó fuera por no
-coincidir con una búsqueda textual.
+Lectura profunda aplicada a ley, arquitectura, seguridad, método, roadmap,
+IDEA-013, Research Horizon, E0, composición, evidence collection,
+`test_architecture_invariants.py` y `pyproject.toml`. El resto fue cubierto
+por inspección estructural o referencia histórica proporcional.
 
----
+## Findings
 
-## Lectura profunda requerida
+### RSPV0-G0-01 — E0 es el owner del snapshot
 
-```text
-AGENTS.md
-SECURITY.md
-docs/governance/cognitive_constitution.md
-docs/governance/governance_constitution.md
-docs/architecture/blueprint.md
-docs/architecture/kernel.md
-docs/architecture/architecture_quality_gates.md
-docs/architecture/adr/ADR-003-directional-communication-and-authority-flow.md
-docs/architecture/adr/ADR-004-specification-and-verification-first.md
-docs/development/engineering_method.md
-docs/development/development_checklist.md
-docs/development/malak_construction_protocol.md
-docs/project/implementation_roadmap.md
-docs/project/project_context.md
-documents/projects/jarvis/ideas.md
-docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md
-src/malak/infrastructure/repository_reader.py
-src/malak/capabilities/_engineering_evidence.py
-src/malak/app/composition.py
-tests/test_architecture_invariants.py
-pyproject.toml
-```
+`GitRepositoryReader` ya fija commit, tracked files, blob identity y lectura
+snapshot-bound.
 
----
+**Disposition:** `REUSE`; no modificar E0.
 
-# Findings de admisión
+### RSPV0-G0-02 — Existe un gap estructural real
 
-## RSPV0-G0-01 — E0 ya provee el snapshot exacto requerido
+E0 puede buscar texto, pero no expone hechos sobre módulos, símbolos e imports.
+Ese gap obliga hoy a interpretar texto para preguntas que pueden resolverse
+mecánicamente.
 
-```text
-OBSERVED
-blocking: no
-```
+### RSPV0-G0-03 — AST ya está admitido en el baseline
 
-`GitRepositoryReader` ya captura un commit exacto, enumera tracked files y
-lee blobs por identidad Git. Working tree, staged y untracked quedan fuera de
-la vista.
+`tests/test_architecture_invariants.py` ya usa `ast` de Python para verificar
+imports y fronteras. No se introduce parser externo.
 
-Disposition:
+### RSPV0-G0-04 — IDEA-013 respalda una proyección mínima
 
-```text
-REUSE E0
-DO NOT MODIFY E0
-```
+IDEA-013 exige proyecciones `GENERATED / NON-AUTHORITATIVE / REBUILDABLE /
+HASHED / VERSIONED / SOURCE-LINKED` y evita implementar mapa, retrieval, cache
+y memoria en una sola unidad.
 
-## RSPV0-G0-02 — La búsqueda literal no cubre estructura sintáctica
+V0 implementaría sólo la primera primitive estructural.
 
-```text
-OBSERVED
-blocking: no
-```
+### RSPV0-G0-05 — Ownership
 
-E0 puede localizar texto, pero no expone hechos estructurados sobre:
+La primitive pertenece a Infrastructure: deriva hechos técnicos de blobs E0.
+No evalúa arquitectura, policy, autoridad ni estrategia cognitiva.
 
-- módulos Python;
-- clases, funciones y métodos;
-- imports absolutos o relativos.
-
-El gap es material para Engineering Intelligence porque esas preguntas hoy
-requieren inferencia posterior sobre texto.
-
-## RSPV0-G0-03 — AST ya es una técnica aceptada en el baseline
-
-```text
-OBSERVED
-blocking: no
-```
-
-`tests/test_architecture_invariants.py` ya usa `ast` de la standard library
-para verificar imports y fronteras arquitectónicas.
-
-La propuesta no introduce parser externo ni una técnica nueva de confianza.
-
-## RSPV0-G0-04 — IDEA-013 ya preserva la dirección correcta
-
-```text
-OBSERVED
-blocking: no
-```
-
-IDEA-013 contempla proyecciones regenerables, hasheadas, versionadas y
-source-linked, y pide evaluar primero un Repository Knowledge Map mínimo.
-
-V0 no implementará ese mapa completo. Admitirá solamente una proyección
-estructural mínima reutilizable.
-
-## RSPV0-G0-05 — La primitive pertenece a Infrastructure
-
-```text
-OBSERVED
-blocking: no
-```
-
-La responsabilidad propuesta es técnica: derivar hechos sintácticos desde
-blobs ya capturados por E0.
-
-No decide arquitectura, policy, autoridad ni estrategia cognitiva.
-
-No requiere cambios en Kernel, Planner, Capability Registry, Conversation,
-Knowledge o Security Control Plane.
-
----
-
-# Security Horizon
+## Security Horizon
 
 | Línea | Resultado |
 | --- | --- |
-| Prompt & Context Trust | NOT_APPLICABLE — cero prompt/LLM |
-| Identity & Delegation | NOT_APPLICABLE |
-| Compromise Containment | NOT_APPLICABLE |
+| Prompt / Context Trust | NOT_APPLICABLE |
+| Identity / Delegation | NOT_APPLICABLE |
 | Memory / Knowledge Poisoning | NOT_APPLICABLE |
-| AI Supply Chain | ALREADY_COVERED — Python stdlib solamente |
-| Data Disclosure | NOT_APPLICABLE — proyección local read-only |
-| Resource Governance | REQUIRES_REINFORCEMENT — hard bounds de files/bytes/facts/output |
-| Observability / Evidence | ALREADY_COVERED — baseline/path/blob/line binding |
-| Human in Control | ALREADY_COVERED — evidence only, authority delta 0 |
+| AI Supply Chain | ALREADY_COVERED — stdlib |
+| Data Disclosure | NOT_APPLICABLE |
+| Resource Governance | REQUIRES_REINFORCEMENT — hard bounds |
+| Evidence / Auditability | ALREADY_COVERED |
+| Human in Control | ALREADY_COVERED |
 
-No existe `BLOCKING_GAP` para diseñar V0.
+No existe `BLOCKING_GAP`.
 
----
+## Alignment
 
-# Malāk Alignment Matrix
-
-| Fuente | Disposición | Efecto V0 |
+| Fuente | Disposición | Efecto |
 | --- | --- | --- |
-| Cognitive Constitution | ADOPT | regla/herramienta determinista antes de inferencia probabilística |
-| Governance Constitution | ADOPT | read-only, sin nueva autoridad |
-| Blueprint | ADAPT | primitive técnica en Infrastructure; Kernel delta 0 |
-| Architecture Quality Gates | ADOPT | Kernel First, Capability First, Runtime Independence preservados |
-| SECURITY.md | ADOPT | Zero Trust; evidence != authority; hard bounds |
-| ADR-003 | ADOPT | downstream produce evidencia, no control upstream |
-| ADR-004 | ADOPT | G0/G1 + RED antes de GREEN |
-| E0 Repository Read | REUSE | único owner del snapshot y blob identity |
-| IDEA-013 | ADAPT | primera proyección mínima; no Knowledge Map completo |
-| Research Horizon | ADOPT | instrumentos deterministas antes de cognición adicional |
-| baseline tests | REUSE | `ast` ya usado para assurance estructural |
+| Cognitive Constitution | ADOPT | determinismo antes de inferencia cuando sea suficiente |
+| Governance Constitution | ADOPT | read-only, authority delta 0 |
+| Blueprint / Quality Gates | ADAPT | Infrastructure primitive; Kernel delta 0 |
+| SECURITY.md | ADOPT | Zero Trust; evidence != authority; bounded |
+| ADR-003 | ADOPT | evidencia asciende sin transferir control |
+| ADR-004 | ADOPT | RED antes de GREEN |
+| E0 Repository Read | REUSE | único owner del snapshot |
+| IDEA-013 | ADAPT | proyección mínima, no Knowledge Map completo |
+| Research Horizon | ADOPT | instrumentos verificables antes de cognición adicional |
 
----
-
-# Cierre G0
+## Cierre
 
 ```text
-Repository Structural Projection V0
 G0 = PASS
-
-new external dependency     = no
-new persistent store        = no
-new index/cache             = no
-Kernel change               = no
-Planner change              = no
-Security authority change   = no
-write authority             = no
-LLM/provider dependency     = no
-resource bounds required    = yes
+external dependency   = 0
+persistent store      = 0
+Kernel delta          = 0
+Planner delta         = 0
+authority delta       = 0
+writes                = 0
+LLM/provider          = 0
+hard resource bounds  = REQUIRED
 ```
 
 Este PASS autoriza únicamente G1 documental.
