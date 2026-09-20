@@ -14,7 +14,9 @@ red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-20
 red_baseline: 2e5f97aac41804461ceadd81680762b9e2313d13
-implementation_authorized: false
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-20
 risk_class: 2
 ---
 
@@ -223,7 +225,7 @@ RDD Stage 2
 G0                    PASS
 G1 design             ADMITTED
 RED                   AUTHORIZED
-GREEN                 NOT AUTHORIZED
+GREEN                 AUTHORIZED
 
 Kernel delta          0
 Planner delta         0
@@ -232,4 +234,4 @@ persistent state      0
 authority delta       0
 ```
 
-RED fue autorizado por el Owner el 2026-09-20. Este documento no autoriza GREEN.
+RED y GREEN fueron autorizados por el Owner el 2026-09-20. La aceptación y el merge continúan bajo decisión exclusiva del Owner.
