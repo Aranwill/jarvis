@@ -265,4 +265,3 @@ def test_engineering_composition_projects_structure_only_for_inspect(
     assert projection.baseline_commit == baseline
     assert "structural_projection" not in captured["analyze"]
     assert "structural_projection" not in captured["propose"]
-
