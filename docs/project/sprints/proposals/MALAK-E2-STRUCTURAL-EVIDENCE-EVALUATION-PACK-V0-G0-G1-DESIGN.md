@@ -62,10 +62,52 @@ B: structural_projection = projection(same baseline)
 
 ```text
 A baseline != B baseline
-→ STOP / INVALID CASE
+→ case_result = INVALID
+→ pair is not executed
+→ conformance_result = FAIL
 ```
 
-## 4. Ground truth
+## 4. Evaluation identity y schema cerrado
+
+Cada ejecución debe quedar ligada a:
+
+```text
+malak_baseline_sha
+case_set_schema_version
+case_set_digest
+runner_version
+runner_digest
+provider_policy_version
+```
+
+Regla de invalidación:
+
+```text
+case-set changes
+OR runner changes
+OR provider-policy changes
+→ evaluation identity changes
+→ prior evaluation does not certify the new identity
+```
+
+El case-set V0 usa schema cerrado y fail-closed:
+
+```text
+unknown field       → STOP
+missing field       → STOP
+wrong type          → STOP
+unknown enum        → STOP
+duplicate case_id   → STOP
+empty subject       → STOP
+unsupported fixture → STOP
+```
+
+El dataset no puede contener código ejecutable, comandos, URLs, rutas arbitrarias
+fuera del fixture contract ni instrucciones para ampliar permisos/scope.
+
+Los enums admitidos deben ser cerrados por la implementación V0; ningún valor
+desconocido se normaliza, ignora o interpreta por heurística.
+## 5. Ground truth
 
 El expected se define antes de ejecutar y no puede derivarse del output B.
 
@@ -79,7 +121,8 @@ comparison_class
 expected_a_status
 expected_b_status
 expected_structural_facts
-expected_structural_count
+expected_total_structural_count
+expected_emitted_structural_count
 expected_context_truncated
 ```
 
@@ -96,20 +139,20 @@ relative_level
 
 `baseline_commit` y `blob_sha` validan binding; no son oráculo manual.
 
-## 5. Casos V0
+## 6. Casos V0
 
 | Caso | Subject / fixture | A | B | Expected S |
 | --- | --- | --- | --- | --- |
 | C1 exact symbol | `malak.component.NeedleComponent1` | UNCONFIRMED | GROUNDED | exact symbol |
 | C2 exact module | `malak.component` | UNCONFIRMED | GROUNDED | symbols + imports |
-| C3 substring | `NeedleComponent` | compatible non-S | compatible non-S | 0 |
-| C4 textual/knowledge | `needle` | compatible R/K | compatible R/K | 0 |
+| C3 substring | `NeedleComponent` | exact observed non-S fields | same exact non-S fields | 0 |
+| C4 textual/knowledge | `needle` | exact R/K observed fields | same exact R/K fields | 0 |
 | C5 absent | `absent-evaluation-token` | UNCONFIRMED | UNCONFIRMED | 0 |
-| C6 truncation | >12 structural facts | no S | GROUNDED | 12 + truncated |
+| C6 truncation | >12 structural facts | structural count 0 | GROUNDED | exact total >12; emitted=12; truncated=true |
 
 Sólo se añaden casos si representan una clase nueva de comportamiento.
 
-## 6. Métricas
+## 7. Métricas
 
 No existe score compuesto.
 
@@ -132,7 +175,7 @@ context_truncated
 
 `structural_coverage_gain_count` mide cobertura, no calidad.
 
-## 7. Límites
+## 8. Límites
 
 ```text
 A: UNCONFIRMED
@@ -150,7 +193,7 @@ S should propagate to E3/E4
 
 `GROUNDED` sólo indica que E2 recorrió su path grounded con evidencia admisible.
 
-## 8. Anti-autoengaño
+## 9. Anti-autoengaño
 
 1. expected definido antes de ejecutar;
 2. expected no derivado del projector/lookup bajo prueba;
@@ -161,9 +204,12 @@ S should propagate to E3/E4
 7. incluir casos positivos y negativos;
 8. mismo baseline A/B;
 9. no seleccionar sólo casos favorables a S;
-10. evaluation evidence carries zero authority.
+10. evaluation evidence carries zero authority;
+11. todos los casos declarados son obligatorios;
+12. skip / xfail / filtering / case selection están prohibidos en V0;
+13. un fallo individual permanece visible aunque los agregados parezcan favorables.
 
-## 9. Provider de evaluación
+## 10. Provider de evaluación
 
 V0 usa un provider determinista de test con política fija para recorrer E2 de
 forma reproducible.
@@ -176,7 +222,7 @@ provider output
 
 Un benchmark con modelos reales requiere gate separado.
 
-## 10. Estructura futura admitida
+## 11. Estructura futura admitida
 
 ```text
 evaluations/e2_structural_evidence_v0/cases.json
@@ -187,12 +233,17 @@ tests/test_e2_structural_evidence_evaluation.py
 Reglas:
 
 - JSON / stdlib;
-- runner read-only;
+- runner read-only respecto del working tree y repos oficiales;
+- fixtures sólo en directorio temporal aislado;
 - output a stdout;
-- sin DB/cache/red;
-- sin persistencia por defecto.
+- sin network;
+- sin DB/cache;
+- sin commits/branches/PRs;
+- sin modificación de repos oficiales;
+- sin persistencia por defecto;
+- no skip / xfail / filtering de casos.
 
-## 11. Output candidato
+## 12. Output candidato
 
 ```text
 baseline_commit
@@ -203,12 +254,34 @@ unexpected_structural_activation_count
 structural_fact_mismatch_count
 non_structural_regression_count
 invalid_paired_baseline_count
-conclusion
+conformance_result
+utility_observation
 ```
 
-`conclusion: pass` significa conformance del pack, no aprobación arquitectónica.
+`conformance_result: PASS` significa únicamente conformance del pack.
 
-## 12. Scope futuro
+`utility_observation` reporta observaciones como coverage gain y nunca participa
+en PASS/FAIL. Un pack puede ser conforme y demostrar utilidad nula.
+
+```text
+conformance PASS != usefulness
+usefulness observed != architecture approval
+```
+
+Cada `case_results[]` debe exponer al menos:
+
+```text
+case_id
+case_result: PASS | FAIL | INVALID
+expected
+observed_a
+observed_b
+mismatches[]
+```
+
+Un caso `INVALID` no puede convertirse en PASS por agregación.
+
+## 13. Scope futuro
 
 RED futuro:
 
@@ -237,7 +310,7 @@ Security
 provider registry
 ```
 
-## 13. Relación con trabajo actual
+## 14. Relación con trabajo actual
 
 ```text
 Observability V0
@@ -260,7 +333,7 @@ identify real weaknesses before adding complexity
 
 Este pack no es training dataset, hidden eval global ni benchmark de modelos.
 
-## 14. Governance
+## 15. Governance
 
 ```text
 runtime delta           0
@@ -276,7 +349,7 @@ model benchmark         0
 Human in Control        unchanged
 ```
 
-## 15. Gate de salida
+## 16. Gate de salida
 
 El futuro pack sólo puede considerarse conforme si:
 
@@ -290,7 +363,35 @@ case-level evidence            preserved
 
 Incluso entonces, E3/E4 requieren gate separado.
 
-## 16. Estado
+## 17. Hardening G1 y controles separados
+
+El contrato fue endurecido antes de RED contra:
+
+```text
+alternate material interpretation
+adversarial interpretation
+fail-open behavior
+schema ambiguity
+identity drift
+silent skip/bypass
+authority confusion
+side-effect expansion
+metric/utility conflation
+```
+
+Cuatro preguntas de ley:
+
+```text
+Blueprint                         PASS
+Cognitive Constitution           PASS
+Governance Constitution          PASS
+Kernel complexity delta          0 / PASS
+```
+
+FULL 4R debe ejecutarse y registrarse por separado sobre el candidato material.
+Las preguntas de ley no sustituyen FULL 4R.
+
+## 18. Estado
 
 ```text
 G0        PASS
