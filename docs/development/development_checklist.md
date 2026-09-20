@@ -130,7 +130,10 @@ Cuando el cambio defina o modifique una superficie crítica, validar antes de RE
 - [ ] No existen rutas silenciosas de skip, bypass, auto-promoción o ampliación de scope.
 - [ ] Toda ambigüedad material conocida quedó resuelta o clasificada `INCONCLUSIVE`.
 - [ ] `INCONCLUSIVE` bloquea RED hasta resolución o decisión humana explícita.
-- [ ] Se aplicaron por separado las cuatro preguntas de ley y FULL 4R; una no sustituyó a la otra.
+- [ ] El contrato crítico pasó las cuatro preguntas de ley antes de RED.
+- [ ] El contrato crítico pasó Design 4R antes de RED, con evidencia separada por lente.
+- [ ] Design 4R no fue utilizado como sustituto del FULL 4R del candidate material.
+- [ ] El candidate material ejecutó FULL 4R post-GREEN/pre-close cuando correspondía.
 
 ---
 # Revisión proporcional al riesgo
