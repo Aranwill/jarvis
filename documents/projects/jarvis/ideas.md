@@ -199,6 +199,12 @@ Crear un ciclo gobernado mediante el cual Malāk pueda observar evidencia, evalu
 
 > La evidencia puede originar una propuesta; solamente la gobernanza puede convertirla en una modificación.
 
+Malāk deberá formar criterio propio a partir de evidencia interna y externa, experimentos
+reproducibles e instrumentos verificables. Las metodologías, papers y sistemas externos
+son insumos de investigación, no plantillas ni autoridad. Cuando una pregunta pueda
+resolverse mediante observación o validación determinista, esa vía deberá preferirse antes
+de delegar la conclusión a razonamiento probabilístico.
+
 **Evidencia prevista**
 
 - benchmarks;
@@ -1879,6 +1885,12 @@ needs_owner_decision
 ```
 
 Las conversaciones libres entre agentes no deberán convertirse en mecanismo principal de coordinación cuando contratos, eventos o artefactos estructurados resulten suficientes.
+
+Cuando el baseline futuro justifique trabajo de horizonte largo, IDEA-024 deberá
+reevaluar coordinación asíncrona consciente de dependencias, espera/reanudación,
+handoffs estructurados y cooperación mediada por artefactos, sin asumir que un
+agente debe permanecer vivo mientras espera. El detalle conceptual se conserva en
+`docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md`.
 
 **Structured Deliberation**
 

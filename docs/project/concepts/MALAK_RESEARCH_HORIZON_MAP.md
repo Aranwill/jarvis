@@ -184,6 +184,11 @@ Malāk podrá impulsar una mejora mediante investigación, comparación, prototi
 tests, evidencia e Implementation Packets candidatos, pero no aprobarla, mergearla
 o desplegarla por autoridad propia.
 
+La mejora deberá buscar propiedades demostrables, no copiar workflows externos. La
+preferencia conceptual es: observación determinista cuando sea suficiente; evidencia
+estructurada; evaluación probabilística sólo cuando aporte información material; y
+experimentación aislada antes de recomendar cambios estructurales.
+
 ### 4.3. Adversarial Security, Deception y Forensics
 
 IDEA-019 ya contempla:
@@ -933,6 +938,7 @@ capability, componente o sprint.
 
 Revisión realizada: `2026-09-12`
 Baseline contrastado: `Aranwill/jarvis/main@cd50c308e1f5a1481851d6402ae4435341410d27`
+Suplemento de evidencia revisado: `2026-09-20`
 
 Esta sección **agrega evidencia** a la reconciliación existente sin modificar ni
 reclasificar las secciones 1–18.
@@ -1014,6 +1020,12 @@ aprobación o autoridad.
 | `EXT-20` | Anthropic — *Demystifying evals for AI agents* — 2026-01-09 | trayectorias multistep, tool calls y cambios de estado en evaluaciones agentic | evaluar solo output final puede ocultar fallos importantes de proceso | Agent evaluation / future validation | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar su framework o métricas sin revalidación propia |
 | `EXT-21` | USENIX Security 2026 — *AttriGuard: Defeating Indirect Prompt Injection in LLM Agents via Causal Attribution of Tool Invocations* | causal attribution de tool invocations frente a indirect prompt injection | vincular una acción con su causa/intención puede ayudar a distinguir user intent de contenido no confiable | Prompt & Context Trust / tool provenance | `WATCH_SIGNAL` | asumir madurez suficiente ni incorporar el método experimental ahora |
 | `EXT-22` | Gentleman Programming `gentle-pi` — `main@6e4478c04615b0c013a017178dcfefa51579982d` | native RDD workflow, review integration, runner/protocol, task lifecycle y presence projection | candidate freeze, explicit lineage, candidate-bound receipts, bounded correction, review sin delivery authority, typed lifecycle y bounded concurrency son propiedades implementables | future RDD / Task lifecycle / agent execution | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | copiar Pi, OpenSpec, schemas, defaults, CLI/TUI, authority model ni autorizar RDD Stage 2 |
+| `EXT-23` | Anthropic — *How we built our multi-agent research system* / agent-team patterns revisados 2026-09-20 | coordinación de subagentes, paralelismo, espera y persistencia de resultados fuera del coordinador | el trabajo largo puede progresar mediante dependencias y artefactos sin convertir chat libre ni contexto vivo en fuente de estado | Governed Swarm / Long Horizon / Task State | `CORROBORATION` + `IMPLEMENTATION_INPUT` | copiar su harness, mantener agentes vivos por defecto o adoptar su modelo de autoridad |
+| `EXT-24` | Microsoft AutoGen — GraphFlow docs revisadas 2026-09-20 | fan-out, joins `all/any`, branching y loops explícitos en grafos dirigidos | dependencias de tareas pueden tener semántica estructurada y evaluable fuera del razonamiento libre del agente | Execution Graph / Mission Orchestration | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | adoptar AutoGen, su runtime o sus APIs como dependencia |
+| `EXT-25` | Gentleman Programming — Gentle AI ODD/RDD, `main` revisado 2026-09-20 | ODD separa autorización, exploración, incertidumbre, proporcionalidad y ejecución; RDD revisa candidatos terminados con identidad/evidencia acotada | separar método de trabajo, assurance y delivery evita convertir una metodología externa en autoridad; formalizar sólo cuando complejidad/recoverability lo justifiquen | Engineering Method / future RDD / Engineering Intelligence | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar ODD/RDD como framework, copiar Engram como Task State o importar sus heurísticas numéricas |
+
+| `EXT-26` | Stanford MAST — Agent JIT Compilation, ICML 2026 | planes ejecutables con pre/postcondiciones, validación contra tools y selección considerando coste | planes y decisiones de ejecución pueden expresarse mediante contratos verificables antes de delegar razonamiento libre | Execution Contracts / Planning / deterministic validation | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | adoptar su planner, compiler, tool protocol o arquitectura completa |
+
 
 ### 19.3. Regla de revalidación
 
