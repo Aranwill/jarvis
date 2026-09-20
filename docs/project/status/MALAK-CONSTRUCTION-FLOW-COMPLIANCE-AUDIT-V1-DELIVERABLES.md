@@ -1,6 +1,6 @@
 ---
 title: MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1 — Deliverables Index
-status: in_progress
+status: completed_pending_owner_review
 authority: derived_audit
 baseline_commit: b1093f291e4a83af779302454485f46f21644801
 authority_effect: none
@@ -187,23 +187,33 @@ silent S propagation to E3/E4 = 0
 The Evaluation Pack remains design-only and Structural Delta remains deferred;
 neither is promoted to implemented state by this audit.
 
-## Gate F — PENDING OWNER ADVANCE
+## Gate F — CLOSED / OWNER REVIEW PENDING
 
-Gate F has not started.
+- `MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md`
 
-Scope:
+Reconciliation:
 
-- reconcile U01–U13;
-- deduplicate findings;
-- issue final per-unit disposition;
-- residual-risk register;
-- final compliance report;
-- candidate-bound validation of audit artifacts;
-- no remediation unless separately authorized.
+```text
+units reconciled = 13 / 13
+current blocking findings = 0
+historical resolved findings = 1
+historical/process evidence gaps = 2
+retroactive PASS fabrication = 0
+runtime remediation performed = 0
+authority expansion performed = 0
+```
 
-Expected final deliverable:
+Final material conclusion:
 
-`MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md`
+```text
+current material construction-flow gaps found: 0
+current baseline revalidation: PASS
+historical universal full-flow compliance claim: NOT MADE
+```
+
+Candidate-bound validation must refer to the exact final branch HEAD. The check
+result is preserved on PR #173 rather than committed back into the candidate,
+so recording the result does not invalidate the SHA that was validated.
 
 ## Delivery boundary
 
@@ -214,4 +224,4 @@ Draft PR != Ready
 Ready/merge = Owner-only
 ```
 
-The audit remains isolated on Draft PR #173.
+The audit remains isolated on Draft PR #173 pending Owner review.
