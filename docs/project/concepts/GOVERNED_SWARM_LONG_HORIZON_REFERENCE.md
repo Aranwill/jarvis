@@ -231,6 +231,31 @@ Un futuro Persistent Task State podrá conservar, según necesidad:
 El contexto LLM no deberá convertirse en la fuente primaria de estado de una
 misión larga.
 
+### 8.1. Coordinación cooperativa consciente de dependencias
+
+Como línea futura de diseño, una tarea podrá esperar dependencias sin bloquear
+toda la misión:
+
+```text
+READY → RUNNING → WAITING_DEPENDENCY → READY → RUNNING
+```
+
+El estado pertenece a Malāk, no al agente. Un mensaje de agente no deberá
+convertirse por sí mismo en transición de estado, y `artifact_ready` deberá
+representar un artefacto candidato hasta que la evidencia y validación aplicables
+permitan satisfacer la dependencia.
+
+Cuando una espera sea prolongada, deberá poder evaluarse liberar contexto,
+modelo, proceso y sandbox, preservando fuera del agente únicamente Task State,
+referencias de artefactos, checkpoints y evidencia autorizada; el ejecutor podrá
+reconstruirse al reanudarse la tarea.
+
+El Execution Graph deberá modelar trabajo y dependencias, no una topología de
+conversaciones. La comunicación libre entre agentes será secundaria cuando
+eventos, contratos, estados y referencias de artefactos resulten suficientes.
+
+---
+
 ---
 
 ## 9. Checkpoints y recuperación
