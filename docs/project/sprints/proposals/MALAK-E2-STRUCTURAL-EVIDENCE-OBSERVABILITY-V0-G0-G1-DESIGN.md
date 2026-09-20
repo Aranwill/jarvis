@@ -13,7 +13,9 @@ red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-20
 red_baseline: 9512f79f40bd67678bb11f66e8e6e14bbc1e76d6
-implementation_authorized: false
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-20
 risk_class: 2
 ---
 
@@ -292,7 +294,7 @@ No existe `BLOCKING_GAP`.
 G0        PASS
 G1        ADMITTED
 RED       AUTHORIZED
-GREEN     NOT AUTHORIZED
+GREEN     AUTHORIZED
 ```
 
-RED fue autorizado por el Owner el 2026-09-20. GREEN permanece no autorizado.
+RED y GREEN fueron autorizados por el Owner el 2026-09-20. La aceptación final y el merge permanecen bajo decisión exclusiva del Owner.
