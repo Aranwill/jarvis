@@ -18,16 +18,11 @@ risk_class: 2
 
 ## 1. Propósito
 
-Exponer señales deterministas y efímeras sobre la evidencia utilizada por
-`Engineering Inspect (E2)`, sin crear telemetry runtime, storage, métricas
-persistentes ni autoridad nueva.
+Exponer señales deterministas y efímeras de `Engineering Inspect (E2)` para
+observar qué evidencia estuvo disponible y qué refs válidas aparecen
+explícitamente en su respuesta.
 
-La pregunta de V0 es limitada:
-
-> ¿Qué evidencia estuvo disponible y qué referencias explícitas aparecen en la
-> respuesta de E2?
-
-V0 no intenta medir calidad, verdad, causalidad ni mejora cognitiva.
+V0 no mide calidad, verdad, causalidad ni mejora cognitiva.
 
 ## 2. G0
 
@@ -40,23 +35,19 @@ tree truncated: false
 G0 RESULT: PASS
 ```
 
-La responsabilidad puede vivir en la frontera existente de E2. No se justifica
-un componente adicional.
-
-## 3. Decisión de admisión
+La responsabilidad cabe en E2. No se justifica componente adicional.
 
 ```text
-E2 Structural Evidence Observability V0  ADMIT
-new metrics component                    REJECT
-persistent telemetry                     REJECT
-E3 propagation                           DEFER
-E4 propagation                           DEFER
-Structural Delta                         DEFER
+Observability V0        ADMIT
+new metrics component   REJECT
+persistent telemetry    REJECT
+E3/E4 propagation       DEFER
+Structural Delta        DEFER
 ```
 
-## 4. Fuente de las señales
+## 3. Fuente
 
-E2 ya conoce durante una ejecución:
+Las señales se derivan únicamente de datos que E2 ya posee:
 
 ```text
 repository_evidence
@@ -64,21 +55,13 @@ knowledge_evidence
 structural_evidence
 validated model response
 context_truncated
-whether inference occurred
+provider call path
 ```
 
-Las nuevas señales deben derivarse únicamente de esos datos ya disponibles.
+No se permite nueva lectura Git/filesystem, nueva consulta estructural, nueva
+llamada al modelo, network telemetry ni persistencia.
 
-No se permite:
-
-- nueva lectura de Git;
-- nueva lectura de filesystem;
-- nueva consulta a Structural Lookup;
-- nueva llamada al modelo;
-- network telemetry;
-- persistencia.
-
-## 5. Señales V0
+## 4. Señales V0
 
 ### Evidencia disponible
 
@@ -88,12 +71,9 @@ knowledge_evidence_count
 structural_evidence_count
 ```
 
-`count > 0` significa sólo que esa clase de evidencia fue incluida en el
-packet E2. No significa que el modelo la haya usado correctamente.
+Significan sólo cuántos elementos de cada clase estuvieron en el packet E2.
 
-### Referencias explícitas observadas
-
-Después de validar la respuesta del modelo:
+### Citas explícitas
 
 ```text
 repository_citation_count
@@ -101,8 +81,8 @@ knowledge_citation_count
 structural_citation_count
 ```
 
-Cada count representa refs únicos válidos presentes explícitamente como
-`[R#]`, `[K#]` o `[S#]`.
+Cada count = número de refs únicas válidas de su clase presentes explícitamente
+en la respuesta.
 
 ```text
 citation
@@ -115,26 +95,18 @@ citation
 ### Ejecución
 
 ```text
-model_inference_count
+model_inference_count ∈ {0,1}
 context_truncated
 ```
 
-En E2 V0:
+`0`: camino sin evidencia, `UNCONFIRMED`.
+`1`: una llamada al provider.
 
-```text
-model_inference_count ∈ {0, 1}
-```
+Latencia, tokens y coste quedan fuera de V0.
 
-`0` corresponde al camino sin evidencia que termina `UNCONFIRMED`.
-`1` corresponde a una ejecución que invocó el provider una vez.
+## 5. Output candidato
 
-No se mide latencia en V0.
-
-## 6. Output candidato
-
-Las señales se exponen en el resultado textual existente de E2.
-
-Ejemplo GROUNDED:
+GROUNDED:
 
 ```text
 repository_evidence_count: 2
@@ -147,7 +119,7 @@ model_inference_count: 1
 context_truncated: false
 ```
 
-Ejemplo UNCONFIRMED:
+UNCONFIRMED:
 
 ```text
 repository_evidence_count: 0
@@ -162,40 +134,29 @@ context_truncated: false
 
 No se crea schema persistente ni API nueva.
 
-## 7. Derivación
+## 6. Derivación
 
 ```text
-evidence_count
-=
-len(evidence collection)
-
-citation_count
-=
-count(unique validated refs of class present in model output)
-
-model_inference_count
-=
-0 before/no provider call
-1 after exactly one provider call
+evidence_count = len(evidence collection)
+citation_count = count(unique validated refs of class in model output)
+model_inference_count = 0 or 1 according to existing E2 path
 ```
 
-Las citas desconocidas continúan produciendo STOP antes de renderizar un
-resultado grounded.
+Las refs desconocidas siguen produciendo STOP antes del render grounded.
 
-## 8. Invariantes semánticos
+## 7. Invariantes
 
-1. Evidence availability != evidence usefulness.
+1. Evidence availability != usefulness.
 2. Citation != semantic use.
-3. Citation frequency != confidence.
-4. Citation frequency != correctness.
-5. Structural citation != semantic dependency.
-6. Zero citations != evidence irrelevance.
-7. Observability != evaluation.
-8. Observability != authority.
-9. Metrics cannot authorize propagation to E3/E4.
-10. Metrics cannot prove quality improvement by themselves.
+3. Citation frequency != confidence/correctness.
+4. Structural citation != semantic dependency.
+5. Zero citations != irrelevance.
+6. Observability != evaluation.
+7. Observability != authority.
+8. Counts cannot authorize E3/E4 propagation.
+9. Counts cannot prove quality improvement.
 
-## 9. Scope admitido
+## 8. Scope
 
 GREEN futuro puede modificar únicamente:
 
@@ -220,22 +181,14 @@ engineering_propose.py
 repository_reader.py
 repository_structure.py
 repository_structure_lookup.py
-Kernel
-Planner
-CLI
-Knowledge
-Security
-database
-cache
-event bus
-telemetry exporter
-metrics registry
-receipt store
+Kernel / Planner / CLI / Knowledge / Security
+database / cache / event bus
+telemetry exporter / metrics registry / receipt store
 ```
 
-## 10. Compatibilidad
+## 9. Compatibilidad
 
-La integración no cambia:
+V0 no cambia:
 
 - selección de evidencia;
 - packet enviado al modelo;
@@ -244,32 +197,31 @@ La integración no cambia:
 - validación de refs;
 - límites de contexto;
 - autoridad;
-- comportamiento de E3/E4.
+- E3/E4.
 
-Sólo amplía la salida observable de E2 con hechos derivados de la ejecución
-actual.
+Sólo amplía la salida observable de E2.
 
-## 11. RED requerido
+## 10. RED requerido
 
 RED deberá demostrar:
 
-- counts R/K/S reflejan exactamente el packet real;
-- citation counts cuentan refs únicos válidos;
-- refs repetidos cuentan una sola vez;
-- refs de clases distintas permanecen separados;
-- `[S999]` continúa => STOP;
+- counts R/K/S exactos;
+- citation counts por refs únicas válidas;
+- refs repetidas cuentan una vez;
+- clases R/K/S permanecen separadas;
+- ref desconocida continúa => STOP;
 - GROUNDED => `model_inference_count: 1`;
 - R=K=S=0 => `model_inference_count: 0`;
-- UNCONFIRMED muestra todos los citation counts en cero;
+- UNCONFIRMED => citation counts en cero;
 - truncation existente se preserva;
-- packet enviado al modelo permanece sin nuevas señales;
-- no hay provider call adicional;
-- no hay I/O adicional;
-- E3/E4 permanecen sin cambios.
+- packet/model prompt no incorpora estas señales;
+- cero provider calls adicionales;
+- cero I/O adicional;
+- E3/E4 sin cambios.
 
-## 12. Qué V0 sí permite observar
+## 11. Interpretación permitida
 
-Después de múltiples ejecuciones externas se podrá distinguir, sin inferir causa:
+V0 permite observar:
 
 ```text
 S available / S cited
@@ -279,89 +231,65 @@ mixed evidence request
 UNCONFIRMED request
 ```
 
-La agregación histórica de esos eventos NO pertenece a V0.
-
-## 13. Qué V0 no demuestra
-
-Un resultado como:
-
-```text
-structural_evidence_count: 4
-structural_citation_count: 3
-```
-
-no permite concluir:
+No permite concluir:
 
 ```text
 "Structural Evidence improved the answer"
 "The answer is more correct"
 "The model reasoned better"
-"E3/E4 should now receive S"
+"E3/E4 should receive S"
 ```
 
-Esas conclusiones requieren evaluación separada y evidencia comparativa.
+Eso requiere evaluación comparativa separada.
 
-## 14. Relación con Cognitive Assurance
+## 12. Cognitive Assurance
 
-V0 adopta dos propiedades ya documentadas:
+Se reutilizan dos propiedades ya documentadas:
 
 ```text
 measure before expanding complexity
 assurance evidence carries zero authority
 ```
 
-Métricas más amplias como `claim_support_coverage`,
-`unsupported_claim_escape_rate`, `latency_delta`,
-`tokens_per_response` y `external_cost_per_response` siguen fuera de V0.
+`claim_support_coverage`, `unsupported_claim_escape_rate`, latencia, tokens,
+coste y agregación histórica quedan fuera de V0.
 
-## 15. Security / Governance
+## 13. Governance / Security
 
 ```text
-Prompt / Context Trust       unchanged
-Identity / Delegation        unchanged
-Containment / Revocation     unchanged
-Memory / Knowledge           unchanged
-Supply Chain                 unchanged
-Data Disclosure              unchanged
-Resource Governance          unchanged
-Evidence / Auditability      reinforced
-Human in Control             unchanged
+new authority            0
+new component            0
+persistent state         0
+new model calls          0
+new I/O                  0
+Kernel delta             0
+Planner delta            0
+E3/E4 delta              0
+Evidence/Auditability    reinforced
+Human in Control         unchanged
 ```
 
 No existe `BLOCKING_GAP`.
 
-```text
-observability counts carry zero authority
-```
-
-## 16. Alignment
+## 14. Alignment
 
 | Fuente | Disposición | Efecto |
 | --- | --- | --- |
 | Cognitive Constitution | ADOPT | hechos antes que interpretación |
-| Governance Constitution | ADOPT | evidence/metrics != authority |
+| Governance Constitution | ADOPT | metrics != authority |
 | Blueprint | ADAPT | usar frontera existente |
-| Cognitive Assurance G0/G1 | ADOPT | medir sin nuevo manager/store |
+| Cognitive Assurance G0/G1 | ADOPT | medir sin manager/store |
 | E2 Structural Evidence V0 | REUSE | R/K/S ya disponibles |
-| E3 / E4 | DEFER | no propagation |
-| Structural Delta | DEFER | necesidad aún no demostrada |
+| E3/E4 | DEFER | sin propagation |
+| Structural Delta | DEFER | necesidad no demostrada |
 
-## 17. Estado
+## 15. Estado
 
 ```text
-G0                    PASS
-G1 design             ADMITTED
-RED                   NOT AUTHORIZED
-GREEN                 NOT AUTHORIZED
-
-new component         0
-persistent state      0
-new model calls       0
-new I/O               0
-Kernel delta          0
-Planner delta         0
-E3/E4 delta           0
-authority delta       0
+G0        PASS
+G1        ADMITTED
+RED       NOT AUTHORIZED
+GREEN     NOT AUTHORIZED
 ```
 
 El próximo gate, si el Owner lo autoriza, es RED y sólo RED.
