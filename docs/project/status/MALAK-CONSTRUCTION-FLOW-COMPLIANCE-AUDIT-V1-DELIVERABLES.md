@@ -136,10 +136,10 @@ cannot be reconstructed without fabricating retroactive evidence.
 ## Current cumulative state
 
 ```text
-units completed = 11 / 13
+units completed = 13 / 13
 
 HISTORICALLY_EVIDENCED:
-U02 U03 U05 U06 U07 U10 U11 U12 U13
+U02 U03 U05 U06 U07 U08 U09 U10 U11 U12 U13
 
 CURRENT_STATE_REVALIDATED:
 U01 U04
@@ -161,22 +161,35 @@ runtime remediation performed:
 0
 ```
 
-## Gate E — PENDING OWNER ADVANCE
+## Gate E — CLOSED
 
-Scope:
+- `MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-E.md`
+
+Units:
 
 ```text
 U08 Engineering E0–E4 evidence path
 U09 Repository structural evidence
 ```
 
-Expected deliverable:
+Result:
 
-`MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-E.md`
+```text
+U08 HISTORICALLY_EVIDENCED
+U09 HISTORICALLY_EVIDENCED
 
-Gate E must not be treated as started until the Owner explicitly advances it.
+blocking current findings = 0
+authority expansion found = 0
+write expansion found = 0
+silent S propagation to E3/E4 = 0
+```
 
-## Gate F — BLOCKED UNTIL E CLOSES
+The Evaluation Pack remains design-only and Structural Delta remains deferred;
+neither is promoted to implemented state by this audit.
+
+## Gate F — PENDING OWNER ADVANCE
+
+Gate F has not started.
 
 Scope:
 
