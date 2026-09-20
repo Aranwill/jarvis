@@ -219,3 +219,50 @@ def test_build_engineering_kernel_set_exposes_same_readers_to_explorer_and_e2_e4
     assert later_head != baseline
     assert repository_reader.baseline_commit == baseline
     assert knowledge_reader.baseline_commit == baseline
+
+def test_engineering_composition_projects_structure_only_for_inspect(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    repo = tmp_path / "repo"
+    baseline = _create_repository(repo)
+    captured: dict[str, dict[str, object]] = {}
+
+    class FakeCapability:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+    def factory(action: str, name: str):
+        def build(**kwargs: object):
+            captured[action] = kwargs
+            return FakeCapability(name)
+
+        return build
+
+    monkeypatch.setattr(
+        composition,
+        "EngineeringInspectCapability",
+        factory("inspect", "engineering_inspect"),
+    )
+    monkeypatch.setattr(
+        composition,
+        "EngineeringAnalyzeCapability",
+        factory("analyze", "engineering_analyze"),
+    )
+    monkeypatch.setattr(
+        composition,
+        "EngineeringProposeCapability",
+        factory("propose", "engineering_propose"),
+    )
+
+    composition.build_engineering_kernel_set(
+        repository_root=repo,
+        service=build_service(),
+        provider_name="mock",
+    )
+
+    projection = captured["inspect"]["structural_projection"]
+    assert projection.baseline_commit == baseline
+    assert "structural_projection" not in captured["analyze"]
+    assert "structural_projection" not in captured["propose"]
+
