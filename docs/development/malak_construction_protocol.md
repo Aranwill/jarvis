@@ -523,6 +523,102 @@ candidate FULL 4R PASS
 Ambos deben producir evidencia separada por lente cuando sean aplicables.
 
 ---
+## 5.4 RDD Stage 1 checkpoints explícitos
+
+RDD Stage 1 se evalúa como control separado. Usar candidate SHA, RED/GREEN o
+FULL 4R no demuestra por sí solo conformidad RDD.
+
+Para cambios materiales existen dos checkpoints distintos:
+
+```text
+pre-RED:
+RDD Stage 1 Design Check
+
+post-GREEN / pre-close:
+RDD Stage 1 Candidate Conformance
+```
+
+### RDD Stage 1 Design Check — pre-RED
+
+Debe verificar que el diseño preserve explícitamente:
+
+```text
+candidate identity strategy
+baseline/candidate binding
+evidence provenance
+Writer / Reviewer / Validator / Authority separation
+PASS | FAIL | INCONCLUSIVE only
+INCONCLUSIVE != PASS
+candidate change invalidates affected evidence
+bounded correction / correction budget when findings occur
+independent fix validation when applicable
+authority_effect = none
+RDD Stage 2 remains NOT AUTHORIZED
+```
+
+Resultados permitidos:
+
+```text
+PASS
+FAIL
+INCONCLUSIVE
+```
+
+Regla:
+
+```text
+RDD Stage 1 Design Check != PASS
+→ RED NOT ADMISSIBLE
+```
+
+### RDD Stage 1 Candidate Conformance — post-GREEN / pre-close
+
+Debe verificar el candidato material exacto contra
+`MALAK-EVIDENCE-MANIFEST/v1` o evidencia estructurada equivalente
+explícitamente aprobada que preserve sus invariantes.
+
+Como mínimo:
+
+```text
+manifest/schema valid
+baseline exact
+candidate exact
+baseline ancestor of candidate
+scope/spec/gate bound
+validations bound to candidate
+required 4R evidence present
+findings preserved
+correction_round accurate
+producer/validator provenance present
+role independence demonstrated externally when required
+terminal result correctly aggregated
+authority_effect = none
+no Stage 2 fields/effects
+```
+
+Regla de invalidación:
+
+```text
+candidate changes
+→ prior RDD Candidate Conformance no longer certifies new candidate
+→ affected RDD evidence must be regenerated/revalidated
+```
+
+Separaciones obligatorias:
+
+```text
+RDD Design Check PASS
+!= RDD Candidate Conformance PASS
+
+RDD Candidate Conformance PASS
+!= FULL 4R PASS
+!= E2E PASS
+!= Owner approval
+```
+
+RDD Stage 1 produce evidencia de construcción con autoridad cero.
+
+---
 # 6. Cuatro lentes obligatorios
 
 Los cuatro lentes definidos por el Engineering Method son:
