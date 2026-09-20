@@ -517,7 +517,45 @@ Kernel complexity delta          0 / PASS
 FULL 4R debe ejecutarse y registrarse por separado sobre el candidato material.
 Las preguntas de ley no sustituyen FULL 4R.
 
-## 19. Estado
+## 19. Registro del flujo obligatorio y auditoría futura
+
+Este diseño queda sujeto al flujo crítico obligatorio definido por
+`malak_construction_protocol.md`. Ningún actor puede sustituir etapas por
+equivalencia implícita o por recordar controles ejecutados en conversaciones
+anteriores.
+
+Para este incremento:
+
+```text
+G0                              PASS
+G1 hardened                     PASS
+four law questions              PASS
+Design 4R                       PASS
+RDD Stage 1 Design Check        PASS
+RED                             NOT AUTHORIZED
+GREEN                           NOT AUTHORIZED
+RDD Candidate Conformance       PENDING
+Candidate FULL 4R               PENDING
+E2E / CI candidate validation   PENDING
+Owner Ready / Merge             OWNER ONLY
+```
+
+Además, el endurecimiento transversal introducido en este sprint requiere una
+auditoría retrospectiva separada de las implementaciones existentes de Malāk.
+
+La auditoría futura deberá determinar evidencia real de aplicación del flujo y
+no asumir cumplimiento ni incumplimiento por ausencia documental.
+
+Nombre de unidad sugerido:
+
+```text
+MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1
+```
+
+Esa auditoría no queda autorizada ni ejecutada por este documento. Requiere
+admission/gate propio y autorización separada del Owner.
+
+## 20. Estado
 
 ```text
 G0        PASS
