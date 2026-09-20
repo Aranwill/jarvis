@@ -120,6 +120,31 @@ Estado:
 
 `concept / non_normative / research_horizon_reconciliation`
 
+
+### Governed Self-Review Bootstrap Task
+
+Archivo:
+
+GOVERNED_SELF_REVIEW_BOOTSTRAP_TASK.md
+
+Preserva como una de las primeras tareas candidatas de Malāk un ejercicio
+gobernado de autoinspección posterior a la Construction Flow Compliance Audit
+V1.
+
+El ejercicio obliga a distinguir gap actual, deuda histórica, riesgo residual y
+ausencia legítima de cambio. Su foco inicial incluye U01, U04 y la reevaluación
+condicional de Strong SecurityContext Provenance (RR-03), sin convertir ninguno
+de esos elementos en remediation automática.
+
+Principio central:
+
+> Malāk puede inspeccionarse, encontrar evidencia y proponer hardening; no puede
+> convertir esa observación en autoridad para modificarse.
+
+Estado:
+
+concept / non_normative / owner_requested_first_task_candidate
+
 ## Regla de uso
 
 Antes de utilizar cualquiera de estos documentos para proponer implementación:
