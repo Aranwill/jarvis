@@ -248,6 +248,7 @@ Para todo cambio material sujeto a RDD Stage 1, validar los checkpoints por sepa
 - [ ] Se definió cómo se liga baseline y candidate exactos.
 - [ ] Se definió provenance de evidencia y separación Writer/Reviewer/Validator/Authority.
 - [ ] Sólo se admiten `PASS`, `FAIL` o `INCONCLUSIVE`; `INCONCLUSIVE != PASS`.
+- [ ] Los resultados internos del dominio no fueron confundidos con el resultado terminal RDD; cualquier mapping es explícito y fail-closed.
 - [ ] Se definió que un cambio de candidate invalida la evidencia afectada.
 - [ ] Findings y bounded correction no pueden ampliar scope automáticamente.
 - [ ] `authority_effect` permanece `none`.
