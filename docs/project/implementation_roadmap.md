@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-19
-as_of_commit: 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+as_of_date: 2026-09-20
+as_of_commit: 996a45359784efc390c3993851e8c16f12163913
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -37,10 +37,10 @@ Este documento es deliberadamente **derivado y no normativo**.
 No reemplaza ni modifica ninguna fuente de ley, arquitectura, seguridad,
 gobernanza o contrato aprobado.
 
-## Estado CURRENT reconciliado — 2026-09-19
+## Estado CURRENT reconciliado — 2026-09-20
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e`.
+`Aranwill/jarvis/main@996a45359784efc390c3993851e8c16f12163913`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -78,8 +78,21 @@ candidate 3463f1c391f6a11de70a0d6ecfc37c4127da21cb
 merge     14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 status    INTEGRATED
 
-E5 — Engineering CLI
-status    NOT AUTHORIZED
+E5-A — Command Surface
+PR #155
+merge     3015e9baab7c6a810b2183b7d592933279bacc1e
+status    INTEGRATED
+
+E5-B1 — Read-only Explorer
+PR #157
+merge     433e075bb762cc5fb4bf11e18efe18a1faab7a2f
+status    INTEGRATED
+
+E5-B2 — Runtime Context Browser
+status    DEFERRED
+
+E5-B3 — Engineering Artifact Browser
+status    DEFERRED
 ```
 
 La validación candidate-bound final de E4 quedó registrada en Validation #330
@@ -754,7 +767,9 @@ ENGINEERING INTELLIGENCE E1 — GOVERNED KNOWLEDGE READ INTEGRADO
 ENGINEERING INTELLIGENCE E2 — ENGINEERING INSPECT INTEGRADO
 ENGINEERING INTELLIGENCE E3 — ENGINEERING ANALYZE INTEGRADO
 ENGINEERING INTELLIGENCE E4 — ENGINEERING PROPOSE INTEGRADO
-ENGINEERING INTELLIGENCE E5 — CLI NO AUTORIZADO
+ENGINEERING INTELLIGENCE E5-A — COMMAND SURFACE INTEGRADO
+ENGINEERING INTELLIGENCE E5-B1 — READ-ONLY EXPLORER INTEGRADO
+ENGINEERING INTELLIGENCE E5-B2/B3 — DIFERIDO
 CONVERSATION G2B BLOQUEADO / NO AUTORIZADO
 SPRINT 7.12 NO AUTORIZADO
 RDD STAGE 2 NO AUTORIZADO
@@ -832,7 +847,8 @@ No está autorizado:
 - Conversation Protected Finalization Integration / G2B;
 - RDD Stage 2;
 - Memory persistente;
-- E4 Engineering Propose y E5 CLI;
+- E5-B2 Runtime Context Browser y E5-B3 Engineering Artifact Browser;
+- E5-F1 Governed Git Delivery;
 - cualquier nueva capability adicional sin admission review y autorización separadas;
 - agentes;
 - tools;
@@ -1583,7 +1599,7 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+996a45359784efc390c3993851e8c16f12163913
 
 CURRENT MATERIAL COGNITIVE HEAD
 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
@@ -1607,7 +1623,7 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST CODE UNIT
-Engineering Propose — E4
+E5-B1 — Read-only Explorer
 
 LATEST EPISODIC PRODUCT UNIT
 Episodic Admission Governed Projection Consumption Boundary
@@ -1642,8 +1658,14 @@ INTEGRATED
 ENGINEERING INTELLIGENCE E4
 INTEGRATED
 
-ENGINEERING INTELLIGENCE E5
-NOT AUTHORIZED
+ENGINEERING INTELLIGENCE E5-A
+INTEGRATED
+
+ENGINEERING INTELLIGENCE E5-B1
+INTEGRATED
+
+ENGINEERING INTELLIGENCE E5-B2/B3
+DEFERRED
 
 CONVERSATION G2B
 BLOCKED / NOT AUTHORIZED

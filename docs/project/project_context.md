@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-19
-as_of_commit: 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+as_of_date: 2026-09-20
+as_of_commit: 996a45359784efc390c3993851e8c16f12163913
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -139,19 +139,21 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+HEAD integrado actual:             996a45359784efc390c3993851e8c16f12163913
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Última unidad de código integrada: Engineering Propose — E4
+Última unidad de código integrada: E5-B1 — Read-only Explorer
 Última foundation previa:          Assurance Signal Authority & Projection Foundation — G2
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
 Última unidad de assurance:        Assurance Signal Boundary G2 — integrada / aislada
-Engineering Intelligence:          E0–E4 integrados; E5 no autorizado
+Engineering Intelligence:          E0–E4 + E5-A/B1 integrados; E5-B2/B3 diferidos
 Sprint activo autorizado:          ninguno
 Rama de implementación activa:     ninguna
 Candidato E4:                      3463f1c391f6a11de70a0d6ecfc37c4127da21cb
 Merge E4:                          14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
 Validación E4:                     Validation #330 / 1168 passed Ubuntu + Windows
+Merge E5-A:                        3015e9baab7c6a810b2183b7d592933279bacc1e
+Merge E5-B1:                       433e075bb762cc5fb4bf11e18efe18a1faab7a2f
 Sprint posterior autorizado:       ninguno
 Signal Boundary G2:                integrado / aislado
 Conversation G2B:                  bloqueado / no autorizado
@@ -376,10 +378,11 @@ D:\Ollama\jarvis
 
 ## Arquitectura implementada actual
 
-### Engineering Intelligence — E0–E4
+### Engineering Intelligence — E0–E5-B1
 
-El vertical bounded de Engineering Intelligence está integrado en
-`main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e`:
+El vertical bounded de Engineering Intelligence y sus superficies read-only está
+integrado hasta E5-B1. El HEAD reconciliado es
+`main@996a45359784efc390c3993851e8c16f12163913`:
 
 ```text
 E0 Repository Read          PR #147  INTEGRATED
@@ -394,11 +397,15 @@ shared bounded evidence
                                                 ↓
                                               Owner
 
-E5 Engineering CLI          NOT AUTHORIZED
+E5-A Command Surface        PR #155  INTEGRATED
+E5-B1 Read-only Explorer    PR #157  INTEGRATED
+E5-B2 Runtime Context       DEFERRED
+E5-B3 Engineering Artifacts DEFERRED
 ```
 
-E0–E4 permanecen read-only. No introducen writes, tools, agents, sandbox,
-Planner/CLI routing ni autoridad operacional. E3 produce findings grounded y E4
+E0–E4 permanecen read-only y E5-A/B1 sólo exponen esas capacidades y readers
+mediante routing/navegación deterministas de aplicación. No introducen writes,
+agents, sandbox ni autoridad operacional. E3 produce findings grounded y E4
 transforma únicamente findings elegibles en propuestas bounded para revisión
 humana.
 
@@ -1179,7 +1186,7 @@ Estado reconciliado:
 
 ```text
 rama permanente: main
-HEAD integrado de referencia: 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+HEAD integrado de referencia: 996a45359784efc390c3993851e8c16f12163913
 commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
 Sprint 7.7: cerrado
 Sprint 7.8: completado
@@ -1188,13 +1195,15 @@ Sprint 7.10: completado
 Sprint 7.11: completado e integrado
 última ruta conversacional/runtime: Sprint 7.10
 última foundation previa: Assurance Signal Authority & Projection Foundation — G2
-última unidad de código integrada: Engineering Propose — E4
+última unidad de código integrada: E5-B1 — Read-only Explorer
 Engineering Intelligence E0: integrado
 Engineering Intelligence E1: integrado
 Engineering Intelligence E2: integrado
 Engineering Intelligence E3: integrado
 Engineering Intelligence E4: integrado
-Engineering Intelligence E5: no autorizado
+Engineering Intelligence E5-A: integrado
+Engineering Intelligence E5-B1: integrado
+Engineering Intelligence E5-B2/B3: diferido
 último diseño Memory: Episodic Candidate Content Identity G0/G1
 última unidad cognitiva de assurance: Assurance Signal Boundary G2
 candidate E4: 3463f1c391f6a11de70a0d6ecfc37c4127da21cb
@@ -1255,7 +1264,7 @@ LAST CONVERSATIONAL/RUNTIME SPRINT
 Sprint 7.10 — Conversation Session Isolation Foundation
 
 LATEST INTEGRATED CODE UNIT
-Engineering Propose — E4
+E5-B1 — Read-only Explorer
 
 ENGINEERING INTELLIGENCE
 E0 INTEGRATED
@@ -1263,7 +1272,9 @@ E1 INTEGRATED
 E2 INTEGRATED
 E3 INTEGRATED
 E4 INTEGRATED
-E5 NOT AUTHORIZED
+E5-A COMMAND SURFACE INTEGRATED
+E5-B1 READ-ONLY EXPLORER INTEGRATED
+E5-B2/B3 DEFERRED
 
 LATEST PRE-E0/E4 CODE FOUNDATION
 Assurance Signal Authority & Projection Foundation — G2
@@ -1485,10 +1496,11 @@ baseline resultante y obtener aprobación explícita.
 ## Política de actualización
 
 Este documento fue reconciliado contra el estado material observado después de
-integrar E0–E4, culminando en PR #152 — `feat(e4): add grounded Engineering Propose capability`:
+integrar E5-A mediante PR #155 y E5-B1 mediante PR #157, más el corrective packet
+documental de PR #161:
 
 ```text
-main@14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+main@996a45359784efc390c3993851e8c16f12163913
 active_work_branch@NONE
 ```
 
