@@ -21,22 +21,21 @@ risk_class: 2
 Medir de forma reproducible qué cambia en `Engineering Inspect (E2)` cuando la
 misma solicitud recibe o no evidencia estructural `[S#]`.
 
-V0 evalúa comportamiento observable del sistema. No evalúa razonamiento general
-del modelo ni autoriza cambios arquitectónicos.
+V0 evalúa comportamiento observable del sistema. No evalúa calidad general del
+modelo ni autoriza cambios arquitectónicos.
 
 ## 2. G0
 
 ```text
 baseline: 5c942d27ea610873182ded77b85d0364bfbe15a0
-tracked files discovered: 271
-tracked files classified: 271
-silently omitted files: 0
+tracked files: 271/271 classified
+silently omitted: 0
 tree truncated: false
 G0 RESULT: PASS
 ```
 
-No existe hoy un harness específico para E2. La Cognitive Dataset Foundation ya
-establece evaluación antes de entrenamiento o expansión de complejidad.
+No existe harness específico para E2. La Cognitive Dataset Foundation ya exige
+evaluación antes de entrenamiento o expansión de complejidad.
 
 ```text
 Evaluation Pack V0       ADMIT
@@ -47,9 +46,9 @@ E3/E4 propagation        DEFER
 Structural Delta         DEFER
 ```
 
-## 3. A/B obligatorio
+## 3. Contrato A/B
 
-Cada caso usa el mismo snapshot y subject.
+Cada caso usa el mismo commit, fixture, subject, provider policy y configuración.
 
 ```text
 A: structural_projection = None
@@ -59,23 +58,18 @@ B: structural_projection = projection(same baseline)
    → R + K + S
 ```
 
-Invariantes:
+Única diferencia material permitida: disponibilidad de S.
 
-1. mismo commit;
-2. mismo fixture;
-3. mismo subject;
-4. misma política del provider de evaluación;
-5. misma configuración E2;
-6. única diferencia material: disponibilidad de S.
-
-Baseline A != B => `STOP / INVALID CASE`.
+```text
+A baseline != B baseline
+→ STOP / INVALID CASE
+```
 
 ## 4. Ground truth
 
-El expected se define antes de ejecutar el sistema y no puede derivarse del
-output observado de B.
+El expected se define antes de ejecutar y no puede derivarse del output B.
 
-Cada caso declara:
+Campos mínimos:
 
 ```text
 case_id
@@ -100,94 +94,34 @@ kind
 relative_level
 ```
 
-`baseline_commit` y `blob_sha` validan binding, pero no son el oráculo manual.
+`baseline_commit` y `blob_sha` validan binding; no son oráculo manual.
 
-## 5. Casos mínimos
+## 5. Casos V0
 
-### C1 exact symbol / structural-only
-
-```text
-subject: malak.component.NeedleComponent1
-A: UNCONFIRMED
-B: GROUNDED
-expected S: exact symbol
-```
-
-### C2 exact module
-
-```text
-subject: malak.component
-A: UNCONFIRMED
-B: GROUNDED
-expected S: symbols + imports
-```
-
-### C3 substring sin structural activation
-
-```text
-subject: NeedleComponent
-expected S: 0
-A/B non-structural behavior compatible
-```
-
-### C4 textual/knowledge only
-
-```text
-subject: needle
-expected S: 0
-A/B status and R/K behavior compatible
-```
-
-### C5 absent
-
-```text
-subject: absent-evaluation-token
-A: UNCONFIRMED
-B: UNCONFIRMED
-expected S: 0
-```
-
-### C6 truncation
-
-```text
-fixture: >12 structural facts
-B structural_evidence_count: 12
-B context_truncated: true
-```
+| Caso | Subject / fixture | A | B | Expected S |
+| --- | --- | --- | --- | --- |
+| C1 exact symbol | `malak.component.NeedleComponent1` | UNCONFIRMED | GROUNDED | exact symbol |
+| C2 exact module | `malak.component` | UNCONFIRMED | GROUNDED | symbols + imports |
+| C3 substring | `NeedleComponent` | compatible non-S | compatible non-S | 0 |
+| C4 textual/knowledge | `needle` | compatible R/K | compatible R/K | 0 |
+| C5 absent | `absent-evaluation-token` | UNCONFIRMED | UNCONFIRMED | 0 |
+| C6 truncation | >12 structural facts | no S | GROUNDED | 12 + truncated |
 
 Sólo se añaden casos si representan una clase nueva de comportamiento.
 
-## 6. Métricas V0
+## 6. Métricas
 
 No existe score compuesto.
 
-### structural_coverage_gain_count
+| Métrica | Semántica | Objetivo |
+| --- | --- | --- |
+| `structural_coverage_gain_count` | ground truth espera S, A=UNCONFIRMED, B=GROUNDED | observar |
+| `unexpected_structural_activation_count` | expected S=0 pero B produce S>0 | 0 |
+| `structural_fact_mismatch_count` | facts B != expected manual | 0 |
+| `non_structural_regression_count` | expected S=0 y A/B difieren inesperadamente | 0 |
+| `invalid_paired_baseline_count` | baseline A/B distinto | 0 |
 
-Casos donde:
-
-```text
-ground truth expects S
-AND A == UNCONFIRMED
-AND B == GROUNDED
-```
-
-Mide cobertura, no calidad.
-
-### unexpected_structural_activation_count
-
-Casos con `expected S=0` y `B S>0`.
-
-Objetivo contractual: `0`.
-
-### structural_fact_mismatch_count
-
-Casos donde los facts observados en B no coinciden con el expected manual.
-
-Objetivo contractual: `0`.
-
-### non_structural_regression_count
-
-En casos `expected S=0`, diferencias A/B inesperadas en:
+Para `non_structural_regression_count` se comparan:
 
 ```text
 status
@@ -196,15 +130,9 @@ knowledge_evidence_count
 context_truncated
 ```
 
-Objetivo contractual: `0`.
+`structural_coverage_gain_count` mide cobertura, no calidad.
 
-### invalid_paired_baseline_count
-
-Pares A/B con baseline distinto.
-
-Objetivo contractual: `0`.
-
-## 7. Límites de interpretación
+## 7. Límites
 
 ```text
 A: UNCONFIRMED
@@ -224,7 +152,7 @@ S should propagate to E3/E4
 
 ## 8. Anti-autoengaño
 
-1. expected antes de ejecutar;
+1. expected definido antes de ejecutar;
 2. expected no derivado del projector/lookup bajo prueba;
 3. resultados visibles por caso;
 4. no esconder fallos en promedios;
@@ -237,10 +165,8 @@ S should propagate to E3/E4
 
 ## 9. Provider de evaluación
 
-V0 no evalúa un LLM real.
-
-El futuro harness usará un provider determinista de test con política fija para
-recorrer E2 de forma reproducible.
+V0 usa un provider determinista de test con política fija para recorrer E2 de
+forma reproducible.
 
 ```text
 provider output
@@ -252,18 +178,10 @@ Un benchmark con modelos reales requiere gate separado.
 
 ## 10. Estructura futura admitida
 
-Sin implementación autorizada:
-
 ```text
-evaluations/
-  e2_structural_evidence_v0/
-    cases.json
-
-scripts/
-  evaluate_e2_structural_evidence.py
-
-tests/
-  test_e2_structural_evidence_evaluation.py
+evaluations/e2_structural_evidence_v0/cases.json
+scripts/evaluate_e2_structural_evidence.py
+tests/test_e2_structural_evidence_evaluation.py
 ```
 
 Reglas:
@@ -319,7 +237,7 @@ Security
 provider registry
 ```
 
-## 13. Relación con Observability V0
+## 13. Relación con trabajo actual
 
 ```text
 Observability V0
@@ -332,9 +250,7 @@ Evaluation Pack V0
 Reutiliza counts R/K/S, citation counts, `model_inference_count` y
 `context_truncated`, sin añadir señales al runtime.
 
-## 14. Relación con Cognitive Dataset Foundation
-
-Adopta:
+Cognitive Dataset Foundation aporta:
 
 ```text
 evaluation before training
@@ -342,9 +258,9 @@ benchmark before adaptation
 identify real weaknesses before adding complexity
 ```
 
-No es todavía training dataset, hidden eval global ni benchmark de modelos.
+Este pack no es training dataset, hidden eval global ni benchmark de modelos.
 
-## 15. Governance
+## 14. Governance
 
 ```text
 runtime delta           0
@@ -360,7 +276,7 @@ model benchmark         0
 Human in Control        unchanged
 ```
 
-## 16. Gate de salida
+## 15. Gate de salida
 
 El futuro pack sólo puede considerarse conforme si:
 
@@ -374,7 +290,7 @@ case-level evidence            preserved
 
 Incluso entonces, E3/E4 requieren gate separado.
 
-## 17. Estado
+## 16. Estado
 
 ```text
 G0        PASS
