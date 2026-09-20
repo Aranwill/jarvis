@@ -3,7 +3,7 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-09-20
-as_of_commit: 37af50628fb2d56fa48113a65a53de51049bd8da
+as_of_commit: e6f2b5060131f961f1054e83203cb7da91f5302c
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -146,7 +146,7 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             37af50628fb2d56fa48113a65a53de51049bd8da
+HEAD integrado actual:             e6f2b5060131f961f1054e83203cb7da91f5302c
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última unidad de código integrada: E5-B1 — Read-only Explorer
@@ -309,7 +309,7 @@ permutaciones, y falla cerrado ante inconsistencias. No decide verdad cognitiva,
 no persiste, no hace I/O ni red y no prueba por sí solo provenance criptográfica
 del `AuthorizationDecision`.
 
-Permanece fuera de alcance:
+En ese corte histórico, hasta PR #120, permanecía fuera de alcance:
 
 ~~~text
 Conversation/runtime wiring de la cadena episódica
@@ -326,6 +326,11 @@ external dependencies
 Sprint 7.12
 RDD Stage 2
 ~~~
+
+Ese bloque es histórico y no describe por sí solo el estado mutable actual. Las
+integraciones posteriores de Candidate Content Identity, su propagation/binding,
+Persistence Readiness y Authorization Request Composition se reflejan en la
+sección de planificación vigente de este documento.
 
 Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
 G2A y G2 son foundations aisladas de finalización protegida y assurance signal
@@ -390,8 +395,8 @@ D:\Ollama\jarvis
 ### Engineering Intelligence — E0–E5-B1
 
 El vertical bounded de Engineering Intelligence y sus superficies read-only está
-integrado hasta E5-B1. El HEAD reconciliado es
-`main@37af50628fb2d56fa48113a65a53de51049bd8da`:
+integrado hasta E5-B1. El HEAD derivado reconciliado es
+`main@e6f2b5060131f961f1054e83203cb7da91f5302c`:
 
 ```text
 E0 Repository Read          PR #147  INTEGRATED
@@ -1235,8 +1240,9 @@ Layer de forma aislada; PR #110 añadió G2A y PR #118 añadió G2 como foundati
 aisladas sin wiring conversacional.
 
 No debe certificarse una nueva release, crear o mover un tag, abrir Sprint 7.12,
-iniciar Candidate Content Identity G2, implementar Persistence Authorization o
-Conversation G2B sin un proceso específico de evaluación y aprobación.
+habilitar Persistence Authorization decision/enforcement, Protected Durable
+Write, Persistent Memory o Conversation G2B sin un proceso específico de
+evaluación y aprobación.
 
 ---
 
@@ -1256,12 +1262,19 @@ Admission, Assessment Provenance, Assessment Producer Authorization, Governed
 Input Projection y Governed Projection Consumption. Ninguna de esas unidades
 constituye Sprint 7.12.
 
-PR #93 integró únicamente G0/G1 de Candidate Content Identity. PR #97–#99
-preservaron y diseñaron la dirección de Evidence-Bound Cognition y Progressive
-Cognitive Assurance. Después del rebaseline y los fixes de auditoría hasta PR
-#109, PR #110 implementó G2A en aislamiento, PR #111 integró G0/G1 del Assurance
-Signal Authority Boundary, PR #118 integró G2 en aislamiento y PR #120 agregó el
-Evidence Map externo al Research Horizon sin autorizar implementación adicional.
+PR #93 integró G0/G1 de Candidate Content Identity; PR #123 integró su G2 y
+PR #126 integró Content Identity Propagation & Binding G2. Más adelante, PR #140
+integró Episodic Persistence Readiness G2B y PR #146 integró G2P-B —
+Authorization Request Composition. Estas dos últimas fronteras permanecen
+aisladas: readiness/request composition != authorization decision/enforcement !=
+durable write.
+
+PR #97–#99 preservaron y diseñaron la dirección de Evidence-Bound Cognition y
+Progressive Cognitive Assurance. Después del rebaseline y los fixes de auditoría
+hasta PR #109, PR #110 implementó G2A en aislamiento, PR #111 integró G0/G1 del
+Assurance Signal Authority Boundary, PR #118 integró G2 en aislamiento y PR #120
+agregó el Evidence Map externo al Research Horizon sin autorizar implementación
+adicional.
 
 Actualmente:
 
@@ -1288,8 +1301,8 @@ E5-B2/B3 DEFERRED
 LATEST PRE-E0/E4 CODE FOUNDATION
 Assurance Signal Authority & Projection Foundation — G2
 
-LATEST MEMORY DESIGN UNIT
-Episodic Candidate Content Identity — G0/G1 ONLY
+LATEST MEMORY CODE UNIT
+G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
 
 LATEST COGNITIVE ASSURANCE UNIT
 Assurance Signal Boundary G2 — INTEGRATED / ISOLATED
@@ -1307,6 +1320,24 @@ CONVERSATION G2B
 BLOCKED / NOT AUTHORIZED
 
 CANDIDATE CONTENT IDENTITY G2
+INTEGRATED — PR #123
+
+CONTENT IDENTITY PROPAGATION & BINDING G2
+INTEGRATED — PR #126
+
+EPISODIC PERSISTENCE READINESS G2B
+INTEGRATED / ISOLATED — PR #140
+
+PERSISTENCE AUTHORIZATION REQUEST COMPOSITION G2P-B
+INTEGRATED / ISOLATED — PR #146
+
+PERSISTENCE AUTHORIZATION DECISION / ENFORCEMENT
+NOT AUTHORIZED
+
+PROTECTED DURABLE WRITE
+NOT AUTHORIZED
+
+PERSISTENT MEMORY
 NOT AUTHORIZED
 
 RDD STAGE 2
@@ -1368,8 +1399,8 @@ Hasta que un sprint o unidad aprobada las autorice, no se deben introducir:
 - navegación externa;
 - comunicaciones externas automáticas;
 - memoria persistente sensible sin controles aprobados;
-- Candidate Content Identity G2/implementación/propagación sin gate separado;
-- Persistence Authorization sin diseño y autorización propios;
+- Protected Durable Write sin admission y autorización propias;
+- Persistence Authorization decision/enforcement más allá del request composer integrado, sin diseño y autorización propios;
 - Conversation Finalization Integration / G2B mientras no exista una admisión
   específica que resuelva producers reales y semántica del historial;
 - elevación automática de privilegios;
