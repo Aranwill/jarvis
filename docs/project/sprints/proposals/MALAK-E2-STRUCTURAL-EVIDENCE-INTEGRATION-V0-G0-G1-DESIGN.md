@@ -13,7 +13,9 @@ red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-20
 red_baseline: e7ce1bfab8b73690c8e3c5b032c6baf0ee63b2c0
-implementation_authorized: false
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-20
 risk_class: 2
 ---
 
@@ -304,7 +306,7 @@ el pack real. No existe `BLOCKING_GAP`.
 G0                    PASS
 G1 design             ADMITTED
 RED                   AUTHORIZED
-GREEN                 NOT AUTHORIZED
+GREEN                 AUTHORIZED
 
 Kernel delta          0
 Planner delta         0
@@ -315,4 +317,4 @@ authority delta       0
 new model calls       0
 ```
 
-RED fue autorizado por el Owner el 2026-09-20. Este documento no autoriza GREEN.
+RED y GREEN fueron autorizados por el Owner el 2026-09-20. La aceptación final y el merge permanecen bajo decisión exclusiva del Owner.
