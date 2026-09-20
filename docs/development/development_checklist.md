@@ -117,6 +117,55 @@ Cuando el cambio sea material, validar:
 
 ---
 
+# Hardening de contratos críticos
+
+Cuando el cambio defina o modifique una superficie crítica, validar antes de RED:
+
+- [ ] Se revisaron interpretaciones materiales alternativas del contrato.
+- [ ] Se revisaron interpretaciones adversariales por agentes, modelos o tools.
+- [ ] Se definió comportamiento fail-closed para entradas/estados inválidos cuando corresponde.
+- [ ] Se cerraron límites de autoridad y side effects.
+- [ ] Inputs, schemas, enums, campos desconocidos, faltantes y duplicados tienen semántica explícita.
+- [ ] Se definieron identidad/binding e invalidación de evidencia cuando cambia el candidato relevante.
+- [ ] No existen rutas silenciosas de skip, bypass, auto-promoción o ampliación de scope.
+- [ ] Toda ambigüedad material conocida quedó resuelta o clasificada `INCONCLUSIVE`.
+- [ ] `INCONCLUSIVE` bloquea RED hasta resolución o decisión humana explícita.
+- [ ] El contrato crítico pasó las cuatro preguntas de ley antes de RED.
+- [ ] El contrato crítico pasó Design 4R antes de RED, con evidencia separada por lente.
+- [ ] Design 4R no fue utilizado como sustituto del FULL 4R del candidate material.
+- [ ] El candidate material ejecutó FULL 4R post-GREEN/pre-close cuando correspondía.
+
+---
+# Secuencia crítica obligatoria
+
+Para cambios materiales sobre contratos críticos, validar:
+
+- [ ] La secuencia aplicable quedó registrada y no dependió de memoria conversacional.
+- [ ] Se ejecutaron por separado G0/G1, hardening, cuatro preguntas de ley, Design 4R y RDD Stage 1 Design Check antes de RED.
+- [ ] RED y GREEN conservaron identidad de candidate y evidencia propia.
+- [ ] Post-GREEN se ejecutaron por separado RDD Stage 1 Candidate Conformance y Candidate FULL 4R.
+- [ ] E2E/integration, CI y validación independiente aplicable quedaron candidate-bound.
+- [ ] Ninguna etapa fue considerada equivalente a otra por similitud.
+- [ ] Toda etapa `N/A` conservó razón y evidencia explícitas.
+- [ ] `tests green` no fue utilizado como sustituto del cierre integral.
+- [ ] Ready y merge permanecieron bajo autoridad humana.
+
+---
+
+# Auditoría retrospectiva de implementaciones
+
+Cuando se audite la aplicación histórica del flujo, validar:
+
+- [ ] La auditoría recorre todas las unidades materiales incluidas en el alcance.
+- [ ] Cada unidad recibe una disposición explícita: `HISTORICALLY_EVIDENCED`, `CURRENT_STATE_REVALIDATED`, `PARTIALLY_EVIDENCED`, `UNCONFIRMED`, `GAP_REQUIRES_HARDENING` o `NOT_APPLICABLE_WITH_REASON`.
+- [ ] Evidencia ausente no se interpreta automáticamente como incumplimiento.
+- [ ] No se reconstruyen PASS desde memoria, inferencia o conversación.
+- [ ] No se crean manifests/receipts retroactivos para simular evidencia histórica.
+- [ ] No se reescribe historia Git para fabricar conformidad.
+- [ ] Findings actuales generan remediation candidates nuevos y gobernados.
+- [ ] La auditoría no concede autoridad ni modifica baseline por sí misma.
+
+---
 # Revisión proporcional al riesgo
 
 Cuando corresponda, validar:
@@ -222,7 +271,34 @@ Cuando forme parte del alcance del cambio, validar:
 
 # Perfil RDD progresivo
 
-Cuando se utilicen receipts o evidencia estructurada inspirada en Receipt-Driven Development, validar:
+Para todo cambio material sujeto a RDD Stage 1, validar los checkpoints por separado:
+
+### Pre-RED — RDD Stage 1 Design Check
+
+- [ ] Se definió cómo se liga baseline y candidate exactos.
+- [ ] Se definió provenance de evidencia y separación Writer/Reviewer/Validator/Authority.
+- [ ] Sólo se admiten `PASS`, `FAIL` o `INCONCLUSIVE`; `INCONCLUSIVE != PASS`.
+- [ ] Los resultados internos del dominio no fueron confundidos con el resultado terminal RDD; cualquier mapping es explícito y fail-closed.
+- [ ] Se definió que un cambio de candidate invalida la evidencia afectada.
+- [ ] Findings y bounded correction no pueden ampliar scope automáticamente.
+- [ ] `authority_effect` permanece `none`.
+- [ ] RDD Stage 2 permanece explícitamente no autorizado.
+- [ ] Un resultado distinto de PASS bloquea RED.
+
+### Post-GREEN / pre-close — RDD Stage 1 Candidate Conformance
+
+- [ ] El manifest/evidencia corresponde al baseline y candidate exactos.
+- [ ] El baseline es ancestro del candidate cuando aplica el manifest v1.
+- [ ] Scope, specification, gate y validations están ligados al candidate.
+- [ ] La evidencia 4R requerida está presente y corresponde al candidate.
+- [ ] Findings y correction rounds fueron preservados y son exactos.
+- [ ] Producer/validator provenance está presente y la independencia real fue demostrada cuando correspondía.
+- [ ] El resultado terminal fue agregado correctamente.
+- [ ] `authority_effect` es exactamente `none`.
+- [ ] No aparecieron estados/campos/efectos de RDD Stage 2.
+- [ ] Si el candidate cambió, se regeneró/revalidó la evidencia RDD afectada.
+
+Además, validar las invariantes transversales:
 
 - [ ] Se preservó `Evidence != Receipt != Validation != Decision != Authority`.
 - [ ] El receipt o manifest está ligado a una identidad exacta de candidato.

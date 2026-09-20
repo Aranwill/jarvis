@@ -421,6 +421,336 @@ El E2E no puede omitirse silenciosamente. Cuando no exista un runtime E2E aplica
 
 ---
 
+## 5.2 Critical Contract Hardening Gate
+
+Todo cambio material que defina o modifique contratos críticos debe cerrar
+interpretaciones materiales antes de RED.
+
+Un contrato se clasifica como crítico en V1 si cumple al menos una de estas
+condiciones materiales:
+
+```text
+1. define o modifica authority / permission / delegation / enforcement;
+2. produce o interpreta evidence / validation / evaluation / assurance usada
+   por gates, decisiones o promoción de candidatos;
+3. define trust, provenance, knowledge, memory o self-model consumido para
+   decisiones o razonamiento gobernado;
+4. habilita tools, agents, network, filesystem u otros side effects;
+5. define security boundaries, secrets, datos sensibles o disclosure;
+6. define learning, adaptation, self-improvement o promoción de conocimiento;
+7. define candidate identity, binding, invalidation o lineage.
+```
+
+Fuera de esas condiciones, una superficie sólo puede elevarse a crítica mediante
+clasificación explícita y justificada del Owner. Un agente/modelo no puede ampliar
+la categoría por inferencia propia.
+
+El hardening debe revisar explícitamente:
+
+```text
+ambiguity / alternate material interpretations
+adversarial interpretation
+fail-open vs fail-closed behavior
+authority boundaries
+input/schema strictness
+candidate/evidence binding
+unknown/missing/duplicate handling
+skip/bypass paths
+resource / side-effect boundaries
+rollback / invalidation conditions
+```
+
+Regla de cierre:
+
+```text
+known material ambiguity unresolved
+→ INCONCLUSIVE
+→ RED NOT ADMISSIBLE
+```
+
+No se exige demostrar ausencia absoluta de toda ambigüedad futura. Sí se exige
+que no permanezca ninguna ambigüedad material conocida sin disposición explícita.
+
+## 5.3 Cuatro preguntas de ley != FULL 4R
+
+Los dos controles son obligatorios cuando correspondan y no se sustituyen.
+
+```text
+Cuatro preguntas de ley
+1. respeta Blueprint
+2. respeta Cognitive Constitution
+3. respeta Governance Constitution
+4. mantiene o reduce complejidad del Kernel
+
+FULL 4R
+Risk
+Readability
+Reliability
+Resilience
+```
+
+Las cuatro preguntas validan alineación arquitectónica/gobernada.
+FULL 4R revisa el candidato bajo lentes de ingeniería.
+
+```text
+law questions PASS
+!= FULL 4R executed
+
+FULL 4R PASS
+!= architectural admission
+```
+
+Para un contrato crítico existen dos checkpoints 4R distintos:
+
+```text
+pre-RED:
+Design 4R sobre el contrato endurecido
+
+post-GREEN / pre-close:
+FULL 4R sobre el candidate material exacto
+```
+
+El diseño endurecido debe además pasar las cuatro preguntas de ley antes de RED.
+
+```text
+Design 4R PASS
+!= candidate FULL 4R PASS
+
+candidate FULL 4R PASS
+!= Design 4R PASS
+```
+
+Ambos deben producir evidencia separada por lente cuando sean aplicables.
+
+---
+## 5.4 RDD Stage 1 checkpoints explícitos
+
+RDD Stage 1 se evalúa como control separado. Usar candidate SHA, RED/GREEN o
+FULL 4R no demuestra por sí solo conformidad RDD.
+
+Para cambios materiales existen dos checkpoints distintos:
+
+```text
+pre-RED:
+RDD Stage 1 Design Check
+
+post-GREEN / pre-close:
+RDD Stage 1 Candidate Conformance
+```
+
+### RDD Stage 1 Design Check — pre-RED
+
+Debe verificar que el diseño preserve explícitamente:
+
+```text
+candidate identity strategy
+baseline/candidate binding
+evidence provenance
+Writer / Reviewer / Validator / Authority separation
+PASS | FAIL | INCONCLUSIVE only
+INCONCLUSIVE != PASS
+candidate change invalidates affected evidence
+bounded correction / correction budget when findings occur
+independent fix validation when applicable
+authority_effect = none
+RDD Stage 2 remains NOT AUTHORIZED
+```
+
+Resultados permitidos:
+
+```text
+PASS
+FAIL
+INCONCLUSIVE
+```
+
+Regla:
+
+```text
+RDD Stage 1 Design Check != PASS
+→ RED NOT ADMISSIBLE
+```
+
+### RDD Stage 1 Candidate Conformance — post-GREEN / pre-close
+
+Debe verificar el candidato material exacto contra
+`MALAK-EVIDENCE-MANIFEST/v1` o evidencia estructurada equivalente
+explícitamente aprobada que preserve sus invariantes.
+
+Como mínimo:
+
+```text
+manifest/schema valid
+baseline exact
+candidate exact
+baseline ancestor of candidate
+scope/spec/gate bound
+validations bound to candidate
+required 4R evidence present
+findings preserved
+correction_round accurate
+producer/validator provenance present
+role independence demonstrated externally when required
+terminal result correctly aggregated
+authority_effect = none
+no Stage 2 fields/effects
+```
+
+Regla de invalidación:
+
+```text
+candidate changes
+→ prior RDD Candidate Conformance no longer certifies new candidate
+→ affected RDD evidence must be regenerated/revalidated
+```
+
+Separaciones obligatorias:
+
+```text
+RDD Design Check PASS
+!= RDD Candidate Conformance PASS
+
+RDD Candidate Conformance PASS
+!= FULL 4R PASS
+!= E2E PASS
+!= Owner approval
+```
+
+Domain result enums pueden existir dentro del artefacto evaluado, pero no
+redefinen el enum terminal RDD.
+
+```text
+domain result (ej. INVALID)
+!= RDD validation result
+
+RDD terminal result remains:
+PASS | FAIL | INCONCLUSIVE
+```
+
+Todo mapping dominio → RDD debe ser explícito y fail-closed.
+
+RDD Stage 1 produce evidencia de construcción con autoridad cero.
+
+---
+## 5.5 Secuencia crítica obligatoria y no sustituible
+
+Para todo cambio material que afecte un contrato crítico, la secuencia aplicable
+debe quedar registrada explícitamente. No puede depender de memoria del operador,
+del contexto conversacional ni de interpretación de un agente/modelo.
+
+```text
+G0 / admission
+        ↓
+G1 design
+        ↓
+Critical Contract Hardening
+        ↓
+Cuatro preguntas de ley
+        ↓
+Design 4R
+        ↓
+RDD Stage 1 Design Check
+        ↓
+RED
+        ↓
+GREEN
+        ↓
+RDD Stage 1 Candidate Conformance
+        ↓
+Candidate FULL 4R
+        ↓
+E2E / integration validation
+        ↓
+CI / candidate-bound evidence
+        ↓
+independent validation when applicable
+        ↓
+human review
+        ↓
+Owner Ready / Merge
+        ↓
+post-merge validation / reconciliation
+```
+
+Reglas:
+
+1. una etapa no sustituye a otra;
+2. una etapa omitida requiere disposición explícita y justificada;
+3. un `FAIL` o `INCONCLUSIVE` bloqueante impide avanzar;
+4. todo resultado debe referirse al candidate exacto aplicable;
+5. si cambia el candidate, se revalida la evidencia afectada;
+6. ningún agente/modelo puede auto-declarar una etapa equivalente por similitud;
+7. `tests green` no equivale a cierre del flujo;
+8. `Design 4R PASS` no equivale a `Candidate FULL 4R PASS`;
+9. `RDD Design Check PASS` no equivale a `RDD Candidate Conformance PASS`;
+10. ningún resultado concede autoridad de Ready, merge o promoción.
+
+Cuando una etapa sea realmente no aplicable, debe registrarse:
+
+```text
+stage
+disposition: N/A
+reason
+evidence
+authority_effect: none
+```
+
+`N/A` sin razón y evidencia no es válido.
+
+## 5.6 Auditoría retrospectiva del flujo de construcción
+
+Después de introducir o endurecer controles transversales del proceso de
+construcción, Malāk debe permitir una auditoría retrospectiva de las
+implementaciones existentes.
+
+El objetivo de esa auditoría no es reescribir la historia ni declarar fallos
+retroactivos por reglas que no existían todavía. Debe distinguir:
+
+```text
+HISTORICALLY_EVIDENCED
+CURRENT_STATE_REVALIDATED
+PARTIALLY_EVIDENCED
+UNCONFIRMED
+GAP_REQUIRES_HARDENING
+NOT_APPLICABLE_WITH_REASON
+```
+
+La auditoría debe evaluar, por unidad material o implementación relevante:
+
+```text
+baseline / candidate identity available
+G0/G1 or equivalent design evidence
+critical-contract classification
+hardening / ambiguity review
+four law questions
+Design 4R
+RED evidence
+GREEN evidence
+RDD Stage 1 design evidence
+RDD candidate-bound conformance
+Candidate FULL 4R
+E2E / integration validation
+CI / independent validation
+post-merge reconciliation
+authority boundaries / human merge
+```
+
+Reglas de auditoría:
+
+- evidencia ausente != evidencia de incumplimiento;
+- evidencia ausente => `UNCONFIRMED` salvo prueba contraria;
+- no reconstruir PASS desde memoria o inferencia;
+- no falsificar manifests/receipts retroactivos;
+- no reescribir commits históricos para simular conformidad;
+- findings actuales se corrigen mediante nuevos candidates gobernados;
+- la auditoría produce evidencia y deuda/hardening candidates, no autoridad;
+- cualquier remediation posterior requiere gates y autorización propios.
+
+La auditoría retrospectiva debe ejecutarse como unidad formal separada cuando
+el Owner la autorice; no se incorpora silenciosamente al sprint que introdujo
+las reglas.
+
+---
 # 6. Cuatro lentes obligatorios
 
 Los cuatro lentes definidos por el Engineering Method son:
