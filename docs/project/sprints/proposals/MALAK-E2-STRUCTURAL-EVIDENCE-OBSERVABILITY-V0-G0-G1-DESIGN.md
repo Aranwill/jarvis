@@ -9,7 +9,10 @@ baseline_commit: 79319eef23cdd1490531d01de914712811135d9d
 g0_result: pass
 design_authorized_by: owner
 design_authorized_at: 2026-09-20
-red_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-20
+red_baseline: 9512f79f40bd67678bb11f66e8e6e14bbc1e76d6
 implementation_authorized: false
 risk_class: 2
 ---
@@ -288,8 +291,8 @@ No existe `BLOCKING_GAP`.
 ```text
 G0        PASS
 G1        ADMITTED
-RED       NOT AUTHORIZED
+RED       AUTHORIZED
 GREEN     NOT AUTHORIZED
 ```
 
-El próximo gate, si el Owner lo autoriza, es RED y sólo RED.
+RED fue autorizado por el Owner el 2026-09-20. GREEN permanece no autorizado.
