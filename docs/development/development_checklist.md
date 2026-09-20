@@ -39,7 +39,7 @@ Antes de aprobar un cambio validar:
 
 Cuando el trabajo sea una revisión integral, auditoría, certificación, reconciliación o admission review, validar:
 
-- [ ] Se levantó un inventario recursivo de todos los archivos trackeados de cada repositorio incluido en el alcance.
+- [ ] Se levantó un inventario recursivo de todos los archivos trackeados del repositorio oficial incluidos en el alcance.
 - [ ] Cada archivo inventariado recibió una clasificación o disposición explícita; archivos omitidos silenciosamente: `0`.
 - [ ] La profundidad de lectura fue proporcional al rol del artefacto y al problema, sin utilizar búsquedas textuales como sustituto del inventario.
 - [ ] Los archivos protegidos o expresamente prohibidos fueron identificados sin abrirse ni procesarse y quedaron clasificados con la razón correspondiente.

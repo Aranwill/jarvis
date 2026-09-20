@@ -997,4 +997,4 @@ Sprint autorizado: ninguno
 Baseline modificado: no
 ```
 
-Este documento deberá compararse con el estado real de los repositorios antes de convertirse en diseño operativo.
+Este documento deberá compararse con el estado real del repositorio oficial de Malāk antes de convertirse en diseño operativo.

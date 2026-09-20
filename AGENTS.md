@@ -91,20 +91,18 @@ fuente normativa / arquitectónica / conceptual correspondiente
 código + tests + evidencia cuando la pregunta lo requiera
 ```
 
-Malāk debe permanecer autosuficiente respecto de infraestructura externa de
-contexto, observación o reconciliación. Ningún servicio, repositorio o proceso
-externo puede ser requisito para comprender, planificar, validar, ejecutar o
-cerrar una unidad de trabajo dentro de Malāk.
+Malāk resuelve la comprensión, planificación, validación, ejecución y
+cierre de una unidad de trabajo desde su repositorio oficial y las fuentes
+admitidas por su jerarquía documental.
 
-Las fuentes externas no forman parte del Minimum Review Set de Malāk y no deben
-ser consultadas como dependencia arquitectónica, runtime, Memory, Knowledge,
-autoridad o condición de admisión.
+Las fuentes de investigación o evidencia admitidas para una tarea pueden aportar
+contexto, pero no sustituyen el baseline oficial ni adquieren autoridad por sí mismas.
 
 ## Revisión integral del proyecto y detección de drift
 
 Cuando la tarea solicite una revisión integral del estado de Malāk, validar el
 baseline, analizar arquitectura, determinar próximos pasos, contrastar roadmap,
-detectar inconsistencias o reconciliar los repositorios relacionados, la revisión
+detectar inconsistencias o reconciliar el estado oficial del proyecto, la revisión
 deberá ser transversal y basada en evidencia.
 
 Una revisión no deberá declararse completa por haber inspeccionado únicamente
@@ -141,7 +139,7 @@ Malāk — source of truth
 
 ### Cobertura exhaustiva obligatoria
 
-Toda revisión declarada `integral`, `completa`, `transversal`, de admisión de sprint, certificación, reconciliación o auditoría debe comenzar por un inventario recursivo de todos los archivos trackeados de los repositorios incluidos en el alcance.
+Toda revisión declarada `integral`, `completa`, `transversal`, de admisión de sprint, certificación, reconciliación o auditoría debe comenzar por un inventario recursivo de todos los archivos trackeados del repositorio oficial incluidos en el alcance.
 
 Cada archivo debe recibir una clasificación o disposición explícita. La profundidad de lectura puede ser proporcional al rol del artefacto y a la pregunta, pero ningún archivo puede quedar fuera del inventario por no coincidir con una búsqueda textual.
 
@@ -364,9 +362,10 @@ Las revisiones de Malāk deben cerrarse con evidencia disponible dentro del
 repositorio oficial: documentación, código, tests, Git y artefactos internos
 admitidos por su jerarquía documental.
 
-No se permite elevar infraestructura externa de observación, contexto o
-reconciliación a componente arquitectónico, fuente de verdad, requisito de
-review o condición de cierre.
+El cierre y la autoridad de una revisión se determinan sobre el repositorio oficial
+y las fuentes admitidas por la jerarquía documental aplicable. Evidencia adicional
+puede informar la revisión, pero no puede elevarse por sí sola a componente
+arquitectónico, fuente de verdad, requisito de review o condición de cierre.
 
 ### Taxonomía mínima de drift
 
@@ -985,8 +984,8 @@ el estado oficial de Malāk:
 - gates, ADR y decisiones pertinentes;
 - ausencia de drift interno conocido no resuelto.
 
-El cierre de Malāk no depende de infraestructura externa de contexto,
-observación o reconciliación.
+El cierre post-merge de Malāk se verifica sobre el estado oficial del repositorio
+y las fuentes internas aplicables.
 
 ### Auditoría completa vs revisión incremental
 
