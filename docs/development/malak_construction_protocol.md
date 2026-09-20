@@ -426,21 +426,24 @@ El E2E no puede omitirse silenciosamente. Cuando no exista un runtime E2E aplica
 Todo cambio material que defina o modifique contratos críticos debe cerrar
 interpretaciones materiales antes de RED.
 
-Se consideran superficies críticas, entre otras:
+Un contrato se clasifica como crítico en V1 si cumple al menos una de estas
+condiciones materiales:
 
 ```text
-authority
-evidence
-evaluation
-knowledge
-memory
-security
-tools
-agents
-self-model
-learning
-self-improvement
+1. define o modifica authority / permission / delegation / enforcement;
+2. produce o interpreta evidence / validation / evaluation / assurance usada
+   por gates, decisiones o promoción de candidatos;
+3. define trust, provenance, knowledge, memory o self-model consumido para
+   decisiones o razonamiento gobernado;
+4. habilita tools, agents, network, filesystem u otros side effects;
+5. define security boundaries, secrets, datos sensibles o disclosure;
+6. define learning, adaptation, self-improvement o promoción de conocimiento;
+7. define candidate identity, binding, invalidation o lineage.
 ```
+
+Fuera de esas condiciones, una superficie sólo puede elevarse a crítica mediante
+clasificación explícita y justificada del Owner. Un agente/modelo no puede ampliar
+la categoría por inferencia propia.
 
 El hardening debe revisar explícitamente:
 
@@ -497,9 +500,27 @@ FULL 4R PASS
 != architectural admission
 ```
 
-Para un contrato crítico, el diseño endurecido debe pasar las cuatro preguntas
-antes de RED y el candidato material debe conservar evidencia FULL 4R separada
-por lente antes del cierre.
+Para un contrato crítico existen dos checkpoints 4R distintos:
+
+```text
+pre-RED:
+Design 4R sobre el contrato endurecido
+
+post-GREEN / pre-close:
+FULL 4R sobre el candidate material exacto
+```
+
+El diseño endurecido debe además pasar las cuatro preguntas de ley antes de RED.
+
+```text
+Design 4R PASS
+!= candidate FULL 4R PASS
+
+candidate FULL 4R PASS
+!= Design 4R PASS
+```
+
+Ambos deben producir evidencia separada por lente cuando sean aplicables.
 
 ---
 # 6. Cuatro lentes obligatorios
