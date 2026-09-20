@@ -998,3 +998,132 @@ def test_e2_structural_red_c10_system_prompt_bounds_structural_evidence(
     assert "syntax" in prompt
     assert "dependency" in prompt
     assert "authority" in prompt
+
+# E2 Structural Evidence Observability V0 — RED
+
+
+def test_e2_observability_red_c01_grounded_reports_exact_evidence_counts(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_capability(tmp_path)
+
+    result = execute(capability)
+    packet = evidence_packet(provider)
+
+    assert f"repository_evidence_count: {len(packet['repository_evidence'])}" in result
+    assert f"knowledge_evidence_count: {len(packet['knowledge_evidence'])}" in result
+    assert "structural_evidence_count: 0" in result
+
+
+def test_e2_observability_red_c02_structural_only_reports_exact_structural_count(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    result = execute(capability, "malak.component.NeedleComponent1")
+    packet = evidence_packet(provider)
+
+    assert packet["repository_evidence"] == []
+    assert packet["knowledge_evidence"] == []
+    assert len(packet["structural_evidence"]) == 1
+    assert "repository_evidence_count: 0" in result
+    assert "knowledge_evidence_count: 0" in result
+    assert "structural_evidence_count: 1" in result
+
+
+def test_e2_observability_red_c03_repeated_r_k_citations_count_unique_refs(
+    tmp_path: Path,
+) -> None:
+    provider = RecordingProvider("Grounded [R1] [R1] [K1] [K1]")
+    *_, capability = build_capability(tmp_path, provider=provider)
+
+    result = execute(capability)
+
+    assert provider.calls == 1
+    assert "repository_citation_count: 1" in result
+    assert "knowledge_citation_count: 1" in result
+    assert "structural_citation_count: 0" in result
+
+
+def test_e2_observability_red_c04_repeated_s_citations_count_unique_refs(
+    tmp_path: Path,
+) -> None:
+    provider = RecordingProvider("Grounded structural [S1] [S1]")
+    *_, capability = build_structural_e2_capability(
+        tmp_path,
+        provider=provider,
+    )
+
+    result = execute(capability, "malak.component.NeedleComponent1")
+
+    assert provider.calls == 1
+    assert "repository_citation_count: 0" in result
+    assert "knowledge_citation_count: 0" in result
+    assert "structural_citation_count: 1" in result
+
+
+def test_e2_observability_red_c05_grounded_reports_single_model_inference(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    result = execute(capability, "malak.component.NeedleComponent1")
+
+    assert provider.calls == 1
+    assert "model_inference_count: 1" in result
+
+
+def test_e2_observability_red_c06_unconfirmed_reports_zero_counts_without_model(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    result = execute(capability, "absent-observability-token")
+
+    assert provider.calls == 0
+    assert "status: UNCONFIRMED" in result
+    assert "repository_evidence_count: 0" in result
+    assert "knowledge_evidence_count: 0" in result
+    assert "structural_evidence_count: 0" in result
+    assert "repository_citation_count: 0" in result
+    assert "knowledge_citation_count: 0" in result
+    assert "structural_citation_count: 0" in result
+    assert "model_inference_count: 0" in result
+
+
+def test_e2_observability_red_c07_signals_do_not_enter_model_packet(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(tmp_path)
+
+    execute(capability, "malak.component.NeedleComponent1")
+    packet = evidence_packet(provider)
+
+    forbidden = {
+        "repository_evidence_count",
+        "knowledge_evidence_count",
+        "structural_evidence_count",
+        "repository_citation_count",
+        "knowledge_citation_count",
+        "structural_citation_count",
+        "model_inference_count",
+    }
+    assert forbidden.isdisjoint(packet)
+
+
+def test_e2_observability_red_c08_truncation_preserved_with_structural_count(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build_structural_e2_capability(
+        tmp_path,
+        symbol_count=13,
+    )
+
+    result = execute(capability, "malak.component")
+    packet = evidence_packet(provider)
+
+    assert len(packet["structural_evidence"]) == 12
+    assert packet["limitations"]["context_truncated"] is True
+    assert "structural_evidence_count: 12" in result
+    assert "context_truncated: true" in result
+
