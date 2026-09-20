@@ -387,7 +387,77 @@ case-level evidence            preserved
 
 Incluso entonces, E3/E4 requieren gate separado.
 
-## 17. Hardening G1 y controles separados
+## 17. RDD Stage 1 aplicado al Evaluation Pack
+
+Este incremento es material porque produce evidencia que puede informar gates
+y decisiones futuras. Por lo tanto RDD Stage 1 aplica explícitamente.
+
+### Pre-RED — RDD Stage 1 Design Check
+
+El diseño debe demostrar:
+
+```text
+baseline exacto identificado
+candidate identity strategy definida
+evaluation identity separada de authority
+ground truth provenance explícita
+ground truth reviewer separado del runner implementation actor
+case-set / runner / provider policy con binding e invalidación
+resultados limitados a PASS | FAIL | INCONCLUSIVE
+INCONCLUSIVE != PASS
+findings preservables por caso
+bounded correction sin ampliación automática
+authority_effect = none
+RDD Stage 2 = NOT AUTHORIZED
+```
+
+Regla:
+
+```text
+RDD Stage 1 Design Check != PASS
+→ RED NOT AUTHORIZED
+```
+
+### Post-GREEN / pre-close — RDD Stage 1 Candidate Conformance
+
+El candidate material deberá demostrar contra
+`MALAK-EVIDENCE-MANIFEST/v1` o evidencia equivalente aprobada:
+
+```text
+baseline exact
+candidate exact
+baseline ancestor of candidate
+scope/spec/gate bound
+validations candidate-bound
+FULL 4R candidate-bound
+findings preserved
+correction_round accurate
+producer / validator provenance
+required role independence evidenced
+terminal result correctly aggregated
+authority_effect = none
+no RDD Stage 2 field/effect
+```
+
+Si cambia cualquiera de los archivos materiales del candidate:
+
+```text
+candidate identity changes
+→ previous RDD conformance invalid for new candidate
+→ affected evidence must be regenerated/revalidated
+```
+
+Separación:
+
+```text
+RDD Design Check
+!= Design 4R
+!= Candidate RDD Conformance
+!= Candidate FULL 4R
+!= E2E / CI
+!= Owner decision
+```
+## 18. Hardening G1 y controles separados
 
 El contrato fue endurecido antes de RED contra:
 
@@ -415,7 +485,7 @@ Kernel complexity delta          0 / PASS
 FULL 4R debe ejecutarse y registrarse por separado sobre el candidato material.
 Las preguntas de ley no sustituyen FULL 4R.
 
-## 18. Estado
+## 19. Estado
 
 ```text
 G0        PASS
