@@ -18,12 +18,11 @@ risk_class: 2
 
 ## 1. Propósito
 
-Crear una evaluación reproducible y acotada para medir qué cambia en
-`Engineering Inspect (E2)` cuando la misma solicitud recibe o no evidencia
-estructural `[S#]`.
+Medir de forma reproducible qué cambia en `Engineering Inspect (E2)` cuando la
+misma solicitud recibe o no evidencia estructural `[S#]`.
 
 V0 evalúa comportamiento observable del sistema. No evalúa razonamiento general
-del modelo ni autoriza cambios de arquitectura.
+del modelo ni autoriza cambios arquitectónicos.
 
 ## 2. G0
 
@@ -36,39 +35,28 @@ tree truncated: false
 G0 RESULT: PASS
 ```
 
-No existe hoy un harness específico para `engineering_inspect`. Sí existe una
-fundación conceptual que exige evaluación antes de entrenamiento o expansión de
-complejidad.
-
-## 3. Decisión de admisión
+No existe hoy un harness específico para E2. La Cognitive Dataset Foundation ya
+establece evaluación antes de entrenamiento o expansión de complejidad.
 
 ```text
-E2 Structural Evidence Evaluation Pack V0  ADMIT
-new runtime capability                    REJECT
-new model abstraction                     REJECT
-persistent telemetry                      REJECT
-training dataset                           NOT THIS V0
-model-quality benchmark                    DEFER
-E3/E4 propagation                          DEFER
-Structural Delta                           DEFER
+Evaluation Pack V0       ADMIT
+new runtime capability   REJECT
+persistent telemetry     REJECT
+model-quality benchmark  DEFER
+E3/E4 propagation        DEFER
+Structural Delta         DEFER
 ```
 
-## 4. Diseño A/B
+## 3. A/B obligatorio
 
-Cada caso se ejecuta sobre el mismo snapshot y el mismo subject.
+Cada caso usa el mismo snapshot y subject.
 
 ```text
-A
-repository_reader
-knowledge_reader
-structural_projection = None
-→ R + K
+A: structural_projection = None
+   → R + K
 
-B
-same repository_reader baseline
-same knowledge baseline
-structural_projection = projection(same baseline)
-→ R + K + S
+B: structural_projection = projection(same baseline)
+   → R + K + S
 ```
 
 Invariantes:
@@ -78,21 +66,16 @@ Invariantes:
 3. mismo subject;
 4. misma política del provider de evaluación;
 5. misma configuración E2;
-6. única diferencia material permitida: disponibilidad de S.
+6. única diferencia material: disponibilidad de S.
 
-Si A y B no comparten baseline exacto:
+Baseline A != B => `STOP / INVALID CASE`.
 
-```text
-STOP / INVALID CASE
-```
+## 4. Ground truth
 
-## 5. Ground truth
+El expected se define antes de ejecutar el sistema y no puede derivarse del
+output observado de B.
 
-El expected outcome se define antes de ejecutar el sistema bajo prueba.
-
-No se permite derivar el expected desde el output observado de B.
-
-Cada caso deberá declarar al menos:
+Cada caso declara:
 
 ```text
 case_id
@@ -106,8 +89,7 @@ expected_structural_count
 expected_context_truncated
 ```
 
-Los structural facts esperados se describen mediante identidad semántica de
-sintaxis, por ejemplo:
+Los facts esperados usan identidad sintáctica explícita:
 
 ```text
 fact_type
@@ -118,12 +100,11 @@ kind
 relative_level
 ```
 
-`blob_sha` y `baseline_commit` se validan como binding del snapshot, no como
-oráculo manual.
+`baseline_commit` y `blob_sha` validan binding, pero no son el oráculo manual.
 
-## 6. Casos mínimos V0
+## 5. Casos mínimos
 
-### C1 — exact symbol, structural-only
+### C1 exact symbol / structural-only
 
 ```text
 subject: malak.component.NeedleComponent1
@@ -132,32 +113,32 @@ B: GROUNDED
 expected S: exact symbol
 ```
 
-### C2 — exact module, symbols + imports
+### C2 exact module
 
 ```text
 subject: malak.component
 A: UNCONFIRMED
 B: GROUNDED
-expected S: module symbols + imports
+expected S: symbols + imports
 ```
 
-### C3 — substring does not activate structural lookup
+### C3 substring sin structural activation
 
 ```text
 subject: NeedleComponent
 expected S: 0
-A/B: non-structural behavior must remain compatible
+A/B non-structural behavior compatible
 ```
 
-### C4 — textual/knowledge evidence without structural match
+### C4 textual/knowledge only
 
 ```text
 subject: needle
 expected S: 0
-A/B: status and R/K evidence behavior must remain compatible
+A/B status and R/K behavior compatible
 ```
 
-### C5 — absent subject
+### C5 absent
 
 ```text
 subject: absent-evaluation-token
@@ -166,60 +147,47 @@ B: UNCONFIRMED
 expected S: 0
 ```
 
-### C6 — structural truncation
+### C6 truncation
 
 ```text
-fixture: >12 structural facts in one module
+fixture: >12 structural facts
 B structural_evidence_count: 12
 B context_truncated: true
-A remains without S
 ```
 
-V0 puede añadir casos sólo si representan una clase nueva de comportamiento, no
-variaciones cosméticas.
+Sólo se añaden casos si representan una clase nueva de comportamiento.
 
-## 7. Métricas V0
+## 6. Métricas V0
 
-No se crea score compuesto.
+No existe score compuesto.
 
-### Structural coverage gain count
+### structural_coverage_gain_count
 
-Número de casos donde:
+Casos donde:
 
 ```text
-ground truth expects structural evidence
-AND
-A == UNCONFIRMED
-AND
-B == GROUNDED
+ground truth expects S
+AND A == UNCONFIRMED
+AND B == GROUNDED
 ```
 
-Esto mide cobertura del sistema, no calidad de respuesta.
+Mide cobertura, no calidad.
 
-### Unexpected structural activation count
+### unexpected_structural_activation_count
 
-Número de casos donde ground truth espera `S=0` y B produce `S>0`.
+Casos con `expected S=0` y `B S>0`.
 
-Objetivo contractual:
+Objetivo contractual: `0`.
 
-```text
-0
-```
+### structural_fact_mismatch_count
 
-### Structural fact mismatch count
+Casos donde los facts observados en B no coinciden con el expected manual.
 
-Número de casos donde los structural facts observados en B no coinciden con el
-expected manual.
+Objetivo contractual: `0`.
 
-Objetivo contractual:
+### non_structural_regression_count
 
-```text
-0
-```
-
-### Non-structural regression count
-
-En casos con `expected S=0`, diferencias inesperadas A/B en:
+En casos `expected S=0`, diferencias A/B inesperadas en:
 
 ```text
 status
@@ -228,32 +196,22 @@ knowledge_evidence_count
 context_truncated
 ```
 
-Objetivo contractual:
+Objetivo contractual: `0`.
 
-```text
-0
-```
+### invalid_paired_baseline_count
 
-### Invalid paired baseline count
+Pares A/B con baseline distinto.
 
-A/B con baseline distinto.
+Objetivo contractual: `0`.
 
-Objetivo contractual:
-
-```text
-0
-```
-
-## 8. Lo que V0 no puede afirmar
-
-Incluso si:
+## 7. Límites de interpretación
 
 ```text
 A: UNCONFIRMED
 B: GROUNDED
 ```
 
-no se puede concluir:
+no implica:
 
 ```text
 B is correct
@@ -262,31 +220,27 @@ S improves answer quality
 S should propagate to E3/E4
 ```
 
-`GROUNDED` sólo indica que hubo evidencia admisible suficiente para ejecutar el
-path grounded de E2.
+`GROUNDED` sólo indica que E2 recorrió su path grounded con evidencia admisible.
 
-## 9. Anti-autoengaño
+## 8. Anti-autoengaño
 
-1. expected definido antes de la ejecución;
+1. expected antes de ejecutar;
 2. expected no derivado del projector/lookup bajo prueba;
-3. resultados por caso siempre visibles;
-4. no ocultar fallos detrás de un promedio;
-5. no convertir coverage en quality;
-6. no usar citation count como correctness;
-7. no seleccionar sólo casos favorables a S;
-8. incluir casos negativos y sin match;
-9. mismo baseline A/B;
-10. evaluación no concede autoridad.
+3. resultados visibles por caso;
+4. no esconder fallos en promedios;
+5. coverage != quality;
+6. citation count != correctness;
+7. incluir casos positivos y negativos;
+8. mismo baseline A/B;
+9. no seleccionar sólo casos favorables a S;
+10. evaluation evidence carries zero authority.
 
-## 10. Provider de evaluación
+## 9. Provider de evaluación
 
 V0 no evalúa un LLM real.
 
-El futuro harness deberá usar un provider determinista de test con una política
-fija y reproducible. Su función será permitir recorrer E2 y observar contracts,
-no simular inteligencia.
-
-Por lo tanto:
+El futuro harness usará un provider determinista de test con política fija para
+recorrer E2 de forma reproducible.
 
 ```text
 provider output
@@ -294,11 +248,11 @@ provider output
 != answer quality evidence
 ```
 
-Un benchmark con modelos reales será un gate separado.
+Un benchmark con modelos reales requiere gate separado.
 
-## 11. Estructura candidata futura
+## 10. Estructura futura admitida
 
-Sin implementación autorizada, G1 admite como forma mínima:
+Sin implementación autorizada:
 
 ```text
 evaluations/
@@ -312,17 +266,15 @@ tests/
   test_e2_structural_evidence_evaluation.py
 ```
 
-Preferencias:
+Reglas:
 
-- JSON para casos: stdlib, sin dependencia nueva;
+- JSON / stdlib;
 - runner read-only;
 - output a stdout;
-- no DB;
-- no cache;
-- no red;
-- no persistencia por defecto.
+- sin DB/cache/red;
+- sin persistencia por defecto.
 
-## 12. Output candidato del runner
+## 11. Output candidato
 
 ```text
 baseline_commit
@@ -336,10 +288,9 @@ invalid_paired_baseline_count
 conclusion
 ```
 
-`conclusion` puede ser `pass` sólo por conformance del pack. No constituye
-aprobación arquitectónica.
+`conclusion: pass` significa conformance del pack, no aprobación arquitectónica.
 
-## 13. Scope futuro admitido
+## 12. Scope futuro
 
 RED futuro:
 
@@ -347,14 +298,14 @@ RED futuro:
 tests/test_e2_structural_evidence_evaluation.py
 ```
 
-GREEN futuro, si se autoriza:
+GREEN futuro:
 
 ```text
 evaluations/e2_structural_evidence_v0/cases.json
 scripts/evaluate_e2_structural_evidence.py
 ```
 
-No se modifica:
+Fuera de alcance:
 
 ```text
 src/malak/**
@@ -368,30 +319,22 @@ Security
 provider registry
 ```
 
-## 14. Relación con Observability V0
+## 13. Relación con Observability V0
 
 ```text
 Observability V0
-→ expone qué ocurrió en una ejecución
+→ qué ocurrió
 
 Evaluation Pack V0
-→ compara ejecuciones emparejadas contra ground truth
+→ qué diferencia reproducible produjo S contra ground truth
 ```
 
-El pack reutiliza:
+Reutiliza counts R/K/S, citation counts, `model_inference_count` y
+`context_truncated`, sin añadir señales al runtime.
 
-```text
-R/K/S evidence counts
-R/K/S citation counts
-model_inference_count
-context_truncated
-```
+## 14. Relación con Cognitive Dataset Foundation
 
-sin añadir señales al runtime.
-
-## 15. Relación con Cognitive Dataset Foundation
-
-Este incremento adopta:
+Adopta:
 
 ```text
 evaluation before training
@@ -399,31 +342,27 @@ benchmark before adaptation
 identify real weaknesses before adding complexity
 ```
 
-Pero este pack no es todavía:
+No es todavía training dataset, hidden eval global ni benchmark de modelos.
 
-- dataset cognitivo de entrenamiento;
-- hidden evaluation global;
-- benchmark de modelos candidatos;
-- mecanismo de continual learning.
-
-## 16. Governance / Security
+## 15. Governance
 
 ```text
-runtime authority          0
-new capability             0
-persistent state           0
-new model calls in runtime 0
-Kernel delta               0
-Planner delta              0
-E3/E4 delta                0
-Human in Control           unchanged
+runtime delta           0
+authority delta         0
+new capability          0
+persistent state        0
+Kernel delta            0
+Planner delta           0
+E3/E4 delta             0
+dataset created         0
+harness created         0
+model benchmark         0
+Human in Control        unchanged
 ```
 
-Evaluation evidence carries zero authority.
+## 16. Gate de salida
 
-## 17. Gate de salida de V0
-
-Un resultado futuro del pack sólo podrá habilitar una nueva discusión si:
+El futuro pack sólo puede considerarse conforme si:
 
 ```text
 paired baseline integrity      PASS
@@ -433,21 +372,15 @@ non-structural regressions     0
 case-level evidence            preserved
 ```
 
-Aun cumpliéndose, la propagación a E3/E4 seguirá requiriendo un gate separado.
+Incluso entonces, E3/E4 requieren gate separado.
 
-## 18. Estado
+## 17. Estado
 
 ```text
-G0                    PASS
-G1 design             ADMITTED
-RED                   NOT AUTHORIZED
-GREEN                 NOT AUTHORIZED
-
-runtime delta         0
-authority delta       0
-dataset created       0
-harness created       0
-model benchmark       0
+G0        PASS
+G1        ADMITTED
+RED       NOT AUTHORIZED
+GREEN     NOT AUTHORIZED
 ```
 
 El próximo gate, si el Owner lo autoriza, es RED y sólo RED.
