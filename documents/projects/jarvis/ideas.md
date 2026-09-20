@@ -1880,6 +1880,12 @@ needs_owner_decision
 
 Las conversaciones libres entre agentes no deberán convertirse en mecanismo principal de coordinación cuando contratos, eventos o artefactos estructurados resulten suficientes.
 
+Cuando el baseline futuro justifique trabajo de horizonte largo, IDEA-024 deberá
+reevaluar coordinación asíncrona consciente de dependencias, espera/reanudación,
+handoffs estructurados y cooperación mediada por artefactos, sin asumir que un
+agente debe permanecer vivo mientras espera. El detalle conceptual se conserva en
+`docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md`.
+
 **Structured Deliberation**
 
 Cuando una decisión realmente justifique múltiples perspectivas, podrá evaluarse deliberación estructurada mediante funciones como:
