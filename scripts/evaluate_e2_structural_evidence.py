@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -49,7 +51,6 @@ _CASE_KEYS = {
     "expected_emitted_structural_count",
     "expected_context_truncated",
     "ground_truth_source",
-    "ground_truth_review_status",
 }
 _ALLOWED_SCHEMA_VERSION = "MALAK-E2-STRUCTURAL-EVIDENCE-CASESET/v0"
 _ALLOWED_FIXTURES = {"basic", "truncation"}
@@ -60,7 +61,12 @@ _ALLOWED_COMPARISON_CLASSES = {
     "TRUNCATION",
 }
 _ALLOWED_STATUSES = {"UNCONFIRMED", "GROUNDED"}
-_ALLOWED_REVIEW_STATUS = {"OWNER_APPROVED_DESIGN"}
+_REVIEW_ATTESTATION_FIELDS = (
+    "reviewer_id",
+    "implementation_actor_id",
+    "reviewed_case_set_digest",
+    "review_evidence_reference",
+)
 _SYMBOL_KEYS = {"fact_type", "module_name", "qualified_name", "kind"}
 _IMPORT_KEYS = {
     "fact_type",
@@ -120,6 +126,128 @@ def _official_candidate_sha() -> str:
     return _git(ROOT, "rev-parse", "HEAD")
 
 
+def _review_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Run E2 Structural Evidence Evaluation Pack V0."
+    )
+    parser.add_argument("--reviewer-id")
+    parser.add_argument("--implementation-actor-id")
+    parser.add_argument("--reviewed-case-set-digest")
+    parser.add_argument("--review-evidence-reference")
+    return parser
+
+
+def _validated_provenance_string(value: str, *, name: str) -> str:
+    if not isinstance(value, str) or not value.strip() or value != value.strip():
+        raise ValueError(f"{name} must be a non-empty trimmed string")
+    if any(ord(character) < 32 or ord(character) == 127 for character in value):
+        raise ValueError(f"{name} contains forbidden control characters")
+    return value
+
+
+def _review_attestation(
+    args: argparse.Namespace,
+    *,
+    case_set_digest: str,
+) -> dict[str, Any]:
+    supplied = {
+        field: getattr(args, field)
+        for field in _REVIEW_ATTESTATION_FIELDS
+    }
+    present = {
+        field: value
+        for field, value in supplied.items()
+        if value is not None
+    }
+
+    if not present:
+        return {
+            "status": "MISSING_EXTERNAL_ATTESTATION",
+            "evaluation_executable": False,
+            "identity_independence_claimed": False,
+            "identity_independence_verified": False,
+            "requires_external_validation": True,
+            "reviewer_id": None,
+            "implementation_actor_id": None,
+            "review_evidence_reference": None,
+        }
+
+    if len(present) != len(_REVIEW_ATTESTATION_FIELDS):
+        return {
+            "status": "PARTIAL_EXTERNAL_ATTESTATION",
+            "evaluation_executable": False,
+            "identity_independence_claimed": False,
+            "identity_independence_verified": False,
+            "requires_external_validation": True,
+            "reviewer_id": supplied["reviewer_id"],
+            "implementation_actor_id": supplied["implementation_actor_id"],
+            "review_evidence_reference": supplied["review_evidence_reference"],
+        }
+
+    reviewer_id = _validated_provenance_string(
+        supplied["reviewer_id"],
+        name="reviewer_id",
+    )
+    implementation_actor_id = _validated_provenance_string(
+        supplied["implementation_actor_id"],
+        name="implementation_actor_id",
+    )
+    review_evidence_reference = _validated_provenance_string(
+        supplied["review_evidence_reference"],
+        name="review_evidence_reference",
+    )
+    reviewed_digest = supplied["reviewed_case_set_digest"]
+    if not isinstance(reviewed_digest, str) or not re.fullmatch(
+        r"[0-9a-f]{64}",
+        reviewed_digest,
+    ):
+        return {
+            "status": "INVALID_REVIEW_DIGEST",
+            "evaluation_executable": False,
+            "identity_independence_claimed": False,
+            "identity_independence_verified": False,
+            "requires_external_validation": True,
+            "reviewer_id": reviewer_id,
+            "implementation_actor_id": implementation_actor_id,
+            "review_evidence_reference": review_evidence_reference,
+        }
+
+    if reviewed_digest != case_set_digest:
+        return {
+            "status": "REVIEW_DIGEST_MISMATCH",
+            "evaluation_executable": False,
+            "identity_independence_claimed": reviewer_id != implementation_actor_id,
+            "identity_independence_verified": False,
+            "requires_external_validation": True,
+            "reviewer_id": reviewer_id,
+            "implementation_actor_id": implementation_actor_id,
+            "review_evidence_reference": review_evidence_reference,
+        }
+
+    if reviewer_id == implementation_actor_id:
+        return {
+            "status": "REVIEWER_IMPLEMENTER_COLLISION",
+            "evaluation_executable": False,
+            "identity_independence_claimed": False,
+            "identity_independence_verified": False,
+            "requires_external_validation": True,
+            "reviewer_id": reviewer_id,
+            "implementation_actor_id": implementation_actor_id,
+            "review_evidence_reference": review_evidence_reference,
+        }
+
+    return {
+        "status": "EXTERNAL_ATTESTATION_DECLARED",
+        "evaluation_executable": True,
+        "identity_independence_claimed": True,
+        "identity_independence_verified": False,
+        "requires_external_validation": True,
+        "reviewer_id": reviewer_id,
+        "implementation_actor_id": implementation_actor_id,
+        "review_evidence_reference": review_evidence_reference,
+    }
+
+
 def _load_case_set() -> tuple[dict[str, Any], bytes]:
     raw = CASE_SET.read_bytes()
     payload = json.loads(raw.decode("utf-8"))
@@ -170,8 +298,6 @@ def _validate_case(case: Any, seen: set[str]) -> None:
         raise ValueError("expected_context_truncated must be bool")
     if not isinstance(case["ground_truth_source"], str) or not case["ground_truth_source"]:
         raise ValueError("ground_truth_source must be non-empty")
-    if case["ground_truth_review_status"] not in _ALLOWED_REVIEW_STATUS:
-        raise ValueError("ground truth is not independently owner-reviewed")
 
     expected_facts = case["expected_structural_facts"]
     if not isinstance(expected_facts, list):
@@ -537,10 +663,58 @@ def _evaluate_case(
     return result, metrics
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     case_set, case_bytes = _load_case_set()
     candidate_sha = _official_candidate_sha()
     runner_bytes = Path(__file__).read_bytes()
+    case_set_digest = _sha256_bytes(case_bytes)
+    review = _review_attestation(
+        _review_parser().parse_args(argv),
+        case_set_digest=case_set_digest,
+    )
+
+    evaluation_identity = {
+        "malak_baseline_sha": candidate_sha,
+        "case_set_schema_version": case_set["schema_version"],
+        "case_set_digest": case_set_digest,
+        "runner_version": RUNNER_VERSION,
+        "runner_digest": _sha256_bytes(runner_bytes),
+        "provider_policy_version": PROVIDER_POLICY_VERSION,
+        "provider_policy_digest": _sha256_bytes(PROVIDER_POLICY),
+    }
+
+    if not review["evaluation_executable"]:
+        output = {
+            "baseline_commit": candidate_sha,
+            "case_count": len(case_set["cases"]),
+            "case_results": [],
+            "structural_coverage_gain_count": 0,
+            "unexpected_structural_activation_count": 0,
+            "structural_fact_mismatch_count": 0,
+            "non_structural_regression_count": 0,
+            "invalid_paired_baseline_count": 0,
+            "conformance_result": "INCONCLUSIVE",
+            "utility_observation": {
+                "structural_coverage_gain_count": 0,
+                "interpretation": (
+                    "evaluation not executable until external ground-truth "
+                    "review attestation is digest-bound and role-separated"
+                ),
+                "evaluation_identity": evaluation_identity,
+                "ground_truth_review": review,
+                "authority_effect": "none",
+            },
+        }
+        sys.stdout.write(
+            json.dumps(
+                output,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+            + "\n"
+        )
+        return 2
 
     aggregate = {
         "structural_coverage_gain_count": 0,
@@ -580,16 +754,6 @@ def main() -> int:
         else "PASS"
     )
 
-    evaluation_identity = {
-        "malak_baseline_sha": candidate_sha,
-        "case_set_schema_version": case_set["schema_version"],
-        "case_set_digest": _sha256_bytes(case_bytes),
-        "runner_version": RUNNER_VERSION,
-        "runner_digest": _sha256_bytes(runner_bytes),
-        "provider_policy_version": PROVIDER_POLICY_VERSION,
-        "provider_policy_digest": _sha256_bytes(PROVIDER_POLICY),
-    }
-
     output = {
         "baseline_commit": candidate_sha,
         "case_count": len(case_results),
@@ -605,6 +769,7 @@ def main() -> int:
                 "answer quality or E3/E4 propagation approval"
             ),
             "evaluation_identity": evaluation_identity,
+            "ground_truth_review": review,
             "authority_effect": "none",
         },
     }
