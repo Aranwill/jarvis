@@ -326,6 +326,46 @@ def test_malformed_review_provenance_is_inconclusive() -> None:
     assert review["evaluation_executable"] is False
 
 
+@pytest.mark.parametrize("case_result", ["FAIL", "INVALID"])
+def test_case_failure_or_invalid_forces_nonzero_conformance(
+    case_result: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    module = _runner_module()
+
+    def forced_result(case: dict, temp_root: Path):
+        return (
+            {
+                "case_id": case["case_id"],
+                "case_result": case_result,
+                "expected": {},
+                "observed_a": {},
+                "observed_b": {},
+                "mismatches": ["forced-test-finding"],
+            },
+            {
+                "structural_coverage_gain_count": 0,
+                "unexpected_structural_activation_count": 0,
+                "structural_fact_mismatch_count": 0,
+                "non_structural_regression_count": 0,
+                "invalid_paired_baseline_count": int(case_result == "INVALID"),
+            },
+        )
+
+    monkeypatch.setattr(module, "_evaluate_case", forced_result)
+
+    exit_code = module.main(_valid_review_args())
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert payload["conformance_result"] == "FAIL"
+    assert all(
+        result["case_result"] == case_result
+        for result in payload["case_results"]
+    )
+
+
 def test_case_set_exists_without_becoming_executable_input() -> None:
     raw = _require_case_set().read_text(encoding="utf-8")
 
