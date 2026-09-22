@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import copy
+import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
+from functools import lru_cache
 from pathlib import Path
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,28 +50,50 @@ REQUIRED_CASE_RESULT_KEYS = {
 
 def _require_case_set() -> Path:
     assert CASE_SET.is_file(), (
-        "RED: E2 Structural Evidence Evaluation Pack V0 case-set is not implemented"
+        "E2 Structural Evidence Evaluation Pack V0 case-set is not implemented"
     )
     return CASE_SET
 
 
 def _require_runner() -> Path:
     assert RUNNER.is_file(), (
-        "RED: E2 Structural Evidence Evaluation Pack V0 runner is not implemented"
+        "E2 Structural Evidence Evaluation Pack V0 runner is not implemented"
     )
     return RUNNER
 
 
-def _run_pack() -> dict[str, object]:
+def _case_set_digest() -> str:
+    return hashlib.sha256(_require_case_set().read_bytes()).hexdigest()
+
+
+def _valid_review_args() -> list[str]:
+    return [
+        "--reviewer-id",
+        "test-owner-reviewer",
+        "--implementation-actor-id",
+        "test-runner-writer",
+        "--reviewed-case-set-digest",
+        _case_set_digest(),
+        "--review-evidence-reference",
+        "TEST-ONLY-REVIEW-ATTESTATION",
+    ]
+
+
+def _run_raw(extra_args: list[str] | None = None) -> subprocess.CompletedProcess[str]:
     runner = _require_runner()
-    completed = subprocess.run(
-        [sys.executable, str(runner)],
+    return subprocess.run(
+        [sys.executable, str(runner), *(extra_args or [])],
         cwd=ROOT,
         check=False,
         capture_output=True,
         text=True,
         timeout=60,
     )
+
+
+@lru_cache(maxsize=1)
+def _run_pack() -> dict[str, object]:
+    completed = _run_raw(_valid_review_args())
     assert completed.returncode == 0, (
         "evaluation runner must complete successfully on its fixed deterministic "
         f"V0 pack; stderr={completed.stderr!r}"
@@ -80,11 +108,46 @@ def _run_pack() -> dict[str, object]:
     return payload
 
 
-def test_red_case_set_artifact_is_missing_before_green() -> None:
+@lru_cache(maxsize=1)
+def _runner_module():
+    spec = importlib.util.spec_from_file_location(
+        "malak_e2_structural_eval_runner_test",
+        RUNNER,
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _case_set_payload() -> dict:
+    return json.loads(_require_case_set().read_text(encoding="utf-8"))
+
+
+def _write_case_set(tmp_path: Path, payload: dict) -> Path:
+    path = tmp_path / "cases.json"
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _assert_case_set_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    payload: dict,
+    message: str,
+) -> None:
+    module = _runner_module()
+    path = _write_case_set(tmp_path, payload)
+    monkeypatch.setattr(module, "CASE_SET", path)
+    with pytest.raises(ValueError, match=message):
+        module._load_case_set()
+
+
+def test_case_set_and_runner_artifacts_exist() -> None:
     _require_case_set()
-
-
-def test_red_runner_artifact_is_missing_before_green() -> None:
     _require_runner()
 
 
@@ -151,11 +214,73 @@ def test_pack_preserves_evaluation_separations() -> None:
 
     assert payload["conformance_result"] in {"PASS", "FAIL", "INCONCLUSIVE"}
     assert payload["utility_observation"] is not None
+    assert payload["utility_observation"]["authority_effect"] == "none"
+
+
+def test_case_set_cannot_self_attest_ground_truth_review() -> None:
+    raw = _require_case_set().read_text(encoding="utf-8")
+    assert "ground_truth_review_status" not in raw
+    assert "OWNER_APPROVED_DESIGN" not in raw
+
+
+def test_valid_review_attestation_is_declared_not_self_verified() -> None:
+    payload = _run_pack()
+    review = payload["utility_observation"]["ground_truth_review"]
+
+    assert review["status"] == "EXTERNAL_ATTESTATION_DECLARED"
+    assert review["evaluation_executable"] is True
+    assert review["identity_independence_claimed"] is True
+    assert review["identity_independence_verified"] is False
+    assert review["requires_external_validation"] is True
+    assert review["review_evidence_reference"] == "TEST-ONLY-REVIEW-ATTESTATION"
+
+
+def test_missing_external_review_is_inconclusive_and_not_executable() -> None:
+    completed = _run_raw()
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 2
+    assert payload["conformance_result"] == "INCONCLUSIVE"
+    assert payload["case_results"] == []
+    review = payload["utility_observation"]["ground_truth_review"]
+    assert review["status"] == "MISSING_EXTERNAL_ATTESTATION"
+    assert review["evaluation_executable"] is False
+    assert review["requires_external_validation"] is True
+
+
+def test_review_digest_mismatch_is_inconclusive_and_not_executable() -> None:
+    args = _valid_review_args()
+    digest_index = args.index("--reviewed-case-set-digest") + 1
+    args[digest_index] = "0" * 64
+
+    completed = _run_raw(args)
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 2
+    assert payload["conformance_result"] == "INCONCLUSIVE"
+    review = payload["utility_observation"]["ground_truth_review"]
+    assert review["status"] == "REVIEW_DIGEST_MISMATCH"
+    assert review["evaluation_executable"] is False
+
+
+def test_reviewer_implementer_collision_is_inconclusive() -> None:
+    args = _valid_review_args()
+    reviewer = args[args.index("--reviewer-id") + 1]
+    actor_index = args.index("--implementation-actor-id") + 1
+    args[actor_index] = reviewer
+
+    completed = _run_raw(args)
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 2
+    assert payload["conformance_result"] == "INCONCLUSIVE"
+    review = payload["utility_observation"]["ground_truth_review"]
+    assert review["status"] == "REVIEWER_IMPLEMENTER_COLLISION"
+    assert review["evaluation_executable"] is False
 
 
 def test_case_set_exists_without_becoming_executable_input() -> None:
-    case_set = _require_case_set()
-    raw = case_set.read_text(encoding="utf-8")
+    raw = _require_case_set().read_text(encoding="utf-8")
 
     forbidden_markers = (
         "http://",
@@ -165,3 +290,129 @@ def test_case_set_exists_without_becoming_executable_input() -> None:
         "shell=True",
     )
     assert not any(marker in raw for marker in forbidden_markers)
+
+
+def test_schema_rejects_unknown_top_level_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["unexpected"] = True
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "case-set top-level schema mismatch",
+    )
+
+
+def test_schema_rejects_missing_case_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    del payload["cases"][0]["subject"]
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "case schema mismatch",
+    )
+
+
+def test_schema_rejects_unknown_case_field_including_review_self_attestation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["cases"][0]["ground_truth_review_status"] = "OWNER_APPROVED_DESIGN"
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "case schema mismatch",
+    )
+
+
+def test_schema_rejects_wrong_type(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["cases"][0]["expected_total_structural_count"] = "1"
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "expected_total_structural_count must be int",
+    )
+
+
+def test_schema_rejects_unknown_enum(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["cases"][0]["comparison_class"] = "MAGIC"
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "unsupported comparison class",
+    )
+
+
+def test_schema_rejects_duplicate_case_id(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["cases"][1]["case_id"] = payload["cases"][0]["case_id"]
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "duplicate case_id",
+    )
+
+
+def test_schema_rejects_blank_subject(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["cases"][0]["subject"] = "   "
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "subject must be non-empty",
+    )
+
+
+def test_schema_rejects_unsupported_fixture(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["cases"][0]["fixture_profile"] = "arbitrary"
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "unsupported fixture profile",
+    )
+
+
+def test_schema_rejects_unknown_structural_fact_type(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    payload = _case_set_payload()
+    payload["cases"][0]["expected_structural_facts"][0]["fact_type"] = "semantic"
+    _assert_case_set_rejected(
+        monkeypatch,
+        tmp_path,
+        payload,
+        "unsupported structural fact type",
+    )
