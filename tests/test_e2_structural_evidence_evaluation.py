@@ -232,7 +232,9 @@ def test_valid_review_attestation_is_declared_not_self_verified() -> None:
     assert review["identity_independence_claimed"] is True
     assert review["identity_independence_verified"] is False
     assert review["requires_external_validation"] is True
+    assert review["reviewed_case_set_digest"] == _case_set_digest()
     assert review["review_evidence_reference"] == "TEST-ONLY-REVIEW-ATTESTATION"
+    assert "must still be validated outside this runner" in review["reason"]
 
 
 def test_missing_external_review_is_inconclusive_and_not_executable() -> None:
@@ -276,6 +278,51 @@ def test_reviewer_implementer_collision_is_inconclusive() -> None:
     assert payload["conformance_result"] == "INCONCLUSIVE"
     review = payload["utility_observation"]["ground_truth_review"]
     assert review["status"] == "REVIEWER_IMPLEMENTER_COLLISION"
+    assert review["evaluation_executable"] is False
+
+
+def test_partial_review_attestation_is_inconclusive() -> None:
+    args = _valid_review_args()
+    ref_index = args.index("--review-evidence-reference")
+    del args[ref_index : ref_index + 2]
+
+    completed = _run_raw(args)
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 2
+    assert payload["conformance_result"] == "INCONCLUSIVE"
+    review = payload["utility_observation"]["ground_truth_review"]
+    assert review["status"] == "PARTIAL_EXTERNAL_ATTESTATION"
+    assert review["evaluation_executable"] is False
+
+
+def test_malformed_review_digest_is_inconclusive() -> None:
+    args = _valid_review_args()
+    digest_index = args.index("--reviewed-case-set-digest") + 1
+    args[digest_index] = "NOT-A-SHA256"
+
+    completed = _run_raw(args)
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 2
+    assert payload["conformance_result"] == "INCONCLUSIVE"
+    review = payload["utility_observation"]["ground_truth_review"]
+    assert review["status"] == "INVALID_REVIEW_DIGEST"
+    assert review["evaluation_executable"] is False
+
+
+def test_malformed_review_provenance_is_inconclusive() -> None:
+    args = _valid_review_args()
+    reviewer_index = args.index("--reviewer-id") + 1
+    args[reviewer_index] = " test-owner-reviewer"
+
+    completed = _run_raw(args)
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 2
+    assert payload["conformance_result"] == "INCONCLUSIVE"
+    review = payload["utility_observation"]["ground_truth_review"]
+    assert review["status"] == "INVALID_REVIEW_PROVENANCE"
     assert review["evaluation_executable"] is False
 
 
