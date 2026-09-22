@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-20
-as_of_commit: e6f2b5060131f961f1054e83203cb7da91f5302c
+as_of_date: 2026-09-22
+as_of_commit: e29d3dc79445506aa9bb4e59a8383524d627db68
 branch: main
 certification_branch: null
 candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
@@ -89,6 +89,15 @@ Este contexto fue reconciliado a partir de:
   referencia conceptual no normativa y candidata a una de las primeras tareas
   gobernadas de autoinspección; ejecución e implementación permanecen no
   autorizadas;
+- integración de Repository Structural Projection V0 mediante PR #164 y
+  Repository Structural Lookup V0 mediante PR #166;
+- integración de Structural Evidence en E2 mediante PR #168 y de su observabilidad
+  determinista mediante PR #170, sin propagación a E3/E4;
+- integración de E2 Structural Evidence Evaluation Pack V0 mediante PR #177 como
+  tooling de evaluación reproducible, sin nueva Capability, sin cambios de Kernel
+  o Planner, sin persistencia y sin authority delta;
+- validación post-merge de PR #177 mediante Validation #428, con `1278 passed`
+  en Ubuntu y Windows, `compileall` PASS y diff validation PASS;
 
 El documento:
 
@@ -146,10 +155,11 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             e6f2b5060131f961f1054e83203cb7da91f5302c
+HEAD integrado actual:             e29d3dc79445506aa9bb4e59a8383524d627db68
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Última unidad de código integrada: E5-B1 — Read-only Explorer
+Última unidad funcional/runtime integrada: E5-B1 — Read-only Explorer
+Último tooling E2 integrado:       Structural Evidence Evaluation Pack V0 — PR #177
 Última foundation previa:          Assurance Signal Authority & Projection Foundation — G2
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
 Última unidad de assurance:        Assurance Signal Boundary G2 — integrada / aislada
@@ -166,6 +176,13 @@ Signal Boundary G2:                integrado / aislado
 Conversation G2B:                  bloqueado / no autorizado
 RDD Stage 2:                       no autorizado
 Construction Flow Audit V1:        integrada / 13 de 13 / 0 blockers actuales
+Repository Structural Projection V0: integrado — PR #164
+Repository Structural Lookup V0:     integrado — PR #166
+E2 Structural Evidence:            integrado en E2 — PR #168
+E2 Structural Observability:       integrado — PR #170
+E2 Evaluation Pack V0:             integrado / evaluation tooling — PR #177
+Structural Evidence E3/E4:         diferido / no propagado
+Structural Delta:                  diferido
 Governed Self-Review Bootstrap:     concept integrado / first-task candidate / ejecución no autorizada
 ```
 
@@ -394,9 +411,9 @@ D:\Ollama\jarvis
 
 ### Engineering Intelligence — E0–E5-B1
 
-El vertical bounded de Engineering Intelligence y sus superficies read-only está
-integrado hasta E5-B1. El HEAD derivado reconciliado es
-`main@e6f2b5060131f961f1054e83203cb7da91f5302c`:
+El vertical bounded de Engineering Intelligence, sus superficies read-only y el
+tooling de evaluación estructural de E2 están reconciliados contra
+`main@e29d3dc79445506aa9bb4e59a8383524d627db68`:
 
 ```text
 E0 Repository Read          PR #147  INTEGRATED
@@ -415,6 +432,15 @@ E5-A Command Surface        PR #155  INTEGRATED
 E5-B1 Read-only Explorer    PR #157  INTEGRATED
 E5-B2 Runtime Context       DEFERRED
 E5-B3 Engineering Artifacts DEFERRED
+
+Repository Structural Projection V0     PR #164  INTEGRATED
+Repository Structural Lookup V0         PR #166  INTEGRATED
+E2 Structural Evidence Integration V0   PR #168  INTEGRATED
+E2 Structural Evidence Observability V0 PR #170  INTEGRATED
+E2 Structural Evidence Evaluation Pack  PR #177  INTEGRATED / EVALUATION TOOLING
+
+Structural Evidence propagation E3/E4   DEFERRED
+Structural Delta                        DEFERRED
 ```
 
 E0–E4 permanecen read-only y E5-A/B1 sólo exponen esas capacidades y readers
@@ -1200,7 +1226,7 @@ Estado reconciliado:
 
 ```text
 rama permanente: main
-HEAD integrado de referencia: 37af50628fb2d56fa48113a65a53de51049bd8da
+HEAD integrado de referencia: e29d3dc79445506aa9bb4e59a8383524d627db68
 commit integración Sprint 7.11: 3413e8ccb348440aea757d1feccde25c65be011f
 Sprint 7.7: cerrado
 Sprint 7.8: completado
@@ -1209,7 +1235,7 @@ Sprint 7.10: completado
 Sprint 7.11: completado e integrado
 última ruta conversacional/runtime: Sprint 7.10
 última foundation previa: Assurance Signal Authority & Projection Foundation — G2
-última unidad de código integrada: E5-B1 — Read-only Explorer
+última unidad funcional/runtime integrada: E5-B1 — Read-only Explorer
 Engineering Intelligence E0: integrado
 Engineering Intelligence E1: integrado
 Engineering Intelligence E2: integrado
@@ -1218,6 +1244,13 @@ Engineering Intelligence E4: integrado
 Engineering Intelligence E5-A: integrado
 Engineering Intelligence E5-B1: integrado
 Engineering Intelligence E5-B2/B3: diferido
+Repository Structural Projection V0: integrado
+Repository Structural Lookup V0: integrado
+E2 Structural Evidence Integration V0: integrado
+E2 Structural Evidence Observability V0: integrado
+E2 Structural Evidence Evaluation Pack V0: integrado / evaluation tooling
+Structural Evidence propagation E3/E4: diferido
+Structural Delta: diferido
 último diseño Memory: Episodic Candidate Content Identity G0/G1
 última unidad cognitiva de assurance: Assurance Signal Boundary G2
 candidate E4: 3463f1c391f6a11de70a0d6ecfc37c4127da21cb
@@ -1229,6 +1262,7 @@ sprint actualmente autorizado: ninguno
 Signal Boundary G2: integrado / aislado
 Conversation G2B: bloqueado / no autorizado
 RDD Stage 2: no autorizado
+post-merge Validation #428: 1278 passed Ubuntu + Windows / PASS
 ```
 
 El commit `3413e8ccb348440aea757d1feccde25c65be011f` continúa siendo el estado de
@@ -1535,12 +1569,12 @@ baseline resultante y obtener aprobación explícita.
 
 ## Política de actualización
 
-Este documento fue reconciliado contra el estado material observado después de
-integrar E5-A mediante PR #155 y E5-B1 mediante PR #157, más el corrective packet
-documental de PR #161:
+Este documento fue reconciliado contra el estado material observado hasta la
+integración de E2 Structural Evidence Evaluation Pack V0 mediante PR #177 y su
+validación post-merge #428:
 
 ```text
-main@37af50628fb2d56fa48113a65a53de51049bd8da
+main@e29d3dc79445506aa9bb4e59a8383524d627db68
 active_work_branch@NONE
 ```
 

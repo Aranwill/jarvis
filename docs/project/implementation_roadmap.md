@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-20
-as_of_commit: e6f2b5060131f961f1054e83203cb7da91f5302c
+as_of_date: 2026-09-22
+as_of_commit: e29d3dc79445506aa9bb4e59a8383524d627db68
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -37,10 +37,10 @@ Este documento es deliberadamente **derivado y no normativo**.
 No reemplaza ni modifica ninguna fuente de ley, arquitectura, seguridad,
 gobernanza o contrato aprobado.
 
-## Estado CURRENT reconciliado — 2026-09-20
+## Estado CURRENT reconciliado — 2026-09-22
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@37af50628fb2d56fa48113a65a53de51049bd8da`.
+`Aranwill/jarvis/main@e29d3dc79445506aa9bb4e59a8383524d627db68`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -93,6 +93,35 @@ status    DEFERRED
 
 E5-B3 — Engineering Artifact Browser
 status    DEFERRED
+
+Repository Structural Projection V0
+PR #164
+merge     a1028f626cdca2da9979002a21d70645ed848e3e
+status    INTEGRATED
+
+Repository Structural Lookup V0
+PR #166
+merge     2a00a16618a7f11403edd06f051fd8cbb68849ed
+status    INTEGRATED
+
+E2 Structural Evidence Integration V0
+PR #168
+merge     79319eef23cdd1490531d01de914712811135d9d
+status    INTEGRATED
+
+E2 Structural Evidence Observability V0
+PR #170
+merge     5c942d27ea610873182ded77b85d0364bfbe15a0
+status    INTEGRATED
+
+E2 Structural Evidence Evaluation Pack V0
+PR #177
+merge     e29d3dc79445506aa9bb4e59a8383524d627db68
+status    INTEGRATED / EVALUATION TOOLING
+runtime delta    0
+authority delta  0
+E3/E4 propagation DEFERRED
+Structural Delta  DEFERRED
 
 Construction Flow Compliance Audit V1
 PR #173
@@ -1618,7 +1647,7 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-e6f2b5060131f961f1054e83203cb7da91f5302c
+e29d3dc79445506aa9bb4e59a8383524d627db68
 
 CURRENT MATERIAL COGNITIVE HEAD
 14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
@@ -1641,7 +1670,7 @@ v0.6.0-alpha
 LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
-LATEST CODE UNIT
+LATEST FUNCTIONAL/RUNTIME CODE UNIT
 E5-B1 — Read-only Explorer
 
 LATEST EPISODIC PRODUCT UNIT
@@ -1684,6 +1713,27 @@ ENGINEERING INTELLIGENCE E5-B1
 INTEGRATED
 
 ENGINEERING INTELLIGENCE E5-B2/B3
+DEFERRED
+
+REPOSITORY STRUCTURAL PROJECTION V0
+INTEGRATED — PR #164
+
+REPOSITORY STRUCTURAL LOOKUP V0
+INTEGRATED — PR #166
+
+E2 STRUCTURAL EVIDENCE INTEGRATION V0
+INTEGRATED — PR #168
+
+E2 STRUCTURAL EVIDENCE OBSERVABILITY V0
+INTEGRATED — PR #170
+
+E2 STRUCTURAL EVIDENCE EVALUATION PACK V0
+INTEGRATED / EVALUATION TOOLING — PR #177
+
+STRUCTURAL EVIDENCE PROPAGATION E3/E4
+DEFERRED
+
+STRUCTURAL DELTA
 DEFERRED
 
 CONSTRUCTION FLOW COMPLIANCE AUDIT V1
@@ -1730,6 +1780,9 @@ ubuntu-latest / windows-latest
 
 E4 CANDIDATE VALIDATION
 Validation #330 / 1168 passed Ubuntu + Windows / PASS
+
+E2 EVALUATION PACK POST-MERGE VALIDATION
+Validation #428 / 1278 passed Ubuntu + Windows / PASS
 
 LEGACY ROADMAP
 DISPOSITION REGISTERED
