@@ -19,8 +19,7 @@
       "expected_total_structural_count": 1,
       "expected_emitted_structural_count": 1,
       "expected_context_truncated": false,
-      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
-      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6"
     },
     {
       "case_id": "C2-exact-module",
@@ -54,8 +53,7 @@
       "expected_total_structural_count": 3,
       "expected_emitted_structural_count": 3,
       "expected_context_truncated": false,
-      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
-      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6"
     },
     {
       "case_id": "C3-substring",
@@ -68,8 +66,7 @@
       "expected_total_structural_count": 0,
       "expected_emitted_structural_count": 0,
       "expected_context_truncated": false,
-      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
-      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6"
     },
     {
       "case_id": "C4-textual-knowledge",
@@ -82,8 +79,7 @@
       "expected_total_structural_count": 0,
       "expected_emitted_structural_count": 0,
       "expected_context_truncated": false,
-      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
-      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6"
     },
     {
       "case_id": "C5-absent",
@@ -96,8 +92,7 @@
       "expected_total_structural_count": 0,
       "expected_emitted_structural_count": 0,
       "expected_context_truncated": false,
-      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
-      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6"
     },
     {
       "case_id": "C6-truncation",
@@ -189,8 +184,7 @@
       "expected_total_structural_count": 13,
       "expected_emitted_structural_count": 12,
       "expected_context_truncated": true,
-      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
-      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6"
     }
   ]
 }
