@@ -617,7 +617,7 @@ def main() -> int:
         )
         + "\n"
     )
-    return 0
+    return 0 if conformance == "PASS" else 1
 
 
 if __name__ == "__main__":
