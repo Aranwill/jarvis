@@ -1,0 +1,196 @@
+{
+  "schema_version": "MALAK-E2-STRUCTURAL-EVIDENCE-CASESET/v0",
+  "cases": [
+    {
+      "case_id": "C1-exact-symbol",
+      "subject": "malak.component.NeedleComponent1",
+      "fixture_profile": "basic",
+      "comparison_class": "STRUCTURAL_COVERAGE_GAIN",
+      "expected_a_status": "UNCONFIRMED",
+      "expected_b_status": "GROUNDED",
+      "expected_structural_facts": [
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent1",
+          "kind": "CLASS"
+        }
+      ],
+      "expected_total_structural_count": 1,
+      "expected_emitted_structural_count": 1,
+      "expected_context_truncated": false,
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
+      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+    },
+    {
+      "case_id": "C2-exact-module",
+      "subject": "malak.component",
+      "fixture_profile": "basic",
+      "comparison_class": "STRUCTURAL_COVERAGE_GAIN",
+      "expected_a_status": "UNCONFIRMED",
+      "expected_b_status": "GROUNDED",
+      "expected_structural_facts": [
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent1",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "import",
+          "source_module": "malak.component",
+          "target_module": "os",
+          "imported_name": null,
+          "relative_level": 0
+        },
+        {
+          "fact_type": "import",
+          "source_module": "malak.component",
+          "target_module": "malak.services",
+          "imported_name": "planner",
+          "relative_level": 0
+        }
+      ],
+      "expected_total_structural_count": 3,
+      "expected_emitted_structural_count": 3,
+      "expected_context_truncated": false,
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
+      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+    },
+    {
+      "case_id": "C3-substring",
+      "subject": "NeedleComponent",
+      "fixture_profile": "basic",
+      "comparison_class": "NO_STRUCTURAL_ACTIVATION",
+      "expected_a_status": "GROUNDED",
+      "expected_b_status": "GROUNDED",
+      "expected_structural_facts": [],
+      "expected_total_structural_count": 0,
+      "expected_emitted_structural_count": 0,
+      "expected_context_truncated": false,
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
+      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+    },
+    {
+      "case_id": "C4-textual-knowledge",
+      "subject": "needle",
+      "fixture_profile": "basic",
+      "comparison_class": "NO_STRUCTURAL_ACTIVATION",
+      "expected_a_status": "GROUNDED",
+      "expected_b_status": "GROUNDED",
+      "expected_structural_facts": [],
+      "expected_total_structural_count": 0,
+      "expected_emitted_structural_count": 0,
+      "expected_context_truncated": false,
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
+      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+    },
+    {
+      "case_id": "C5-absent",
+      "subject": "absent-evaluation-token",
+      "fixture_profile": "basic",
+      "comparison_class": "ABSENT",
+      "expected_a_status": "UNCONFIRMED",
+      "expected_b_status": "UNCONFIRMED",
+      "expected_structural_facts": [],
+      "expected_total_structural_count": 0,
+      "expected_emitted_structural_count": 0,
+      "expected_context_truncated": false,
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
+      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+    },
+    {
+      "case_id": "C6-truncation",
+      "subject": "malak.component",
+      "fixture_profile": "truncation",
+      "comparison_class": "TRUNCATION",
+      "expected_a_status": "UNCONFIRMED",
+      "expected_b_status": "GROUNDED",
+      "expected_structural_facts": [
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent1",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent2",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent3",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent4",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent5",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent6",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent7",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent8",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent9",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent10",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent11",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent12",
+          "kind": "CLASS"
+        },
+        {
+          "fact_type": "symbol",
+          "module_name": "malak.component",
+          "qualified_name": "malak.component.NeedleComponent13",
+          "kind": "CLASS"
+        }
+      ],
+      "expected_total_structural_count": 13,
+      "expected_emitted_structural_count": 12,
+      "expected_context_truncated": true,
+      "ground_truth_source": "MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN section 6",
+      "ground_truth_review_status": "OWNER_APPROVED_DESIGN"
+    }
+  ]
+}
