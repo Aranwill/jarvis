@@ -45,7 +45,17 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - PR #97 preservó `Malāk Evidence-Bound Cognition Foundation` como referencia
   conceptual no normativa; PR #98 y PR #99 integraron respectivamente G0 de
   investigación/costos y G1 de diseño de Progressive Cognitive Assurance, sin
-  implementación runtime ni cambio constitucional.
+  implementación runtime ni cambio constitucional en esos gates.
+- PR #164 integró `Repository Structural Projection V0` y PR #166 integró
+  `Repository Structural Lookup V0` como primitives deterministas, read-only y
+  baseline-bound para hechos sintácticos de repositorio.
+- PR #168 integró evidencia estructural `[S#]` exclusivamente en E2 Engineering
+  Inspect y PR #170 incorporó observabilidad determinista de esa evidencia, sin
+  propagarla a E3/E4 ni introducir authority delta.
+- PR #177 integró `E2 Structural Evidence Evaluation Pack V0`, con seis casos
+  A/B reproducibles, ground truth revisado separadamente, schema fail-closed y
+  runner determinista; no añadió Capability, runtime productivo, persistencia,
+  Kernel/Planner delta ni propagación estructural a E3/E4.
 
 ### Changed
 
@@ -59,9 +69,9 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - PR #96 reforzó `AGENTS.md` para exigir modificaciones acotadas, deterministas,
   observables y proporcionales al objetivo autorizado; refactors, limpiezas,
   simplificaciones o mejoras laterales requieren scope/gate separado.
-- La documentación derivada de proyecto se reconcilia al estado post-PR #99 sin
-  reestructuración editorial, preservando la distinción entre estado productivo,
-  diseño no implementado y autoridad no concedida.
+- La documentación derivada de proyecto se reconcilia al baseline post-PR #177
+  sin reescribir snapshots históricos, preservando la distinción entre runtime
+  productivo, tooling de evaluación, diseño histórico y autoridad no concedida.
 
 ### Security
 
@@ -94,6 +104,9 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - La validación local post-G3 reportada por el Owner sobre el HEAD integrado de
   PR #92 concluyó con `645 passed`, forced `compileall` PASS, diff-check PASS y
   árbol de trabajo limpio.
+- Validation #428 revalidó post-merge `main@e29d3dc79445506aa9bb4e59a8383524d627db68`
+  después de PR #177: `1278 passed` en Ubuntu y Windows, `compileall: PASS` y
+  diff validation PASS.
 
 ### Notes
 
@@ -108,9 +121,11 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - `candidate_id` binding no equivale a identidad criptográfica del contenido;
   Candidate Content Identity permanece únicamente en G0/G1 y su G2 no está
   autorizado.
-- Progressive Cognitive Assurance permanece en G0/G1 de diseño documental;
-  no existe todavía una frontera runtime de response assurance ni cambio
-  constitucional asociado.
+- PR #97–#99 conservan el origen G0/G1 de Progressive Cognitive Assurance; ese
+  estado es histórico y no describe por sí solo el baseline CURRENT. Las
+  promociones y foundations posteriores deben consultarse en las fuentes CURRENT.
+- Structural Evidence permanece limitada a E2; su propagación a E3/E4 y
+  `Structural Delta` continúan diferidas y requieren gates separados.
 - Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
 - RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
