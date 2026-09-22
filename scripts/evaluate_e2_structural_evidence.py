@@ -145,6 +145,31 @@ def _validated_provenance_string(value: str, *, name: str) -> str:
     return value
 
 
+def _review_result(
+    *,
+    status: str,
+    evaluation_executable: bool,
+    reviewer_id: str | None,
+    implementation_actor_id: str | None,
+    reviewed_case_set_digest: str | None,
+    review_evidence_reference: str | None,
+    identity_independence_claimed: bool,
+    reason: str,
+) -> dict[str, Any]:
+    return {
+        "status": status,
+        "evaluation_executable": evaluation_executable,
+        "identity_independence_claimed": identity_independence_claimed,
+        "identity_independence_verified": False,
+        "requires_external_validation": True,
+        "reviewer_id": reviewer_id,
+        "implementation_actor_id": implementation_actor_id,
+        "reviewed_case_set_digest": reviewed_case_set_digest,
+        "review_evidence_reference": review_evidence_reference,
+        "reason": reason,
+    }
+
+
 def _review_attestation(
     args: argparse.Namespace,
     *,
@@ -161,92 +186,109 @@ def _review_attestation(
     }
 
     if not present:
-        return {
-            "status": "MISSING_EXTERNAL_ATTESTATION",
-            "evaluation_executable": False,
-            "identity_independence_claimed": False,
-            "identity_independence_verified": False,
-            "requires_external_validation": True,
-            "reviewer_id": None,
-            "implementation_actor_id": None,
-            "review_evidence_reference": None,
-        }
+        return _review_result(
+            status="MISSING_EXTERNAL_ATTESTATION",
+            evaluation_executable=False,
+            reviewer_id=None,
+            implementation_actor_id=None,
+            reviewed_case_set_digest=None,
+            review_evidence_reference=None,
+            identity_independence_claimed=False,
+            reason="external ground-truth review attestation is required",
+        )
 
     if len(present) != len(_REVIEW_ATTESTATION_FIELDS):
-        return {
-            "status": "PARTIAL_EXTERNAL_ATTESTATION",
-            "evaluation_executable": False,
-            "identity_independence_claimed": False,
-            "identity_independence_verified": False,
-            "requires_external_validation": True,
-            "reviewer_id": supplied["reviewer_id"],
-            "implementation_actor_id": supplied["implementation_actor_id"],
-            "review_evidence_reference": supplied["review_evidence_reference"],
-        }
+        return _review_result(
+            status="PARTIAL_EXTERNAL_ATTESTATION",
+            evaluation_executable=False,
+            reviewer_id=supplied["reviewer_id"],
+            implementation_actor_id=supplied["implementation_actor_id"],
+            reviewed_case_set_digest=supplied["reviewed_case_set_digest"],
+            review_evidence_reference=supplied["review_evidence_reference"],
+            identity_independence_claimed=False,
+            reason="all review attestation fields are required together",
+        )
 
-    reviewer_id = _validated_provenance_string(
-        supplied["reviewer_id"],
-        name="reviewer_id",
-    )
-    implementation_actor_id = _validated_provenance_string(
-        supplied["implementation_actor_id"],
-        name="implementation_actor_id",
-    )
-    review_evidence_reference = _validated_provenance_string(
-        supplied["review_evidence_reference"],
-        name="review_evidence_reference",
-    )
+    try:
+        reviewer_id = _validated_provenance_string(
+            supplied["reviewer_id"],
+            name="reviewer_id",
+        )
+        implementation_actor_id = _validated_provenance_string(
+            supplied["implementation_actor_id"],
+            name="implementation_actor_id",
+        )
+        review_evidence_reference = _validated_provenance_string(
+            supplied["review_evidence_reference"],
+            name="review_evidence_reference",
+        )
+    except ValueError as exc:
+        return _review_result(
+            status="INVALID_REVIEW_PROVENANCE",
+            evaluation_executable=False,
+            reviewer_id=None,
+            implementation_actor_id=None,
+            reviewed_case_set_digest=supplied["reviewed_case_set_digest"],
+            review_evidence_reference=None,
+            identity_independence_claimed=False,
+            reason=str(exc),
+        )
+
     reviewed_digest = supplied["reviewed_case_set_digest"]
     if not isinstance(reviewed_digest, str) or not re.fullmatch(
         r"[0-9a-f]{64}",
         reviewed_digest,
     ):
-        return {
-            "status": "INVALID_REVIEW_DIGEST",
-            "evaluation_executable": False,
-            "identity_independence_claimed": False,
-            "identity_independence_verified": False,
-            "requires_external_validation": True,
-            "reviewer_id": reviewer_id,
-            "implementation_actor_id": implementation_actor_id,
-            "review_evidence_reference": review_evidence_reference,
-        }
+        return _review_result(
+            status="INVALID_REVIEW_DIGEST",
+            evaluation_executable=False,
+            reviewer_id=reviewer_id,
+            implementation_actor_id=implementation_actor_id,
+            reviewed_case_set_digest=reviewed_digest,
+            review_evidence_reference=review_evidence_reference,
+            identity_independence_claimed=False,
+            reason="reviewed_case_set_digest must be lowercase SHA-256",
+        )
+
+    independence_claimed = reviewer_id != implementation_actor_id
 
     if reviewed_digest != case_set_digest:
-        return {
-            "status": "REVIEW_DIGEST_MISMATCH",
-            "evaluation_executable": False,
-            "identity_independence_claimed": reviewer_id != implementation_actor_id,
-            "identity_independence_verified": False,
-            "requires_external_validation": True,
-            "reviewer_id": reviewer_id,
-            "implementation_actor_id": implementation_actor_id,
-            "review_evidence_reference": review_evidence_reference,
-        }
+        return _review_result(
+            status="REVIEW_DIGEST_MISMATCH",
+            evaluation_executable=False,
+            reviewer_id=reviewer_id,
+            implementation_actor_id=implementation_actor_id,
+            reviewed_case_set_digest=reviewed_digest,
+            review_evidence_reference=review_evidence_reference,
+            identity_independence_claimed=independence_claimed,
+            reason="review attestation is not bound to the current case-set bytes",
+        )
 
-    if reviewer_id == implementation_actor_id:
-        return {
-            "status": "REVIEWER_IMPLEMENTER_COLLISION",
-            "evaluation_executable": False,
-            "identity_independence_claimed": False,
-            "identity_independence_verified": False,
-            "requires_external_validation": True,
-            "reviewer_id": reviewer_id,
-            "implementation_actor_id": implementation_actor_id,
-            "review_evidence_reference": review_evidence_reference,
-        }
+    if not independence_claimed:
+        return _review_result(
+            status="REVIEWER_IMPLEMENTER_COLLISION",
+            evaluation_executable=False,
+            reviewer_id=reviewer_id,
+            implementation_actor_id=implementation_actor_id,
+            reviewed_case_set_digest=reviewed_digest,
+            review_evidence_reference=review_evidence_reference,
+            identity_independence_claimed=False,
+            reason="declared reviewer and implementation actor must differ",
+        )
 
-    return {
-        "status": "EXTERNAL_ATTESTATION_DECLARED",
-        "evaluation_executable": True,
-        "identity_independence_claimed": True,
-        "identity_independence_verified": False,
-        "requires_external_validation": True,
-        "reviewer_id": reviewer_id,
-        "implementation_actor_id": implementation_actor_id,
-        "review_evidence_reference": review_evidence_reference,
-    }
-
+    return _review_result(
+        status="EXTERNAL_ATTESTATION_DECLARED",
+        evaluation_executable=True,
+        reviewer_id=reviewer_id,
+        implementation_actor_id=implementation_actor_id,
+        reviewed_case_set_digest=reviewed_digest,
+        review_evidence_reference=review_evidence_reference,
+        identity_independence_claimed=True,
+        reason=(
+            "digest-bound external review is declared; actual role independence "
+            "must still be validated outside this runner"
+        ),
+    )
 
 def _load_case_set() -> tuple[dict[str, Any], bytes]:
     raw = CASE_SET.read_bytes()
