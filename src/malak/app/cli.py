@@ -564,7 +564,7 @@ def run_cli(
                 )
                 summary = result.summary()
                 output_fn("Malāk [self-review/test-v0]")
-                for key in (
+                required_summary_keys = (
                     "run_id",
                     "baseline_commit",
                     "runtime",
@@ -573,10 +573,15 @@ def run_cli(
                     "component_path",
                     "artifact_dir",
                     "live_replay_equivalence",
+                    "authority_effect",
+                )
+                optional_summary_keys = (
                     "tracked_tree_clean",
                     "acceptance",
-                    "authority_effect",
-                ):
+                )
+                for key in (*required_summary_keys, *optional_summary_keys):
+                    if key not in summary:
+                        continue
                     value = summary[key]
                     if isinstance(value, bool):
                         rendered = str(value).lower()
