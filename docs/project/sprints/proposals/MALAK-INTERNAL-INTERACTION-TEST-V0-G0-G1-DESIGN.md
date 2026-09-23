@@ -130,26 +130,55 @@ El usuario no puede modificar `task_id` desde CLI.
 
 ## 6. Scope freeze V0
 
-El scope debe ser constante de aplicación y no texto libre.
-
-Scope canónico:
+El bootstrap gobernado completo conserva tres focos:
 
 ```text
-Governed self-review bootstrap V0: inspect the current exact baseline for
-material gaps in U01 Core Kernel and U04 Observability; reassess RR-03 Strong
-SecurityContext Provenance only against current surfaces; distinguish historical
-evidence limitations from current defects; no-change is a valid outcome;
-authority_effect=none.
+U01 Core Kernel
+U04 Observability
+RR-03 Strong SecurityContext Provenance
 ```
+
+Sin embargo, **Internal Interaction Test V0 ejecuta únicamente el primer slice
+observable del bootstrap**:
+
+```text
+task_id:       governed-self-review-bootstrap-v0
+focus_id:      U01
+focus_label:   U01 Core Kernel
+engineering_subject: Kernel
+```
+
+El `engineering_subject` debe ser constante de aplicación y no texto libre.
+
+Razón técnica: E2/E3/E4 recolectan evidencia mediante coincidencia literal del
+`subject` contra el snapshot capturado. Un subject compuesto que intentara
+expresar U01 + U04 + RR-03 en una sola cadena puede producir cero coincidencias
+aunque exista evidencia material para cada foco por separado. Eso convertiría el
+primer test en `UNCONFIRMED` antes de invocar al LLM y no probaría la interacción
+interna que este V0 pretende observar.
+
+Por tanto:
+
+```text
+Test V0            -> U01 / Kernel
+U04 slice          -> NOT EXECUTED / DEFERRED
+RR-03 slice        -> NOT EXECUTED / DEFERRED
+bootstrap complete -> NO CLAIM
+```
+
+Esta descomposición no cambia Engineering, no amplía autoridad y no elimina los
+otros focos. Evita modificar la semántica global de búsqueda de E2/E3/E4 sólo
+para hacer posible este test.
 
 Propiedades:
 
 - cabe dentro de los límites E2/E3/E4;
-- cubre el bootstrap task existente;
+- prueba una interacción real con evidencia observable;
 - no presupone un defecto;
 - no pide implementación;
 - no pide investigación externa por defecto;
-- no permite alterar scope desde input humano.
+- no permite alterar focus ni subject desde input humano;
+- `NO_CHANGE_RECOMMENDED` sigue siendo un resultado válido.
 
 ## 7. Runtime admission
 
@@ -538,7 +567,7 @@ Interpretaciones cerradas:
 1. `test-v0` no significa self-improvement.
 2. El command owner-triggered no transfiere authority.
 3. Ollama produce propuestas/evaluaciones, no decisiones.
-4. El task y scope son fijos.
+4. El task, focus U01 y engineering_subject `Kernel` son fijos.
 5. External validation refs son evidence metadata.
 6. No existe auto-remediation.
 7. No existe research web en V0.
@@ -587,9 +616,9 @@ Planner planned delta 0
 
 ### Risk — PASS
 
-Controles principales: task fijo, scope fijo, Ollama-only, clean-tree preflight,
-run-id sin overwrite, artifacts confinados, authority none, no side effects de
-producción.
+Controles principales: task fijo, focus U01 fijo, subject `Kernel` fijo,
+Ollama-only, clean-tree preflight, run-id sin overwrite, artifacts confinados,
+authority none y ausencia de side effects de producción.
 
 ### Readability — PASS
 
@@ -632,7 +661,8 @@ RED deberá cubrir al menos:
 
 ```text
 fixed task_id
-fixed scope
+fixed U01 focus
+fixed engineering_subject == Kernel
 Mock runtime rejected
 missing model rejected
 missing repository_root rejected
@@ -714,7 +744,7 @@ RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
 RED authorization                   GRANTED BY OWNER POST-PR #183
-implementation authorization        NOT GRANTED
+implementation authorization        GRANTED BY OWNER AFTER RED #462
 runtime execution authorization     NOT GRANTED
 authority_effect                    none
 runtime delta                       0
@@ -733,9 +763,11 @@ runtime execution: NOT AUTHORIZED
 Siguiente paso permitido:
 
 ```text
-RED tests only
--> observe expected candidate-bound failure
--> explicit GREEN authorization separately
+GREEN candidate only
+-> candidate-bound validation
+-> FULL 4R
+-> E2E
+-> Owner review / merge
 ```
 
 ## 29. GREEN candidate checkpoint
@@ -751,3 +783,44 @@ authority_effect:              none
 ```
 
 El candidate GREEN queda limitado al harness `InternalInteractionTestV0Harness` y al wiring CLI `/self-review test-v0`. No autoriza la primera ejecución real con Ollama.
+
+
+## 30. Bounded Correction — executable bootstrap slice
+
+Durante GREEN, un E2E que compuso el mismo `OllamaRuntime` con el
+`EngineeringKernelSet` real reveló que el scope descriptivo multi-foco no
+activaba inferencia: E2/E3/E4 usan el `subject` como substring literal para
+recolectar evidencia.
+
+Evidencia observada:
+
+```text
+candidate: 7eb1ad43f909d400fcbe03618f13ae3cdcb2cccb
+E2E expected Ollama calls: 4
+E2E observed Ollama calls: 0
+cause: composite subject had no literal evidence match
+```
+
+Disposición:
+
+```text
+change global Engineering search semantics   REJECT
+weaken E2E assertion                         REJECT
+fabricate evidence                           REJECT
+split bootstrap into bounded slices          ADOPT
+
+Test V0 slice                                U01 / Kernel
+U04                                          DEFERRED
+RR-03                                        DEFERRED
+authority_effect                             none
+```
+
+La corrección reduce alcance ejecutable y aumenta fidelidad del test. No declara
+U04 ni RR-03 revisados, no altera el bootstrap conceptual completo y no autoriza
+ejecución runtime.
+
+Known material ambiguity después de la corrección:
+
+```text
+0
+```
