@@ -35,6 +35,7 @@ SCOPE: Final[str] = (
 _RUN_ID_RE: Final[re.Pattern[str]] = re.compile(
     r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
 )
+_GIT_TIMEOUT_SECONDS: Final[float] = 30.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -202,17 +203,29 @@ class InternalInteractionTestV0Harness:
         )
 
     def _git(self, *args: str) -> str:
-        completed = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(self._repository_root),
-                *args,
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        try:
+            completed = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(self._repository_root),
+                    *args,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=_GIT_TIMEOUT_SECONDS,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("Git executable is unavailable") from exc
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError(
+                "Git preflight inspection timed out"
+            ) from exc
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError(
+                "Git preflight inspection failed"
+            ) from exc
         return completed.stdout.strip()
 
     def _tracked_tree_clean(self) -> bool:
