@@ -170,8 +170,11 @@ def _engineering(
                 if analyze_status == "GROUNDED"
                 else "(none)"
             ),
+            "statement: bounded finding",
+            "rationale: bounded operational rationale",
+            "evidence_refs: [R1]",
             "UNCERTAINTIES",
-            "(none)",
+            "- bounded uncertainty",
         )
     )
     propose = "\n".join(
@@ -640,3 +643,30 @@ def test_interaction_bc2_c20_attestation_metadata_is_bound_to_artifacts(
         _module().validate_internal_interaction_artifacts(
             result.artifact_dir
         )
+
+
+def test_interaction_bc2_c21_assessment_preserves_validated_component_outputs(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(
+        repo,
+        analyze_classification="GAP",
+    )
+
+    result = _run(_runner(repo, engineering))
+    assessment = json.loads(
+        (result.artifact_dir / "assessment.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    outputs = assessment["component_outputs"]
+    assert "ENGINEERING_INSPECTION" in outputs["engineering_inspect"]
+    assert "[A1] classification=GAP" in outputs["engineering_analyze"]
+    assert "rationale: bounded operational rationale" in outputs[
+        "engineering_analyze"
+    ]
+    assert "UNCERTAINTIES" in outputs["engineering_analyze"]
+    assert "ENGINEERING_PROPOSAL" in outputs["engineering_propose"]
+    assert assessment["authority_effect"] == "none"
