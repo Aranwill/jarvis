@@ -15,7 +15,9 @@ design_authorized_at: 2026-09-23
 red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-23
-implementation_authorized: false
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-23
 execution_authorized: false
 runtime_delta: 0
 authority_effect: none
@@ -724,7 +726,7 @@ Post-merge admission:
 PR #183 merged by Owner
 main after merge: bd308d5f6bc221dd2582021de9abe00be3152191
 RED candidate: AUTHORIZED
-GREEN / implementation: NOT AUTHORIZED
+GREEN / implementation: AUTHORIZED BY OWNER AFTER RED #462
 runtime execution: NOT AUTHORIZED
 ```
 
@@ -735,3 +737,17 @@ RED tests only
 -> observe expected candidate-bound failure
 -> explicit GREEN authorization separately
 ```
+
+## 29. GREEN candidate checkpoint
+
+El Owner autorizó GREEN después de observar RED candidate-bound en Validation #462.
+
+```text
+GREEN authorized:              YES
+runtime execution:             NOT AUTHORIZED
+Kernel delta:                  0
+Planner delta:                 0
+authority_effect:              none
+```
+
+El candidate GREEN queda limitado al harness `InternalInteractionTestV0Harness` y al wiring CLI `/self-review test-v0`. No autoriza la primera ejecución real con Ollama.
