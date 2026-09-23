@@ -14,7 +14,10 @@ risk_class: 3
 red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-23
-implementation_authorized: false
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-23
+implementation_authorized: true
 execution_authorized: false
 runtime_delta: 0
 authority_effect: none
@@ -1103,7 +1106,8 @@ Design 4R                           PASS
 RDD Stage 1 Design Check            PASS
 
 RED authorization                   GRANTED BY OWNER POST-PR #179
-implementation authorization        NOT GRANTED
+GREEN authorization                 GRANTED BY OWNER AFTER RED #433
+implementation authorization        GRANTED FOR V0 MINIMUM GREEN
 execution authorization             NOT GRANTED
 runtime delta                        0
 authority delta                      0
@@ -1116,17 +1120,22 @@ PR #179 merged by Owner
 main after merge: eb5a48fad12b8888192139e2b8a552bf50ce4870
 Owner continued the work
 RED candidate: AUTHORIZED
-GREEN / implementation: NOT AUTHORIZED
+RED evidence: Validation #433 / 61 failed + 1278 passed on Ubuntu and Windows
+GREEN / implementation: AUTHORIZED FOR V0 MINIMUM
 execution: NOT AUTHORIZED
 ```
 
 Siguiente paso permitido:
 
 ```text
-RED tests only
--> observe expected RED candidate-bound failure
--> Owner review / explicit GREEN authorization separately
+minimum GREEN implementation only
+-> targeted validation
+-> Candidate FULL 4R
+-> E2E / CI
+-> RDD Stage 1 Candidate Conformance
+-> human review
 ```
 
-No debe comenzarse GREEN a partir de este documento sin evidencia RED y
-autorización correspondiente.
+La autorización GREEN no autoriza el primer runtime self-review real. La
+ejecución V0 sobre Malāk permanece separada y requiere cierre técnico y decisión
+humana posterior.
