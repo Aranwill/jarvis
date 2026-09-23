@@ -15,7 +15,9 @@ critical_contract: false
 red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-23
-implementation_authorized: false
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-23
 execution_authorized: false
 runtime_delta: 0
 authority_effect: none
@@ -845,7 +847,7 @@ PR #181 merged by Owner
 main after merge: 675121c3c3180c8436a6e436997247307b19207b
 Owner continued the work
 RED candidate: AUTHORIZED
-GREEN / implementation: NOT AUTHORIZED
+GREEN / implementation: AUTHORIZED BY OWNER AFTER RED #454
 runtime self-review execution: NOT AUTHORIZED
 ```
 
@@ -856,3 +858,17 @@ RED tests only
 -> observe expected candidate-bound failure
 -> Owner review / explicit GREEN authorization separately
 ```
+
+## 29. GREEN candidate checkpoint
+
+El Owner autorizó GREEN después de observar RED candidate-bound en Validation #454.
+
+```text
+GREEN authorized:              YES
+runtime self-review execution: NOT AUTHORIZED
+Kernel delta:                  0
+Planner delta:                 0
+authority_effect:              none
+```
+
+El candidate GREEN sólo puede cerrar el alcance de proyección, renderer/replay y wiring read-only `/trace`. Este checkpoint no declara GREEN PASS; depende de Validation candidate-bound posterior.
