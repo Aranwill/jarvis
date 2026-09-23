@@ -29,14 +29,14 @@ REQUIRED_TEXT_FILES = {
     "SECURITY.md": "security policy\n",
     "docs/governance/cognitive_constitution.md": "cognitive constitution\n",
     "docs/governance/governance_constitution.md": "governance constitution\n",
-    "docs/architecture/blueprint.md": "blueprint\n",
+    "docs/architecture/blueprint.md": "Kernel First\nCapability First\n",
     "docs/architecture/architecture_quality_gates.md": "quality gates\n",
     "docs/development/malak_construction_protocol.md": "construction protocol\n",
     "docs/development/development_checklist.md": "development checklist\n",
     "docs/project/implementation_roadmap.md": "implementation roadmap\n",
     "documents/projects/jarvis/ideas.md": "ideas\n",
     "docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md": "research horizon\n",
-    "docs/project/concepts/GOVERNED_SELF_REVIEW_BOOTSTRAP_TASK.md": "bootstrap task\n",
+    "docs/project/concepts/GOVERNED_SELF_REVIEW_BOOTSTRAP_TASK.md": "U01 Core Kernel\nU04 Observability\nRR-03 Strong SecurityContext Provenance\n",
     "docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md": "audit v1\n",
 }
 
@@ -93,7 +93,7 @@ def _make_repo(
         "---\nid: ADR-003\nstatus: accepted\n---\naccepted\n",
     )
     _write(repo, "docs/project/concepts/README.md", "concept catalog\n")
-    _write(repo, "src/malak/example.py", "VALUE = 1\n")
+    _write(repo, "src/malak/example.py", "class KernelExample:\n    pass\n")
     _write(
         repo,
         "tests/test_example.py",
@@ -243,11 +243,9 @@ def test_harness_red_c01_task_and_scope_are_fixed_constants() -> None:
     module = _module()
 
     assert module.TASK_ID == "governed-self-review-bootstrap-v0"
-    assert "U01 Core Kernel" in module.SCOPE
-    assert "U04 Observability" in module.SCOPE
-    assert "RR-03 Strong SecurityContext Provenance" in module.SCOPE
-    assert "no-change is a valid outcome" in module.SCOPE
-    assert "authority_effect=none" in module.SCOPE
+    assert module.FOCUS_ID == "U01"
+    assert module.FOCUS_LABEL == "U01 Core Kernel"
+    assert module.SCOPE == "Kernel"
 
 
 def test_harness_red_c02_mock_runtime_is_rejected_before_run(
