@@ -12,6 +12,9 @@ from malak.app.composition import (
     build_conversation_kernel,
     build_engineering_kernel_set,
 )
+from malak.app.internal_interaction_test_v0 import (
+    InternalInteractionTestV0Harness,
+)
 from malak.app.trace_view import (
     load_trace_projection,
     render_trace_node,
@@ -42,6 +45,8 @@ Comandos disponibles:
           Muestra los comandos read-only Explorer disponibles.
   /trace help
           Muestra los comandos read-only Trace disponibles.
+  /self-review help
+          Muestra el bootstrap Self-Review gobernado disponible.
   exit    Finaliza la sesión.
 """.strip()
 
@@ -66,6 +71,18 @@ TRACE_HELP_MESSAGE = """
 Comandos Trace:
   /trace replay <run_id>
   /trace inspect <run_id> <node_id>
+""".strip()
+
+SELF_REVIEW_HELP_MESSAGE = """
+Comandos Self-Review:
+  /self-review test-v0 <run_id> <validation_ref> [<validation_ref> ...]
+
+Internal Interaction Test V0:
+  - revisión read-only del baseline exacto;
+  - requiere Ollama local y modelo configurado;
+  - no habilita self-modification;
+  - no acepta task ni scope arbitrarios;
+  - el Owner conserva toda autoridad posterior.
 """.strip()
 
 _ENGINEERING_ACTIONS = frozenset({"inspect", "analyze", "propose"})
@@ -206,6 +223,23 @@ def _engineering_command(
     action = parts[1].lower()
     subject = parts[2].strip() if len(parts) == 3 else None
     return action, subject
+
+
+def _self_review_command(
+    prompt: str,
+) -> tuple[str, str | None, tuple[str, ...]] | None:
+    parts = prompt.split()
+
+    if not parts or parts[0].lower() != "/self-review":
+        return None
+
+    if len(parts) == 2 and parts[1].lower() == "help":
+        return "help", None, ()
+
+    if len(parts) >= 4 and parts[1].lower() == "test-v0":
+        return "test-v0", parts[2], tuple(parts[3:])
+
+    return "", None, ()
 
 
 def _trace_command(
@@ -400,6 +434,7 @@ def _run_engineering(
 def run_cli(
     service: ConversationService | None = None,
     provider_name: str = DEFAULT_PROVIDER,
+    runtime: LLMRuntime | None = None,
     runtime_name: str = "MockLLMRuntime",
     model: str | None = None,
     engineering: EngineeringKernelSet | None = None,
@@ -476,6 +511,82 @@ def run_cli(
             conversation_service.reset_context(session_id)
             session_id = str(uuid.uuid4())
             output_fn("Nueva conversación iniciada.")
+            continue
+
+        self_review_command = _self_review_command(prompt)
+        if self_review_command is not None:
+            action, run_id, validation_refs = self_review_command
+
+            if action == "help":
+                output_fn(SELF_REVIEW_HELP_MESSAGE)
+                continue
+
+            if (
+                action != "test-v0"
+                or run_id is None
+                or not validation_refs
+            ):
+                output_fn(
+                    "Comando Self-Review inválido. "
+                    "Usa /self-review help."
+                )
+                continue
+
+            if repository_root is None or engineering is None:
+                output_fn(
+                    "Self-Review no disponible: configura "
+                    "MALAK_REPOSITORY_ROOT."
+                )
+                continue
+
+            if (
+                runtime is None
+                or runtime_name != "OllamaRuntime"
+                or model is None
+            ):
+                output_fn(
+                    "Self-Review no disponible: "
+                    "requiere Ollama local y modelo configurado."
+                )
+                continue
+
+            try:
+                harness = InternalInteractionTestV0Harness(
+                    repository_root=repository_root,
+                    engineering=engineering,
+                    runtime=runtime,
+                    model=model,
+                    output_fn=output_fn,
+                )
+                result = harness.run(
+                    run_id=run_id,
+                    external_validation_refs=validation_refs,
+                )
+                summary = result.summary()
+                output_fn("Malāk [self-review/test-v0]")
+                for key in (
+                    "run_id",
+                    "baseline_commit",
+                    "runtime",
+                    "model",
+                    "terminal_disposition",
+                    "component_path",
+                    "artifact_dir",
+                    "live_replay_equivalence",
+                    "tracked_tree_clean",
+                    "acceptance",
+                    "authority_effect",
+                ):
+                    value = summary[key]
+                    if isinstance(value, bool):
+                        rendered = str(value).lower()
+                    elif isinstance(value, list):
+                        rendered = ",".join(str(item) for item in value)
+                    else:
+                        rendered = str(value)
+                    output_fn(f"{key}: {rendered}")
+            except Exception as exc:
+                output_fn(f"Error controlado Self-Review: {exc}")
             continue
 
         trace_command = _trace_command(prompt)
@@ -703,6 +814,7 @@ def main() -> None:
     run_cli(
         service=service,
         provider_name=configuration.provider_name,
+        runtime=runtime,
         runtime_name=configuration.runtime_display_name,
         model=configuration.model,
         engineering=engineering,
