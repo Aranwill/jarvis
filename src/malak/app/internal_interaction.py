@@ -29,6 +29,7 @@ from malak.services.self_review_evidence import (
 _RUN_SCHEMA: Final[str] = "MALAK-INTERNAL-INTERACTION-RUN/v0"
 _ARTIFACT_SCHEMA: Final[str] = "MALAK-INTERNAL-INTERACTION-ATTESTATION/v0"
 _WORKFLOW_VERSION: Final[str] = "internal-interaction-v0"
+_MAX_COMPONENT_OUTPUT_BYTES: Final[int] = 256 * 1024
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _FINDING_RE = re.compile(
@@ -245,6 +246,11 @@ class InternalInteractionRunner:
             "finding_classifications": [],
             "proposal_status": "NOT_RUN",
             "operational_rationale": [],
+            "component_outputs": {
+                "engineering_inspect": None,
+                "engineering_analyze": None,
+                "engineering_propose": None,
+            },
             "authority_effect": "none",
         }
         terminal_refs: tuple[str, ...] = ("evidence:packet",)
@@ -419,6 +425,9 @@ class InternalInteractionRunner:
             )
 
         assessment["inspection_status"] = inspection_status
+        assessment["component_outputs"]["engineering_inspect"] = (
+            inspect_response.content
+        )
         trace_emit(
             phase="engineering",
             component="engineering_inspect",
@@ -504,6 +513,9 @@ class InternalInteractionRunner:
         )
         assessment["analysis_status"] = analysis_status
         assessment["finding_classifications"] = list(classifications)
+        assessment["component_outputs"]["engineering_analyze"] = (
+            analyze_response.content
+        )
 
         trace_emit(
             phase="engineering",
@@ -615,6 +627,9 @@ class InternalInteractionRunner:
             )
 
         assessment["proposal_status"] = proposal_status
+        assessment["component_outputs"]["engineering_propose"] = (
+            propose_response.content
+        )
         trace_emit(
             phase="engineering",
             component="engineering_propose",
@@ -696,6 +711,49 @@ def validate_internal_interaction_artifacts(
     if attestation["authority_effect"] != "none":
         raise ValueError("attestation authority_effect must be none")
 
+    manifest = _load_json_object(root / "manifest.json", "manifest")
+    evidence = _load_json_object(root / "evidence.json", "evidence")
+    assessment = _load_json_object(root / "assessment.json", "assessment")
+    outcome = _load_json_object(root / "outcome.json", "outcome")
+
+    run_id = manifest.get("run_id")
+    baseline_commit = manifest.get("baseline_commit")
+    if not isinstance(run_id, str) or not _RUN_ID_RE.fullmatch(run_id):
+        raise ValueError("manifest run_id is invalid")
+    if not isinstance(baseline_commit, str) or not _SHA_RE.fullmatch(
+        baseline_commit
+    ):
+        raise ValueError("manifest baseline_commit is invalid")
+
+    if attestation["run_id"] != run_id:
+        raise ValueError("attestation run_id does not match manifest")
+    if attestation["baseline_commit"] != baseline_commit:
+        raise ValueError(
+            "attestation baseline_commit does not match manifest"
+        )
+
+    if evidence.get("baseline_commit") != baseline_commit:
+        raise ValueError("evidence baseline_commit does not match manifest")
+    if outcome.get("run_id") != run_id:
+        raise ValueError("outcome run_id does not match manifest")
+    if outcome.get("baseline_commit") != baseline_commit:
+        raise ValueError("outcome baseline_commit does not match manifest")
+    if outcome.get("disposition") not in {
+        item.value for item in TerminalDisposition
+    }:
+        raise ValueError("outcome disposition is invalid")
+
+    for payload_name, payload in (
+        ("manifest", manifest),
+        ("evidence", evidence),
+        ("assessment", assessment),
+        ("outcome", outcome),
+    ):
+        if payload.get("authority_effect") != "none":
+            raise ValueError(
+                f"{payload_name} authority_effect must remain none"
+            )
+
     files = attestation["files"]
     if not isinstance(files, dict):
         raise ValueError("attestation files must be an object")
@@ -718,6 +776,23 @@ def validate_internal_interaction_artifacts(
         raise ValueError("trace must not be empty")
     if any(event.authority_effect != "none" for event in events):
         raise ValueError("trace authority_effect must remain none")
+    if any(event.run_id != run_id for event in events):
+        raise ValueError("trace run_id does not match manifest")
+    if any(
+        event.baseline_commit != baseline_commit
+        for event in events
+    ):
+        raise ValueError("trace baseline_commit does not match manifest")
+
+
+def _load_json_object(path: Path, label: str) -> dict[str, object]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"{label} JSON is invalid") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"{label} must be a JSON object")
+    return payload
 
 
 def _write_attestation(
@@ -802,6 +877,8 @@ def _component_envelope_status(
     expected_baseline: str,
 ) -> str:
     if not isinstance(content, str):
+        raise _ComponentEnvelopeError("validation_failed")
+    if len(content.encode("utf-8")) > _MAX_COMPONENT_OUTPUT_BYTES:
         raise _ComponentEnvelopeError("validation_failed")
 
     baseline = _rendered_field(content, "baseline_commit")
