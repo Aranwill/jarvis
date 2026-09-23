@@ -1,0 +1,715 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from enum import Enum
+from pathlib import Path
+from typing import Final
+
+from malak.core.request import Request
+from malak.observability.execution_trace import (
+    TRACE_SCHEMA,
+    ExecutionTrace,
+    ExecutionTraceEvent,
+    project_component_path,
+    read_execution_trace_jsonl,
+    write_execution_trace_jsonl,
+)
+from malak.services.self_review_evidence import (
+    SelfReviewEvidencePacket,
+    build_self_review_evidence_packet,
+)
+
+
+_RUN_SCHEMA: Final[str] = "MALAK-INTERNAL-INTERACTION-RUN/v0"
+_ARTIFACT_SCHEMA: Final[str] = "MALAK-INTERNAL-INTERACTION-ATTESTATION/v0"
+_WORKFLOW_VERSION: Final[str] = "internal-interaction-v0"
+_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_FINDING_RE = re.compile(r"\bclassification=([A-Z_]+)\b")
+_ARTIFACT_PAYLOAD_FILES: Final[tuple[str, ...]] = (
+    "assessment.json",
+    "evidence.json",
+    "manifest.json",
+    "outcome.json",
+    "trace.jsonl",
+)
+_EXPECTED_ARTIFACT_FILES: Final[frozenset[str]] = frozenset(
+    (*_ARTIFACT_PAYLOAD_FILES, "attestation.json")
+)
+
+
+class TerminalDisposition(str, Enum):
+    NO_CHANGE_RECOMMENDED = "NO_CHANGE_RECOMMENDED"
+    HARDENING_PROPOSAL = "HARDENING_PROPOSAL"
+    RESEARCH_REQUIRED = "RESEARCH_REQUIRED"
+    DEFER = "DEFER"
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
+@dataclass(frozen=True, slots=True)
+class InternalInteractionResult:
+    run_id: str
+    baseline_commit: str
+    disposition: TerminalDisposition
+    component_path: tuple[str, ...]
+    artifact_dir: Path
+    trace_events: tuple[ExecutionTraceEvent, ...]
+    authority_effect: str = "none"
+
+
+class InternalInteractionRunner:
+    def __init__(
+        self,
+        *,
+        engineering,
+        artifact_root: str | Path,
+        runtime_name: str = "engineering_kernel_set",
+        model: str | None = None,
+    ) -> None:
+        required = (
+            "baseline_commit",
+            "kernels",
+            "repository_reader",
+            "knowledge_reader",
+        )
+        for attribute in required:
+            if not hasattr(engineering, attribute):
+                raise TypeError(
+                    f"engineering must expose {attribute}"
+                )
+
+        if engineering.repository_reader.baseline_commit != engineering.baseline_commit:
+            raise RuntimeError("engineering repository baseline mismatch")
+        if engineering.knowledge_reader.baseline_commit != engineering.baseline_commit:
+            raise RuntimeError("engineering knowledge baseline mismatch")
+
+        if not isinstance(runtime_name, str) or not runtime_name.strip():
+            raise ValueError("runtime_name must be a non-empty string")
+        if runtime_name != runtime_name.strip():
+            raise ValueError("runtime_name must not have surrounding whitespace")
+        if model is not None:
+            _validate_text("model", model)
+
+        self._engineering = engineering
+        self._artifact_root = Path(artifact_root)
+        self._runtime_name = runtime_name
+        self._model = model
+
+    def run(
+        self,
+        *,
+        task_id: str,
+        scope: str,
+        external_validation_refs: tuple[str, ...],
+        run_id: str,
+        created_at: datetime,
+    ) -> InternalInteractionResult:
+        _validate_text("task_id", task_id)
+        _validate_text("scope", scope)
+        _validate_text("run_id", run_id)
+        _validate_utc(created_at)
+
+        baseline = self._engineering.baseline_commit
+        if not _SHA_RE.fullmatch(baseline):
+            raise ValueError("engineering baseline is not a supported Git SHA")
+
+        trace = ExecutionTrace(
+            run_id=run_id,
+            baseline_commit=baseline,
+            initial_refs=("task:input",),
+        )
+        sequence = 0
+
+        def emit(
+            *,
+            phase: str,
+            component: str,
+            event_type: str,
+            input_refs: tuple[str, ...] = (),
+            output_refs: tuple[str, ...] = (),
+            evidence_refs: tuple[str, ...] = (),
+            outcome: str,
+            reason_code: str | None = None,
+        ) -> ExecutionTraceEvent:
+            nonlocal sequence
+            sequence += 1
+            event = ExecutionTraceEvent(
+                schema=TRACE_SCHEMA,
+                run_id=run_id,
+                sequence=sequence,
+                occurred_at=created_at,
+                baseline_commit=baseline,
+                task_id=task_id,
+                phase=phase,
+                component=component,
+                event_type=event_type,
+                input_refs=input_refs,
+                output_refs=output_refs,
+                evidence_refs=evidence_refs,
+                outcome=outcome,
+                reason_code=reason_code,
+                authority_effect="none",
+            )
+            trace.append(event)
+            return event
+
+        emit(
+            phase="run",
+            component="internal_interaction",
+            event_type="RUN_STARTED",
+            output_refs=("run:manifest",),
+            outcome="STARTED",
+        )
+        emit(
+            phase="scope",
+            component="internal_interaction",
+            event_type="SCOPE_FROZEN",
+            input_refs=("task:input",),
+            output_refs=("scope:frozen",),
+            outcome="SUCCEEDED",
+        )
+        emit(
+            phase="evidence",
+            component="self_review_evidence",
+            event_type="EVIDENCE_PACKET_STARTED",
+            input_refs=("scope:frozen",),
+            outcome="STARTED",
+        )
+
+        packet = build_self_review_evidence_packet(
+            repository_reader=self._engineering.repository_reader,
+            knowledge_reader=self._engineering.knowledge_reader,
+            external_validation_refs=external_validation_refs,
+        )
+
+        packet_ready = packet.status == "READY"
+        emit(
+            phase="evidence",
+            component="self_review_evidence",
+            event_type="EVIDENCE_PACKET_READY",
+            input_refs=("scope:frozen",),
+            output_refs=("evidence:packet",),
+            outcome="SUCCEEDED" if packet_ready else "INCONCLUSIVE",
+            reason_code=None if packet_ready else "required_evidence_missing",
+        )
+
+        assessment: dict[str, object] = {
+            "inspection_status": "NOT_RUN",
+            "analysis_status": "NOT_RUN",
+            "finding_classifications": [],
+            "proposal_status": "NOT_RUN",
+            "operational_rationale": [],
+            "authority_effect": "none",
+        }
+        terminal_refs: tuple[str, ...] = ("evidence:packet",)
+
+        if not packet_ready:
+            for component in (
+                "engineering_inspect",
+                "engineering_analyze",
+                "engineering_propose",
+            ):
+                emit(
+                    phase="engineering",
+                    component=component,
+                    event_type="COMPONENT_SKIPPED",
+                    input_refs=("evidence:packet",),
+                    outcome="SKIPPED",
+                    reason_code="precondition_not_met",
+                )
+            disposition = TerminalDisposition.INCONCLUSIVE
+            assessment["operational_rationale"] = [
+                "mandatory self-review evidence packet is incomplete"
+            ]
+        else:
+            disposition, terminal_refs = self._run_engineering(
+                scope=scope,
+                run_id=run_id,
+                trace_emit=emit,
+                assessment=assessment,
+            )
+
+        emit(
+            phase="decision",
+            component="internal_interaction",
+            event_type="TERMINAL_DISPOSITION",
+            input_refs=terminal_refs,
+            output_refs=("outcome:terminal",),
+            outcome="SUCCEEDED",
+        )
+
+        artifact_dir = self._artifact_root / run_id
+        artifact_dir.mkdir(parents=True, exist_ok=False)
+
+        manifest = {
+            "schema": _RUN_SCHEMA,
+            "run_id": run_id,
+            "task_id": task_id,
+            "created_at": created_at.isoformat().replace("+00:00", "Z"),
+            "baseline_commit": baseline,
+            "workflow_version": _WORKFLOW_VERSION,
+            "runtime_name": self._runtime_name,
+            "model": self._model,
+            "scope": scope,
+            "authority_effect": "none",
+        }
+        evidence_payload = _packet_payload(packet)
+        outcome_payload = {
+            "schema": "MALAK-INTERNAL-INTERACTION-OUTCOME/v0",
+            "run_id": run_id,
+            "baseline_commit": baseline,
+            "disposition": disposition.value,
+            "authority_effect": "none",
+        }
+
+        _write_json(artifact_dir / "manifest.json", manifest)
+        _write_json(artifact_dir / "evidence.json", evidence_payload)
+        _write_json(artifact_dir / "assessment.json", assessment)
+        _write_json(artifact_dir / "outcome.json", outcome_payload)
+
+        emit(
+            phase="artifact",
+            component="internal_interaction",
+            event_type="ARTIFACT_FINALIZED",
+            input_refs=("outcome:terminal",),
+            output_refs=("artifact:set",),
+            outcome="SUCCEEDED",
+        )
+        emit(
+            phase="run",
+            component="internal_interaction",
+            event_type="RUN_STOPPED",
+            input_refs=("artifact:set",),
+            outcome="SUCCEEDED",
+        )
+
+        write_execution_trace_jsonl(
+            artifact_dir / "trace.jsonl",
+            trace.events,
+        )
+        _write_attestation(
+            artifact_dir=artifact_dir,
+            run_id=run_id,
+            baseline_commit=baseline,
+        )
+        validate_internal_interaction_artifacts(artifact_dir)
+
+        return InternalInteractionResult(
+            run_id=run_id,
+            baseline_commit=baseline,
+            disposition=disposition,
+            component_path=project_component_path(trace.events),
+            artifact_dir=artifact_dir,
+            trace_events=trace.events,
+            authority_effect="none",
+        )
+
+    def _run_engineering(
+        self,
+        *,
+        scope: str,
+        run_id: str,
+        trace_emit,
+        assessment: dict[str, object],
+    ) -> tuple[TerminalDisposition, tuple[str, ...]]:
+        request = Request(content=scope, session_id=run_id)
+
+        trace_emit(
+            phase="engineering",
+            component="engineering_inspect",
+            event_type="COMPONENT_STARTED",
+            input_refs=("evidence:packet",),
+            outcome="STARTED",
+        )
+        try:
+            inspect_response = self._engineering.kernels["inspect"].receive(
+                request
+            )
+        except Exception:
+            trace_emit(
+                phase="engineering",
+                component="engineering_inspect",
+                event_type="COMPONENT_FAILED",
+                input_refs=("evidence:packet",),
+                outcome="FAILED",
+                reason_code="component_error",
+            )
+            self._skip_following_components(
+                trace_emit,
+                ("engineering_analyze", "engineering_propose"),
+            )
+            assessment["operational_rationale"] = [
+                "engineering inspect failed"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("evidence:packet",),
+            )
+
+        inspection_status = _rendered_field(
+            inspect_response.content,
+            "status",
+        )
+        assessment["inspection_status"] = inspection_status
+        trace_emit(
+            phase="engineering",
+            component="engineering_inspect",
+            event_type="COMPONENT_COMPLETED",
+            input_refs=("evidence:packet",),
+            output_refs=("engineering:inspect",),
+            outcome="SUCCEEDED",
+        )
+
+        if inspection_status != "GROUNDED":
+            self._skip_following_components(
+                trace_emit,
+                ("engineering_analyze", "engineering_propose"),
+            )
+            assessment["operational_rationale"] = [
+                "engineering inspection is not grounded"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("engineering:inspect",),
+            )
+
+        trace_emit(
+            phase="engineering",
+            component="engineering_analyze",
+            event_type="COMPONENT_STARTED",
+            input_refs=("evidence:packet",),
+            outcome="STARTED",
+        )
+        try:
+            analyze_response = self._engineering.kernels["analyze"].receive(
+                request
+            )
+        except Exception:
+            trace_emit(
+                phase="engineering",
+                component="engineering_analyze",
+                event_type="COMPONENT_FAILED",
+                input_refs=("evidence:packet",),
+                outcome="FAILED",
+                reason_code="component_error",
+            )
+            self._skip_following_components(
+                trace_emit,
+                ("engineering_propose",),
+            )
+            assessment["operational_rationale"] = [
+                "engineering analysis failed"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("evidence:packet",),
+            )
+
+        analysis_status = _rendered_field(
+            analyze_response.content,
+            "status",
+        )
+        classifications = tuple(
+            _FINDING_RE.findall(analyze_response.content)
+        )
+        assessment["analysis_status"] = analysis_status
+        assessment["finding_classifications"] = list(classifications)
+
+        trace_emit(
+            phase="engineering",
+            component="engineering_analyze",
+            event_type="COMPONENT_COMPLETED",
+            input_refs=("evidence:packet",),
+            output_refs=("engineering:analyze",),
+            outcome="SUCCEEDED",
+        )
+
+        if analysis_status != "GROUNDED":
+            self._skip_following_components(
+                trace_emit,
+                ("engineering_propose",),
+            )
+            assessment["operational_rationale"] = [
+                "engineering analysis is not grounded"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("engineering:analyze",),
+            )
+
+        if any(
+            classification in {"CONTRADICTION", "UNRESOLVED"}
+            for classification in classifications
+        ):
+            self._skip_following_components(
+                trace_emit,
+                ("engineering_propose",),
+            )
+            assessment["operational_rationale"] = [
+                "analysis contains unresolved or contradictory findings"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("engineering:analyze",),
+            )
+
+        actionable = any(
+            classification in {"GAP", "PARTIAL"}
+            for classification in classifications
+        )
+        if not actionable:
+            trace_emit(
+                phase="engineering",
+                component="engineering_propose",
+                event_type="COMPONENT_SKIPPED",
+                input_refs=("evidence:packet",),
+                outcome="SKIPPED",
+                reason_code="not_required_by_workflow",
+            )
+            assessment["operational_rationale"] = [
+                "analysis found no material actionable gap"
+            ]
+            return (
+                TerminalDisposition.NO_CHANGE_RECOMMENDED,
+                ("engineering:analyze",),
+            )
+
+        trace_emit(
+            phase="engineering",
+            component="engineering_propose",
+            event_type="COMPONENT_STARTED",
+            input_refs=("evidence:packet",),
+            outcome="STARTED",
+        )
+        try:
+            propose_response = self._engineering.kernels["propose"].receive(
+                request
+            )
+        except Exception:
+            trace_emit(
+                phase="engineering",
+                component="engineering_propose",
+                event_type="COMPONENT_FAILED",
+                input_refs=("evidence:packet",),
+                outcome="FAILED",
+                reason_code="component_error",
+            )
+            assessment["operational_rationale"] = [
+                "engineering proposal failed"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("engineering:analyze",),
+            )
+
+        proposal_status = _rendered_field(
+            propose_response.content,
+            "status",
+        )
+        assessment["proposal_status"] = proposal_status
+        trace_emit(
+            phase="engineering",
+            component="engineering_propose",
+            event_type="COMPONENT_COMPLETED",
+            input_refs=("evidence:packet",),
+            output_refs=("engineering:propose",),
+            outcome="SUCCEEDED",
+        )
+
+        if proposal_status != "GROUNDED":
+            assessment["operational_rationale"] = [
+                "proposal is not grounded"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("engineering:propose",),
+            )
+
+        assessment["operational_rationale"] = [
+            "grounded actionable finding produced a bounded proposal"
+        ]
+        return (
+            TerminalDisposition.HARDENING_PROPOSAL,
+            ("engineering:analyze", "engineering:propose"),
+        )
+
+    @staticmethod
+    def _skip_following_components(
+        trace_emit,
+        components: tuple[str, ...],
+    ) -> None:
+        for component in components:
+            trace_emit(
+                phase="engineering",
+                component=component,
+                event_type="COMPONENT_SKIPPED",
+                input_refs=("evidence:packet",),
+                outcome="SKIPPED",
+                reason_code="precondition_not_met",
+            )
+
+
+def validate_internal_interaction_artifacts(
+    artifact_dir: str | Path,
+) -> None:
+    root = Path(artifact_dir)
+    if not root.is_dir():
+        raise ValueError("artifact_dir must be an existing directory")
+
+    actual_files = {
+        item.name
+        for item in root.iterdir()
+        if item.is_file()
+    }
+    if actual_files != _EXPECTED_ARTIFACT_FILES:
+        raise ValueError("internal interaction artifact set mismatch")
+
+    try:
+        attestation = json.loads(
+            (root / "attestation.json").read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("attestation.json is invalid") from exc
+
+    expected_keys = {
+        "schema",
+        "run_id",
+        "baseline_commit",
+        "digest_algorithm",
+        "files",
+        "authority_effect",
+    }
+    if not isinstance(attestation, dict) or set(attestation) != expected_keys:
+        raise ValueError("attestation keys mismatch")
+    if attestation["schema"] != _ARTIFACT_SCHEMA:
+        raise ValueError("attestation schema mismatch")
+    if attestation["digest_algorithm"] != "sha256":
+        raise ValueError("attestation digest algorithm mismatch")
+    if attestation["authority_effect"] != "none":
+        raise ValueError("attestation authority_effect must be none")
+
+    files = attestation["files"]
+    if not isinstance(files, dict):
+        raise ValueError("attestation files must be an object")
+    if tuple(files) != _ARTIFACT_PAYLOAD_FILES:
+        raise ValueError("attestation file order/set mismatch")
+
+    for name in _ARTIFACT_PAYLOAD_FILES:
+        digest = files[name]
+        if not isinstance(digest, str) or not re.fullmatch(
+            r"[0-9a-f]{64}",
+            digest,
+        ):
+            raise ValueError("attestation contains invalid digest")
+        actual = hashlib.sha256((root / name).read_bytes()).hexdigest()
+        if actual != digest:
+            raise ValueError(f"artifact digest mismatch: {name}")
+
+    events = read_execution_trace_jsonl(root / "trace.jsonl")
+    if not events:
+        raise ValueError("trace must not be empty")
+    if any(event.authority_effect != "none" for event in events):
+        raise ValueError("trace authority_effect must remain none")
+
+
+def _write_attestation(
+    *,
+    artifact_dir: Path,
+    run_id: str,
+    baseline_commit: str,
+) -> None:
+    files = {
+        name: hashlib.sha256(
+            (artifact_dir / name).read_bytes()
+        ).hexdigest()
+        for name in _ARTIFACT_PAYLOAD_FILES
+    }
+    payload = {
+        "schema": _ARTIFACT_SCHEMA,
+        "run_id": run_id,
+        "baseline_commit": baseline_commit,
+        "digest_algorithm": "sha256",
+        "files": files,
+        "authority_effect": "none",
+    }
+    _write_json(artifact_dir / "attestation.json", payload)
+
+
+def _packet_payload(
+    packet: SelfReviewEvidencePacket,
+) -> dict[str, object]:
+    return {
+        "schema": "MALAK-SELF-REVIEW-EVIDENCE-PACKET/v0",
+        "baseline_commit": packet.baseline_commit,
+        "status": packet.status,
+        "required_sources": [
+            asdict(source)
+            for source in packet.required_sources
+        ],
+        "missing_required_sources": list(
+            packet.missing_required_sources
+        ),
+        "unreadable_required_sources": list(
+            packet.unreadable_required_sources
+        ),
+        "accepted_adrs": [
+            asdict(source)
+            for source in packet.accepted_adrs
+        ],
+        "concept_paths": list(packet.concept_paths),
+        "source_paths": list(packet.source_paths),
+        "test_paths": list(packet.test_paths),
+        "external_validation_refs": list(
+            packet.external_validation_refs
+        ),
+        "authority_effect": "none",
+    }
+
+
+def _write_json(path: Path, payload: dict[str, object]) -> None:
+    path.write_text(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
+def _rendered_field(content: str, field: str) -> str | None:
+    prefix = f"{field}:"
+    for line in content.splitlines():
+        if line.startswith(prefix):
+            return line.partition(":")[2].strip()
+    return None
+
+
+def _validate_text(field_name: str, value: object) -> None:
+    if not isinstance(value, str):
+        raise TypeError(f"{field_name} must be a string")
+    if not value:
+        raise ValueError(f"{field_name} must not be empty")
+    if value != value.strip():
+        raise ValueError(
+            f"{field_name} must not contain surrounding whitespace"
+        )
+    if any(ord(character) < 32 or ord(character) == 127 for character in value):
+        raise ValueError(
+            f"{field_name} contains forbidden control characters"
+        )
+
+
+def _validate_utc(value: object) -> None:
+    if not isinstance(value, datetime):
+        raise TypeError("created_at must be a datetime")
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("created_at must be timezone-aware")
+    if value.utcoffset() != UTC.utcoffset(value):
+        raise ValueError("created_at must use UTC")
