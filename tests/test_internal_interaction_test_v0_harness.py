@@ -538,6 +538,30 @@ def test_harness_red_c18_summary_exposes_only_governed_run_metadata(
     assert forbidden.isdisjoint(summary)
 
 
+def test_harness_bc1_git_timeout_fails_before_engineering(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(repo)
+    harness = _harness(repo, engineering)
+    module = _module()
+
+    def _timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired(
+            cmd=kwargs.get("args", args[0] if args else "git"),
+            timeout=30,
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", _timeout)
+
+    with pytest.raises(RuntimeError, match="Git preflight inspection timed out"):
+        _run(harness)
+
+    assert calls == []
+    assert not (repo / "runtime" / "internal_interaction").exists()
+
+
 def test_harness_red_c19_harness_exposes_no_arbitrary_task_or_scope_parameters(
     tmp_path: Path,
 ) -> None:
