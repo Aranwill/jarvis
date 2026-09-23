@@ -1139,3 +1139,18 @@ minimum GREEN implementation only
 La autorización GREEN no autoriza el primer runtime self-review real. La
 ejecución V0 sobre Malāk permanece separada y requiere cierre técnico y decisión
 humana posterior.
+
+## 27. GREEN candidate checkpoint
+
+El Owner autorizó GREEN después de observar RED candidate-bound en Validation #433.
+
+El candidate GREEN debe validarse sobre el SHA exacto que contenga únicamente el delta acotado de Trace V0, Self-Review Evidence Packet V0, Internal Interaction Runner V0 y sus tests.
+
+```text
+GREEN authorized:       YES
+runtime execution:      NOT AUTHORIZED
+Owner Ready / Merge:    OWNER ONLY
+authority_effect:       none
+```
+
+Este checkpoint no declara GREEN PASS. El resultado depende de Validation candidate-bound posterior.
