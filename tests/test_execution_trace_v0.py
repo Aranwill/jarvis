@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import FrozenInstanceError
 from datetime import datetime, timezone
 from importlib import import_module
@@ -331,3 +332,59 @@ def test_trace_red_c16_jsonl_round_trip_preserves_replay_path(
     assert _module().project_component_path(replayed) == (
         "engineering_inspect",
     )
+
+
+def test_trace_bc1_c17_component_skipped_requires_skipped_outcome() -> None:
+    with pytest.raises(ValueError):
+        _event(
+            event_type="COMPONENT_SKIPPED",
+            phase="engineering",
+            component="engineering_propose",
+            outcome="SUCCEEDED",
+            reason_code=None,
+            output_refs=(),
+        )
+
+
+def test_trace_bc1_c18_replay_revalidates_sequence_and_reference_semantics(
+    tmp_path: Path,
+) -> None:
+    trace = _trace(initial_refs=("task:input",))
+    trace.append(
+        _event(
+            sequence=1,
+            event_type="SCOPE_FROZEN",
+            outcome="SUCCEEDED",
+            input_refs=("task:input",),
+            output_refs=("scope:frozen",),
+        )
+    )
+    trace.append(
+        _event(
+            sequence=2,
+            phase="evidence",
+            component="self_review_evidence",
+            event_type="EVIDENCE_PACKET_READY",
+            outcome="SUCCEEDED",
+            input_refs=("scope:frozen",),
+            output_refs=("evidence:packet",),
+        )
+    )
+
+    path = tmp_path / "trace.jsonl"
+    _module().write_execution_trace_jsonl(path, trace.events)
+    payloads = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+    ]
+    payloads[1]["sequence"] = 1
+    path.write_text(
+        "".join(
+            json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n"
+            for payload in payloads
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError):
+        _module().read_execution_trace_jsonl(path)
