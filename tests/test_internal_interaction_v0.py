@@ -610,3 +610,33 @@ def test_interaction_bc2_c19_live_events_use_runtime_clock(
     assert len(set(observed)) == len(observed)
     assert observed[0] == NOW
     assert observed[-1] > observed[0]
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("run_id", "run-other"),
+        ("baseline_commit", "1" * 40),
+    ],
+)
+def test_interaction_bc2_c20_attestation_metadata_is_bound_to_artifacts(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo)
+
+    result = _run(_runner(repo, engineering))
+    attestation_path = result.artifact_dir / "attestation.json"
+    attestation = json.loads(attestation_path.read_text(encoding="utf-8"))
+    attestation[field] = value
+    attestation_path.write_text(
+        json.dumps(attestation, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError):
+        _module().validate_internal_interaction_artifacts(
+            result.artifact_dir
+        )
