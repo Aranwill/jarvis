@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from importlib import import_module
 from pathlib import Path
 from types import SimpleNamespace
@@ -212,6 +212,7 @@ def _runner(
     *,
     artifact_root: Path | None = None,
     event_sink=None,
+    clock=None,
 ):
     root = (
         artifact_root
@@ -221,6 +222,8 @@ def _runner(
     kwargs = {}
     if event_sink is not None:
         kwargs["event_sink"] = event_sink
+    if clock is not None:
+        kwargs["clock"] = clock
     return _module().InternalInteractionRunner(
         engineering=engineering,
         artifact_root=root,
@@ -579,3 +582,31 @@ def test_interaction_bc1_c18_component_authority_laundering_fails_closed(
     ]
     assert len(failed) == 1
     assert failed[0].reason_code == "validation_failed"
+
+
+def test_interaction_bc2_c19_live_events_use_runtime_clock(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo, analyze_classification="GAP")
+    live_events = []
+    ticks = iter(
+        NOW + timedelta(milliseconds=index)
+        for index in range(100)
+    )
+
+    result = _run(
+        _runner(
+            repo,
+            engineering,
+            event_sink=live_events.append,
+            clock=lambda: next(ticks),
+        )
+    )
+
+    observed = [event.occurred_at for event in live_events]
+    assert tuple(live_events) == result.trace_events
+    assert observed == sorted(observed)
+    assert len(set(observed)) == len(observed)
+    assert observed[0] == NOW
+    assert observed[-1] > observed[0]
