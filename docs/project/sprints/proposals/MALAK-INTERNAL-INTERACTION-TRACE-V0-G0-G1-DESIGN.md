@@ -11,8 +11,13 @@ design_authorized_by: owner
 design_authorized_at: 2026-09-23
 critical_contract: true
 risk_class: 3
-red_authorized: false
-implementation_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-23
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-23
+implementation_authorized: true
 execution_authorized: false
 runtime_delta: 0
 authority_effect: none
@@ -298,6 +303,48 @@ latest applicable audit/reconciliation
 
 No se exige insertar todo el contenido crudo en un único prompt.
 
+Para V0, la cobertura mínima se vuelve determinista:
+
+```text
+core required exact paths:
+  AGENTS.md
+  SECURITY.md
+  docs/governance/cognitive_constitution.md
+  docs/governance/governance_constitution.md
+  docs/architecture/blueprint.md
+  docs/architecture/architecture_quality_gates.md
+  docs/development/malak_construction_protocol.md
+  docs/development/development_checklist.md
+  docs/project/implementation_roadmap.md
+  documents/projects/jarvis/ideas.md
+  docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md
+  docs/project/concepts/GOVERNED_SELF_REVIEW_BOOTSTRAP_TASK.md
+  docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md
+
+ADR coverage:
+  catalog ALL tracked docs/architecture/adr/ADR-*.md
+  include every ADR whose frontmatter status is exactly accepted
+  target-specific selection may narrow prompt evidence later
+  catalog coverage itself may not silently omit an accepted ADR
+
+concept coverage:
+  catalog docs/project/concepts/**
+  required minimum paths above must be present
+  relevance selection is recorded separately from catalog coverage
+
+current source/tests:
+  catalog tracked src/malak/** and tests/**
+  selected evidence may be bounded, catalog coverage must remain explicit
+
+current CI/evidence:
+  supplied as explicit external_validation_refs by the caller/Owner boundary
+  refs are metadata/evidence only, never authority
+  missing required current validation reference -> packet INCONCLUSIVE
+```
+
+V0 no intenta inferir desde Git local un resultado de GitHub Actions inexistente
+en el snapshot.
+
 El packet debe distinguir:
 
 ```text
@@ -392,6 +439,7 @@ EVIDENCE_PACKET_STARTED
 EVIDENCE_PACKET_READY
 COMPONENT_STARTED
 COMPONENT_COMPLETED
+COMPONENT_SKIPPED
 COMPONENT_FAILED
 GATE_EVALUATED
 TERMINAL_DISPOSITION
@@ -400,6 +448,74 @@ RUN_STOPPED
 ```
 
 No se agregan payloads arbitrarios de modelo al event stream.
+
+### 9.1 Outcome V0 cerrado
+
+`ExecutionTraceEvent.outcome` utiliza únicamente:
+
+```text
+STARTED
+SUCCEEDED
+FAILED
+INCONCLUSIVE
+SKIPPED
+```
+
+Reglas:
+
+```text
+COMPONENT_SKIPPED -> outcome = SKIPPED
+FAILED            -> reason_code required
+INCONCLUSIVE      -> reason_code required
+SKIPPED           -> reason_code required
+STARTED/SUCCEEDED -> reason_code absent
+```
+
+Reason codes V0 permitidos:
+
+```text
+validation_failed
+baseline_mismatch
+required_evidence_missing
+unknown_reference
+component_error
+dependency_unavailable
+trace_write_failed
+artifact_validation_failed
+not_required_by_workflow
+precondition_not_met
+unresolved_contradiction
+policy_stop
+```
+
+No se aceptan reason codes desconocidos ni mensajes de excepción crudos.
+
+### 9.2 Ciclo de referencias del trace
+
+Los IDs de `input_refs`, `output_refs` y `evidence_refs` son referencias
+opacas run-local; no son authority ni punteros a objetos mutables.
+
+Para cada run existe un catálogo de referencias conocido por el trace:
+
+```text
+input_refs / evidence_refs
+-> MUST already exist in run reference catalog
+
+output_refs
+-> declare new refs after successful event append
+-> MUST NOT duplicate an existing ref
+-> MUST NOT self-reference through input/evidence in the same event
+```
+
+Un ref desconocido, duplicado o perteneciente a otro run:
+
+```text
+-> event rejected
+-> trace remains unchanged
+```
+
+Esto permite reconstruir flujo de información sin persistir payload cognitivo
+arbitrario dentro del event stream.
 
 ## 10. Component observation contract
 
@@ -508,6 +624,26 @@ outcome.json
 
 attestation.json
 -> digests del artifact set + baseline binding
+```
+
+Attestation V0 usa SHA-256 sobre los bytes exactos de:
+
+```text
+manifest.json
+trace.jsonl
+evidence.json
+assessment.json
+outcome.json
+```
+
+`attestation.json` no se auto-incluye en su propio digest set.
+
+La lista de archivos atestados debe ser exacta y ordenada canónicamente. Cualquier
+archivo faltante, extra dentro del set declarado o digest distinto:
+
+```text
+-> artifact validation FAIL
+-> run cannot close successfully
 ```
 
 El contrato `MALAK-EVIDENCE-MANIFEST/v1` NO se reutiliza como runtime manifest.
@@ -766,10 +902,47 @@ Interpretaciones materiales cerradas:
 17. Runtime artifact no sustituye MALAK-EVIDENCE-MANIFEST/v1.
 18. Failure to persist required trace blocks successful V0 closure.
 
-Known material ambiguity unresolved:
+Bounded correction post-merge PR #179:
 
 ```text
-0 at G1 design level
+BC-TRACE-001
+issue:
+  SKIPPED_WITH_REASON existed as a visual/component state but the event enum
+  had no event capable of recording an explicit skipped component.
+
+correction:
+  add COMPONENT_SKIPPED
+  close trace outcome enum
+  require reason_code for FAILED / INCONCLUSIVE / SKIPPED
+
+BC-TRACE-002
+issue:
+  unknown-ref rejection was required without defining reference lifecycle.
+
+correction:
+  define run-local reference catalog and append semantics.
+
+BC-PACKET-001
+issue:
+  "accepted ADRs applicable to target", "relevant concepts" and current CI
+  evidence could depend on hidden inference.
+
+correction:
+  catalog all accepted ADRs, catalog concepts/src/tests explicitly, and receive
+  current validation refs as explicit external evidence metadata.
+
+BC-ARTIFACT-001
+issue:
+  attestation digest semantics did not state whether it hashed itself.
+
+correction:
+  SHA-256 exact-byte digest set excludes attestation.json itself.
+```
+
+Known material ambiguity unresolved after bounded correction:
+
+```text
+0
 ```
 
 ## 20. Cuatro preguntas de ley
@@ -932,19 +1105,52 @@ Four law questions                  PASS
 Design 4R                           PASS
 RDD Stage 1 Design Check            PASS
 
-RED authorization                   NOT GRANTED
-implementation authorization        NOT GRANTED
+RED authorization                   GRANTED BY OWNER POST-PR #179
+GREEN authorization                 GRANTED BY OWNER AFTER RED #433
+implementation authorization        GRANTED FOR V0 MINIMUM GREEN
 execution authorization             NOT GRANTED
 runtime delta                        0
 authority delta                      0
 ```
 
+Post-merge admission:
+
+```text
+PR #179 merged by Owner
+main after merge: eb5a48fad12b8888192139e2b8a552bf50ce4870
+Owner continued the work
+RED candidate: AUTHORIZED
+RED evidence: Validation #433 / 61 failed + 1278 passed on Ubuntu and Windows
+GREEN / implementation: AUTHORIZED FOR V0 MINIMUM
+execution: NOT AUTHORIZED
+```
+
 Siguiente paso permitido:
 
 ```text
-Owner review of this G0/G1 candidate
--> if approved, authorize RED candidate separately
+minimum GREEN implementation only
+-> targeted validation
+-> Candidate FULL 4R
+-> E2E / CI
+-> RDD Stage 1 Candidate Conformance
+-> human review
 ```
 
-No debe comenzarse GREEN a partir de este documento sin RED y autorización
-correspondiente.
+La autorización GREEN no autoriza el primer runtime self-review real. La
+ejecución V0 sobre Malāk permanece separada y requiere cierre técnico y decisión
+humana posterior.
+
+## 27. GREEN candidate checkpoint
+
+El Owner autorizó GREEN después de observar RED candidate-bound en Validation #433.
+
+El candidate GREEN debe validarse sobre el SHA exacto que contenga únicamente el delta acotado de Trace V0, Self-Review Evidence Packet V0, Internal Interaction Runner V0 y sus tests.
+
+```text
+GREEN authorized:       YES
+runtime execution:      NOT AUTHORIZED
+Owner Ready / Merge:    OWNER ONLY
+authority_effect:       none
+```
+
+Este checkpoint no declara GREEN PASS. El resultado depende de Validation candidate-bound posterior.
