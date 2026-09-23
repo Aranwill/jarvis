@@ -12,7 +12,9 @@ risk_class: 3
 critical_contract: true
 design_authorized_by: owner
 design_authorized_at: 2026-09-23
-red_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-23
 implementation_authorized: false
 execution_authorized: false
 runtime_delta: 0
@@ -709,16 +711,27 @@ Design 4R                           PASS
 RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
-RED authorization                   NOT GRANTED
+RED authorization                   GRANTED BY OWNER POST-PR #183
 implementation authorization        NOT GRANTED
 runtime execution authorization     NOT GRANTED
 authority_effect                    none
 runtime delta                       0
 ```
 
+Post-merge admission:
+
+```text
+PR #183 merged by Owner
+main after merge: bd308d5f6bc221dd2582021de9abe00be3152191
+RED candidate: AUTHORIZED
+GREEN / implementation: NOT AUTHORIZED
+runtime execution: NOT AUTHORIZED
+```
+
 Siguiente paso permitido:
 
 ```text
-Owner review
--> if merged, RED candidate separately
+RED tests only
+-> observe expected candidate-bound failure
+-> explicit GREEN authorization separately
 ```
