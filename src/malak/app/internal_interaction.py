@@ -32,7 +32,7 @@ _WORKFLOW_VERSION: Final[str] = "internal-interaction-v0"
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _FINDING_RE = re.compile(
-    r"^\\[A[1-9][0-9]*\\] classification="
+    r"^\[A[1-9][0-9]*\] classification="
     r"(ALIGNED|PARTIAL|GAP|CONTRADICTION|UNRESOLVED)$",
     re.MULTILINE,
 )
