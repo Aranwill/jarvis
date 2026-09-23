@@ -24,13 +24,9 @@ from malak.runtime.ollama_runtime import OllamaRuntime
 
 
 TASK_ID: Final[str] = "governed-self-review-bootstrap-v0"
-SCOPE: Final[str] = (
-    "Governed self-review bootstrap V0: inspect the current exact baseline for "
-    "material gaps in U01 Core Kernel and U04 Observability; reassess RR-03 "
-    "Strong SecurityContext Provenance only against current surfaces; "
-    "distinguish historical evidence limitations from current defects; "
-    "no-change is a valid outcome; authority_effect=none."
-)
+FOCUS_ID: Final[str] = "U01"
+FOCUS_LABEL: Final[str] = "U01 Core Kernel"
+SCOPE: Final[str] = "Kernel"
 
 _RUN_ID_RE: Final[re.Pattern[str]] = re.compile(
     r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
