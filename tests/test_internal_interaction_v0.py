@@ -9,9 +9,17 @@ from types import SimpleNamespace
 
 import pytest
 
+from malak.app.composition import build_engineering_kernel_set
+from malak.core.conversation import (
+    ConversationProvider,
+    ConversationRequest,
+    ConversationResponse,
+)
+from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.response import Response
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
+from malak.services.conversation_service import ConversationService
 
 
 NOW = datetime(2026, 9, 23, 21, 0, tzinfo=timezone.utc)
@@ -234,10 +242,15 @@ def _runner(
     )
 
 
-def _run(runner, *, run_id: str = "run-001"):
+def _run(
+    runner,
+    *,
+    run_id: str = "run-001",
+    scope: str = "kernel-and-observability",
+):
     return runner.run(
         task_id="self-review-v0",
-        scope="kernel-and-observability",
+        scope=scope,
         external_validation_refs=("Validation#428",),
         run_id=run_id,
         created_at=NOW,
@@ -670,3 +683,127 @@ def test_interaction_bc2_c21_assessment_preserves_validated_component_outputs(
     assert "UNCERTAINTIES" in outputs["engineering_analyze"]
     assert "ENGINEERING_PROPOSAL" in outputs["engineering_propose"]
     assert assessment["authority_effect"] == "none"
+
+
+class _RealEngineeringProvider(ConversationProvider):
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def generate(
+        self,
+        request: ConversationRequest,
+    ) -> ConversationResponse:
+        self.calls += 1
+
+        if self.calls == 1:
+            content = "Grounded inspection [R1] [K1]"
+        elif self.calls in (2, 3):
+            content = json.dumps(
+                {
+                    "summary": "Grounded real-kernel analysis.",
+                    "findings": [
+                        {
+                            "classification": "GAP",
+                            "statement": "Observed bounded gap.",
+                            "rationale": "Repository and governed knowledge support it.",
+                            "evidence_refs": ["R1", "K1"],
+                        }
+                    ],
+                    "uncertainties": [],
+                }
+            )
+        elif self.calls == 4:
+            content = json.dumps(
+                {
+                    "summary": "Bounded proposal for owner review.",
+                    "proposals": [
+                        {
+                            "kind": "HARDEN",
+                            "target": "src/malak/example.py",
+                            "description": "Harden the bounded example.",
+                            "rationale": "The grounded gap supports the proposal.",
+                            "finding_refs": ["A1"],
+                            "evidence_refs": ["R1", "K1"],
+                        }
+                    ],
+                    "validation_plan": ["Run targeted tests."],
+                    "risks": ["Bounded regression risk."],
+                    "assumptions": ["Owner authorization remains required."],
+                }
+            )
+        else:
+            raise RuntimeError("unexpected provider call")
+
+        return ConversationResponse(
+            content=content,
+            model=request.model,
+            provider="recording",
+        )
+
+
+def test_interaction_e2e_real_engineering_kernel_set(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    _write(
+        repo,
+        "src/malak/example.py",
+        'VALUE = "needle implementation"\n',
+    )
+    _write(
+        repo,
+        "docs/governance/cognitive_constitution.md",
+        "needle governed knowledge\n",
+    )
+    _git(repo, "add", ".")
+    _git(repo, "commit", "--no-gpg-sign", "-m", "e2e evidence")
+
+    provider = _RealEngineeringProvider()
+    registry = ConversationProviderRegistry()
+    registry.register("recording", provider)
+    service = ConversationService(registry)
+
+    engineering = build_engineering_kernel_set(
+        repository_root=repo,
+        service=service,
+        provider_name="recording",
+        model="test-model",
+    )
+    live_events = []
+    before = _git(repo, "status", "--porcelain")
+
+    result = _run(
+        _runner(
+            repo,
+            engineering,
+            event_sink=live_events.append,
+        ),
+        scope="needle",
+    )
+
+    after = _git(repo, "status", "--porcelain")
+    assert provider.calls == 4
+    assert result.disposition.value == "HARDENING_PROPOSAL"
+    assert result.component_path == (
+        "engineering_inspect",
+        "engineering_analyze",
+        "engineering_propose",
+    )
+    assert tuple(live_events) == result.trace_events
+    assert before == after == ""
+
+    assessment = json.loads(
+        (result.artifact_dir / "assessment.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert "Grounded real-kernel analysis." in assessment[
+        "component_outputs"
+    ]["engineering_analyze"]
+    assert "Bounded proposal for owner review." in assessment[
+        "component_outputs"
+    ]["engineering_propose"]
+
+    _module().validate_internal_interaction_artifacts(
+        result.artifact_dir
+    )
