@@ -82,6 +82,7 @@ class InternalInteractionRunner:
         runtime_name: str = "engineering_kernel_set",
         model: str | None = None,
         event_sink: Callable[[ExecutionTraceEvent], None] | None = None,
+        clock: Callable[[], datetime] | None = None,
     ) -> None:
         required = (
             "baseline_commit",
@@ -108,6 +109,8 @@ class InternalInteractionRunner:
             _validate_text("model", model)
         if event_sink is not None and not callable(event_sink):
             raise TypeError("event_sink must be callable")
+        if clock is not None and not callable(clock):
+            raise TypeError("clock must be callable")
 
         artifact_root_path = Path(artifact_root).expanduser()
         if (
@@ -132,6 +135,7 @@ class InternalInteractionRunner:
         self._runtime_name = runtime_name
         self._model = model
         self._event_sink = event_sink
+        self._clock = clock if clock is not None else _utc_now
 
     def run(
         self,
@@ -171,11 +175,13 @@ class InternalInteractionRunner:
         ) -> ExecutionTraceEvent:
             nonlocal sequence
             sequence += 1
+            occurred_at = self._clock()
+            _validate_utc(occurred_at)
             event = ExecutionTraceEvent(
                 schema=TRACE_SCHEMA,
                 run_id=run_id,
                 sequence=sequence,
-                occurred_at=created_at,
+                occurred_at=occurred_at,
                 baseline_commit=baseline,
                 task_id=task_id,
                 phase=phase,
@@ -835,6 +841,10 @@ def _validate_text(field_name: str, value: object) -> None:
         raise ValueError(
             f"{field_name} contains forbidden control characters"
         )
+
+
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
 
 
 def _validate_utc(value: object) -> None:
