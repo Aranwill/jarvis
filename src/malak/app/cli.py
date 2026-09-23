@@ -5,11 +5,17 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from os import environ
+from pathlib import Path
 
 from malak.app.composition import (
     EngineeringKernelSet,
     build_conversation_kernel,
     build_engineering_kernel_set,
+)
+from malak.app.trace_view import (
+    load_trace_projection,
+    render_trace_node,
+    render_trace_projection,
 )
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.llm_runtime import LLMRuntime
@@ -34,6 +40,8 @@ Comandos disponibles:
           Muestra los comandos Engineering disponibles.
   /explore help
           Muestra los comandos read-only Explorer disponibles.
+  /trace help
+          Muestra los comandos read-only Trace disponibles.
   exit    Finaliza la sesión.
 """.strip()
 
@@ -52,6 +60,12 @@ Comandos Explorer:
   /explore knowledge list
   /explore knowledge read <path>
   /explore knowledge search <text>
+""".strip()
+
+TRACE_HELP_MESSAGE = """
+Comandos Trace:
+  /trace replay <run_id>
+  /trace inspect <run_id> <node_id>
 """.strip()
 
 _ENGINEERING_ACTIONS = frozenset({"inspect", "analyze", "propose"})
@@ -192,6 +206,26 @@ def _engineering_command(
     action = parts[1].lower()
     subject = parts[2].strip() if len(parts) == 3 else None
     return action, subject
+
+
+def _trace_command(
+    prompt: str,
+) -> tuple[str, str | None, str | None] | None:
+    parts = prompt.split()
+
+    if not parts or parts[0].lower() != "/trace":
+        return None
+
+    if len(parts) == 2 and parts[1].lower() == "help":
+        return "help", None, None
+
+    if len(parts) == 3 and parts[1].lower() == "replay":
+        return "replay", parts[2], None
+
+    if len(parts) == 4 and parts[1].lower() == "inspect":
+        return "inspect", parts[2], parts[3]
+
+    return "", None, None
 
 
 def _explore_command(
@@ -369,6 +403,7 @@ def run_cli(
     runtime_name: str = "MockLLMRuntime",
     model: str | None = None,
     engineering: EngineeringKernelSet | None = None,
+    repository_root: str | Path | None = None,
     input_fn: Callable[[str], str] = input,
     output_fn: Callable[[str], None] = print,
     operational_event_sink: OperationalEventSink | None = None,
@@ -441,6 +476,53 @@ def run_cli(
             conversation_service.reset_context(session_id)
             session_id = str(uuid.uuid4())
             output_fn("Nueva conversación iniciada.")
+            continue
+
+        trace_command = _trace_command(prompt)
+        if trace_command is not None:
+            action, run_id, node_id = trace_command
+
+            if action == "help":
+                output_fn(TRACE_HELP_MESSAGE)
+                continue
+
+            if action not in {"replay", "inspect"} or run_id is None:
+                output_fn(
+                    "Comando Trace inválido. "
+                    "Usa /trace help."
+                )
+                continue
+
+            if action == "inspect" and node_id is None:
+                output_fn(
+                    "Comando Trace inválido. "
+                    "Usa /trace help."
+                )
+                continue
+
+            if repository_root is None:
+                output_fn(
+                    "Trace no disponible: configura "
+                    "MALAK_REPOSITORY_ROOT."
+                )
+                continue
+
+            try:
+                projection = load_trace_projection(
+                    repository_root=repository_root,
+                    run_id=run_id,
+                )
+                if action == "replay":
+                    output_fn(render_trace_projection(projection))
+                else:
+                    output_fn(
+                        render_trace_node(
+                            projection,
+                            node_id,
+                        )
+                    )
+            except Exception as exc:
+                output_fn(f"Error controlado Trace: {exc}")
             continue
 
         explore_command = _explore_command(prompt)
@@ -624,6 +706,7 @@ def main() -> None:
         runtime_name=configuration.runtime_display_name,
         model=configuration.model,
         engineering=engineering,
+        repository_root=configuration.repository_root,
     )
 
 
