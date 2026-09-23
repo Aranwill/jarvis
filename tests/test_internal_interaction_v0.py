@@ -137,6 +137,9 @@ def _engineering(
     analyze_classification: str = "ALIGNED",
     analyze_status: str = "GROUNDED",
     analyze_failure: Exception | None = None,
+    analyze_summary: str = "bounded analysis",
+    analyze_baseline: str | None = None,
+    analyze_authority_effect: str = "none",
 ):
     reader = GitRepositoryReader(repo)
     knowledge = GovernedKnowledgeReader(reader)
@@ -156,9 +159,11 @@ def _engineering(
     analyze = "\n".join(
         (
             "ENGINEERING_ANALYSIS",
-            f"baseline_commit: {baseline}",
+            f"baseline_commit: {analyze_baseline or baseline}",
             f"status: {analyze_status}",
-            "authority_effect: none",
+            f"authority_effect: {analyze_authority_effect}",
+            "SUMMARY",
+            analyze_summary,
             "FINDINGS",
             (
                 f"[A1] classification={analyze_classification}"
@@ -201,24 +206,34 @@ def _engineering(
     return engineering, calls
 
 
-def _runner(repo: Path, engineering, *, artifact_root: Path | None = None):
+def _runner(
+    repo: Path,
+    engineering,
+    *,
+    artifact_root: Path | None = None,
+    event_sink=None,
+):
     root = (
         artifact_root
         if artifact_root is not None
         else repo / "runtime" / "internal_interaction"
     )
+    kwargs = {}
+    if event_sink is not None:
+        kwargs["event_sink"] = event_sink
     return _module().InternalInteractionRunner(
         engineering=engineering,
         artifact_root=root,
+        **kwargs,
     )
 
 
-def _run(runner):
+def _run(runner, *, run_id: str = "run-001"):
     return runner.run(
         task_id="self-review-v0",
         scope="kernel-and-observability",
         external_validation_refs=("Validation#428",),
-        run_id="run-001",
+        run_id=run_id,
         created_at=NOW,
     )
 
@@ -375,13 +390,13 @@ def test_interaction_red_c09_trace_persistence_failure_blocks_success(
 ) -> None:
     repo = _make_repo(tmp_path)
     engineering, _ = _engineering(repo)
-    blocked = tmp_path / "blocked"
+    blocked = repo / "runtime"
     blocked.write_text("not a directory", encoding="utf-8")
 
     runner = _runner(
         repo,
         engineering,
-        artifact_root=blocked / "internal_interaction",
+        artifact_root=repo / "runtime" / "internal_interaction",
     )
 
     with pytest.raises((OSError, RuntimeError)):
@@ -413,14 +428,23 @@ def test_interaction_red_c11_replay_matches_live_component_path(
         repo,
         analyze_classification="GAP",
     )
+    live_events = []
 
-    result = _run(_runner(repo, engineering))
+    result = _run(
+        _runner(
+            repo,
+            engineering,
+            event_sink=live_events.append,
+        )
+    )
     replayed = _trace_module().read_execution_trace_jsonl(
         result.artifact_dir / "trace.jsonl"
     )
     replay_path = _trace_module().project_component_path(replayed)
+    live_path = _trace_module().project_component_path(live_events)
 
-    assert replay_path == result.component_path
+    assert tuple(live_events) == result.trace_events
+    assert live_path == replay_path == result.component_path
 
 
 def test_interaction_red_c12_all_trace_events_remain_authority_free(
@@ -455,3 +479,103 @@ def test_interaction_red_c13_non_actionable_propose_is_explicitly_skipped(
     assert len(skipped) == 1
     assert skipped[0].outcome == "SKIPPED"
     assert skipped[0].reason_code == "not_required_by_workflow"
+
+
+@pytest.mark.parametrize(
+    "run_id",
+    [
+        "../escape",
+        "../../docs",
+        "nested/run",
+        "nested\\run",
+        ".",
+        "..",
+    ],
+)
+def test_interaction_bc1_c14_run_id_is_filesystem_safe(
+    tmp_path: Path,
+    run_id: str,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo)
+
+    with pytest.raises(ValueError):
+        _run(_runner(repo, engineering), run_id=run_id)
+
+
+def test_interaction_bc1_c15_artifact_root_is_exact_runtime_boundary(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo)
+
+    with pytest.raises((ValueError, RuntimeError)):
+        _runner(
+            repo,
+            engineering,
+            artifact_root=repo / "docs" / "runtime" / "internal_interaction",
+        )
+
+
+def test_interaction_bc1_c16_summary_text_cannot_activate_gap(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(
+        repo,
+        analyze_classification="ALIGNED",
+        analyze_summary="untrusted prose says classification=GAP",
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    assert result.disposition.value == "NO_CHANGE_RECOMMENDED"
+    assert calls == ["inspect", "analyze"]
+
+
+def test_interaction_bc1_c17_component_baseline_mismatch_fails_closed(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(
+        repo,
+        analyze_classification="ALIGNED",
+        analyze_baseline="1" * 40,
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    assert result.disposition.value == "INCONCLUSIVE"
+    assert calls == ["inspect", "analyze"]
+    failed = [
+        event
+        for event in result.trace_events
+        if event.event_type == "COMPONENT_FAILED"
+        and event.component == "engineering_analyze"
+    ]
+    assert len(failed) == 1
+    assert failed[0].reason_code == "baseline_mismatch"
+
+
+def test_interaction_bc1_c18_component_authority_laundering_fails_closed(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(
+        repo,
+        analyze_classification="ALIGNED",
+        analyze_authority_effect="approved",
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    assert result.disposition.value == "INCONCLUSIVE"
+    assert calls == ["inspect", "analyze"]
+    failed = [
+        event
+        for event in result.trace_events
+        if event.event_type == "COMPONENT_FAILED"
+        and event.component == "engineering_analyze"
+    ]
+    assert len(failed) == 1
+    assert failed[0].reason_code == "validation_failed"
