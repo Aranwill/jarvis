@@ -9,6 +9,12 @@ from types import SimpleNamespace
 
 import pytest
 
+from malak.app.cli import build_conversation_service
+from malak.app.composition import build_engineering_kernel_set
+from malak.core.conversation import (
+    ConversationRequest,
+    ConversationResponse,
+)
 from malak.core.response import Response
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
@@ -536,6 +542,113 @@ def test_harness_red_c18_summary_exposes_only_governed_run_metadata(
         "secrets",
     }
     assert forbidden.isdisjoint(summary)
+
+
+class _DeterministicOllamaRuntime(OllamaRuntime):
+    def __init__(self) -> None:
+        super().__init__(base_url="http://127.0.0.1:11434")
+        self.calls = 0
+
+    def generate(
+        self,
+        request: ConversationRequest,
+    ) -> ConversationResponse:
+        self.calls += 1
+
+        if self.calls == 1:
+            content = "Grounded inspection [R1] [K1]"
+        elif self.calls in (2, 3):
+            content = json.dumps(
+                {
+                    "summary": "Grounded bootstrap analysis.",
+                    "findings": [
+                        {
+                            "classification": "GAP",
+                            "statement": "Observed bounded bootstrap gap.",
+                            "rationale": "Repository and governed knowledge support it.",
+                            "evidence_refs": ["R1", "K1"],
+                        }
+                    ],
+                    "uncertainties": [],
+                }
+            )
+        elif self.calls == 4:
+            content = json.dumps(
+                {
+                    "summary": "Bounded hardening proposal.",
+                    "proposals": [
+                        {
+                            "kind": "HARDEN",
+                            "target": "src/malak/example.py",
+                            "description": "Harden the bounded example.",
+                            "rationale": "The grounded gap supports owner review.",
+                            "finding_refs": ["A1"],
+                            "evidence_refs": ["R1", "K1"],
+                        }
+                    ],
+                    "validation_plan": ["Run targeted tests."],
+                    "risks": ["Bounded regression risk."],
+                    "assumptions": ["Owner authorization remains required."],
+                }
+            )
+        else:
+            raise RuntimeError("unexpected deterministic Ollama call")
+
+        return ConversationResponse(
+            content=content,
+            model=request.model,
+            provider="ollama",
+        )
+
+
+def test_harness_e2e_real_engineering_composed_from_same_ollama_runtime(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    runtime = _DeterministicOllamaRuntime()
+    service = build_conversation_service(
+        runtime=runtime,
+        provider_name="ollama",
+        with_context=False,
+    )
+    engineering = build_engineering_kernel_set(
+        repository_root=repo,
+        service=service,
+        provider_name="ollama",
+        model="test-model",
+    )
+    before = _git(repo, "status", "--porcelain", "--untracked-files=no")
+
+    result = _run(
+        _harness(
+            repo,
+            engineering,
+            runtime=runtime,
+            model="test-model",
+        ),
+        run_id="bootstrap-v0-e2e",
+        refs=("Validation#468",),
+    )
+
+    after = _git(repo, "status", "--porcelain", "--untracked-files=no")
+
+    assert runtime.calls == 4
+    assert result.internal_result.disposition.value == "HARDENING_PROPOSAL"
+    assert result.internal_result.component_path == (
+        "engineering_inspect",
+        "engineering_analyze",
+        "engineering_propose",
+    )
+    assert result.live_replay_equivalence is True
+    assert result.live_projection == result.replay_projection
+    assert result.tracked_tree_clean is True
+    assert result.acceptance == "PASS"
+    assert result.authority_effect == "none"
+    assert before == after == ""
+
+    _module().validate_internal_interaction_artifacts(
+        result.internal_result.artifact_dir
+    )
 
 
 def test_harness_bc1_git_timeout_fails_before_engineering(
