@@ -6,10 +6,12 @@ import re
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from enum import Enum
+from collections.abc import Callable
 from pathlib import Path
 from typing import Final
 
 from malak.core.request import Request
+from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.observability.execution_trace import (
     TRACE_SCHEMA,
     ExecutionTrace,
@@ -28,7 +30,12 @@ _RUN_SCHEMA: Final[str] = "MALAK-INTERNAL-INTERACTION-RUN/v0"
 _ARTIFACT_SCHEMA: Final[str] = "MALAK-INTERNAL-INTERACTION-ATTESTATION/v0"
 _WORKFLOW_VERSION: Final[str] = "internal-interaction-v0"
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-_FINDING_RE = re.compile(r"\bclassification=([A-Z_]+)\b")
+_RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_FINDING_RE = re.compile(
+    r"^\\[A[1-9][0-9]*\\] classification="
+    r"(ALIGNED|PARTIAL|GAP|CONTRADICTION|UNRESOLVED)$",
+    re.MULTILINE,
+)
 _ARTIFACT_PAYLOAD_FILES: Final[tuple[str, ...]] = (
     "assessment.json",
     "evidence.json",
@@ -47,6 +54,12 @@ class TerminalDisposition(str, Enum):
     RESEARCH_REQUIRED = "RESEARCH_REQUIRED"
     DEFER = "DEFER"
     INCONCLUSIVE = "INCONCLUSIVE"
+
+
+class _ComponentEnvelopeError(ValueError):
+    def __init__(self, reason_code: str) -> None:
+        super().__init__(reason_code)
+        self.reason_code = reason_code
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,6 +81,7 @@ class InternalInteractionRunner:
         artifact_root: str | Path,
         runtime_name: str = "engineering_kernel_set",
         model: str | None = None,
+        event_sink: Callable[[ExecutionTraceEvent], None] | None = None,
     ) -> None:
         required = (
             "baseline_commit",
@@ -92,11 +106,32 @@ class InternalInteractionRunner:
             raise ValueError("runtime_name must not have surrounding whitespace")
         if model is not None:
             _validate_text("model", model)
+        if event_sink is not None and not callable(event_sink):
+            raise TypeError("event_sink must be callable")
+
+        artifact_root_path = Path(artifact_root).expanduser()
+        if (
+            artifact_root_path.name != "internal_interaction"
+            or artifact_root_path.parent.name != "runtime"
+        ):
+            raise ValueError(
+                "artifact_root must end in runtime/internal_interaction"
+            )
+
+        repository_root = artifact_root_path.parent.parent
+        boundary_reader = GitRepositoryReader(repository_root)
+        if boundary_reader.baseline_commit != engineering.baseline_commit:
+            raise RuntimeError(
+                "artifact_root repository baseline does not match engineering"
+            )
+        if artifact_root_path.parent.is_symlink() or artifact_root_path.is_symlink():
+            raise RuntimeError("artifact_root boundary must not use symlinks")
 
         self._engineering = engineering
-        self._artifact_root = Path(artifact_root)
+        self._artifact_root = artifact_root_path
         self._runtime_name = runtime_name
         self._model = model
+        self._event_sink = event_sink
 
     def run(
         self,
@@ -109,7 +144,7 @@ class InternalInteractionRunner:
     ) -> InternalInteractionResult:
         _validate_text("task_id", task_id)
         _validate_text("scope", scope)
-        _validate_text("run_id", run_id)
+        _validate_run_id(run_id)
         _validate_utc(created_at)
 
         baseline = self._engineering.baseline_commit
@@ -154,6 +189,8 @@ class InternalInteractionRunner:
                 authority_effect="none",
             )
             trace.append(event)
+            if self._event_sink is not None:
+                self._event_sink(event)
             return event
 
         emit(
@@ -349,10 +386,32 @@ class InternalInteractionRunner:
                 ("evidence:packet",),
             )
 
-        inspection_status = _rendered_field(
-            inspect_response.content,
-            "status",
-        )
+        try:
+            inspection_status = _component_envelope_status(
+                inspect_response.content,
+                expected_baseline=self._engineering.baseline_commit,
+            )
+        except _ComponentEnvelopeError as exc:
+            trace_emit(
+                phase="engineering",
+                component="engineering_inspect",
+                event_type="COMPONENT_FAILED",
+                input_refs=("evidence:packet",),
+                outcome="FAILED",
+                reason_code=exc.reason_code,
+            )
+            self._skip_following_components(
+                trace_emit,
+                ("engineering_analyze", "engineering_propose"),
+            )
+            assessment["operational_rationale"] = [
+                "engineering inspect envelope validation failed"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("evidence:packet",),
+            )
+
         assessment["inspection_status"] = inspection_status
         trace_emit(
             phase="engineering",
@@ -408,10 +467,32 @@ class InternalInteractionRunner:
                 ("evidence:packet",),
             )
 
-        analysis_status = _rendered_field(
-            analyze_response.content,
-            "status",
-        )
+        try:
+            analysis_status = _component_envelope_status(
+                analyze_response.content,
+                expected_baseline=self._engineering.baseline_commit,
+            )
+        except _ComponentEnvelopeError as exc:
+            trace_emit(
+                phase="engineering",
+                component="engineering_analyze",
+                event_type="COMPONENT_FAILED",
+                input_refs=("evidence:packet",),
+                outcome="FAILED",
+                reason_code=exc.reason_code,
+            )
+            self._skip_following_components(
+                trace_emit,
+                ("engineering_propose",),
+            )
+            assessment["operational_rationale"] = [
+                "engineering analysis envelope validation failed"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("evidence:packet",),
+            )
+
         classifications = tuple(
             _FINDING_RE.findall(analyze_response.content)
         )
@@ -505,10 +586,28 @@ class InternalInteractionRunner:
                 ("engineering:analyze",),
             )
 
-        proposal_status = _rendered_field(
-            propose_response.content,
-            "status",
-        )
+        try:
+            proposal_status = _component_envelope_status(
+                propose_response.content,
+                expected_baseline=self._engineering.baseline_commit,
+            )
+        except _ComponentEnvelopeError as exc:
+            trace_emit(
+                phase="engineering",
+                component="engineering_propose",
+                event_type="COMPONENT_FAILED",
+                input_refs=("evidence:packet",),
+                outcome="FAILED",
+                reason_code=exc.reason_code,
+            )
+            assessment["operational_rationale"] = [
+                "engineering proposal envelope validation failed"
+            ]
+            return (
+                TerminalDisposition.INCONCLUSIVE,
+                ("engineering:analyze",),
+            )
+
         assessment["proposal_status"] = proposal_status
         trace_emit(
             phase="engineering",
@@ -689,6 +788,38 @@ def _rendered_field(content: str, field: str) -> str | None:
         if line.startswith(prefix):
             return line.partition(":")[2].strip()
     return None
+
+
+def _component_envelope_status(
+    content: object,
+    *,
+    expected_baseline: str,
+) -> str:
+    if not isinstance(content, str):
+        raise _ComponentEnvelopeError("validation_failed")
+
+    baseline = _rendered_field(content, "baseline_commit")
+    if baseline != expected_baseline:
+        raise _ComponentEnvelopeError("baseline_mismatch")
+
+    authority_effect = _rendered_field(content, "authority_effect")
+    if authority_effect != "none":
+        raise _ComponentEnvelopeError("validation_failed")
+
+    status = _rendered_field(content, "status")
+    if status not in {"GROUNDED", "UNCONFIRMED"}:
+        raise _ComponentEnvelopeError("validation_failed")
+
+    return status
+
+
+def _validate_run_id(value: object) -> None:
+    if not isinstance(value, str):
+        raise TypeError("run_id must be a string")
+    if not _RUN_ID_RE.fullmatch(value):
+        raise ValueError(
+            "run_id must be a path-safe identifier of 1-128 characters"
+        )
 
 
 def _validate_text(field_name: str, value: object) -> None:
