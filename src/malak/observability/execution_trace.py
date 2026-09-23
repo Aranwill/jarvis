@@ -55,6 +55,20 @@ ALLOWED_REASON_CODES: Final[frozenset[str]] = frozenset(
 _REASON_REQUIRED_OUTCOMES: Final[frozenset[str]] = frozenset(
     {"FAILED", "INCONCLUSIVE", "SKIPPED"}
 )
+_EVENT_OUTCOMES: Final[dict[str, frozenset[str]]] = {
+    "RUN_STARTED": frozenset({"STARTED"}),
+    "SCOPE_FROZEN": frozenset({"SUCCEEDED"}),
+    "EVIDENCE_PACKET_STARTED": frozenset({"STARTED"}),
+    "EVIDENCE_PACKET_READY": frozenset({"SUCCEEDED", "INCONCLUSIVE"}),
+    "COMPONENT_STARTED": frozenset({"STARTED"}),
+    "COMPONENT_COMPLETED": frozenset({"SUCCEEDED"}),
+    "COMPONENT_SKIPPED": frozenset({"SKIPPED"}),
+    "COMPONENT_FAILED": frozenset({"FAILED"}),
+    "GATE_EVALUATED": frozenset({"SUCCEEDED", "FAILED", "INCONCLUSIVE"}),
+    "TERMINAL_DISPOSITION": frozenset({"SUCCEEDED"}),
+    "ARTIFACT_FINALIZED": frozenset({"SUCCEEDED"}),
+    "RUN_STOPPED": frozenset({"SUCCEEDED"}),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,6 +122,10 @@ class ExecutionTraceEvent:
             raise ValueError("event_type is not allowed")
         if self.outcome not in ALLOWED_OUTCOMES:
             raise ValueError("outcome is not allowed")
+        if self.outcome not in _EVENT_OUTCOMES[self.event_type]:
+            raise ValueError(
+                "outcome is not valid for the selected event_type"
+            )
 
         for field_name in ("input_refs", "output_refs", "evidence_refs"):
             _validate_refs(field_name, getattr(self, field_name))
@@ -303,7 +321,18 @@ def read_execution_trace_jsonl(
             )
         )
 
-    return tuple(events)
+    if not events:
+        return ()
+
+    replay = ExecutionTrace(
+        run_id=events[0].run_id,
+        baseline_commit=events[0].baseline_commit,
+        initial_refs=("task:input",),
+    )
+    for event in events:
+        replay.append(event)
+
+    return replay.events
 
 
 def _json_refs(value: object, field_name: str) -> tuple[str, ...]:
