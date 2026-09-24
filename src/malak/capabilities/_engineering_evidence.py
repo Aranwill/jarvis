@@ -456,8 +456,13 @@ def bootstrap_engineering_evidence_focuses(
                 EvidenceSelector(
                     "EXACT_PATH",
                     "docs/architecture/blueprint.md",
-                    ("Kernel", "Capability"),
-                    64,
+                    (
+                        "Kernel First",
+                        "Capability First",
+                        "No implementa lógica de negocio",
+                        "Toda funcionalidad pertenece a una Capability",
+                    ),
+                    16,
                 ),
                 EvidenceSelector(
                     "EXACT_PATH",
@@ -468,14 +473,14 @@ def bootstrap_engineering_evidence_focuses(
                 EvidenceSelector(
                     "EXACT_PATH",
                     "docs/governance/cognitive_constitution.md",
-                    ("Kernel", "evidence"),
+                    ("evidencia", "incertidumbre", "autoridad"),
                     64,
                 ),
                 EvidenceSelector(
                     "EXACT_PATH",
                     "docs/governance/governance_constitution.md",
-                    ("authority", "evidence"),
-                    64,
+                    ("máxima autoridad operativa", "control", "usuario"),
+                    32,
                 ),
                 EvidenceSelector(
                     "EXACT_PATH",
