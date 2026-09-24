@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from importlib import import_module
 from pathlib import Path
+import time
 
 import pytest
 
@@ -424,3 +425,184 @@ def test_trace_view_red_c13_live_text_view_renders_from_real_events_only() -> No
         live.projection
     )
     assert "[OK] STOP" in outputs[-1]
+
+
+def test_live_elapsed_red_a01_running_node_refreshes_without_new_trace_event() -> None:
+    outputs: list[str] = []
+    monotonic = [100.0]
+    live = _view_module().LiveTraceTextView(
+        output_fn=outputs.append,
+        monotonic_fn=lambda: monotonic[0],
+        refresh_interval_seconds=10.0,
+    )
+    events = (
+        _event(1, "RUN_STARTED"),
+        _event(
+            2,
+            "COMPONENT_STARTED",
+            component="engineering_analyze",
+            phase="engineering",
+            seconds=1,
+        ),
+    )
+
+    for event in events:
+        live.append(event)
+
+    projection_before = live.projection
+    sequence_before = live.projection.last_sequence
+    monotonic[0] = 101.25
+
+    live.refresh_elapsed()
+
+    assert live.projection == projection_before
+    assert live.projection.last_sequence == sequence_before
+    assert "[>>] Analyze elapsed=1250 ms" in outputs[-1]
+
+
+def test_live_elapsed_red_a02_never_renders_fake_progress_or_eta() -> None:
+    outputs: list[str] = []
+    monotonic = [20.0]
+    live = _view_module().LiveTraceTextView(
+        output_fn=outputs.append,
+        monotonic_fn=lambda: monotonic[0],
+        refresh_interval_seconds=10.0,
+    )
+    live.append(_event(1, "RUN_STARTED"))
+    live.append(
+        _event(
+            2,
+            "COMPONENT_STARTED",
+            component="engineering_inspect",
+            phase="engineering",
+            seconds=1,
+        )
+    )
+    monotonic[0] = 25.0
+
+    live.refresh_elapsed()
+
+    rendered = outputs[-1].lower()
+    assert "elapsed=5000 ms" in rendered
+    assert "%" not in rendered
+    assert "eta" not in rendered
+    assert "progress=" not in rendered
+    assert "almost done" not in rendered
+
+
+def test_live_elapsed_red_a03_uses_monotonic_clock_not_event_wall_clock() -> None:
+    outputs: list[str] = []
+    monotonic = [500.0]
+    live = _view_module().LiveTraceTextView(
+        output_fn=outputs.append,
+        monotonic_fn=lambda: monotonic[0],
+        refresh_interval_seconds=10.0,
+    )
+    live.append(_event(1, "RUN_STARTED", seconds=0))
+    live.append(
+        _event(
+            2,
+            "COMPONENT_STARTED",
+            component="engineering_inspect",
+            phase="engineering",
+            seconds=100,
+        )
+    )
+    monotonic[0] = 501.5
+
+    live.refresh_elapsed()
+
+    assert "elapsed=1500 ms" in outputs[-1]
+
+
+def test_live_elapsed_red_a04_terminal_node_stops_elapsed_and_uses_trace_duration() -> None:
+    outputs: list[str] = []
+    monotonic = [30.0]
+    live = _view_module().LiveTraceTextView(
+        output_fn=outputs.append,
+        monotonic_fn=lambda: monotonic[0],
+        refresh_interval_seconds=10.0,
+    )
+    live.append(_event(1, "RUN_STARTED"))
+    live.append(
+        _event(
+            2,
+            "COMPONENT_STARTED",
+            component="engineering_inspect",
+            phase="engineering",
+            seconds=4,
+        )
+    )
+    monotonic[0] = 37.5
+    live.refresh_elapsed()
+    assert "elapsed=7500 ms" in outputs[-1]
+
+    live.append(
+        _event(
+            3,
+            "COMPONENT_COMPLETED",
+            component="engineering_inspect",
+            phase="engineering",
+            seconds=6,
+        )
+    )
+    monotonic[0] = 99.0
+    live.refresh_elapsed()
+
+    rendered = outputs[-1]
+    assert "[OK] Inspect 2000 ms" in rendered
+    assert "Inspect elapsed=" not in rendered
+
+
+def test_live_elapsed_red_a05_ticker_stops_and_cannot_outlive_teardown() -> None:
+    outputs: list[str] = []
+    live = _view_module().LiveTraceTextView(
+        output_fn=outputs.append,
+        refresh_interval_seconds=0.01,
+    )
+    live.append(_event(1, "RUN_STARTED"))
+    live.append(
+        _event(
+            2,
+            "COMPONENT_STARTED",
+            component="engineering_analyze",
+            phase="engineering",
+            seconds=1,
+        )
+    )
+
+    live.start_liveness()
+    deadline = time.monotonic() + 0.5
+    while (
+        not any("elapsed=" in item for item in outputs)
+        and time.monotonic() < deadline
+    ):
+        time.sleep(0.01)
+
+    assert live.liveness_active is True
+    assert any("elapsed=" in item for item in outputs)
+
+    live.stop_liveness()
+    count_after_stop = len(outputs)
+    time.sleep(0.05)
+
+    assert live.liveness_active is False
+    assert len(outputs) == count_after_stop
+
+
+def test_live_elapsed_red_a06_final_material_projection_still_matches_replay_fold() -> None:
+    outputs: list[str] = []
+    live = _view_module().LiveTraceTextView(
+        output_fn=outputs.append,
+        refresh_interval_seconds=10.0,
+    )
+
+    events = _events()
+    for event in events:
+        live.append(event)
+
+    live.refresh_elapsed()
+
+    assert live.projection == _projection_module().fold_execution_trace(events)
+    assert live.projection.stopped is True
+    assert "elapsed=" not in outputs[-1]
