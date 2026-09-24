@@ -44,6 +44,7 @@ REQUIRED_TEXT_FILES = {
 ARTIFACT_FILES = {
     "manifest.json",
     "trace.jsonl",
+    "diagnostics.jsonl",
     "evidence.json",
     "assessment.json",
     "outcome.json",

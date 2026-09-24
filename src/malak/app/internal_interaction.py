@@ -20,6 +20,12 @@ from malak.observability.execution_trace import (
     read_execution_trace_jsonl,
     write_execution_trace_jsonl,
 )
+from malak.observability.safe_diagnostic import (
+    SafeDiagnosticEnvelope,
+    build_safe_diagnostic,
+    read_safe_diagnostics_jsonl,
+    write_safe_diagnostics_jsonl,
+)
 from malak.services.self_review_evidence import (
     SelfReviewEvidencePacket,
     build_self_review_evidence_packet,
@@ -40,6 +46,7 @@ _FINDING_RE = re.compile(
 )
 _ARTIFACT_PAYLOAD_FILES: Final[tuple[str, ...]] = (
     "assessment.json",
+    "diagnostics.jsonl",
     "evidence.json",
     "manifest.json",
     "outcome.json",
@@ -141,6 +148,7 @@ class InternalInteractionRunner:
 
         self._engineering = engineering
         self._artifact_root = artifact_root_path
+        self._repository_root = repository_root.resolve()
         self._runtime_name = runtime_name
         self._model = model
         self._event_sink = event_sink
@@ -170,6 +178,31 @@ class InternalInteractionRunner:
             initial_refs=("task:input",),
         )
         sequence = 0
+        diagnostics: list[SafeDiagnosticEnvelope] = []
+
+        def record_diagnostic(
+            *,
+            exc: Exception,
+            phase: str,
+            component: str,
+            reason_code: str = "component_error",
+        ) -> str:
+            if len(diagnostics) >= 9999:
+                raise RuntimeError("diagnostic capacity exceeded")
+            diagnostic_id = f"D{len(diagnostics) + 1:04d}"
+            diagnostic = build_safe_diagnostic(
+                exc=exc,
+                repository_root=self._repository_root,
+                diagnostic_id=diagnostic_id,
+                run_id=run_id,
+                baseline_commit=baseline,
+                task_id=task_id,
+                phase=phase,
+                component=component,
+                reason_code=reason_code,
+            )
+            diagnostics.append(diagnostic)
+            return f"diagnostic:{diagnostic_id}"
 
         def emit(
             *,
@@ -287,6 +320,7 @@ class InternalInteractionRunner:
                 run_id=run_id,
                 trace_emit=emit,
                 assessment=assessment,
+                record_diagnostic=record_diagnostic,
             )
 
         emit(
@@ -326,6 +360,10 @@ class InternalInteractionRunner:
         _write_json(artifact_dir / "evidence.json", evidence_payload)
         _write_json(artifact_dir / "assessment.json", assessment)
         _write_json(artifact_dir / "outcome.json", outcome_payload)
+        write_safe_diagnostics_jsonl(
+            artifact_dir / "diagnostics.jsonl",
+            diagnostics,
+        )
 
         emit(
             phase="artifact",
@@ -371,6 +409,7 @@ class InternalInteractionRunner:
         run_id: str,
         trace_emit,
         assessment: dict[str, object],
+        record_diagnostic,
     ) -> tuple[TerminalDisposition, tuple[str, ...]]:
         request = Request(content=scope, session_id=run_id)
 
@@ -385,12 +424,18 @@ class InternalInteractionRunner:
             inspect_response = self._engineering.kernels["inspect"].receive(
                 request
             )
-        except Exception:
+        except Exception as exc:
+            diagnostic_ref = record_diagnostic(
+                exc=exc,
+                phase="engineering",
+                component="engineering_inspect",
+            )
             trace_emit(
                 phase="engineering",
                 component="engineering_inspect",
                 event_type="COMPONENT_FAILED",
                 input_refs=("evidence:packet",),
+                output_refs=(diagnostic_ref,),
                 outcome="FAILED",
                 reason_code="component_error",
             )
@@ -491,12 +536,18 @@ class InternalInteractionRunner:
             analyze_response = self._engineering.kernels["analyze"].receive(
                 request
             )
-        except Exception:
+        except Exception as exc:
+            diagnostic_ref = record_diagnostic(
+                exc=exc,
+                phase="engineering",
+                component="engineering_analyze",
+            )
             trace_emit(
                 phase="engineering",
                 component="engineering_analyze",
                 event_type="COMPONENT_FAILED",
                 input_refs=("evidence:packet",),
+                output_refs=(diagnostic_ref,),
                 outcome="FAILED",
                 reason_code="component_error",
             )
@@ -624,12 +675,18 @@ class InternalInteractionRunner:
             propose_response = self._engineering.kernels["propose"].receive(
                 request
             )
-        except Exception:
+        except Exception as exc:
+            diagnostic_ref = record_diagnostic(
+                exc=exc,
+                phase="engineering",
+                component="engineering_propose",
+            )
             trace_emit(
                 phase="engineering",
                 component="engineering_propose",
                 event_type="COMPONENT_FAILED",
                 input_refs=("evidence:packet",),
+                output_refs=(diagnostic_ref,),
                 outcome="FAILED",
                 reason_code="component_error",
             )
@@ -827,6 +884,87 @@ def validate_internal_interaction_artifacts(
         for event in events
     ):
         raise ValueError("trace baseline_commit does not match manifest")
+
+    diagnostics = read_safe_diagnostics_jsonl(
+        root / "diagnostics.jsonl"
+    )
+    task_id = manifest.get("task_id")
+    if not isinstance(task_id, str) or not task_id:
+        raise ValueError("manifest task_id is invalid")
+    if any(
+        diagnostic.run_id != run_id
+        for diagnostic in diagnostics
+    ):
+        raise ValueError("diagnostic run_id does not match manifest")
+    if any(
+        diagnostic.baseline_commit != baseline_commit
+        for diagnostic in diagnostics
+    ):
+        raise ValueError(
+            "diagnostic baseline_commit does not match manifest"
+        )
+    if any(
+        diagnostic.task_id != task_id
+        for diagnostic in diagnostics
+    ):
+        raise ValueError("diagnostic task_id does not match manifest")
+    if any(
+        diagnostic.authority_effect != "none"
+        for diagnostic in diagnostics
+    ):
+        raise ValueError(
+            "diagnostic authority_effect must remain none"
+        )
+
+    diagnostic_by_ref = {
+        f"diagnostic:{diagnostic.diagnostic_id}": diagnostic
+        for diagnostic in diagnostics
+    }
+    referenced: list[str] = []
+    for event in events:
+        event_diagnostic_refs = tuple(
+            ref
+            for ref in event.output_refs
+            if ref.startswith("diagnostic:")
+        )
+        if event_diagnostic_refs and (
+            event.event_type != "COMPONENT_FAILED"
+            or event.reason_code != "component_error"
+        ):
+            raise ValueError(
+                "diagnostic refs are only valid on component_error failures"
+            )
+        if (
+            event.event_type == "COMPONENT_FAILED"
+            and event.reason_code == "component_error"
+        ):
+            if len(event_diagnostic_refs) != 1:
+                raise ValueError(
+                    "component_error failure requires one diagnostic ref"
+                )
+            diagnostic = diagnostic_by_ref.get(
+                event_diagnostic_refs[0]
+            )
+            if diagnostic is None:
+                raise ValueError(
+                    "trace references unknown diagnostic"
+                )
+            if (
+                diagnostic.phase != event.phase
+                or diagnostic.component != event.component
+                or diagnostic.reason_code != event.reason_code
+            ):
+                raise ValueError(
+                    "diagnostic binding does not match failure event"
+                )
+            referenced.extend(event_diagnostic_refs)
+
+    if set(referenced) != set(diagnostic_by_ref):
+        raise ValueError(
+            "diagnostic artifact contains unreferenced entries"
+        )
+    if len(referenced) != len(set(referenced)):
+        raise ValueError("diagnostic ref must be unique in trace")
 
 
 def _load_json_object(path: Path, label: str) -> dict[str, object]:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from datetime import datetime, timedelta, timezone
 from importlib import import_module
@@ -43,6 +44,7 @@ REQUIRED_TEXT_FILES = {
 ARTIFACT_FILES = {
     "manifest.json",
     "trace.jsonl",
+    "diagnostics.jsonl",
     "evidence.json",
     "assessment.json",
     "outcome.json",
@@ -361,6 +363,65 @@ def test_interaction_red_c06_component_failure_is_visible_and_inconclusive(
     assert failed[0].reason_code == "component_error"
     assert "synthetic failure" not in json.dumps(
         [event.reason_code for event in result.trace_events]
+    )
+
+
+def test_safe_diagnostic_red_b15_component_failure_emits_diagnostic_ref_and_artifact(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    secret = "secret-token=abc123"
+    engineering, calls = _engineering(
+        repo,
+        analyze_failure=RuntimeError(secret),
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    assert result.disposition.value == "INCONCLUSIVE"
+    assert calls == ["inspect", "analyze"]
+
+    failed = [
+        event
+        for event in result.trace_events
+        if event.event_type == "COMPONENT_FAILED"
+    ]
+    assert len(failed) == 1
+    assert failed[0].reason_code == "component_error"
+    assert failed[0].output_refs == ("diagnostic:D0001",)
+
+    diagnostics_path = result.artifact_dir / "diagnostics.jsonl"
+    assert diagnostics_path.is_file()
+    serialized = diagnostics_path.read_text(encoding="utf-8")
+    assert secret not in serialized
+    assert "RuntimeError" in serialized
+    assert '"diagnostic_id":"D0001"' in serialized.replace(" ", "")
+
+
+def test_safe_diagnostic_red_b16_diagnostics_artifact_is_attested(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(
+        repo,
+        analyze_failure=RuntimeError("synthetic failure"),
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    attestation = json.loads(
+        (result.artifact_dir / "attestation.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert "diagnostics.jsonl" in attestation["files"]
+    assert re.fullmatch(
+        r"[0-9a-f]{64}",
+        attestation["files"]["diagnostics.jsonl"],
+    )
+
+    _module().validate_internal_interaction_artifacts(
+        result.artifact_dir
     )
 
 

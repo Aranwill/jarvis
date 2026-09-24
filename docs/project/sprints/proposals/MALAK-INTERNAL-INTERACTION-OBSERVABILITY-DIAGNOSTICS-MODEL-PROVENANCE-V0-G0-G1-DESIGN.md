@@ -15,7 +15,12 @@ red_authorized: true
 red_slice_a_authorized: true
 red_slice_a_authorized_by: owner
 red_slice_a_authorized_at: 2026-09-24
-red_slice_b_authorized: false
+red_slice_b_authorized: true
+red_slice_b_authorized_by: owner
+red_slice_b_authorized_at: 2026-09-24
+green_slice_b_authorized: true
+green_slice_b_authorized_by: owner
+green_slice_b_authorized_at: 2026-09-24
 red_slice_c_authorized: false
 green_slice_a_authorized: true
 green_slice_a_authorized_by: owner
@@ -1225,7 +1230,7 @@ RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
 RED Slice A                         GRANTED BY OWNER
-RED Slice B                         NOT GRANTED
+RED Slice B                         GRANTED BY OWNER
 RED Slice C                         NOT GRANTED
 implementation authorization        NOT GRANTED
 runtime execution authorization     NOT GRANTED
@@ -1309,3 +1314,70 @@ authority_effect                   none
 
 GREEN debe implementar únicamente overlay elapsed/liveness y lifecycle seguro
 del ticker, preservando final material LIVE == REPLAY.
+
+
+## 26. RED Slice B authorization checkpoint
+
+Después del merge humano de PR #188, el Owner autorizó avanzar con Slice B /
+OBS-02 — Safe Diagnostic Envelope.
+
+```text
+Slice A merge commit                74f46a62e05eadd2700a1058d7ab88cf08a83f1d
+RED Slice B                         GRANTED
+RED Slice C                         NOT GRANTED
+GREEN Slice B                       NOT AUTHORIZED
+runtime self-review execution       NOT AUTHORIZED
+third real U01                      BLOCKED
+authority_effect                    none
+```
+
+El RED candidate queda limitado a tests que demuestren que el baseline actual
+pierde causa técnica útil y todavía no produce un diagnostic artifact seguro.
+No puede introducir código productivo, cambiar el schema de
+`ExecutionTraceEvent` ni implementar Model Provenance.
+
+
+## 27. RED Slice B evidence y GREEN authorization checkpoint
+
+El RED candidate exacto quedó congelado en:
+
+```text
+candidate: ef640b3db8d6ac23f66dc7ea53b8b1ae157c3309
+Validation: #504
+Ubuntu:  16 failed / 1501 passed
+Windows: 16 failed / 1501 passed
+conclusion: FAILURE expected / RED demonstrated
+```
+
+Las dieciséis fallas fueron exclusivamente las nuevas de OBS-02:
+
+```text
+B01-B14
+-> safe_diagnostic contract absent
+
+B15
+-> COMPONENT_FAILED had no diagnostic ref
+
+B16
+-> diagnostics.jsonl absent from attestation
+```
+
+No se observaron regresiones ajenas a Slice B.
+
+Después de revisar esta evidencia RED, el Owner autorizó GREEN Slice B.
+
+```text
+GREEN Slice B                      GRANTED
+implementation scope               OBS-02 only
+RED Slice C                        NOT GRANTED
+runtime self-review execution      NOT AUTHORIZED
+third real U01                     BLOCKED
+ExecutionTrace schema delta        0 planned
+Kernel planned delta               0
+Planner planned delta              0
+authority_effect                   none
+```
+
+GREEN queda limitado a Safe Diagnostic Envelope, diagnostic refs en
+`COMPONENT_FAILED`, `diagnostics.jsonl` y attestation/validation del artifact.
+No autoriza Model Provenance ni ejecución real del Self-Review.
