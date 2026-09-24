@@ -18,6 +18,9 @@ red_slice_a_authorized_at: 2026-09-24
 red_slice_b_authorized: true
 red_slice_b_authorized_by: owner
 red_slice_b_authorized_at: 2026-09-24
+green_slice_b_authorized: true
+green_slice_b_authorized_by: owner
+green_slice_b_authorized_at: 2026-09-24
 red_slice_c_authorized: false
 green_slice_a_authorized: true
 green_slice_a_authorized_by: owner
@@ -1332,3 +1335,49 @@ El RED candidate queda limitado a tests que demuestren que el baseline actual
 pierde causa técnica útil y todavía no produce un diagnostic artifact seguro.
 No puede introducir código productivo, cambiar el schema de
 `ExecutionTraceEvent` ni implementar Model Provenance.
+
+
+## 27. RED Slice B evidence y GREEN authorization checkpoint
+
+El RED candidate exacto quedó congelado en:
+
+```text
+candidate: ef640b3db8d6ac23f66dc7ea53b8b1ae157c3309
+Validation: #504
+Ubuntu:  16 failed / 1501 passed
+Windows: 16 failed / 1501 passed
+conclusion: FAILURE expected / RED demonstrated
+```
+
+Las dieciséis fallas fueron exclusivamente las nuevas de OBS-02:
+
+```text
+B01-B14
+-> safe_diagnostic contract absent
+
+B15
+-> COMPONENT_FAILED had no diagnostic ref
+
+B16
+-> diagnostics.jsonl absent from attestation
+```
+
+No se observaron regresiones ajenas a Slice B.
+
+Después de revisar esta evidencia RED, el Owner autorizó GREEN Slice B.
+
+```text
+GREEN Slice B                      GRANTED
+implementation scope               OBS-02 only
+RED Slice C                        NOT GRANTED
+runtime self-review execution      NOT AUTHORIZED
+third real U01                     BLOCKED
+ExecutionTrace schema delta        0 planned
+Kernel planned delta               0
+Planner planned delta              0
+authority_effect                   none
+```
+
+GREEN queda limitado a Safe Diagnostic Envelope, diagnostic refs en
+`COMPONENT_FAILED`, `diagnostics.jsonl` y attestation/validation del artifact.
+No autoriza Model Provenance ni ejecución real del Self-Review.
