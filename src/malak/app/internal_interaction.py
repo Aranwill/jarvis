@@ -424,12 +424,18 @@ class InternalInteractionRunner:
             inspect_response = self._engineering.kernels["inspect"].receive(
                 request
             )
-        except Exception:
+        except Exception as exc:
+            diagnostic_ref = record_diagnostic(
+                exc=exc,
+                phase="engineering",
+                component="engineering_inspect",
+            )
             trace_emit(
                 phase="engineering",
                 component="engineering_inspect",
                 event_type="COMPONENT_FAILED",
                 input_refs=("evidence:packet",),
+                output_refs=(diagnostic_ref,),
                 outcome="FAILED",
                 reason_code="component_error",
             )
@@ -530,12 +536,18 @@ class InternalInteractionRunner:
             analyze_response = self._engineering.kernels["analyze"].receive(
                 request
             )
-        except Exception:
+        except Exception as exc:
+            diagnostic_ref = record_diagnostic(
+                exc=exc,
+                phase="engineering",
+                component="engineering_analyze",
+            )
             trace_emit(
                 phase="engineering",
                 component="engineering_analyze",
                 event_type="COMPONENT_FAILED",
                 input_refs=("evidence:packet",),
+                output_refs=(diagnostic_ref,),
                 outcome="FAILED",
                 reason_code="component_error",
             )
@@ -663,12 +675,18 @@ class InternalInteractionRunner:
             propose_response = self._engineering.kernels["propose"].receive(
                 request
             )
-        except Exception:
+        except Exception as exc:
+            diagnostic_ref = record_diagnostic(
+                exc=exc,
+                phase="engineering",
+                component="engineering_propose",
+            )
             trace_emit(
                 phase="engineering",
                 component="engineering_propose",
                 event_type="COMPONENT_FAILED",
                 input_refs=("evidence:packet",),
+                output_refs=(diagnostic_ref,),
                 outcome="FAILED",
                 reason_code="component_error",
             )
