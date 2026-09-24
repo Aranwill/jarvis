@@ -21,7 +21,9 @@ red_slice_b_authorized_at: 2026-09-24
 green_slice_b_authorized: true
 green_slice_b_authorized_by: owner
 green_slice_b_authorized_at: 2026-09-24
-red_slice_c_authorized: false
+red_slice_c_authorized: true
+red_slice_c_authorized_by: owner
+red_slice_c_authorized_at: 2026-09-24
 green_slice_a_authorized: true
 green_slice_a_authorized_by: owner
 green_slice_a_authorized_at: 2026-09-24
@@ -1231,7 +1233,7 @@ known material ambiguity            0
 
 RED Slice A                         GRANTED BY OWNER
 RED Slice B                         GRANTED BY OWNER
-RED Slice C                         NOT GRANTED
+RED Slice C                         GRANTED BY OWNER
 implementation authorization        NOT GRANTED
 runtime execution authorization     NOT GRANTED
 third real U01 execution            BLOCKED
@@ -1381,3 +1383,31 @@ authority_effect                   none
 GREEN queda limitado a Safe Diagnostic Envelope, diagnostic refs en
 `COMPONENT_FAILED`, `diagnostics.jsonl` y attestation/validation del artifact.
 No autoriza Model Provenance ni ejecución real del Self-Review.
+
+
+## 28. RED Slice C authorization checkpoint
+
+Después del merge humano de PR #189, el Owner autorizó avanzar con Slice C /
+Runtime & Model Provenance.
+
+```text
+Slice B merge commit                635841a3918ab5cb60a4187e94a146ad153bf3b6
+RED Slice C                         GRANTED
+GREEN Slice C                       NOT AUTHORIZED
+runtime self-review execution       NOT AUTHORIZED
+third real U01                      BLOCKED
+authority_effect                    none
+```
+
+El RED candidate queda limitado a tests que demuestren que el baseline actual
+todavía no congela identidad reproducible del runtime/modelo ni genera
+`runtime_provenance.json`.
+
+No puede:
+
+- actualizar, descargar o eliminar modelos;
+- cambiar el modelo configurado;
+- ejecutar el tercer U01;
+- introducir autoridad nueva;
+- modificar Kernel/Planner;
+- convertir métricas en evaluación.
