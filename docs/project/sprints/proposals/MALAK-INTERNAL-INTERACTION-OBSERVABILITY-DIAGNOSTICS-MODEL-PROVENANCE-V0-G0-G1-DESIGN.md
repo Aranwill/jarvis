@@ -11,7 +11,12 @@ design_authorized_by: owner
 design_authorized_at: 2026-09-24
 risk_class: 3
 critical_contract: true
-red_authorized: false
+red_authorized: true
+red_slice_a_authorized: true
+red_slice_a_authorized_by: owner
+red_slice_a_authorized_at: 2026-09-24
+red_slice_b_authorized: false
+red_slice_c_authorized: false
 implementation_authorized: false
 runtime_execution_authorized: false
 third_u01_execution_authorized: false
@@ -1215,7 +1220,7 @@ Security Horizon Check              PASS
 RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
-RED Slice A                         NOT GRANTED
+RED Slice A                         GRANTED BY OWNER
 RED Slice B                         NOT GRANTED
 RED Slice C                         NOT GRANTED
 implementation authorization        NOT GRANTED
@@ -1225,11 +1230,30 @@ authority_effect                    none
 runtime delta                       0
 ```
 
-Siguiente gate permitido tras revisión/merge humano de este diseño:
+Siguiente gate permitido:
 
 ```text
-Owner explicit RED authorization for Slice A / OBS-01
--> RED tests only
--> candidate-bound evidence
--> STOP
+RED Slice A / OBS-01 tests only
+-> candidate-bound failure evidence
+-> STOP for Owner review / explicit GREEN Slice A authorization
 ```
+
+## 24. RED Slice A authorization checkpoint
+
+Después del merge humano de PR #187, el Owner autorizó avanzar con Slice A /
+OBS-01.
+
+```text
+design merge commit                ec554dd2217e5bf3bec110c8c6a0a7c7b80f0e04
+RED Slice A                        GRANTED
+RED Slice B                        NOT GRANTED
+RED Slice C                        NOT GRANTED
+GREEN Slice A                      NOT AUTHORIZED
+runtime self-review execution      NOT AUTHORIZED
+third real U01                     BLOCKED
+authority_effect                   none
+```
+
+El RED candidate queda limitado a tests de live elapsed/liveness y a esta
+actualización documental de autoridad. No puede introducir todavía código
+productivo ni implementar diagnostics/model provenance.
