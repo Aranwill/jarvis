@@ -606,3 +606,35 @@ def test_live_elapsed_red_a06_final_material_projection_still_matches_replay_fol
     assert live.projection == _projection_module().fold_execution_trace(events)
     assert live.projection.stopped is True
     assert "elapsed=" not in outputs[-1]
+
+
+def test_safe_diagnostic_green_b13_failed_node_exposes_diagnostic_ref() -> None:
+    projection = _projection_module().fold_execution_trace(
+        (
+            _event(1, "RUN_STARTED"),
+            _event(
+                2,
+                "COMPONENT_STARTED",
+                component="engineering_analyze",
+                phase="engineering",
+                seconds=1,
+            ),
+            _event(
+                3,
+                "COMPONENT_FAILED",
+                component="engineering_analyze",
+                phase="engineering",
+                reason_code="component_error",
+                output_refs=("diagnostic:D0001",),
+                seconds=2,
+            ),
+        )
+    )
+
+    rendered = _view_module().render_trace_node(
+        projection,
+        "engineering_analyze",
+    )
+
+    assert "reason_code: component_error" in rendered
+    assert "output_refs: diagnostic:D0001" in rendered
