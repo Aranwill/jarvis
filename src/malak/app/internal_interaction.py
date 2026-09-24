@@ -20,6 +20,12 @@ from malak.observability.execution_trace import (
     read_execution_trace_jsonl,
     write_execution_trace_jsonl,
 )
+from malak.observability.safe_diagnostic import (
+    SafeDiagnosticEnvelope,
+    build_safe_diagnostic,
+    read_safe_diagnostics_jsonl,
+    write_safe_diagnostics_jsonl,
+)
 from malak.services.self_review_evidence import (
     SelfReviewEvidencePacket,
     build_self_review_evidence_packet,
@@ -40,6 +46,7 @@ _FINDING_RE = re.compile(
 )
 _ARTIFACT_PAYLOAD_FILES: Final[tuple[str, ...]] = (
     "assessment.json",
+    "diagnostics.jsonl",
     "evidence.json",
     "manifest.json",
     "outcome.json",
@@ -141,6 +148,7 @@ class InternalInteractionRunner:
 
         self._engineering = engineering
         self._artifact_root = artifact_root_path
+        self._repository_root = repository_root.resolve()
         self._runtime_name = runtime_name
         self._model = model
         self._event_sink = event_sink
