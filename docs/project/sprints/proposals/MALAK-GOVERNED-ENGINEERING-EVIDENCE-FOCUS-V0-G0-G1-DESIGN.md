@@ -600,6 +600,7 @@ src/malak/capabilities/engineering_inspect.py
 src/malak/capabilities/_engineering_analysis.py
 src/malak/capabilities/engineering_analyze.py
 src/malak/capabilities/engineering_propose.py
+src/malak/app/composition.py
 src/malak/app/internal_interaction.py
 src/malak/app/internal_interaction_test_v0.py
 tests/test_engineering_inspect.py
@@ -955,3 +956,50 @@ El GREEN candidate queda limitado al contrato de focus, selección/completitud d
 evidencia, binding focal de Engineering y validación de continuidad material del
 evidence set. No autoriza OBS-01, OBS-02, model trace ni ejecución real del
 tercer U01.
+
+
+## 30. Bounded Correction — binding focal en Composition
+
+Durante GREEN apareció una necesidad de wiring acotada: el Self-Review real
+recibe el `EngineeringKernelSet` genérico ya compuesto por la CLI. Para que U01
+consuma focus evidence sin alterar `Request`, sin introducir un canal implícito y
+sin cambiar silenciosamente `/engineering`, el focus debe enlazarse al componer
+las mismas capabilities E2/E3/E4.
+
+Opciones evaluadas:
+
+```text
+expand Request contract                    REJECT
+encode focus inside subject string         REJECT
+global/thread-local focus state            REJECT
+change generic /engineering semantics      REJECT
+bypass Kernel and call capabilities direct REJECT
+bounded composition binding                ADOPT
+```
+
+Delta admitido:
+
+```text
+src/malak/app/composition.py
+-> EngineeringKernelSet.with_evidence_focus(...)
+-> reutiliza exactamente repository_reader + knowledge_reader
+-> reutiliza ConversationService/provider/model existentes
+-> compone E2/E3/E4 con el mismo focus inmutable
+-> no cambia build_engineering_kernel_set() generic
+```
+
+Invariantes preservados:
+
+```text
+baseline before == baseline after
+generic Engineering behavior unchanged
+Kernel delta 0
+Planner delta 0
+Request delta 0
+authority_effect none
+focus binding != authority
+```
+
+Esta corrección amplía el budget de superficie candidata en un único archivo
+existente y evita una solución más invasiva. No abre una nueva capa ni un
+servicio adicional.
