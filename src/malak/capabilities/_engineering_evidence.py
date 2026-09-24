@@ -405,7 +405,7 @@ def collect_focused_engineering_evidence(
         repository_match_count=len(repository_evidence),
         knowledge_match_count=len(knowledge_evidence),
         repository_skipped_unreadable=repository_skipped_unreadable,
-        context_truncated=required_truncated or supplemental_truncated,
+        context_truncated=required_truncated,
         supplemental_truncated=supplemental_truncated,
         complete=complete,
         evidence_set_digest=evidence_set_digest,
@@ -561,12 +561,6 @@ def bootstrap_engineering_evidence_focuses(
                     ("observability", "metrics"),
                     64,
                 ),
-                EvidenceSelector(
-                    "EXACT_PATH",
-                    "docs/project/sprints/proposals/MALAK-E2-STRUCTURAL-EVIDENCE-OBSERVABILITY-V0-G0-G1-DESIGN.md",
-                    ("Observability", "authority", "evaluation"),
-                    96,
-                ),
             ),
             supplemental_terms=("Observability", "metrics", "telemetry"),
             supplemental_max_matches_per_kind=12,
@@ -643,18 +637,6 @@ def bootstrap_engineering_evidence_focuses(
                     "EXACT_PATH",
                     "docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md",
                     ("RR-03", "SecurityContext"),
-                    64,
-                ),
-                EvidenceSelector(
-                    "EXACT_PATH",
-                    "docs/project/sprints/SPRINT-7.7.md",
-                    ("SecurityContext", "provenance"),
-                    64,
-                ),
-                EvidenceSelector(
-                    "EXACT_PATH",
-                    "docs/project/sprints/SPRINT-7.9.md",
-                    ("SecurityContext", "provenance"),
                     64,
                 ),
             ),
@@ -875,12 +857,13 @@ def _validate_repo_path(value: object, *, prefix: bool) -> None:
     assert isinstance(value, str)
     if value.startswith("/") or "\\" in value:
         raise ValueError("selector value must be a repository-relative POSIX path")
-    if any(part in {"", ".", ".."} for part in value.split("/") if not (prefix and part == "")):
-        raise ValueError("selector value contains an invalid path segment")
     if prefix and not value.endswith("/"):
         raise ValueError("PATH_PREFIX selector must end with '/'")
     if not prefix and value.endswith("/"):
         raise ValueError("EXACT_PATH selector must not end with '/'")
+    normalized = value[:-1] if prefix else value
+    if any(part in {"", ".", ".."} for part in normalized.split("/")):
+        raise ValueError("selector value contains an invalid path segment")
 
 
 def _validate_text(field: str, value: object) -> None:
