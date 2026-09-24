@@ -14,7 +14,12 @@ critical_contract: true
 red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-24
-implementation_authorized: false
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-24
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-24
 runtime_execution_authorized: false
 runtime_delta: 0
 authority_effect: none
@@ -55,7 +60,9 @@ complete focus evidence
 + explicit completeness result
 ```
 
-Este gate no autoriza RED, implementación ni una tercera ejecución U01.
+La admisión inicial de este diseño no autorizó RED, implementación ni una tercera
+ejecución U01. Los checkpoints posteriores de autoridad quedan registrados al
+final del documento.
 
 ## 2. Baseline G0
 
@@ -864,19 +871,21 @@ RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
 RED authorization                   GRANTED BY OWNER POST-PR #185
-implementation authorization        NOT GRANTED
+implementation authorization        GRANTED BY OWNER AFTER RED #476
 runtime execution authorization     NOT GRANTED
 third U01 execution                 BLOCKED
 authority_effect                    none
 runtime delta                       0
 ```
 
-Siguiente gate permitido:
+Siguiente gate permitido después del RED observado:
 
 ```text
-RED tests only
--> candidate-bound failure evidence
--> STOP for Owner review / explicit GREEN authorization
+GREEN candidate only
+-> candidate-bound validation
+-> FULL 4R
+-> E2E
+-> Owner review / merge
 ```
 
 ## 28. RED authorization checkpoint
@@ -895,3 +904,54 @@ authority_effect                   none
 El RED candidate debe limitarse a tests y a esta actualización documental de
 autoridad. No puede introducir código productivo ni corregir todavía los fallos
 esperados.
+
+
+## 29. RED evidence y GREEN authorization checkpoint
+
+El RED candidate quedó congelado en:
+
+```text
+candidate: 6f0811a216a36e86c800379e455d259a726947cf
+Validation: #476
+Ubuntu:  22 failed / 1470 passed
+Windows: 22 failed / 1470 passed
+conclusion: FAILURE expected / RED demonstrated
+```
+
+Las fallas observadas fueron materialmente las esperadas por el diseño:
+
+```text
+GovernedEngineeringEvidenceFocus          missing
+EvidenceSelector                          missing
+bootstrap_engineering_evidence_focuses    missing
+evaluate_bootstrap_focus_completion       missing
+
+focus_complete=false
+-> runner continued past Inspect
+
+Inspect / Analyze digest mismatch
+-> runner did not reject
+
+Analyze / Propose digest mismatch
+-> runner did not reject
+```
+
+No se observaron fallas ajenas al contrato RED en el resumen de pytest. El
+baseline restante conservó 1470 tests PASS en ambos sistemas operativos.
+
+Después de revisar ese RED candidate, el Owner indicó continuar.
+
+```text
+GREEN authorization                   GRANTED
+implementation authorization          GRANTED
+runtime execution authorization       NOT GRANTED
+third real U01 execution              BLOCKED
+Kernel planned delta                  0
+Planner planned delta                 0
+authority_effect                      none
+```
+
+El GREEN candidate queda limitado al contrato de focus, selección/completitud de
+evidencia, binding focal de Engineering y validación de continuidad material del
+evidence set. No autoriza OBS-01, OBS-02, model trace ni ejecución real del
+tercer U01.
