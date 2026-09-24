@@ -1003,3 +1003,51 @@ focus binding != authority
 Esta corrección amplía el budget de superficie candidata en un único archivo
 existente y evita una solución más invasiva. No abre una nueva capa ni un
 servicio adicional.
+
+
+## 31. Candidate conformance correction — sprint documents fuera de E1
+
+Durante la revisión FULL 4R / candidate conformance del SHA verde
+`15a7b87ec29ce88d38ce68226f2cac8f18824781` se detectó una desviación del
+diseño: tres fuentes requeridas por U04 / RR-03 existen en el baseline, pero no
+pertenecen actualmente al catálogo clasificado de `GovernedKnowledgeReader`.
+
+Fuentes afectadas:
+
+```text
+docs/project/sprints/proposals/
+  MALAK-E2-STRUCTURAL-EVIDENCE-OBSERVABILITY-V0-G0-G1-DESIGN.md
+
+docs/project/sprints/SPRINT-7.7.md
+docs/project/sprints/SPRINT-7.9.md
+```
+
+No se amplía E1 ni se les asigna autoridad documental artificialmente.
+
+Corrección acotada:
+
+```text
+tracked required source
+-> repository_required_selector
+-> required for focus completeness
+-> no source_class / authority_class inference
+-> authority_effect = none
+```
+
+Se rechazan:
+
+```text
+drop required source to obtain GREEN        REJECT
+expand GovernedKnowledgeReader classification REJECT
+infer governance authority from sprint docs REJECT
+```
+
+Se adopta:
+
+```text
+preserve exact source as required tracked context
+-> ADOPT
+```
+
+El cambio mantiene los tres documentos dentro del evidence set requerido sin
+cambiar la frontera de Knowledge ni la autoridad de las fuentes.
