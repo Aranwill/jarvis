@@ -27,8 +27,8 @@ NOW = datetime(2026, 9, 23, 23, 30, tzinfo=UTC)
 REQUIRED_TEXT_FILES = {
     "AGENTS.md": "agent rules\n",
     "SECURITY.md": "security policy\n",
-    "docs/governance/cognitive_constitution.md": "Kernel evidence remains bounded.\n",
-    "docs/governance/governance_constitution.md": "evidence != authority\n",
+    "docs/governance/cognitive_constitution.md": "evidencia incertidumbre autoridad\n",
+    "docs/governance/governance_constitution.md": "El usuario es la máxima autoridad operativa.\ncontrol del usuario\n",
     "docs/architecture/blueprint.md": "Kernel First\nCapability First\n",
     "docs/architecture/architecture_quality_gates.md": "Kernel complexity gate\n",
     "docs/development/malak_construction_protocol.md": "construction protocol\n",
