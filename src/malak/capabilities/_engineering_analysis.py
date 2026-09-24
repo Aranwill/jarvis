@@ -185,19 +185,20 @@ def run_engineering_analysis(
             reason="analysis requires complete untruncated evidence",
         )
 
+    limitations = {
+        "repository_skipped_unreadable": bundle.repository_skipped_unreadable,
+        "context_truncated": bundle.context_truncated,
+        "authority_effect": "none",
+    }
     packet = {
         "baseline_commit": bundle.baseline_commit,
         "analysis_subject": subject,
         "repository_evidence": list(repository_evidence),
         "knowledge_evidence": list(knowledge_evidence),
-        "limitations": {
-            "repository_skipped_unreadable": bundle.repository_skipped_unreadable,
-            "context_truncated": bundle.context_truncated,
-            "supplemental_truncated": supplemental_truncated,
-            "authority_effect": "none",
-        },
+        "limitations": limitations,
     }
     if evidence_focus is not None:
+        limitations["supplemental_truncated"] = supplemental_truncated
         packet["focus"] = {
             "focus_id": focus_id,
             "complete": focus_complete,
