@@ -178,6 +178,31 @@ class InternalInteractionRunner:
             initial_refs=("task:input",),
         )
         sequence = 0
+        diagnostics: list[SafeDiagnosticEnvelope] = []
+
+        def record_diagnostic(
+            *,
+            exc: Exception,
+            phase: str,
+            component: str,
+            reason_code: str = "component_error",
+        ) -> str:
+            if len(diagnostics) >= 9999:
+                raise RuntimeError("diagnostic capacity exceeded")
+            diagnostic_id = f"D{len(diagnostics) + 1:04d}"
+            diagnostic = build_safe_diagnostic(
+                exc=exc,
+                repository_root=self._repository_root,
+                diagnostic_id=diagnostic_id,
+                run_id=run_id,
+                baseline_commit=baseline,
+                task_id=task_id,
+                phase=phase,
+                component=component,
+                reason_code=reason_code,
+            )
+            diagnostics.append(diagnostic)
+            return f"diagnostic:{diagnostic_id}"
 
         def emit(
             *,
@@ -295,6 +320,7 @@ class InternalInteractionRunner:
                 run_id=run_id,
                 trace_emit=emit,
                 assessment=assessment,
+                record_diagnostic=record_diagnostic,
             )
 
         emit(
@@ -334,6 +360,10 @@ class InternalInteractionRunner:
         _write_json(artifact_dir / "evidence.json", evidence_payload)
         _write_json(artifact_dir / "assessment.json", assessment)
         _write_json(artifact_dir / "outcome.json", outcome_payload)
+        write_safe_diagnostics_jsonl(
+            artifact_dir / "diagnostics.jsonl",
+            diagnostics,
+        )
 
         emit(
             phase="artifact",
@@ -379,6 +409,7 @@ class InternalInteractionRunner:
         run_id: str,
         trace_emit,
         assessment: dict[str, object],
+        record_diagnostic,
     ) -> tuple[TerminalDisposition, tuple[str, ...]]:
         request = Request(content=scope, session_id=run_id)
 
