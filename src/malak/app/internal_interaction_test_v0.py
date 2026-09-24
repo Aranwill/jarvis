@@ -13,6 +13,9 @@ from malak.app.internal_interaction import (
     InternalInteractionRunner,
     validate_internal_interaction_artifacts,
 )
+from malak.capabilities._engineering_evidence import (
+    bootstrap_engineering_evidence_focuses,
+)
 from malak.app.trace_view import (
     LiveTraceTextView,
     load_trace_projection,
@@ -151,8 +154,19 @@ class InternalInteractionTestV0Harness:
             )
 
         live_view = LiveTraceTextView(output_fn=self._output_fn)
+        run_engineering = self._engineering
+        if hasattr(run_engineering, "with_evidence_focus"):
+            focuses = bootstrap_engineering_evidence_focuses()
+            focus = next(
+                item for item in focuses
+                if item.focus_id == FOCUS_ID
+            )
+            run_engineering = run_engineering.with_evidence_focus(focus)
+            if run_engineering.baseline_commit != self._engineering.baseline_commit:
+                raise RuntimeError("focused engineering baseline mismatch")
+
         runner = InternalInteractionRunner(
-            engineering=self._engineering,
+            engineering=run_engineering,
             artifact_root=artifact_root,
             runtime_name=type(self._runtime).__name__,
             model=self._model,
