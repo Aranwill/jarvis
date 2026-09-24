@@ -813,6 +813,7 @@ def _with_focus_envelope(content: str, *, complete: bool, digest: str) -> str:
     lines = content.splitlines()
     insert_at = 4
     lines[insert_at:insert_at] = [
+        "focus_id: U01",
         f"focus_complete: {str(complete).lower()}",
         f"evidence_set_digest: {digest}",
     ]
