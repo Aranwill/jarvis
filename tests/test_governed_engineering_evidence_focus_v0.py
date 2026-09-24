@@ -321,6 +321,42 @@ def test_focus_red_f12_bootstrap_catalog_has_three_independent_slices() -> None:
     assert all(focus.authority_effect == "none" for focus in focuses)
 
 
+def test_focus_green_catalog_preserves_required_context_sources() -> None:
+    focuses = {
+        focus.focus_id: focus
+        for focus in _module().bootstrap_engineering_evidence_focuses()
+    }
+
+    u04_repository = {
+        selector.value
+        for selector in focuses["U04"].repository_required_selectors
+    }
+    rr03_repository = {
+        selector.value
+        for selector in focuses["RR-03"].repository_required_selectors
+    }
+    u04_knowledge = {
+        selector.value
+        for selector in focuses["U04"].knowledge_required_selectors
+    }
+    rr03_knowledge = {
+        selector.value
+        for selector in focuses["RR-03"].knowledge_required_selectors
+    }
+
+    observability_design = (
+        "docs/project/sprints/proposals/"
+        "MALAK-E2-STRUCTURAL-EVIDENCE-OBSERVABILITY-V0-G0-G1-DESIGN.md"
+    )
+    assert observability_design in u04_repository
+    assert observability_design not in u04_knowledge
+
+    assert "docs/project/sprints/SPRINT-7.7.md" in rr03_repository
+    assert "docs/project/sprints/SPRINT-7.9.md" in rr03_repository
+    assert "docs/project/sprints/SPRINT-7.7.md" not in rr03_knowledge
+    assert "docs/project/sprints/SPRINT-7.9.md" not in rr03_knowledge
+
+
 def test_focus_red_f13_inconclusive_slice_prevents_bootstrap_complete() -> None:
     summary = _module().evaluate_bootstrap_focus_completion(
         {
