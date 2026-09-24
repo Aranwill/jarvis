@@ -6,7 +6,11 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Callable
 
-from malak.capabilities._engineering_evidence import collect_engineering_evidence
+from malak.capabilities._engineering_evidence import (
+    GovernedEngineeringEvidenceFocus,
+    collect_engineering_evidence,
+    collect_focused_engineering_evidence,
+)
 from malak.core.conversation import ConversationRequest
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
@@ -76,6 +80,10 @@ class EngineeringAnalysisResult:
     status: str
     analysis: _Analysis | None
     reason: str | None
+    focus_id: str | None = None
+    focus_complete: bool | None = None
+    evidence_set_digest: str | None = None
+    supplemental_truncated: bool = False
 
 
 def run_engineering_analysis(
@@ -96,23 +104,46 @@ def run_engineering_analysis(
     max_model_output_bytes: int,
     error_scope: str,
     parse_analysis_fn: Callable[..., _Analysis],
+    evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
 ) -> EngineeringAnalysisResult:
-    bundle = collect_engineering_evidence(
-        repository_reader=repository_reader,
-        knowledge_reader=knowledge_reader,
-        subject=subject,
-        max_repository_files=max_repository_files,
-        max_repository_bytes=max_repository_bytes,
-        max_repository_matches=max_repository_matches,
-        max_context_matches_per_kind=max_context_matches_per_kind,
-        max_evidence_line_bytes=max_evidence_line_bytes,
-        error_scope=error_scope,
-    )
+    if evidence_focus is not None:
+        if evidence_focus.subject != subject:
+            raise RuntimeError("engineering evidence focus subject mismatch")
+        bundle = collect_focused_engineering_evidence(
+            repository_reader=repository_reader,
+            knowledge_reader=knowledge_reader,
+            focus=evidence_focus,
+        )
+        focus_id = bundle.focus_id
+        focus_complete = bundle.complete
+        evidence_set_digest = bundle.evidence_set_digest
+        supplemental_truncated = bundle.supplemental_truncated
+    else:
+        bundle = collect_engineering_evidence(
+            repository_reader=repository_reader,
+            knowledge_reader=knowledge_reader,
+            subject=subject,
+            max_repository_files=max_repository_files,
+            max_repository_bytes=max_repository_bytes,
+            max_repository_matches=max_repository_matches,
+            max_context_matches_per_kind=max_context_matches_per_kind,
+            max_evidence_line_bytes=max_evidence_line_bytes,
+            error_scope=error_scope,
+        )
+        focus_id = None
+        focus_complete = None
+        evidence_set_digest = None
+        supplemental_truncated = False
 
     repository_evidence = tuple(bundle.repository_evidence)
     knowledge_evidence = tuple(bundle.knowledge_evidence)
 
-    if bundle.repository_match_count == 0 or bundle.knowledge_match_count == 0:
+    def result(
+        *,
+        status: str,
+        analysis: _Analysis | None,
+        reason: str | None,
+    ) -> EngineeringAnalysisResult:
         return EngineeringAnalysisResult(
             baseline_commit=bundle.baseline_commit,
             subject=subject,
@@ -122,6 +153,24 @@ def run_engineering_analysis(
             knowledge_match_count=bundle.knowledge_match_count,
             repository_skipped_unreadable=bundle.repository_skipped_unreadable,
             context_truncated=bundle.context_truncated,
+            status=status,
+            analysis=analysis,
+            reason=reason,
+            focus_id=focus_id,
+            focus_complete=focus_complete,
+            evidence_set_digest=evidence_set_digest,
+            supplemental_truncated=supplemental_truncated,
+        )
+
+    if evidence_focus is not None and not bundle.complete:
+        return result(
+            status="UNCONFIRMED",
+            analysis=None,
+            reason="focused analysis requires complete required evidence",
+        )
+
+    if bundle.repository_match_count == 0 or bundle.knowledge_match_count == 0:
+        return result(
             status="UNCONFIRMED",
             analysis=None,
             reason=(
@@ -129,16 +178,8 @@ def run_engineering_analysis(
             ),
         )
 
-    if bundle.context_truncated:
-        return EngineeringAnalysisResult(
-            baseline_commit=bundle.baseline_commit,
-            subject=subject,
-            repository_evidence=repository_evidence,
-            knowledge_evidence=knowledge_evidence,
-            repository_match_count=bundle.repository_match_count,
-            knowledge_match_count=bundle.knowledge_match_count,
-            repository_skipped_unreadable=bundle.repository_skipped_unreadable,
-            context_truncated=True,
+    if evidence_focus is None and bundle.context_truncated:
+        return result(
             status="UNCONFIRMED",
             analysis=None,
             reason="analysis requires complete untruncated evidence",
@@ -152,9 +193,17 @@ def run_engineering_analysis(
         "limitations": {
             "repository_skipped_unreadable": bundle.repository_skipped_unreadable,
             "context_truncated": bundle.context_truncated,
+            "supplemental_truncated": supplemental_truncated,
             "authority_effect": "none",
         },
     }
+    if evidence_focus is not None:
+        packet["focus"] = {
+            "focus_id": focus_id,
+            "complete": focus_complete,
+            "evidence_set_digest": evidence_set_digest,
+        }
+
     prompt = json.dumps(
         packet,
         ensure_ascii=False,
@@ -189,15 +238,7 @@ def run_engineering_analysis(
         repository_evidence=list(repository_evidence),
         knowledge_evidence=list(knowledge_evidence),
     )
-    return EngineeringAnalysisResult(
-        baseline_commit=bundle.baseline_commit,
-        subject=subject,
-        repository_evidence=repository_evidence,
-        knowledge_evidence=knowledge_evidence,
-        repository_match_count=bundle.repository_match_count,
-        knowledge_match_count=bundle.knowledge_match_count,
-        repository_skipped_unreadable=bundle.repository_skipped_unreadable,
-        context_truncated=bundle.context_truncated,
+    return result(
         status="GROUNDED",
         analysis=analysis,
         reason=None,
