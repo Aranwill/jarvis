@@ -11,8 +11,15 @@ design_authorized_by: owner
 design_authorized_at: 2026-09-24
 risk_class: 3
 critical_contract: true
-red_authorized: false
-implementation_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-24
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-24
+implementation_authorized: true
+implementation_authorized_by: owner
+implementation_authorized_at: 2026-09-24
 runtime_execution_authorized: false
 runtime_delta: 0
 authority_effect: none
@@ -53,7 +60,9 @@ complete focus evidence
 + explicit completeness result
 ```
 
-Este gate no autoriza RED, implementación ni una tercera ejecución U01.
+La admisión inicial de este diseño no autorizó RED, implementación ni una tercera
+ejecución U01. Los checkpoints posteriores de autoridad quedan registrados al
+final del documento.
 
 ## 2. Baseline G0
 
@@ -591,6 +600,7 @@ src/malak/capabilities/engineering_inspect.py
 src/malak/capabilities/_engineering_analysis.py
 src/malak/capabilities/engineering_analyze.py
 src/malak/capabilities/engineering_propose.py
+src/malak/app/composition.py
 src/malak/app/internal_interaction.py
 src/malak/app/internal_interaction_test_v0.py
 tests/test_engineering_inspect.py
@@ -861,19 +871,183 @@ Design 4R                           PASS
 RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
-RED authorization                   NOT GRANTED
-implementation authorization        NOT GRANTED
+RED authorization                   GRANTED BY OWNER POST-PR #185
+implementation authorization        GRANTED BY OWNER AFTER RED #476
 runtime execution authorization     NOT GRANTED
 third U01 execution                 BLOCKED
 authority_effect                    none
 runtime delta                       0
 ```
 
-Siguiente gate permitido después de revisión/merge humano:
+Siguiente gate permitido después del RED observado:
 
 ```text
-Owner explicit RED authorization
--> RED tests only
--> candidate-bound failure evidence
--> STOP for Owner review
+GREEN candidate only
+-> candidate-bound validation
+-> FULL 4R
+-> E2E
+-> Owner review / merge
 ```
+
+## 28. RED authorization checkpoint
+
+Después del merge humano de PR #185, el Owner autorizó avanzar al gate RED.
+
+```text
+design merge commit                a3efb42fa6ba2a441ca161c488fef554a1713b76
+RED authorization                  GRANTED
+GREEN / implementation             NOT AUTHORIZED
+runtime execution                  NOT AUTHORIZED
+third U01 execution                BLOCKED
+authority_effect                   none
+```
+
+El RED candidate debe limitarse a tests y a esta actualización documental de
+autoridad. No puede introducir código productivo ni corregir todavía los fallos
+esperados.
+
+
+## 29. RED evidence y GREEN authorization checkpoint
+
+El RED candidate quedó congelado en:
+
+```text
+candidate: 6f0811a216a36e86c800379e455d259a726947cf
+Validation: #476
+Ubuntu:  22 failed / 1470 passed
+Windows: 22 failed / 1470 passed
+conclusion: FAILURE expected / RED demonstrated
+```
+
+Las fallas observadas fueron materialmente las esperadas por el diseño:
+
+```text
+GovernedEngineeringEvidenceFocus          missing
+EvidenceSelector                          missing
+bootstrap_engineering_evidence_focuses    missing
+evaluate_bootstrap_focus_completion       missing
+
+focus_complete=false
+-> runner continued past Inspect
+
+Inspect / Analyze digest mismatch
+-> runner did not reject
+
+Analyze / Propose digest mismatch
+-> runner did not reject
+```
+
+No se observaron fallas ajenas al contrato RED en el resumen de pytest. El
+baseline restante conservó 1470 tests PASS en ambos sistemas operativos.
+
+Después de revisar ese RED candidate, el Owner indicó continuar.
+
+```text
+GREEN authorization                   GRANTED
+implementation authorization          GRANTED
+runtime execution authorization       NOT GRANTED
+third real U01 execution              BLOCKED
+Kernel planned delta                  0
+Planner planned delta                 0
+authority_effect                      none
+```
+
+El GREEN candidate queda limitado al contrato de focus, selección/completitud de
+evidencia, binding focal de Engineering y validación de continuidad material del
+evidence set. No autoriza OBS-01, OBS-02, model trace ni ejecución real del
+tercer U01.
+
+
+## 30. Bounded Correction — binding focal en Composition
+
+Durante GREEN apareció una necesidad de wiring acotada: el Self-Review real
+recibe el `EngineeringKernelSet` genérico ya compuesto por la CLI. Para que U01
+consuma focus evidence sin alterar `Request`, sin introducir un canal implícito y
+sin cambiar silenciosamente `/engineering`, el focus debe enlazarse al componer
+las mismas capabilities E2/E3/E4.
+
+Opciones evaluadas:
+
+```text
+expand Request contract                    REJECT
+encode focus inside subject string         REJECT
+global/thread-local focus state            REJECT
+change generic /engineering semantics      REJECT
+bypass Kernel and call capabilities direct REJECT
+bounded composition binding                ADOPT
+```
+
+Delta admitido:
+
+```text
+src/malak/app/composition.py
+-> EngineeringKernelSet.with_evidence_focus(...)
+-> reutiliza exactamente repository_reader + knowledge_reader
+-> reutiliza ConversationService/provider/model existentes
+-> compone E2/E3/E4 con el mismo focus inmutable
+-> no cambia build_engineering_kernel_set() generic
+```
+
+Invariantes preservados:
+
+```text
+baseline before == baseline after
+generic Engineering behavior unchanged
+Kernel delta 0
+Planner delta 0
+Request delta 0
+authority_effect none
+focus binding != authority
+```
+
+Esta corrección amplía el budget de superficie candidata en un único archivo
+existente y evita una solución más invasiva. No abre una nueva capa ni un
+servicio adicional.
+
+
+## 31. Candidate conformance correction — sprint documents fuera de E1
+
+Durante la revisión FULL 4R / candidate conformance del SHA verde
+`15a7b87ec29ce88d38ce68226f2cac8f18824781` se detectó una desviación del
+diseño: tres fuentes requeridas por U04 / RR-03 existen en el baseline, pero no
+pertenecen actualmente al catálogo clasificado de `GovernedKnowledgeReader`.
+
+Fuentes afectadas:
+
+```text
+docs/project/sprints/proposals/
+  MALAK-E2-STRUCTURAL-EVIDENCE-OBSERVABILITY-V0-G0-G1-DESIGN.md
+
+docs/project/sprints/SPRINT-7.7.md
+docs/project/sprints/SPRINT-7.9.md
+```
+
+No se amplía E1 ni se les asigna autoridad documental artificialmente.
+
+Corrección acotada:
+
+```text
+tracked required source
+-> repository_required_selector
+-> required for focus completeness
+-> no source_class / authority_class inference
+-> authority_effect = none
+```
+
+Se rechazan:
+
+```text
+drop required source to obtain GREEN        REJECT
+expand GovernedKnowledgeReader classification REJECT
+infer governance authority from sprint docs REJECT
+```
+
+Se adopta:
+
+```text
+preserve exact source as required tracked context
+-> ADOPT
+```
+
+El cambio mantiene los tres documentos dentro del evidence set requerido sin
+cambiar la frontera de Knowledge ni la autoridad de las fuentes.

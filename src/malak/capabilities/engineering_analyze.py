@@ -12,6 +12,7 @@ from malak.capabilities._engineering_analysis import (
     require_exact_keys as _require_exact_keys,
     run_engineering_analysis,
 )
+from malak.capabilities._engineering_evidence import GovernedEngineeringEvidenceFocus
 from malak.contracts.capability import Capability
 from malak.core.request import Request
 from malak.infrastructure.repository_reader import GitRepositoryReader
@@ -52,6 +53,7 @@ class EngineeringAnalyzeCapability(Capability):
         conversation_service: ConversationService,
         provider_name: str,
         model: str | None = None,
+        evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
     ) -> None:
         if repository_reader.baseline_commit != knowledge_reader.baseline_commit:
             raise RuntimeError(
@@ -65,6 +67,7 @@ class EngineeringAnalyzeCapability(Capability):
         self._conversation_service = conversation_service
         self._provider_name = provider_name
         self._model = model
+        self._evidence_focus = evidence_focus
         self._baseline_commit = repository_reader.baseline_commit
 
     @property
@@ -90,6 +93,7 @@ class EngineeringAnalyzeCapability(Capability):
             max_model_output_bytes=_MAX_MODEL_OUTPUT_BYTES,
             error_scope="E3",
             parse_analysis_fn=_parse_analysis,
+            evidence_focus=self._evidence_focus,
         )
 
         repository_evidence = list(result.repository_evidence)
@@ -104,6 +108,10 @@ class EngineeringAnalyzeCapability(Capability):
                 repository_skipped_unreadable=result.repository_skipped_unreadable,
                 context_truncated=result.context_truncated,
                 reason=result.reason or "analysis is unconfirmed",
+                focus_id=result.focus_id,
+                focus_complete=result.focus_complete,
+                evidence_set_digest=result.evidence_set_digest,
+                supplemental_truncated=result.supplemental_truncated,
             )
 
         if result.analysis is None:
@@ -117,6 +125,10 @@ class EngineeringAnalyzeCapability(Capability):
             knowledge_evidence=knowledge_evidence,
             repository_skipped_unreadable=result.repository_skipped_unreadable,
             context_truncated=result.context_truncated,
+            focus_id=result.focus_id,
+            focus_complete=result.focus_complete,
+            evidence_set_digest=result.evidence_set_digest,
+            supplemental_truncated=result.supplemental_truncated,
         )
 
 
@@ -192,17 +204,32 @@ def _render_unconfirmed(
     repository_skipped_unreadable: int,
     context_truncated: bool,
     reason: str,
+    focus_id: str | None = None,
+    focus_complete: bool | None = None,
+    evidence_set_digest: str | None = None,
+    supplemental_truncated: bool = False,
 ) -> str:
-    return "\n".join(
+    lines = [
+        "ENGINEERING_ANALYSIS",
+        f"baseline_commit: {baseline_commit}",
+        f"analysis_subject: {analysis_subject}",
+        "status: UNCONFIRMED",
+        f"repository_evidence_count: {repository_evidence_count}",
+        f"knowledge_evidence_count: {knowledge_evidence_count}",
+        f"repository_skipped_unreadable: {repository_skipped_unreadable}",
+        f"context_truncated: {str(context_truncated).lower()}",
+    ]
+    if focus_id is not None:
+        lines.extend(
+            (
+                f"focus_id: {focus_id}",
+                f"focus_complete: {str(bool(focus_complete)).lower()}",
+                f"evidence_set_digest: {evidence_set_digest}",
+                f"supplemental_truncated: {str(supplemental_truncated).lower()}",
+            )
+        )
+    lines.extend(
         (
-            "ENGINEERING_ANALYSIS",
-            f"baseline_commit: {baseline_commit}",
-            f"analysis_subject: {analysis_subject}",
-            "status: UNCONFIRMED",
-            f"repository_evidence_count: {repository_evidence_count}",
-            f"knowledge_evidence_count: {knowledge_evidence_count}",
-            f"repository_skipped_unreadable: {repository_skipped_unreadable}",
-            f"context_truncated: {str(context_truncated).lower()}",
             "authority_effect: none",
             f"reason: {reason}",
             "",
@@ -213,6 +240,7 @@ def _render_unconfirmed(
             "(none)",
         )
     )
+    return "\n".join(lines)
 
 
 def _render_grounded(
@@ -224,6 +252,10 @@ def _render_grounded(
     knowledge_evidence: list[dict[str, object]],
     repository_skipped_unreadable: int,
     context_truncated: bool,
+    focus_id: str | None = None,
+    focus_complete: bool | None = None,
+    evidence_set_digest: str | None = None,
+    supplemental_truncated: bool = False,
 ) -> str:
     lines = [
         "ENGINEERING_ANALYSIS",
@@ -235,13 +267,26 @@ def _render_grounded(
         f"knowledge_evidence_count: {len(knowledge_evidence)}",
         f"repository_skipped_unreadable: {repository_skipped_unreadable}",
         f"context_truncated: {str(context_truncated).lower()}",
+    ]
+    if focus_id is not None:
+        lines.extend(
+            (
+                f"focus_id: {focus_id}",
+                f"focus_complete: {str(bool(focus_complete)).lower()}",
+                f"evidence_set_digest: {evidence_set_digest}",
+                f"supplemental_truncated: {str(supplemental_truncated).lower()}",
+            )
+        )
+    lines.extend(
+        [
         "authority_effect: none",
         "",
         "SUMMARY",
         analysis.summary,
         "",
         "FINDINGS",
-    ]
+        ]
+    )
 
     if analysis.findings:
         for index, finding in enumerate(analysis.findings, start=1):
