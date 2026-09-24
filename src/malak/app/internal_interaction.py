@@ -885,6 +885,87 @@ def validate_internal_interaction_artifacts(
     ):
         raise ValueError("trace baseline_commit does not match manifest")
 
+    diagnostics = read_safe_diagnostics_jsonl(
+        root / "diagnostics.jsonl"
+    )
+    task_id = manifest.get("task_id")
+    if not isinstance(task_id, str) or not task_id:
+        raise ValueError("manifest task_id is invalid")
+    if any(
+        diagnostic.run_id != run_id
+        for diagnostic in diagnostics
+    ):
+        raise ValueError("diagnostic run_id does not match manifest")
+    if any(
+        diagnostic.baseline_commit != baseline_commit
+        for diagnostic in diagnostics
+    ):
+        raise ValueError(
+            "diagnostic baseline_commit does not match manifest"
+        )
+    if any(
+        diagnostic.task_id != task_id
+        for diagnostic in diagnostics
+    ):
+        raise ValueError("diagnostic task_id does not match manifest")
+    if any(
+        diagnostic.authority_effect != "none"
+        for diagnostic in diagnostics
+    ):
+        raise ValueError(
+            "diagnostic authority_effect must remain none"
+        )
+
+    diagnostic_by_ref = {
+        f"diagnostic:{diagnostic.diagnostic_id}": diagnostic
+        for diagnostic in diagnostics
+    }
+    referenced: list[str] = []
+    for event in events:
+        event_diagnostic_refs = tuple(
+            ref
+            for ref in event.output_refs
+            if ref.startswith("diagnostic:")
+        )
+        if event_diagnostic_refs and (
+            event.event_type != "COMPONENT_FAILED"
+            or event.reason_code != "component_error"
+        ):
+            raise ValueError(
+                "diagnostic refs are only valid on component_error failures"
+            )
+        if (
+            event.event_type == "COMPONENT_FAILED"
+            and event.reason_code == "component_error"
+        ):
+            if len(event_diagnostic_refs) != 1:
+                raise ValueError(
+                    "component_error failure requires one diagnostic ref"
+                )
+            diagnostic = diagnostic_by_ref.get(
+                event_diagnostic_refs[0]
+            )
+            if diagnostic is None:
+                raise ValueError(
+                    "trace references unknown diagnostic"
+                )
+            if (
+                diagnostic.phase != event.phase
+                or diagnostic.component != event.component
+                or diagnostic.reason_code != event.reason_code
+            ):
+                raise ValueError(
+                    "diagnostic binding does not match failure event"
+                )
+            referenced.extend(event_diagnostic_refs)
+
+    if set(referenced) != set(diagnostic_by_ref):
+        raise ValueError(
+            "diagnostic artifact contains unreferenced entries"
+        )
+    if len(referenced) != len(set(referenced)):
+        raise ValueError("diagnostic ref must be unique in trace")
+
 
 def _load_json_object(path: Path, label: str) -> dict[str, object]:
     try:
