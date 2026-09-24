@@ -27,10 +27,10 @@ NOW = datetime(2026, 9, 23, 23, 30, tzinfo=UTC)
 REQUIRED_TEXT_FILES = {
     "AGENTS.md": "agent rules\n",
     "SECURITY.md": "security policy\n",
-    "docs/governance/cognitive_constitution.md": "cognitive constitution\n",
-    "docs/governance/governance_constitution.md": "governance constitution\n",
+    "docs/governance/cognitive_constitution.md": "Kernel evidence remains bounded.\n",
+    "docs/governance/governance_constitution.md": "evidence != authority\n",
     "docs/architecture/blueprint.md": "Kernel First\nCapability First\n",
-    "docs/architecture/architecture_quality_gates.md": "quality gates\n",
+    "docs/architecture/architecture_quality_gates.md": "Kernel complexity gate\n",
     "docs/development/malak_construction_protocol.md": "construction protocol\n",
     "docs/development/development_checklist.md": "development checklist\n",
     "docs/project/implementation_roadmap.md": "implementation roadmap\n",
@@ -38,6 +38,7 @@ REQUIRED_TEXT_FILES = {
     "docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md": "research horizon\n",
     "docs/project/concepts/GOVERNED_SELF_REVIEW_BOOTSTRAP_TASK.md": "U01 Core Kernel\nU04 Observability\nRR-03 Strong SecurityContext Provenance\n",
     "docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md": "audit v1\n",
+    "docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-D.md": "U01 Core Kernel\n",
 }
 
 ARTIFACT_FILES = {
@@ -94,6 +95,16 @@ def _make_repo(
     )
     _write(repo, "docs/project/concepts/README.md", "concept catalog\n")
     _write(repo, "src/malak/example.py", "class KernelExample:\n    pass\n")
+    _write(repo, "src/malak/kernel/kernel.py", "class Kernel:\n    pass\n")
+    _write(repo, "src/malak/kernel/registry.py", "class CapabilityRegistry:\n    pass\n")
+    _write(repo, "src/malak/services/planner.py", "class Planner:\n    capability = 'conversation'\n")
+    _write(repo, "src/malak/contracts/capability.py", "class Capability:\n    pass\n")
+    _write(repo, "src/malak/app/composition.py", "engineering = 'Kernel Capability'\n")
+    _write(
+        repo,
+        "tests/test_kernel.py",
+        "def test_kernel():\n    assert 'Kernel'\n",
+    )
     _write(
         repo,
         "tests/test_example.py",
