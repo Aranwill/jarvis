@@ -3,7 +3,12 @@ from __future__ import annotations
 import json
 import re
 
-from malak.capabilities._engineering_evidence import collect_engineering_evidence
+from malak.capabilities._engineering_evidence import (
+    GovernedEngineeringEvidenceFocus,
+    FocusedEngineeringEvidenceBundle,
+    collect_engineering_evidence,
+    collect_focused_engineering_evidence,
+)
 from malak.contracts.capability import Capability
 from malak.core.conversation import ConversationRequest
 from malak.core.request import Request
@@ -69,6 +74,7 @@ class EngineeringInspectCapability(Capability):
         conversation_service: ConversationService,
         provider_name: str,
         model: str | None = None,
+        evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
     ) -> None:
         if repository_reader.baseline_commit != knowledge_reader.baseline_commit:
             raise RuntimeError(
@@ -90,6 +96,7 @@ class EngineeringInspectCapability(Capability):
         self._conversation_service = conversation_service
         self._provider_name = provider_name
         self._model = model
+        self._evidence_focus = evidence_focus
         self._baseline_commit = repository_reader.baseline_commit
 
     @property
@@ -98,38 +105,60 @@ class EngineeringInspectCapability(Capability):
 
     def execute(self, request: Request) -> str:
         term = _validate_inspection_term(request.content)
-        bundle = collect_engineering_evidence(
-            repository_reader=self._repository_reader,
-            knowledge_reader=self._knowledge_reader,
-            subject=term,
-            max_repository_files=_MAX_REPOSITORY_FILES,
-            max_repository_bytes=_MAX_REPOSITORY_BYTES,
-            max_repository_matches=_MAX_REPOSITORY_MATCHES,
-            max_context_matches_per_kind=_MAX_CONTEXT_MATCHES_PER_KIND,
-            max_evidence_line_bytes=_MAX_EVIDENCE_LINE_BYTES,
-            error_scope="E2",
-        )
+
+        if self._evidence_focus is not None:
+            if self._evidence_focus.subject != term:
+                raise RuntimeError("engineering evidence focus subject mismatch")
+            focus_bundle = collect_focused_engineering_evidence(
+                repository_reader=self._repository_reader,
+                knowledge_reader=self._knowledge_reader,
+                focus=self._evidence_focus,
+            )
+            if not focus_bundle.complete:
+                return _render_focused_unconfirmed(
+                    baseline_commit=self._baseline_commit,
+                    inspection_term=term,
+                    bundle=focus_bundle,
+                )
+            bundle = focus_bundle
+            structural_evidence: list[dict[str, object]] = []
+            context_truncated = bundle.context_truncated
+        else:
+            bundle = collect_engineering_evidence(
+                repository_reader=self._repository_reader,
+                knowledge_reader=self._knowledge_reader,
+                subject=term,
+                max_repository_files=_MAX_REPOSITORY_FILES,
+                max_repository_bytes=_MAX_REPOSITORY_BYTES,
+                max_repository_matches=_MAX_REPOSITORY_MATCHES,
+                max_context_matches_per_kind=_MAX_CONTEXT_MATCHES_PER_KIND,
+                max_evidence_line_bytes=_MAX_EVIDENCE_LINE_BYTES,
+                error_scope="E2",
+            )
+            structural_evidence, structural_truncated = _structural_context(
+                self._structural_projection,
+                term,
+                max_refs=_MAX_STRUCTURAL_REFS,
+            )
+            context_truncated = bundle.context_truncated or structural_truncated
 
         repository_evidence = list(bundle.repository_evidence)
         knowledge_evidence = list(bundle.knowledge_evidence)
-        structural_evidence, structural_truncated = _structural_context(
-            self._structural_projection,
-            term,
-            max_refs=_MAX_STRUCTURAL_REFS,
-        )
-        context_truncated = bundle.context_truncated or structural_truncated
 
         if (
             bundle.repository_match_count == 0
             and bundle.knowledge_match_count == 0
             and not structural_evidence
         ):
-            return _render_unconfirmed(
+            rendered = _render_unconfirmed(
                 baseline_commit=self._baseline_commit,
                 inspection_term=term,
                 repository_skipped_unreadable=bundle.repository_skipped_unreadable,
                 context_truncated=context_truncated,
             )
+            if self._evidence_focus is not None:
+                return _with_focus_metadata(rendered, focus_bundle)
+            return rendered
 
         packet = {
             "baseline_commit": self._baseline_commit,
@@ -143,6 +172,14 @@ class EngineeringInspectCapability(Capability):
                 "authority_effect": "none",
             },
         }
+        if self._evidence_focus is not None:
+            packet["focus"] = {
+                "focus_id": focus_bundle.focus_id,
+                "complete": focus_bundle.complete,
+                "evidence_set_digest": focus_bundle.evidence_set_digest,
+                "supplemental_truncated": focus_bundle.supplemental_truncated,
+            }
+
         prompt = json.dumps(
             packet,
             ensure_ascii=False,
@@ -183,7 +220,7 @@ class EngineeringInspectCapability(Capability):
             structural_evidence=structural_evidence,
         )
 
-        return _render_grounded(
+        rendered = _render_grounded(
             baseline_commit=self._baseline_commit,
             inspection_term=term,
             analysis=analysis,
@@ -196,6 +233,9 @@ class EngineeringInspectCapability(Capability):
             repository_skipped_unreadable=bundle.repository_skipped_unreadable,
             context_truncated=context_truncated,
         )
+        if self._evidence_focus is not None:
+            return _with_focus_metadata(rendered, focus_bundle)
+        return rendered
 
 
 
@@ -402,3 +442,49 @@ def _render_grounded(
             )
 
     return "\n".join(lines)
+
+
+def _render_focused_unconfirmed(
+    *,
+    baseline_commit: str,
+    inspection_term: str,
+    bundle: FocusedEngineeringEvidenceBundle,
+) -> str:
+    rendered = "\n".join(
+        (
+            "ENGINEERING_INSPECTION",
+            f"baseline_commit: {baseline_commit}",
+            f"inspection_term: {inspection_term}",
+            "status: UNCONFIRMED",
+            f"repository_evidence_count: {len(bundle.repository_evidence)}",
+            f"knowledge_evidence_count: {len(bundle.knowledge_evidence)}",
+            "structural_evidence_count: 0",
+            "model_inference_count: 0",
+            f"repository_skipped_unreadable: {bundle.repository_skipped_unreadable}",
+            f"context_truncated: {str(bundle.context_truncated).lower()}",
+            "authority_effect: none",
+            "reason: focused inspection requires complete required evidence",
+            "",
+            "EVIDENCE_REFERENCES",
+            "(none)",
+        )
+    )
+    return _with_focus_metadata(rendered, bundle)
+
+
+def _with_focus_metadata(
+    rendered: str,
+    bundle: FocusedEngineeringEvidenceBundle,
+) -> str:
+    marker = "authority_effect: none"
+    metadata = "\n".join(
+        (
+            f"focus_id: {bundle.focus_id}",
+            f"focus_complete: {str(bundle.complete).lower()}",
+            f"evidence_set_digest: {bundle.evidence_set_digest}",
+            f"supplemental_truncated: {str(bundle.supplemental_truncated).lower()}",
+        )
+    )
+    if marker not in rendered:
+        raise RuntimeError("engineering envelope is missing authority_effect")
+    return rendered.replace(marker, metadata + "\n" + marker, 1)
