@@ -31,6 +31,7 @@ _ARTIFACT_SCHEMA: Final[str] = "MALAK-INTERNAL-INTERACTION-ATTESTATION/v0"
 _WORKFLOW_VERSION: Final[str] = "internal-interaction-v0"
 _MAX_COMPONENT_OUTPUT_BYTES: Final[int] = 256 * 1024
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_FOCUS_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 _RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _FINDING_RE = re.compile(
     r"^\[A[1-9][0-9]*\] classification="
@@ -61,6 +62,13 @@ class _ComponentEnvelopeError(ValueError):
     def __init__(self, reason_code: str) -> None:
         super().__init__(reason_code)
         self.reason_code = reason_code
+
+
+@dataclass(frozen=True, slots=True)
+class _ComponentFocusEnvelope:
+    focus_id: str
+    complete: bool
+    evidence_set_digest: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -403,6 +411,9 @@ class InternalInteractionRunner:
                 inspect_response.content,
                 expected_baseline=self._engineering.baseline_commit,
             )
+            inspection_focus = _component_focus_envelope(
+                inspect_response.content,
+            )
         except _ComponentEnvelopeError as exc:
             trace_emit(
                 phase="engineering",
@@ -436,6 +447,25 @@ class InternalInteractionRunner:
             output_refs=("engineering:inspect",),
             outcome="SUCCEEDED",
         )
+
+        if inspection_focus is not None:
+            assessment["focus_id"] = inspection_focus.focus_id
+            assessment["focus_complete"] = inspection_focus.complete
+            assessment["evidence_set_digest"] = (
+                inspection_focus.evidence_set_digest
+            )
+            if not inspection_focus.complete:
+                self._skip_following_components(
+                    trace_emit,
+                    ("engineering_analyze", "engineering_propose"),
+                )
+                assessment["operational_rationale"] = [
+                    "governed engineering focus evidence is incomplete"
+                ]
+                return (
+                    TerminalDisposition.INCONCLUSIVE,
+                    ("engineering:inspect",),
+                )
 
         if inspection_status != "GROUNDED":
             self._skip_following_components(
@@ -486,6 +516,13 @@ class InternalInteractionRunner:
             analysis_status = _component_envelope_status(
                 analyze_response.content,
                 expected_baseline=self._engineering.baseline_commit,
+            )
+            analysis_focus = _component_focus_envelope(
+                analyze_response.content,
+            )
+            _validate_focus_continuity(
+                inspection_focus,
+                analysis_focus,
             )
         except _ComponentEnvelopeError as exc:
             trace_emit(
@@ -608,6 +645,13 @@ class InternalInteractionRunner:
             proposal_status = _component_envelope_status(
                 propose_response.content,
                 expected_baseline=self._engineering.baseline_commit,
+            )
+            proposal_focus = _component_focus_envelope(
+                propose_response.content,
+            )
+            _validate_focus_continuity(
+                inspection_focus,
+                proposal_focus,
             )
         except _ComponentEnvelopeError as exc:
             trace_emit(
@@ -869,6 +913,59 @@ def _rendered_field(content: str, field: str) -> str | None:
         if line.startswith(prefix):
             return line.partition(":")[2].strip()
     return None
+
+
+def _component_focus_envelope(
+    content: object,
+) -> _ComponentFocusEnvelope | None:
+    if not isinstance(content, str):
+        raise _ComponentEnvelopeError("validation_failed")
+
+    focus_id = _rendered_field(content, "focus_id")
+    complete = _rendered_field(content, "focus_complete")
+    digest = _rendered_field(content, "evidence_set_digest")
+    values = (focus_id, complete, digest)
+    if all(value is None for value in values):
+        return None
+    if any(value is None for value in values):
+        raise _ComponentEnvelopeError("validation_failed")
+
+    assert focus_id is not None
+    assert complete is not None
+    assert digest is not None
+
+    if (
+        not focus_id
+        or focus_id != focus_id.strip()
+        or any(ord(character) < 32 or ord(character) == 127 for character in focus_id)
+    ):
+        raise _ComponentEnvelopeError("validation_failed")
+    if complete not in {"true", "false"}:
+        raise _ComponentEnvelopeError("validation_failed")
+    if not _FOCUS_DIGEST_RE.fullmatch(digest):
+        raise _ComponentEnvelopeError("validation_failed")
+
+    return _ComponentFocusEnvelope(
+        focus_id=focus_id,
+        complete=complete == "true",
+        evidence_set_digest=digest,
+    )
+
+
+def _validate_focus_continuity(
+    expected: _ComponentFocusEnvelope | None,
+    observed: _ComponentFocusEnvelope | None,
+) -> None:
+    if expected is None and observed is None:
+        return
+    if expected is None or observed is None:
+        raise _ComponentEnvelopeError("validation_failed")
+    if (
+        expected.focus_id != observed.focus_id
+        or expected.evidence_set_digest != observed.evidence_set_digest
+        or not observed.complete
+    ):
+        raise _ComponentEnvelopeError("validation_failed")
 
 
 def _component_envelope_status(
