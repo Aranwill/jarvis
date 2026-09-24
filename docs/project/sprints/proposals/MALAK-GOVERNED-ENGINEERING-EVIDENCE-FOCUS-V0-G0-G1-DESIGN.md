@@ -11,7 +11,9 @@ design_authorized_by: owner
 design_authorized_at: 2026-09-24
 risk_class: 3
 critical_contract: true
-red_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-24
 implementation_authorized: false
 runtime_execution_authorized: false
 runtime_delta: 0
@@ -861,7 +863,7 @@ Design 4R                           PASS
 RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
-RED authorization                   NOT GRANTED
+RED authorization                   GRANTED BY OWNER POST-PR #185
 implementation authorization        NOT GRANTED
 runtime execution authorization     NOT GRANTED
 third U01 execution                 BLOCKED
@@ -869,11 +871,27 @@ authority_effect                    none
 runtime delta                       0
 ```
 
-Siguiente gate permitido después de revisión/merge humano:
+Siguiente gate permitido:
 
 ```text
-Owner explicit RED authorization
--> RED tests only
+RED tests only
 -> candidate-bound failure evidence
--> STOP for Owner review
+-> STOP for Owner review / explicit GREEN authorization
 ```
+
+## 28. RED authorization checkpoint
+
+Después del merge humano de PR #185, el Owner autorizó avanzar al gate RED.
+
+```text
+design merge commit                a3efb42fa6ba2a441ca161c488fef554a1713b76
+RED authorization                  GRANTED
+GREEN / implementation             NOT AUTHORIZED
+runtime execution                  NOT AUTHORIZED
+third U01 execution                BLOCKED
+authority_effect                   none
+```
+
+El RED candidate debe limitarse a tests y a esta actualización documental de
+autoridad. No puede introducir código productivo ni corregir todavía los fallos
+esperados.
