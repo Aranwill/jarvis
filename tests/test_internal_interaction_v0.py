@@ -807,3 +807,82 @@ def test_interaction_e2e_real_engineering_kernel_set(
     _module().validate_internal_interaction_artifacts(
         result.artifact_dir
     )
+
+
+def _with_focus_envelope(content: str, *, complete: bool, digest: str) -> str:
+    lines = content.splitlines()
+    insert_at = 4
+    lines[insert_at:insert_at] = [
+        f"focus_complete: {str(complete).lower()}",
+        f"evidence_set_digest: {digest}",
+    ]
+    return "\n".join(lines)
+
+
+def test_evidence_focus_red_f10_stage_digest_mismatch_is_inconclusive(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(repo, analyze_classification="ALIGNED")
+    engineering.kernels["inspect"]._content = _with_focus_envelope(
+        engineering.kernels["inspect"]._content,
+        complete=True,
+        digest="a" * 64,
+    )
+    engineering.kernels["analyze"]._content = _with_focus_envelope(
+        engineering.kernels["analyze"]._content,
+        complete=True,
+        digest="b" * 64,
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    assert result.disposition.value == "INCONCLUSIVE"
+    assert calls == ["inspect", "analyze"]
+    assert result.authority_effect == "none"
+
+
+def test_evidence_focus_red_f11_incomplete_focus_stops_after_inspect(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(repo, analyze_classification="GAP")
+    engineering.kernels["inspect"]._content = _with_focus_envelope(
+        engineering.kernels["inspect"]._content,
+        complete=False,
+        digest="a" * 64,
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    assert result.disposition.value == "INCONCLUSIVE"
+    assert calls == ["inspect"]
+    assert result.authority_effect == "none"
+
+
+def test_evidence_focus_red_f11_proposal_digest_mismatch_is_inconclusive(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(repo, analyze_classification="GAP")
+    engineering.kernels["inspect"]._content = _with_focus_envelope(
+        engineering.kernels["inspect"]._content,
+        complete=True,
+        digest="a" * 64,
+    )
+    engineering.kernels["analyze"]._content = _with_focus_envelope(
+        engineering.kernels["analyze"]._content,
+        complete=True,
+        digest="a" * 64,
+    )
+    engineering.kernels["propose"]._content = _with_focus_envelope(
+        engineering.kernels["propose"]._content,
+        complete=True,
+        digest="b" * 64,
+    )
+
+    result = _run(_runner(repo, engineering))
+
+    assert result.disposition.value == "INCONCLUSIVE"
+    assert calls == ["inspect", "analyze", "propose"]
+    assert result.authority_effect == "none"
