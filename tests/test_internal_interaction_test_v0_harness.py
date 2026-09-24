@@ -706,3 +706,76 @@ def test_harness_red_c19_harness_exposes_no_arbitrary_task_or_scope_parameters(
             created_at=NOW,
             scope="arbitrary",
         )
+
+
+def test_live_elapsed_red_a07_harness_starts_and_stops_liveness(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo)
+    module = _module()
+
+    starts: list[object] = []
+    stops: list[object] = []
+
+    monkeypatch.setattr(
+        module.LiveTraceTextView,
+        "start_liveness",
+        lambda self: starts.append(self),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        module.LiveTraceTextView,
+        "stop_liveness",
+        lambda self: stops.append(self),
+        raising=False,
+    )
+
+    result = _run(_harness(repo, engineering))
+
+    assert result.acceptance == "PASS"
+    assert len(starts) == 1
+    assert len(stops) == 1
+    assert starts[0] is stops[0]
+
+
+def test_live_elapsed_red_a08_harness_stops_liveness_on_runner_exception(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo)
+    module = _module()
+
+    starts: list[object] = []
+    stops: list[object] = []
+
+    monkeypatch.setattr(
+        module.LiveTraceTextView,
+        "start_liveness",
+        lambda self: starts.append(self),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        module.LiveTraceTextView,
+        "stop_liveness",
+        lambda self: stops.append(self),
+        raising=False,
+    )
+
+    def _raise_during_run(self, **kwargs):
+        raise RuntimeError("synthetic runner failure")
+
+    monkeypatch.setattr(
+        module.InternalInteractionRunner,
+        "run",
+        _raise_during_run,
+    )
+
+    with pytest.raises(RuntimeError, match="synthetic runner failure"):
+        _run(_harness(repo, engineering), run_id="bootstrap-v0-live-failure")
+
+    assert len(starts) == 1
+    assert len(stops) == 1
+    assert starts[0] is stops[0]
