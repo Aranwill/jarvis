@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from malak.capabilities.conversation import ConversationCapability
+from malak.capabilities._engineering_evidence import GovernedEngineeringEvidenceFocus
 from malak.capabilities.engineering_analyze import EngineeringAnalyzeCapability
 from malak.capabilities.engineering_inspect import EngineeringInspectCapability
 from malak.capabilities.engineering_propose import EngineeringProposeCapability
@@ -22,6 +23,56 @@ class EngineeringKernelSet:
     kernels: dict[str, Kernel]
     repository_reader: GitRepositoryReader
     knowledge_reader: GovernedKnowledgeReader
+    _service: ConversationService
+    _provider_name: str
+    _model: str | None
+
+    def with_evidence_focus(
+        self,
+        focus: GovernedEngineeringEvidenceFocus,
+    ) -> "EngineeringKernelSet":
+        if not isinstance(focus, GovernedEngineeringEvidenceFocus):
+            raise TypeError("focus must be a GovernedEngineeringEvidenceFocus")
+
+        capabilities = {
+            "inspect": EngineeringInspectCapability(
+                repository_reader=self.repository_reader,
+                knowledge_reader=self.knowledge_reader,
+                structural_projection=None,
+                conversation_service=self._service,
+                provider_name=self._provider_name,
+                model=self._model,
+                evidence_focus=focus,
+            ),
+            "analyze": EngineeringAnalyzeCapability(
+                repository_reader=self.repository_reader,
+                knowledge_reader=self.knowledge_reader,
+                conversation_service=self._service,
+                provider_name=self._provider_name,
+                model=self._model,
+                evidence_focus=focus,
+            ),
+            "propose": EngineeringProposeCapability(
+                repository_reader=self.repository_reader,
+                knowledge_reader=self.knowledge_reader,
+                conversation_service=self._service,
+                provider_name=self._provider_name,
+                model=self._model,
+                evidence_focus=focus,
+            ),
+        }
+        return EngineeringKernelSet(
+            baseline_commit=self.baseline_commit,
+            kernels={
+                action: _build_fixed_kernel(capability)
+                for action, capability in capabilities.items()
+            },
+            repository_reader=self.repository_reader,
+            knowledge_reader=self.knowledge_reader,
+            _service=self._service,
+            _provider_name=self._provider_name,
+            _model=self._model,
+        )
 
 
 def _build_fixed_kernel(capability) -> Kernel:
@@ -110,4 +161,7 @@ def build_engineering_kernel_set(
         },
         repository_reader=repository_reader,
         knowledge_reader=knowledge_reader,
+        _service=service,
+        _provider_name=provider_name,
+        _model=model,
     )
