@@ -15,7 +15,9 @@ red_authorized: true
 red_slice_a_authorized: true
 red_slice_a_authorized_by: owner
 red_slice_a_authorized_at: 2026-09-24
-red_slice_b_authorized: false
+red_slice_b_authorized: true
+red_slice_b_authorized_by: owner
+red_slice_b_authorized_at: 2026-09-24
 red_slice_c_authorized: false
 green_slice_a_authorized: true
 green_slice_a_authorized_by: owner
@@ -1225,7 +1227,7 @@ RDD Stage 1 Design Check            PASS
 known material ambiguity            0
 
 RED Slice A                         GRANTED BY OWNER
-RED Slice B                         NOT GRANTED
+RED Slice B                         GRANTED BY OWNER
 RED Slice C                         NOT GRANTED
 implementation authorization        NOT GRANTED
 runtime execution authorization     NOT GRANTED
@@ -1309,3 +1311,24 @@ authority_effect                   none
 
 GREEN debe implementar únicamente overlay elapsed/liveness y lifecycle seguro
 del ticker, preservando final material LIVE == REPLAY.
+
+
+## 26. RED Slice B authorization checkpoint
+
+Después del merge humano de PR #188, el Owner autorizó avanzar con Slice B /
+OBS-02 — Safe Diagnostic Envelope.
+
+```text
+Slice A merge commit                74f46a62e05eadd2700a1058d7ab88cf08a83f1d
+RED Slice B                         GRANTED
+RED Slice C                         NOT GRANTED
+GREEN Slice B                       NOT AUTHORIZED
+runtime self-review execution       NOT AUTHORIZED
+third real U01                      BLOCKED
+authority_effect                    none
+```
+
+El RED candidate queda limitado a tests que demuestren que el baseline actual
+pierde causa técnica útil y todavía no produce un diagnostic artifact seguro.
+No puede introducir código productivo, cambiar el schema de
+`ExecutionTraceEvent` ni implementar Model Provenance.
