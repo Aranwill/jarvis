@@ -546,6 +546,12 @@ def bootstrap_engineering_evidence_focuses(
                     ("performance", "metric"),
                     64,
                 ),
+                EvidenceSelector(
+                    "EXACT_PATH",
+                    "docs/project/sprints/proposals/MALAK-E2-STRUCTURAL-EVIDENCE-OBSERVABILITY-V0-G0-G1-DESIGN.md",
+                    ("Observability", "authority", "evaluation"),
+                    96,
+                ),
             ),
             knowledge_required_selectors=(
                 EvidenceSelector(
@@ -616,6 +622,18 @@ def bootstrap_engineering_evidence_focuses(
                     "EXACT_PATH",
                     "tests/test_authorization_contracts.py",
                     ("SecurityContext",),
+                    64,
+                ),
+                EvidenceSelector(
+                    "EXACT_PATH",
+                    "docs/project/sprints/SPRINT-7.7.md",
+                    ("SecurityContext", "provenance"),
+                    64,
+                ),
+                EvidenceSelector(
+                    "EXACT_PATH",
+                    "docs/project/sprints/SPRINT-7.9.md",
+                    ("SecurityContext", "provenance"),
                     64,
                 ),
             ),
