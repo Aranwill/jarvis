@@ -174,13 +174,26 @@ class InternalInteractionTestV0Harness:
         )
 
         started_at = created_at if created_at is not None else datetime.now(UTC)
-        internal_result = runner.run(
-            task_id=TASK_ID,
-            scope=SCOPE,
-            external_validation_refs=refs,
-            run_id=run_id,
-            created_at=started_at,
-        )
+        live_view.start_liveness()
+        try:
+            internal_result = runner.run(
+                task_id=TASK_ID,
+                scope=SCOPE,
+                external_validation_refs=refs,
+                run_id=run_id,
+                created_at=started_at,
+            )
+        except Exception as exc:
+            try:
+                live_view.stop_liveness()
+            except Exception as teardown_exc:
+                exc.add_note(
+                    "live liveness teardown failed: "
+                    f"{type(teardown_exc).__name__}"
+                )
+            raise
+        else:
+            live_view.stop_liveness()
 
         validate_internal_interaction_artifacts(
             internal_result.artifact_dir
