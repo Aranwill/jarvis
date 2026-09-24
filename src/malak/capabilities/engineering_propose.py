@@ -15,6 +15,7 @@ from malak.capabilities._engineering_analysis import (
     require_exact_keys,
     run_engineering_analysis,
 )
+from malak.capabilities._engineering_evidence import GovernedEngineeringEvidenceFocus
 from malak.contracts.capability import Capability
 from malak.core.conversation import ConversationRequest
 from malak.core.request import Request
@@ -120,6 +121,7 @@ class EngineeringProposeCapability(Capability):
         conversation_service: ConversationService,
         provider_name: str,
         model: str | None = None,
+        evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
     ) -> None:
         if repository_reader.baseline_commit != knowledge_reader.baseline_commit:
             raise RuntimeError(
@@ -133,6 +135,7 @@ class EngineeringProposeCapability(Capability):
         self._conversation_service = conversation_service
         self._provider_name = provider_name
         self._model = model
+        self._evidence_focus = evidence_focus
         self._baseline_commit = repository_reader.baseline_commit
 
     @property
@@ -158,13 +161,14 @@ class EngineeringProposeCapability(Capability):
             max_model_output_bytes=_MAX_ANALYSIS_MODEL_OUTPUT_BYTES,
             error_scope="E4",
             parse_analysis_fn=_parse_analysis,
+            evidence_focus=self._evidence_focus,
         )
 
         repository_evidence = list(result.repository_evidence)
         knowledge_evidence = list(result.knowledge_evidence)
 
         if result.status == "UNCONFIRMED":
-            return _render_no_proposal(
+            rendered = _render_no_proposal(
                 baseline_commit=self._baseline_commit,
                 proposal_subject=subject,
                 status="UNCONFIRMED",
@@ -174,6 +178,13 @@ class EngineeringProposeCapability(Capability):
                 repository_skipped_unreadable=result.repository_skipped_unreadable,
                 context_truncated=result.context_truncated,
             )
+            return _with_focus_metadata(
+                rendered,
+                focus_id=result.focus_id,
+                focus_complete=result.focus_complete,
+                evidence_set_digest=result.evidence_set_digest,
+                supplemental_truncated=result.supplemental_truncated,
+            )
 
         analysis = result.analysis
         if analysis is None:
@@ -181,7 +192,7 @@ class EngineeringProposeCapability(Capability):
 
         blocker = _proposal_blocker(analysis)
         if blocker is not None:
-            return _render_no_proposal(
+            rendered = _render_no_proposal(
                 baseline_commit=self._baseline_commit,
                 proposal_subject=subject,
                 status="NO_PROPOSAL",
@@ -190,6 +201,13 @@ class EngineeringProposeCapability(Capability):
                 knowledge_evidence_count=len(knowledge_evidence),
                 repository_skipped_unreadable=result.repository_skipped_unreadable,
                 context_truncated=result.context_truncated,
+            )
+            return _with_focus_metadata(
+                rendered,
+                focus_id=result.focus_id,
+                focus_complete=result.focus_complete,
+                evidence_set_digest=result.evidence_set_digest,
+                supplemental_truncated=result.supplemental_truncated,
             )
 
         structured_analysis = _structured_analysis(analysis)
@@ -241,7 +259,7 @@ class EngineeringProposeCapability(Capability):
             repository_evidence=repository_evidence,
             knowledge_evidence=knowledge_evidence,
         )
-        return _render_grounded(
+        rendered = _render_grounded(
             baseline_commit=self._baseline_commit,
             proposal_subject=subject,
             proposal_set=proposals,
@@ -250,6 +268,13 @@ class EngineeringProposeCapability(Capability):
             knowledge_evidence=knowledge_evidence,
             repository_skipped_unreadable=result.repository_skipped_unreadable,
             context_truncated=result.context_truncated,
+        )
+        return _with_focus_metadata(
+            rendered,
+            focus_id=result.focus_id,
+            focus_complete=result.focus_complete,
+            evidence_set_digest=result.evidence_set_digest,
+            supplemental_truncated=result.supplemental_truncated,
         )
 
 
@@ -676,3 +701,27 @@ def _render_grounded(
         )
 
     return "\n".join(lines)
+
+
+def _with_focus_metadata(
+    rendered: str,
+    *,
+    focus_id: str | None,
+    focus_complete: bool | None,
+    evidence_set_digest: str | None,
+    supplemental_truncated: bool,
+) -> str:
+    if focus_id is None:
+        return rendered
+    marker = "authority_effect: none"
+    metadata = "\n".join(
+        (
+            f"focus_id: {focus_id}",
+            f"focus_complete: {str(bool(focus_complete)).lower()}",
+            f"evidence_set_digest: {evidence_set_digest}",
+            f"supplemental_truncated: {str(supplemental_truncated).lower()}",
+        )
+    )
+    if marker not in rendered:
+        raise RuntimeError("engineering proposal envelope is missing authority_effect")
+    return rendered.replace(marker, metadata + "\n" + marker, 1)
