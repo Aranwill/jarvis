@@ -17,7 +17,11 @@ red_slice_a_authorized_by: owner
 red_slice_a_authorized_at: 2026-09-24
 red_slice_b_authorized: false
 red_slice_c_authorized: false
-implementation_authorized: false
+green_slice_a_authorized: true
+green_slice_a_authorized_by: owner
+green_slice_a_authorized_at: 2026-09-24
+implementation_authorized: true
+implementation_scope: slice_a_obs_01_only
 runtime_execution_authorized: false
 third_u01_execution_authorized: false
 runtime_delta: 0
@@ -1257,3 +1261,51 @@ authority_effect                   none
 El RED candidate queda limitado a tests de live elapsed/liveness y a esta
 actualización documental de autoridad. No puede introducir todavía código
 productivo ni implementar diagnostics/model provenance.
+
+
+## 25. RED Slice A evidence y GREEN authorization checkpoint
+
+El RED candidate exacto quedó congelado en:
+
+```text
+candidate: 08d4a7b5107fd3772af382c2a31746f51fd04271
+Validation: #499
+Ubuntu:  8 failed / 1493 passed
+Windows: 8 failed / 1493 passed
+conclusion: FAILURE expected / RED demonstrated
+```
+
+Las ocho fallas fueron exclusivamente las nuevas de OBS-01:
+
+```text
+A01-A06
+-> LiveTraceTextView no acepta monotonic_fn / refresh_interval_seconds
+-> no existe refresh_elapsed()
+-> no existe lifecycle de ticker/liveness
+
+A07-A08
+-> Harness no inicia liveness
+-> Harness no detiene liveness
+-> teardown ante excepción no está garantizado
+```
+
+No se observaron regresiones ajenas al Slice A; los 1493 tests previos
+continuaron PASS en Ubuntu y Windows.
+
+Después de revisar esta evidencia RED, el Owner autorizó GREEN Slice A.
+
+```text
+GREEN Slice A                      GRANTED
+implementation scope               OBS-01 only
+RED Slice B                        NOT GRANTED
+RED Slice C                        NOT GRANTED
+runtime self-review execution      NOT AUTHORIZED
+third real U01                     BLOCKED
+Kernel planned delta               0
+Planner planned delta              0
+ExecutionTrace schema delta        0
+authority_effect                   none
+```
+
+GREEN debe implementar únicamente overlay elapsed/liveness y lifecycle seguro
+del ticker, preservando final material LIVE == REPLAY.
