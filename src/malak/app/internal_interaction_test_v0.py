@@ -180,7 +180,7 @@ class InternalInteractionTestV0Harness:
         runner = InternalInteractionRunner(
             engineering=run_engineering,
             artifact_root=artifact_root,
-            runtime_name=type(self._runtime).__name__,
+            runtime_name=runtime_provenance.runtime_class,
             model=self._model,
             runtime_provenance=runtime_provenance,
             event_sink=live_view.append,
