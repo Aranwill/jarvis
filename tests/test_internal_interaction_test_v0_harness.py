@@ -48,6 +48,7 @@ ARTIFACT_FILES = {
     "evidence.json",
     "assessment.json",
     "outcome.json",
+    "runtime_provenance.json",
     "attestation.json",
 }
 
@@ -217,8 +218,15 @@ def _engineering(
     return engineering, calls
 
 
+class _HarnessOllamaRuntime(OllamaRuntime):
+    def capture_provenance(self, model: str):
+        return _runtime_provenance(model=model)
+
+
 def _ollama() -> OllamaRuntime:
-    return OllamaRuntime(base_url="http://127.0.0.1:11434")
+    return _HarnessOllamaRuntime(
+        base_url="http://127.0.0.1:11434"
+    )
 
 
 def _harness(
@@ -559,6 +567,9 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
         super().__init__(base_url="http://127.0.0.1:11434")
         self.calls = 0
 
+    def capture_provenance(self, model: str):
+        return _runtime_provenance(model=model)
+
     def generate(
         self,
         request: ConversationRequest,
@@ -785,6 +796,7 @@ def test_live_elapsed_red_a08_harness_stops_liveness_on_runner_exception(
 def _runtime_provenance(
     *,
     strength: str = "DIGEST_BOUND",
+    model: str = "qwen3:8b",
 ):
     module = import_module("malak.runtime.runtime_provenance")
     digest = (
@@ -793,7 +805,7 @@ def _runtime_provenance(
         else None
     )
     resolved_model = (
-        "qwen3:8b"
+        model
         if strength in {"DIGEST_BOUND", "TAG_ONLY"}
         else None
     )
@@ -809,7 +821,7 @@ def _runtime_provenance(
         captured_at=NOW,
         runtime_class="OllamaRuntime",
         provider="ollama",
-        requested_model="qwen3:8b",
+        requested_model=model,
         resolved_model=resolved_model,
         model_digest=digest,
         model_identity_strength=strength,
