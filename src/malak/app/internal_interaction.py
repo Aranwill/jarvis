@@ -143,6 +143,10 @@ class InternalInteractionRunner:
                 raise ValueError(
                     "runtime_provenance requested_model mismatch"
                 )
+            if runtime_provenance.runtime_class != runtime_name:
+                raise ValueError(
+                    "runtime_provenance runtime_class mismatch"
+                )
         if event_sink is not None and not callable(event_sink):
             raise TypeError("event_sink must be callable")
         if clock is not None and not callable(clock):
@@ -1019,6 +1023,18 @@ def validate_internal_interaction_artifacts(
         if provenance.requested_model != manifest_model:
             raise ValueError(
                 "runtime provenance requested_model does not match manifest"
+            )
+        manifest_runtime = manifest.get("runtime_name")
+        if (
+            not isinstance(manifest_runtime, str)
+            or not manifest_runtime
+        ):
+            raise ValueError(
+                "runtime provenance requires manifest runtime_name"
+            )
+        if provenance.runtime_class != manifest_runtime:
+            raise ValueError(
+                "runtime provenance runtime_class does not match manifest"
             )
         if provenance.authority_effect != "none":
             raise ValueError(
