@@ -1411,3 +1411,53 @@ No puede:
 - introducir autoridad nueva;
 - modificar Kernel/Planner;
 - convertir métricas en evaluación.
+
+
+## 29. RED Slice C evidence y GREEN authorization checkpoint
+
+El RED candidate exacto quedó congelado en:
+
+```text
+candidate: 0293ba7537d5fe3b407eb6ea9ce91b504ed1b5f1
+Validation: #515
+Ubuntu:  15 failed / 1518 passed
+Windows: 15 failed / 1518 passed
+conclusion: FAILURE expected / RED demonstrated
+```
+
+Las quince fallas fueron exclusivamente las nuevas de Runtime / Model Provenance:
+
+```text
+C01-C12
+-> runtime_provenance contract absent
+-> OllamaRuntime.capture_provenance() absent
+
+C13
+-> runtime_provenance.json absent from artifact/attestation
+
+C14
+-> Engineering starts before provenance capture
+
+C15
+-> TAG_ONLY does not stop benchmark-grade Self-Review
+```
+
+No se observaron regresiones ajenas a Slice C.
+
+Después de revisar esta evidencia RED, el Owner autorizó GREEN Slice C.
+
+```text
+GREEN Slice C                      GRANTED
+implementation scope               runtime/model provenance only
+runtime self-review execution      NOT AUTHORIZED
+third real U01                     BLOCKED
+Kernel planned delta               0
+Planner planned delta              0
+model mutation paths               0
+authority_effect                   none
+```
+
+GREEN queda limitado al contrato `RuntimeModelProvenance`, introspección local
+read-only de Ollama, persistencia/attestation de `runtime_provenance.json` y
+admission `DIGEST_BOUND` antes de Engineering. No autoriza ejecutar el tercer
+U01 ni cambiar/actualizar el modelo.
