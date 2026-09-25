@@ -11,7 +11,8 @@ import pytest
 from malak.runtime.ollama_runtime import OllamaRuntime
 
 
-DIGEST = "sha256:" + ("a" * 64)
+RAW_DIGEST = "a" * 64
+DIGEST = "sha256:" + RAW_DIGEST
 
 
 class _FakeHTTPResponse:
@@ -35,7 +36,7 @@ def _module():
 def _capture(
     monkeypatch: pytest.MonkeyPatch,
     *,
-    digest: str | None = DIGEST,
+    digest: str | None = RAW_DIGEST,
     resolved_model: str = "qwen3:8b",
     context_window: int | None = 32768,
 ):
