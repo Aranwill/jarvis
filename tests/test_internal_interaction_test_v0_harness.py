@@ -795,23 +795,23 @@ def test_live_elapsed_red_a08_harness_stops_liveness_on_runner_exception(
 
 def _runtime_provenance(
     *,
-    strength: str = "DIGEST_BOUND",
+    strength: str = "TAG_DIGEST_BOUND",
     model: str = "qwen3:8b",
 ):
     module = import_module("malak.runtime.runtime_provenance")
     digest = (
         "sha256:" + ("b" * 64)
-        if strength == "DIGEST_BOUND"
+        if strength == "TAG_DIGEST_BOUND"
         else None
     )
     resolved_model = (
         model
-        if strength in {"DIGEST_BOUND", "TAG_ONLY"}
+        if strength in {"TAG_DIGEST_BOUND", "TAG_ONLY"}
         else None
     )
     status = (
         "READY"
-        if strength == "DIGEST_BOUND"
+        if strength == "TAG_DIGEST_BOUND"
         else "PARTIAL"
         if strength == "TAG_ONLY"
         else "UNAVAILABLE"
@@ -870,7 +870,7 @@ def test_model_provenance_red_c13_harness_persists_and_attests_runtime_provenanc
     payload = json.loads(provenance_path.read_text(encoding="utf-8"))
     assert payload["requested_model"] == "qwen3:8b"
     assert payload["model_digest"] == "sha256:" + ("b" * 64)
-    assert payload["model_identity_strength"] == "DIGEST_BOUND"
+    assert payload["model_identity_strength"] == "TAG_DIGEST_BOUND"
     assert payload["authority_effect"] == "none"
 
     attestation = json.loads(
@@ -935,7 +935,7 @@ def test_model_provenance_red_c15_benchmark_grade_run_rejects_tag_only_identity(
 
     with pytest.raises(
         RuntimeError,
-        match="DIGEST_BOUND",
+        match="TAG_DIGEST_BOUND",
     ):
         _run(_harness(repo, engineering, runtime=runtime))
 
