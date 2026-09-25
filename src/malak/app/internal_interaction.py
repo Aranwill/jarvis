@@ -1041,7 +1041,11 @@ def _artifact_payload_files(
     include_runtime_provenance: bool,
 ) -> tuple[str, ...]:
     if include_runtime_provenance:
-        return (*_ARTIFACT_PAYLOAD_FILES, _RUNTIME_PROVENANCE_FILE)
+        return tuple(
+            sorted(
+                (*_ARTIFACT_PAYLOAD_FILES, _RUNTIME_PROVENANCE_FILE)
+            )
+        )
     return _ARTIFACT_PAYLOAD_FILES
 
 
