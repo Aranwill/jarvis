@@ -109,7 +109,7 @@ def test_model_provenance_red_c02_records_requested_and_resolved_model(
     assert provenance.resolved_model == "qwen3:8b"
 
 
-def test_model_provenance_red_c03_digest_binds_exact_model_identity(
+def test_model_provenance_red_c03_tag_digest_binds_observed_local_identity(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     provenance, _ = _capture(monkeypatch)
