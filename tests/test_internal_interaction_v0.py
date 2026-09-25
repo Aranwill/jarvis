@@ -20,6 +20,7 @@ from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.response import Response
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
+from malak.runtime.runtime_provenance import RuntimeModelProvenance
 from malak.services.conversation_service import ConversationService
 
 
@@ -219,6 +220,32 @@ def _engineering(
     return engineering, calls
 
 
+def _runtime_provenance(
+    *,
+    runtime_class: str = "OllamaRuntime",
+) -> RuntimeModelProvenance:
+    return RuntimeModelProvenance(
+        schema="MALAK-RUNTIME-MODEL-PROVENANCE/v0",
+        captured_at=NOW,
+        runtime_class=runtime_class,
+        provider="ollama",
+        requested_model="qwen3:8b",
+        resolved_model="qwen3:8b",
+        model_digest="sha256:" + ("c" * 64),
+        model_identity_strength="TAG_DIGEST_BOUND",
+        runtime_version="0.12.0",
+        declared_context_window=32768,
+        context_window_source="ollama:model_info",
+        generation_options={},
+        timeout_seconds=30.0,
+        keep_alive=0,
+        max_request_bytes=1024,
+        max_response_bytes=2048,
+        provenance_status="READY",
+        authority_effect="none",
+    )
+
+
 def _runner(
     repo: Path,
     engineering,
@@ -257,6 +284,25 @@ def _run(
         run_id=run_id,
         created_at=NOW,
     )
+
+
+def test_model_provenance_green_c02_runner_rejects_runtime_identity_mismatch(
+    tmp_path: Path,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo)
+
+    with pytest.raises(
+        ValueError,
+        match="runtime_provenance runtime_class mismatch",
+    ):
+        _module().InternalInteractionRunner(
+            engineering=engineering,
+            artifact_root=repo / "runtime" / "internal_interaction",
+            runtime_name="synthetic-runtime",
+            model="qwen3:8b",
+            runtime_provenance=_runtime_provenance(),
+        )
 
 
 def test_interaction_red_c01_terminal_disposition_is_closed() -> None:
