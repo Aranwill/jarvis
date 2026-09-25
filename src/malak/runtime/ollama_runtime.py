@@ -174,7 +174,7 @@ class OllamaRuntime(LLMRuntime):
             identity_strength = "TAG_ONLY"
             provenance_status = "PARTIAL"
         else:
-            identity_strength = "DIGEST_BOUND"
+            identity_strength = "TAG_DIGEST_BOUND"
             provenance_status = "READY"
 
         return RuntimeModelProvenance(
