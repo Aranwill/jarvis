@@ -6,6 +6,9 @@ document_role: admission_review
 language: es
 created: 2026-09-25
 baseline_commit: 07e667d669352d8cb0974dbbbcb017fa4ea7d979
+reviewed_code_baseline: 07e667d669352d8cb0974dbbbcb017fa4ea7d979
+admission_merge_observed: 32ad7e49513c5c96d7f66b1084544feb4531d667
+execution_baseline_rule: current_main_with_admission_doc_only_delta
 admission_result: conditional_pass
 runtime_execution_authorized: false
 third_u01_authorized: false
@@ -41,14 +44,58 @@ Este gate no autoriza runtime. Su función es responder:
 con suficiente evidencia como para pedir autorización de ejecución?
 ```
 
-## 2. Baseline exacto
+## 2. Baseline revisado y binding de ejecución
+
+El baseline de código/runtime evaluado por este admission review es:
 
 ```text
 repository: Aranwill/jarvis
 branch: main
-baseline: 07e667d669352d8cb0974dbbbcb017fa4ea7d979
+reviewed_code_baseline:
+07e667d669352d8cb0974dbbbcb017fa4ea7d979
+
 open PRs observed at admission: 0
 remote branches observed at admission: main only
+```
+
+La integración de este mismo admission review produjo después:
+
+```text
+admission_merge_observed:
+32ad7e49513c5c96d7f66b1084544feb4531d667
+```
+
+Entre `reviewed_code_baseline` y ese merge se observó únicamente:
+
+```text
+docs/project/sprints/proposals/
+MALAK-THIRD-U01-ADMISSION-REVIEW-20260925.md
+```
+
+sin cambios de código, tests, configuración ni runtime.
+
+Esto cierra una propiedad auto-referencial del gate: un documento trackeado no
+puede exigir que `HEAD` siga siendo su commit padre después de ser mergeado.
+
+Por tanto, el contrato correcto es:
+
+```text
+reviewed_code_baseline
+-> congela el código/runtime admitido
+
+execution_baseline
+-> exact current main HEAD at local preflight
+-> captured by Engineering / artifacts
+-> may differ from reviewed_code_baseline only through this admission-review
+   document
+```
+
+Cualquier otro path modificado desde `reviewed_code_baseline`:
+
+```text
+-> admission invalidated
+-> STOP
+-> new admission review required
 ```
 
 Integraciones previas relevantes:
@@ -137,8 +184,11 @@ CLOSED AT IMPLEMENTATION LEVEL
 
 ## 4. U01 exact-current-baseline selector review
 
-Se revisaron los selectores requeridos de U01 contra el contenido actual de
-`main@07e667d...`.
+Se revisaron los selectores requeridos de U01 contra el
+`reviewed_code_baseline@07e667d...`.
+
+La integración posterior del admission review no modificó ninguno de esos
+selectores ni sus fuentes requeridas.
 
 Resultado estático de admisión:
 
@@ -319,8 +369,17 @@ La ejecución futura sólo puede iniciarse si, en local:
 
 ```text
 branch == main
-HEAD == 07e667d669352d8cb0974dbbbcb017fa4ea7d979
 tracked working tree == clean
+
+diff reviewed_code_baseline..HEAD
+-> only:
+   docs/project/sprints/proposals/
+   MALAK-THIRD-U01-ADMISSION-REVIEW-20260925.md
+
+current HEAD
+-> becomes exact execution baseline
+-> Engineering baseline must equal that HEAD
+
 MALAK_RUNTIME == ollama
 MALAK_OLLAMA_MODEL configured
 MALAK_REPOSITORY_ROOT points to exact repository
@@ -333,6 +392,9 @@ run_id does not already exist
 El Harness ya falla cerrado ante branch/head/tree mismatch y ante identidad
 inferior a `TAG_DIGEST_BOUND`.
 
+El control adicional `reviewed_code_baseline..HEAD` pertenece al preflight de
+admisión y debe ejecutarse antes de invocar el Harness.
+
 ## 9. Run identity propuesto
 
 Si el Owner autoriza runtime después de integrar este admission review:
@@ -343,8 +405,13 @@ bootstrap-u01-20260925-003
 
 validation refs:
 Validation#541
+Validation#543
 PR#190
-main@07e667d669352d8cb0974dbbbcb017fa4ea7d979
+PR#191
+reviewed-code@07e667d669352d8cb0974dbbbcb017fa4ea7d979
+
+exact execution baseline:
+captured from current main HEAD at preflight and persisted by the run artifacts
 ```
 
 El task/focus/scope siguen congelados por Test V0:
@@ -500,7 +567,8 @@ de convertir incertidumbre en finding o autoridad.
 Este admission review no implementa runtime.
 
 ```text
-baseline exact                   PASS
+reviewed code baseline exact     PASS
+execution baseline rule           PASS
 prior candidate validations      PASS
 causal gaps closed separately    PASS
 runtime preconditions explicit   PASS
@@ -517,6 +585,7 @@ de U01.
 Third U01 Admission Review
 
 baseline readiness              PASS
+baseline binding semantics       PASS
 EVID-01 / EVID-02               CLOSED
 OBS-01                          CLOSED
 OBS-02                          CLOSED
@@ -558,4 +627,56 @@ Owner explicit runtime authorization
 -> disposition
 -> Owner
 -> STOP
+```
+
+
+## 17. Post-merge baseline binding correction
+
+Después de mergear este admission review se verificó una inconsistencia
+documental material:
+
+```text
+document required:
+HEAD == reviewed_code_baseline
+
+but merging the document itself changed HEAD
+```
+
+Eso no representa drift de código, pero sí hacía imposible cumplir literalmente
+la precondición después del merge.
+
+La corrección no relaja el baseline. Lo separa en dos identidades:
+
+```text
+reviewed_code_baseline
+= 07e667d669352d8cb0974dbbbcb017fa4ea7d979
+
+execution_baseline
+= exact current main HEAD at preflight
+```
+
+Admission sigue válido únicamente si:
+
+```text
+git diff --name-only reviewed_code_baseline..HEAD
+==
+docs/project/sprints/proposals/
+MALAK-THIRD-U01-ADMISSION-REVIEW-20260925.md
+```
+
+Si aparece cualquier otro path:
+
+```text
+STOP
+-> current admission no longer covers execution baseline
+-> new admission review required
+```
+
+Este ajuste:
+
+```text
+runtime authority expansion     0
+code/runtime delta              0
+self-review execution           NOT AUTHORIZED
+authority_effect                none
 ```
