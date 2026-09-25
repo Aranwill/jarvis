@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import UTC, datetime
 from json import JSONDecodeError
 from typing import Any
@@ -123,12 +124,14 @@ class OllamaRuntime(LLMRuntime):
                 continue
             resolved_model = requested_model
             digest = item.get("digest")
-            if (
-                isinstance(digest, str)
-                and digest.startswith("sha256:")
-                and len(digest) == 71
-            ):
-                model_digest = digest
+            if isinstance(digest, str):
+                if re.fullmatch(r"[0-9a-f]{64}", digest):
+                    model_digest = f"sha256:{digest}"
+                elif re.fullmatch(
+                    r"sha256:[0-9a-f]{64}",
+                    digest,
+                ):
+                    model_digest = digest
             break
 
         declared_context_window: int | None = None
