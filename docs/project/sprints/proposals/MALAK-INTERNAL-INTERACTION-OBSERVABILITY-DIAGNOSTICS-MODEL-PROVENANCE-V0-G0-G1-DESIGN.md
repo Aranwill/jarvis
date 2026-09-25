@@ -1627,3 +1627,85 @@ runtime execution        NOT AUTHORIZED
 third real U01           BLOCKED
 authority_effect         none
 ```
+
+
+## 33. FULL 4R bounded corrections after Validation #536
+
+Validation #536 cerró verde sobre:
+
+```text
+candidate: be9f6f1e69b3ee1d1f67a4febbe45232fcf2a162
+Ubuntu:  1533 passed
+Windows: 1533 passed
+```
+
+Durante FULL 4R / conformance posterior se detectaron dos endurecimientos
+acotados antes de entregar el candidate al Owner.
+
+### 33.1 Deep immutability de generation_options
+
+`RuntimeModelProvenance` era una dataclass frozen, pero
+`generation_options` seguía siendo un `dict` mutable internamente.
+
+Eso permitía:
+
+```text
+frozen envelope
+-> mutable nested mapping
+-> provenance material change after capture
+```
+
+Corrección:
+
+```text
+generation_options
+-> validated mapping
+-> defensive copy
+-> MappingProxyType
+```
+
+La serialización continúa usando una copia JSON cerrada.
+
+### 33.2 Binding runtime_class <-> manifest/runtime_name
+
+El artifact validator ya ligaba:
+
+```text
+requested_model
+<-> manifest.model
+```
+
+pero no comprobaba explícitamente:
+
+```text
+runtime_provenance.runtime_class
+<-> manifest.runtime_name
+```
+
+Corrección:
+
+```text
+Runner construction
+-> reject runtime identity mismatch
+
+artifact validation
+-> reject runtime_class / runtime_name mismatch
+```
+
+Esto evita artifacts internamente inconsistentes aunque sus archivos sean
+individualmente válidos.
+
+### 33.3 Alcance
+
+```text
+Kernel delta             0
+Planner delta            0
+Request delta            0
+model mutation paths     0
+runtime execution        NOT AUTHORIZED
+third real U01           BLOCKED
+authority_effect         none
+```
+
+Estas correcciones permanecen dentro de Slice C y no alteran la fuerza declarada
+de `TAG_DIGEST_BOUND`.
