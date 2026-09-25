@@ -1584,3 +1584,46 @@ runtime execution        NOT AUTHORIZED
 third real U01           BLOCKED
 authority_effect         none
 ```
+
+
+## 32. GREEN correction checkpoint — Validation #534
+
+Validation #534 sobre el candidate `6808678eb1f8033b6341bcaa63a60f9f14d64421`
+redujo el GREEN a una única inconsistencia observable en Ubuntu:
+
+```text
+1 failed / 1532 passed
+```
+
+Falla:
+
+```text
+InternalInteractionTestV0Result.runtime
+-> _HarnessOllamaRuntime
+expected
+-> OllamaRuntime
+```
+
+La causa era un segundo binding residual a `type(self._runtime).__name__` en el
+summary final del Harness. El Runner ya usaba correctamente
+`runtime_provenance.runtime_class`.
+
+Corrección acotada:
+
+```text
+InternalInteractionTestV0Result.runtime
+-> runtime_provenance.runtime_class
+```
+
+Esto evita que nombres de subclases de test contaminen la identidad semántica
+persistida/expuesta del runtime.
+
+No se amplía scope:
+
+```text
+Kernel delta             0
+Planner delta            0
+runtime execution        NOT AUTHORIZED
+third real U01           BLOCKED
+authority_effect         none
+```
