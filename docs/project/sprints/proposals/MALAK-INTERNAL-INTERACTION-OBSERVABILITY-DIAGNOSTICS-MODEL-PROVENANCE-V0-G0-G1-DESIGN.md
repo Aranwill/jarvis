@@ -640,7 +640,7 @@ RuntimeModelProvenance
 Estados mínimos:
 
 ```text
-DIGEST_BOUND
+TAG_DIGEST_BOUND
 TAG_ONLY
 UNAVAILABLE
 ```
@@ -652,7 +652,7 @@ requested tag only
 != exact reproducible model identity
 
 digest known
--> DIGEST_BOUND
+-> TAG_DIGEST_BOUND
 
 tag known but digest unavailable
 -> TAG_ONLY
@@ -837,7 +837,7 @@ Owner explicit runtime authorization
 Se recomienda para el tercer U01 exigir:
 
 ```text
-model_identity_strength = DIGEST_BOUND
+model_identity_strength = TAG_DIGEST_BOUND
 ```
 
 Si el runtime local no puede resolver digest:
@@ -1148,7 +1148,7 @@ RED deberá demostrar:
 ```text
 C01 requested model recorded
 C02 resolved local model recorded
-C03 valid digest -> DIGEST_BOUND
+C03 valid digest -> TAG_DIGEST_BOUND
 C04 missing digest -> TAG_ONLY/UNAVAILABLE, never fabricated
 C05 runtime version recorded when available
 C06 context metadata explicit as declared, not actual-use claim
@@ -1160,7 +1160,7 @@ C11 provenance artifact included in attestation
 C12 same evidence_set_digest remains independently visible
 C13 metrics remain telemetry only
 C14 no model update/pull/delete path
-C15 benchmark-grade self-review rejects non-DIGEST_BOUND identity
+C15 benchmark-grade self-review rejects non-TAG_DIGEST_BOUND identity
 C16 authority_effect none
 ```
 
@@ -1172,7 +1172,7 @@ Después de GREEN de los tres slices:
 real local Ollama
 exact baseline
 exact focus evidence digest
-DIGEST_BOUND model identity
+TAG_DIGEST_BOUND model identity
 LIVE elapsed visible during long call
 controlled synthetic component failure path test
 safe diagnostic replay/inspection
@@ -1459,5 +1459,5 @@ authority_effect                   none
 
 GREEN queda limitado al contrato `RuntimeModelProvenance`, introspección local
 read-only de Ollama, persistencia/attestation de `runtime_provenance.json` y
-admission `DIGEST_BOUND` antes de Engineering. No autoriza ejecutar el tercer
+admission `TAG_DIGEST_BOUND` antes de Engineering. No autoriza ejecutar el tercer
 U01 ni cambiar/actualizar el modelo.
