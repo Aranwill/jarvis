@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from types import MappingProxyType
 from typing import Final
 
 
@@ -38,7 +40,7 @@ class RuntimeModelProvenance:
     runtime_version: str | None
     declared_context_window: int | None
     context_window_source: str
-    generation_options: dict[str, object]
+    generation_options: Mapping[str, object]
     timeout_seconds: float
     keep_alive: int | str
     max_request_bytes: int
@@ -115,11 +117,17 @@ class RuntimeModelProvenance:
                     "available context window requires an explicit source"
                 )
 
-        if not isinstance(self.generation_options, dict):
-            raise TypeError("generation_options must be a dict")
+        if not isinstance(self.generation_options, Mapping):
+            raise TypeError("generation_options must be a mapping")
+        generation_options = dict(self.generation_options)
         _validate_json_object(
             "generation_options",
-            self.generation_options,
+            generation_options,
+        )
+        object.__setattr__(
+            self,
+            "generation_options",
+            MappingProxyType(generation_options),
         )
 
         if (
@@ -297,7 +305,7 @@ def _parse_utc_datetime(value: object) -> datetime:
 
 def _validate_json_object(
     field: str,
-    value: dict[str, object],
+    value: Mapping[str, object],
 ) -> None:
     for key, item in value.items():
         _validate_text(f"{field} key", key)
