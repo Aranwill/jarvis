@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from json import JSONDecodeError
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -14,6 +15,10 @@ from malak.core.llm_runtime import LLMRuntime
 from malak.runtime.runtime_metric_sample import RuntimeMetricSample
 from malak.runtime.runtime_metric_sink import RuntimeMetricSink
 from malak.runtime.runtime_metrics import RuntimeMetrics
+from malak.runtime.runtime_provenance import (
+    RUNTIME_MODEL_PROVENANCE_SCHEMA,
+    RuntimeModelProvenance,
+)
 
 
 class OllamaRuntime(LLMRuntime):
@@ -67,6 +72,197 @@ class OllamaRuntime(LLMRuntime):
         self._max_request_bytes = max_request_bytes
         self._max_response_bytes = max_response_bytes
         self._last_metrics: RuntimeMetrics | None = None
+
+    def capture_provenance(
+        self,
+        model: str,
+    ) -> RuntimeModelProvenance:
+        requested_model = model.strip() if isinstance(model, str) else ""
+        if not requested_model:
+            raise ValueError("model is required for provenance capture")
+        if requested_model != model:
+            raise ValueError(
+                "model must not contain surrounding whitespace"
+            )
+
+        version_payload = self._read_introspection_json(
+            path="/api/version",
+            method="GET",
+        )
+        version = version_payload.get("version")
+        runtime_version = (
+            version
+            if isinstance(version, str) and version.strip() == version and version
+            else None
+        )
+
+        tags_payload = self._read_introspection_json(
+            path="/api/tags",
+            method="GET",
+        )
+        models = tags_payload.get("models")
+        if not isinstance(models, list):
+            raise RuntimeError(
+                "Ollama tags response does not contain a valid models list"
+            )
+
+        resolved_model: str | None = None
+        model_digest: str | None = None
+        for item in models:
+            if not isinstance(item, dict):
+                continue
+            names = tuple(
+                value
+                for value in (
+                    item.get("name"),
+                    item.get("model"),
+                )
+                if isinstance(value, str)
+            )
+            if requested_model not in names:
+                continue
+            resolved_model = requested_model
+            digest = item.get("digest")
+            if (
+                isinstance(digest, str)
+                and digest.startswith("sha256:")
+                and len(digest) == 71
+            ):
+                model_digest = digest
+            break
+
+        declared_context_window: int | None = None
+        context_window_source = "unavailable"
+        if resolved_model is not None:
+            try:
+                show_payload = self._read_introspection_json(
+                    path="/api/show",
+                    method="POST",
+                    payload={"model": resolved_model},
+                )
+            except RuntimeError:
+                show_payload = {}
+
+            model_info = show_payload.get("model_info")
+            if isinstance(model_info, dict):
+                context_candidates = [
+                    value
+                    for key, value in model_info.items()
+                    if (
+                        isinstance(key, str)
+                        and (
+                            key == "context_length"
+                            or key.endswith(".context_length")
+                        )
+                        and type(value) is int
+                        and value > 0
+                    )
+                ]
+                if context_candidates:
+                    unique_candidates = set(context_candidates)
+                    if len(unique_candidates) == 1:
+                        declared_context_window = context_candidates[0]
+                        context_window_source = "ollama:model_info"
+
+        if resolved_model is None:
+            identity_strength = "UNAVAILABLE"
+            provenance_status = "UNAVAILABLE"
+        elif model_digest is None:
+            identity_strength = "TAG_ONLY"
+            provenance_status = "PARTIAL"
+        else:
+            identity_strength = "DIGEST_BOUND"
+            provenance_status = "READY"
+
+        return RuntimeModelProvenance(
+            schema=RUNTIME_MODEL_PROVENANCE_SCHEMA,
+            captured_at=datetime.now(UTC),
+            runtime_class="OllamaRuntime",
+            provider="ollama",
+            requested_model=requested_model,
+            resolved_model=resolved_model,
+            model_digest=model_digest,
+            model_identity_strength=identity_strength,
+            runtime_version=runtime_version,
+            declared_context_window=declared_context_window,
+            context_window_source=context_window_source,
+            generation_options={},
+            timeout_seconds=self._timeout_seconds,
+            keep_alive=self._keep_alive,
+            max_request_bytes=self._max_request_bytes,
+            max_response_bytes=self._max_response_bytes,
+            provenance_status=provenance_status,
+            authority_effect="none",
+        )
+
+    def _read_introspection_json(
+        self,
+        *,
+        path: str,
+        method: str,
+        payload: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        encoded_payload: bytes | None = None
+        if payload is not None:
+            encoded_payload = json.dumps(
+                payload,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            if len(encoded_payload) > self._max_request_bytes:
+                raise RuntimeError(
+                    "Ollama introspection request exceeded "
+                    "max_request_bytes"
+                )
+
+        headers = {"Accept": "application/json"}
+        if encoded_payload is not None:
+            headers["Content-Type"] = "application/json"
+
+        request = Request(
+            url=f"{self._base_url}{path}",
+            data=encoded_payload,
+            headers=headers,
+            method=method,
+        )
+
+        try:
+            with urlopen(
+                request,
+                timeout=self._timeout_seconds,
+            ) as response:
+                raw = response.read(self._max_response_bytes + 1)
+                if len(raw) > self._max_response_bytes:
+                    raise RuntimeError(
+                        "Ollama introspection response exceeded "
+                        "max_response_bytes"
+                    )
+        except HTTPError as exc:
+            raise RuntimeError(
+                f"Ollama introspection returned HTTP status {exc.code}"
+            ) from exc
+        except URLError as exc:
+            raise RuntimeError(
+                "Unable to reach Ollama for provenance introspection"
+            ) from exc
+        except TimeoutError as exc:
+            raise RuntimeError(
+                "Ollama provenance introspection timed out"
+            ) from exc
+
+        try:
+            decoded = json.loads(raw.decode("utf-8"))
+        except (UnicodeDecodeError, JSONDecodeError) as exc:
+            raise RuntimeError(
+                "Ollama provenance introspection returned invalid JSON"
+            ) from exc
+
+        if not isinstance(decoded, dict):
+            raise RuntimeError(
+                "Ollama provenance introspection payload is invalid"
+            )
+        return decoded
 
     @property
     def last_metrics(self) -> RuntimeMetrics | None:
