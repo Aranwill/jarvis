@@ -116,7 +116,7 @@ def test_model_provenance_red_c03_digest_binds_exact_model_identity(
 
     assert provenance.model_digest == DIGEST
     assert re.fullmatch(r"sha256:[0-9a-f]{64}", provenance.model_digest)
-    assert provenance.model_identity_strength == "DIGEST_BOUND"
+    assert provenance.model_identity_strength == "TAG_DIGEST_BOUND"
     assert provenance.provenance_status == "READY"
 
 
