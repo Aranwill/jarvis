@@ -233,7 +233,7 @@ class InternalInteractionTestV0Harness:
             live_replay_equivalence=equivalent,
             tracked_tree_clean=tracked_clean,
             acceptance=acceptance,
-            runtime=type(self._runtime).__name__,
+            runtime=runtime_provenance.runtime_class,
             model=self._model,
             authority_effect="none",
         )
