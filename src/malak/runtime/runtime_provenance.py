@@ -18,7 +18,7 @@ _SAFE_TEXT_RE: Final[re.Pattern[str]] = re.compile(
     r"^[^\x00-\x1f\x7f]+$"
 )
 _IDENTITY_STRENGTHS: Final[frozenset[str]] = frozenset(
-    {"DIGEST_BOUND", "TAG_ONLY", "UNAVAILABLE"}
+    {"TAG_DIGEST_BOUND", "TAG_ONLY", "UNAVAILABLE"}
 )
 _PROVENANCE_STATUSES: Final[frozenset[str]] = frozenset(
     {"READY", "PARTIAL", "UNAVAILABLE"}
@@ -73,13 +73,13 @@ class RuntimeModelProvenance:
         ):
             raise ValueError("model_digest must be sha256:<64 lowercase hex>")
 
-        if self.model_identity_strength == "DIGEST_BOUND":
+        if self.model_identity_strength == "TAG_DIGEST_BOUND":
             if self.resolved_model is None or self.model_digest is None:
                 raise ValueError(
-                    "DIGEST_BOUND requires resolved_model and model_digest"
+                    "TAG_DIGEST_BOUND requires resolved_model and model_digest"
                 )
             if self.provenance_status != "READY":
-                raise ValueError("DIGEST_BOUND provenance must be READY")
+                raise ValueError("TAG_DIGEST_BOUND provenance must be READY")
         elif self.model_identity_strength == "TAG_ONLY":
             if self.resolved_model is None or self.model_digest is not None:
                 raise ValueError(
