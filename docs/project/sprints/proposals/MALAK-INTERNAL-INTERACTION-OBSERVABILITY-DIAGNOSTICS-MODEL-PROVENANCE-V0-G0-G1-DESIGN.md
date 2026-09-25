@@ -1530,3 +1530,57 @@ runtime execution       NOT AUTHORIZED
 third real U01          BLOCKED
 authority_effect        none
 ```
+
+
+## 31. GREEN correction checkpoint — Validation #530
+
+Validation #530 sobre el candidate `63fa13ffb61012b4e67b1d86dc937d2fe1c6a4d2`
+falló en ambos runners con:
+
+```text
+Ubuntu:  10 failed / 1523 passed
+Windows: 10 failed / 1523 passed
+```
+
+Las fallas fueron acotadas a dos inconsistencias introducidas durante el
+endurecimiento semántico de Slice C:
+
+```text
+1. OllamaRuntime.capture_provenance()
+   todavía emitía model_identity_strength = DIGEST_BOUND
+   mientras el contrato ya exigía TAG_DIGEST_BOUND.
+
+2. El Harness pasaba type(runtime).__name__ al Runner.
+   En tests, el runtime es una subclase determinista:
+   _HarnessOllamaRuntime
+   pero la provenance ya declara la clase semántica estable:
+   OllamaRuntime.
+```
+
+Correcciones adoptadas:
+
+```text
+capture_provenance
+-> TAG_DIGEST_BOUND
+
+runner runtime_name
+-> runtime_provenance.runtime_class
+-> no depende del nombre de una subclase de test
+```
+
+También se renombró el test C03 para no sugerir una identidad servida más fuerte
+que la observada:
+
+```text
+tag digest binds observed local identity
+```
+
+No se amplía scope:
+
+```text
+Kernel delta             0
+Planner delta            0
+runtime execution        NOT AUTHORIZED
+third real U01           BLOCKED
+authority_effect         none
+```
