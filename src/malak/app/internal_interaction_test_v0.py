@@ -158,11 +158,11 @@ class InternalInteractionTestV0Harness:
         )
         if (
             runtime_provenance.model_identity_strength
-            != "DIGEST_BOUND"
+            != "TAG_DIGEST_BOUND"
         ):
             raise RuntimeError(
                 "Internal Interaction Test V0 requires "
-                "DIGEST_BOUND model identity"
+                "TAG_DIGEST_BOUND model identity"
             )
 
         live_view = LiveTraceTextView(output_fn=self._output_fn)
