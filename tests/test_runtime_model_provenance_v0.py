@@ -100,6 +100,15 @@ def test_model_provenance_red_c01_contract_is_frozen_and_authority_free(
         provenance.requested_model = "other"
 
 
+def test_model_provenance_green_c01_generation_options_are_deeply_immutable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provenance, _ = _capture(monkeypatch)
+
+    with pytest.raises(TypeError):
+        provenance.generation_options["temperature"] = 0.0
+
+
 def test_model_provenance_red_c02_records_requested_and_resolved_model(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
