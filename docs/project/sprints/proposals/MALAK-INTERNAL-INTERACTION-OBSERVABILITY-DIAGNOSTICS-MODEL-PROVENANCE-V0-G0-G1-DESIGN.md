@@ -651,7 +651,7 @@ Reglas:
 requested tag only
 != exact reproducible model identity
 
-digest known
+digest observed for the local tag
 -> TAG_DIGEST_BOUND
 
 tag known but digest unavailable
@@ -776,14 +776,17 @@ runtime metrics
 Así:
 
 ```text
-same evidence set + same model digest
--> comparable execution conditions
+same evidence set + same observed local tag digest
+-> stronger comparable execution conditions
 
 different evidence set
 -> not a clean model-capability comparison
 
-different model digest
--> not the same model artifact
+different observed local tag digest
+-> not the same captured local model state
+
+TAG_DIGEST_BOUND
+!= served-response digest attestation
 ```
 
 ## 9. Artifact set propuesto
@@ -834,11 +837,15 @@ RDD Stage 1 Candidate Conformance PASS
 Owner explicit runtime authorization
 ```
 
-Se recomienda para el tercer U01 exigir:
+Se recomienda para el tercer U01 exigir como mínimo:
 
 ```text
 model_identity_strength = TAG_DIGEST_BOUND
 ```
+
+Pero el admission gate del tercer U01 debe decidir explícitamente si la
+observación del digest del tag local es suficiente para esa ejecución o si se
+requiere una prueba más fuerte del artifact servido.
 
 Si el runtime local no puede resolver digest:
 
@@ -934,12 +941,14 @@ Interpretaciones materiales cerradas:
 10. exception type no equivale a finding;
 11. diagnostic fingerprint no equivale a issue identity perfecta;
 12. model tag no equivale a model digest;
-13. declared context window no equivale a tokens usados;
-14. metrics no equivalen a evaluación;
-15. provenance no concede autoridad;
-16. runtime introspection local no puede mutar Ollama/modelos;
-17. missing model digest no se inventa;
-18. third U01 no se autoautoriza al quedar GREEN.
+13. TAG_DIGEST_BOUND describe el binding observado del tag local, no una
+    attestation del digest exacto servido por cada respuesta;
+14. declared context window no equivale a tokens usados;
+15. metrics no equivalen a evaluación;
+16. provenance no concede autoridad;
+17. runtime introspection local no puede mutar Ollama/modelos;
+18. missing model digest no se inventa;
+19. third U01 no se autoautoriza al quedar GREEN.
 
 Adversarial / fail-open:
 
@@ -1461,3 +1470,63 @@ GREEN queda limitado al contrato `RuntimeModelProvenance`, introspección local
 read-only de Ollama, persistencia/attestation de `runtime_provenance.json` y
 admission `TAG_DIGEST_BOUND` antes de Engineering. No autoriza ejecutar el tercer
 U01 ni cambiar/actualizar el modelo.
+
+
+## 30. Bounded Correction — Ollama digest semantics y attestation order
+
+Durante GREEN Slice C se verificó la forma real del contrato local de Ollama.
+
+### Digest observado
+
+`GET /api/tags` expone actualmente el digest de modelo como 64 caracteres
+hexadecimales sin prefijo `sha256:`.
+
+Corrección:
+
+```text
+/api/tags digest = <64 hex>
+        ↓
+normalize locally
+        ↓
+sha256:<64 hex>
+        ↓
+runtime_provenance.json
+```
+
+No se inventa digest y un formato inválido degrada la identidad a `TAG_ONLY`.
+
+### Alcance de TAG_DIGEST_BOUND
+
+El estado se renombra de `DIGEST_BOUND` a `TAG_DIGEST_BOUND` para cerrar una
+ambigüedad material:
+
+```text
+TAG_DIGEST_BOUND
+= tag local resuelto + digest local observado al capturar provenance
+
+TAG_DIGEST_BOUND
+!= prueba criptográfica de que cada respuesta /api/chat fue servida
+   exactamente por ese digest
+```
+
+El API local estándar no debe asumirse como fuente de served-response digest si
+ese dato no forma parte del contrato observado. Por eso el tercer U01 permanece
+bloqueado y su admission review deberá decidir qué fuerza de binding es
+suficiente antes de autorizar una ejecución benchmark-grade.
+
+### Canonical attestation order
+
+`attestation.json` se serializa con keys ordenadas. Al añadir
+`runtime_provenance.json`, el payload file set se ordena canónicamente antes de
+validar para evitar un mismatch artificial de orden.
+
+Estas correcciones no amplían autoridad ni surface:
+
+```text
+Kernel delta            0
+Planner delta           0
+model mutation paths    0
+runtime execution       NOT AUTHORIZED
+third real U01          BLOCKED
+authority_effect        none
+```
