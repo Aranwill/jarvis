@@ -48,6 +48,7 @@ ARTIFACT_FILES = {
     "evidence.json",
     "assessment.json",
     "outcome.json",
+    "runtime_provenance.json",
     "attestation.json",
 }
 
@@ -217,8 +218,15 @@ def _engineering(
     return engineering, calls
 
 
+class _HarnessOllamaRuntime(OllamaRuntime):
+    def capture_provenance(self, model: str):
+        return _runtime_provenance(model=model)
+
+
 def _ollama() -> OllamaRuntime:
-    return OllamaRuntime(base_url="http://127.0.0.1:11434")
+    return _HarnessOllamaRuntime(
+        base_url="http://127.0.0.1:11434"
+    )
 
 
 def _harness(
@@ -559,6 +567,9 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
         super().__init__(base_url="http://127.0.0.1:11434")
         self.calls = 0
 
+    def capture_provenance(self, model: str):
+        return _runtime_provenance(model=model)
+
     def generate(
         self,
         request: ConversationRequest,
@@ -780,3 +791,155 @@ def test_live_elapsed_red_a08_harness_stops_liveness_on_runner_exception(
     assert len(starts) == 1
     assert len(stops) == 1
     assert starts[0] is stops[0]
+
+
+def _runtime_provenance(
+    *,
+    strength: str = "TAG_DIGEST_BOUND",
+    model: str = "qwen3:8b",
+):
+    module = import_module("malak.runtime.runtime_provenance")
+    digest = (
+        "sha256:" + ("b" * 64)
+        if strength == "TAG_DIGEST_BOUND"
+        else None
+    )
+    resolved_model = (
+        model
+        if strength in {"TAG_DIGEST_BOUND", "TAG_ONLY"}
+        else None
+    )
+    status = (
+        "READY"
+        if strength == "TAG_DIGEST_BOUND"
+        else "PARTIAL"
+        if strength == "TAG_ONLY"
+        else "UNAVAILABLE"
+    )
+    return module.RuntimeModelProvenance(
+        schema="MALAK-RUNTIME-MODEL-PROVENANCE/v0",
+        captured_at=NOW,
+        runtime_class="OllamaRuntime",
+        provider="ollama",
+        requested_model=model,
+        resolved_model=resolved_model,
+        model_digest=digest,
+        model_identity_strength=strength,
+        runtime_version="0.12.0",
+        declared_context_window=32768,
+        context_window_source="ollama:model_info",
+        generation_options={},
+        timeout_seconds=600.0,
+        keep_alive=0,
+        max_request_bytes=4 * 1024 * 1024,
+        max_response_bytes=16 * 1024 * 1024,
+        provenance_status=status,
+        authority_effect="none",
+    )
+
+
+def test_model_provenance_red_c13_harness_persists_and_attests_runtime_provenance(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, _ = _engineering(repo)
+    runtime = _ollama()
+    provenance = _runtime_provenance()
+
+    monkeypatch.setattr(
+        runtime,
+        "capture_provenance",
+        lambda model: provenance,
+        raising=False,
+    )
+
+    result = _run(
+        _harness(
+            repo,
+            engineering,
+            runtime=runtime,
+            model="qwen3:8b",
+        )
+    )
+
+    artifact_dir = result.internal_result.artifact_dir
+    provenance_path = artifact_dir / "runtime_provenance.json"
+    assert provenance_path.is_file()
+
+    payload = json.loads(provenance_path.read_text(encoding="utf-8"))
+    assert payload["requested_model"] == "qwen3:8b"
+    assert payload["model_digest"] == "sha256:" + ("b" * 64)
+    assert payload["model_identity_strength"] == "TAG_DIGEST_BOUND"
+    assert payload["authority_effect"] == "none"
+
+    attestation = json.loads(
+        (artifact_dir / "attestation.json").read_text(encoding="utf-8")
+    )
+    assert "runtime_provenance.json" in attestation["files"]
+
+
+def test_model_provenance_red_c14_capture_happens_before_engineering(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(repo)
+    runtime = _ollama()
+    order: list[str] = []
+
+    def capture(model: str):
+        order.append("provenance")
+        return _runtime_provenance()
+
+    monkeypatch.setattr(
+        runtime,
+        "capture_provenance",
+        capture,
+        raising=False,
+    )
+
+    original_inspect = engineering.kernels["inspect"].receive
+
+    def inspect(request):
+        order.append("engineering")
+        return original_inspect(request)
+
+    monkeypatch.setattr(
+        engineering.kernels["inspect"],
+        "receive",
+        inspect,
+    )
+
+    _run(_harness(repo, engineering, runtime=runtime))
+
+    assert calls
+    assert order[0] == "provenance"
+    assert order[1] == "engineering"
+
+
+def test_model_provenance_red_c15_benchmark_grade_run_rejects_tag_only_identity(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _make_repo(tmp_path)
+    engineering, calls = _engineering(repo)
+    runtime = _ollama()
+
+    monkeypatch.setattr(
+        runtime,
+        "capture_provenance",
+        lambda model: _runtime_provenance(strength="TAG_ONLY"),
+        raising=False,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="TAG_DIGEST_BOUND",
+    ):
+        _run(_harness(repo, engineering, runtime=runtime))
+
+    assert calls == []
+    assert not (
+        repo / "runtime" / "internal_interaction"
+    ).exists()

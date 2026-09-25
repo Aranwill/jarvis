@@ -21,7 +21,9 @@ red_slice_b_authorized_at: 2026-09-24
 green_slice_b_authorized: true
 green_slice_b_authorized_by: owner
 green_slice_b_authorized_at: 2026-09-24
-red_slice_c_authorized: false
+red_slice_c_authorized: true
+red_slice_c_authorized_by: owner
+red_slice_c_authorized_at: 2026-09-24
 green_slice_a_authorized: true
 green_slice_a_authorized_by: owner
 green_slice_a_authorized_at: 2026-09-24
@@ -638,7 +640,7 @@ RuntimeModelProvenance
 Estados mínimos:
 
 ```text
-DIGEST_BOUND
+TAG_DIGEST_BOUND
 TAG_ONLY
 UNAVAILABLE
 ```
@@ -649,8 +651,8 @@ Reglas:
 requested tag only
 != exact reproducible model identity
 
-digest known
--> DIGEST_BOUND
+digest observed for the local tag
+-> TAG_DIGEST_BOUND
 
 tag known but digest unavailable
 -> TAG_ONLY
@@ -774,14 +776,17 @@ runtime metrics
 Así:
 
 ```text
-same evidence set + same model digest
--> comparable execution conditions
+same evidence set + same observed local tag digest
+-> stronger comparable execution conditions
 
 different evidence set
 -> not a clean model-capability comparison
 
-different model digest
--> not the same model artifact
+different observed local tag digest
+-> not the same captured local model state
+
+TAG_DIGEST_BOUND
+!= served-response digest attestation
 ```
 
 ## 9. Artifact set propuesto
@@ -832,11 +837,15 @@ RDD Stage 1 Candidate Conformance PASS
 Owner explicit runtime authorization
 ```
 
-Se recomienda para el tercer U01 exigir:
+Se recomienda para el tercer U01 exigir como mínimo:
 
 ```text
-model_identity_strength = DIGEST_BOUND
+model_identity_strength = TAG_DIGEST_BOUND
 ```
+
+Pero el admission gate del tercer U01 debe decidir explícitamente si la
+observación del digest del tag local es suficiente para esa ejecución o si se
+requiere una prueba más fuerte del artifact servido.
 
 Si el runtime local no puede resolver digest:
 
@@ -932,12 +941,14 @@ Interpretaciones materiales cerradas:
 10. exception type no equivale a finding;
 11. diagnostic fingerprint no equivale a issue identity perfecta;
 12. model tag no equivale a model digest;
-13. declared context window no equivale a tokens usados;
-14. metrics no equivalen a evaluación;
-15. provenance no concede autoridad;
-16. runtime introspection local no puede mutar Ollama/modelos;
-17. missing model digest no se inventa;
-18. third U01 no se autoautoriza al quedar GREEN.
+13. TAG_DIGEST_BOUND describe el binding observado del tag local, no una
+    attestation del digest exacto servido por cada respuesta;
+14. declared context window no equivale a tokens usados;
+15. metrics no equivalen a evaluación;
+16. provenance no concede autoridad;
+17. runtime introspection local no puede mutar Ollama/modelos;
+18. missing model digest no se inventa;
+19. third U01 no se autoautoriza al quedar GREEN.
 
 Adversarial / fail-open:
 
@@ -1146,7 +1157,7 @@ RED deberá demostrar:
 ```text
 C01 requested model recorded
 C02 resolved local model recorded
-C03 valid digest -> DIGEST_BOUND
+C03 valid digest -> TAG_DIGEST_BOUND
 C04 missing digest -> TAG_ONLY/UNAVAILABLE, never fabricated
 C05 runtime version recorded when available
 C06 context metadata explicit as declared, not actual-use claim
@@ -1158,7 +1169,7 @@ C11 provenance artifact included in attestation
 C12 same evidence_set_digest remains independently visible
 C13 metrics remain telemetry only
 C14 no model update/pull/delete path
-C15 benchmark-grade self-review rejects non-DIGEST_BOUND identity
+C15 benchmark-grade self-review rejects non-TAG_DIGEST_BOUND identity
 C16 authority_effect none
 ```
 
@@ -1170,7 +1181,7 @@ Después de GREEN de los tres slices:
 real local Ollama
 exact baseline
 exact focus evidence digest
-DIGEST_BOUND model identity
+TAG_DIGEST_BOUND model identity
 LIVE elapsed visible during long call
 controlled synthetic component failure path test
 safe diagnostic replay/inspection
@@ -1231,7 +1242,7 @@ known material ambiguity            0
 
 RED Slice A                         GRANTED BY OWNER
 RED Slice B                         GRANTED BY OWNER
-RED Slice C                         NOT GRANTED
+RED Slice C                         GRANTED BY OWNER
 implementation authorization        NOT GRANTED
 runtime execution authorization     NOT GRANTED
 third real U01 execution            BLOCKED
@@ -1381,3 +1392,320 @@ authority_effect                   none
 GREEN queda limitado a Safe Diagnostic Envelope, diagnostic refs en
 `COMPONENT_FAILED`, `diagnostics.jsonl` y attestation/validation del artifact.
 No autoriza Model Provenance ni ejecución real del Self-Review.
+
+
+## 28. RED Slice C authorization checkpoint
+
+Después del merge humano de PR #189, el Owner autorizó avanzar con Slice C /
+Runtime & Model Provenance.
+
+```text
+Slice B merge commit                635841a3918ab5cb60a4187e94a146ad153bf3b6
+RED Slice C                         GRANTED
+GREEN Slice C                       NOT AUTHORIZED
+runtime self-review execution       NOT AUTHORIZED
+third real U01                      BLOCKED
+authority_effect                    none
+```
+
+El RED candidate queda limitado a tests que demuestren que el baseline actual
+todavía no congela identidad reproducible del runtime/modelo ni genera
+`runtime_provenance.json`.
+
+No puede:
+
+- actualizar, descargar o eliminar modelos;
+- cambiar el modelo configurado;
+- ejecutar el tercer U01;
+- introducir autoridad nueva;
+- modificar Kernel/Planner;
+- convertir métricas en evaluación.
+
+
+## 29. RED Slice C evidence y GREEN authorization checkpoint
+
+El RED candidate exacto quedó congelado en:
+
+```text
+candidate: 0293ba7537d5fe3b407eb6ea9ce91b504ed1b5f1
+Validation: #515
+Ubuntu:  15 failed / 1518 passed
+Windows: 15 failed / 1518 passed
+conclusion: FAILURE expected / RED demonstrated
+```
+
+Las quince fallas fueron exclusivamente las nuevas de Runtime / Model Provenance:
+
+```text
+C01-C12
+-> runtime_provenance contract absent
+-> OllamaRuntime.capture_provenance() absent
+
+C13
+-> runtime_provenance.json absent from artifact/attestation
+
+C14
+-> Engineering starts before provenance capture
+
+C15
+-> TAG_ONLY does not stop benchmark-grade Self-Review
+```
+
+No se observaron regresiones ajenas a Slice C.
+
+Después de revisar esta evidencia RED, el Owner autorizó GREEN Slice C.
+
+```text
+GREEN Slice C                      GRANTED
+implementation scope               runtime/model provenance only
+runtime self-review execution      NOT AUTHORIZED
+third real U01                     BLOCKED
+Kernel planned delta               0
+Planner planned delta              0
+model mutation paths               0
+authority_effect                   none
+```
+
+GREEN queda limitado al contrato `RuntimeModelProvenance`, introspección local
+read-only de Ollama, persistencia/attestation de `runtime_provenance.json` y
+admission `TAG_DIGEST_BOUND` antes de Engineering. No autoriza ejecutar el tercer
+U01 ni cambiar/actualizar el modelo.
+
+
+## 30. Bounded Correction — Ollama digest semantics y attestation order
+
+Durante GREEN Slice C se verificó la forma real del contrato local de Ollama.
+
+### Digest observado
+
+`GET /api/tags` expone actualmente el digest de modelo como 64 caracteres
+hexadecimales sin prefijo `sha256:`.
+
+Corrección:
+
+```text
+/api/tags digest = <64 hex>
+        ↓
+normalize locally
+        ↓
+sha256:<64 hex>
+        ↓
+runtime_provenance.json
+```
+
+No se inventa digest y un formato inválido degrada la identidad a `TAG_ONLY`.
+
+### Alcance de TAG_DIGEST_BOUND
+
+El estado se renombra de `DIGEST_BOUND` a `TAG_DIGEST_BOUND` para cerrar una
+ambigüedad material:
+
+```text
+TAG_DIGEST_BOUND
+= tag local resuelto + digest local observado al capturar provenance
+
+TAG_DIGEST_BOUND
+!= prueba criptográfica de que cada respuesta /api/chat fue servida
+   exactamente por ese digest
+```
+
+El API local estándar no debe asumirse como fuente de served-response digest si
+ese dato no forma parte del contrato observado. Por eso el tercer U01 permanece
+bloqueado y su admission review deberá decidir qué fuerza de binding es
+suficiente antes de autorizar una ejecución benchmark-grade.
+
+### Canonical attestation order
+
+`attestation.json` se serializa con keys ordenadas. Al añadir
+`runtime_provenance.json`, el payload file set se ordena canónicamente antes de
+validar para evitar un mismatch artificial de orden.
+
+Estas correcciones no amplían autoridad ni surface:
+
+```text
+Kernel delta            0
+Planner delta           0
+model mutation paths    0
+runtime execution       NOT AUTHORIZED
+third real U01          BLOCKED
+authority_effect        none
+```
+
+
+## 31. GREEN correction checkpoint — Validation #530
+
+Validation #530 sobre el candidate `63fa13ffb61012b4e67b1d86dc937d2fe1c6a4d2`
+falló en ambos runners con:
+
+```text
+Ubuntu:  10 failed / 1523 passed
+Windows: 10 failed / 1523 passed
+```
+
+Las fallas fueron acotadas a dos inconsistencias introducidas durante el
+endurecimiento semántico de Slice C:
+
+```text
+1. OllamaRuntime.capture_provenance()
+   todavía emitía model_identity_strength = DIGEST_BOUND
+   mientras el contrato ya exigía TAG_DIGEST_BOUND.
+
+2. El Harness pasaba type(runtime).__name__ al Runner.
+   En tests, el runtime es una subclase determinista:
+   _HarnessOllamaRuntime
+   pero la provenance ya declara la clase semántica estable:
+   OllamaRuntime.
+```
+
+Correcciones adoptadas:
+
+```text
+capture_provenance
+-> TAG_DIGEST_BOUND
+
+runner runtime_name
+-> runtime_provenance.runtime_class
+-> no depende del nombre de una subclase de test
+```
+
+También se renombró el test C03 para no sugerir una identidad servida más fuerte
+que la observada:
+
+```text
+tag digest binds observed local identity
+```
+
+No se amplía scope:
+
+```text
+Kernel delta             0
+Planner delta            0
+runtime execution        NOT AUTHORIZED
+third real U01           BLOCKED
+authority_effect         none
+```
+
+
+## 32. GREEN correction checkpoint — Validation #534
+
+Validation #534 sobre el candidate `6808678eb1f8033b6341bcaa63a60f9f14d64421`
+redujo el GREEN a una única inconsistencia observable en Ubuntu:
+
+```text
+1 failed / 1532 passed
+```
+
+Falla:
+
+```text
+InternalInteractionTestV0Result.runtime
+-> _HarnessOllamaRuntime
+expected
+-> OllamaRuntime
+```
+
+La causa era un segundo binding residual a `type(self._runtime).__name__` en el
+summary final del Harness. El Runner ya usaba correctamente
+`runtime_provenance.runtime_class`.
+
+Corrección acotada:
+
+```text
+InternalInteractionTestV0Result.runtime
+-> runtime_provenance.runtime_class
+```
+
+Esto evita que nombres de subclases de test contaminen la identidad semántica
+persistida/expuesta del runtime.
+
+No se amplía scope:
+
+```text
+Kernel delta             0
+Planner delta            0
+runtime execution        NOT AUTHORIZED
+third real U01           BLOCKED
+authority_effect         none
+```
+
+
+## 33. FULL 4R bounded corrections after Validation #536
+
+Validation #536 cerró verde sobre:
+
+```text
+candidate: be9f6f1e69b3ee1d1f67a4febbe45232fcf2a162
+Ubuntu:  1533 passed
+Windows: 1533 passed
+```
+
+Durante FULL 4R / conformance posterior se detectaron dos endurecimientos
+acotados antes de entregar el candidate al Owner.
+
+### 33.1 Deep immutability de generation_options
+
+`RuntimeModelProvenance` era una dataclass frozen, pero
+`generation_options` seguía siendo un `dict` mutable internamente.
+
+Eso permitía:
+
+```text
+frozen envelope
+-> mutable nested mapping
+-> provenance material change after capture
+```
+
+Corrección:
+
+```text
+generation_options
+-> validated mapping
+-> defensive copy
+-> MappingProxyType
+```
+
+La serialización continúa usando una copia JSON cerrada.
+
+### 33.2 Binding runtime_class <-> manifest/runtime_name
+
+El artifact validator ya ligaba:
+
+```text
+requested_model
+<-> manifest.model
+```
+
+pero no comprobaba explícitamente:
+
+```text
+runtime_provenance.runtime_class
+<-> manifest.runtime_name
+```
+
+Corrección:
+
+```text
+Runner construction
+-> reject runtime identity mismatch
+
+artifact validation
+-> reject runtime_class / runtime_name mismatch
+```
+
+Esto evita artifacts internamente inconsistentes aunque sus archivos sean
+individualmente válidos.
+
+### 33.3 Alcance
+
+```text
+Kernel delta             0
+Planner delta            0
+Request delta            0
+model mutation paths     0
+runtime execution        NOT AUTHORIZED
+third real U01           BLOCKED
+authority_effect         none
+```
+
+Estas correcciones permanecen dentro de Slice C y no alteran la fuerza declarada
+de `TAG_DIGEST_BOUND`.

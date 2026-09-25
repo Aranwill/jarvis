@@ -26,6 +26,11 @@ from malak.observability.safe_diagnostic import (
     read_safe_diagnostics_jsonl,
     write_safe_diagnostics_jsonl,
 )
+from malak.runtime.runtime_provenance import (
+    RuntimeModelProvenance,
+    read_runtime_model_provenance,
+    write_runtime_model_provenance,
+)
 from malak.services.self_review_evidence import (
     SelfReviewEvidencePacket,
     build_self_review_evidence_packet,
@@ -52,6 +57,7 @@ _ARTIFACT_PAYLOAD_FILES: Final[tuple[str, ...]] = (
     "outcome.json",
     "trace.jsonl",
 )
+_RUNTIME_PROVENANCE_FILE: Final[str] = "runtime_provenance.json"
 _EXPECTED_ARTIFACT_FILES: Final[frozenset[str]] = frozenset(
     (*_ARTIFACT_PAYLOAD_FILES, "attestation.json")
 )
@@ -97,6 +103,7 @@ class InternalInteractionRunner:
         artifact_root: str | Path,
         runtime_name: str = "engineering_kernel_set",
         model: str | None = None,
+        runtime_provenance: RuntimeModelProvenance | None = None,
         event_sink: Callable[[ExecutionTraceEvent], None] | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
@@ -123,6 +130,23 @@ class InternalInteractionRunner:
             raise ValueError("runtime_name must not have surrounding whitespace")
         if model is not None:
             _validate_text("model", model)
+        if runtime_provenance is not None:
+            if not isinstance(runtime_provenance, RuntimeModelProvenance):
+                raise TypeError(
+                    "runtime_provenance must be RuntimeModelProvenance"
+                )
+            if model is None:
+                raise ValueError(
+                    "runtime_provenance requires configured model"
+                )
+            if runtime_provenance.requested_model != model:
+                raise ValueError(
+                    "runtime_provenance requested_model mismatch"
+                )
+            if runtime_provenance.runtime_class != runtime_name:
+                raise ValueError(
+                    "runtime_provenance runtime_class mismatch"
+                )
         if event_sink is not None and not callable(event_sink):
             raise TypeError("event_sink must be callable")
         if clock is not None and not callable(clock):
@@ -151,6 +175,7 @@ class InternalInteractionRunner:
         self._repository_root = repository_root.resolve()
         self._runtime_name = runtime_name
         self._model = model
+        self._runtime_provenance = runtime_provenance
         self._event_sink = event_sink
         self._clock = clock if clock is not None else _utc_now
 
@@ -364,6 +389,11 @@ class InternalInteractionRunner:
             artifact_dir / "diagnostics.jsonl",
             diagnostics,
         )
+        if self._runtime_provenance is not None:
+            write_runtime_model_provenance(
+                artifact_dir / _RUNTIME_PROVENANCE_FILE,
+                self._runtime_provenance,
+            )
 
         emit(
             phase="artifact",
@@ -385,10 +415,16 @@ class InternalInteractionRunner:
             artifact_dir / "trace.jsonl",
             trace.events,
         )
+        payload_files = _artifact_payload_files(
+            include_runtime_provenance=(
+                self._runtime_provenance is not None
+            )
+        )
         _write_attestation(
             artifact_dir=artifact_dir,
             run_id=run_id,
             baseline_commit=baseline,
+            payload_files=payload_files,
         )
         validate_internal_interaction_artifacts(artifact_dir)
 
@@ -785,7 +821,16 @@ def validate_internal_interaction_artifacts(
         for item in root.iterdir()
         if item.is_file()
     }
-    if actual_files != _EXPECTED_ARTIFACT_FILES:
+    include_runtime_provenance = (
+        _RUNTIME_PROVENANCE_FILE in actual_files
+    )
+    payload_files = _artifact_payload_files(
+        include_runtime_provenance=include_runtime_provenance
+    )
+    expected_artifact_files = frozenset(
+        (*payload_files, "attestation.json")
+    )
+    if actual_files != expected_artifact_files:
         raise ValueError("internal interaction artifact set mismatch")
 
     try:
@@ -858,10 +903,10 @@ def validate_internal_interaction_artifacts(
     files = attestation["files"]
     if not isinstance(files, dict):
         raise ValueError("attestation files must be an object")
-    if tuple(files) != _ARTIFACT_PAYLOAD_FILES:
+    if tuple(files) != payload_files:
         raise ValueError("attestation file order/set mismatch")
 
-    for name in _ARTIFACT_PAYLOAD_FILES:
+    for name in payload_files:
         digest = files[name]
         if not isinstance(digest, str) or not re.fullmatch(
             r"[0-9a-f]{64}",
@@ -966,6 +1011,36 @@ def validate_internal_interaction_artifacts(
     if len(referenced) != len(set(referenced)):
         raise ValueError("diagnostic ref must be unique in trace")
 
+    if include_runtime_provenance:
+        provenance = read_runtime_model_provenance(
+            root / _RUNTIME_PROVENANCE_FILE
+        )
+        manifest_model = manifest.get("model")
+        if not isinstance(manifest_model, str) or not manifest_model:
+            raise ValueError(
+                "runtime provenance requires manifest model"
+            )
+        if provenance.requested_model != manifest_model:
+            raise ValueError(
+                "runtime provenance requested_model does not match manifest"
+            )
+        manifest_runtime = manifest.get("runtime_name")
+        if (
+            not isinstance(manifest_runtime, str)
+            or not manifest_runtime
+        ):
+            raise ValueError(
+                "runtime provenance requires manifest runtime_name"
+            )
+        if provenance.runtime_class != manifest_runtime:
+            raise ValueError(
+                "runtime provenance runtime_class does not match manifest"
+            )
+        if provenance.authority_effect != "none":
+            raise ValueError(
+                "runtime provenance authority_effect must remain none"
+            )
+
 
 def _load_json_object(path: Path, label: str) -> dict[str, object]:
     try:
@@ -977,17 +1052,31 @@ def _load_json_object(path: Path, label: str) -> dict[str, object]:
     return payload
 
 
+def _artifact_payload_files(
+    *,
+    include_runtime_provenance: bool,
+) -> tuple[str, ...]:
+    if include_runtime_provenance:
+        return tuple(
+            sorted(
+                (*_ARTIFACT_PAYLOAD_FILES, _RUNTIME_PROVENANCE_FILE)
+            )
+        )
+    return _ARTIFACT_PAYLOAD_FILES
+
+
 def _write_attestation(
     *,
     artifact_dir: Path,
     run_id: str,
     baseline_commit: str,
+    payload_files: tuple[str, ...],
 ) -> None:
     files = {
         name: hashlib.sha256(
             (artifact_dir / name).read_bytes()
         ).hexdigest()
-        for name in _ARTIFACT_PAYLOAD_FILES
+        for name in payload_files
     }
     payload = {
         "schema": _ARTIFACT_SCHEMA,

@@ -153,6 +153,18 @@ class InternalInteractionTestV0Harness:
                 f"run already exists: {run_id}"
             )
 
+        runtime_provenance = self._runtime.capture_provenance(
+            self._model
+        )
+        if (
+            runtime_provenance.model_identity_strength
+            != "TAG_DIGEST_BOUND"
+        ):
+            raise RuntimeError(
+                "Internal Interaction Test V0 requires "
+                "TAG_DIGEST_BOUND model identity"
+            )
+
         live_view = LiveTraceTextView(output_fn=self._output_fn)
         run_engineering = self._engineering
         if hasattr(run_engineering, "with_evidence_focus"):
@@ -168,8 +180,9 @@ class InternalInteractionTestV0Harness:
         runner = InternalInteractionRunner(
             engineering=run_engineering,
             artifact_root=artifact_root,
-            runtime_name=type(self._runtime).__name__,
+            runtime_name=runtime_provenance.runtime_class,
             model=self._model,
+            runtime_provenance=runtime_provenance,
             event_sink=live_view.append,
         )
 
@@ -220,7 +233,7 @@ class InternalInteractionTestV0Harness:
             live_replay_equivalence=equivalent,
             tracked_tree_clean=tracked_clean,
             acceptance=acceptance,
-            runtime=type(self._runtime).__name__,
+            runtime=runtime_provenance.runtime_class,
             model=self._model,
             authority_effect="none",
         )
