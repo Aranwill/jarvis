@@ -20,6 +20,7 @@ from malak.infrastructure.repository_structure import (
 )
 from malak.infrastructure.repository_structure_lookup import RepositoryStructuralLookup
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 from malak.services.conversation_service import ConversationService
 
 _MAX_INSPECTION_TERM_BYTES = 512
@@ -74,6 +75,7 @@ class EngineeringInspectCapability(Capability):
         conversation_service: ConversationService,
         provider_name: str,
         model: str | None = None,
+        generation_contract: RuntimeGenerationContract | None = None,
         evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
     ) -> None:
         if repository_reader.baseline_commit != knowledge_reader.baseline_commit:
@@ -96,6 +98,7 @@ class EngineeringInspectCapability(Capability):
         self._conversation_service = conversation_service
         self._provider_name = provider_name
         self._model = model
+        self._generation_contract = generation_contract
         self._evidence_focus = evidence_focus
         self._baseline_commit = repository_reader.baseline_commit
 
@@ -197,6 +200,7 @@ class EngineeringInspectCapability(Capability):
                 model=self._model,
                 system_prompt=_SYSTEM_PROMPT,
                 history=(),
+                generation_contract=self._generation_contract,
             ),
             provider=self._provider_name,
         )
