@@ -7,7 +7,7 @@ language: es
 created: 2026-09-26
 reviewed_code_baseline: c67485cee7b19571426f05747a8620c374da7f5b
 execution_baseline_rule: current_main_with_admission_doc_only_delta
-admission_result: pending_candidate_validation
+admission_result: conditional_pass
 risk_class: high_bounded_local_runtime
 runtime_execution_authorized: false
 fifth_u01_authorized: false
@@ -923,7 +923,7 @@ Security Horizon check                    PASS
 execution-profile 4R                      PASS
 RDD Stage 1 execution identity check      PASS
 
-admission document candidate CI           PENDING
+admission document candidate CI           PASS — Validation #599
 local runtime preflight                    NOT EXECUTED
 runtime execution                          NOT AUTHORIZED
 Fifth U01                                  NOT AUTHORIZED
@@ -934,16 +934,26 @@ authority_effect                           none
 Admission result:
 
 ```text
-PENDING CANDIDATE VALIDATION
-```
-
-Después de candidate-bound CI verde, el documento puede pasar a:
-
-```text
 CONDITIONAL PASS
 ```
 
-con condiciones restantes:
+Evidencia candidate-bound:
+
+```text
+candidate:
+d6af5131b39b31839f0aca421d2fd79049617694
+
+Validation #599:
+Ubuntu   1578 passed
+Windows  1578 passed
+compile  PASS
+diff     PASS
+```
+
+La corrección documental que registra este cierre cambia la identidad del
+candidate y requiere una última Validation candidate-bound antes del merge.
+
+Condiciones restantes:
 
 ```text
 Owner reviews and merges admission
