@@ -16,6 +16,7 @@ from malak.core.llm_runtime import LLMRuntime
 from malak.runtime.runtime_metric_sample import RuntimeMetricSample
 from malak.runtime.runtime_metric_sink import RuntimeMetricSink
 from malak.runtime.runtime_metrics import RuntimeMetrics
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 from malak.runtime.runtime_provenance import (
     RUNTIME_MODEL_PROVENANCE_SCHEMA,
     RuntimeModelProvenance,
@@ -77,8 +78,17 @@ class OllamaRuntime(LLMRuntime):
     def capture_provenance(
         self,
         model: str,
+        *,
+        generation_contract: RuntimeGenerationContract | None = None,
     ) -> RuntimeModelProvenance:
         requested_model = model.strip() if isinstance(model, str) else ""
+        if generation_contract is not None and not isinstance(
+            generation_contract,
+            RuntimeGenerationContract,
+        ):
+            raise TypeError(
+                "generation_contract must be a RuntimeGenerationContract"
+            )
         if not requested_model:
             raise ValueError("model is required for provenance capture")
         if requested_model != model:
@@ -167,6 +177,16 @@ class OllamaRuntime(LLMRuntime):
                         declared_context_window = context_candidates[0]
                         context_window_source = "ollama:model_info"
 
+        if (
+            generation_contract is not None
+            and declared_context_window is not None
+            and generation_contract.context_window_tokens
+            > declared_context_window
+        ):
+            raise RuntimeError(
+                "generation contract context exceeds declared model context"
+            )
+
         if resolved_model is None:
             identity_strength = "UNAVAILABLE"
             provenance_status = "UNAVAILABLE"
@@ -189,7 +209,11 @@ class OllamaRuntime(LLMRuntime):
             runtime_version=runtime_version,
             declared_context_window=declared_context_window,
             context_window_source=context_window_source,
-            generation_options={},
+            generation_options=(
+                generation_contract.to_generation_options()
+                if generation_contract is not None
+                else {}
+            ),
             timeout_seconds=self._timeout_seconds,
             keep_alive=self._keep_alive,
             max_request_bytes=self._max_request_bytes,
@@ -325,6 +349,16 @@ class OllamaRuntime(LLMRuntime):
             "keep_alive": self._keep_alive,
         }
 
+        generation_contract = request.generation_contract
+        if generation_contract is not None:
+            payload["think"] = generation_contract.thinking_enabled
+            payload["truncate"] = False
+            payload["shift"] = False
+            payload["options"] = {
+                "num_ctx": generation_contract.context_window_tokens,
+                "num_predict": generation_contract.max_output_tokens,
+            }
+
         if request.response_json_schema is not None:
             try:
                 schema_payload = json.loads(
@@ -402,12 +436,74 @@ class OllamaRuntime(LLMRuntime):
                 "Ollama returned an invalid response payload"
             )
 
+        if generation_contract is not None:
+            done = response_payload.get("done")
+            if done is not True:
+                raise RuntimeError(
+                    "Ollama generation is incomplete: done must be true"
+                )
+
+            done_reason = response_payload.get("done_reason")
+            if done_reason == "length":
+                raise RuntimeError(
+                    "Ollama generation budget exhausted: done_reason=length"
+                )
+            if done_reason is not None and not isinstance(done_reason, str):
+                raise RuntimeError(
+                    "Ollama generation done_reason is invalid"
+                )
+
+            prompt_eval_count = response_payload.get("prompt_eval_count")
+            eval_count = response_payload.get("eval_count")
+            for name, value in (
+                ("prompt_eval_count", prompt_eval_count),
+                ("eval_count", eval_count),
+            ):
+                if value is not None and (
+                    type(value) is not int or value < 0
+                ):
+                    raise RuntimeError(
+                        f"Ollama generation {name} is invalid"
+                    )
+
+            if (
+                eval_count is not None
+                and eval_count > generation_contract.max_output_tokens
+            ):
+                raise RuntimeError(
+                    "Ollama generation exceeded max_output_tokens"
+                )
+            if (
+                prompt_eval_count is not None
+                and eval_count is not None
+                and prompt_eval_count + eval_count
+                > generation_contract.context_window_tokens
+            ):
+                raise RuntimeError(
+                    "Ollama generation exceeded context_window_tokens"
+                )
+
         message_payload = response_payload.get("message")
 
         if not isinstance(message_payload, dict):
             raise RuntimeError(
                 "Ollama response does not contain a valid message field"
             )
+
+        if generation_contract is not None:
+            thinking = message_payload.get("thinking")
+            if thinking is not None and not isinstance(thinking, str):
+                raise RuntimeError(
+                    "Ollama response thinking field is invalid"
+                )
+            if (
+                generation_contract.thinking_enabled is False
+                and isinstance(thinking, str)
+                and thinking
+            ):
+                raise RuntimeError(
+                    "Ollama generation contract forbids returned thinking"
+                )
 
         generated_content = message_payload.get("content")
 
