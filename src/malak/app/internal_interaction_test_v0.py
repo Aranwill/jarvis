@@ -180,6 +180,13 @@ class InternalInteractionTestV0Harness:
                 "Internal Interaction Test V0 requires "
                 "TAG_DIGEST_BOUND model identity"
             )
+        if (
+            dict(runtime_provenance.generation_options)
+            != self._generation_contract.to_generation_options()
+        ):
+            raise RuntimeError(
+                "runtime provenance generation contract mismatch"
+            )
 
         live_view = LiveTraceTextView(output_fn=self._output_fn)
         run_engineering = self._engineering
