@@ -20,9 +20,18 @@ from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 
 
 NOW = datetime(2026, 9, 23, 23, 30, tzinfo=UTC)
+
+
+def _test_generation_contract() -> RuntimeGenerationContract:
+    return RuntimeGenerationContract(
+        context_window_tokens=8192,
+        max_output_tokens=2048,
+        thinking_enabled=False,
+    )
 
 REQUIRED_TEXT_FILES = {
     "AGENTS.md": "agent rules\n",
@@ -204,6 +213,7 @@ def _engineering(
         baseline_commit=baseline,
         repository_reader=reader,
         knowledge_reader=knowledge,
+        generation_contract=_test_generation_contract(),
         kernels={
             "inspect": _Kernel(
                 inspect,
@@ -219,8 +229,16 @@ def _engineering(
 
 
 class _HarnessOllamaRuntime(OllamaRuntime):
-    def capture_provenance(self, model: str):
-        return _runtime_provenance(model=model)
+    def capture_provenance(
+        self,
+        model: str,
+        *,
+        generation_contract=None,
+    ):
+        return _runtime_provenance(
+            model=model,
+            generation_contract=generation_contract,
+        )
 
 
 def _ollama() -> OllamaRuntime:
@@ -567,8 +585,16 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
         super().__init__(base_url="http://127.0.0.1:11434")
         self.calls = 0
 
-    def capture_provenance(self, model: str):
-        return _runtime_provenance(model=model)
+    def capture_provenance(
+        self,
+        model: str,
+        *,
+        generation_contract=None,
+    ):
+        return _runtime_provenance(
+            model=model,
+            generation_contract=generation_contract,
+        )
 
     def generate(
         self,
@@ -637,6 +663,7 @@ def test_harness_e2e_real_engineering_composed_from_same_ollama_runtime(
         service=service,
         provider_name="ollama",
         model="test-model",
+        generation_contract=_test_generation_contract(),
     )
     before = _git(repo, "status", "--porcelain", "--untracked-files=no")
 
@@ -797,6 +824,7 @@ def _runtime_provenance(
     *,
     strength: str = "TAG_DIGEST_BOUND",
     model: str = "qwen3:8b",
+    generation_contract=None,
 ):
     module = import_module("malak.runtime.runtime_provenance")
     digest = (
@@ -828,7 +856,11 @@ def _runtime_provenance(
         runtime_version="0.12.0",
         declared_context_window=32768,
         context_window_source="ollama:model_info",
-        generation_options={},
+        generation_options=(
+            generation_contract.to_generation_options()
+            if generation_contract is not None
+            else {}
+        ),
         timeout_seconds=600.0,
         keep_alive=0,
         max_request_bytes=4 * 1024 * 1024,
@@ -850,7 +882,7 @@ def test_model_provenance_red_c13_harness_persists_and_attests_runtime_provenanc
     monkeypatch.setattr(
         runtime,
         "capture_provenance",
-        lambda model: provenance,
+        lambda model, **_: provenance,
         raising=False,
     )
 
@@ -888,9 +920,11 @@ def test_model_provenance_red_c14_capture_happens_before_engineering(
     runtime = _ollama()
     order: list[str] = []
 
-    def capture(model: str):
+    def capture(model: str, **_):
         order.append("provenance")
-        return _runtime_provenance()
+        return _runtime_provenance(
+            generation_contract=engineering.generation_contract,
+        )
 
     monkeypatch.setattr(
         runtime,
@@ -929,7 +963,7 @@ def test_model_provenance_red_c15_benchmark_grade_run_rejects_tag_only_identity(
     monkeypatch.setattr(
         runtime,
         "capture_provenance",
-        lambda model: _runtime_provenance(strength="TAG_ONLY"),
+        lambda model, **_: _runtime_provenance(strength="TAG_ONLY"),
         raising=False,
     )
 
