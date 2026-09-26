@@ -101,3 +101,14 @@ def test_conversation_provider_contract_can_be_implemented():
 def test_conversation_provider_cannot_be_instantiated_directly():
     with pytest.raises(TypeError):
         ConversationProvider()
+
+
+def test_analyze_structured_output_red_s01_conversation_request_accepts_schema_contract():
+    schema = '{"additionalProperties":false,"type":"object"}'
+
+    request = ConversationRequest(
+        prompt="Return structured output.",
+        response_json_schema=schema,
+    )
+
+    assert request.response_json_schema == schema
