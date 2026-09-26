@@ -12,7 +12,9 @@ design_authorized_at: 2026-09-25
 risk_class: 3
 critical_contract: true
 implementation_authorized: false
-red_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-25
 green_authorized: false
 runtime_execution_authorized: false
 fourth_u01_execution_authorized: false
@@ -1004,4 +1006,55 @@ Request routing delta 0
 authority expansion   0
 runtime execution     NOT AUTHORIZED
 Fourth U01            NOT AUTHORIZED
+```
+
+
+## 30. RED authorization checkpoint
+
+El Owner autorizó explícitamente RED el 2026-09-25.
+
+Alcance autorizado:
+
+```text
+tests only
++
+documentation of RED evidence
+```
+
+No autorizado:
+
+```text
+production implementation
+GREEN
+Fourth U01
+runtime execution
+self-modification
+```
+
+Baseline RED:
+
+```text
+main@d48987b93c46bd192fea10ca4744d96156e53f07
+```
+
+RED debe aislar exactamente:
+
+```text
+S01 ConversationRequest lacks response_json_schema
+S02 OllamaRuntime does not map requested schema to /api/chat format
+S03 Engineering Analyze does not attach a response schema
+S04 malformed model JSON reaches the existing strict parser and fails closed
+S05 ordinary Ollama requests remain without format
+S06 RuntimeConversationProvider must not hide unsupported schema behavior
+S07 MockLLMRuntime must fail closed when schema is explicitly requested
+```
+
+Expected RED properties:
+
+```text
+new contract tests fail only where functionality is intentionally absent
+existing unrelated suite remains green
+no production file changed
+Kernel / Planner / Request delta 0
+authority_effect none
 ```
