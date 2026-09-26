@@ -201,13 +201,13 @@ Rechazada: mezcla mecanismo del adapter con política local/hardware.
 
 Defer: todavía no hay evidencia suficiente para justificar perfiles separados de Inspect / Analyze / Propose.
 
-### D — Contrato runtime-level explícito para Self-Review
+### D — Contrato explícito, request-scoped, inyectado por composición Engineering
 
-Seleccionada para V0 por menor complejidad y mejor trazabilidad.
+Seleccionada para V0. El contrato viaja en `ConversationRequest`, la composición Engineering aplica el mismo objeto a E2/E3/E4 y el runtime sólo lo mapea. Así el chat genérico puede seguir usando el mismo runtime sin heredar política de Self-Review.
 
 ## 8. RuntimeGenerationContract V0
 
-Se propone un value object inmutable:
+Se propone un value object inmutable y provider-neutral:
 
 ```python
 @dataclass(frozen=True, slots=True)
@@ -250,28 +250,69 @@ history shifting      -> shift=false
 
 Los valores numéricos exactos NO se aprueban en este diseño; se congelarán en un admission posterior.
 
-## 11. Ownership
+## 11. Binding y ownership
+
+V0 corrige una ambigüedad importante del diseño inicial: el contrato NO debe quedar como estado global de `OllamaRuntime`, porque el CLI comparte el mismo runtime entre conversación ordinaria y Engineering.
+
+Binding seleccionado:
 
 ```text
-Capability      -> no infiere política de hardware
-OllamaRuntime   -> mapea contrato, no inventa defaults para Self-Review
-Self-Review     -> requiere contrato explícito antes de Engineering
-Kernel/Planner  -> sin cambios
+CLI configuration
+-> RuntimeGenerationContract
+-> build_engineering_kernel_set(..., generation_contract=contract)
+-> same immutable contract supplied to E2 / E3 / E4
+-> ConversationRequest.generation_contract
+-> RuntimeConversationProvider passthrough
+-> OllamaRuntime mapping
 ```
 
-El contrato debe vivir en la frontera runtime/app, no convertirse en autoridad del Kernel.
+Ownership:
+
+```text
+CLI / app boundary  -> construye y valida política externa
+Composition         -> distribuye un único contrato a Engineering
+Capability          -> adjunta el contrato recibido; no inventa valores
+ConversationService -> passthrough; no selecciona policy
+RuntimeProvider     -> passthrough; no selecciona policy
+OllamaRuntime       -> mapea mecanismo; no inventa defaults
+Self-Review Harness -> exige contract presente antes de Engineering
+Kernel / Planner    -> sin cambios
+```
+
+Regla:
+
+```text
+request-scoped contract
+!= runtime-global mutable policy
+```
+
+Esto evita que una política destinada a Engineering altere silenciosamente el chat genérico.
 
 ## 12. Compatibilidad con conversación genérica
 
-```text
-generic conversation + no RuntimeGenerationContract
--> comportamiento existente preservado
+`ConversationRequest` incorpora:
 
-Internal Interaction Test V0 + no RuntimeGenerationContract
+```text
+generation_contract: RuntimeGenerationContract | None = None
+```
+
+Semántica:
+
+```text
+generic conversation request
+-> generation_contract=None
+-> payload existente preservado
+
+Engineering request con contract configurado
+-> explicit generation contract
+
+Internal Interaction Test V0 + Engineering contract absent
 -> unavailable / fail closed before Engineering
 ```
 
-Esto endurece el flujo crítico sin romper chat ordinario.
+`dataclasses.replace()` de `ConversationService` debe preservar el campo automáticamente al enriquecer history. Un test contractual debe demostrarlo.
+
+No se autoriza un default global en `OllamaRuntime` para resolver este slice.
 
 ## 13. Configuración externa propuesta
 
@@ -398,17 +439,33 @@ Producción probable:
 
 ```text
 src/malak/runtime/runtime_generation_contract.py   NEW
+src/malak/core/conversation.py
 src/malak/runtime/ollama_runtime.py
+src/malak/runtime/mock_llm_runtime.py
 src/malak/runtime/runtime_provenance.py
 src/malak/app/cli.py
+src/malak/app/composition.py
 src/malak/app/internal_interaction_test_v0.py
+src/malak/capabilities/engineering_inspect.py
+src/malak/capabilities/engineering_analyze.py
+src/malak/capabilities/engineering_propose.py
+src/malak/capabilities/_engineering_analysis.py
 ```
+
+Los cambios en Capability/composition quedan limitados a transportar el mismo contrato inmutable; no autorizan policy distinta por E2/E3/E4 ni cambios de parser.
 
 Tests probables:
 
 ```text
+tests/test_conversation_contract.py
+tests/test_conversation_service.py
+tests/test_llm_runtime.py
 tests/test_ollama_runtime.py
 tests/test_runtime_provenance.py
+tests/test_composition.py
+tests/test_engineering_inspect.py
+tests/test_engineering_analyze.py
+tests/test_engineering_propose.py
 tests/test_cli_self_review_v0.py
 tests/test_internal_interaction_test_v0_harness.py
 ```
@@ -420,8 +477,9 @@ Kernel delta             0
 Planner delta            0
 Request routing delta    0
 Evidence Focus delta     0
-Engineering parser delta 0
-Structured Output delta  0
+Engineering parser logic 0
+Structured Output logic  0
+Capability policy split  0
 ```
 
 Si alguno necesita cambiar, STOP y nueva revisión de scope.
@@ -458,15 +516,18 @@ RED requiere autorización separada.
 ```text
 R01 invalid / zero / bool token budgets -> reject
 R02 max_output_tokens >= context_window_tokens -> reject
-R03 explicit contract -> num_ctx, num_predict, think, truncate=false, shift=false
+R03 request-scoped contract -> num_ctx, num_predict, think, truncate=false, shift=false
 R04 generic request without contract -> existing payload unchanged
-R05 provenance -> exact canonical generation_options
-R06 Self-Review without contract -> STOP before Engineering
-R07 done_reason=length -> fail closed
-R08 done=false -> fail closed
-R09 thinking_enabled=false + thinking present -> fail closed
-R10 Analyze keeps format=<schema> together with generation contract
-R11 Inspect empty final content rejection remains unchanged
+R05 ConversationService history enrichment preserves generation_contract
+R06 Mock runtime + explicit generation_contract -> fail closed
+R07 provenance -> exact canonical generation_options
+R08 Self-Review without Engineering contract -> STOP before Engineering
+R09 done_reason=length -> fail closed
+R10 done=false -> fail closed
+R11 thinking_enabled=false + thinking present -> fail closed
+R12 Analyze keeps format=<schema> together with generation contract
+R13 E2/E3/E4 receive the exact same immutable contract identity/value
+R14 Inspect empty final content rejection remains unchanged
 ```
 
 ## 24. GREEN acceptance
@@ -578,7 +639,7 @@ BUDGET-01 identified                        PASS
 TERM-01 identified                          PASS
 INPUT-01 identified                         PASS
 
-runtime-level contract selected             PASS
+request-scoped Engineering contract selected PASS
 provider mapping specified                  PASS
 safe provenance specified                   PASS
 anti-relaxation specified                   PASS
