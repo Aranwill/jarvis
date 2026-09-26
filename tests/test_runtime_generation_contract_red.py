@@ -748,4 +748,3 @@ def test_generation_contract_green_g17_completion_token_metadata_is_required(
             request,
             response_payload=response_payload,
         )
-
