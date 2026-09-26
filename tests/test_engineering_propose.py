@@ -608,3 +608,17 @@ def test_e4_red_c31_text_fields_are_byte_bounded(
     *_, capability = build(tmp_path, provider)
     with pytest.raises(RuntimeError):
         execute(capability)
+
+
+
+def test_analyze_structured_output_green_g13_propose_request_remains_unconstrained(
+    tmp_path: Path,
+) -> None:
+    provider = SequencedProvider()
+    *_, capability = build(tmp_path, provider)
+
+    execute(capability)
+
+    assert provider.calls == 2
+    assert provider.requests[0].response_json_schema is not None
+    assert provider.requests[1].response_json_schema is None
