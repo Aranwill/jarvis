@@ -459,24 +459,17 @@ class OllamaRuntime(LLMRuntime):
                 ("prompt_eval_count", prompt_eval_count),
                 ("eval_count", eval_count),
             ):
-                if value is not None and (
-                    type(value) is not int or value < 0
-                ):
+                if type(value) is not int or value < 0:
                     raise RuntimeError(
                         f"Ollama generation {name} is invalid"
                     )
 
-            if (
-                eval_count is not None
-                and eval_count > generation_contract.max_output_tokens
-            ):
+            if eval_count > generation_contract.max_output_tokens:
                 raise RuntimeError(
                     "Ollama generation exceeded max_output_tokens"
                 )
             if (
-                prompt_eval_count is not None
-                and eval_count is not None
-                and prompt_eval_count + eval_count
+                prompt_eval_count + eval_count
                 > generation_contract.context_window_tokens
             ):
                 raise RuntimeError(
