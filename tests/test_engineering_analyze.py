@@ -698,7 +698,7 @@ def test_analyze_structured_output_green_g07_schema_matches_e3_shape(
     assert schema["additionalProperties"] is False
     findings = schema["properties"]["findings"]
     assert findings["minItems"] == 1
-    assert findings["maxItems"] == 16
+    assert findings["maxItems"] == module()._MAX_FINDINGS
 
     finding = findings["items"]
     assert finding["additionalProperties"] is False
@@ -710,4 +710,11 @@ def test_analyze_structured_output_green_g07_schema_matches_e3_shape(
         "UNRESOLVED",
     ]
     assert finding["properties"]["evidence_refs"]["uniqueItems"] is True
-    assert schema["properties"]["uncertainties"]["maxItems"] == 16
+    assert (
+        finding["properties"]["evidence_refs"]["maxItems"]
+        == module()._MAX_EVIDENCE_REFS_PER_FINDING
+    )
+    assert (
+        schema["properties"]["uncertainties"]["maxItems"]
+        == module()._MAX_UNCERTAINTIES
+    )
