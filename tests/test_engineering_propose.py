@@ -611,7 +611,7 @@ def test_e4_red_c31_text_fields_are_byte_bounded(
 
 
 
-def test_analyze_structured_output_green_g13_propose_request_remains_unconstrained(
+def test_analyze_structured_output_green_g13_e4_remains_fully_unconstrained(
     tmp_path: Path,
 ) -> None:
     provider = SequencedProvider()
@@ -620,5 +620,7 @@ def test_analyze_structured_output_green_g13_propose_request_remains_unconstrain
     execute(capability)
 
     assert provider.calls == 2
-    assert provider.requests[0].response_json_schema is not None
-    assert provider.requests[1].response_json_schema is None
+    assert all(
+        request.response_json_schema is None
+        for request in provider.requests
+    )
