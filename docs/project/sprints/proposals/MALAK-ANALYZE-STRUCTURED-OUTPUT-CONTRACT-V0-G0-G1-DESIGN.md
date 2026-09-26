@@ -11,11 +11,14 @@ design_authorized_by: owner
 design_authorized_at: 2026-09-25
 risk_class: 3
 critical_contract: true
-implementation_authorized: false
+implementation_authorized: true
+implementation_scope: analyze_structured_output_v0_only
 red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-25
-green_authorized: false
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-25
 runtime_execution_authorized: false
 fourth_u01_execution_authorized: false
 authority_effect: none
@@ -1056,5 +1059,72 @@ new contract tests fail only where functionality is intentionally absent
 existing unrelated suite remains green
 no production file changed
 Kernel / Planner / Request delta 0
+authority_effect none
+```
+
+
+## 31. GREEN authorization checkpoint
+
+Después de Validation #550, RED quedó demostrado sobre:
+
+```text
+candidate:
+6d113047f3413c0d56f00116b3a529d2d3b32c35
+
+Ubuntu:  5 failed / 1537 passed
+Windows: 5 failed / 1537 passed
+```
+
+Fallas nuevas exactas:
+
+```text
+S01 ConversationRequest lacks response_json_schema
+S02 OllamaRuntime lacks format mapping
+S03 Analyze lacks response schema
+S06 runtime provider path does not surface unsupported schema
+S07 MockLLMRuntime does not fail closed
+```
+
+Controles:
+
+```text
+S04 strict parser malformed JSON rejection   PASS
+S05 generic Ollama request has no format     PASS
+```
+
+El Owner autorizó GREEN dentro del scope congelado.
+
+Producción autorizada:
+
+```text
+src/malak/core/conversation.py
+src/malak/runtime/ollama_runtime.py
+src/malak/runtime/mock_llm_runtime.py
+src/malak/capabilities/_engineering_analysis.py
+```
+
+Tests/documentación asociados también están autorizados.
+
+No autorizado:
+
+```text
+Engineering Propose structured-output adoption
+temperature / sampling changes
+retry / repair
+raw response persistence
+Kernel / Planner changes
+Fourth U01
+runtime execution
+self-modification
+```
+
+La implementación debe preservar:
+
+```text
+provider-neutral request contract
+Ollama format mapping
+Mock fail-closed
+strict semantic parser
+generic request backward compatibility
 authority_effect none
 ```
