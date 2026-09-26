@@ -589,3 +589,125 @@ def test_generation_contract_red_r14_inspect_empty_content_stays_fail_closed(
                 session_id="session-A",
             )
         )
+
+
+
+def test_generation_contract_green_g15_provenance_rejects_context_above_declared(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    contract = _contract(
+        context_window_tokens=300000,
+        max_output_tokens=2048,
+    )
+    runtime = OllamaRuntime(
+        base_url="http://127.0.0.1:11434",
+        keep_alive=0,
+    )
+
+    def fake_introspection(
+        *,
+        path: str,
+        method: str,
+        payload: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        if path == "/api/version":
+            return {"version": "0.33.3"}
+        if path == "/api/tags":
+            return {
+                "models": [
+                    {
+                        "name": "qwen3.5:9b",
+                        "model": "qwen3.5:9b",
+                        "digest": "a" * 64,
+                    }
+                ]
+            }
+        if path == "/api/show":
+            return {
+                "model_info": {
+                    "qwen35.context_length": 262144,
+                }
+            }
+        raise AssertionError(path)
+
+    monkeypatch.setattr(
+        runtime,
+        "_read_introspection_json",
+        fake_introspection,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="exceeds declared model context",
+    ):
+        runtime.capture_provenance(
+            "qwen3.5:9b",
+            generation_contract=contract,
+        )
+
+
+@pytest.mark.parametrize(
+    "response_payload, expected",
+    [
+        (
+            {
+                "model": "qwen3.5:9b",
+                "done": True,
+                "done_reason": "stop",
+                "prompt_eval_count": -1,
+                "eval_count": 100,
+                "message": {
+                    "role": "assistant",
+                    "content": "final",
+                },
+            },
+            "prompt_eval_count",
+        ),
+        (
+            {
+                "model": "qwen3.5:9b",
+                "done": True,
+                "done_reason": "stop",
+                "prompt_eval_count": 100,
+                "eval_count": 2049,
+                "message": {
+                    "role": "assistant",
+                    "content": "final",
+                },
+            },
+            "max_output_tokens",
+        ),
+        (
+            {
+                "model": "qwen3.5:9b",
+                "done": True,
+                "done_reason": "stop",
+                "prompt_eval_count": 7000,
+                "eval_count": 1500,
+                "message": {
+                    "role": "assistant",
+                    "content": "final",
+                },
+            },
+            "context_window_tokens",
+        ),
+    ],
+)
+def test_generation_contract_green_g16_response_counts_are_bounded(
+    monkeypatch: pytest.MonkeyPatch,
+    response_payload: dict[str, object],
+    expected: str,
+) -> None:
+    contract = _contract()
+    request = ConversationRequest(
+        prompt="bounded request",
+        model="qwen3.5:9b",
+        generation_contract=contract,
+    )
+
+    with pytest.raises(RuntimeError, match=expected):
+        _ollama_payload(
+            monkeypatch,
+            request,
+            response_payload=response_payload,
+        )
