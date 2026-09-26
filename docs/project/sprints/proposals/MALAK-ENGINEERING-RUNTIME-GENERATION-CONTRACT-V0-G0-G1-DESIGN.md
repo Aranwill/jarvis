@@ -808,3 +808,144 @@ authority expansion
 ```
 
 GREEN debe volver verdes R01–R14 sin debilitar ningún test previo.
+
+
+## 31. GREEN validation + FULL 4R checkpoint
+
+El primer candidate GREEN validado fue:
+
+```text
+8e1bbe3e7e3d7a3aa1065f15be17140c5e6597ee
+Validation #590
+
+Ubuntu:  1571 passed
+Windows: 1571 passed
+```
+
+La revisión posterior no se limitó al estado verde del CI. Se verificó:
+
+```text
+prior test functions removed       0
+prior assertions removed           0
+Kernel delta                       0
+Planner delta                      0
+Evidence Focus delta               0
+automatic retry                    none
+automatic context increase         none
+automatic thinking switch          none
+raw response persistence           none
+raw thinking persistence           none
+authority expansion                0
+```
+
+### 31.1 Risk
+
+```text
+request-scoped contract            explicit
+generic chat                       unchanged without contract
+Self-Review without contract       fail closed
+Mock + contract                    fail closed
+provider defaults in governed run  removed
+silent truncate / shift            disabled
+```
+
+Disposition:
+
+```text
+PASS pending final candidate-bound CI
+```
+
+### 31.2 Readability
+
+Ownership quedó separado:
+
+```text
+CLI/app boundary
+-> builds external policy
+
+Engineering composition
+-> distributes one immutable contract
+
+ConversationRequest
+-> transports contract
+
+ConversationService / RuntimeProvider
+-> passthrough only
+
+OllamaRuntime
+-> maps and validates provider mechanism
+
+Self-Review Harness
+-> requires exact contract + provenance match
+```
+
+Disposition:
+
+```text
+PASS
+```
+
+### 31.3 Reliability
+
+Validation #590 demostró GREEN sobre R01-R14.
+
+La revisión detectó tres invariantes importantes ya implementados pero todavía
+no ligados por test directo suficiente:
+
+```text
+requested context <= declared model context
+provider token counts must remain within requested budgets
+full Analyze -> provider -> Ollama -> strict parser path with generation contract
+```
+
+Se agregaron tests de hardening sin modificar producción:
+
+```text
+G15 provenance rejects requested context above declared model context
+G16 response metrics reject:
+    negative counts
+    eval_count > max_output_tokens
+    prompt_eval_count + eval_count > context_window_tokens
+
+E2E:
+EngineeringAnalyzeCapability
+-> ConversationService
+-> RuntimeConversationProvider
+-> OllamaRuntime
+-> format=<schema>
+-> explicit generation contract
+-> safe completion metadata
+-> existing strict semantic parser
+-> GROUNDED
+```
+
+### 31.4 Resilience
+
+Se conserva:
+
+```text
+done != true               -> fail closed
+done_reason=length          -> fail closed
+invalid token counts        -> fail closed
+budget overrun              -> fail closed
+thinking policy violation   -> fail closed
+empty final content         -> existing fail closed
+unsupported Mock contract   -> fail closed
+no repair / no retry
+```
+
+### 31.5 Anti-relaxation
+
+```text
+Engineering Inspect empty validator   unchanged
+Analyze strict parser                 unchanged
+Analyze semantic validators          unchanged
+Structured Output                    preserved
+Evidence Focus                       preserved
+generic Ollama payload               preserved without contract
+Kernel / Planner                     unchanged
+authority_effect                     none
+```
+
+El candidate posterior a este hardening requiere nueva Validation candidate-bound
+antes de cerrar FULL 4R y E2E/conformance.
