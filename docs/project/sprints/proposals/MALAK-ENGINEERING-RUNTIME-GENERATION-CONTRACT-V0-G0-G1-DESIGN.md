@@ -370,10 +370,10 @@ Se propone validar:
 ```text
 done == true para non-streaming gobernado
 done_reason == length -> generation_budget_exhausted / fail closed
-prompt_eval_count >= 0 si está presente
-eval_count >= 0 si está presente
-eval_count <= max_output_tokens si está presente
-prompt_eval_count + eval_count <= context_window_tokens si ambos están presentes
+prompt_eval_count -> obligatorio, int exacto, >= 0
+eval_count        -> obligatorio, int exacto, >= 0
+eval_count <= max_output_tokens
+prompt_eval_count + eval_count <= context_window_tokens
 ```
 
 También puede observarse `bool(message.thinking)`, pero nunca persistir su contenido.
@@ -949,3 +949,39 @@ authority_effect                     none
 
 El candidate posterior a este hardening requiere nueva Validation candidate-bound
 antes de cerrar FULL 4R y E2E/conformance.
+
+### 31.6 G17 — completion token metadata required
+
+La revisión final posterior a Validation #593 detectó una ambigüedad fail-closed:
+el runtime validaba los conteos cuando estaban presentes, pero aceptaba su ausencia.
+
+Hardening seleccionado:
+
+```text
+generation_contract active
+-> prompt_eval_count required
+-> eval_count required
+-> exact int / non-negative
+-> existing budget bounds preserved
+```
+
+Motivo:
+
+```text
+sin token metadata
+-> no puede demostrarse cumplimiento del budget solicitado
+-> governed completion -> fail closed
+```
+
+Scope:
+
+```text
+OllamaRuntime response validation only
+tests + design evidence
+Kernel / Planner delta 0
+retry / repair none
+authority_effect none
+```
+
+G17 requiere nueva Validation candidate-bound antes de declarar FULL 4R cerrado.
+
