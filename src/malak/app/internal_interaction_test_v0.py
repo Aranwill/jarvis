@@ -192,6 +192,14 @@ class InternalInteractionTestV0Harness:
             run_engineering = run_engineering.with_evidence_focus(focus)
             if run_engineering.baseline_commit != self._engineering.baseline_commit:
                 raise RuntimeError("focused engineering baseline mismatch")
+            if (
+                not hasattr(run_engineering, "generation_contract")
+                or run_engineering.generation_contract
+                is not self._generation_contract
+            ):
+                raise RuntimeError(
+                    "focused engineering generation contract mismatch"
+                )
 
         runner = InternalInteractionRunner(
             engineering=run_engineering,
