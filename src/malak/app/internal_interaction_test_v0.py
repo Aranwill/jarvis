@@ -93,11 +93,14 @@ class InternalInteractionTestV0Harness:
             "kernels",
             "repository_reader",
             "knowledge_reader",
-            "generation_contract",
         ):
             if not hasattr(engineering, attribute):
                 raise TypeError(f"engineering must expose {attribute}")
 
+        if not hasattr(engineering, "generation_contract"):
+            raise TypeError(
+                "engineering must expose generation contract"
+            )
         generation_contract = engineering.generation_contract
         if not isinstance(
             generation_contract,
