@@ -681,3 +681,33 @@ def test_analyze_structured_output_red_s04_non_json_model_output_fails_closed(
         execute(capability)
 
     assert provider.calls == 1
+
+
+
+def test_analyze_structured_output_green_g07_schema_matches_e3_shape(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build(tmp_path)
+
+    execute(capability)
+
+    request = provider.requests[-1]
+    assert request.response_json_schema is not None
+    schema = json.loads(request.response_json_schema)
+
+    assert schema["additionalProperties"] is False
+    findings = schema["properties"]["findings"]
+    assert findings["minItems"] == 1
+    assert findings["maxItems"] == 16
+
+    finding = findings["items"]
+    assert finding["additionalProperties"] is False
+    assert finding["properties"]["classification"]["enum"] == [
+        "ALIGNED",
+        "PARTIAL",
+        "GAP",
+        "CONTRADICTION",
+        "UNRESOLVED",
+    ]
+    assert finding["properties"]["evidence_refs"]["uniqueItems"] is True
+    assert schema["properties"]["uncertainties"]["maxItems"] == 16
