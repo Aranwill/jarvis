@@ -18,6 +18,10 @@ class MockLLMRuntime(LLMRuntime):
             raise RuntimeError(
                 "MockLLMRuntime does not support structured output"
             )
+        if request.generation_contract is not None:
+            raise RuntimeError(
+                "MockLLMRuntime does not support generation contract"
+            )
 
         return ConversationResponse(
             content=f"[RUNTIME] {request.prompt}",

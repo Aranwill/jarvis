@@ -22,6 +22,7 @@ from malak.core.request import Request
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
 from malak.services.conversation_service import ConversationService
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 
 _MAX_PROPOSAL_SUBJECT_BYTES = 512
 _MAX_REPOSITORY_FILES = 512
@@ -121,6 +122,7 @@ class EngineeringProposeCapability(Capability):
         conversation_service: ConversationService,
         provider_name: str,
         model: str | None = None,
+        generation_contract: RuntimeGenerationContract | None = None,
         evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
     ) -> None:
         if repository_reader.baseline_commit != knowledge_reader.baseline_commit:
@@ -135,6 +137,7 @@ class EngineeringProposeCapability(Capability):
         self._conversation_service = conversation_service
         self._provider_name = provider_name
         self._model = model
+        self._generation_contract = generation_contract
         self._evidence_focus = evidence_focus
         self._baseline_commit = repository_reader.baseline_commit
 
@@ -161,6 +164,7 @@ class EngineeringProposeCapability(Capability):
             max_model_output_bytes=_MAX_ANALYSIS_MODEL_OUTPUT_BYTES,
             error_scope="E4",
             parse_analysis_fn=_parse_analysis,
+            generation_contract=self._generation_contract,
             evidence_focus=self._evidence_focus,
         )
 
@@ -241,6 +245,7 @@ class EngineeringProposeCapability(Capability):
                 model=self._model,
                 system_prompt=_PROPOSAL_SYSTEM_PROMPT,
                 history=(),
+                generation_contract=self._generation_contract,
             ),
             provider=self._provider_name,
         )

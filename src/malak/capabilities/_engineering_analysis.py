@@ -14,6 +14,7 @@ from malak.capabilities._engineering_evidence import (
 from malak.core.conversation import ConversationRequest
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 from malak.services.conversation_service import ConversationService
 
 
@@ -175,6 +176,7 @@ def run_engineering_analysis(
     error_scope: str,
     parse_analysis_fn: Callable[..., _Analysis],
     response_json_schema: str | None = None,
+    generation_contract: RuntimeGenerationContract | None = None,
     evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
 ) -> EngineeringAnalysisResult:
     if evidence_focus is not None:
@@ -294,6 +296,7 @@ def run_engineering_analysis(
             system_prompt=system_prompt,
             history=(),
             response_json_schema=response_json_schema,
+            generation_contract=generation_contract,
         ),
         provider=provider_name,
     )

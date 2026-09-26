@@ -6,9 +6,14 @@ document_role: design
 language: es
 created: 2026-09-26
 baseline_commit: 7ab94f7bfd15a3fbf5f23a09db0d84a95a47b032
-implementation_authorized: false
-red_authorized: false
-green_authorized: false
+implementation_authorized: true
+implementation_scope: runtime_generation_contract_v0_only
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-26
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-26
 runtime_execution_authorized: false
 authority_effect: none
 related:
@@ -654,3 +659,293 @@ authority_effect                            none
 G0/G1 RESULT:
 READY FOR OWNER REVIEW
 ```
+
+
+## 30. RED authorization checkpoint — 2026-09-26
+
+El Owner autorizó explícitamente avanzar con RED después del merge de G0/G1.
+
+Baseline congelado:
+
+```text
+main@b183d8921a34f778e204a8a65330890a4e5c3d67
+```
+
+Scope autorizado:
+
+```text
+tests only
++
+documentación de evidencia RED
+```
+
+No autorizado:
+
+```text
+production implementation
+GREEN
+runtime execution
+next U01
+self-modification
+authority expansion
+```
+
+### 30.1 Interface freeze para RED
+
+Los tests RED fijan estas fronteras del diseño sin implementar producción:
+
+```text
+RuntimeGenerationContract
+-> provider-neutral immutable value object
+
+ConversationRequest
+-> generation_contract: RuntimeGenerationContract | None
+
+OllamaRuntime.capture_provenance(
+    model,
+    generation_contract=...
+)
+
+build_engineering_kernel_set(
+    ...,
+    generation_contract=...
+)
+
+EngineeringKernelSet.generation_contract
+-> same immutable object retained across with_evidence_focus()
+```
+
+Esto resuelve la única ambigüedad de interfaz pendiente entre request-scoped
+generation policy y provenance del run, sin convertir el contrato en estado
+global mutable del runtime.
+
+### 30.2 Expected RED matrix
+
+```text
+R01 FAIL  invalid / zero / bool token budgets are not contract-rejected yet
+R02 FAIL  budget relation is not contract-rejected yet
+R03 FAIL  Ollama request mapping is absent
+R04 PASS  generic Ollama request remains unchanged
+R05 FAIL  ConversationService cannot preserve a missing generation_contract field
+R06 FAIL  Mock runtime does not fail closed on generation contract
+R07 FAIL  provenance does not bind requested generation options
+R08 FAIL  Self-Review harness does not require Engineering generation contract
+R09 FAIL  done_reason=length is not classified fail-closed
+R10 FAIL  done=false is not classified fail-closed
+R11 FAIL  disabled-thinking contract is not enforced against returned thinking
+R12 FAIL  Structured Output + generation contract coexistence is absent
+R13 FAIL  composition does not bind one contract through E2/E3/E4/focused rebuild
+R14 PASS  Inspect empty final content remains fail-closed
+```
+
+Resultado RED esperado:
+
+```text
+12 failing scenarios
+2 control scenarios passing
+0 unrelated failures
+```
+
+El candidate RED deberá mantener:
+
+```text
+src/malak/** delta = 0
+Kernel delta       = 0
+Planner delta      = 0
+authority_effect   = none
+```
+
+
+## 31. GREEN authorization checkpoint — 2026-09-26
+
+Después de Validation #572, RED quedó demostrado exactamente:
+
+```text
+candidate:
+5be93e50a6c723fccfc09a45cb1975b60f6a0ef3
+
+Ubuntu:  12 failed / 1556 passed
+Windows: 12 failed / 1556 passed
+
+R04 PASS
+R14 PASS
+0 unrelated failures
+```
+
+El Owner autorizó GREEN dentro del scope congelado.
+
+Producción autorizada únicamente para:
+
+```text
+RuntimeGenerationContract
+request-scoped ConversationRequest binding
+Ollama mapping + safe response validation
+Mock fail-closed
+runtime provenance generation_options
+Engineering composition binding
+E2/E3/E4 contract transport
+Self-Review preflight requirement
+CLI external configuration binding
+associated tests/docs
+```
+
+Continúa NO autorizado:
+
+```text
+Kernel changes
+Planner changes
+Evidence Focus semantic changes
+Engineering parser relaxations
+Structured Output relaxations
+automatic retry
+automatic context increase
+automatic thinking switch
+raw response persistence
+raw thinking persistence
+next U01 runtime execution
+self-modification
+authority expansion
+```
+
+GREEN debe volver verdes R01–R14 sin debilitar ningún test previo.
+
+
+## 31. GREEN validation + FULL 4R checkpoint
+
+El primer candidate GREEN validado fue:
+
+```text
+8e1bbe3e7e3d7a3aa1065f15be17140c5e6597ee
+Validation #590
+
+Ubuntu:  1571 passed
+Windows: 1571 passed
+```
+
+La revisión posterior no se limitó al estado verde del CI. Se verificó:
+
+```text
+prior test functions removed       0
+prior assertions removed           0
+Kernel delta                       0
+Planner delta                      0
+Evidence Focus delta               0
+automatic retry                    none
+automatic context increase         none
+automatic thinking switch          none
+raw response persistence           none
+raw thinking persistence           none
+authority expansion                0
+```
+
+### 31.1 Risk
+
+```text
+request-scoped contract            explicit
+generic chat                       unchanged without contract
+Self-Review without contract       fail closed
+Mock + contract                    fail closed
+provider defaults in governed run  removed
+silent truncate / shift            disabled
+```
+
+Disposition:
+
+```text
+PASS pending final candidate-bound CI
+```
+
+### 31.2 Readability
+
+Ownership quedó separado:
+
+```text
+CLI/app boundary
+-> builds external policy
+
+Engineering composition
+-> distributes one immutable contract
+
+ConversationRequest
+-> transports contract
+
+ConversationService / RuntimeProvider
+-> passthrough only
+
+OllamaRuntime
+-> maps and validates provider mechanism
+
+Self-Review Harness
+-> requires exact contract + provenance match
+```
+
+Disposition:
+
+```text
+PASS
+```
+
+### 31.3 Reliability
+
+Validation #590 demostró GREEN sobre R01-R14.
+
+La revisión detectó tres invariantes importantes ya implementados pero todavía
+no ligados por test directo suficiente:
+
+```text
+requested context <= declared model context
+provider token counts must remain within requested budgets
+full Analyze -> provider -> Ollama -> strict parser path with generation contract
+```
+
+Se agregaron tests de hardening sin modificar producción:
+
+```text
+G15 provenance rejects requested context above declared model context
+G16 response metrics reject:
+    negative counts
+    eval_count > max_output_tokens
+    prompt_eval_count + eval_count > context_window_tokens
+
+E2E:
+EngineeringAnalyzeCapability
+-> ConversationService
+-> RuntimeConversationProvider
+-> OllamaRuntime
+-> format=<schema>
+-> explicit generation contract
+-> safe completion metadata
+-> existing strict semantic parser
+-> GROUNDED
+```
+
+### 31.4 Resilience
+
+Se conserva:
+
+```text
+done != true               -> fail closed
+done_reason=length          -> fail closed
+invalid token counts        -> fail closed
+budget overrun              -> fail closed
+thinking policy violation   -> fail closed
+empty final content         -> existing fail closed
+unsupported Mock contract   -> fail closed
+no repair / no retry
+```
+
+### 31.5 Anti-relaxation
+
+```text
+Engineering Inspect empty validator   unchanged
+Analyze strict parser                 unchanged
+Analyze semantic validators          unchanged
+Structured Output                    preserved
+Evidence Focus                       preserved
+generic Ollama payload               preserved without contract
+Kernel / Planner                     unchanged
+authority_effect                     none
+```
+
+El candidate posterior a este hardening requiere nueva Validation candidate-bound
+antes de cerrar FULL 4R y E2E/conformance.
