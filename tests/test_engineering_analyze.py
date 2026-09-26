@@ -646,3 +646,38 @@ def test_e3_hardening_c37_generated_text_cannot_inject_reserved_ref_tokens(
 
     with pytest.raises(RuntimeError):
         execute(capability)
+
+
+
+def test_analyze_structured_output_red_s03_analyze_attaches_response_schema(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build(tmp_path)
+
+    execute(capability)
+
+    request = provider.requests[-1]
+    assert request.response_json_schema is not None
+
+    schema = json.loads(request.response_json_schema)
+    assert schema["type"] == "object"
+    assert set(schema["required"]) == {
+        "summary",
+        "findings",
+        "uncertainties",
+    }
+
+
+def test_analyze_structured_output_red_s04_non_json_model_output_fails_closed(
+    tmp_path: Path,
+) -> None:
+    provider = RecordingProvider("not-json")
+    *_, capability = build(tmp_path, provider)
+
+    with pytest.raises(
+        RuntimeError,
+        match="engineering analysis model response is not strict JSON",
+    ):
+        execute(capability)
+
+    assert provider.calls == 1
