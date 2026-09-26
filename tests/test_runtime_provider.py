@@ -1,3 +1,5 @@
+import pytest
+
 from malak.core.conversation import ConversationRequest
 from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
@@ -28,3 +30,23 @@ def test_runtime_provider_preserves_model():
     )
 
     assert response.model == "test-model"
+
+
+def test_analyze_structured_output_red_s06_provider_surfaces_unsupported_schema():
+    runtime = MockLLMRuntime()
+    provider = RuntimeConversationProvider(runtime)
+    request = ConversationRequest(
+        prompt="Return structured output.",
+        model="test-model",
+    )
+    object.__setattr__(
+        request,
+        "response_json_schema",
+        '{"type":"object"}',
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="structured output",
+    ):
+        provider.generate(request)
