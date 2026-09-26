@@ -7,7 +7,7 @@ language: es
 created: 2026-09-26
 reviewed_code_baseline: 0794d5617eec354a66c41e271e7bf413d454b1a6
 execution_baseline_rule: current_main_with_admission_doc_only_delta
-admission_result: pending_candidate_validation
+admission_result: conditional_pass
 risk_class: high_bounded_local_runtime
 runtime_execution_authorized: false
 sixth_u01_authorized: false
@@ -789,7 +789,7 @@ Evidence Focus delta               0
 runtime contract delta             0
 authority_effect                   none
 
-admission candidate CI             PENDING
+admission candidate CI             PASS — Validation #602
 local preflight                    NOT EXECUTED
 runtime execution                  NOT AUTHORIZED
 Sixth U01                          NOT AUTHORIZED
@@ -799,8 +799,24 @@ self-modification                  NOT AUTHORIZED
 Admission result:
 
 ```text
-PENDING CANDIDATE VALIDATION
+CONDITIONAL PASS
 ```
+
+Evidencia candidate-bound:
+
+```text
+candidate:
+1233acc1b2751ed845374a6fe11dcefd9f3e0949
+
+Validation #602:
+Ubuntu   1578 passed
+Windows  1578 passed
+compile  PASS
+diff     PASS
+```
+
+La corrección documental que registra este cierre cambia la identidad del
+candidate y requiere una última Validation candidate-bound antes del merge.
 
 ## 26. Current authority state
 
