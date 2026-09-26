@@ -7,7 +7,9 @@ language: es
 created: 2026-09-26
 baseline_commit: 7ab94f7bfd15a3fbf5f23a09db0d84a95a47b032
 implementation_authorized: false
-red_authorized: false
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-26
 green_authorized: false
 runtime_execution_authorized: false
 authority_effect: none
@@ -653,4 +655,99 @@ authority_effect                            none
 
 G0/G1 RESULT:
 READY FOR OWNER REVIEW
+```
+
+
+## 30. RED authorization checkpoint — 2026-09-26
+
+El Owner autorizó explícitamente avanzar con RED después del merge de G0/G1.
+
+Baseline congelado:
+
+```text
+main@b183d8921a34f778e204a8a65330890a4e5c3d67
+```
+
+Scope autorizado:
+
+```text
+tests only
++
+documentación de evidencia RED
+```
+
+No autorizado:
+
+```text
+production implementation
+GREEN
+runtime execution
+next U01
+self-modification
+authority expansion
+```
+
+### 30.1 Interface freeze para RED
+
+Los tests RED fijan estas fronteras del diseño sin implementar producción:
+
+```text
+RuntimeGenerationContract
+-> provider-neutral immutable value object
+
+ConversationRequest
+-> generation_contract: RuntimeGenerationContract | None
+
+OllamaRuntime.capture_provenance(
+    model,
+    generation_contract=...
+)
+
+build_engineering_kernel_set(
+    ...,
+    generation_contract=...
+)
+
+EngineeringKernelSet.generation_contract
+-> same immutable object retained across with_evidence_focus()
+```
+
+Esto resuelve la única ambigüedad de interfaz pendiente entre request-scoped
+generation policy y provenance del run, sin convertir el contrato en estado
+global mutable del runtime.
+
+### 30.2 Expected RED matrix
+
+```text
+R01 FAIL  invalid / zero / bool token budgets are not contract-rejected yet
+R02 FAIL  budget relation is not contract-rejected yet
+R03 FAIL  Ollama request mapping is absent
+R04 PASS  generic Ollama request remains unchanged
+R05 FAIL  ConversationService cannot preserve a missing generation_contract field
+R06 FAIL  Mock runtime does not fail closed on generation contract
+R07 FAIL  provenance does not bind requested generation options
+R08 FAIL  Self-Review harness does not require Engineering generation contract
+R09 FAIL  done_reason=length is not classified fail-closed
+R10 FAIL  done=false is not classified fail-closed
+R11 FAIL  disabled-thinking contract is not enforced against returned thinking
+R12 FAIL  Structured Output + generation contract coexistence is absent
+R13 FAIL  composition does not bind one contract through E2/E3/E4/focused rebuild
+R14 PASS  Inspect empty final content remains fail-closed
+```
+
+Resultado RED esperado:
+
+```text
+12 failing scenarios
+2 control scenarios passing
+0 unrelated failures
+```
+
+El candidate RED deberá mantener:
+
+```text
+src/malak/** delta = 0
+Kernel delta       = 0
+Planner delta      = 0
+authority_effect   = none
 ```
