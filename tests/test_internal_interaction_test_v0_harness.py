@@ -877,7 +877,9 @@ def test_model_provenance_red_c13_harness_persists_and_attests_runtime_provenanc
     repo = _make_repo(tmp_path)
     engineering, _ = _engineering(repo)
     runtime = _ollama()
-    provenance = _runtime_provenance()
+    provenance = _runtime_provenance(
+        generation_contract=engineering.generation_contract,
+    )
 
     monkeypatch.setattr(
         runtime,
