@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Final, Protocol
 
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
+
 
 _MAX_RESPONSE_JSON_SCHEMA_BYTES: Final = 64 * 1024
 
@@ -40,8 +42,18 @@ class ConversationRequest:
     system_prompt: str | None = None
     history: tuple[ConversationMessage, ...] = ()
     response_json_schema: str | None = None
+    generation_contract: RuntimeGenerationContract | None = None
 
     def __post_init__(self) -> None:
+        contract = self.generation_contract
+        if contract is not None and not isinstance(
+            contract,
+            RuntimeGenerationContract,
+        ):
+            raise TypeError(
+                "generation_contract must be a RuntimeGenerationContract"
+            )
+
         schema = self.response_json_schema
         if schema is None:
             return
