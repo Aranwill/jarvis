@@ -711,3 +711,41 @@ def test_generation_contract_green_g16_response_counts_are_bounded(
             request,
             response_payload=response_payload,
         )
+
+@pytest.mark.parametrize(
+    "missing_field",
+    [
+        "prompt_eval_count",
+        "eval_count",
+    ],
+)
+def test_generation_contract_green_g17_completion_token_metadata_is_required(
+    monkeypatch: pytest.MonkeyPatch,
+    missing_field: str,
+) -> None:
+    contract = _contract()
+    request = ConversationRequest(
+        prompt="bounded request",
+        model="qwen3.5:9b",
+        generation_contract=contract,
+    )
+    response_payload: dict[str, object] = {
+        "model": "qwen3.5:9b",
+        "done": True,
+        "done_reason": "stop",
+        "prompt_eval_count": 100,
+        "eval_count": 100,
+        "message": {
+            "role": "assistant",
+            "content": "final",
+        },
+    }
+    response_payload.pop(missing_field)
+
+    with pytest.raises(RuntimeError, match=missing_field):
+        _ollama_payload(
+            monkeypatch,
+            request,
+            response_payload=response_payload,
+        )
+
