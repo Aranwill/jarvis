@@ -1128,3 +1128,121 @@ strict semantic parser
 generic request backward compatibility
 authority_effect none
 ```
+
+
+## 32. FULL 4R / anti-relaxation correction after Validation #559
+
+Validation #559 sobre el candidate previo:
+
+```text
+dd2dabf124f4bd11ff45cab6f4b894a536fa8143
+
+Ubuntu:  1553 passed
+Windows: 1553 passed
+```
+
+La revisión posterior no se limitó a "tests verdes". Se comparó el candidate con
+el baseline y se verificó:
+
+```text
+prior test assertions removed       0
+prior pytest.raises removed         0
+strict parser relaxations           0
+retry / repair paths added          0
+raw response persistence added      0
+sampling changes                    0
+Kernel / Planner delta              0
+authority expansion                 0
+```
+
+### 32.1 Ambigüedad encontrada: shared analysis path
+
+`run_engineering_analysis()` es compartido por:
+
+```text
+EngineeringAnalyzeCapability (E3)
+EngineeringProposeCapability (E4 internal analysis phase)
+```
+
+El primer GREEN candidate adjuntaba `ANALYZE_RESPONSE_JSON_SCHEMA`
+directamente dentro del helper compartido.
+
+Consecuencia no deseada:
+
+```text
+E3 Analyze
+-> structured output
+
+E4 internal analysis
+-> structured output también
+```
+
+Eso contradecía el scope congelado:
+
+```text
+apply only to Analyze first
+E4 remains unchanged in this slice
+```
+
+Aunque todos los tests pasaban, el comportamiento ampliaba silenciosamente el
+scope funcional.
+
+### 32.2 Corrección fail-closed de scope
+
+El helper compartido pasa a recibir:
+
+```text
+response_json_schema: str | None = None
+```
+
+y no decide política por sí mismo.
+
+`EngineeringAnalyzeCapability` declara explícitamente:
+
+```text
+response_json_schema=ANALYZE_RESPONSE_JSON_SCHEMA
+```
+
+`EngineeringProposeCapability` no solicita schema:
+
+```text
+E4 analysis request   response_json_schema=None
+E4 proposal request   response_json_schema=None
+```
+
+Test contractual:
+
+```text
+G13
+all E4 requests remain unconstrained in this slice
+```
+
+Esto cierra la ambigüedad entre:
+
+```text
+shared implementation utility
+!=
+policy owner
+```
+
+La Capability que necesita structured output debe declararlo explícitamente.
+
+### 32.3 Anti-relaxation disposition
+
+```text
+semantic parser                  unchanged
+E3 invalid JSON rejection        preserved
+E3 extra fields rejection        preserved
+E3 unknown classification        preserved
+E3 unknown refs                  preserved
+E3 duplicate refs/keys           preserved
+generic Ollama request           unchanged
+Mock unsupported schema          fail closed
+E4                               unchanged
+Kernel / Planner                 delta 0
+authority_effect                 none
+Fourth U01                       NOT AUTHORIZED
+```
+
+El candidate posterior a esta corrección requiere nueva Validation candidate-bound
+antes de cerrar FULL 4R / E2E.
