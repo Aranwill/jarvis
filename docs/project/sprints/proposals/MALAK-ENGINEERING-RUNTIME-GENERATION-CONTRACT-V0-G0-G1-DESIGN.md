@@ -984,4 +984,3 @@ authority_effect none
 ```
 
 G17 requiere nueva Validation candidate-bound antes de declarar FULL 4R cerrado.
-
