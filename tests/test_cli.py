@@ -196,6 +196,57 @@ def test_build_cli_configuration_selects_ollama() -> None:
     )
 
 
+def test_build_cli_configuration_builds_generation_contract() -> None:
+    configuration = build_cli_configuration(
+        {
+            "MALAK_RUNTIME": "ollama",
+            "MALAK_OLLAMA_MODEL": "qwen3.5:9b",
+            "MALAK_OLLAMA_CONTEXT_WINDOW_TOKENS": "8192",
+            "MALAK_OLLAMA_MAX_OUTPUT_TOKENS": "2048",
+            "MALAK_OLLAMA_THINKING": "disabled",
+        }
+    )
+
+    contract = configuration.generation_contract
+    assert contract is not None
+    assert contract.context_window_tokens == 8192
+    assert contract.max_output_tokens == 2048
+    assert contract.thinking_enabled is False
+
+
+def test_build_cli_configuration_rejects_partial_generation_contract() -> None:
+    try:
+        build_cli_configuration(
+            {
+                "MALAK_RUNTIME": "ollama",
+                "MALAK_OLLAMA_MODEL": "qwen3.5:9b",
+                "MALAK_OLLAMA_CONTEXT_WINDOW_TOKENS": "8192",
+            }
+        )
+    except ValueError as exc:
+        assert "required together" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError")
+
+
+def test_build_cli_configuration_rejects_ambiguous_thinking_mode() -> None:
+    try:
+        build_cli_configuration(
+            {
+                "MALAK_RUNTIME": "ollama",
+                "MALAK_OLLAMA_MODEL": "qwen3.5:9b",
+                "MALAK_OLLAMA_CONTEXT_WINDOW_TOKENS": "8192",
+                "MALAK_OLLAMA_MAX_OUTPUT_TOKENS": "2048",
+                "MALAK_OLLAMA_THINKING": "auto",
+            }
+        )
+    except ValueError as exc:
+        assert "enabled" in str(exc)
+        assert "disabled" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError")
+
+
 def test_build_cli_configuration_requires_model_for_ollama() -> None:
     try:
         build_cli_configuration(

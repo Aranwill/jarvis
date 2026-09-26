@@ -24,6 +24,7 @@ from malak.observability.execution_trace_projection import (
     ExecutionTraceProjection,
 )
 from malak.runtime.ollama_runtime import OllamaRuntime
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 
 
 TASK_ID: Final[str] = "governed-self-review-bootstrap-v0"
@@ -96,6 +97,19 @@ class InternalInteractionTestV0Harness:
             if not hasattr(engineering, attribute):
                 raise TypeError(f"engineering must expose {attribute}")
 
+        if not hasattr(engineering, "generation_contract"):
+            raise TypeError(
+                "engineering must expose generation contract"
+            )
+        generation_contract = engineering.generation_contract
+        if not isinstance(
+            generation_contract,
+            RuntimeGenerationContract,
+        ):
+            raise ValueError(
+                "Internal Interaction Test V0 requires generation contract"
+            )
+
         if not isinstance(runtime, OllamaRuntime):
             raise ValueError(
                 "Internal Interaction Test V0 requires OllamaRuntime"
@@ -113,6 +127,7 @@ class InternalInteractionTestV0Harness:
         self._engineering = engineering
         self._runtime = runtime
         self._model = model
+        self._generation_contract = generation_contract
         self._output_fn = output_fn
 
     def run(
@@ -154,7 +169,8 @@ class InternalInteractionTestV0Harness:
             )
 
         runtime_provenance = self._runtime.capture_provenance(
-            self._model
+            self._model,
+            generation_contract=self._generation_contract,
         )
         if (
             runtime_provenance.model_identity_strength
@@ -163,6 +179,13 @@ class InternalInteractionTestV0Harness:
             raise RuntimeError(
                 "Internal Interaction Test V0 requires "
                 "TAG_DIGEST_BOUND model identity"
+            )
+        if (
+            dict(runtime_provenance.generation_options)
+            != self._generation_contract.to_generation_options()
+        ):
+            raise RuntimeError(
+                "runtime provenance generation contract mismatch"
             )
 
         live_view = LiveTraceTextView(output_fn=self._output_fn)
@@ -176,6 +199,14 @@ class InternalInteractionTestV0Harness:
             run_engineering = run_engineering.with_evidence_focus(focus)
             if run_engineering.baseline_commit != self._engineering.baseline_commit:
                 raise RuntimeError("focused engineering baseline mismatch")
+            if (
+                not hasattr(run_engineering, "generation_contract")
+                or run_engineering.generation_contract
+                is not self._generation_contract
+            ):
+                raise RuntimeError(
+                    "focused engineering generation contract mismatch"
+                )
 
         runner = InternalInteractionRunner(
             engineering=run_engineering,

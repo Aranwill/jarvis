@@ -16,6 +16,7 @@ from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
 from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 from malak.services.conversation_service import ConversationService
 
 
@@ -189,6 +190,112 @@ def test_analyze_structured_output_green_e2e_reaches_ollama_format_and_parser(
     payload = json.loads(http_request.data.decode("utf-8"))
 
     assert payload["format"] == json.loads(ANALYZE_RESPONSE_JSON_SCHEMA)
+    assert payload["stream"] is False
+    assert payload["keep_alive"] == 0
+    assert captured["timeout"] == 30.0
+
+    assert "status: GROUNDED" in result
+    assert "classification=ALIGNED" in result
+    assert "authority_effect: none" in result
+
+
+
+def test_generation_contract_green_e2e_analyze_reaches_ollama_and_parser(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> _FakeHTTPResponse:
+        captured["request"] = request
+        captured["timeout"] = timeout
+        return _FakeHTTPResponse(
+            {
+                "model": "qwen3.5:9b",
+                "done": True,
+                "done_reason": "stop",
+                "prompt_eval_count": 120,
+                "eval_count": 180,
+                "message": {
+                    "role": "assistant",
+                    "content": json.dumps(
+                        {
+                            "summary": "Grounded engineering analysis.",
+                            "findings": [
+                                {
+                                    "classification": "ALIGNED",
+                                    "statement": (
+                                        "Implementation aligns with governed knowledge."
+                                    ),
+                                    "rationale": (
+                                        "Repository and knowledge evidence support it."
+                                    ),
+                                    "evidence_refs": ["R1", "K1"],
+                                }
+                            ],
+                            "uncertainties": [],
+                        }
+                    ),
+                },
+            }
+        )
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    repo = _make_engineering_repo(tmp_path)
+    repository_reader = GitRepositoryReader(repo)
+    knowledge_reader = GovernedKnowledgeReader(repository_reader)
+
+    contract = RuntimeGenerationContract(
+        context_window_tokens=8192,
+        max_output_tokens=2048,
+        thinking_enabled=False,
+    )
+    runtime = OllamaRuntime(
+        base_url="http://localhost:11434",
+        timeout_seconds=30.0,
+        keep_alive=0,
+    )
+    registry = ConversationProviderRegistry()
+    registry.register(
+        "ollama",
+        RuntimeConversationProvider(runtime),
+    )
+    service = ConversationService(registry)
+
+    capability = EngineeringAnalyzeCapability(
+        repository_reader=repository_reader,
+        knowledge_reader=knowledge_reader,
+        conversation_service=service,
+        provider_name="ollama",
+        model="qwen3.5:9b",
+        generation_contract=contract,
+    )
+
+    result = capability.execute(
+        Request(
+            content="needle",
+            session_id="session-A",
+        )
+    )
+
+    http_request = captured["request"]
+    payload = json.loads(http_request.data.decode("utf-8"))
+
+    assert payload["format"] == json.loads(ANALYZE_RESPONSE_JSON_SCHEMA)
+    assert payload["options"] == {
+        "num_ctx": 8192,
+        "num_predict": 2048,
+    }
+    assert payload["think"] is False
+    assert payload["truncate"] is False
+    assert payload["shift"] is False
     assert payload["stream"] is False
     assert payload["keep_alive"] == 0
     assert captured["timeout"] == 30.0

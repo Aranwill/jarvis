@@ -19,6 +19,7 @@ from malak.core.request import Request
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
 from malak.services.conversation_service import ConversationService
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 
 _MAX_ANALYSIS_SUBJECT_BYTES = 512
 _MAX_REPOSITORY_FILES = 512
@@ -54,6 +55,7 @@ class EngineeringAnalyzeCapability(Capability):
         conversation_service: ConversationService,
         provider_name: str,
         model: str | None = None,
+        generation_contract: RuntimeGenerationContract | None = None,
         evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
     ) -> None:
         if repository_reader.baseline_commit != knowledge_reader.baseline_commit:
@@ -68,6 +70,7 @@ class EngineeringAnalyzeCapability(Capability):
         self._conversation_service = conversation_service
         self._provider_name = provider_name
         self._model = model
+        self._generation_contract = generation_contract
         self._evidence_focus = evidence_focus
         self._baseline_commit = repository_reader.baseline_commit
 
@@ -95,6 +98,7 @@ class EngineeringAnalyzeCapability(Capability):
             error_scope="E3",
             parse_analysis_fn=_parse_analysis,
             response_json_schema=ANALYZE_RESPONSE_JSON_SCHEMA,
+            generation_contract=self._generation_contract,
             evidence_focus=self._evidence_focus,
         )
 
