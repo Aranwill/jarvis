@@ -321,3 +321,48 @@ def test_conversation_service_reset_without_context_is_safe():
     service = ConversationService(registry)
 
     service.reset_context()
+
+
+
+def test_analyze_structured_output_green_g04_context_replace_preserves_schema():
+    registry = ConversationProviderRegistry()
+    provider = RecordingConversationProvider()
+    registry.register("recording", provider)
+
+    context = InMemoryConversationContext()
+    context.record_exchange(
+        session_id="session-A",
+        user_content="First question",
+        assistant_content="First answer",
+    )
+
+    service = ConversationService(
+        registry,
+        context=context,
+    )
+    schema = '{"type":"object"}'
+
+    request = ConversationRequest(
+        prompt="Second question",
+        model="test-model",
+        response_json_schema=schema,
+    )
+
+    service.generate(
+        request,
+        provider="recording",
+        session_id="session-A",
+    )
+
+    assert provider.last_request is not None
+    assert provider.last_request.response_json_schema == schema
+    assert provider.last_request.history == (
+        ConversationMessage(
+            role="user",
+            content="First question",
+        ),
+        ConversationMessage(
+            role="assistant",
+            content="First answer",
+        ),
+    )
