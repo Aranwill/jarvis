@@ -174,6 +174,7 @@ def run_engineering_analysis(
     max_model_output_bytes: int,
     error_scope: str,
     parse_analysis_fn: Callable[..., _Analysis],
+    response_json_schema: str | None = None,
     evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
 ) -> EngineeringAnalysisResult:
     if evidence_focus is not None:
@@ -292,7 +293,7 @@ def run_engineering_analysis(
             model=model,
             system_prompt=system_prompt,
             history=(),
-            response_json_schema=ANALYZE_RESPONSE_JSON_SCHEMA,
+            response_json_schema=response_json_schema,
         ),
         provider=provider_name,
     )
