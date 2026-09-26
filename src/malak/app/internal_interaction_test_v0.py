@@ -24,6 +24,7 @@ from malak.observability.execution_trace_projection import (
     ExecutionTraceProjection,
 )
 from malak.runtime.ollama_runtime import OllamaRuntime
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 
 
 TASK_ID: Final[str] = "governed-self-review-bootstrap-v0"
@@ -92,9 +93,19 @@ class InternalInteractionTestV0Harness:
             "kernels",
             "repository_reader",
             "knowledge_reader",
+            "generation_contract",
         ):
             if not hasattr(engineering, attribute):
                 raise TypeError(f"engineering must expose {attribute}")
+
+        generation_contract = engineering.generation_contract
+        if not isinstance(
+            generation_contract,
+            RuntimeGenerationContract,
+        ):
+            raise ValueError(
+                "Internal Interaction Test V0 requires generation contract"
+            )
 
         if not isinstance(runtime, OllamaRuntime):
             raise ValueError(
@@ -113,6 +124,7 @@ class InternalInteractionTestV0Harness:
         self._engineering = engineering
         self._runtime = runtime
         self._model = model
+        self._generation_contract = generation_contract
         self._output_fn = output_fn
 
     def run(
@@ -154,7 +166,8 @@ class InternalInteractionTestV0Harness:
             )
 
         runtime_provenance = self._runtime.capture_provenance(
-            self._model
+            self._model,
+            generation_contract=self._generation_contract,
         )
         if (
             runtime_provenance.model_identity_strength
