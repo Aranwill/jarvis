@@ -32,3 +32,22 @@ def test_runtime_preserves_model():
 def test_runtime_cannot_be_instantiated():
     with pytest.raises(TypeError):
         LLMRuntime()
+
+
+def test_analyze_structured_output_red_s07_mock_runtime_fails_closed_on_schema():
+    runtime = MockLLMRuntime()
+    request = ConversationRequest(
+        prompt="Return structured output.",
+        model="mock-model",
+    )
+    object.__setattr__(
+        request,
+        "response_json_schema",
+        '{"type":"object"}',
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="structured output",
+    ):
+        runtime.generate(request)
