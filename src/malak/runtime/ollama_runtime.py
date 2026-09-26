@@ -325,6 +325,21 @@ class OllamaRuntime(LLMRuntime):
             "keep_alive": self._keep_alive,
         }
 
+        if request.response_json_schema is not None:
+            try:
+                schema_payload = json.loads(
+                    request.response_json_schema,
+                )
+            except (json.JSONDecodeError, TypeError, RecursionError) as exc:
+                raise RuntimeError(
+                    "structured output schema is not valid JSON"
+                ) from exc
+            if not isinstance(schema_payload, dict):
+                raise RuntimeError(
+                    "structured output schema root must be an object"
+                )
+            payload["format"] = schema_payload
+
         encoded_payload = json.dumps(payload).encode("utf-8")
 
         if len(encoded_payload) > self._max_request_bytes:

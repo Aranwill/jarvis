@@ -11,9 +11,14 @@ design_authorized_by: owner
 design_authorized_at: 2026-09-25
 risk_class: 3
 critical_contract: true
-implementation_authorized: false
-red_authorized: false
-green_authorized: false
+implementation_authorized: true
+implementation_scope: analyze_structured_output_v0_only
+red_authorized: true
+red_authorized_by: owner
+red_authorized_at: 2026-09-25
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-25
 runtime_execution_authorized: false
 fourth_u01_execution_authorized: false
 authority_effect: none
@@ -1005,3 +1010,239 @@ authority expansion   0
 runtime execution     NOT AUTHORIZED
 Fourth U01            NOT AUTHORIZED
 ```
+
+
+## 30. RED authorization checkpoint
+
+El Owner autorizó explícitamente RED el 2026-09-25.
+
+Alcance autorizado:
+
+```text
+tests only
++
+documentation of RED evidence
+```
+
+No autorizado:
+
+```text
+production implementation
+GREEN
+Fourth U01
+runtime execution
+self-modification
+```
+
+Baseline RED:
+
+```text
+main@d48987b93c46bd192fea10ca4744d96156e53f07
+```
+
+RED debe aislar exactamente:
+
+```text
+S01 ConversationRequest lacks response_json_schema
+S02 OllamaRuntime does not map requested schema to /api/chat format
+S03 Engineering Analyze does not attach a response schema
+S04 malformed model JSON reaches the existing strict parser and fails closed
+S05 ordinary Ollama requests remain without format
+S06 RuntimeConversationProvider must not hide unsupported schema behavior
+S07 MockLLMRuntime must fail closed when schema is explicitly requested
+```
+
+Expected RED properties:
+
+```text
+new contract tests fail only where functionality is intentionally absent
+existing unrelated suite remains green
+no production file changed
+Kernel / Planner / Request delta 0
+authority_effect none
+```
+
+
+## 31. GREEN authorization checkpoint
+
+Después de Validation #550, RED quedó demostrado sobre:
+
+```text
+candidate:
+6d113047f3413c0d56f00116b3a529d2d3b32c35
+
+Ubuntu:  5 failed / 1537 passed
+Windows: 5 failed / 1537 passed
+```
+
+Fallas nuevas exactas:
+
+```text
+S01 ConversationRequest lacks response_json_schema
+S02 OllamaRuntime lacks format mapping
+S03 Analyze lacks response schema
+S06 runtime provider path does not surface unsupported schema
+S07 MockLLMRuntime does not fail closed
+```
+
+Controles:
+
+```text
+S04 strict parser malformed JSON rejection   PASS
+S05 generic Ollama request has no format     PASS
+```
+
+El Owner autorizó GREEN dentro del scope congelado.
+
+Producción autorizada:
+
+```text
+src/malak/core/conversation.py
+src/malak/runtime/ollama_runtime.py
+src/malak/runtime/mock_llm_runtime.py
+src/malak/capabilities/_engineering_analysis.py
+```
+
+Tests/documentación asociados también están autorizados.
+
+No autorizado:
+
+```text
+Engineering Propose structured-output adoption
+temperature / sampling changes
+retry / repair
+raw response persistence
+Kernel / Planner changes
+Fourth U01
+runtime execution
+self-modification
+```
+
+La implementación debe preservar:
+
+```text
+provider-neutral request contract
+Ollama format mapping
+Mock fail-closed
+strict semantic parser
+generic request backward compatibility
+authority_effect none
+```
+
+
+## 32. FULL 4R / anti-relaxation correction after Validation #559
+
+Validation #559 sobre el candidate previo:
+
+```text
+dd2dabf124f4bd11ff45cab6f4b894a536fa8143
+
+Ubuntu:  1553 passed
+Windows: 1553 passed
+```
+
+La revisión posterior no se limitó a "tests verdes". Se comparó el candidate con
+el baseline y se verificó:
+
+```text
+prior test assertions removed       0
+prior pytest.raises removed         0
+strict parser relaxations           0
+retry / repair paths added          0
+raw response persistence added      0
+sampling changes                    0
+Kernel / Planner delta              0
+authority expansion                 0
+```
+
+### 32.1 Ambigüedad encontrada: shared analysis path
+
+`run_engineering_analysis()` es compartido por:
+
+```text
+EngineeringAnalyzeCapability (E3)
+EngineeringProposeCapability (E4 internal analysis phase)
+```
+
+El primer GREEN candidate adjuntaba `ANALYZE_RESPONSE_JSON_SCHEMA`
+directamente dentro del helper compartido.
+
+Consecuencia no deseada:
+
+```text
+E3 Analyze
+-> structured output
+
+E4 internal analysis
+-> structured output también
+```
+
+Eso contradecía el scope congelado:
+
+```text
+apply only to Analyze first
+E4 remains unchanged in this slice
+```
+
+Aunque todos los tests pasaban, el comportamiento ampliaba silenciosamente el
+scope funcional.
+
+### 32.2 Corrección fail-closed de scope
+
+El helper compartido pasa a recibir:
+
+```text
+response_json_schema: str | None = None
+```
+
+y no decide política por sí mismo.
+
+`EngineeringAnalyzeCapability` declara explícitamente:
+
+```text
+response_json_schema=ANALYZE_RESPONSE_JSON_SCHEMA
+```
+
+`EngineeringProposeCapability` no solicita schema:
+
+```text
+E4 analysis request   response_json_schema=None
+E4 proposal request   response_json_schema=None
+```
+
+Test contractual:
+
+```text
+G13
+all E4 requests remain unconstrained in this slice
+```
+
+Esto cierra la ambigüedad entre:
+
+```text
+shared implementation utility
+!=
+policy owner
+```
+
+La Capability que necesita structured output debe declararlo explícitamente.
+
+### 32.3 Anti-relaxation disposition
+
+```text
+semantic parser                  unchanged
+E3 invalid JSON rejection        preserved
+E3 extra fields rejection        preserved
+E3 unknown classification        preserved
+E3 unknown refs                  preserved
+E3 duplicate refs/keys           preserved
+generic Ollama request           unchanged
+Mock unsupported schema          fail closed
+E4                               unchanged
+Kernel / Planner                 delta 0
+authority_effect                 none
+Fourth U01                       NOT AUTHORIZED
+```
+
+El candidate posterior a esta corrección requiere nueva Validation candidate-bound
+antes de cerrar FULL 4R / E2E.

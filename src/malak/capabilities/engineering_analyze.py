@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from malak.capabilities._engineering_analysis import (
+    ANALYZE_RESPONSE_JSON_SCHEMA,
     ANALYZE_SYSTEM_PROMPT,
     _Analysis,
     _Finding,
@@ -93,6 +94,7 @@ class EngineeringAnalyzeCapability(Capability):
             max_model_output_bytes=_MAX_MODEL_OUTPUT_BYTES,
             error_scope="E3",
             parse_analysis_fn=_parse_analysis,
+            response_json_schema=ANALYZE_RESPONSE_JSON_SCHEMA,
             evidence_focus=self._evidence_focus,
         )
 

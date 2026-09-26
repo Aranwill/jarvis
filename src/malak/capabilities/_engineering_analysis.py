@@ -52,6 +52,76 @@ Evidence != Authority. Analysis != Decision. Finding != Authorization.
 """
 
 
+ANALYZE_RESPONSE_JSON_SCHEMA = json.dumps(
+    {
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "summary",
+            "findings",
+            "uncertainties",
+        ],
+        "properties": {
+            "summary": {
+                "type": "string",
+            },
+            "findings": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": [
+                        "classification",
+                        "statement",
+                        "rationale",
+                        "evidence_refs",
+                    ],
+                    "properties": {
+                        "classification": {
+                            "type": "string",
+                            "enum": [
+                                "ALIGNED",
+                                "PARTIAL",
+                                "GAP",
+                                "CONTRADICTION",
+                                "UNRESOLVED",
+                            ],
+                        },
+                        "statement": {
+                            "type": "string",
+                        },
+                        "rationale": {
+                            "type": "string",
+                        },
+                        "evidence_refs": {
+                            "type": "array",
+                            "minItems": 1,
+                            "maxItems": 16,
+                            "uniqueItems": True,
+                            "items": {
+                                "type": "string",
+                            },
+                        },
+                    },
+                },
+            },
+            "uncertainties": {
+                "type": "array",
+                "maxItems": 16,
+                "items": {
+                    "type": "string",
+                },
+            },
+        },
+    },
+    ensure_ascii=False,
+    sort_keys=True,
+    separators=(",", ":"),
+)
+
+
 @dataclass(frozen=True)
 class _Finding:
     classification: str
@@ -104,6 +174,7 @@ def run_engineering_analysis(
     max_model_output_bytes: int,
     error_scope: str,
     parse_analysis_fn: Callable[..., _Analysis],
+    response_json_schema: str | None = None,
     evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
 ) -> EngineeringAnalysisResult:
     if evidence_focus is not None:
@@ -222,6 +293,7 @@ def run_engineering_analysis(
             model=model,
             system_prompt=system_prompt,
             history=(),
+            response_json_schema=response_json_schema,
         ),
         provider=provider_name,
     )

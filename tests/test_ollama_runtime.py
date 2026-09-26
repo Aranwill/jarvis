@@ -513,3 +513,86 @@ def test_ollama_runtime_rejects_response_above_byte_limit(
         )
 
     assert fake_response.read_sizes == [max_response_bytes + 1]
+
+
+
+def test_analyze_structured_output_red_s02_ollama_maps_schema_to_format(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> FakeHTTPResponse:
+        captured["request"] = request
+        return FakeHTTPResponse(
+            {
+                "model": "qwen3.5:9b",
+                "message": {
+                    "role": "assistant",
+                    "content": '{"summary":"ok","findings":[],"uncertainties":[]}',
+                },
+            }
+        )
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    schema = '{"additionalProperties":false,"type":"object"}'
+    request = ConversationRequest(
+        prompt="Return structured output.",
+        model="qwen3.5:9b",
+    )
+    object.__setattr__(
+        request,
+        "response_json_schema",
+        schema,
+    )
+
+    OllamaRuntime().generate(request)
+
+    http_request = captured["request"]
+    payload = json.loads(http_request.data.decode("utf-8"))
+
+    assert payload["format"] == json.loads(schema)
+
+
+def test_analyze_structured_output_red_s05_generic_ollama_request_has_no_format(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_urlopen(
+        request: object,
+        timeout: float,
+    ) -> FakeHTTPResponse:
+        captured["request"] = request
+        return FakeHTTPResponse(
+            {
+                "model": "qwen3.5:9b",
+                "message": {
+                    "role": "assistant",
+                    "content": "plain response",
+                },
+            }
+        )
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.urlopen",
+        fake_urlopen,
+    )
+
+    OllamaRuntime().generate(
+        ConversationRequest(
+            prompt="Return a plain response.",
+            model="qwen3.5:9b",
+        )
+    )
+
+    http_request = captured["request"]
+    payload = json.loads(http_request.data.decode("utf-8"))
+
+    assert "format" not in payload
