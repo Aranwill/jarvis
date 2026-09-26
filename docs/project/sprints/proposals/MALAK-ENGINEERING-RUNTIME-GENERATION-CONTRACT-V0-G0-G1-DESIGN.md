@@ -6,11 +6,14 @@ document_role: design
 language: es
 created: 2026-09-26
 baseline_commit: 7ab94f7bfd15a3fbf5f23a09db0d84a95a47b032
-implementation_authorized: false
+implementation_authorized: true
+implementation_scope: runtime_generation_contract_v0_only
 red_authorized: true
 red_authorized_by: owner
 red_authorized_at: 2026-09-26
-green_authorized: false
+green_authorized: true
+green_authorized_by: owner
+green_authorized_at: 2026-09-26
 runtime_execution_authorized: false
 authority_effect: none
 related:
@@ -751,3 +754,57 @@ Kernel delta       = 0
 Planner delta      = 0
 authority_effect   = none
 ```
+
+
+## 31. GREEN authorization checkpoint — 2026-09-26
+
+Después de Validation #572, RED quedó demostrado exactamente:
+
+```text
+candidate:
+5be93e50a6c723fccfc09a45cb1975b60f6a0ef3
+
+Ubuntu:  12 failed / 1556 passed
+Windows: 12 failed / 1556 passed
+
+R04 PASS
+R14 PASS
+0 unrelated failures
+```
+
+El Owner autorizó GREEN dentro del scope congelado.
+
+Producción autorizada únicamente para:
+
+```text
+RuntimeGenerationContract
+request-scoped ConversationRequest binding
+Ollama mapping + safe response validation
+Mock fail-closed
+runtime provenance generation_options
+Engineering composition binding
+E2/E3/E4 contract transport
+Self-Review preflight requirement
+CLI external configuration binding
+associated tests/docs
+```
+
+Continúa NO autorizado:
+
+```text
+Kernel changes
+Planner changes
+Evidence Focus semantic changes
+Engineering parser relaxations
+Structured Output relaxations
+automatic retry
+automatic context increase
+automatic thinking switch
+raw response persistence
+raw thinking persistence
+next U01 runtime execution
+self-modification
+authority expansion
+```
+
+GREEN debe volver verdes R01–R14 sin debilitar ningún test previo.
