@@ -13,6 +13,7 @@ from malak.infrastructure.repository_structure import RepositoryStructuralProjec
 from malak.kernel.kernel import Kernel
 from malak.kernel.registry import CapabilityRegistry
 from malak.knowledge.knowledge_reader import GovernedKnowledgeReader
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 from malak.services.conversation_service import ConversationService
 from malak.services.planner import Planner
 
@@ -23,6 +24,7 @@ class EngineeringKernelSet:
     kernels: dict[str, Kernel]
     repository_reader: GitRepositoryReader
     knowledge_reader: GovernedKnowledgeReader
+    generation_contract: RuntimeGenerationContract | None
     _service: ConversationService
     _provider_name: str
     _model: str | None
@@ -42,6 +44,7 @@ class EngineeringKernelSet:
                 conversation_service=self._service,
                 provider_name=self._provider_name,
                 model=self._model,
+                generation_contract=self.generation_contract,
                 evidence_focus=focus,
             ),
             "analyze": EngineeringAnalyzeCapability(
@@ -50,6 +53,7 @@ class EngineeringKernelSet:
                 conversation_service=self._service,
                 provider_name=self._provider_name,
                 model=self._model,
+                generation_contract=self.generation_contract,
                 evidence_focus=focus,
             ),
             "propose": EngineeringProposeCapability(
@@ -58,6 +62,7 @@ class EngineeringKernelSet:
                 conversation_service=self._service,
                 provider_name=self._provider_name,
                 model=self._model,
+                generation_contract=self.generation_contract,
                 evidence_focus=focus,
             ),
         }
@@ -69,6 +74,7 @@ class EngineeringKernelSet:
             },
             repository_reader=self.repository_reader,
             knowledge_reader=self.knowledge_reader,
+            generation_contract=self.generation_contract,
             _service=self._service,
             _provider_name=self._provider_name,
             _model=self._model,
@@ -115,6 +121,7 @@ def build_engineering_kernel_set(
     service: ConversationService,
     provider_name: str,
     model: str | None = None,
+    generation_contract: RuntimeGenerationContract | None = None,
 ) -> EngineeringKernelSet:
     """
     Compose E2/E3/E4 over one exact repository snapshot.
@@ -136,6 +143,7 @@ def build_engineering_kernel_set(
             conversation_service=service,
             provider_name=provider_name,
             model=model,
+            generation_contract=generation_contract,
         ),
         "analyze": EngineeringAnalyzeCapability(
             repository_reader=repository_reader,
@@ -143,6 +151,7 @@ def build_engineering_kernel_set(
             conversation_service=service,
             provider_name=provider_name,
             model=model,
+            generation_contract=generation_contract,
         ),
         "propose": EngineeringProposeCapability(
             repository_reader=repository_reader,
@@ -150,6 +159,7 @@ def build_engineering_kernel_set(
             conversation_service=service,
             provider_name=provider_name,
             model=model,
+            generation_contract=generation_contract,
         ),
     }
 
@@ -161,6 +171,7 @@ def build_engineering_kernel_set(
         },
         repository_reader=repository_reader,
         knowledge_reader=knowledge_reader,
+        generation_contract=generation_contract,
         _service=service,
         _provider_name=provider_name,
         _model=model,
