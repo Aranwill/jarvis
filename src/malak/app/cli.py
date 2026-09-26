@@ -28,6 +28,7 @@ from malak.observability.operational_event_sink import OperationalEventSink
 from malak.providers.runtime_provider import RuntimeConversationProvider
 from malak.runtime.mock_llm_runtime import MockLLMRuntime
 from malak.runtime.ollama_runtime import OllamaRuntime
+from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 from malak.services.conversation_context import InMemoryConversationContext
 from malak.services.conversation_service import ConversationService
 
@@ -96,6 +97,7 @@ class CLIConfiguration:
     model: str | None
     ollama_base_url: str
     repository_root: str | None = None
+    generation_contract: RuntimeGenerationContract | None = None
 
 
 def build_cli_configuration(
@@ -136,6 +138,8 @@ def build_cli_configuration(
                 "when MALAK_RUNTIME=ollama"
             )
 
+        generation_contract = _build_generation_contract(environment)
+
         return CLIConfiguration(
             runtime_name="ollama",
             provider_name="ollama",
@@ -143,9 +147,55 @@ def build_cli_configuration(
             model=model,
             ollama_base_url=ollama_base_url,
             repository_root=repository_root,
+            generation_contract=generation_contract,
         )
 
     raise ValueError(f"Unsupported runtime: {runtime_name}")
+
+
+def _build_generation_contract(
+    environment: Mapping[str, str],
+) -> RuntimeGenerationContract | None:
+    names = (
+        "MALAK_OLLAMA_CONTEXT_WINDOW_TOKENS",
+        "MALAK_OLLAMA_MAX_OUTPUT_TOKENS",
+        "MALAK_OLLAMA_THINKING",
+    )
+    raw_values = tuple(environment.get(name) for name in names)
+
+    if all(value is None for value in raw_values):
+        return None
+    if any(value is None or not value.strip() for value in raw_values):
+        raise ValueError(
+            "all Ollama generation contract variables are required together"
+        )
+
+    raw_context, raw_output, raw_thinking = (
+        value.strip() for value in raw_values if value is not None
+    )
+
+    try:
+        context_window_tokens = int(raw_context)
+        max_output_tokens = int(raw_output)
+    except ValueError as exc:
+        raise ValueError(
+            "Ollama generation token budgets must be integers"
+        ) from exc
+
+    if raw_thinking == "enabled":
+        thinking_enabled = True
+    elif raw_thinking == "disabled":
+        thinking_enabled = False
+    else:
+        raise ValueError(
+            "MALAK_OLLAMA_THINKING must be 'enabled' or 'disabled'"
+        )
+
+    return RuntimeGenerationContract(
+        context_window_tokens=context_window_tokens,
+        max_output_tokens=max_output_tokens,
+        thinking_enabled=thinking_enabled,
+    )
 
 
 def build_runtime(
@@ -814,6 +864,7 @@ def main() -> None:
             service=engineering_service,
             provider_name=configuration.provider_name,
             model=configuration.model,
+            generation_contract=configuration.generation_contract,
         )
 
     run_cli(
