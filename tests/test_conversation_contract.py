@@ -112,3 +112,49 @@ def test_analyze_structured_output_red_s01_conversation_request_accepts_schema_c
     )
 
     assert request.response_json_schema == schema
+
+
+
+def test_analyze_structured_output_green_g01_schema_is_canonicalized():
+    request = ConversationRequest(
+        prompt="Return structured output.",
+        response_json_schema='{ "type": "object", "additionalProperties": false }',
+    )
+
+    assert request.response_json_schema == (
+        '{"additionalProperties":false,"type":"object"}'
+    )
+
+
+@pytest.mark.parametrize(
+    "schema",
+    [
+        "",
+        "   ",
+        "{not-json",
+        "[]",
+        '{"x":NaN}',
+        '{"x":1,"x":2}',
+    ],
+)
+def test_analyze_structured_output_green_g02_invalid_schema_fails_closed(
+    schema: str,
+) -> None:
+    with pytest.raises(ValueError):
+        ConversationRequest(
+            prompt="Return structured output.",
+            response_json_schema=schema,
+        )
+
+
+def test_analyze_structured_output_green_g03_schema_is_byte_bounded():
+    schema = '{"value":"' + ("x" * (70 * 1024)) + '"}'
+
+    with pytest.raises(
+        ValueError,
+        match="byte limit",
+    ):
+        ConversationRequest(
+            prompt="Return structured output.",
+            response_json_schema=schema,
+        )
