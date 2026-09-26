@@ -372,14 +372,24 @@ AND provider cannot enforce it
 -> do not silently ignore
 ```
 
-Para V0 sólo se implementa soporte real en:
+Para V0 se implementan dos comportamientos explícitos:
 
 ```text
 OllamaRuntime
+-> soporta response_json_schema
+-> lo mapea a /api/chat format
+
+MockLLMRuntime
+-> NO soporta structured output
+-> si recibe response_json_schema != None
+   FAIL CLOSED
 ```
 
+Esto evita que un runtime in-tree ignore silenciosamente un contrato solicitado.
+
 No se crea capability negotiation framework ni registry de features en este
-slice.
+slice. La ausencia de soporte se expresa por comportamiento fail-closed del
+runtime concreto.
 
 ## 10. Analyze response schema
 
@@ -559,6 +569,7 @@ Archivos de implementación esperados:
 ```text
 src/malak/core/conversation.py
 src/malak/runtime/ollama_runtime.py
+src/malak/runtime/mock_llm_runtime.py
 src/malak/capabilities/_engineering_analysis.py
 tests/test_conversation*.py or existing core request tests
 tests/test_ollama_runtime.py
@@ -688,7 +699,8 @@ S02 Ollama request does not send format schema
 S03 Analyze does not attach response schema
 S04 unconstrained non-JSON model response reaches parser and fails
 S05 generic requests remain unchanged when no schema is present
-S06 provider must not silently ignore an explicitly requested schema
+S06 provider/runtime must not silently ignore an explicitly requested schema
+S07 MockLLMRuntime explicitly fails closed when schema is requested
 ```
 
 El RED no ejecuta el modelo real.
@@ -713,6 +725,7 @@ G12 no generation temperature/options change
 G13 E4 remains unchanged in this slice
 G14 Kernel / Planner / Request delta 0
 G15 existing suite PASS Ubuntu + Windows
+G16 MockLLMRuntime fails closed instead of pretending structured-output support
 ```
 
 ## 22. E2E / conformance
@@ -735,6 +748,10 @@ ordinary conversation
 -> response_json_schema None
 -> no format field
 -> behavior unchanged
+
+Mock runtime + schema request
+-> explicit failure
+-> no silent ignore
 ```
 
 No se ejecuta Fourth U01 durante implementation validation.
@@ -896,4 +913,95 @@ Siguiente gate:
 ```text
 Owner review of this design
 -> explicit RED authorization
+```
+
+
+## 29. Post-validation design review hardening
+
+Validation #547 sobre el candidate documental inicial:
+
+```text
+44c0e5c3768acf5a07fd41a60011cf92b305f087
+
+Ubuntu:  1535 passed
+Windows: 1535 passed
+```
+
+La revisión posterior detectó una ambigüedad de contrato antes de autorizar RED.
+
+### 29.1 MockLLMRuntime
+
+Malāk posee dos runtimes in-tree:
+
+```text
+OllamaRuntime
+MockLLMRuntime
+```
+
+Agregar `response_json_schema` al request sin modificar Mock podría permitir:
+
+```text
+schema requested
+-> Mock ignores field
+-> response returned anyway
+```
+
+Eso contradice:
+
+```text
+explicit structured-output request
+must not be silently ignored
+```
+
+Por tanto el diseño se endurece:
+
+```text
+OllamaRuntime
+-> enforce via provider-native format
+
+MockLLMRuntime
+-> reject explicit schema request
+```
+
+No se introduce negotiation framework.
+
+### 29.2 Provider-native constraint is not semantic authority
+
+Incluso cuando Ollama acepta `format=<schema>`, Malāk no debe interpretar eso
+como prueba de cumplimiento semántico o como una attestation del output.
+
+Regla preservada:
+
+```text
+provider-native structured constraint
+-> best-effort structural enforcement at generation boundary
+
+actual response
+-> MUST still pass strict Malāk parser + semantic validators
+```
+
+Si un backend/model devuelve contenido no conforme pese al schema:
+
+```text
+existing parser fails
+-> component_error
+-> diagnostic
+-> INCONCLUSIVE
+-> STOP
+```
+
+No existe fallback a unconstrained generation.
+
+### 29.3 Scope effect
+
+```text
+additional production file in expected scope:
+src/malak/runtime/mock_llm_runtime.py
+
+Kernel delta          0
+Planner delta         0
+Request routing delta 0
+authority expansion   0
+runtime execution     NOT AUTHORIZED
+Fourth U01            NOT AUTHORIZED
 ```
