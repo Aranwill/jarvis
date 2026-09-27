@@ -49,6 +49,11 @@ def make_repo(tmp_path: Path) -> tuple[Path, str]:
         "needle governing-context knowledge-only\n",
     )
     write(repo, "docs/architecture/blueprint.md", "needle architecture-context\n")
+    write(
+        repo,
+        "docs/architecture/kernel.md",
+        "needle Kernel approved specification KIC-01\n",
+    )
     write(repo, "SECURITY.md", "needle security-context\n")
     write(
         repo,
@@ -207,6 +212,19 @@ def test_e3_red_c07_prompt_boundary(tmp_path: Path) -> None:
     assert '"analysis_subject":"needle"' in request.prompt
 
 
+def test_kaf01_red_r05_r07_analyze_prompt_declares_approved_specification_precedence(
+    tmp_path: Path,
+) -> None:
+    *_, provider, capability = build(tmp_path)
+    execute(capability)
+    prompt = provider.requests[-1].system_prompt
+
+    assert "APPROVED_SPECIFICATION / normative_subordinate" in prompt
+    assert "subordinate to GOVERNING" in prompt
+    assert "source_class and authority_class only as documentary roles" in prompt
+    assert "Evidence != Authority" in prompt
+
+
 def test_e3_red_c08_e2_e3_evidence_is_identical(tmp_path: Path) -> None:
     repo, _ = make_repo(tmp_path)
     repository_reader = GitRepositoryReader(repo)
@@ -247,6 +265,7 @@ def test_e3_red_c09_roles_preserved(tmp_path: Path) -> None:
         for item in packet(provider)["knowledge_evidence"]
     }
     assert ("GOVERNING", "normative") in roles
+    assert ("APPROVED_SPECIFICATION", "normative_subordinate") in roles
     assert ("SECURITY_POLICY", "protected_subordinate") in roles
     assert ("DECISION_RECORD", "status_dependent") in roles
     assert ("NON_NORMATIVE_IDEA", "non_normative") in roles

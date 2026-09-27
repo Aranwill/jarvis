@@ -31,6 +31,8 @@ uncertainty and unresolved precedence instead of inventing a conclusion.
 
 Respect source_class and authority_class only as documentary roles:
 - GOVERNING / normative is normative within the captured snapshot.
+- APPROVED_SPECIFICATION / normative_subordinate is normative within its declared
+  scope and subordinate to GOVERNING.
 - SECURITY_POLICY / protected_subordinate is protected but does not override GOVERNING.
 - DECISION_RECORD / status_dependent must not be treated as Accepted.
 - reference, process_reference, curated_reference, derived, and non_normative
