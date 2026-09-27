@@ -708,6 +708,8 @@ def test_sgh_red_r08_relation_namespace_must_match_focus_id() -> None:
         {"evaluation_question": "x" * 1025},
         {"relation_label": "unsafe\u202elabel"},
         {"evaluation_question": "unsafe\u200bquestion"},
+        {"relation_label": "unsafe\u0085label"},
+        {"evaluation_question": "unsafe\u009fquestion"},
     ],
 )
 def test_sgh_red_r09_relation_text_is_bounded_and_visible(

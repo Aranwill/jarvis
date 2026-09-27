@@ -1030,7 +1030,7 @@ def _validate_relation_text(
     if len(value.encode("utf-8")) > max_bytes:
         raise ValueError(f"{field} exceeds UTF-8 byte limit")
     if any(
-        unicodedata.category(character) in {"Cf", "Zl", "Zp"}
+        unicodedata.category(character) in {"Cc", "Cf", "Zl", "Zp"}
         for character in value
     ):
         raise ValueError(f"{field} contains forbidden format characters")

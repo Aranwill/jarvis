@@ -965,8 +965,10 @@ rollback
 -> retirar únicamente los dos documentos nuevos antes de commit
 ~~~
 
-En un GREEN futuro, el rollback deberá limitarse al contrato E3/E4 y sus tests
-autorizados. No se utilizarán operaciones destructivas de Git.
+Para el GREEN actual, el rollback queda limitado al catálogo gobernado agregado
+en `src/malak/capabilities/_engineering_evidence.py`, su cobertura autorizada en
+`tests/test_governed_engineering_evidence_focus_v0.py` y la documentación de este
+gate. No se utilizarán operaciones destructivas de Git.
 
 ## 21. Estado de autoridad
 
@@ -985,7 +987,8 @@ bounded correction         PASS — negative coverage only
 focused validation         PASS — 21 selected / 48 file total
 integration validation     PASS — 276 passed
 full local suite           PASS — 1620 passed
-independent validation     NOT EXECUTED
+independent validation     FAIL — Unicode C1 gap observed before bounded correction
+post-correction independent revalidation  PENDING
 runtime execution          NOT AUTHORIZED
 self-modification          NOT AUTHORIZED
 Ready                      OWNER ONLY
@@ -997,6 +1000,6 @@ Siguiente transición lícita:
 
 ~~~text
 owner reviews candidate and validation evidence
--> independent validation if explicitly authorized/required
+-> independent revalidation of the bounded C1 correction if required
 -> owner decides whether to authorize commit/push or further downstream design
 ~~~
