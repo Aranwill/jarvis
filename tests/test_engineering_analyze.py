@@ -737,3 +737,89 @@ def test_analyze_structured_output_green_g07_schema_matches_e3_shape(
         schema["properties"]["uncertainties"]["maxItems"]
         == module()._MAX_UNCERTAINTIES
     )
+
+
+def _epistemic_prompt() -> str:
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+    return " ".join(analysis_module.ANALYZE_SYSTEM_PROMPT.lower().split())
+
+
+def test_u007_f04_f06_red_r01_findings_are_current_snapshot_only() -> None:
+    prompt = _epistemic_prompt()
+
+    assert "captured repository snapshot only" in prompt
+
+
+def test_u007_f04_f06_red_r02_future_risk_alone_is_not_current_unresolved() -> None:
+    prompt = _epistemic_prompt()
+
+    assert "future drift" in prompt
+    assert "future regression" in prompt
+    assert "not by itself" in prompt
+    assert "current unresolved" in prompt
+
+
+def test_u007_f04_f06_red_r03_historical_incompleteness_alone_is_not_unresolved() -> None:
+    prompt = _epistemic_prompt()
+
+    assert "historical process incompleteness" in prompt
+    assert "does not by itself" in prompt
+    assert "current implementation relationship unresolved" in prompt
+
+
+def test_u007_f04_f06_red_r04_current_relation_is_evaluated_independently() -> None:
+    prompt = _epistemic_prompt()
+
+    assert "evaluate the current relation independently" in prompt
+    assert "current implementation" in prompt
+    assert "applicable governed knowledge" in prompt
+
+
+def test_u007_f04_f06_red_r05_unresolved_is_reserved_for_current_ambiguity() -> None:
+    prompt = _epistemic_prompt()
+
+    assert "unresolved is reserved for" in prompt
+    assert "material ambiguity in the current captured snapshot" in prompt
+    assert "insufficient supplied evidence" in prompt
+    assert "current applicable precedence" in prompt
+
+
+def test_u007_f04_f06_red_r06_prospective_or_historical_residuals_are_uncertainties() -> None:
+    prompt = _epistemic_prompt()
+
+    assert "prospective or historical residuals" in prompt
+    assert "uncertainties" in prompt
+    assert "current blocker" in prompt
+
+
+def test_u007_f04_f06_red_ec06_does_not_force_optimism() -> None:
+    prompt = _epistemic_prompt()
+
+    assert "do not prefer aligned" in prompt
+    assert "genuine current insufficiency remains unresolved" in prompt
+
+
+def test_u007_f04_f06_red_r07_e3_uses_shared_analyze_prompt() -> None:
+    analyze_module = import_module("malak.capabilities.engineering_analyze")
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+
+    assert analyze_module._SYSTEM_PROMPT is analysis_module.ANALYZE_SYSTEM_PROMPT
+
+
+def test_u007_f04_f06_red_r09_r11_structured_contract_is_unchanged() -> None:
+    analyze_module = import_module("malak.capabilities.engineering_analyze")
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+    schema = json.loads(analysis_module.ANALYZE_RESPONSE_JSON_SCHEMA)
+
+    enum = (
+        schema["properties"]["findings"]["items"]["properties"]
+        ["classification"]["enum"]
+    )
+    assert enum == ["ALIGNED", "PARTIAL", "GAP", "CONTRADICTION", "UNRESOLVED"]
+    assert analyze_module._ALLOWED_CLASSES == {
+        "ALIGNED",
+        "PARTIAL",
+        "GAP",
+        "CONTRADICTION",
+        "UNRESOLVED",
+    }

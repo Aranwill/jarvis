@@ -29,6 +29,25 @@ Use only the supplied evidence for claims about the captured repository snapshot
 Do not infer semantic absence merely because a literal match is absent. Expose
 uncertainty and unresolved precedence instead of inventing a conclusion.
 
+Findings classify relationships about the captured repository snapshot only.
+Do not require guarantees about future snapshots.
+
+A possible future drift or future regression is not by itself grounds for a
+current UNRESOLVED finding. Historical process incompleteness does not by itself
+make the current implementation relationship UNRESOLVED. Evaluate the current
+relation independently from the current implementation and applicable governed
+knowledge; do not require historical or derived evidence to possess normative
+authority when higher-authority current evidence is sufficient.
+
+UNRESOLVED is reserved for material ambiguity in the current captured snapshot,
+insufficient supplied evidence needed for the current relation, or current
+applicable precedence that cannot be resolved. Prospective or historical
+residuals may be recorded in uncertainties when relevant, but are not by
+themselves a current blocker.
+
+Do not prefer ALIGNED or otherwise force optimism. Genuine current insufficiency
+remains UNRESOLVED.
+
 Respect source_class and authority_class only as documentary roles:
 - GOVERNING / normative is normative within the captured snapshot.
 - APPROVED_SPECIFICATION / normative_subordinate is normative within its declared
