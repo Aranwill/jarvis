@@ -173,7 +173,7 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
+Baseline material/productivo reconciliado: 32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
