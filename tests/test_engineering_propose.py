@@ -783,3 +783,23 @@ def test_e4_reference_bound_red_r13_schemas_are_deterministic_for_same_packet(
     assert all(schema is not None for schema in schemas)
     assert schemas[0] == schemas[2]
     assert schemas[1] == schemas[3]
+
+
+def test_u007_f04_f06_red_r08_e4_internal_analysis_uses_shared_prompt(
+    tmp_path: Path,
+) -> None:
+    provider = SequencedProvider()
+    *_, capability = build(tmp_path, provider)
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+    propose_module = module()
+
+    execute(capability)
+
+    assert provider.requests[0].system_prompt is analysis_module.ANALYZE_SYSTEM_PROMPT
+    assert propose_module.ANALYZE_SYSTEM_PROMPT is analysis_module.ANALYZE_SYSTEM_PROMPT
+
+
+def test_u007_f04_f06_red_r12_e4_eligibility_remains_unchanged() -> None:
+    propose_module = module()
+
+    assert propose_module._ACTIONABLE_CLASSES == {"GAP", "PARTIAL"}
