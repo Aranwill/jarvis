@@ -48,7 +48,8 @@ def make_repo(tmp_path: Path) -> tuple[Path, str]:
     )
     write(repo, "docs/governance/new_policy.md", "future policy\nshared-token\n")
     write(repo, "docs/architecture/blueprint.md", "blueprint\nshared-token\n")
-    write(repo, "docs/architecture/kernel.md", "kernel reference\nshared-token\n")
+    write(repo, "docs/architecture/kernel.md", "kernel approved specification\nshared-token\n")
+    write(repo, "docs/architecture/other.md", "generic architecture reference\nshared-token\n")
     write(
         repo,
         "docs/architecture/schemas/knowledge_schema.yaml",
@@ -147,6 +148,11 @@ def test_e1_red_c02_source_catalog_is_exact_and_deterministic(tmp_path: Path) ->
         ("docs/architecture/blueprint.md", "GOVERNING", "normative"),
         (
             "docs/architecture/kernel.md",
+            "APPROVED_SPECIFICATION",
+            "normative_subordinate",
+        ),
+        (
+            "docs/architecture/other.md",
             "ARCHITECTURE_REFERENCE",
             "reference",
         ),
