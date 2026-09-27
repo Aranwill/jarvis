@@ -39,6 +39,19 @@ REQUIRED_TEXT_FILES = {
     "docs/governance/cognitive_constitution.md": "evidencia incertidumbre autoridad\n",
     "docs/governance/governance_constitution.md": "El usuario es la máxima autoridad operativa.\ncontrol del usuario\n",
     "docs/architecture/blueprint.md": "Kernel First\nCapability First\n",
+    "docs/architecture/kernel.md": (
+        "Kernel lógico e instancias concretas\n"
+        "Kernel First\n"
+        "Capability First\n"
+        "KIC-01 — Responsabilidad, no singleton\n"
+        "KIC-02 — Instancias concretas permitidas\n"
+        "KIC-03 — Sin autoridad o estado independiente\n"
+        "KIC-04 — Capability First preservado\n"
+        "KIC-05 — Un único Core Kernel arquitectónico\n"
+        "KIC-06 — Divergencia requiere un nuevo gate\n"
+        "KIC-07 — Complejidad mínima\n"
+        "Kernel.receive(...)\n"
+    ),
     "docs/architecture/architecture_quality_gates.md": "Kernel complexity gate\n",
     "docs/development/malak_construction_protocol.md": "construction protocol\n",
     "docs/development/development_checklist.md": "development checklist\n",
