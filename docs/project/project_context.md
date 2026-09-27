@@ -3,7 +3,7 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-09-27
-as_of_commit: 32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
+as_of_commit: da4db9de845612adb42a041236f8283f0278e7d3
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -116,6 +116,18 @@ Este contexto fue reconciliado a partir de:
 - integración de KAF-01 mediante PR #208 y Validation #630;
 - integración de E3 Epistemic Calibration mediante PR #209 y Validation #634,
   con `1599 passed` en Ubuntu y Windows;
+- integración de la admisión del Octavo U01 mediante PR #210 y ejecución
+  autorizada de `bootstrap-u01-20260927-008`, con disposición cognitiva
+  histórica `INCONCLUSIVE` y `7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL`;
+- auditoría semántica del Octavo U01 con disposición
+  `GAP_REQUIRES_HARDENING` y findings `E008-SG-01..03`;
+- integración de Governed Engineering Relation Catalog Foundation mediante
+  PR #212, con Candidate FULL 4R PASS, RDD Stage 1 Candidate Conformance PASS y
+  `authority_effect = none`; el consumo downstream de `relation_id` por E3/E4
+  permanece no autorizado;
+- validación post-merge de PR #212 mediante Validation #648 sobre
+  `main@da4db9de845612adb42a041236f8283f0278e7d3`, con `1622 passed` en Ubuntu y Windows,
+  `compileall`, candidate identity y candidate diff en PASS;
 
 El documento:
 
@@ -173,7 +185,7 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-Baseline material/productivo reconciliado: 32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
+Baseline material/productivo reconciliado: da4db9de845612adb42a041236f8283f0278e7d3
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
@@ -191,12 +203,17 @@ E4 Reference-Bounded Output V0:    integrado — PR #201
 Kernel KIC-01..KIC-07:             promoción normativa integrada — PR #205
 KAF-01:                            integrado — PR #208
 E3 Epistemic Calibration:          integrado — PR #209
-Última validación productiva:      Validation #634 / 1599 passed Ubuntu + Windows
+Governed Relation Catalog U01:     integrado — PR #212
+Última validación productiva:      Validation #648 / 1622 passed Ubuntu + Windows
 Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
 Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
-Eighth U01:                        no autorizado
-Runtime Self-Review:               requiere admisión + preflight + autorización separada
+Eighth U01:                        bootstrap-u01-20260927-008 / INCONCLUSIVE
+Eighth findings:                   7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL
+Semantic grounding audit:          GAP_REQUIRES_HARDENING / E008-SG-01..03
+Relation catalog foundation:       integrado / downstream E3 consumption no autorizado
+Runtime Self-Review:               run 008 ejecutado; nueva ejecución requiere admisión + preflight + autorización separada
+RDD Stage 1 PR #212:               PASS / authority_effect none
 Self-modification:                 no autorizada
 RDD Stage 2:                       no autorizado
 Structural Evidence E3/E4:         diferido / no propagado
