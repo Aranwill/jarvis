@@ -921,7 +921,7 @@ Run identity, baseline, focus, recursos, lineage y límites de autoridad son exp
 PASS WITH LOCAL PREFLIGHT PENDING
 ~~~
 
-El candidato de repositorio está validado.
+El baseline del repositorio está validado; el candidate de admisión permanece pendiente de su Validation candidate-bound.
 
 Permanece dependiente del host:
 
