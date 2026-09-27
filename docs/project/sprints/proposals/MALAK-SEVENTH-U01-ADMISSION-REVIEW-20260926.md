@@ -7,7 +7,7 @@ language: es
 created: 2026-09-26
 reviewed_code_baseline: 4833b50d76cf139c3466c7b8acd68bc4168ce708
 execution_baseline_rule: current_main_with_admission_doc_only_delta
-admission_result: pending_candidate_validation
+admission_result: conditional_pass_pending_final_validation
 risk_class: high_bounded_local_runtime
 runtime_execution_authorized: false
 seventh_u01_authorized: false
@@ -935,7 +935,8 @@ Evidence Focus delta             0
 runtime contract delta           0
 authority_effect                 none
 
-admission candidate CI           PENDING
+admission candidate CI           PASS — Validation #613
+final admission validation       PENDING
 local preflight                  NOT EXECUTED
 runtime execution                NOT AUTHORIZED
 Seventh U01                      NOT AUTHORIZED
@@ -945,10 +946,58 @@ self-modification                NOT AUTHORIZED
 Admission result:
 
 ~~~text
-PENDING CANDIDATE VALIDATION
+CONDITIONAL PASS
+pending final candidate-bound validation
+after recording Validation #613
 ~~~
 
-## 27. Current authority state
+## 27. Candidate-bound admission validation
+
+Validation #613 executed against:
+
+~~~text
+candidate:
+b598172abc905ba2d6afba4245bcf3ca966cdf71
+~~~
+
+Result:
+
+~~~text
+Ubuntu                       1583 passed
+Windows                      1583 passed
+compileall                   PASS
+candidate identity           PASS
+candidate diff               PASS
+review threads               0
+~~~
+
+Validated scope:
+
+~~~text
+1 admission document
+0 production code
+Kernel delta 0
+Planner delta 0
+Evidence Focus delta 0
+runtime contract delta 0
+authority_effect none
+~~~
+
+Interpretation:
+
+~~~text
+candidate-bound admission validation PASS
+!= local preflight
+!= runtime authorization
+!= Seventh U01 authorization
+~~~
+
+Recording this evidence changes the candidate identity.
+
+Therefore one final candidate-bound Validation is required before Owner review /
+merge.
+
+## 28. Current authority state
 
 ~~~text
 admission review       PREPARED
