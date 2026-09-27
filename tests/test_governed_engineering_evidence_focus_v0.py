@@ -525,3 +525,232 @@ def test_kaf01_red_r12_other_bootstrap_focuses_do_not_require_kernel_spec() -> N
             selector.value
             for selector in focuses[focus_id].knowledge_required_selectors
         }
+
+
+def _governed_relation(
+    *,
+    relation_id: str = "U01.KERNEL_INSTANCE_CARDINALITY",
+    relation_label: str = "Kernel instance cardinality",
+    evaluation_question: str = (
+        "Do concrete Kernel instances preserve one architectural Core Kernel?"
+    ),
+):
+    return _module().GovernedEngineeringRelation(
+        relation_id=relation_id,
+        relation_label=relation_label,
+        evaluation_question=evaluation_question,
+    )
+
+
+def test_sgh_red_r01_governed_relation_contract_is_exact_and_immutable() -> None:
+    relation = _governed_relation()
+
+    assert relation.relation_id == "U01.KERNEL_INSTANCE_CARDINALITY"
+    assert relation.relation_label == "Kernel instance cardinality"
+    assert "architectural Core Kernel" in relation.evaluation_question
+
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        relation.relation_id = "U01.OTHER"
+
+
+@pytest.mark.parametrize(
+    "relation_id",
+    [
+        "",
+        "U01",
+        "u01.kernel_instance_cardinality",
+        "U01 KERNEL INSTANCE CARDINALITY",
+        "U01..KERNEL_INSTANCE_CARDINALITY",
+        ".U01.KERNEL_INSTANCE_CARDINALITY",
+        "U01.KERNEL_INSTANCE_CARDINALITY.",
+    ],
+)
+def test_sgh_red_r02_relation_id_is_strict_and_namespaced(
+    relation_id: str,
+) -> None:
+    with pytest.raises(ValueError):
+        _governed_relation(relation_id=relation_id)
+
+
+def test_sgh_red_r03_focus_rejects_duplicate_governed_relations() -> None:
+    relation = _governed_relation()
+
+    with pytest.raises(ValueError):
+        _module().GovernedEngineeringEvidenceFocus(
+            focus_id="U01",
+            focus_label="U01 Core Kernel",
+            subject="Kernel",
+            repository_required_selectors=(_selector(),),
+            knowledge_required_selectors=(
+                _selector(
+                    value="docs/architecture/blueprint.md",
+                    terms=("Kernel First",),
+                ),
+            ),
+            supplemental_terms=("Kernel",),
+            supplemental_max_matches_per_kind=1,
+            max_evidence_line_bytes=512,
+            governed_relations=(relation, relation),
+            completeness_criteria="ALL_REQUIRED_SELECTORS_RESOLVED",
+            authority_effect="none",
+        )
+
+
+def test_sgh_red_r04_u01_catalog_governs_current_kernel_relations() -> None:
+    focuses = {
+        focus.focus_id: focus
+        for focus in _module().bootstrap_engineering_evidence_focuses()
+    }
+
+    relations = {
+        relation.relation_id: relation
+        for relation in focuses["U01"].governed_relations
+    }
+
+    assert tuple(relations) == (
+        "U01.KERNEL_RESPONSIBILITY",
+        "U01.KERNEL_INSTANCE_CARDINALITY",
+        "U01.CAPABILITY_ROUTING",
+        "U01.RUNTIME_INDEPENDENCE",
+        "U01.MINIMAL_COMPLEXITY",
+    )
+    assert "concrete Kernel instances" in relations[
+        "U01.KERNEL_INSTANCE_CARDINALITY"
+    ].evaluation_question
+    assert "one architectural Core Kernel" in relations[
+        "U01.KERNEL_INSTANCE_CARDINALITY"
+    ].evaluation_question
+
+
+def test_sgh_red_r05_other_focus_catalogs_are_not_invented_by_u01_fix() -> None:
+    focuses = {
+        focus.focus_id: focus
+        for focus in _module().bootstrap_engineering_evidence_focuses()
+    }
+
+    assert focuses["U04"].governed_relations == ()
+    assert focuses["RR-03"].governed_relations == ()
+
+
+def test_sgh_red_r06_relation_catalog_is_bound_to_evidence_digest(
+    tmp_path: Path,
+) -> None:
+    _, reader, knowledge = _make_repo(tmp_path)
+    base = _focus()
+    governed = _module().GovernedEngineeringEvidenceFocus(
+        focus_id=base.focus_id,
+        focus_label=base.focus_label,
+        subject=base.subject,
+        repository_required_selectors=base.repository_required_selectors,
+        knowledge_required_selectors=base.knowledge_required_selectors,
+        supplemental_terms=base.supplemental_terms,
+        supplemental_max_matches_per_kind=base.supplemental_max_matches_per_kind,
+        max_evidence_line_bytes=base.max_evidence_line_bytes,
+        governed_relations=(_governed_relation(),),
+        completeness_criteria=base.completeness_criteria,
+        authority_effect="none",
+    )
+
+    base_bundle = _collect(reader, knowledge, base)
+    governed_bundle = _collect(reader, knowledge, governed)
+
+    assert base_bundle.evidence_set_digest != governed_bundle.evidence_set_digest
+
+
+def test_sgh_red_r07_duplicate_relation_id_is_rejected_even_if_text_differs() -> None:
+    first = _governed_relation()
+    second = _governed_relation(
+        relation_label="Different label",
+        evaluation_question="Different question?",
+    )
+
+    with pytest.raises(ValueError):
+        _module().GovernedEngineeringEvidenceFocus(
+            focus_id="U01",
+            focus_label="U01 Core Kernel",
+            subject="Kernel",
+            repository_required_selectors=(_selector(),),
+            knowledge_required_selectors=(),
+            supplemental_terms=(),
+            supplemental_max_matches_per_kind=1,
+            max_evidence_line_bytes=512,
+            governed_relations=(first, second),
+            completeness_criteria="ALL_REQUIRED_SELECTORS_RESOLVED",
+            authority_effect="none",
+        )
+
+
+def test_sgh_red_r08_relation_namespace_must_match_focus_id() -> None:
+    relation = _governed_relation(
+        relation_id="U04.KERNEL_INSTANCE_CARDINALITY",
+    )
+
+    with pytest.raises(ValueError):
+        _module().GovernedEngineeringEvidenceFocus(
+            focus_id="U01",
+            focus_label="U01 Core Kernel",
+            subject="Kernel",
+            repository_required_selectors=(_selector(),),
+            knowledge_required_selectors=(),
+            supplemental_terms=(),
+            supplemental_max_matches_per_kind=1,
+            max_evidence_line_bytes=512,
+            governed_relations=(relation,),
+            completeness_criteria="ALL_REQUIRED_SELECTORS_RESOLVED",
+            authority_effect="none",
+        )
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"relation_label": "x" * 257},
+        {"evaluation_question": "x" * 1025},
+        {"relation_label": "unsafe\u202elabel"},
+        {"evaluation_question": "unsafe\u200bquestion"},
+    ],
+)
+def test_sgh_red_r09_relation_text_is_bounded_and_visible(
+    overrides: dict[str, str],
+) -> None:
+    with pytest.raises(ValueError):
+        _governed_relation(**overrides)
+
+
+def test_sgh_green_r10_governed_relations_must_be_a_tuple() -> None:
+    with pytest.raises(TypeError):
+        _module().GovernedEngineeringEvidenceFocus(
+            focus_id="U01",
+            focus_label="U01 Core Kernel",
+            subject="Kernel",
+            repository_required_selectors=(_selector(),),
+            knowledge_required_selectors=(),
+            supplemental_terms=(),
+            supplemental_max_matches_per_kind=1,
+            max_evidence_line_bytes=512,
+            governed_relations=[_governed_relation()],
+            completeness_criteria="ALL_REQUIRED_SELECTORS_RESOLVED",
+            authority_effect="none",
+        )
+
+
+def test_sgh_green_r11_governed_relations_reject_unknown_values() -> None:
+    with pytest.raises(TypeError):
+        _module().GovernedEngineeringEvidenceFocus(
+            focus_id="U01",
+            focus_label="U01 Core Kernel",
+            subject="Kernel",
+            repository_required_selectors=(_selector(),),
+            knowledge_required_selectors=(),
+            supplemental_terms=(),
+            supplemental_max_matches_per_kind=1,
+            max_evidence_line_bytes=512,
+            governed_relations=("U01.KERNEL_INSTANCE_CARDINALITY",),
+            completeness_criteria="ALL_REQUIRED_SELECTORS_RESOLVED",
+            authority_effect="none",
+        )
+
+
+def test_sgh_green_r12_relation_id_respects_utf8_byte_limit() -> None:
+    with pytest.raises(ValueError):
+        _governed_relation(relation_id="U01." + ("A" * 125))
