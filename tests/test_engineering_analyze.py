@@ -741,7 +741,7 @@ def test_analyze_structured_output_green_g07_schema_matches_e3_shape(
 
 def _epistemic_prompt() -> str:
     analysis_module = import_module("malak.capabilities._engineering_analysis")
-    return analysis_module.ANALYZE_SYSTEM_PROMPT.lower()
+    return " ".join(analysis_module.ANALYZE_SYSTEM_PROMPT.lower().split())
 
 
 def test_u007_f04_f06_red_r01_findings_are_current_snapshot_only() -> None:
