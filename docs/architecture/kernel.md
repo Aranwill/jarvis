@@ -4,9 +4,9 @@ title: Kernel
 
 status: active
 
-version: 0.6.0-alpha
+version: 0.6.1-alpha
 
-date: 2026-07-05
+date: 2026-09-27
 
 author: Hector Rodriguez
 
@@ -45,7 +45,7 @@ graph:
 
 history:
   created: 2026-06-27
-  updated: 2026-07-05
+  updated: 2026-09-27
 ---
 
 # Malāk Kernel
@@ -66,7 +66,7 @@ Sprint: Sprint 6.5 — Conversation Runtime
 ID de arquitectura: ARQ-003
 Estado: Implementado y validado
 Versión objetivo: Malāk v0.6.0-alpha
-Última revisión arquitectónica: 2026-07-05
+Última revisión arquitectónica: 2026-09-27
 
 ---
 
@@ -96,6 +96,81 @@ El Kernel es quien decide:
 * si debe registrarse un evento;
 * si debe medirse una acción;
 * si debe solicitarse confirmación humana.
+
+---
+
+## Kernel lógico e instancias concretas
+
+En esta especificación, **Malāk Kernel** designa una única responsabilidad
+arquitectónica y una única frontera lógica de invariantes, coordinación y
+separación de autoridad.
+
+\`Kernel First\` gobierna esa responsabilidad arquitectónica. No impone por sí
+mismo:
+
+* un único proceso;
+* un único objeto Python;
+* una instancia global mutable;
+* un patrón singleton.
+
+Una superficie de aplicación puede materializar más de una instancia concreta
+de \`Kernel\` cuando cada instancia actúa únicamente como una frontera acotada de
+composición y conserva exactamente el mismo contrato arquitectónico.
+
+La multiplicidad técnica de instancias:
+
+* no crea múltiples Core Kernels arquitectónicos;
+* no crea dominios de autoridad independientes;
+* no crea políticas independientes;
+* no concede ownership de Memory ni estado persistente;
+* no habilita lógica de negocio dentro del Kernel;
+* no permite omitir \`Capability First\`;
+* no permite evitar \`Kernel.receive(...)\` cuando ese sea el boundary de
+  ejecución definido por la composición.
+
+Para una composición fija, una instancia concreta puede quedar asociada a un
+\`Planner\` determinista y a un \`CapabilityRegistry\` acotado a una capability.
+Ese patrón sigue representando el mismo Kernel lógico siempre que no introduzca
+responsabilidades, autoridad, policy, estado o routing divergentes.
+
+### Invariantes de cardinalidad y responsabilidad
+
+**KIC-01 — Responsabilidad, no singleton**
+
+\`Kernel First\` es responsibility-centric, no singleton-object-centric.
+
+**KIC-02 — Instancias concretas permitidas**
+
+Pueden existir múltiples instancias concretas de \`Kernel\` en fronteras de
+composición de aplicación cuando implementan el mismo contrato de Kernel.
+
+**KIC-03 — Sin autoridad o estado independiente**
+
+Una instancia concreta no puede adquirir autoridad, policy, memoria persistente,
+estado durable ni lógica de negocio independientes.
+
+**KIC-04 — Capability First preservado**
+
+La multiplicidad de instancias no puede utilizarse para omitir
+\`Capability First\`, evitar el routing gobernado ni bypassar
+\`Kernel.receive(...)\`.
+
+**KIC-05 — Un único Core Kernel arquitectónico**
+
+Más de una instancia concreta no implica más de un Core Kernel arquitectónico.
+La responsabilidad e invariantes de Kernel continúan siendo únicos.
+
+**KIC-06 — Divergencia requiere un nuevo gate**
+
+Si una instancia candidata necesita responsabilidad, autoridad, policy, estado,
+routing o comportamiento arquitectónico divergente, esta aclaración deja de ser
+suficiente y se requiere un gate arquitectónico separado antes de implementarla.
+
+**KIC-07 — Complejidad mínima**
+
+La cantidad de instancias no constituye por sí sola una justificación
+arquitectónica. Toda composición debe preservar un Kernel pequeño, estable y
+determinista, conforme a Architecture Quality Gates.
 
 ---
 
