@@ -1199,7 +1199,7 @@ No declara una auditoría completa de Malāk.
 
 ## 29. Admission disposition
 
-Antes de candidate-bound CI:
+Después de candidate-bound CI y antes de la validación final:
 
 ~~~text
 Seventh U01 integrity             PASS
@@ -1236,7 +1236,8 @@ Planner delta                     0
 runtime contract delta            0
 authority_effect                  none
 
-admission candidate CI            PENDING
+admission candidate CI            PASS — Validation #642
+final admission validation        PENDING
 local preflight                   NOT EXECUTED
 runtime execution                 NOT AUTHORIZED
 Eighth U01                        NOT AUTHORIZED
@@ -1247,10 +1248,57 @@ Admission result:
 
 ~~~text
 CONDITIONAL PASS
-pending candidate-bound validation
+pending final candidate-bound validation
+after recording Validation #642
 ~~~
 
-## 30. Estado de autoridad actual
+## 30. Candidate-bound admission validation
+
+Validation #642 se ejecutó contra:
+
+~~~text
+candidate:
+011fb1a039a40dc4bac05d11569e26dce7168c30
+~~~
+
+Resultado:
+
+~~~text
+Ubuntu                       1599 passed
+Windows                      1599 passed
+compileall                   PASS
+candidate identity           PASS
+candidate diff               PASS
+review threads               0
+~~~
+
+Alcance validado:
+
+~~~text
+1 documento de admisión
+0 código de producción
+0 tests
+Kernel delta                 0
+Planner delta                0
+runtime contract delta       0
+authority_effect             none
+~~~
+
+Interpretación:
+
+~~~text
+candidate-bound admission validation PASS
+!= preflight local
+!= autorización de runtime
+!= autorización del Octavo U01
+~~~
+
+Registrar esta evidencia cambia la identidad del candidate.
+
+Por tanto se requiere una última Validation candidate-bound antes de la
+revisión / Ready / merge del Propietario.
+
+## 31. Estado de autoridad actual
 
 ~~~text
 admission review       PREPARED
