@@ -16,6 +16,9 @@ _GOVERNING_SOURCES = {
     "docs/governance/governance_constitution.md",
     "docs/architecture/blueprint.md",
 }
+_APPROVED_SPECIFICATION_SOURCES = {
+    "docs/architecture/kernel.md",
+}
 _DERIVED_STATE_SOURCES = {
     "docs/project/implementation_roadmap.md",
     "docs/project/project_context.md",
@@ -184,6 +187,9 @@ class GovernedKnowledgeReader:
 def _classify_source(path: str) -> tuple[str, str] | None:
     if path in _GOVERNING_SOURCES:
         return "GOVERNING", "normative"
+
+    if path in _APPROVED_SPECIFICATION_SOURCES:
+        return "APPROVED_SPECIFICATION", "normative_subordinate"
 
     if path == "SECURITY.md":
         return "SECURITY_POLICY", "protected_subordinate"
