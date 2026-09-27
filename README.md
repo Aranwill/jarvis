@@ -311,7 +311,7 @@ authority_effect:
 none
 ```
 
-El baseline integrado posterior corresponde a `main@32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c`.
+El baseline material/productivo reconciliado por esta documentación corresponde a `main@32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c`.
 
 Validar compilación:
 
