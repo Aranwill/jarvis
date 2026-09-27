@@ -610,8 +610,52 @@ def test_e4_red_c31_text_fields_are_byte_bounded(
         execute(capability)
 
 
+def _schema_payload(request: ConversationRequest) -> dict:
+    assert request.response_json_schema is not None
+    return json.loads(request.response_json_schema)
 
-def test_analyze_structured_output_green_g13_e4_remains_fully_unconstrained(
+
+def _packet_evidence_refs(request: ConversationRequest) -> list[str]:
+    packet = json.loads(request.prompt)
+    return [
+        str(item["ref"])
+        for item in (
+            *packet["repository_evidence"],
+            *packet["knowledge_evidence"],
+        )
+    ]
+
+
+def _analysis_call_kwargs(
+    tmp_path: Path,
+    provider: ConversationProvider,
+) -> dict[str, object]:
+    repo, _ = make_repo(tmp_path)
+    repository_reader = GitRepositoryReader(repo)
+    knowledge_reader = GovernedKnowledgeReader(repository_reader)
+    m = module()
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+    return {
+        "repository_reader": repository_reader,
+        "knowledge_reader": knowledge_reader,
+        "conversation_service": service(provider),
+        "provider_name": "recording",
+        "model": "test-model",
+        "subject": "needle",
+        "system_prompt": analysis_module.ANALYZE_SYSTEM_PROMPT,
+        "max_repository_files": m._MAX_REPOSITORY_FILES,
+        "max_repository_bytes": m._MAX_REPOSITORY_BYTES,
+        "max_repository_matches": m._MAX_REPOSITORY_MATCHES,
+        "max_context_matches_per_kind": m._MAX_CONTEXT_MATCHES_PER_KIND,
+        "max_evidence_line_bytes": m._MAX_EVIDENCE_LINE_BYTES,
+        "max_prompt_bytes": m._MAX_ANALYSIS_PROMPT_BYTES,
+        "max_model_output_bytes": m._MAX_ANALYSIS_MODEL_OUTPUT_BYTES,
+        "error_scope": "E4",
+        "parse_analysis_fn": m._parse_analysis,
+    }
+
+
+def test_e4_reference_bound_red_r01_r03_internal_analysis_schema_uses_exact_refs(
     tmp_path: Path,
 ) -> None:
     provider = SequencedProvider()
@@ -620,7 +664,122 @@ def test_analyze_structured_output_green_g13_e4_remains_fully_unconstrained(
     execute(capability)
 
     assert provider.calls == 2
-    assert all(
-        request.response_json_schema is None
-        for request in provider.requests
+    request = provider.requests[0]
+    schema = _schema_payload(request)
+    evidence_refs = _packet_evidence_refs(request)
+
+    enum = (
+        schema["properties"]["findings"]["items"]["properties"]
+        ["evidence_refs"]["items"]["enum"]
     )
+    assert enum == evidence_refs
+
+
+def test_e4_reference_bound_red_r02_r04_r05_proposal_schema_uses_exact_refs(
+    tmp_path: Path,
+) -> None:
+    provider = SequencedProvider()
+    *_, capability = build(tmp_path, provider)
+
+    execute(capability)
+
+    assert provider.calls == 2
+    request = provider.requests[1]
+    schema = _schema_payload(request)
+    packet = json.loads(request.prompt)
+
+    proposal = schema["properties"]["proposals"]["items"]["properties"]
+    expected_findings = [
+        str(item["ref"])
+        for item in packet["structured_analysis"]["findings"]
+    ]
+    expected_evidence = [
+        str(item["ref"])
+        for item in (
+            *packet["repository_evidence"],
+            *packet["knowledge_evidence"],
+        )
+    ]
+
+    assert set(proposal["kind"]["enum"]) == module()._ALLOWED_KINDS
+    assert proposal["finding_refs"]["items"]["enum"] == expected_findings
+    assert proposal["evidence_refs"]["items"]["enum"] == expected_evidence
+
+
+def test_e4_reference_bound_red_r09_static_schema_and_builder_are_exclusive(
+    tmp_path: Path,
+) -> None:
+    provider = SequencedProvider([analysis_json()])
+    kwargs = _analysis_call_kwargs(tmp_path, provider)
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+
+    with pytest.raises(ValueError):
+        analysis_module.run_engineering_analysis(
+            **kwargs,
+            response_json_schema="{}",
+            response_json_schema_builder=lambda *_: "{}",
+        )
+
+    assert provider.calls == 0
+
+
+def test_e4_reference_bound_red_r10_oversized_builder_schema_fails_closed(
+    tmp_path: Path,
+) -> None:
+    provider = SequencedProvider([analysis_json()])
+    kwargs = _analysis_call_kwargs(tmp_path, provider)
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+
+    oversized = json.dumps(
+        {
+            "type": "object",
+            "description": "x" * (65 * 1024),
+        }
+    )
+
+    with pytest.raises(ValueError):
+        analysis_module.run_engineering_analysis(
+            **kwargs,
+            response_json_schema_builder=lambda *_: oversized,
+        )
+
+    assert provider.calls == 0
+
+
+def test_e4_reference_bound_red_r12_malformed_builder_schema_fails_closed(
+    tmp_path: Path,
+) -> None:
+    provider = SequencedProvider([analysis_json()])
+    kwargs = _analysis_call_kwargs(tmp_path, provider)
+    analysis_module = import_module("malak.capabilities._engineering_analysis")
+
+    with pytest.raises(ValueError):
+        analysis_module.run_engineering_analysis(
+            **kwargs,
+            response_json_schema_builder=lambda *_: "{not-json",
+        )
+
+    assert provider.calls == 0
+
+
+def test_e4_reference_bound_red_r13_schemas_are_deterministic_for_same_packet(
+    tmp_path: Path,
+) -> None:
+    provider = SequencedProvider(
+        [
+            analysis_json(),
+            proposal_json(),
+            analysis_json(),
+            proposal_json(),
+        ]
+    )
+    *_, capability = build(tmp_path, provider)
+
+    execute(capability)
+    execute(capability)
+
+    assert provider.calls == 4
+    schemas = [request.response_json_schema for request in provider.requests]
+    assert all(schema is not None for schema in schemas)
+    assert schemas[0] == schemas[2]
+    assert schemas[1] == schemas[3]
