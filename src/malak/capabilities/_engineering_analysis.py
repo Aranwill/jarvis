@@ -224,13 +224,6 @@ def run_engineering_analysis(
     repository_evidence = tuple(bundle.repository_evidence)
     knowledge_evidence = tuple(bundle.knowledge_evidence)
 
-    resolved_response_json_schema = response_json_schema
-    if response_json_schema_builder is not None:
-        resolved_response_json_schema = response_json_schema_builder(
-            repository_evidence,
-            knowledge_evidence,
-        )
-
     def result(
         *,
         status: str,
@@ -307,6 +300,13 @@ def run_engineering_analysis(
     if len(prompt.encode("utf-8")) > max_prompt_bytes:
         raise RuntimeError(
             f"engineering analysis prompt exceeds {max_prompt_bytes} UTF-8 bytes"
+        )
+
+    resolved_response_json_schema = response_json_schema
+    if response_json_schema_builder is not None:
+        resolved_response_json_schema = response_json_schema_builder(
+            repository_evidence,
+            knowledge_evidence,
         )
 
     response = conversation_service.generate(
