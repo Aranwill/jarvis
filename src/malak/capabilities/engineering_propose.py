@@ -6,6 +6,7 @@ import unicodedata
 from dataclasses import dataclass
 
 from malak.capabilities._engineering_analysis import (
+    ANALYZE_RESPONSE_JSON_SCHEMA,
     ANALYZE_SYSTEM_PROMPT,
     _Analysis,
     _Finding,
@@ -164,6 +165,7 @@ class EngineeringProposeCapability(Capability):
             max_model_output_bytes=_MAX_ANALYSIS_MODEL_OUTPUT_BYTES,
             error_scope="E4",
             parse_analysis_fn=_parse_analysis,
+            response_json_schema_builder=_build_analysis_response_json_schema,
             generation_contract=self._generation_contract,
             evidence_focus=self._evidence_focus,
         )
@@ -245,6 +247,11 @@ class EngineeringProposeCapability(Capability):
                 model=self._model,
                 system_prompt=_PROPOSAL_SYSTEM_PROMPT,
                 history=(),
+                response_json_schema=_build_proposal_response_json_schema(
+                    analysis=analysis,
+                    repository_evidence=repository_evidence,
+                    knowledge_evidence=knowledge_evidence,
+                ),
                 generation_contract=self._generation_contract,
             ),
             provider=self._provider_name,
@@ -295,6 +302,157 @@ def _validate_proposal_subject(content: str) -> str:
     if len(subject.encode("utf-8")) > _MAX_PROPOSAL_SUBJECT_BYTES:
         raise ValueError("proposal subject exceeds the hard E4 UTF-8 byte limit")
     return subject
+
+
+def _ordered_evidence_refs(
+    repository_evidence: tuple[dict[str, object], ...] | list[dict[str, object]],
+    knowledge_evidence: tuple[dict[str, object], ...] | list[dict[str, object]],
+) -> list[str]:
+    refs = [
+        str(item["ref"])
+        for item in (*repository_evidence, *knowledge_evidence)
+    ]
+    if not refs:
+        raise ValueError("reference-bound schema requires evidence refs")
+    if len(refs) != len(set(refs)):
+        raise ValueError("reference-bound schema requires unique evidence refs")
+    return refs
+
+
+def _build_analysis_response_json_schema(
+    repository_evidence: tuple[dict[str, object], ...],
+    knowledge_evidence: tuple[dict[str, object], ...],
+) -> str:
+    refs = _ordered_evidence_refs(repository_evidence, knowledge_evidence)
+    schema = json.loads(ANALYZE_RESPONSE_JSON_SCHEMA)
+    schema["properties"]["findings"]["items"]["properties"]["evidence_refs"][
+        "items"
+    ] = {
+        "type": "string",
+        "enum": refs,
+    }
+    return json.dumps(
+        schema,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _build_proposal_response_json_schema(
+    *,
+    analysis: _Analysis,
+    repository_evidence: list[dict[str, object]],
+    knowledge_evidence: list[dict[str, object]],
+) -> str:
+    evidence_refs = _ordered_evidence_refs(
+        repository_evidence,
+        knowledge_evidence,
+    )
+    finding_refs = [
+        f"A{index}"
+        for index, _finding in enumerate(analysis.findings, start=1)
+    ]
+    if not finding_refs:
+        raise ValueError("reference-bound proposal schema requires finding refs")
+
+    proposal_item = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "kind",
+            "target",
+            "description",
+            "rationale",
+            "finding_refs",
+            "evidence_refs",
+        ],
+        "properties": {
+            "kind": {
+                "type": "string",
+                "enum": sorted(_ALLOWED_KINDS),
+            },
+            "target": {
+                "type": "string",
+            },
+            "description": {
+                "type": "string",
+            },
+            "rationale": {
+                "type": "string",
+            },
+            "finding_refs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": _MAX_FINDING_REFS_PER_PROPOSAL,
+                "uniqueItems": True,
+                "items": {
+                    "type": "string",
+                    "enum": finding_refs,
+                },
+            },
+            "evidence_refs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": _MAX_EVIDENCE_REFS_PER_PROPOSAL,
+                "uniqueItems": True,
+                "items": {
+                    "type": "string",
+                    "enum": evidence_refs,
+                },
+            },
+        },
+    }
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "summary",
+            "proposals",
+            "validation_plan",
+            "risks",
+            "assumptions",
+        ],
+        "properties": {
+            "summary": {
+                "type": "string",
+            },
+            "proposals": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": _MAX_PROPOSALS,
+                "items": proposal_item,
+            },
+            "validation_plan": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": _MAX_LIST_ITEMS,
+                "items": {
+                    "type": "string",
+                },
+            },
+            "risks": {
+                "type": "array",
+                "maxItems": _MAX_LIST_ITEMS,
+                "items": {
+                    "type": "string",
+                },
+            },
+            "assumptions": {
+                "type": "array",
+                "maxItems": _MAX_LIST_ITEMS,
+                "items": {
+                    "type": "string",
+                },
+            },
+        },
+    }
+    return json.dumps(
+        schema,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
 
 
 def _parse_analysis(
