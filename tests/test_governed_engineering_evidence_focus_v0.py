@@ -486,15 +486,10 @@ def test_kaf01_red_r11_missing_kernel_spec_prevents_required_focus_completion(
     reader = GitRepositoryReader(repo)
     knowledge = GovernedKnowledgeReader(reader)
 
-    bootstrap_u01 = next(
-        focus
-        for focus in _module().bootstrap_engineering_evidence_focuses()
-        if focus.focus_id == "U01"
-    )
-    kernel_selector = next(
-        selector
-        for selector in bootstrap_u01.knowledge_required_selectors
-        if selector.value == "docs/architecture/kernel.md"
+    kernel_selector = _selector(
+        value="docs/architecture/kernel.md",
+        terms=("KIC-", "Kernel.receive"),
+        max_matches=64,
     )
     focus = _module().GovernedEngineeringEvidenceFocus(
         focus_id="U01-KAF-01",
