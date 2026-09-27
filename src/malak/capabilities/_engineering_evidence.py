@@ -466,6 +466,19 @@ def bootstrap_engineering_evidence_focuses(
                 ),
                 EvidenceSelector(
                     "EXACT_PATH",
+                    "docs/architecture/kernel.md",
+                    (
+                        "Kernel lógico e instancias concretas",
+                        "Kernel First",
+                        "Capability First",
+                        "KIC-",
+                        "Core Kernel",
+                        "Kernel.receive",
+                    ),
+                    64,
+                ),
+                EvidenceSelector(
+                    "EXACT_PATH",
                     "docs/architecture/architecture_quality_gates.md",
                     ("Kernel", "complex"),
                     64,
