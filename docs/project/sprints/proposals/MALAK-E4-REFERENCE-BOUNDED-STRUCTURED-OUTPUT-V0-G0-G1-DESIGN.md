@@ -19,6 +19,8 @@ seventh_u01_authorized: false
 self_modification_authorized: false
 authority_effect: none
 rdd_stage_1_design_check: pass
+design_candidate_validation: pass
+design_candidate_validation_ref: Validation#605
 rdd_stage_2_authorized: false
 related:
   - AGENTS.md
@@ -1444,7 +1446,49 @@ generation contract
 governance authority
 ~~~
 
-## 33. Current disposition
+## 33. Candidate-bound design validation
+
+Validation #605 executed against:
+
+~~~text
+candidate:
+7a8da22865546117c6f6c8240699bd8cfcf84533
+~~~
+
+Result:
+
+~~~text
+Ubuntu                       1578 passed
+Windows                      1578 passed
+compile                      PASS
+candidate identity           PASS
+candidate diff               PASS
+review threads               0
+~~~
+
+Validated scope:
+
+~~~text
+1 design document
+0 production code
+Kernel delta 0
+Planner delta 0
+Evidence Focus delta 0
+authority_effect none
+~~~
+
+Interpretation:
+
+~~~text
+candidate-bound design validation PASS
+!= RED authorization
+!= implementation authorization
+~~~
+
+This documentation-only closure changes the candidate identity and therefore
+requires one final candidate-bound Validation before human review / merge.
+
+## 34. Current disposition
 
 ~~~text
 G0                              PASS
@@ -1453,6 +1497,7 @@ Critical Contract Hardening     PASS
 Four Questions of Law           PASS
 Design 4R                       PASS
 RDD Stage 1 Design Check        PASS
+Design candidate validation     PASS — Validation #605
 
 implementation                  NOT AUTHORIZED
 RED                             NOT AUTHORIZED
