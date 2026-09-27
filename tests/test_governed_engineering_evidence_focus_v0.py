@@ -48,6 +48,23 @@ def _make_repo(tmp_path: Path) -> tuple[Path, GitRepositoryReader, GovernedKnowl
     )
     _write(
         repo,
+        "docs/architecture/kernel.md",
+        (
+            "Kernel lógico e instancias concretas\n"
+            "Kernel First\n"
+            "Capability First\n"
+            "KIC-01 — Responsabilidad, no singleton\n"
+            "KIC-02 — Instancias concretas permitidas\n"
+            "KIC-03 — Sin autoridad o estado independiente\n"
+            "KIC-04 — Capability First preservado\n"
+            "KIC-05 — Un único Core Kernel arquitectónico\n"
+            "KIC-06 — Divergencia requiere un nuevo gate\n"
+            "KIC-07 — Complejidad mínima\n"
+            "Kernel.receive(...)\n"
+        ),
+    )
+    _write(
+        repo,
         "docs/governance/cognitive_constitution.md",
         "Kernel evidence must remain bounded.\n",
     )
@@ -415,3 +432,101 @@ def test_focus_red_f18_bundle_remains_authority_free(tmp_path: Path) -> None:
     bundle = _collect(reader, knowledge, _focus())
 
     assert bundle.authority_effect == "none"
+
+
+def test_kaf01_red_r08_u01_requires_kernel_specification() -> None:
+    focuses = {
+        focus.focus_id: focus
+        for focus in _module().bootstrap_engineering_evidence_focuses()
+    }
+
+    kernel_selectors = [
+        selector
+        for selector in focuses["U01"].knowledge_required_selectors
+        if selector.value == "docs/architecture/kernel.md"
+    ]
+
+    assert len(kernel_selectors) == 1
+    selector = kernel_selectors[0]
+    assert selector.kind == "EXACT_PATH"
+    assert selector.max_matches <= 64
+    assert "KIC-" in selector.terms
+    assert "Kernel.receive" in selector.terms
+
+
+def test_kaf01_red_r09_r10_u01_kernel_spec_evidence_is_required_and_bounded(
+    tmp_path: Path,
+) -> None:
+    _, reader, knowledge = _make_repo(tmp_path)
+    focus = next(
+        focus
+        for focus in _module().bootstrap_engineering_evidence_focuses()
+        if focus.focus_id == "U01"
+    )
+
+    bundle = _collect(reader, knowledge, focus)
+    kernel_items = [
+        item
+        for item in bundle.knowledge_evidence
+        if item["path"] == "docs/architecture/kernel.md"
+    ]
+
+    assert kernel_items
+    assert all(item["required"] is True for item in kernel_items)
+    assert any("KIC-" in str(item["line"]) for item in kernel_items)
+    assert len(kernel_items) <= 64
+
+
+def test_kaf01_red_r11_missing_kernel_spec_prevents_required_focus_completion(
+    tmp_path: Path,
+) -> None:
+    repo, _, _ = _make_repo(tmp_path)
+    _git(repo, "rm", "docs/architecture/kernel.md")
+    _git(repo, "commit", "--no-gpg-sign", "-m", "remove kernel specification")
+    reader = GitRepositoryReader(repo)
+    knowledge = GovernedKnowledgeReader(reader)
+
+    bootstrap_u01 = next(
+        focus
+        for focus in _module().bootstrap_engineering_evidence_focuses()
+        if focus.focus_id == "U01"
+    )
+    kernel_selector = next(
+        selector
+        for selector in bootstrap_u01.knowledge_required_selectors
+        if selector.value == "docs/architecture/kernel.md"
+    )
+    focus = _module().GovernedEngineeringEvidenceFocus(
+        focus_id="U01-KAF-01",
+        focus_label="U01 Kernel Specification requirement",
+        subject="Kernel",
+        repository_required_selectors=(_selector(),),
+        knowledge_required_selectors=(kernel_selector,),
+        supplemental_terms=(),
+        supplemental_max_matches_per_kind=1,
+        max_evidence_line_bytes=512,
+        completeness_criteria="ALL_REQUIRED_SELECTORS_RESOLVED",
+        authority_effect="none",
+    )
+
+    bundle = _collect(reader, knowledge, focus)
+
+    assert bundle.complete is False
+    assert any(
+        result.selector_value == "docs/architecture/kernel.md"
+        and result.status == "MISSING"
+        for result in bundle.selector_results
+    )
+
+
+def test_kaf01_red_r12_other_bootstrap_focuses_do_not_require_kernel_spec() -> None:
+    focuses = {
+        focus.focus_id: focus
+        for focus in _module().bootstrap_engineering_evidence_focuses()
+    }
+
+    for focus_id in ("U04", "RR-03"):
+        assert "docs/architecture/kernel.md" not in {
+            selector.value
+            for selector in focuses[focus_id].knowledge_required_selectors
+        }
