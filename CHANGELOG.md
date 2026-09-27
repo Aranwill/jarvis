@@ -72,6 +72,11 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   fail-closed de completion metadata.
 - PR #201 integró `E4 Reference-Bounded Structured Output V0`, ligando
   dinámicamente los schemas de E4 a los identificadores exactos del packet.
+- PR #212 integró `Governed Engineering Relation Catalog Foundation` para U01,
+  con cinco relaciones gobernadas, validación fail-closed de identidad/texto y
+  binding determinista del catálogo no vacío al `evidence_set_digest`. El
+  consumo downstream de `relation_id` por E3/E4 permanece fuera de alcance y
+  no autorizado.
 
 ### Changed
 
@@ -143,6 +148,10 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - KAF-01 cerró con Validation #630: `1588 passed` en Ubuntu y Windows.
 - E3 Epistemic Calibration cerró con Validation #634:
   `1599 passed` en Ubuntu y Windows.
+- PR #212 cerró candidate-bound con Validation #647 y `1622 passed` en Ubuntu
+  y Windows. Su merge `da4db9de845612adb42a041236f8283f0278e7d3` fue
+  revalidado post-merge por Validation #648 con `1622 passed` en ambos runners,
+  candidate identity, `compileall` y candidate diff en PASS.
 - Las validaciones finales anteriores pasaron con candidate identity,
   `compileall` y candidate diff en PASS según sus gates.
 
@@ -169,9 +178,16 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   `3 ALIGNED + 3 UNRESOLVED`; ese resultado histórico no se reescribe.
 - Los findings posteriores fueron tratados mediante U007-F05, KAF-01 y
   E3 Epistemic Calibration.
-- La integración de esas correcciones no autoriza por sí sola un Octavo U01.
-- Eighth U01 continúa requiriendo admission review, preflight local, identidad
-  exacta de runtime/modelo y autorización explícita del Owner.
+- La admisión del Octavo U01 fue integrada mediante PR #210 y el run
+  `bootstrap-u01-20260927-008` fue ejecutado con autorización separada del
+  Owner. Su resultado cognitivo histórico fue `INCONCLUSIVE` con
+  `7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL`.
+- La auditoría semántica posterior clasificó el resultado como
+  `GAP_REQUIRES_HARDENING`; PR #212 integró únicamente la fundación del
+  catálogo gobernado de relaciones necesaria para el hardening.
+- El consumo downstream del catálogo por E3/E4 permanece no autorizado y
+  requiere gate separado. Cualquier nueva ejecución de Runtime Self-Review
+  requiere nueva admisión, preflight y autorización explícita del Owner.
 - `acceptance PASS != cognitive PASS`.
 - `Evidence != Authority`.
 - Self-modification continúa no autorizada.

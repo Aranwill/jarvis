@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-27
-as_of_commit: 32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
+as_of_commit: da4db9de845612adb42a041236f8283f0278e7d3
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -40,7 +40,7 @@ gobernanza o contrato aprobado.
 ## Estado CURRENT reconciliado — 2026-09-27
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c`.
+`Aranwill/jarvis/main@da4db9de845612adb42a041236f8283f0278e7d3`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -197,11 +197,30 @@ result    3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration
 status    CLOSED / INTEGRATED
 
+Eighth U01 Admission
+PR #210
+status    INTEGRATED
+
 Eighth U01
-status    NOT AUTHORIZED
+run       bootstrap-u01-20260927-008
+status    INCONCLUSIVE
+result    7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL
+
+Eighth U01 Semantic Grounding Audit
+status    GAP_REQUIRES_HARDENING
+findings  E008-SG-01 / E008-SG-02 / E008-SG-03
+
+Governed Engineering Relation Catalog Foundation
+PR #212
+status    INTEGRATED
+RDD Stage 1 Candidate Conformance PASS
+authority_effect none
+
+Downstream E3 relation consumption
+status    NOT AUTHORIZED / SEPARATE GATE REQUIRED
 
 Runtime Self-Review execution
-status    REQUIRES SEPARATE ADMISSION + PREFLIGHT + OWNER AUTHORIZATION
+status    RUN 008 COMPLETE; ANY NEW RUN REQUIRES SEPARATE ADMISSION + PREFLIGHT + OWNER AUTHORIZATION
 
 RDD Stage 2
 status    NOT AUTHORIZED
@@ -219,6 +238,8 @@ Runtime Generation Contract V0   Validation #597 / 1578 passed
 E4 Reference-Bounded Output V0   Validation #611 / 1583 passed
 KAF-01                           Validation #630 / 1588 passed
 E3 Epistemic Calibration         Validation #634 / 1599 passed
+Relation Catalog Foundation       Validation #647 / 1622 passed
+PR #212 post-merge                Validation #648 / 1622 passed
 ```
 
 Las validaciones finales indicadas pasaron en Ubuntu y Windows con
