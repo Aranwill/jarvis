@@ -105,7 +105,7 @@ En esta especificación, **Malāk Kernel** designa una única responsabilidad
 arquitectónica y una única frontera lógica de invariantes, coordinación y
 separación de autoridad.
 
-\`Kernel First\` gobierna esa responsabilidad arquitectónica. No impone por sí
+`Kernel First` gobierna esa responsabilidad arquitectónica. No impone por sí
 mismo:
 
 * un único proceso;
@@ -114,7 +114,7 @@ mismo:
 * un patrón singleton.
 
 Una superficie de aplicación puede materializar más de una instancia concreta
-de \`Kernel\` cuando cada instancia actúa únicamente como una frontera acotada de
+de `Kernel` cuando cada instancia actúa únicamente como una frontera acotada de
 composición y conserva exactamente el mismo contrato arquitectónico.
 
 La multiplicidad técnica de instancias:
@@ -124,12 +124,12 @@ La multiplicidad técnica de instancias:
 * no crea políticas independientes;
 * no concede ownership de Memory ni estado persistente;
 * no habilita lógica de negocio dentro del Kernel;
-* no permite omitir \`Capability First\`;
-* no permite evitar \`Kernel.receive(...)\` cuando ese sea el boundary de
+* no permite omitir `Capability First`;
+* no permite evitar `Kernel.receive(...)` cuando ese sea el boundary de
   ejecución definido por la composición.
 
 Para una composición fija, una instancia concreta puede quedar asociada a un
-\`Planner\` determinista y a un \`CapabilityRegistry\` acotado a una capability.
+`Planner` determinista y a un `CapabilityRegistry` acotado a una capability.
 Ese patrón sigue representando el mismo Kernel lógico siempre que no introduzca
 responsabilidades, autoridad, policy, estado o routing divergentes.
 
@@ -137,11 +137,11 @@ responsabilidades, autoridad, policy, estado o routing divergentes.
 
 **KIC-01 — Responsabilidad, no singleton**
 
-\`Kernel First\` es responsibility-centric, no singleton-object-centric.
+`Kernel First` es responsibility-centric, no singleton-object-centric.
 
 **KIC-02 — Instancias concretas permitidas**
 
-Pueden existir múltiples instancias concretas de \`Kernel\` en fronteras de
+Pueden existir múltiples instancias concretas de `Kernel` en fronteras de
 composición de aplicación cuando implementan el mismo contrato de Kernel.
 
 **KIC-03 — Sin autoridad o estado independiente**
@@ -152,8 +152,8 @@ estado durable ni lógica de negocio independientes.
 **KIC-04 — Capability First preservado**
 
 La multiplicidad de instancias no puede utilizarse para omitir
-\`Capability First\`, evitar el routing gobernado ni bypassar
-\`Kernel.receive(...)\`.
+`Capability First`, evitar el routing gobernado ni bypassar
+`Kernel.receive(...)`.
 
 **KIC-05 — Un único Core Kernel arquitectónico**
 
