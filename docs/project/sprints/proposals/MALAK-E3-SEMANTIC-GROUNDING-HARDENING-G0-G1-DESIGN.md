@@ -924,8 +924,8 @@ candidate diff hash:
 Revalidación:
 
 ~~~text
-focused SGH       21 passed, 27 deselected
-full focus file   48 passed
+focused SGH       23 passed, 27 deselected
+full focus file   50 passed
 ~~~
 
 ### 19.5 Validación de integración y suite completa
@@ -949,12 +949,14 @@ command:
 .\.venv\Scripts\python.exe -m pytest -q
 
 result:
-1620 passed in 405.28s (0:06:45)
+1622 passed in 368.48s (0:06:08)
 ~~~
 
 No se llamó a Ollama, no se generaron artifacts runtime y no se ejecutó
-`/self-review`. La validación independiente por otro agente no fue ejecutada y no
-se presenta como evidencia disponible.
+`/self-review`. Una validación independiente previa detectó el gap Unicode C1.
+La bounded correction posterior fue revalidada localmente con SGH focalizado,
+archivo focal completo, integración y suite completa. La revalidación
+independiente post-correction permanece pendiente y no se presenta como ejecutada.
 
 ## 20. Rollback
 
@@ -984,9 +986,9 @@ RED E3 consumption         NOT AUTHORIZED
 GREEN relation catalog     PASS — candidate 747c3b1...
 Candidate FULL 4R          PASS — no blocking findings
 bounded correction         PASS — negative coverage only
-focused validation         PASS — 21 selected / 48 file total
+focused validation         PASS — 23 selected / 50 file total
 integration validation     PASS — 276 passed
-full local suite           PASS — 1620 passed
+full local suite           PASS — 1622 passed
 independent validation     FAIL — Unicode C1 gap observed before bounded correction
 post-correction independent revalidation  PENDING
 runtime execution          NOT AUTHORIZED
