@@ -49,7 +49,12 @@ def make_repo(tmp_path: Path) -> tuple[Path, str]:
         "needle governing-context knowledge-only\n",
     )
     write(repo, "docs/architecture/blueprint.md", "needle architecture-context\n")
-    write(\n        repo,\n        "docs/architecture/kernel.md",\n        "needle Kernel approved specification KIC-01\\n",\n    )\n    write(repo, "SECURITY.md", "needle security-context\n")
+    write(
+        repo,
+        "docs/architecture/kernel.md",
+        "needle Kernel approved specification KIC-01\n",
+    )
+    write(repo, "SECURITY.md", "needle security-context\n")
     write(
         repo,
         "docs/architecture/adr/ADR-007-example.md",
