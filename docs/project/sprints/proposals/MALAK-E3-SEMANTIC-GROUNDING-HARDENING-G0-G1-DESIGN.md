@@ -743,8 +743,13 @@ Resultado:
 
 ~~~text
 RDD Stage 1 Design Check — relation catalog foundation: PASS
-RDD Stage 1 Candidate Conformance: PASS — relation catalog foundation
+RDD Stage 1 Candidate Conformance: NOT YET ADMISSIBLE
 ~~~
+
+La línea de Candidate Conformance no puede promoverse antes de reunir la evidencia
+candidate-bound exigida por §5.4/§5.5. En particular, debe ocurrir después de
+Candidate FULL 4R vigente, correcciones y revalidaciones afectadas, integración/E2E,
+CI e independent validation cuando aplique.
 
 ## 18. STOP conditions
 
@@ -761,19 +766,25 @@ Detener antes de RED si:
 
 ## 19. Validation plan candidato
 
-Cuando RED/GREEN sea autorizado:
+Cuando RED/GREEN sea autorizado, la secuencia de cierre aplicable debe respetar
+§5.5 y conservar identidad de candidate:
 
 1. tests focalizados del contrato y parser;
 2. tests compartidos E3/E4;
 3. tests del internal interaction mapper;
 4. UTF-8 y `git diff --check`;
-5. Candidate FULL 4R;
+5. Candidate FULL 4R sobre el candidate exacto;
 6. bounded correction si existen findings;
 7. Fix Validator independiente cuando aplique;
-8. E2E focalizado con provider determinista;
-9. suite completa Windows/Ubuntu cuando corresponda;
-10. RDD Stage 1 Candidate Conformance;
-11. runtime follow-up sólo con autorización humana separada.
+8. revalidación de evidencia afectada;
+9. Candidate FULL 4R sobre el candidate corregido;
+10. E2E / integration validation proporcional al cambio;
+11. suite completa y CI candidate-bound;
+12. independent validation cuando aplique;
+13. RDD Stage 1 Candidate Conformance;
+14. human review;
+15. Owner Ready / Merge;
+16. runtime follow-up sólo con autorización humana separada.
 
 Un test de prompt por substring no demostrará por sí solo el cierre.
 
@@ -958,6 +969,78 @@ La bounded correction posterior fue revalidada localmente con SGH focalizado,
 archivo focal completo, integración y suite completa. La revalidación
 independiente post-correction permanece pendiente y no se presenta como ejecutada.
 
+Para esta fundación de catálogo no existe un cambio de runtime/provider que
+justifique ejecutar un E2E con Ollama. La validación end-to-end equivalente de la
+cadena realmente afectada se registra mediante la integración de Inspect,
+Analyze, Propose e internal interaction indicada arriba (276 PASS). Esta
+disposición no autoriza una nueva ejecución runtime.
+
+### 19.6 Candidate FULL 4R posterior a C1 — finding documental
+
+Se ejecutó una nueva revisión FULL 4R read-only sobre el candidate exacto:
+
+~~~text
+166466bd66459a8f9045e1d3f2139b3132c0be19
+~~~
+
+Resultado por lente:
+
+~~~text
+Risk         PASS
+Readability  PASS
+Reliability  FAIL — 4R-F01
+Resilience   PASS
+
+overall      FAIL
+~~~
+
+Finding `4R-F01`:
+
+~~~text
+type:
+evidence-sequence / candidate-binding drift
+
+production defect:
+NO
+
+architecture defect:
+NO
+
+scope expansion:
+NO
+
+blocking effect:
+Ready / Merge blocked until corrected
+~~~
+
+Causa: el documento declaraba prematuramente
+`RDD Stage 1 Candidate Conformance: PASS` antes de cerrar la secuencia §5.5 y
+mantenía como cierre terminal un Candidate FULL 4R anterior a la bounded
+correction Unicode C1.
+
+Bounded Correction autorizada por el Owner:
+
+~~~text
+scope:
+este documento únicamente
+
+production delta:
+0
+
+test delta:
+0
+
+objective:
+reconciliar secuencia, candidate binding y estado de cierre
+
+correction budget:
+documentation-only / one file
+~~~
+
+La corrección documental aplicada no convierte este mismo review en PASS. Al
+cambiar el candidate, corresponde revalidar la evidencia afectada y ejecutar
+Candidate FULL 4R nuevamente sobre el nuevo SHA antes de Candidate Conformance.
+
 ## 20. Rollback
 
 En este gate documental:
@@ -984,24 +1067,42 @@ first RED run              INVALID_SEQUENCE / NOT_ADMISSIBLE
 RED relation catalog       PASS — 18 causal failures / candidate e35787a...
 RED E3 consumption         NOT AUTHORIZED
 GREEN relation catalog     PASS — candidate 747c3b1...
-Candidate FULL 4R          PASS — no blocking findings
-bounded correction         PASS — negative coverage only
+prior Candidate FULL 4R    SUPERSEDED BY CANDIDATE CHANGE
+bounded correction C1      PASS — negative coverage only
 focused validation         PASS — 23 selected / 50 file total
 integration validation     PASS — 276 passed
+runtime E2E                N/A — no runtime/provider delta; integration is equivalent affected-chain validation
 full local suite           PASS — 1622 passed
 independent validation     FAIL — Unicode C1 gap observed before bounded correction
 post-correction independent revalidation  PENDING
+Candidate FULL 4R @166466  FAIL — 4R-F01 documentary sequence/binding drift
+bounded correction 4R-F01  APPLIED — documentation-only / one file
+post-correction FULL 4R    PENDING — new candidate required
+RDD Candidate Conformance  NOT YET ADMISSIBLE
 runtime execution          NOT AUTHORIZED
 self-modification          NOT AUTHORIZED
-Ready                      OWNER ONLY
-merge                      OWNER ONLY
+Ready                      BLOCKED — Owner authority preserved
+merge                      BLOCKED — Owner authority preserved
 authority_effect           none
 ~~~
 
 Siguiente transición lícita:
 
 ~~~text
-owner reviews candidate and validation evidence
--> independent revalidation of the bounded C1 correction if required
--> owner decides whether to authorize commit/push or further downstream design
+bounded correction 4R-F01 committed
+-> affected documentary revalidation
+-> Candidate FULL 4R on corrected candidate
+-> candidate-bound CI on corrected candidate
+-> independent revalidation post-C1 when available
+-> RDD Stage 1 Candidate Conformance
+-> human review
+-> Owner decides Ready / Merge
+~~~
+
+Hasta completar esa secuencia:
+
+~~~text
+Ready = BLOCKED
+Merge = BLOCKED
+authority_effect = none
 ~~~
