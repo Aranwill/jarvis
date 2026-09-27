@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+import unicodedata
 from dataclasses import dataclass
 
 from malak.infrastructure.repository_reader import GitRepositoryReader
@@ -14,6 +16,10 @@ from malak.knowledge.knowledge_reader import (
 _ALLOWED_SELECTOR_KINDS = frozenset({"EXACT_PATH", "PATH_PREFIX"})
 _SELECTOR_STATUSES = frozenset({"RESOLVED", "MISSING", "UNREADABLE", "TRUNCATED"})
 _COMPLETENESS_CRITERIA = "ALL_REQUIRED_SELECTORS_RESOLVED"
+_RELATION_ID_RE = re.compile(r"[A-Z][A-Z0-9-]*\.[A-Z][A-Z0-9_]*")
+_MAX_RELATION_ID_BYTES = 128
+_MAX_RELATION_LABEL_BYTES = 256
+_MAX_EVALUATION_QUESTION_BYTES = 1024
 
 
 @dataclass(frozen=True)
@@ -50,6 +56,32 @@ class EvidenceSelector:
 
 
 @dataclass(frozen=True, slots=True)
+class GovernedEngineeringRelation:
+    relation_id: str
+    relation_label: str
+    evaluation_question: str
+
+    def __post_init__(self) -> None:
+        _validate_relation_text(
+            "relation_id",
+            self.relation_id,
+            max_bytes=_MAX_RELATION_ID_BYTES,
+        )
+        if _RELATION_ID_RE.fullmatch(self.relation_id) is None:
+            raise ValueError("relation_id must be a namespaced uppercase identifier")
+        _validate_relation_text(
+            "relation_label",
+            self.relation_label,
+            max_bytes=_MAX_RELATION_LABEL_BYTES,
+        )
+        _validate_relation_text(
+            "evaluation_question",
+            self.evaluation_question,
+            max_bytes=_MAX_EVALUATION_QUESTION_BYTES,
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class GovernedEngineeringEvidenceFocus:
     focus_id: str
     focus_label: str
@@ -59,6 +91,7 @@ class GovernedEngineeringEvidenceFocus:
     supplemental_terms: tuple[str, ...]
     supplemental_max_matches_per_kind: int
     max_evidence_line_bytes: int
+    governed_relations: tuple[GovernedEngineeringRelation, ...] = ()
     completeness_criteria: str = _COMPLETENESS_CRITERIA
     authority_effect: str = "none"
 
@@ -77,6 +110,10 @@ class GovernedEngineeringEvidenceFocus:
         _validate_selector_tuple(
             "knowledge_required_selectors",
             self.knowledge_required_selectors,
+        )
+        _validate_governed_relations(
+            focus_id=self.focus_id,
+            relations=self.governed_relations,
         )
         if not isinstance(self.supplemental_terms, tuple):
             raise TypeError("supplemental_terms must be a tuple")
@@ -387,6 +424,15 @@ def collect_focused_engineering_evidence(
         "supplemental_truncated": supplemental_truncated,
         "authority_effect": "none",
     }
+    if focus.governed_relations:
+        digest_payload["governed_relations"] = [
+            {
+                "relation_id": relation.relation_id,
+                "relation_label": relation.relation_label,
+                "evaluation_question": relation.evaluation_question,
+            }
+            for relation in focus.governed_relations
+        ]
     canonical = json.dumps(
         digest_payload,
         ensure_ascii=False,
@@ -511,6 +557,47 @@ def bootstrap_engineering_evidence_focuses(
             supplemental_terms=("Kernel", "Capability First", "Kernel First"),
             supplemental_max_matches_per_kind=12,
             max_evidence_line_bytes=2048,
+            governed_relations=(
+                GovernedEngineeringRelation(
+                    relation_id="U01.KERNEL_RESPONSIBILITY",
+                    relation_label="Kernel responsibility boundary",
+                    evaluation_question=(
+                        "Does Kernel remain limited to coordination without "
+                        "absorbing business or capability logic?"
+                    ),
+                ),
+                GovernedEngineeringRelation(
+                    relation_id="U01.KERNEL_INSTANCE_CARDINALITY",
+                    relation_label="Kernel instance cardinality",
+                    evaluation_question=(
+                        "Do concrete Kernel instances preserve one architectural "
+                        "Core Kernel?"
+                    ),
+                ),
+                GovernedEngineeringRelation(
+                    relation_id="U01.CAPABILITY_ROUTING",
+                    relation_label="Capability routing boundary",
+                    evaluation_question=(
+                        "Does capability routing preserve Capability First and "
+                        "the governed Kernel.receive boundary?"
+                    ),
+                ),
+                GovernedEngineeringRelation(
+                    relation_id="U01.RUNTIME_INDEPENDENCE",
+                    relation_label="Runtime independence",
+                    evaluation_question=(
+                        "Does Kernel remain independent from concrete runtimes, "
+                        "providers and models?"
+                    ),
+                ),
+                GovernedEngineeringRelation(
+                    relation_id="U01.MINIMAL_COMPLEXITY",
+                    relation_label="Minimal Kernel complexity",
+                    evaluation_question=(
+                        "Does Kernel remain small, stable and deterministic?"
+                    ),
+                ),
+            ),
         ),
         GovernedEngineeringEvidenceFocus(
             focus_id="U04",
@@ -888,6 +975,27 @@ def _validate_selector_tuple(
         seen.add(selector)
 
 
+def _validate_governed_relations(
+    *,
+    focus_id: str,
+    relations: object,
+) -> None:
+    if not isinstance(relations, tuple):
+        raise TypeError("governed_relations must be a tuple")
+    seen_ids: set[str] = set()
+    expected_prefix = f"{focus_id}."
+    for relation in relations:
+        if not isinstance(relation, GovernedEngineeringRelation):
+            raise TypeError(
+                "governed_relations must contain GovernedEngineeringRelation values"
+            )
+        if not relation.relation_id.startswith(expected_prefix):
+            raise ValueError("governed relation namespace must match focus_id")
+        if relation.relation_id in seen_ids:
+            raise ValueError("duplicate governed relation_id")
+        seen_ids.add(relation.relation_id)
+
+
 def _validate_repo_path(value: object, *, prefix: bool) -> None:
     _validate_text("selector value", value)
     assert isinstance(value, str)
@@ -909,6 +1017,23 @@ def _validate_text(field: str, value: object) -> None:
         raise ValueError(f"{field} must be a non-empty trimmed string")
     if any(ord(character) < 32 or ord(character) == 127 for character in value):
         raise ValueError(f"{field} contains forbidden control characters")
+
+
+def _validate_relation_text(
+    field: str,
+    value: object,
+    *,
+    max_bytes: int,
+) -> None:
+    _validate_text(field, value)
+    assert isinstance(value, str)
+    if len(value.encode("utf-8")) > max_bytes:
+        raise ValueError(f"{field} exceeds UTF-8 byte limit")
+    if any(
+        unicodedata.category(character) in {"Cc", "Cf", "Zl", "Zp"}
+        for character in value
+    ):
+        raise ValueError(f"{field} contains forbidden format characters")
 
 
 def _validate_knowledge_evidence(
