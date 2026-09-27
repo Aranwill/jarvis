@@ -149,11 +149,12 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 ### Notes
 
 - Sprint 7.11 permanece como el último sprint numerado integrado.
-- La unidad de código de producto integrada más reciente es
-  `Episodic Admission Governed Projection Consumption Boundary` (PR #92),
-  precedida por Governed Input Projection, Assessment Producer Authorization,
-  Assessment Provenance y Episodic Memory Admission; toda la cadena permanece
-  aislada de Conversation/runtime y sin persistencia o retrieval.
+- Dentro de la cadena episódica/Memory aislada, la última unidad funcional
+  integrada continúa siendo `Episodic Admission Governed Projection Consumption
+  Boundary` (PR #92), precedida por Governed Input Projection, Assessment
+  Producer Authorization, Assessment Provenance y Episodic Memory Admission;
+  esa cadena permanece aislada de Conversation/runtime y sin persistencia o
+  retrieval.
 - `Projection READY != Admission ELIGIBLE != Stored != Authority` y
   `Consumption EVALUATED != persistence authorization != Authority`.
 - `candidate_id` binding no equivale a identidad criptográfica del contenido;
