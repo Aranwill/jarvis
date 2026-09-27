@@ -2,11 +2,11 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-22
-as_of_commit: e29d3dc79445506aa9bb4e59a8383524d627db68
+as_of_date: 2026-09-27
+as_of_commit: 32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
 branch: main
 certification_branch: null
-candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+candidate_commit: null
 certification_status: sprint_7_11_completed
 baseline: v0.6.0-alpha
 ---
@@ -98,6 +98,24 @@ Este contexto fue reconciliado a partir de:
   o Planner, sin persistencia y sin authority delta;
 - validación post-merge de PR #177 mediante Validation #428, con `1278 passed`
   en Ubuntu y Windows, `compileall` PASS y diff validation PASS;
+- integración de Internal Interaction Trace V0 mediante PR #180;
+- integración de Live / Replay Visual Projection V0 mediante PR #182;
+- integración de Internal Interaction Test V0 mediante PR #184;
+- integración de Governed Engineering Evidence Focus V0 mediante PR #186,
+  con Validation #495 y `1493 passed` en Ubuntu y Windows;
+- integración de Live Elapsed / OBS-01 mediante PR #188 y Validation #502;
+- integración de Safe Diagnostics / OBS-02 mediante PR #189 y Validation #513;
+- integración de Runtime / Model Provenance mediante PR #190 y Validation #541;
+- integración de Analyze Structured Output Contract V0 mediante PR #194 y
+  Validation #565;
+- integración de Runtime Generation Contract V0 mediante PR #197 y
+  Validation #597;
+- integración de E4 Reference-Bounded Structured Output V0 mediante PR #201 y
+  Validation #611;
+- promoción de KIC-01..KIC-07 a la Kernel Specification mediante PR #205;
+- integración de KAF-01 mediante PR #208 y Validation #630;
+- integración de E3 Epistemic Calibration mediante PR #209 y Validation #634,
+  con `1599 passed` en Ubuntu y Windows;
 
 El documento:
 
@@ -155,35 +173,34 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-HEAD integrado actual:             e29d3dc79445506aa9bb4e59a8383524d627db68
+Baseline material/productivo reconciliado: 32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
-Última unidad funcional/runtime integrada: E5-B1 — Read-only Explorer
-Último tooling E2 integrado:       Structural Evidence Evaluation Pack V0 — PR #177
-Última foundation previa:          Assurance Signal Authority & Projection Foundation — G2
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
-Última unidad de assurance:        Assurance Signal Boundary G2 — integrada / aislada
 Engineering Intelligence:          E0–E4 + E5-A/B1 integrados; E5-B2/B3 diferidos
-Sprint activo autorizado:          ninguno
-Rama de implementación activa:     ninguna
-Candidato E4:                      3463f1c391f6a11de70a0d6ecfc37c4127da21cb
-Merge E4:                          14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
-Validación E4:                     Validation #330 / 1168 passed Ubuntu + Windows
-Merge E5-A:                        3015e9baab7c6a810b2183b7d592933279bacc1e
-Merge E5-B1:                       433e075bb762cc5fb4bf11e18efe18a1faab7a2f
-Sprint posterior autorizado:       ninguno
-Signal Boundary G2:                integrado / aislado
-Conversation G2B:                  bloqueado / no autorizado
+Internal Interaction Trace V0:     integrado — PR #180
+Live / Replay Projection V0:       integrado — PR #182
+Internal Interaction Test V0:      integrado — PR #184
+Governed Evidence Focus V0:        integrado — PR #186
+Live Elapsed / OBS-01:             integrado — PR #188
+Safe Diagnostics / OBS-02:         integrado — PR #189
+Runtime / Model Provenance:        integrado — PR #190
+Analyze Structured Output V0:      integrado — PR #194
+Runtime Generation Contract V0:    integrado — PR #197
+E4 Reference-Bounded Output V0:    integrado — PR #201
+Kernel KIC-01..KIC-07:             promoción normativa integrada — PR #205
+KAF-01:                            integrado — PR #208
+E3 Epistemic Calibration:          integrado — PR #209
+Última validación productiva:      Validation #634 / 1599 passed Ubuntu + Windows
+Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
+Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
+U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
+Eighth U01:                        no autorizado
+Runtime Self-Review:               requiere admisión + preflight + autorización separada
+Self-modification:                 no autorizada
 RDD Stage 2:                       no autorizado
-Construction Flow Audit V1:        integrada / 13 de 13 / 0 blockers actuales
-Repository Structural Projection V0: integrado — PR #164
-Repository Structural Lookup V0:     integrado — PR #166
-E2 Structural Evidence:            integrado en E2 — PR #168
-E2 Structural Observability:       integrado — PR #170
-E2 Evaluation Pack V0:             integrado / evaluation tooling — PR #177
 Structural Evidence E3/E4:         diferido / no propagado
 Structural Delta:                  diferido
-Governed Self-Review Bootstrap:     concept integrado / first-task candidate / ejecución no autorizada
 ```
 
 Sprint 7.11 — `Reproducible Validation Pipeline Foundation` fue admitido,

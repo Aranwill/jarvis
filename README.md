@@ -26,7 +26,7 @@ Rama permanente:
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 ```
 
-Última ruta conversacional/runtime integrada:
+Última ruta conversacional numerada integrada:
 
 ```text
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -36,7 +36,9 @@ Después de Sprint 7.11 se integraron unidades aisladas de Memory y Cognitive As
 
 CAL-014 — Protected Durable Reliance está activado normativamente mediante CC-013, R-023 y ADR-006. Esa activación no autoriza Persistence Authorization, Persistent Memory, Conversation G2B, RDD Stage 2 ni Sprint 7.12.
 
-La interfaz disponible actualmente es una CLI técnica para validar el subsistema conversacional, la continuidad conversacional efímera y el aislamiento de contexto por sesión.
+La interfaz disponible actualmente es una CLI técnica que conserva la ruta conversacional y expone, además, superficies read-only de Engineering, Explorer, Trace y Governed Self-Review.
+
+Estas superficies permiten inspeccionar el baseline, explorar Repository/Knowledge, ejecutar Engineering Inspect/Analyze/Propose bajo sus contracts y reproducir o inspeccionar trazas de Self-Review. No conceden autoridad de modificación, merge ni self-modification.
 
 La CLI puede utilizar:
 
@@ -193,11 +195,15 @@ Las variables configuradas mediante `$env:` se aplican únicamente a la sesión 
 
 ## Variables admitidas
 
-| Variable | Obligatoria | Valor predeterminado |
+| Variable | Obligatoria | Uso / valor |
 |---|---:|---|
-| `MALAK_RUNTIME` | No | `mock` |
-| `MALAK_OLLAMA_MODEL` | Sí cuando el runtime es `ollama` | Sin valor |
+| `MALAK_RUNTIME` | No | `mock` por defecto; `ollama` para runtime local |
+| `MALAK_OLLAMA_MODEL` | Sí cuando el runtime es `ollama` | Modelo solicitado |
 | `MALAK_OLLAMA_BASE_URL` | No | `http://localhost:11434` |
+| `MALAK_REPOSITORY_ROOT` | Sí para Engineering / Explorer / Trace / Self-Review | Raíz del snapshot Git |
+| `MALAK_OLLAMA_CONTEXT_WINDOW_TOKENS` | Sólo cuando se configura generation contract | Presupuesto de contexto |
+| `MALAK_OLLAMA_MAX_OUTPUT_TOKENS` | Sólo cuando se configura generation contract | Presupuesto máximo de salida |
+| `MALAK_OLLAMA_THINKING` | Sólo cuando se configura generation contract | `enabled` o `disabled` |
 
 Valores admitidos para `MALAK_RUNTIME`:
 
@@ -208,6 +214,18 @@ ollama
 
 Un runtime desconocido debe ser rechazado de forma controlada.
 
+Las tres variables del `RuntimeGenerationContract` deben configurarse juntas. Una configuración parcial se rechaza. Cuando el contrato está presente, preserva explícitamente:
+
+```text
+context_window_tokens
+max_output_tokens
+thinking_enabled
+truncate=false
+shift=false
+```
+
+El contrato es request-scoped y no altera el comportamiento conversacional ordinario cuando no fue configurado. `/self-review test-v0` exige que este contrato esté configurado de forma completa.
+
 ## Comandos de la CLI
 
 ```text
@@ -215,6 +233,27 @@ help
 ayuda
 status
 new
+
+/engineering help
+/engineering inspect <subject>
+/engineering analyze <subject>
+/engineering propose <subject>
+
+/explore help
+/explore repo list [prefix]
+/explore repo read <path>
+/explore repo search <text>
+/explore knowledge list
+/explore knowledge read <path>
+/explore knowledge search <text>
+
+/trace help
+/trace replay <run_id>
+/trace inspect <run_id> <node_id>
+
+/self-review help
+/self-review test-v0 <run_id> <validation_ref> [<validation_ref> ...]
+
 exit
 quit
 salir
@@ -239,17 +278,40 @@ Ejecutar la suite completa:
 python -m pytest -q
 ```
 
-La última implementación productiva integrada de Candidate Content Identity Propagation & Binding fue validada candidate-bound con:
+La última implementación productiva integrada de esta línea fue E3 Epistemic Calibration (PR #209), validada candidate-bound con:
 
 ```text
-838 passed — Ubuntu
-838 passed — Windows
-compileall: PASS
-git diff --check: PASS
-FULL 4R: PASS
+candidate:
+c7a3ec63d8280192bb17f4828759cdf0d8033242
+
+Validation #634
+
+Ubuntu:
+1599 passed
+
+Windows:
+1599 passed
+
+compileall:
+PASS
+
+candidate identity:
+PASS
+
+candidate diff:
+PASS
+
+Kernel delta:
+0
+
+Planner delta:
+0
+
+authority_effect:
+none
 ```
 
-Los commits documentales posteriores conservaron Validation en verde sobre `main`.
+El baseline material/productivo reconciliado por esta documentación corresponde a `main@32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c`.
 
 Validar compilación:
 
@@ -312,7 +374,13 @@ La CLI permite:
 - aislar el contexto conversacional por `session_id`;
 - reiniciar el contexto mediante `new` sin persistencia;
 - retornar la respuesta a través de la frontera cognitiva;
-- gestionar comandos básicos y errores controlados.
+- gestionar comandos básicos y errores controlados;
+- ejecutar `/engineering inspect|analyze|propose` sobre el baseline configurado;
+- explorar Repository y Knowledge mediante `/explore` en modo read-only;
+- reproducir e inspeccionar artefactos de trace mediante `/trace`;
+- ejecutar el harness gobernado `/self-review test-v0` únicamente cuando se cumplen sus precondiciones de admisión.
+
+Las superficies Engineering, Explorer, Trace y Self-Review no convierten evidencia, findings o propuestas en autoridad y no habilitan self-modification.
 
 La ruta conversacional actual es:
 

@@ -3,12 +3,12 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-22
-as_of_commit: e29d3dc79445506aa9bb4e59a8383524d627db68
+as_of_date: 2026-09-27
+as_of_commit: 32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
-candidate_commit: 59f592e2e36d11bbd14f7d9d93b1dac4f442c108
+candidate_commit: null
 certification_status: sprint_7_11_completed
 legacy_planning_source:
   - docs/project/roadmap.md
@@ -37,10 +37,10 @@ Este documento es deliberadamente **derivado y no normativo**.
 No reemplaza ni modifica ninguna fuente de ley, arquitectura, seguridad,
 gobernanza o contrato aprobado.
 
-## Estado CURRENT reconciliado — 2026-09-22
+## Estado CURRENT reconciliado — 2026-09-27
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@e29d3dc79445506aa9bb4e59a8383524d627db68`.
+`Aranwill/jarvis/main@32d15ba049ec4a2ef4d46108edfee1d6a59d1f8c`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -134,11 +134,95 @@ PR #174
 merge     37af50628fb2d56fa48113a65a53de51049bd8da
 status    CONCEPT INTEGRATED / FIRST-TASK CANDIDATE
 execution NOT AUTHORIZED
+
+Internal Interaction Trace V0
+PR #180
+status    INTEGRATED
+
+Live / Replay Visual Projection V0
+PR #182
+status    INTEGRATED
+
+Internal Interaction Test V0
+PR #184
+status    INTEGRATED / READ-ONLY SELF-REVIEW HARNESS
+
+Governed Engineering Evidence Focus V0
+PR #186
+status    INTEGRATED
+
+OBS-01 — Live Elapsed
+PR #188
+status    INTEGRATED
+
+OBS-02 — Safe Diagnostics
+PR #189
+status    INTEGRATED
+
+Runtime / Model Provenance
+PR #190
+status    INTEGRATED
+
+Analyze Structured Output Contract V0
+PR #194
+status    INTEGRATED
+
+Runtime Generation Contract V0
+PR #197
+status    INTEGRATED
+
+E4 Reference-Bounded Structured Output V0
+PR #201
+status    INTEGRATED
+
+Kernel instance clarification KIC-01..KIC-07
+PR #205
+status    PROMOTED TO KERNEL SPECIFICATION
+
+KAF-01
+PR #208
+status    INTEGRATED
+kernel.md -> APPROVED_SPECIFICATION / normative_subordinate
+U01 -> kernel.md required
+
+E3 Epistemic Calibration
+PR #209
+status    INTEGRATED
+
+Seventh U01
+run       bootstrap-u01-20260926-007
+status    INCONCLUSIVE
+result    3 ALIGNED + 3 UNRESOLVED
+
+U007-F05 / KAF-01 / E3 Calibration
+status    CLOSED / INTEGRATED
+
+Eighth U01
+status    NOT AUTHORIZED
+
+Runtime Self-Review execution
+status    REQUIRES SEPARATE ADMISSION + PREFLIGHT + OWNER AUTHORIZATION
+
+RDD Stage 2
+status    NOT AUTHORIZED
 ```
 
-La validación candidate-bound final de E4 quedó registrada en Validation #330
-con `1168 passed` en Ubuntu y Windows, además de `compileall`, candidate
-identity y candidate diff en PASS.
+La línea reciente conserva cierres candidate-bound progresivos:
+
+```text
+Governed Evidence Focus V0       Validation #495 / 1493 passed
+Live Elapsed / OBS-01            Validation #502 / 1501 passed
+Safe Diagnostics / OBS-02       Validation #513 / 1518 passed
+Runtime / Model Provenance       Validation #541 / 1535 passed
+Analyze Structured Output V0     Validation #565 / 1554 passed
+Runtime Generation Contract V0   Validation #597 / 1578 passed
+E4 Reference-Bounded Output V0   Validation #611 / 1583 passed
+KAF-01                           Validation #630 / 1588 passed
+E3 Epistemic Calibration         Validation #634 / 1599 passed
+```
+
+Las validaciones finales indicadas pasaron en Ubuntu y Windows con
+`compileall`, candidate identity y candidate diff en PASS según sus gates.
 
 ---
 
