@@ -26,7 +26,7 @@ Rama permanente:
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 ```
 
-Última ruta conversacional/runtime integrada:
+Última ruta conversacional numerada integrada:
 
 ```text
 Sprint 7.10 — Conversation Session Isolation Foundation
@@ -224,7 +224,7 @@ truncate=false
 shift=false
 ```
 
-El contrato es request-scoped y no altera el comportamiento conversacional ordinario cuando no fue configurado.
+El contrato es request-scoped y no altera el comportamiento conversacional ordinario cuando no fue configurado. `/self-review test-v0` exige que este contrato esté configurado de forma completa.
 
 ## Comandos de la CLI
 
