@@ -1090,8 +1090,10 @@ Siguiente transición lícita:
 
 ~~~text
 bounded correction 4R-F01 committed
+-> Fix Validator independiente sobre la bounded correction
 -> affected documentary revalidation
 -> Candidate FULL 4R on corrected candidate
+-> E2E / integration validation proporcional
 -> candidate-bound CI on corrected candidate
 -> independent revalidation post-C1 when available
 -> RDD Stage 1 Candidate Conformance
