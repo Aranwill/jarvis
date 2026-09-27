@@ -56,6 +56,22 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   A/B reproducibles, ground truth revisado separadamente, schema fail-closed y
   runner determinista; no añadió Capability, runtime productivo, persistencia,
   Kernel/Planner delta ni propagación estructural a E3/E4.
+- PR #180 integró `Internal Interaction Trace V0`, con recorrido reconstruible,
+  artefactos ligados al baseline y `authority_effect=none`.
+- PR #182 integró `Live / Replay Visual Projection V0` y PR #184
+  `Internal Interaction Test V0`, preservando equivalencia material
+  LIVE/REPLAY y ejecución read-only del slice U01.
+- PR #186 integró `Governed Engineering Evidence Focus V0`, con selectores
+  deterministas, evidencia requerida/suplementaria, `focus_complete`
+  fail-closed y continuidad de `evidence_set_digest`.
+- PR #188 integró Live Elapsed, PR #189 Safe Diagnostics y PR #190 Runtime /
+  Model Provenance, sin ampliar autoridad ni modificar Kernel o Planner.
+- PR #194 integró `Analyze Structured Output Contract V0`.
+- PR #197 integró `Runtime Generation Contract V0`, con contexto/output/
+  thinking explícitos, `truncate=false`, `shift=false` y validación
+  fail-closed de completion metadata.
+- PR #201 integró `E4 Reference-Bounded Structured Output V0`, ligando
+  dinámicamente los schemas de E4 a los identificadores exactos del packet.
 
 ### Changed
 
@@ -72,6 +88,14 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - La documentación derivada de proyecto se reconcilia al baseline post-PR #177
   sin reescribir snapshots históricos, preservando la distinción entre runtime
   productivo, tooling de evaluación, diseño histórico y autoridad no concedida.
+- PR #205 promovió KIC-01..KIC-07 a la Kernel Specification, aclarando que
+  Kernel First es responsibility-centric y no exige singleton de objeto.
+- PR #208 integró KAF-01: `docs/architecture/kernel.md` pasa a
+  `APPROVED_SPECIFICATION / normative_subordinate` dentro de E1 y se vuelve
+  evidencia requerida del foco U01.
+- PR #209 integró E3 Epistemic Calibration, separando incertidumbre del estado
+  actual, incompletitud histórica y riesgo prospectivo sin relajar
+  `UNRESOLVED`.
 
 ### Security
 
@@ -107,6 +131,20 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - Validation #428 revalidó post-merge `main@e29d3dc79445506aa9bb4e59a8383524d627db68`
   después de PR #177: `1278 passed` en Ubuntu y Windows, `compileall: PASS` y
   diff validation PASS.
+- Governed Engineering Evidence Focus V0 cerró con Validation #495:
+  `1493 passed` en Ubuntu y Windows.
+- Live Elapsed cerró con Validation #502: `1501 passed` en Ubuntu y Windows.
+- Safe Diagnostics cerró con Validation #513: `1518 passed` en Ubuntu y Windows.
+- Runtime / Model Provenance cerró con Validation #541: `1535 passed` en Ubuntu y Windows.
+- Analyze Structured Output cerró con Validation #565: `1554 passed` en Ubuntu y Windows.
+- Runtime Generation Contract cerró con Validation #597: `1578 passed` en Ubuntu y Windows.
+- E4 Reference-Bounded Structured Output cerró con Validation #611:
+  `1583 passed` en Ubuntu y Windows.
+- KAF-01 cerró con Validation #630: `1588 passed` en Ubuntu y Windows.
+- E3 Epistemic Calibration cerró con Validation #634:
+  `1599 passed` en Ubuntu y Windows.
+- Las validaciones finales anteriores pasaron con candidate identity,
+  `compileall` y candidate diff en PASS según sus gates.
 
 ### Notes
 
@@ -126,6 +164,16 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   promociones y foundations posteriores deben consultarse en las fuentes CURRENT.
 - Structural Evidence permanece limitada a E2; su propagación a E3/E4 y
   `Structural Delta` continúan diferidas y requieren gates separados.
+- Seventh U01 (`bootstrap-u01-20260926-007`) terminó `INCONCLUSIVE` con
+  `3 ALIGNED + 3 UNRESOLVED`; ese resultado histórico no se reescribe.
+- Los findings posteriores fueron tratados mediante U007-F05, KAF-01 y
+  E3 Epistemic Calibration.
+- La integración de esas correcciones no autoriza por sí sola un Octavo U01.
+- Eighth U01 continúa requiriendo admission review, preflight local, identidad
+  exacta de runtime/modelo y autorización explícita del Owner.
+- `acceptance PASS != cognitive PASS`.
+- `Evidence != Authority`.
+- Self-modification continúa no autorizada.
 - Sprint 7.10 permanece como la última ruta conversacional/runtime integrada.
 - RDD Stage 1 permanece adoptado y RDD Stage 2 continúa no autorizado.
 - Ningún cambio de versión, tag, merge o promoción de release queda autorizado
