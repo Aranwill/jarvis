@@ -176,9 +176,22 @@ def run_engineering_analysis(
     error_scope: str,
     parse_analysis_fn: Callable[..., _Analysis],
     response_json_schema: str | None = None,
+    response_json_schema_builder: Callable[
+        [
+            tuple[dict[str, object], ...],
+            tuple[dict[str, object], ...],
+        ],
+        str,
+    ]
+    | None = None,
     generation_contract: RuntimeGenerationContract | None = None,
     evidence_focus: GovernedEngineeringEvidenceFocus | None = None,
 ) -> EngineeringAnalysisResult:
+    if response_json_schema is not None and response_json_schema_builder is not None:
+        raise ValueError(
+            "response_json_schema and response_json_schema_builder are mutually exclusive"
+        )
+
     if evidence_focus is not None:
         if evidence_focus.subject != subject:
             raise RuntimeError("engineering evidence focus subject mismatch")
@@ -210,6 +223,13 @@ def run_engineering_analysis(
 
     repository_evidence = tuple(bundle.repository_evidence)
     knowledge_evidence = tuple(bundle.knowledge_evidence)
+
+    resolved_response_json_schema = response_json_schema
+    if response_json_schema_builder is not None:
+        resolved_response_json_schema = response_json_schema_builder(
+            repository_evidence,
+            knowledge_evidence,
+        )
 
     def result(
         *,
@@ -295,7 +315,7 @@ def run_engineering_analysis(
             model=model,
             system_prompt=system_prompt,
             history=(),
-            response_json_schema=response_json_schema,
+            response_json_schema=resolved_response_json_schema,
             generation_contract=generation_contract,
         ),
         provider=provider_name,
