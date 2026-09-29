@@ -94,6 +94,10 @@ class EngineeringAnalyzeCapability(Capability):
         analysis_parser = _parse_analysis
         response_json_schema = ANALYZE_RESPONSE_JSON_SCHEMA
         if governed_relation_ids:
+            if len(governed_relation_ids) > _MAX_FINDINGS:
+                raise RuntimeError(
+                    "governed relation catalog exceeds hard E3 finding limit"
+                )
             analysis_parser = partial(
                 _parse_analysis,
                 allowed_relation_ids=governed_relation_ids,
@@ -195,6 +199,8 @@ def _build_relation_response_json_schema(
         "type": "string",
         "enum": list(allowed_relation_ids),
     }
+    schema["properties"]["findings"]["minItems"] = len(allowed_relation_ids)
+    schema["properties"]["findings"]["maxItems"] = len(allowed_relation_ids)
     return json.dumps(
         schema,
         ensure_ascii=False,
@@ -210,7 +216,7 @@ def _parse_analysis(
     knowledge_evidence: list[dict[str, object]],
     allowed_relation_ids: tuple[str, ...] = (),
 ) -> _Analysis:
-    return parse_engineering_analysis(
+    analysis = parse_engineering_analysis(
         raw,
         repository_evidence=repository_evidence,
         knowledge_evidence=knowledge_evidence,
@@ -222,6 +228,37 @@ def _parse_analysis(
         max_uncertainties=_MAX_UNCERTAINTIES,
         max_uncertainty_bytes=_MAX_UNCERTAINTY_BYTES,
         allowed_relation_ids=allowed_relation_ids,
+    )
+    if not allowed_relation_ids:
+        return analysis
+
+    observed_relation_ids = tuple(
+        finding.relation_id for finding in analysis.findings
+    )
+    if len(observed_relation_ids) != len(allowed_relation_ids):
+        raise RuntimeError(
+            "focused engineering analysis must cover every governed relation exactly once"
+        )
+    if len(set(observed_relation_ids)) != len(observed_relation_ids):
+        raise RuntimeError(
+            "focused engineering analysis contains duplicate governed relations"
+        )
+    if set(observed_relation_ids) != set(allowed_relation_ids):
+        raise RuntimeError(
+            "focused engineering analysis relation coverage does not match governed catalog"
+        )
+
+    finding_by_relation = {
+        finding.relation_id: finding
+        for finding in analysis.findings
+    }
+    return _Analysis(
+        summary=analysis.summary,
+        findings=tuple(
+            finding_by_relation[relation_id]
+            for relation_id in allowed_relation_ids
+        ),
+        uncertainties=analysis.uncertainties,
     )
 
 
