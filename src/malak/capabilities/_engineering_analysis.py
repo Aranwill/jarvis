@@ -73,6 +73,10 @@ Allowed classifications:
 ALIGNED, PARTIAL, GAP, CONTRADICTION, UNRESOLVED.
 
 Evidence refs must use only supplied [R#] and [K#] identifiers.
+When the supplied response schema separates repository support, knowledge
+support, limiting/counterevidence, and uncertainty basis, preserve those roles
+exactly. Role binding is structural grounding only and does not prove semantic
+entailment.
 Evidence != Authority. Analysis != Decision. Finding != Authorization.
 """
 
@@ -154,6 +158,10 @@ class _Finding:
     rationale: str
     evidence_refs: tuple[str, ...]
     relation_id: str | None = None
+    supporting_repository_refs: tuple[str, ...] = ()
+    supporting_knowledge_refs: tuple[str, ...] = ()
+    limiting_or_counterevidence_refs: tuple[str, ...] = ()
+    uncertainty_basis: str | None = None
 
 
 @dataclass(frozen=True)
@@ -388,6 +396,7 @@ def parse_engineering_analysis(
     max_uncertainties: int,
     max_uncertainty_bytes: int,
     allowed_relation_ids: tuple[str, ...] = (),
+    structured_evidence_roles: bool = False,
 ) -> _Analysis:
     try:
         payload = json.loads(
@@ -440,10 +449,13 @@ def parse_engineering_analysis(
         parse_engineering_finding(
             item,
             allowed_refs=allowed_refs,
+            repository_evidence=repository_evidence,
+            knowledge_evidence=knowledge_evidence,
             max_statement_bytes=max_statement_bytes,
             max_rationale_bytes=max_rationale_bytes,
             max_evidence_refs=max_evidence_refs_per_finding,
             allowed_relation_ids=allowed_relation_ids,
+            structured_evidence_roles=structured_evidence_roles,
         )
         for item in findings_raw
     )
@@ -473,6 +485,9 @@ def parse_engineering_finding(
     max_rationale_bytes: int,
     max_evidence_refs: int,
     allowed_relation_ids: tuple[str, ...] = (),
+    repository_evidence: list[dict[str, object]] | None = None,
+    knowledge_evidence: list[dict[str, object]] | None = None,
+    structured_evidence_roles: bool = False,
 ) -> _Finding:
     if not isinstance(payload, dict):
         raise RuntimeError("each finding must be an object")
@@ -485,6 +500,21 @@ def parse_engineering_finding(
     }
     if allowed_relation_ids:
         expected_fields.add("relation_id")
+    if structured_evidence_roles:
+        if not allowed_relation_ids:
+            raise RuntimeError(
+                "structured evidence roles require governed relation ids"
+            )
+        expected_fields = {
+            "relation_id",
+            "classification",
+            "statement",
+            "rationale",
+            "supporting_repository_refs",
+            "supporting_knowledge_refs",
+            "limiting_or_counterevidence_refs",
+            "uncertainty_basis",
+        }
     require_exact_keys(
         payload,
         expected_fields,
@@ -519,6 +549,138 @@ def parse_engineering_finding(
         reserved_pattern=r"\[[RKA][0-9]+\]",
         limit_scope="E3",
     )
+
+    if structured_evidence_roles:
+        repository_items = repository_evidence or []
+        knowledge_items = knowledge_evidence or []
+        repository_refs = {str(item["ref"]) for item in repository_items}
+        knowledge_refs = {str(item["ref"]) for item in knowledge_items}
+
+        def role_refs(field: str) -> tuple[str, ...]:
+            raw_refs = payload[field]
+            if not isinstance(raw_refs, list):
+                raise RuntimeError(f"{field} must be a list")
+            if len(raw_refs) > max_evidence_refs:
+                raise RuntimeError(f"{field} exceeds hard E3 limit")
+            if any(not isinstance(ref, str) for ref in raw_refs):
+                raise RuntimeError(f"{field} must contain strings")
+            if len(set(raw_refs)) != len(raw_refs):
+                raise RuntimeError(f"{field} cannot contain duplicate refs")
+            unknown = sorted(set(raw_refs) - allowed_refs)
+            if unknown:
+                raise RuntimeError(
+                    f"{field} contains unknown evidence refs: "
+                    + ", ".join(unknown)
+                )
+            return tuple(raw_refs)
+
+        supporting_repository_refs = role_refs("supporting_repository_refs")
+        supporting_knowledge_refs = role_refs("supporting_knowledge_refs")
+        limiting_or_counterevidence_refs = role_refs(
+            "limiting_or_counterevidence_refs"
+        )
+
+        if any(ref not in repository_refs for ref in supporting_repository_refs):
+            raise RuntimeError(
+                "supporting_repository_refs must contain repository evidence refs"
+            )
+        if any(ref not in knowledge_refs for ref in supporting_knowledge_refs):
+            raise RuntimeError(
+                "supporting_knowledge_refs must contain knowledge evidence refs"
+            )
+
+        supporting_refs = set(supporting_repository_refs) | set(
+            supporting_knowledge_refs
+        )
+        limiting_refs = set(limiting_or_counterevidence_refs)
+        if supporting_refs & limiting_refs:
+            raise RuntimeError(
+                "supporting and limiting/counterevidence refs cannot overlap"
+            )
+
+        evidence_refs = (
+            supporting_repository_refs
+            + supporting_knowledge_refs
+            + limiting_or_counterevidence_refs
+        )
+        if len(evidence_refs) > max_evidence_refs:
+            raise RuntimeError(
+                "finding role-bound evidence refs exceed hard E3 limit"
+            )
+
+        uncertainty_basis = payload["uncertainty_basis"]
+        allowed_uncertainty_bases = {
+            "NONE",
+            "CURRENT_MATERIAL_AMBIGUITY",
+            "INSUFFICIENT_SUPPLIED_EVIDENCE",
+            "UNRESOLVED_CURRENT_PRECEDENCE",
+        }
+        if (
+            not isinstance(uncertainty_basis, str)
+            or uncertainty_basis not in allowed_uncertainty_bases
+        ):
+            raise RuntimeError("finding uncertainty_basis is not allowed")
+
+        if classification in relational_classes:
+            if not supporting_repository_refs or not supporting_knowledge_refs:
+                raise RuntimeError(
+                    f"{classification} finding requires repository and knowledge "
+                    "support refs"
+                )
+            if uncertainty_basis != "NONE":
+                raise RuntimeError(
+                    "resolved finding uncertainty_basis must be NONE"
+                )
+        else:
+            if uncertainty_basis == "NONE":
+                raise RuntimeError(
+                    "UNRESOLVED finding uncertainty_basis must not be NONE"
+                )
+            if not evidence_refs:
+                raise RuntimeError(
+                    "UNRESOLVED finding requires at least one bound evidence ref"
+                )
+
+        if uncertainty_basis == "UNRESOLVED_CURRENT_PRECEDENCE":
+            bound_knowledge_refs = set(supporting_knowledge_refs) | {
+                ref
+                for ref in limiting_or_counterevidence_refs
+                if ref in knowledge_refs
+            }
+            by_ref = {
+                str(item["ref"]): item
+                for item in knowledge_items
+            }
+            has_normative_precedence = any(
+                (
+                    by_ref[ref].get("source_class") == "GOVERNING"
+                    and by_ref[ref].get("authority_class") == "normative"
+                )
+                or (
+                    by_ref[ref].get("source_class") == "APPROVED_SPECIFICATION"
+                    and by_ref[ref].get("authority_class")
+                    == "normative_subordinate"
+                )
+                for ref in bound_knowledge_refs
+                if ref in by_ref
+            )
+            if not has_normative_precedence:
+                raise RuntimeError(
+                    "UNRESOLVED_CURRENT_PRECEDENCE requires normative "
+                    "knowledge evidence"
+                )
+
+        return _Finding(
+            classification=classification,
+            statement=statement,
+            rationale=rationale,
+            evidence_refs=evidence_refs,
+            relation_id=relation_id,
+            supporting_repository_refs=supporting_repository_refs,
+            supporting_knowledge_refs=supporting_knowledge_refs,
+            limiting_or_counterevidence_refs=limiting_or_counterevidence_refs,
+            uncertainty_basis=uncertainty_basis,
+        )
 
     refs_raw = payload["evidence_refs"]
     if not isinstance(refs_raw, list):

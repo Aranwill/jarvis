@@ -629,12 +629,23 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
                 schema = json.loads(request.response_json_schema)
                 finding_schema = schema["properties"]["findings"]["items"]
                 required = finding_schema["required"]
-                if "relation_id" in required:
+                if "supporting_repository_refs" in required:
                     relation_ids = finding_schema["properties"]["relation_id"][
                         "enum"
                     ]
+                    role_finding = {
+                        "classification": "GAP",
+                        "statement": "Observed bounded bootstrap gap.",
+                        "rationale": (
+                            "Repository and governed knowledge support it."
+                        ),
+                        "supporting_repository_refs": ["R1"],
+                        "supporting_knowledge_refs": ["K1"],
+                        "limiting_or_counterevidence_refs": [],
+                        "uncertainty_basis": "NONE",
+                    }
                     findings = [
-                        {**finding, "relation_id": relation_id}
+                        {**role_finding, "relation_id": relation_id}
                         for relation_id in relation_ids
                     ]
             content = json.dumps(
