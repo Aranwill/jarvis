@@ -1,6 +1,6 @@
 # Malāk Construction Protocol
 
-Versión: 0.2.3
+Versión: 0.2.4
 
 Estado: Activo
 
@@ -105,6 +105,58 @@ review_depth
 disposition
 related_findings
 ```
+
+### Contrato semántico de campos
+
+Los campos anteriores describen dimensiones distintas y no pueden reutilizarse
+como sinónimos:
+
+~~~text
+repository
+-> repositorio fuente del archivo; obligatorio incluso si existe uno solo
+
+review_relevance
+-> por qué el archivo es relevante, contextual o no material para la revisión
+-> NO representa permiso de edición ni alcance del candidate
+
+review_depth
+-> profundidad de inspección efectivamente ejecutada
+
+disposition
+-> tratamiento o resultado de revisión aplicado al archivo
+
+related_findings
+-> findings relacionados cuando existan
+~~~
+
+Cuando la revisión sea además una admisión, scope freeze o planificación de una
+implementación, debe registrarse por separado:
+
+~~~text
+change_scope
+~~~
+
+o evidencia equivalente que distinga, como mínimo, archivos candidatos,
+compatibilidad potencial y archivos no modificables por ese gate.
+
+Reglas:
+
+~~~text
+review_relevance != change_scope
+FULL_READ != permission to modify
+OUT_OF_SCOPE for changes != irrelevant to review
+authority_class != change authorization
+~~~
+
+No debe utilizarse `out_of_scope` dentro de `review_relevance` para expresar
+simplemente “este archivo no será modificado”. Si el archivo no tiene relevancia
+material para la revisión, esa condición debe declararse explícitamente con una
+razón y una disposición proporcional, por ejemplo
+`NOT_APPLICABLE_WITH_REASON`.
+
+Esta separación evita que una fuente obligatoria como `SECURITY.md`, una
+Constitución o el Blueprint aparezca falsamente como irrelevante únicamente
+porque el candidate no puede modificarla.
 
 Disposiciones candidatas:
 
