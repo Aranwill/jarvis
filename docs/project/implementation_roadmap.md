@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-29
-as_of_commit: c87afd8c784fc1cfa50915425789679168db4cae
+as_of_commit: 70989b1878f1f4f9289c65611c3d7b561d5ae286
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -40,7 +40,7 @@ gobernanza o contrato aprobado.
 ## Estado CURRENT reconciliado — 2026-09-29
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@c87afd8c784fc1cfa50915425789679168db4cae`.
+`Aranwill/jarvis/main@70989b1878f1f4f9289c65611c3d7b561d5ae286`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -226,6 +226,21 @@ boundary  relation identity != semantic truth
 E4        unchanged / no governed relation consumption
 authority_effect none
 
+E3 Governed Relation Coverage & Uniqueness V0
+PR #218
+status    INTEGRATED
+candidate b6d3d7d42c69610d1e26fbee2ad1778ee45755d0
+validation Validation #667 / 1633 passed Ubuntu + Windows
+post-merge Validation #668 / 1633 passed Ubuntu + Windows
+contract  exact governed relation coverage + uniqueness + canonical catalog order
+capacity  catalog > E3 max findings fails before model call
+boundary  structural consistency != semantic entailment
+E008-SG-02 OPEN / out of scope
+E008-SG-03 assurance boundary preserved
+E4        unchanged / no governed relation consumption
+RDD Stage 1 Candidate Conformance PASS
+authority_effect none
+
 Runtime Self-Review execution
 status    RUN 008 COMPLETE; ANY NEW RUN REQUIRES SEPARATE ADMISSION + PREFLIGHT + OWNER AUTHORIZATION
 
@@ -249,6 +264,8 @@ Relation Catalog Foundation       Validation #647 / 1622 passed
 PR #212 post-merge                Validation #648 / 1622 passed
 E3 Relation Consumption V0        Validation #659 / 1626 passed
 PR #215 post-merge                Validation #660 / 1626 passed
+E3 Relation Coverage & Uniqueness Validation #667 / 1633 passed
+PR #218 post-merge                Validation #668 / 1633 passed
 ```
 
 Las validaciones finales indicadas pasaron en Ubuntu y Windows con
@@ -1761,10 +1778,10 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-c87afd8c784fc1cfa50915425789679168db4cae
+70989b1878f1f4f9289c65611c3d7b561d5ae286
 
 CURRENT MATERIAL COGNITIVE HEAD
-c87afd8c784fc1cfa50915425789679168db4cae
+70989b1878f1f4f9289c65611c3d7b561d5ae286
 
 CURRENT EPISODIC PRODUCT HEAD
 39366da01f793cf8f5d3856c47457954ee758925
@@ -1785,7 +1802,7 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST FUNCTIONAL/RUNTIME CODE UNIT
-E3 Governed Relation Consumption V0 — INTEGRATED — PR #215
+E3 Governed Relation Coverage & Uniqueness V0 — INTEGRATED — PR #218
 
 LATEST EPISODIC PRODUCT UNIT
 G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
@@ -1819,6 +1836,10 @@ INTEGRATED
 
 E3 GOVERNED RELATION CONSUMPTION V0
 INTEGRATED — PR #215 / authority_effect none
+
+E3 GOVERNED RELATION COVERAGE & UNIQUENESS V0
+INTEGRATED — PR #218 / authority_effect none
+E008-SG-02 OPEN / E008-SG-03 boundary preserved
 
 ENGINEERING INTELLIGENCE E4
 INTEGRATED
