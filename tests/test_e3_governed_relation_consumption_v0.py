@@ -104,7 +104,10 @@ def _response(*, relation_id: str = RELATION_ID) -> str:
                     "classification": "ALIGNED",
                     "statement": "Observed implementation relates to governed knowledge.",
                     "rationale": "Repository and governed knowledge support the finding.",
-                    "evidence_refs": ["R1", "K1"],
+                    "supporting_repository_refs": ["R1"],
+                    "supporting_knowledge_refs": ["K1"],
+                    "limiting_or_counterevidence_refs": [],
+                    "uncertainty_basis": "NONE",
                 }
             ],
             "uncertainties": [],
