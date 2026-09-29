@@ -93,6 +93,7 @@ class EngineeringAnalyzeCapability(Capability):
         )
         analysis_parser = _parse_analysis
         response_json_schema = ANALYZE_RESPONSE_JSON_SCHEMA
+        response_json_schema_builder = None
         if governed_relation_ids:
             if len(governed_relation_ids) > _MAX_FINDINGS:
                 raise RuntimeError(
@@ -102,8 +103,10 @@ class EngineeringAnalyzeCapability(Capability):
                 _parse_analysis,
                 allowed_relation_ids=governed_relation_ids,
             )
-            response_json_schema = _build_relation_response_json_schema(
-                governed_relation_ids
+            response_json_schema = None
+            response_json_schema_builder = partial(
+                _build_relation_response_json_schema,
+                governed_relation_ids,
             )
 
         result = run_engineering_analysis(
@@ -124,6 +127,7 @@ class EngineeringAnalyzeCapability(Capability):
             error_scope="E3",
             parse_analysis_fn=analysis_parser,
             response_json_schema=response_json_schema,
+            response_json_schema_builder=response_json_schema_builder,
             generation_contract=self._generation_contract,
             evidence_focus=self._evidence_focus,
         )
@@ -180,11 +184,19 @@ def _validate_analysis_subject(content: str) -> str:
 
 def _build_relation_response_json_schema(
     allowed_relation_ids: tuple[str, ...],
+    repository_evidence: tuple[dict[str, object], ...],
+    knowledge_evidence: tuple[dict[str, object], ...],
 ) -> str:
     if not allowed_relation_ids:
         return ANALYZE_RESPONSE_JSON_SCHEMA
     if len(set(allowed_relation_ids)) != len(allowed_relation_ids):
         raise ValueError("governed relation ids must be unique")
+
+    repository_refs = [str(item["ref"]) for item in repository_evidence]
+    knowledge_refs = [str(item["ref"]) for item in knowledge_evidence]
+    all_refs = repository_refs + knowledge_refs
+    if len(all_refs) != len(set(all_refs)):
+        raise ValueError("focused evidence refs must be unique")
 
     schema = json.loads(ANALYZE_RESPONSE_JSON_SCHEMA)
     finding = schema["properties"]["findings"]["items"]
@@ -193,11 +205,50 @@ def _build_relation_response_json_schema(
         "classification",
         "statement",
         "rationale",
-        "evidence_refs",
+        "supporting_repository_refs",
+        "supporting_knowledge_refs",
+        "limiting_or_counterevidence_refs",
+        "uncertainty_basis",
     ]
+    finding["properties"].pop("evidence_refs")
     finding["properties"]["relation_id"] = {
         "type": "string",
         "enum": list(allowed_relation_ids),
+    }
+    ref_array = {
+        "type": "array",
+        "maxItems": _MAX_EVIDENCE_REFS_PER_FINDING,
+        "uniqueItems": True,
+    }
+    finding["properties"]["supporting_repository_refs"] = {
+        **ref_array,
+        "items": {
+            "type": "string",
+            "enum": repository_refs,
+        },
+    }
+    finding["properties"]["supporting_knowledge_refs"] = {
+        **ref_array,
+        "items": {
+            "type": "string",
+            "enum": knowledge_refs,
+        },
+    }
+    finding["properties"]["limiting_or_counterevidence_refs"] = {
+        **ref_array,
+        "items": {
+            "type": "string",
+            "enum": all_refs,
+        },
+    }
+    finding["properties"]["uncertainty_basis"] = {
+        "type": "string",
+        "enum": [
+            "NONE",
+            "CURRENT_MATERIAL_AMBIGUITY",
+            "INSUFFICIENT_SUPPLIED_EVIDENCE",
+            "UNRESOLVED_CURRENT_PRECEDENCE",
+        ],
     }
     schema["properties"]["findings"]["minItems"] = len(allowed_relation_ids)
     schema["properties"]["findings"]["maxItems"] = len(allowed_relation_ids)
@@ -228,6 +279,7 @@ def _parse_analysis(
         max_uncertainties=_MAX_UNCERTAINTIES,
         max_uncertainty_bytes=_MAX_UNCERTAINTY_BYTES,
         allowed_relation_ids=allowed_relation_ids,
+        structured_evidence_roles=bool(allowed_relation_ids),
     )
     if not allowed_relation_ids:
         return analysis
@@ -373,6 +425,8 @@ def _render_grounded(
                 f"supplemental_truncated: {str(supplemental_truncated).lower()}",
             )
         )
+    if any(finding.uncertainty_basis is not None for finding in analysis.findings):
+        lines.append("semantic_assurance: NOT_VERIFIED")
     lines.extend(
         [
         "authority_effect: none",
@@ -386,7 +440,6 @@ def _render_grounded(
 
     if analysis.findings:
         for index, finding in enumerate(analysis.findings, start=1):
-            refs = " ".join(f"[{ref}]" for ref in finding.evidence_refs)
             finding_lines = [
                 f"[A{index}] classification={finding.classification}",
             ]
@@ -396,9 +449,33 @@ def _render_grounded(
                 (
                     f"statement: {finding.statement}",
                     f"rationale: {finding.rationale}",
-                    f"evidence_refs: {refs}",
                 )
             )
+            if finding.uncertainty_basis is not None:
+                repository_refs = " ".join(
+                    f"[{ref}]" for ref in finding.supporting_repository_refs
+                ) or "(none)"
+                knowledge_refs = " ".join(
+                    f"[{ref}]" for ref in finding.supporting_knowledge_refs
+                ) or "(none)"
+                limiting_refs = " ".join(
+                    f"[{ref}]"
+                    for ref in finding.limiting_or_counterevidence_refs
+                ) or "(none)"
+                finding_lines.extend(
+                    (
+                        f"supporting_repository_refs: {repository_refs}",
+                        f"supporting_knowledge_refs: {knowledge_refs}",
+                        (
+                            "limiting_or_counterevidence_refs: "
+                            f"{limiting_refs}"
+                        ),
+                        f"uncertainty_basis: {finding.uncertainty_basis}",
+                    )
+                )
+            else:
+                refs = " ".join(f"[{ref}]" for ref in finding.evidence_refs)
+                finding_lines.append(f"evidence_refs: {refs}")
             lines.extend(finding_lines)
     else:
         lines.append("(none)")
