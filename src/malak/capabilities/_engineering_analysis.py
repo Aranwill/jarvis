@@ -63,8 +63,11 @@ Do not propose changes. Do not authorize changes. Do not execute anything.
 Return strict JSON only, with exactly these top-level fields:
 summary, findings, uncertainties.
 
-Each finding must contain exactly:
-classification, statement, rationale, evidence_refs.
+Each finding must follow the supplied response schema exactly. When that schema
+includes relation_id, relation_id identifies only the governed relation being
+evaluated and must be selected from the supplied governed relation catalog.
+Relation identity does not establish semantic truth, classification, authority,
+or authorization.
 
 Allowed classifications:
 ALIGNED, PARTIAL, GAP, CONTRADICTION, UNRESOLVED.
@@ -150,6 +153,7 @@ class _Finding:
     statement: str
     rationale: str
     evidence_refs: tuple[str, ...]
+    relation_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -311,6 +315,15 @@ def run_engineering_analysis(
             "complete": focus_complete,
             "evidence_set_digest": evidence_set_digest,
         }
+        if evidence_focus.governed_relations:
+            packet["focus"]["governed_relations"] = [
+                {
+                    "relation_id": relation.relation_id,
+                    "relation_label": relation.relation_label,
+                    "evaluation_question": relation.evaluation_question,
+                }
+                for relation in evidence_focus.governed_relations
+            ]
 
     prompt = json.dumps(
         packet,
@@ -374,6 +387,7 @@ def parse_engineering_analysis(
     max_evidence_refs_per_finding: int,
     max_uncertainties: int,
     max_uncertainty_bytes: int,
+    allowed_relation_ids: tuple[str, ...] = (),
 ) -> _Analysis:
     try:
         payload = json.loads(
@@ -429,6 +443,7 @@ def parse_engineering_analysis(
             max_statement_bytes=max_statement_bytes,
             max_rationale_bytes=max_rationale_bytes,
             max_evidence_refs=max_evidence_refs_per_finding,
+            allowed_relation_ids=allowed_relation_ids,
         )
         for item in findings_raw
     )
@@ -457,15 +472,31 @@ def parse_engineering_finding(
     max_statement_bytes: int,
     max_rationale_bytes: int,
     max_evidence_refs: int,
+    allowed_relation_ids: tuple[str, ...] = (),
 ) -> _Finding:
     if not isinstance(payload, dict):
         raise RuntimeError("each finding must be an object")
 
+    expected_fields = {
+        "classification",
+        "statement",
+        "rationale",
+        "evidence_refs",
+    }
+    if allowed_relation_ids:
+        expected_fields.add("relation_id")
     require_exact_keys(
         payload,
-        {"classification", "statement", "rationale", "evidence_refs"},
+        expected_fields,
         "finding",
     )
+
+    relation_id: str | None = None
+    if allowed_relation_ids:
+        value = payload["relation_id"]
+        if not isinstance(value, str) or value not in allowed_relation_ids:
+            raise RuntimeError("finding relation_id is not governed by this focus")
+        relation_id = value
 
     relational_classes = {"ALIGNED", "PARTIAL", "GAP", "CONTRADICTION"}
     allowed_classes = relational_classes | {"UNRESOLVED"}
@@ -522,6 +553,7 @@ def parse_engineering_finding(
         statement=statement,
         rationale=rationale,
         evidence_refs=tuple(refs_raw),
+        relation_id=relation_id,
     )
 
 
