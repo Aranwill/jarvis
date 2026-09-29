@@ -248,6 +248,7 @@ E3 Epistemic Calibration         Validation #634 / 1599 passed
 Relation Catalog Foundation       Validation #647 / 1622 passed
 PR #212 post-merge                Validation #648 / 1622 passed
 E3 Relation Consumption V0        Validation #659 / 1626 passed
+PR #215 post-merge                Validation #660 / 1626 passed
 ```
 
 Las validaciones finales indicadas pasaron en Ubuntu y Windows con
