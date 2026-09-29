@@ -159,6 +159,9 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - PR #215 cerró candidate-bound con Validation #659 sobre
   `97cf22957b260ba6e9fec79fadec7a79654c1777`: `1626 passed` en Ubuntu y
   Windows, `compileall`, candidate identity y candidate diff en PASS.
+- El merge de PR #215, `c87afd8c784fc1cfa50915425789679168db4cae`, fue
+  revalidado post-merge por Validation #660 con `1626 passed` en Ubuntu y
+  Windows, `compileall`, candidate identity y candidate diff en PASS.
 - Las validaciones finales anteriores pasaron con candidate identity,
   `compileall` y candidate diff en PASS según sus gates.
 
