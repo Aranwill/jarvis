@@ -624,17 +624,23 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
                 "rationale": "Repository and governed knowledge support it.",
                 "evidence_refs": ["R1", "K1"],
             }
+            findings = [finding]
             if request.response_json_schema is not None:
                 schema = json.loads(request.response_json_schema)
-                required = (
-                    schema["properties"]["findings"]["items"]["required"]
-                )
+                finding_schema = schema["properties"]["findings"]["items"]
+                required = finding_schema["required"]
                 if "relation_id" in required:
-                    finding["relation_id"] = "U01.KERNEL_RESPONSIBILITY"
+                    relation_ids = finding_schema["properties"]["relation_id"][
+                        "enum"
+                    ]
+                    findings = [
+                        {**finding, "relation_id": relation_id}
+                        for relation_id in relation_ids
+                    ]
             content = json.dumps(
                 {
                     "summary": "Grounded bootstrap analysis.",
-                    "findings": [finding],
+                    "findings": findings,
                     "uncertainties": [],
                 }
             )
