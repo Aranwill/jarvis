@@ -81,6 +81,13 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   allowlisted en schema/parser, lo conserva en el resultado y rechaza
   identificadores fuera del catálogo. El contrato funcional de E4 no se amplió
   y `authority_effect` permanece en `none`.
+- PR #218 integró `E3 Governed Relation Coverage & Uniqueness V0`: para
+  análisis E3 focalizados con catálogo gobernado no vacío exige cobertura
+  exacta de todas las relaciones, rechaza omisiones y duplicados, falla antes
+  de invocar el modelo si el catálogo supera la capacidad máxima de findings y
+  canoniza el orden de findings al orden del catálogo. El path genérico con
+  catálogo vacío y el contrato funcional de E4 permanecen sin cambios;
+  `authority_effect` continúa en `none`.
 
 ### Changed
 
@@ -162,6 +169,14 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - El merge de PR #215, `c87afd8c784fc1cfa50915425789679168db4cae`, fue
   revalidado post-merge por Validation #660 con `1626 passed` en Ubuntu y
   Windows, `compileall`, candidate identity y candidate diff en PASS.
+- PR #218 cerró sobre candidate
+  `b6d3d7d42c69610d1e26fbee2ad1778ee45755d0` con Candidate FULL 4R PASS,
+  Fix Validator PASS, RDD Stage 1 Candidate Conformance PASS y Validation #667
+  candidate-bound: `1633 passed` en Ubuntu y Windows, `compileall`, candidate
+  identity y candidate diff en PASS.
+- El merge de PR #218, `70989b1878f1f4f9289c65611c3d7b561d5ae286`, fue
+  revalidado post-merge por Validation #668 con `1633 passed` en Ubuntu y
+  Windows, `compileall`, candidate identity y candidate diff en PASS.
 - Las validaciones finales anteriores pasaron con candidate identity,
   `compileall` y candidate diff en PASS según sus gates.
 
@@ -194,10 +209,12 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   `7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL`.
 - La auditoría semántica posterior clasificó el resultado como
   `GAP_REQUIRES_HARDENING`; PR #212 integró la fundación del catálogo
-  gobernado de relaciones y PR #215 integró su consumo gobernado por E3.
-  Esta integración no equivale a semantic truth ni cierra automáticamente la
-  auditoría histórica; cualquier conclusión posterior requiere evidencia y gate
-  propios.
+  gobernado de relaciones, PR #215 integró su consumo gobernado por E3 y
+  PR #218 endureció cobertura exacta, unicidad y orden canónico de esas
+  relaciones en el path focalizado. Este hardening reduce de forma determinista
+  la clase de inconsistencia estructural asociada a E008-SG-01, pero no
+  demuestra semantic entailment ni reevalúa el run histórico.
+  E008-SG-02 permanece abierto y E008-SG-03 continúa como boundary explícito.
 - E4 no recibió consumo gobernado de `relation_id`; Structural Evidence
   E2→E3/E4 continúa diferida. Cualquier nueva ejecución de Runtime Self-Review
   requiere nueva admisión, preflight y autorización explícita del Owner.
