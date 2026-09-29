@@ -618,17 +618,23 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
         if self.calls == 1:
             content = "Grounded inspection [R1] [K1]"
         elif self.calls in (2, 3):
+            finding = {
+                "classification": "GAP",
+                "statement": "Observed bounded bootstrap gap.",
+                "rationale": "Repository and governed knowledge support it.",
+                "evidence_refs": ["R1", "K1"],
+            }
+            if request.response_json_schema is not None:
+                schema = json.loads(request.response_json_schema)
+                required = (
+                    schema["properties"]["findings"]["items"]["required"]
+                )
+                if "relation_id" in required:
+                    finding["relation_id"] = "U01.KERNEL_RESPONSIBILITY"
             content = json.dumps(
                 {
                     "summary": "Grounded bootstrap analysis.",
-                    "findings": [
-                        {
-                            "classification": "GAP",
-                            "statement": "Observed bounded bootstrap gap.",
-                            "rationale": "Repository and governed knowledge support it.",
-                            "evidence_refs": ["R1", "K1"],
-                        }
-                    ],
+                    "findings": [finding],
                     "uncertainties": [],
                 }
             )
