@@ -197,6 +197,18 @@ disposition
 related_findings
 ```
 
+Semántica obligatoria:
+
+- `repository` identifica siempre el repositorio fuente, incluso cuando exista uno solo;
+- `review_relevance` explica **por qué el archivo importa para la revisión** y nunca representa permiso o scope de modificación;
+- `review_depth` registra la profundidad realmente aplicada;
+- `disposition` registra cómo fue tratado el archivo dentro de la revisión;
+- cuando una admisión o planificación necesite registrar qué archivos podrían modificarse, debe utilizar un campo separado `change_scope` o evidencia equivalente;
+- `out_of_scope` no debe utilizarse dentro de `review_relevance` como sinónimo de “no modificar”; un archivo puede ser obligatorio para la revisión y simultáneamente estar fuera del scope de cambios.
+
+La definición detallada de estos campos vive en
+`docs/development/malak_construction_protocol.md`, sección 3.2.
+
 Disposiciones candidatas:
 
 ```text
