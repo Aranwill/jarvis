@@ -475,8 +475,10 @@ El ledger completo se preserva en:
 MALAK-E3-GOVERNED-RELATION-COVERAGE-UNIQUENESS-V0-FILE-COVERAGE.tsv
 ```
 
-El documento rechazado por AGENTS.md fue identificado por path y clasificado
-`REJECTED_DO_NOT_READ`; no fue abierto ni procesado.
+El documento rechazado por AGENTS.md no aparece entre los 329 blobs trackeados
+del baseline actual. No fue abierto, buscado por contenido ni utilizado como
+evidencia. Si reaparece en un baseline futuro, deberá clasificarse
+`REJECTED_DO_NOT_READ`.
 
 ## 18. Disposición
 
