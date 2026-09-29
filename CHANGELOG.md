@@ -74,9 +74,13 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   dinámicamente los schemas de E4 a los identificadores exactos del packet.
 - PR #212 integró `Governed Engineering Relation Catalog Foundation` para U01,
   con cinco relaciones gobernadas, validación fail-closed de identidad/texto y
-  binding determinista del catálogo no vacío al `evidence_set_digest`. El
-  consumo downstream de `relation_id` por E3/E4 permanece fuera de alcance y
-  no autorizado.
+  binding determinista del catálogo no vacío al `evidence_set_digest`.
+- PR #215 integró `E3 Governed Relation Consumption V0`: cuando un
+  `GovernedEngineeringEvidenceFocus` contiene un catálogo no vacío, E3 expone
+  ese catálogo exacto en el packet focalizado, exige un `relation_id`
+  allowlisted en schema/parser, lo conserva en el resultado y rechaza
+  identificadores fuera del catálogo. El contrato funcional de E4 no se amplió
+  y `authority_effect` permanece en `none`.
 
 ### Changed
 
@@ -152,6 +156,9 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   y Windows. Su merge `da4db9de845612adb42a041236f8283f0278e7d3` fue
   revalidado post-merge por Validation #648 con `1622 passed` en ambos runners,
   candidate identity, `compileall` y candidate diff en PASS.
+- PR #215 cerró candidate-bound con Validation #659 sobre
+  `97cf22957b260ba6e9fec79fadec7a79654c1777`: `1626 passed` en Ubuntu y
+  Windows, `compileall`, candidate identity y candidate diff en PASS.
 - Las validaciones finales anteriores pasaron con candidate identity,
   `compileall` y candidate diff en PASS según sus gates.
 
@@ -183,10 +190,13 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   Owner. Su resultado cognitivo histórico fue `INCONCLUSIVE` con
   `7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL`.
 - La auditoría semántica posterior clasificó el resultado como
-  `GAP_REQUIRES_HARDENING`; PR #212 integró únicamente la fundación del
-  catálogo gobernado de relaciones necesaria para el hardening.
-- El consumo downstream del catálogo por E3/E4 permanece no autorizado y
-  requiere gate separado. Cualquier nueva ejecución de Runtime Self-Review
+  `GAP_REQUIRES_HARDENING`; PR #212 integró la fundación del catálogo
+  gobernado de relaciones y PR #215 integró su consumo gobernado por E3.
+  Esta integración no equivale a semantic truth ni cierra automáticamente la
+  auditoría histórica; cualquier conclusión posterior requiere evidencia y gate
+  propios.
+- E4 no recibió consumo gobernado de `relation_id`; Structural Evidence
+  E2→E3/E4 continúa diferida. Cualquier nueva ejecución de Runtime Self-Review
   requiere nueva admisión, preflight y autorización explícita del Owner.
 - `acceptance PASS != cognitive PASS`.
 - `Evidence != Authority`.
