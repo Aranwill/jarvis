@@ -135,6 +135,9 @@ Este contexto fue reconciliado a partir de:
 - Validation #659 candidate-bound de PR #215 con `1626 passed` en Ubuntu y
   Windows, `compileall`, candidate identity y candidate diff en PASS; el merge
   `c87afd8c784fc1cfa50915425789679168db4cae` conserva el mismo árbol validado;
+- Validation #660 revalidó post-merge
+  `main@c87afd8c784fc1cfa50915425789679168db4cae` con `1626 passed` en Ubuntu
+  y Windows, `compileall`, candidate identity y candidate diff en PASS;
 - PR #215 no amplió autoridad ni hizo E4 relation-aware: `relation_id` identifica
   la relación gobernada evaluada, no verdad semántica, clasificación esperada,
   prioridad ni autorización;
@@ -216,6 +219,7 @@ E3 Epistemic Calibration:          integrado — PR #209
 Governed Relation Catalog U01:     integrado — PR #212
 E3 Governed Relation Consumption:  integrado — PR #215 / authority_effect none
 Última validación candidate-bound:  Validation #659 / 1626 passed Ubuntu + Windows
+Última validación post-merge:       Validation #660 / 1626 passed Ubuntu + Windows
 Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
 Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
