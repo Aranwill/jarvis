@@ -350,17 +350,19 @@ def _render_grounded(
     if analysis.findings:
         for index, finding in enumerate(analysis.findings, start=1):
             refs = " ".join(f"[{ref}]" for ref in finding.evidence_refs)
-            finding_header = f"[A{index}] classification={finding.classification}"
+            finding_lines = [
+                f"[A{index}] classification={finding.classification}",
+            ]
             if finding.relation_id is not None:
-                finding_header += f" relation_id={finding.relation_id}"
-            lines.extend(
+                finding_lines.append(f"relation_id={finding.relation_id}")
+            finding_lines.extend(
                 (
-                    finding_header,
                     f"statement: {finding.statement}",
                     f"rationale: {finding.rationale}",
                     f"evidence_refs: {refs}",
                 )
             )
+            lines.extend(finding_lines)
     else:
         lines.append("(none)")
 
