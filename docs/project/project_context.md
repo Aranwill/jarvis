@@ -3,7 +3,7 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-09-29
-as_of_commit: 70989b1878f1f4f9289c65611c3d7b561d5ae286
+as_of_commit: 9b40820790a2179b1dc42c60a714ac3d1686b2e7
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -156,6 +156,21 @@ Este contexto fue reconciliado a partir de:
 - PR #218 no demuestra semantic entailment: E008-SG-02 permanece abierto,
   E008-SG-03 continúa como assurance boundary y no hubo nueva ejecución de
   Runtime Self-Review;
+- integración de `E3 Structured Evidence Role Binding V0` mediante PR #222
+  sobre candidate `e4632bc4b94da93ce9003d066a47403c8e87b191`, con
+  `supporting_repository_refs`, `supporting_knowledge_refs`,
+  `limiting_or_counterevidence_refs` y `uncertainty_basis` ligados al
+  evidence packet exacto del path relation-aware;
+- Validation #681 candidate-bound de PR #222 con `1644 passed` en Ubuntu y
+  Windows, `compileall`, candidate identity y candidate diff en PASS, después
+  de bounded correction 1/2 limitada a fixtures/tests de compatibilidad;
+- merge de PR #222 en
+  `9b40820790a2179b1dc42c60a714ac3d1686b2e7`, con árbol idéntico al candidate
+  validado, y Validation #682 post-merge con `1644 passed` en Ubuntu y Windows;
+- PR #222 endurece estructuralmente E008-SG-02 pero no demuestra semantic
+  entailment: `semantic_assurance: NOT_VERIFIED`, E008-SG-02 permanece OPEN y
+  E008-SG-03 continúa como assurance boundary; E4 permanece relation-less y
+  `authority_effect = none`;
 
 El documento:
 
@@ -213,7 +228,7 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-Baseline material/productivo reconciliado: 70989b1878f1f4f9289c65611c3d7b561d5ae286
+Baseline material/productivo reconciliado: 9b40820790a2179b1dc42c60a714ac3d1686b2e7
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
@@ -234,8 +249,9 @@ E3 Epistemic Calibration:          integrado — PR #209
 Governed Relation Catalog U01:     integrado — PR #212
 E3 Governed Relation Consumption:  integrado — PR #215 / authority_effect none
 E3 Relation Coverage & Uniqueness:  integrado — PR #218 / authority_effect none
-Última validación candidate-bound:  Validation #667 / 1633 passed Ubuntu + Windows
-Última validación post-merge:       Validation #668 / 1633 passed Ubuntu + Windows
+E3 Structured Evidence Role Binding: integrado — PR #222 / semantic_assurance NOT_VERIFIED / authority_effect none
+Última validación candidate-bound:  Validation #681 / 1644 passed Ubuntu + Windows
+Última validación post-merge:       Validation #682 / 1644 passed Ubuntu + Windows
 Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
 Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
@@ -243,14 +259,16 @@ Eighth U01:                        bootstrap-u01-20260927-008 / INCONCLUSIVE
 Eighth findings:                   7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL
 Semantic grounding audit:          histórico GAP_REQUIRES_HARDENING / sin nueva reevaluación runtime
 E008-SG-01 structural hardening:    PR #218 integrado / exact coverage + uniqueness + canonical order
-E008-SG-02 evidence binding:        OPEN / fuera de PR #218
+E008-SG-02 evidence binding:        OPEN / structural role binding hardening integrado — PR #222 / semantic entailment NOT_VERIFIED
 E008-SG-03 assurance boundary:      preservado / GROUNDED != semantic entailment verified
 Relation catalog foundation:       integrado — PR #212
 E3 relation consumption:           integrado — PR #215 / relation identity != semantic truth
 E3 relation coverage/uniqueness:   integrado — PR #218
+E3 structured evidence role binding: integrado — PR #222 / exact packet refs + role separation
 E4 relation consumption:           sin cambio / no relation-aware
 Runtime Self-Review:               run 008 ejecutado; nueva ejecución requiere admisión + preflight + autorización separada
 RDD Stage 1 PR #212:               PASS / authority_effect none
+RDD Stage 1 PR #222:               PASS / authority_effect none
 Self-modification:                 no autorizada
 RDD Stage 2:                       no autorizado
 Structural Evidence E3/E4:         diferido / no propagado
