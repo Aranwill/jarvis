@@ -860,8 +860,8 @@ silently omitted files   = 0
 Disposiciones:
 
 ~~~text
-FULL_READ                    28
-TARGETED_READ                11
+FULL_READ                    27
+TARGETED_READ                12
 STRUCTURAL_INSPECTION       152
 HISTORICAL_REFERENCE         96
 NOT_APPLICABLE_WITH_REASON   45
@@ -872,6 +872,59 @@ Ledger:
 
 ~~~text
 docs/project/sprints/proposals/MALAK-E3-STRUCTURED-EVIDENCE-ROLE-BINDING-V0-FILE-COVERAGE.tsv
+~~~
+
+Semántica del ledger corregida durante revisión humana:
+
+~~~text
+review_relevance != change_scope
+~~~
+
+`review_relevance` expresa **por qué un archivo debe ser considerado durante la
+revisión**. Puede ser, entre otros:
+
+~~~text
+DIRECT_MATERIAL
+COMPATIBILITY_SURFACE
+DEVELOPMENT_PROCESS
+SECURITY_CONTEXT
+GOVERNANCE_CONTEXT
+ARCHITECTURE_CONTEXT
+CURRENT_STATE_CONTEXT
+CONCEPTUAL_CONTEXT
+CI_CONTEXT
+HISTORICAL_CONTEXT
+BASELINE_STRUCTURE
+NOT_RELEVANT_WITH_REASON
+~~~
+
+`change_scope` expresa **si el archivo puede ser modificado por el candidate
+futuro**:
+
+~~~text
+FUTURE_CANDIDATE
+POTENTIAL_COMPATIBILITY
+OUT_OF_SCOPE
+~~~
+
+Por tanto una fuente puede ser obligatoria y material para la revisión, por
+ejemplo `SECURITY.md`, y simultáneamente permanecer `OUT_OF_SCOPE` para
+modificación.
+
+El ledger incluye además el campo mínimo `repository` exigido por
+`AGENTS.md`.
+
+La primera versión de este ledger mezcló erróneamente ambos conceptos al usar
+`out_of_scope` dentro de `review_relevance` para archivos que no eran targets
+de modificación. Esa taxonomía fue descartada y sustituida sin cambiar el
+baseline, las conclusiones técnicas ni el scope productivo del gate.
+
+Conteo por change scope:
+
+~~~text
+FUTURE_CANDIDATE          2
+POTENTIAL_COMPATIBILITY   3
+OUT_OF_SCOPE            327
 ~~~
 
 Todos los archivos bajo:
