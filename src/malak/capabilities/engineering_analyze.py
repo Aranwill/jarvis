@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from functools import partial
+
 from malak.capabilities._engineering_analysis import (
     ANALYZE_RESPONSE_JSON_SCHEMA,
     ANALYZE_SYSTEM_PROMPT,
@@ -80,6 +83,25 @@ class EngineeringAnalyzeCapability(Capability):
 
     def execute(self, request: Request) -> str:
         subject = _validate_analysis_subject(request.content)
+        governed_relation_ids = (
+            tuple(
+                relation.relation_id
+                for relation in self._evidence_focus.governed_relations
+            )
+            if self._evidence_focus is not None
+            else ()
+        )
+        analysis_parser = _parse_analysis
+        response_json_schema = ANALYZE_RESPONSE_JSON_SCHEMA
+        if governed_relation_ids:
+            analysis_parser = partial(
+                _parse_analysis,
+                allowed_relation_ids=governed_relation_ids,
+            )
+            response_json_schema = _build_relation_response_json_schema(
+                governed_relation_ids
+            )
+
         result = run_engineering_analysis(
             repository_reader=self._repository_reader,
             knowledge_reader=self._knowledge_reader,
@@ -96,8 +118,8 @@ class EngineeringAnalyzeCapability(Capability):
             max_prompt_bytes=_MAX_PROMPT_BYTES,
             max_model_output_bytes=_MAX_MODEL_OUTPUT_BYTES,
             error_scope="E3",
-            parse_analysis_fn=_parse_analysis,
-            response_json_schema=ANALYZE_RESPONSE_JSON_SCHEMA,
+            parse_analysis_fn=analysis_parser,
+            response_json_schema=response_json_schema,
             generation_contract=self._generation_contract,
             evidence_focus=self._evidence_focus,
         )
@@ -152,11 +174,41 @@ def _validate_analysis_subject(content: str) -> str:
     return subject
 
 
+def _build_relation_response_json_schema(
+    allowed_relation_ids: tuple[str, ...],
+) -> str:
+    if not allowed_relation_ids:
+        return ANALYZE_RESPONSE_JSON_SCHEMA
+    if len(set(allowed_relation_ids)) != len(allowed_relation_ids):
+        raise ValueError("governed relation ids must be unique")
+
+    schema = json.loads(ANALYZE_RESPONSE_JSON_SCHEMA)
+    finding = schema["properties"]["findings"]["items"]
+    finding["required"] = [
+        "relation_id",
+        "classification",
+        "statement",
+        "rationale",
+        "evidence_refs",
+    ]
+    finding["properties"]["relation_id"] = {
+        "type": "string",
+        "enum": list(allowed_relation_ids),
+    }
+    return json.dumps(
+        schema,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
 def _parse_analysis(
     raw: str,
     *,
     repository_evidence: list[dict[str, object]],
     knowledge_evidence: list[dict[str, object]],
+    allowed_relation_ids: tuple[str, ...] = (),
 ) -> _Analysis:
     return parse_engineering_analysis(
         raw,
@@ -169,6 +221,7 @@ def _parse_analysis(
         max_evidence_refs_per_finding=_MAX_EVIDENCE_REFS_PER_FINDING,
         max_uncertainties=_MAX_UNCERTAINTIES,
         max_uncertainty_bytes=_MAX_UNCERTAINTY_BYTES,
+        allowed_relation_ids=allowed_relation_ids,
     )
 
 
@@ -297,9 +350,12 @@ def _render_grounded(
     if analysis.findings:
         for index, finding in enumerate(analysis.findings, start=1):
             refs = " ".join(f"[{ref}]" for ref in finding.evidence_refs)
+            finding_header = f"[A{index}] classification={finding.classification}"
+            if finding.relation_id is not None:
+                finding_header += f" relation_id={finding.relation_id}"
             lines.extend(
                 (
-                    f"[A{index}] classification={finding.classification}",
+                    finding_header,
                     f"statement: {finding.statement}",
                     f"rationale: {finding.rationale}",
                     f"evidence_refs: {refs}",
