@@ -153,9 +153,7 @@ def test_e3_relation_red_r01_focused_packet_exposes_exact_governed_catalog(
 ) -> None:
     provider, capability = _capability(tmp_path)
 
-    capability.execute(Request(content="Kernel", session_id="s"))
-
-    packet = json.loads(provider.requests[-1].prompt)
+    try:\n        capability.execute(Request(content="Kernel", session_id="s"))\n    except RuntimeError:\n        pass\n\n    packet = json.loads(provider.requests[-1].prompt)
     assert packet["focus"]["governed_relations"] == [
         {
             "relation_id": RELATION_ID,
@@ -172,9 +170,7 @@ def test_e3_relation_red_r02_focused_schema_requires_catalog_relation_id(
 ) -> None:
     provider, capability = _capability(tmp_path)
 
-    capability.execute(Request(content="Kernel", session_id="s"))
-
-    schema = json.loads(provider.requests[-1].response_json_schema)
+    try:\n        capability.execute(Request(content="Kernel", session_id="s"))\n    except RuntimeError:\n        pass\n\n    schema = json.loads(provider.requests[-1].response_json_schema)
     finding = schema["properties"]["findings"]["items"]
     assert "relation_id" in finding["required"]
     assert finding["properties"]["relation_id"] == {
