@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-27
-as_of_commit: da4db9de845612adb42a041236f8283f0278e7d3
+as_of_date: 2026-09-29
+as_of_commit: c87afd8c784fc1cfa50915425789679168db4cae
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -37,10 +37,10 @@ Este documento es deliberadamente **derivado y no normativo**.
 No reemplaza ni modifica ninguna fuente de ley, arquitectura, seguridad,
 gobernanza o contrato aprobado.
 
-## Estado CURRENT reconciliado — 2026-09-27
+## Estado CURRENT reconciliado — 2026-09-29
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@da4db9de845612adb42a041236f8283f0278e7d3`.
+`Aranwill/jarvis/main@c87afd8c784fc1cfa50915425789679168db4cae`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -216,8 +216,15 @@ status    INTEGRATED
 RDD Stage 1 Candidate Conformance PASS
 authority_effect none
 
-Downstream E3 relation consumption
-status    NOT AUTHORIZED / SEPARATE GATE REQUIRED
+E3 Governed Relation Consumption V0
+PR #215
+status    INTEGRATED
+candidate 97cf22957b260ba6e9fec79fadec7a79654c1777
+validation Validation #659 / 1626 passed Ubuntu + Windows
+contract  governed catalog in focused packet + allowlisted relation_id
+boundary  relation identity != semantic truth
+E4        unchanged / no governed relation consumption
+authority_effect none
 
 Runtime Self-Review execution
 status    RUN 008 COMPLETE; ANY NEW RUN REQUIRES SEPARATE ADMISSION + PREFLIGHT + OWNER AUTHORIZATION
@@ -240,6 +247,8 @@ KAF-01                           Validation #630 / 1588 passed
 E3 Epistemic Calibration         Validation #634 / 1599 passed
 Relation Catalog Foundation       Validation #647 / 1622 passed
 PR #212 post-merge                Validation #648 / 1622 passed
+E3 Relation Consumption V0        Validation #659 / 1626 passed
+PR #215 post-merge                Validation #660 / 1626 passed
 ```
 
 Las validaciones finales indicadas pasaron en Ubuntu y Windows con
@@ -1752,10 +1761,10 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-e29d3dc79445506aa9bb4e59a8383524d627db68
+c87afd8c784fc1cfa50915425789679168db4cae
 
 CURRENT MATERIAL COGNITIVE HEAD
-14122dd2d0c94d1c2d5ba1a68b6ae43bcb1c2c9e
+c87afd8c784fc1cfa50915425789679168db4cae
 
 CURRENT EPISODIC PRODUCT HEAD
 39366da01f793cf8f5d3856c47457954ee758925
@@ -1776,7 +1785,7 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST FUNCTIONAL/RUNTIME CODE UNIT
-E5-B1 — Read-only Explorer
+E3 Governed Relation Consumption V0 — INTEGRATED — PR #215
 
 LATEST EPISODIC PRODUCT UNIT
 G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
@@ -1807,6 +1816,9 @@ INTEGRATED
 
 ENGINEERING INTELLIGENCE E3
 INTEGRATED
+
+E3 GOVERNED RELATION CONSUMPTION V0
+INTEGRATED — PR #215 / authority_effect none
 
 ENGINEERING INTELLIGENCE E4
 INTEGRATED

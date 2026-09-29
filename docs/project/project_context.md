@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-27
-as_of_commit: da4db9de845612adb42a041236f8283f0278e7d3
+as_of_date: 2026-09-29
+as_of_commit: c87afd8c784fc1cfa50915425789679168db4cae
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -123,11 +123,24 @@ Este contexto fue reconciliado a partir de:
   `GAP_REQUIRES_HARDENING` y findings `E008-SG-01..03`;
 - integración de Governed Engineering Relation Catalog Foundation mediante
   PR #212, con Candidate FULL 4R PASS, RDD Stage 1 Candidate Conformance PASS y
-  `authority_effect = none`; el consumo downstream de `relation_id` por E3/E4
-  permanece no autorizado;
+  `authority_effect = none`;
 - validación post-merge de PR #212 mediante Validation #648 sobre
   `main@da4db9de845612adb42a041236f8283f0278e7d3`, con `1622 passed` en Ubuntu y Windows,
   `compileall`, candidate identity y candidate diff en PASS;
+- integración de `E3 Governed Relation Consumption V0` mediante PR #215 sobre
+  candidate `97cf22957b260ba6e9fec79fadec7a79654c1777`, con catálogo gobernado
+  exacto expuesto al packet focalizado, `relation_id` obligatorio y allowlisted
+  cuando el catálogo es no vacío, rechazo fail-closed de IDs desconocidos y
+  preservación del contrato genérico cuando el catálogo está vacío;
+- Validation #659 candidate-bound de PR #215 con `1626 passed` en Ubuntu y
+  Windows, `compileall`, candidate identity y candidate diff en PASS; el merge
+  `c87afd8c784fc1cfa50915425789679168db4cae` conserva el mismo árbol validado;
+- Validation #660 revalidó post-merge
+  `main@c87afd8c784fc1cfa50915425789679168db4cae` con `1626 passed` en Ubuntu
+  y Windows, `compileall`, candidate identity y candidate diff en PASS;
+- PR #215 no amplió autoridad ni hizo E4 relation-aware: `relation_id` identifica
+  la relación gobernada evaluada, no verdad semántica, clasificación esperada,
+  prioridad ni autorización;
 
 El documento:
 
@@ -185,7 +198,7 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-Baseline material/productivo reconciliado: da4db9de845612adb42a041236f8283f0278e7d3
+Baseline material/productivo reconciliado: c87afd8c784fc1cfa50915425789679168db4cae
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
@@ -204,14 +217,18 @@ Kernel KIC-01..KIC-07:             promoción normativa integrada — PR #205
 KAF-01:                            integrado — PR #208
 E3 Epistemic Calibration:          integrado — PR #209
 Governed Relation Catalog U01:     integrado — PR #212
-Última validación productiva:      Validation #648 / 1622 passed Ubuntu + Windows
+E3 Governed Relation Consumption:  integrado — PR #215 / authority_effect none
+Última validación candidate-bound:  Validation #659 / 1626 passed Ubuntu + Windows
+Última validación post-merge:       Validation #660 / 1626 passed Ubuntu + Windows
 Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
 Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
 Eighth U01:                        bootstrap-u01-20260927-008 / INCONCLUSIVE
 Eighth findings:                   7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL
-Semantic grounding audit:          GAP_REQUIRES_HARDENING / E008-SG-01..03
-Relation catalog foundation:       integrado / downstream E3 consumption no autorizado
+Semantic grounding audit:          histórico GAP_REQUIRES_HARDENING / sin nueva reevaluación runtime
+Relation catalog foundation:       integrado — PR #212
+E3 relation consumption:           integrado — PR #215 / relation identity != semantic truth
+E4 relation consumption:           sin cambio / no relation-aware
 Runtime Self-Review:               run 008 ejecutado; nueva ejecución requiere admisión + preflight + autorización separada
 RDD Stage 1 PR #212:               PASS / authority_effect none
 Self-modification:                 no autorizada
