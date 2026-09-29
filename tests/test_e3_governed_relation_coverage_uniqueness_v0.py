@@ -130,10 +130,19 @@ def _finding(relation_id: str | None) -> dict[str, object]:
         "classification": "ALIGNED",
         "statement": "Observed implementation relates to governed knowledge.",
         "rationale": "Repository and governed knowledge support this finding.",
-        "evidence_refs": ["R1", "K1"],
     }
-    if relation_id is not None:
-        finding["relation_id"] = relation_id
+    if relation_id is None:
+        finding["evidence_refs"] = ["R1", "K1"]
+    else:
+        finding.update(
+            {
+                "relation_id": relation_id,
+                "supporting_repository_refs": ["R1"],
+                "supporting_knowledge_refs": ["K1"],
+                "limiting_or_counterevidence_refs": [],
+                "uncertainty_basis": "NONE",
+            }
+        )
     return finding
 
 
