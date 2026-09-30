@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-29
-as_of_commit: 9b40820790a2179b1dc42c60a714ac3d1686b2e7
+as_of_date: 2026-09-30
+as_of_commit: 7b1fe7621b1dad48cc8508390e2ad78faa3e3004
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -249,9 +249,10 @@ E3 Epistemic Calibration:          integrado — PR #209
 Governed Relation Catalog U01:     integrado — PR #212
 E3 Governed Relation Consumption:  integrado — PR #215 / authority_effect none
 E3 Relation Coverage & Uniqueness:  integrado — PR #218 / authority_effect none
-E3 Structured Evidence Role Binding: integrado — PR #222 / semantic_assurance NOT_VERIFIED / authority_effect none
-Última validación candidate-bound:  Validation #681 / 1644 passed Ubuntu + Windows
-Última validación post-merge:       Validation #682 / 1644 passed Ubuntu + Windows
+E3 Structured Evidence Role Binding: integrado — PR #222 / authority_effect none
+E3 Governed Evidence Support Assessment: integrado — PR #224 / semantic_assurance NOT_VERIFIED / authority_effect none
+Última validación candidate-bound:  Validation #685 / 1670 passed Ubuntu + Windows
+Última validación post-merge:       Validation #686 / 1670 passed Ubuntu + Windows
 Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
 Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
@@ -265,6 +266,7 @@ Relation catalog foundation:       integrado — PR #212
 E3 relation consumption:           integrado — PR #215 / relation identity != semantic truth
 E3 relation coverage/uniqueness:   integrado — PR #218
 E3 structured evidence role binding: integrado — PR #222 / exact packet refs + role separation
+E3 governed evidence support assessment: integrado — PR #224 / bounded support assessment / semantic_assurance NOT_VERIFIED
 E4 relation consumption:           sin cambio / no relation-aware
 Runtime Self-Review:               run 008 ejecutado; nueva ejecución requiere admisión + preflight + autorización separada
 RDD Stage 1 PR #212:               PASS / authority_effect none
