@@ -286,6 +286,8 @@ E3 Relation Coverage & Uniqueness Validation #667 / 1633 passed
 PR #218 post-merge                Validation #668 / 1633 passed
 E3 Structured Evidence Role Binding Validation #681 / 1644 passed
 PR #222 post-merge                Validation #682 / 1644 passed
+E3 Governed Evidence Support Assessment Validation #685 / 1670 passed
+PR #224 post-merge                Validation #686 / 1670 passed
 ```
 
 Las validaciones finales indicadas pasaron en Ubuntu y Windows con
@@ -1822,7 +1824,7 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST FUNCTIONAL/RUNTIME CODE UNIT
-E3 Structured Evidence Role Binding V0 — INTEGRATED — PR #222
+E3 Governed Evidence Support Assessment V0 — INTEGRATED — PR #224
 
 LATEST EPISODIC PRODUCT UNIT
 G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
@@ -1862,8 +1864,11 @@ INTEGRATED — PR #218 / authority_effect none
 
 E3 STRUCTURED EVIDENCE ROLE BINDING V0
 INTEGRATED — PR #222 / authority_effect none
+
+E3 GOVERNED EVIDENCE SUPPORT ASSESSMENT V0
+INTEGRATED — PR #224 / authority_effect none
 semantic_assurance NOT_VERIFIED
-E008-SG-02 OPEN / structural hardening integrated / semantic entailment not verified
+E008-SG-02 OPEN / bounded support assessment integrated / semantic entailment not verified
 E008-SG-03 boundary preserved
 
 ENGINEERING INTELLIGENCE E4
