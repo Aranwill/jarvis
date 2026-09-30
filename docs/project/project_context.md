@@ -228,7 +228,7 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-Baseline material/productivo reconciliado: 9b40820790a2179b1dc42c60a714ac3d1686b2e7
+Baseline material/productivo reconciliado: 7b1fe7621b1dad48cc8508390e2ad78faa3e3004
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
@@ -1713,3 +1713,20 @@ Este documento no puede:
 - ampliar autoridad operativa.
 
 Su único propósito es proporcionar un snapshot de contexto trazable, actualizado y conveniente.
+
+
+## Reconciliación CURRENT — E3 Governed Evidence Support Assessment V0
+
+Estado reconciliado al baseline `main@7b1fe7621b1dad48cc8508390e2ad78faa3e3004`:
+
+- PR #224 integró `E3 Governed Evidence Support Assessment V0` sobre candidate `ad24d5b6de7a3c3e4dcb5643e5906df8bc8682f6`.
+- El merge commit es `7b1fe7621b1dad48cc8508390e2ad78faa3e3004`.
+- Validation #686 post-merge terminó PASS en Ubuntu y Windows, incluyendo candidate identity, suite de tests, `compileall` y candidate diff.
+- El contrato bounded distingue `SUPPORTED | INSUFFICIENT | INCONCLUSIVE` sin convertir soporte en verdad, hecho verificado, decisión ni autoridad.
+- `E008-SG-02` permanece `OPEN`: existe el contrato gobernado de assessment de soporte, pero `semantic_assurance` continúa `NOT_VERIFIED`.
+- `support_sufficient` permanece sin wiring y no autorizado por esta unidad.
+- `authority_effect = none`.
+- RDD Stage 2 permanece `NOT AUTHORIZED`.
+- Sprint 7.12 permanece `NOT AUTHORIZED`.
+
+Esta reconciliación es derivada y no autoriza una nueva implementación.
