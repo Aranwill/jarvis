@@ -1771,4 +1771,3 @@ Sprint 7.12         NOT AUTHORIZED
 La unidad integrada permite calificar de forma reproducible artifacts de un futuro mecanismo assessor dentro del evaluation pack. Elegir, ejecutar o confiar en un mecanismo real requiere una admisión y gates separados.
 
 Esta sección supersede únicamente el snapshot CURRENT anterior para el estado del Assessor Qualification Pack; los registros históricos de PR #224/#229/#231 permanecen sin reescritura.
-
