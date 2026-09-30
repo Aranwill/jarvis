@@ -15,6 +15,15 @@ rdd_stage_2_authorized: false
 
 # E3 Governed Evidence Support Assessor Qualification Pack V0 — Pre-RED Critical Contract Hardening
 
+> **Bounded correction vigente:** los schemas y claims afectados de este documento
+> fueron corregidos por
+> `MALAK-E3-GOVERNED-EVIDENCE-SUPPORT-ASSESSOR-QUALIFICATION-V0-BOUNDED-CONTRACT-CORRECTION-20260930.md`.
+> La corrección V0.1 supersede, para interpretación current-state, las secciones
+> relativas a representación de cases/inputs, artifact observations, C05/C11/C12/C13,
+> stability/binding metrics y la causal matrix. Este documento permanece como
+> evidencia histórica del contrato v0 y no debe usarse aisladamente para autorizar
+> un nuevo RED.
+
 ## 1. Propósito
 
 Congelar el contrato verificable del `Assessor Qualification Pack V0` antes de
