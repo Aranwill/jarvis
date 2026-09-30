@@ -128,21 +128,41 @@ exact evidence packet material reachable by those refs
 
 Un ID, path o label por sí solo no constituye soporte semántico.
 
-La unidad deberá resolver en diseño cómo ligar el assessment al material exacto evaluado.
-No puede reclamar content integrity, cryptographic identity ni durable provenance que el
-baseline no demuestre.
-
-## 6. Outcome semántico candidato — no congelado
-
-La admisión necesita distinguir al menos:
+V0 congela el sujeto de assessment mediante el binding que E3 ya demuestra:
 
 ```text
-positive material support
-insufficient / absent material support
-material uncertainty
+baseline_commit
++ focus_id
++ evidence_set_digest
++ relation_id
++ finding classification
++ exact statement
++ exact rationale
++ ordered/canonical evidence-role ref sets
++ exact packet material resolved by those refs
 ```
 
-Nombres candidatos:
+`evidence_set_digest` identifica el Evidence Focus capturado; no se reutiliza la identidad
+episódica de otro dominio y no se reclama identidad criptográfica adicional. El assessment
+solo es válido para esa combinación exacta.
+
+```text
+change in baseline_commit
+OR focus_id
+OR evidence_set_digest
+OR finding material
+OR role refs
+OR resolved evidence material
+-> prior assessment INVALIDATED
+-> reevaluation required
+```
+
+Un label/ref lógico sin el material del packet correspondiente no satisface el binding.
+V0 no reclama durable provenance, remote authenticity ni identidad fuera del snapshot E3.
+
+## 6. Outcome semántico V0
+
+V0 congela tres disposiciones de assessment:
 
 ```text
 SUPPORTED
@@ -150,17 +170,51 @@ INSUFFICIENT
 INCONCLUSIVE
 ```
 
-No quedan congelados por G0/G1. En particular:
+Semántica:
+
+```text
+SUPPORTED
+-> el claim material exacto queda directamente respaldado por el conjunto explícito
+   de supporting refs dentro del scope gobernado
+-> no existe counterevidence material no reconciliada dentro del packet
+
+INSUFFICIENT
+-> los supporting refs explícitos no aportan soporte material suficiente al claim
+   exacto, o el soporte requerido está ausente
+
+INCONCLUSIVE
+-> existe ambigüedad material, claim compuesto no evaluable como una única proposición,
+   counterevidence material no reconciliable, evidencia incompleta, assessor no disponible,
+   o el assessment no puede justificar SUPPORTED/INSUFFICIENT sin ampliar scope
+```
 
 ```text
 SUPPORTED != TRUE
 SUPPORTED != VERIFIED_FACT
+SUPPORTED != architectural correctness
 SUPPORTED != authority
+INSUFFICIENT != claim proven false
+INCONCLUSIVE != INSUFFICIENT
 ```
 
-Si la evidencia favorece parcialmente un claim pero deja una parte material sin soporte,
-V0 debe decidir antes de RED si necesita un estado explícito adicional o si corresponde
-`INCONCLUSIVE`. No se permite esconder esa ambigüedad.
+V0 **no introduce `PARTIALLY_SUPPORTED`**. `PARTIAL` ya es una clasificación E3 de la
+relación observada y no debe reutilizarse como medida de cobertura semántica del statement.
+
+Regla de claim scope:
+
+```text
+assessment subject = exact finding.statement as one material proposition
+```
+
+Si el statement contiene varias proposiciones materiales independientes y el soporte no
+cubre todas:
+
+```text
+compound material claim -> INCONCLUSIVE
+```
+
+La corrección futura debe dividir el finding upstream o producir un claim atómico en una
+nueva ejecución autorizada; el assessor V0 no reescribe ni fragmenta findings.
 
 ## 7. Qué puede ser determinista
 
@@ -307,15 +361,19 @@ la futura spec selecciona un evaluator externo/model-based sin cerrar trust/prov
 
 ### Ambigüedad material A — “support” sin scope
 
-**OPEN / BLOCKS RED**
+**CLOSED FOR V0**
 
-Debe definirse qué parte del claim debe quedar soportada y cómo tratar claims compuestos.
+El sujeto es el `finding.statement` exacto. `SUPPORTED` exige soporte material del claim
+completo dentro de la relación gobernada. Un statement con proposiciones materiales
+independientes cuyo soporte no sea completo produce `INCONCLUSIVE`; V0 no lo reescribe.
 
 ### Ambigüedad material B — partial support
 
-**OPEN / BLOCKS RED**
+**CLOSED FOR V0**
 
-Debe decidirse si V0 representa `PARTIALLY_SUPPORTED` o degrada a `INCONCLUSIVE`.
+No existe `PARTIALLY_SUPPORTED` en V0. Soporte parcial de un claim compuesto no puede
+elevarse a `SUPPORTED` ni degradarse automáticamente a `INSUFFICIENT`; produce
+`INCONCLUSIVE`. La clasificación E3 `PARTIAL` permanece ortogonal.
 
 ### Ambigüedad material C — source authority vs semantic support
 
@@ -326,10 +384,31 @@ Malāk. El assessment debe mantener dimensiones separadas.
 
 ### Ambigüedad material D — counterevidence
 
-**OPEN / BLOCKS RED**
+**CLOSED FOR V0**
 
-La presencia de counterevidence no puede ignorarse ni resolverse por orden de entrada.
-Debe existir semántica determinista de conflicto/abstención alrededor del assessment.
+Todo `limiting_or_counterevidence_ref` debe formar parte del assessment material. La
+evaluación es invariante al orden de refs.
+
+```text
+material counterevidence absent
+-> SUPPORTED remains possible
+
+material counterevidence present and demonstrably compatible/limiting without
+negating the exact claim
+-> SUPPORTED remains possible only if the limitation is represented by the exact
+   claim/rationale and no material proposition overreaches it
+
+material counterevidence conflicts with the exact claim and cannot be reconciled
+inside the bounded packet
+-> INCONCLUSIVE
+
+supporting refs irrelevant/insufficient regardless of counterevidence
+-> INSUFFICIENT
+```
+
+El assessor no elimina, rankea por autoridad ni selecciona silenciosamente evidencia
+conflictiva. Precedencia documental se aplica cuando la relación evaluada depende de
+autoridad normativa; no convierte por sí sola una fuente en soporte semántico.
 
 ### Ambigüedad material E — self-assessment
 
@@ -407,19 +486,30 @@ authority_effect none y RED bloqueado hasta cerrar ambigüedades.
 El boundary propuesto mantiene conceptos distintos: finding, evidence role, assessment,
 signal authorization y finalization.
 
-### Reliability — INCONCLUSIVE para RED
+### Reliability — PASS para pre-RED specification
 
-No existe aún contrato cerrado de partial support, claims compuestos, counterevidence ni
-evaluation corpus. Debe resolverse en la spec pre-RED.
+Claim scope, claims compuestos, partial support, counterevidence e invalidación por drift
+quedan cerrados para V0. El corpus/fixture y los thresholds de aceptación permanecen como
+obligación de la spec pre-RED, no como ambigüedad semántica del contrato.
 
-### Resilience — INCONCLUSIVE para RED
+### Resilience — PASS para pre-RED specification
 
-Fail-closed está definido conceptualmente, pero faltan failure semantics completas para
-evaluator unavailable, malformed assessment y material drift.
+Failure semantics mínimas quedan congeladas:
 
 ```text
-Design 4R overall for implementation/RED: INCONCLUSIVE
-Design exploration may continue.
+evaluator unavailable -> INCONCLUSIVE
+malformed assessment -> INCONCLUSIVE / no positive support
+material binding mismatch -> assessment invalid / reevaluation required
+unresolved material counterevidence -> INCONCLUSIVE
+missing exact packet material -> INCONCLUSIVE
+```
+
+Ninguna falla puede producir `SUPPORTED` por default.
+
+```text
+Design 4R overall for G0/G1 -> PASS
+PASS authorizes only progression to Pre-RED Contract Specification.
+RED remains NOT AUTHORIZED.
 ```
 
 ## 17. Cuatro preguntas de ley
@@ -435,27 +525,26 @@ Estas respuestas admiten continuar diseño; no sustituyen Design 4R ni autorizan
 
 ## 18. RDD Stage 1 Design Check — estado G0/G1
 
-- candidate identity strategy: PARTIAL — debe congelarse material binding;
+- candidate identity strategy: PASS — baseline + focus + evidence digest + exact finding material;
 - baseline/candidate binding: PASS para este artefacto;
-- evidence provenance: PARTIAL — exact material binding pendiente;
-- Writer / Reviewer / Validator / Authority separation: PARTIAL;
-- PASS/FAIL/INCONCLUSIVE semantics: PARTIAL;
+- evidence provenance: PASS dentro del bounded E3 snapshot; no durable/remote claim;
+- Writer / Reviewer / Validator / Authority separation: PASS como diseño; roles no colapsables;
+- PASS/FAIL/INCONCLUSIVE semantics: PASS para el gate; assessment usa SUPPORTED/INSUFFICIENT/INCONCLUSIVE sin equivaler a gate PASS;
 - INCONCLUSIVE != PASS: PASS;
-- candidate change invalidates affected evidence: REQUIRED, mecanismo pendiente;
-- bounded correction: REQUIRED para implementación futura;
-- independent fix validation: REQUIRED cuando aplique;
+- candidate/material change invalidates affected evidence: PASS por regla de invalidación;
+- bounded correction: PASS como requisito obligatorio de implementación futura;
+- independent fix validation: PASS como requisito cuando aplique;
 - authority_effect none: PASS;
 - RDD Stage 2 NOT AUTHORIZED: PASS.
 
 Resultado:
 
 ```text
-RDD Stage 1 Design Check = INCONCLUSIVE
-RED NOT ADMISSIBLE
+RDD Stage 1 Design Check = PASS
 ```
 
-No es un failure del G0/G1; identifica exactamente lo que la futura spec debe cerrar antes
-de RED.
+Este PASS admite únicamente avanzar a una **Pre-RED Contract Specification**. No autoriza
+RED, tests productivos ni implementación.
 
 ## 19. Scope freeze G0/G1
 
@@ -530,9 +619,9 @@ proporcional y ningún archivo fue convertido en scope de cambio por su relevanc
 ```text
 G0 problem admission: PASS
 G1 direction admission: PASS
-Critical Contract Hardening: INCONCLUSIVE for RED
-Design 4R: INCONCLUSIVE for RED
-RDD Stage 1 Design Check: INCONCLUSIVE
+Critical Contract Hardening: PASS for G0/G1
+Design 4R: PASS for G0/G1
+RDD Stage 1 Design Check: PASS for G0/G1
 implementation_authorized: false
 red_authorized: false
 authority_effect: none
@@ -547,16 +636,16 @@ E3 Governed Evidence Support Assessment V0
 Pre-RED Contract Specification / Hardening
 ```
 
-Ese gate deberá cerrar, como mínimo:
+Ese gate deberá especificar y endurecer, sin reabrir silenciosamente lo ya cerrado:
 
-1. semántica exacta de claim scope y claims compuestos;
-2. partial support;
-3. counterevidence/conflict;
-4. exact-material binding e invalidación;
-5. assessor/producer independence;
-6. failure semantics;
-7. fixture/corpus y métricas;
-8. mapping explícitamente fuera o dentro de scope hacia `support_sufficient`.
+1. representación/schema exacta del assessment;
+2. assessor/producer independence y provenance operativa;
+3. reason codes y precedencia determinista;
+4. fixture/corpus adversarial y métricas de aceptación;
+5. límites de input/output y resource bounds;
+6. validation/evidence manifest y candidate binding;
+7. mapping hacia `support_sufficient` explícitamente fuera de scope salvo nueva autorización;
+8. allowed files/components exactos para un eventual RED.
 
 Hasta entonces:
 
