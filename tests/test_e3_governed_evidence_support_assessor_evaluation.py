@@ -831,3 +831,44 @@ def test_fix_validator_malformed_scalar_types_fail_closed(
     assert completed.returncode != 0
     payload = json.loads(completed.stdout)
     assert payload["qualification_result"] == "INCONCLUSIVE"
+
+
+def test_fix_validator_cross_role_ref_conflict_fail_closed(
+    tmp_path: Path,
+) -> None:
+    case_set = _case_set_payload()
+    item = _case(case_set, "C01")["inputs"][0]
+    item["subject"]["supporting_knowledge_refs"] = ["R1"]
+    item["knowledge_evidence"] = [
+        {"ref": "R1", "material": "Conflicting knowledge material."}
+    ]
+
+    completed, payload = _run_payload(tmp_path, case_set=case_set)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+
+
+def test_fix_validator_c10_may_model_explicitly_absent_material(
+    tmp_path: Path,
+) -> None:
+    case_set = _case_set_payload()
+    item = _case(case_set, "C10")["inputs"][0]
+    item["repository_evidence"] = [{"ref": "R1", "material": ""}]
+
+    completed, payload = _run_payload(tmp_path, case_set=case_set)
+    assert completed.returncode == 0
+    assert payload["qualification_result"] == "PASS"
+
+
+def test_fix_validator_additional_known_property_is_not_silently_forbidden(
+    tmp_path: Path,
+) -> None:
+    case_set = _case_set_payload()
+    case = _case(case_set, "C06")
+    case["critical_properties"] = sorted(
+        [*case["critical_properties"], "FALSE_SUPPORT"]
+    )
+
+    completed, payload = _run_payload(tmp_path, case_set=case_set)
+    assert completed.returncode == 0
+    assert payload["qualification_result"] == "PASS"
