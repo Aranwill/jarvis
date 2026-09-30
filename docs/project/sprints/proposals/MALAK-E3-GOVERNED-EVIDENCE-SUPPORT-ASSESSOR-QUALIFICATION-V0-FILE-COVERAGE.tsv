@@ -1,46 +1,46 @@
 path	repository	artifact_type	authority_class	review_relevance	review_depth	disposition	related_findings
-.github/PULL_REQUEST_TEMPLATE.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-.github/workflows/validation.yml	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-.gitignore	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-AGENTS.md	Aranwill/jarvis	repository_instruction	repository_governance	mandatory_admission_workflow	FULL_READ	FULL_READ
-CHANGELOG.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-PROJECT.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-README.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-ROADMAP.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
+.github/PULL_REQUEST_TEMPLATE.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+.github/workflows/validation.yml	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+.gitignore	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+AGENTS.md	Aranwill/jarvis	repository_instruction	repository_governance	mandatory_admission_workflow	FULL_READ	FULL_READ	NONE
+CHANGELOG.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+PROJECT.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+README.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+ROADMAP.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
 SECURITY.md	Aranwill/jarvis	security_policy	protected_security	assessor_trust_model_and_model_risk	FULL_READ	FULL_READ	assessor_trust
-configs/models.yaml	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/architecture/adr/ADR-001-identity-migration-jarvis-to-malak.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
+configs/models.yaml	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/architecture/adr/ADR-001-identity-migration-jarvis-to-malak.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
 docs/architecture/adr/ADR-002-policy-enforcement-boundary.md	Aranwill/jarvis	adr	accepted_decision	authority_assurance_and_fail_closed_boundaries	FULL_READ	FULL_READ	assurance_boundary
 docs/architecture/adr/ADR-003-directional-communication-and-authority-flow.md	Aranwill/jarvis	adr	accepted_decision	authority_assurance_and_fail_closed_boundaries	FULL_READ	FULL_READ	assurance_boundary
-docs/architecture/adr/ADR-004-specification-and-verification-first.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
+docs/architecture/adr/ADR-004-specification-and-verification-first.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
 docs/architecture/adr/ADR-005-evidence-bound-final-response-transition.md	Aranwill/jarvis	adr	accepted_decision	authority_assurance_and_fail_closed_boundaries	FULL_READ	FULL_READ	assurance_boundary
 docs/architecture/adr/ADR-006-protected-durable-reliance-preconditions.md	Aranwill/jarvis	adr	accepted_decision	authority_assurance_and_fail_closed_boundaries	FULL_READ	FULL_READ	assurance_boundary
-docs/architecture/adr/ADR-TEMPLATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/architecture/architecture_quality_gates.md	Aranwill/jarvis	architecture	architecture_authority	kernel_capability_runtime_boundaries	FULL_READ	FULL_READ
-docs/architecture/blueprint.md	Aranwill/jarvis	architecture	architecture_authority	kernel_capability_runtime_boundaries	FULL_READ	FULL_READ
-docs/architecture/decisions/decision-index.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-docs/architecture/documentation_architecture.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-docs/architecture/kernel.md	Aranwill/jarvis	architecture	architecture_authority	kernel_capability_runtime_boundaries	FULL_READ	FULL_READ
-docs/architecture/knowledge_model.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-docs/architecture/schemas/knowledge_schema.yaml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-docs/development/development_checklist.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ
-docs/development/development_environment.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-docs/development/engineering_method.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ
-docs/development/evidence_manifest.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ
-docs/development/malak_construction_protocol.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ
-docs/governance/cognitive_constitution.md	Aranwill/jarvis	governance	normative	cognitive_governance_alignment	FULL_READ	FULL_READ
-docs/governance/governance_constitution.md	Aranwill/jarvis	governance	normative	cognitive_governance_alignment	FULL_READ	FULL_READ
-docs/knowledge/architecture/DOC-AKS-001_architecture_knowledge_system.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/architecture/DOC-AKS-002_engineering_knowledge_library.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/architecture/DOC-AKS-003_artifact_taxonomy.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/examples/EXP-001_capability_folder_structure.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/governance/knowledge_governance.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/learning_packs/LPK-001_clean_code_functions.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/recipes/REC-001_creating_new_capability.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/standards/STD-001_coding_standards.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/technologies/TECH-001_python_project_baseline.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/knowledge/templates/ARTIFACT_TEMPLATE.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-docs/operations/operational_architecture.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
+docs/architecture/adr/ADR-TEMPLATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/architecture/architecture_quality_gates.md	Aranwill/jarvis	architecture	architecture_authority	kernel_capability_runtime_boundaries	FULL_READ	FULL_READ	NONE
+docs/architecture/blueprint.md	Aranwill/jarvis	architecture	architecture_authority	kernel_capability_runtime_boundaries	FULL_READ	FULL_READ	NONE
+docs/architecture/decisions/decision-index.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+docs/architecture/documentation_architecture.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+docs/architecture/kernel.md	Aranwill/jarvis	architecture	architecture_authority	kernel_capability_runtime_boundaries	FULL_READ	FULL_READ	NONE
+docs/architecture/knowledge_model.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+docs/architecture/schemas/knowledge_schema.yaml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+docs/development/development_checklist.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ	NONE
+docs/development/development_environment.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+docs/development/engineering_method.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ	NONE
+docs/development/evidence_manifest.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ	NONE
+docs/development/malak_construction_protocol.md	Aranwill/jarvis	development_method	development_process	admission_and_candidate_evidence	FULL_READ	FULL_READ	NONE
+docs/governance/cognitive_constitution.md	Aranwill/jarvis	governance	normative	cognitive_governance_alignment	FULL_READ	FULL_READ	NONE
+docs/governance/governance_constitution.md	Aranwill/jarvis	governance	normative	cognitive_governance_alignment	FULL_READ	FULL_READ	NONE
+docs/knowledge/architecture/DOC-AKS-001_architecture_knowledge_system.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/architecture/DOC-AKS-002_engineering_knowledge_library.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/architecture/DOC-AKS-003_artifact_taxonomy.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/examples/EXP-001_capability_folder_structure.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/governance/knowledge_governance.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/learning_packs/LPK-001_clean_code_functions.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/recipes/REC-001_creating_new_capability.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/standards/STD-001_coding_standards.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/technologies/TECH-001_python_project_baseline.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/knowledge/templates/ARTIFACT_TEMPLATE.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+docs/operations/operational_architecture.md	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
 docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md	Aranwill/jarvis	concept	non_normative	research_horizon_and_evidence_bound_cognition	FULL_READ	FULL_READ	assessor_qualification
 docs/project/concepts/GOVERNED_SELF_REVIEW_BOOTSTRAP_TASK.md	Aranwill/jarvis	concept	non_normative	research_horizon_and_evidence_bound_cognition	FULL_READ	FULL_READ	assessor_qualification
 docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md	Aranwill/jarvis	concept	non_normative	research_horizon_and_evidence_bound_cognition	FULL_READ	FULL_READ	assessor_qualification
@@ -50,291 +50,291 @@ docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md	Aranwill/jarvis	concept	non_
 docs/project/concepts/README.md	Aranwill/jarvis	concept	non_normative	research_horizon_and_evidence_bound_cognition	FULL_READ	FULL_READ	assessor_qualification
 docs/project/implementation_roadmap.md	Aranwill/jarvis	current_state	derived_current_state	current_baseline_and_open_gap	FULL_READ	FULL_READ	E008-SG-02
 docs/project/project_context.md	Aranwill/jarvis	current_state	derived_current_state	current_baseline_and_open_gap	FULL_READ	FULL_READ	E008-SG-02
-docs/project/repository_standard.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-docs/project/roadmap.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-docs/project/sprints/SPRINT-7.0.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.1.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.10.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.11.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.2.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.3.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.4.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.5.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.6.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.7.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.8.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/SPRINT-7.9.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE
-docs/project/sprints/proposals/CONSTITUTIONAL-ASSURANCE-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/CONSTITUTIONAL-ASSURANCE-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PRODUCER-AUTHORIZATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PRODUCER-AUTHORIZATION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PROVENANCE-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PROVENANCE-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-INPUT-PROJECTION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-INPUT-PROJECTION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-PROJECTION-CONSUMPTION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-PROJECTION-CONSUMPTION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-PROPAGATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-PROPAGATION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-MEMORY-ADMISSION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/EPISODIC-MEMORY-ADMISSION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-ADR-002-BOUND-AUTHORIZATION-ENFORCEMENT-HARDENING-G2.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-ADR-002-PERMISSION-OPERATION-BINDING-HARDENING-G2P-A.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-ANALYZE-STRUCTURED-OUTPUT-CONTRACT-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-ASSURANCE-SIGNAL-AUTHORITY-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-ASSURANCE-SIGNAL-BOUNDARY-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-BLUEPRINT-V0.6.2-EVIDENCE-BOUND-FINALIZATION-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-CAL-014-ADR-006-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-CAL-014-BLUEPRINT-V0.6.3-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-CAL-014-COGNITIVE-CONSTITUTION-V1.2-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-CAL-014-DECISION-INDEX-ADR-006-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-CAL-014-DURABLE-RELIANCE-CONSTITUTIONAL-IMPACT-G0-G1.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-PROMOTION-SCOPE-FREEZE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-SCOPE-INTERPRETIVE-HARDENING.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-CONSTITUTIONAL-IMPACT-G0-G1.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-G0-RESEARCH-EVIDENCE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-G1-PROGRESSIVE-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-NORMATIVE-PROMOTION-SCOPE-FREEZE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-COGNITIVE-CONSTITUTION-V1.1-EVIDENCE-BOUND-FINALIZATION-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E0-REPOSITORY-READ-PROOF-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E1-GOVERNED-KNOWLEDGE-READ-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E2-ENGINEERING-INSPECT-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
+docs/project/repository_standard.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+docs/project/roadmap.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+docs/project/sprints/SPRINT-7.0.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.1.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.10.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.11.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.2.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.3.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.4.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.5.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.6.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.7.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.8.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/SPRINT-7.9.md	Aranwill/jarvis	sprint_history	historical_record	historical_context_only	HISTORICAL_REFERENCE	HISTORICAL_REFERENCE	NONE
+docs/project/sprints/proposals/CONSTITUTIONAL-ASSURANCE-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/CONSTITUTIONAL-ASSURANCE-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PRODUCER-AUTHORIZATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PRODUCER-AUTHORIZATION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PROVENANCE-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-ASSESSMENT-PROVENANCE-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-INPUT-PROJECTION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-INPUT-PROJECTION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-PROJECTION-CONSUMPTION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-ADMISSION-GOVERNED-PROJECTION-CONSUMPTION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-PROPAGATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-CANDIDATE-CONTENT-IDENTITY-PROPAGATION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-MEMORY-ADMISSION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/EPISODIC-MEMORY-ADMISSION-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-ADR-002-BOUND-AUTHORIZATION-ENFORCEMENT-HARDENING-G2.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-ADR-002-PERMISSION-OPERATION-BINDING-HARDENING-G2P-A.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-ANALYZE-STRUCTURED-OUTPUT-CONTRACT-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-ASSURANCE-SIGNAL-AUTHORITY-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-ASSURANCE-SIGNAL-BOUNDARY-G2-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-BLUEPRINT-V0.6.2-EVIDENCE-BOUND-FINALIZATION-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-CAL-014-ADR-006-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-CAL-014-BLUEPRINT-V0.6.3-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-CAL-014-COGNITIVE-CONSTITUTION-V1.2-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-CAL-014-DECISION-INDEX-ADR-006-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-CAL-014-DURABLE-RELIANCE-CONSTITUTIONAL-IMPACT-G0-G1.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-PROMOTION-SCOPE-FREEZE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-CAL-014-NORMATIVE-SCOPE-INTERPRETIVE-HARDENING.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-CONSTITUTIONAL-IMPACT-G0-G1.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-G0-RESEARCH-EVIDENCE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-G1-PROGRESSIVE-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-COGNITIVE-ASSURANCE-NORMATIVE-PROMOTION-SCOPE-FREEZE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-COGNITIVE-CONSTITUTION-V1.1-EVIDENCE-BOUND-FINALIZATION-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E0-REPOSITORY-READ-PROOF-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E1-GOVERNED-KNOWLEDGE-READ-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E2-ENGINEERING-INSPECT-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
 docs/project/sprints/proposals/MALAK-E2-STRUCTURAL-EVIDENCE-EVALUATION-PACK-V0-G0-G1-DESIGN.md	Aranwill/jarvis	evaluation_pattern	implemented_evaluation_tooling	reuse_pattern_without_generic_framework	FULL_READ	FULL_READ	evaluation_pack_pattern
-docs/project/sprints/proposals/MALAK-E2-STRUCTURAL-EVIDENCE-INTEGRATION-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E2-STRUCTURAL-EVIDENCE-OBSERVABILITY-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E3-ENGINEERING-ANALYZE-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
+docs/project/sprints/proposals/MALAK-E2-STRUCTURAL-EVIDENCE-INTEGRATION-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E2-STRUCTURAL-EVIDENCE-OBSERVABILITY-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E3-ENGINEERING-ANALYZE-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-EVIDENCE-SUPPORT-ASSESSMENT-V0-G0-G1-ADMISSION-20260930.md	Aranwill/jarvis	accepted_design_record	approved_spec_or_admission	direct_upstream_contract	FULL_READ	FULL_READ	E008-SG-02
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-EVIDENCE-SUPPORT-ASSESSMENT-V0-PRE-RED-CONTRACT-SPEC-20260930.md	Aranwill/jarvis	accepted_design_record	approved_spec_or_admission	direct_upstream_contract	FULL_READ	FULL_READ	E008-SG-02
-docs/project/sprints/proposals/MALAK-E3-GOVERNED-RELATION-COVERAGE-UNIQUENESS-V0-FILE-COVERAGE.tsv	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E3-GOVERNED-RELATION-COVERAGE-UNIQUENESS-V0-G0-G1-ADMISSION-20260929.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
+docs/project/sprints/proposals/MALAK-E3-GOVERNED-RELATION-COVERAGE-UNIQUENESS-V0-FILE-COVERAGE.tsv	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E3-GOVERNED-RELATION-COVERAGE-UNIQUENESS-V0-G0-G1-ADMISSION-20260929.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
 docs/project/sprints/proposals/MALAK-E3-SEMANTIC-GROUNDING-HARDENING-G0-G1-DESIGN.md	Aranwill/jarvis	finding_or_design_record	derived_or_design_evidence	trigger_finding_and_rejected_alternatives	FULL_READ	FULL_READ	E008-SG-02
-docs/project/sprints/proposals/MALAK-E3-STRUCTURED-EVIDENCE-ROLE-BINDING-V0-FILE-COVERAGE.tsv	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E3-STRUCTURED-EVIDENCE-ROLE-BINDING-V0-G0-G1-ADMISSION-20260929.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E4-ENGINEERING-PROPOSE-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E4-REFERENCE-BOUNDED-STRUCTURED-OUTPUT-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E5-B1-READONLY-EXPLORER-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E5-B1-READONLY-EXPLORER-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E5-ENGINEERING-CLI-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-E5-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-EIGHTH-U01-ADMISSION-REVIEW-20260927.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-ENGINEERING-RUNTIME-GENERATION-CONTRACT-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-FIFTH-U01-ADMISSION-REVIEW-20260926.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-FOURTH-U01-ADMISSION-REVIEW-20260925.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-G2P-B-PERSISTENCE-AUTHORIZATION-COMPOSITION-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-GOVERNED-ENGINEERING-EVIDENCE-FOCUS-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-OBSERVABILITY-DIAGNOSTICS-MODEL-PROVENANCE-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-TEST-V0-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-TEST-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-TRACE-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-KAF-01-KNOWLEDGE-AUTHORITY-U01-FOCUS-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-LIVE-REPLAY-VISUAL-PROJECTION-V0-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-LIVE-REPLAY-VISUAL-PROJECTION-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G0-INSPECTION.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G2A-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-SCOPE-FREEZE-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-REPOSITORY-STRUCTURAL-LOOKUP-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-REPOSITORY-STRUCTURAL-PROJECTION-V0-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-REPOSITORY-STRUCTURAL-PROJECTION-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-SEVENTH-U01-ADMISSION-REVIEW-20260926.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-SIXTH-U01-ADMISSION-REVIEW-20260926.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-THIRD-U01-ADMISSION-REVIEW-20260925.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-U007-F04-F06-E3-EPISTEMIC-CALIBRATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/MALAK-U007-F05-KERNEL-INSTANCE-ARCHITECTURE-CLARIFICATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/RDD-M1-CANDIDATE-BOUND-EVIDENCE-FOUNDATION.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/RDD-M1-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/SPRINT-7.11-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/SPRINT-7.11-REPRODUCIBLE-VALIDATION-PIPELINE-FOUNDATION.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/sprints/proposals/SPRINT-7.3-SECOND-CAPABILITY-DRAFT.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-A.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-B.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-C.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-D.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-E.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-DELIVERABLES.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FILE-COVERAGE.tsv	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-G0-G1.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
+docs/project/sprints/proposals/MALAK-E3-STRUCTURED-EVIDENCE-ROLE-BINDING-V0-FILE-COVERAGE.tsv	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E3-STRUCTURED-EVIDENCE-ROLE-BINDING-V0-G0-G1-ADMISSION-20260929.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E4-ENGINEERING-PROPOSE-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E4-REFERENCE-BOUNDED-STRUCTURED-OUTPUT-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E5-B1-READONLY-EXPLORER-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E5-B1-READONLY-EXPLORER-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E5-ENGINEERING-CLI-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-E5-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-EIGHTH-U01-ADMISSION-REVIEW-20260927.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-ENGINEERING-RUNTIME-GENERATION-CONTRACT-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-FIFTH-U01-ADMISSION-REVIEW-20260926.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-FOURTH-U01-ADMISSION-REVIEW-20260925.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-G2P-B-PERSISTENCE-AUTHORIZATION-COMPOSITION-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-GOVERNED-ENGINEERING-EVIDENCE-FOCUS-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-OBSERVABILITY-DIAGNOSTICS-MODEL-PROVENANCE-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-TEST-V0-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-TEST-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-INTERNAL-INTERACTION-TRACE-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-KAF-01-KNOWLEDGE-AUTHORITY-U01-FOCUS-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-LIVE-REPLAY-VISUAL-PROJECTION-V0-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-LIVE-REPLAY-VISUAL-PROJECTION-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G0-INSPECTION.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-G2A-IMPLEMENTATION-CANDIDATE-SPEC.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-PROGRESSIVE-COGNITIVE-ASSURANCE-RUNTIME-SCOPE-FREEZE-CANDIDATE.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-REPOSITORY-STRUCTURAL-LOOKUP-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-REPOSITORY-STRUCTURAL-PROJECTION-V0-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-REPOSITORY-STRUCTURAL-PROJECTION-V0-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-SEVENTH-U01-ADMISSION-REVIEW-20260926.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-SIXTH-U01-ADMISSION-REVIEW-20260926.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-THIRD-U01-ADMISSION-REVIEW-20260925.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-U007-F04-F06-E3-EPISTEMIC-CALIBRATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/MALAK-U007-F05-KERNEL-INSTANCE-ARCHITECTURE-CLARIFICATION-G0-G1-DESIGN.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/RDD-M1-CANDIDATE-BOUND-EVIDENCE-FOUNDATION.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/RDD-M1-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/SPRINT-7.11-G0-COVERAGE-LEDGER.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/SPRINT-7.11-REPRODUCIBLE-VALIDATION-PIPELINE-FOUNDATION.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/sprints/proposals/SPRINT-7.3-SECOND-CAPABILITY-DRAFT.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-A.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-B.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-C.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-D.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-BATCH-E.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-DELIVERABLES.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FILE-COVERAGE.tsv	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-FINAL.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-CONSTRUCTION-FLOW-COMPLIANCE-AUDIT-V1-G0-G1.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
 docs/project/status/MALAK-EIGHTH-U01-SEMANTIC-GROUNDING-AUDIT-20260927.md	Aranwill/jarvis	finding_or_design_record	derived_or_design_evidence	trigger_finding_and_rejected_alternatives	FULL_READ	FULL_READ	E008-SG-02
-docs/project/status/MALAK-POST-AUDIT-REBASELINE-20260911.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-PR224-HISTORICAL-PROCESS-EVIDENCE-RECONCILIATION-20260930.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-SEVENTH-U01-UNRESOLVED-CLASSIFICATION-AUDIT-20260927.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-docs/project/status/MALAK-STATE-RECONCILIATION-20260915.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ
-documents/projects/jarvis/archive/estado_actual_jarvis_v0.4.1.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/archive/manifest_jarvis_legacy.yaml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/changelog.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/decisiones.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/ideas.md	Aranwill/jarvis	idea_registry	non_normative	reuse_existing_evaluation_and_improvement_intent	FULL_READ	FULL_READ
-documents/projects/jarvis/model_benchmarks.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/models.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/proyecto_jarvis_base.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/releases/v0.6.0-alpha.yaml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-documents/projects/jarvis/setup.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-evaluations/e2_structural_evidence_v0/cases.json	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-examples/hello_kernel.py	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-pyproject.toml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-scripts/backup-jarvis.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-scripts/cerrar-jarvis.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-scripts/dev.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
+docs/project/status/MALAK-POST-AUDIT-REBASELINE-20260911.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-PR224-HISTORICAL-PROCESS-EVIDENCE-RECONCILIATION-20260930.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-SEVENTH-U01-UNRESOLVED-CLASSIFICATION-AUDIT-20260927.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+docs/project/status/MALAK-STATE-RECONCILIATION-20260915.md	Aranwill/jarvis	historical_or_design_record	contextual	related_if_triggered	TARGETED_READ	TARGETED_READ	NONE
+documents/projects/jarvis/archive/estado_actual_jarvis_v0.4.1.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/archive/manifest_jarvis_legacy.yaml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/changelog.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/decisiones.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/ideas.md	Aranwill/jarvis	idea_registry	non_normative	reuse_existing_evaluation_and_improvement_intent	FULL_READ	FULL_READ	NONE
+documents/projects/jarvis/model_benchmarks.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/models.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/proyecto_jarvis_base.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/releases/v0.6.0-alpha.yaml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+documents/projects/jarvis/setup.md	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+evaluations/e2_structural_evidence_v0/cases.json	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+examples/hello_kernel.py	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+pyproject.toml	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+scripts/backup-jarvis.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+scripts/cerrar-jarvis.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+scripts/dev.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
 scripts/evaluate_e2_structural_evidence.py	Aranwill/jarvis	evaluation_pattern	implemented_evaluation_tooling	reuse_pattern_without_generic_framework	FULL_READ	FULL_READ	evaluation_pack_pattern
-scripts/iniciar-jarvis.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-scripts/malak_evidence.py	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-scripts/run.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-scripts/test.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-scripts/update-models.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ
-src/app/main.py	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION
-src/malak/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/app/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/app/cli.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/app/composition.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/app/internal_interaction.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/app/internal_interaction_test_v0.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/app/trace_view.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/capabilities/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
+scripts/iniciar-jarvis.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+scripts/malak_evidence.py	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+scripts/run.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+scripts/test.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+scripts/update-models.ps1	Aranwill/jarvis	supporting_context	derived_or_operational	compatibility_context	TARGETED_READ	TARGETED_READ	NONE
+src/app/main.py	Aranwill/jarvis	repository_file	contextual	structural_baseline	STRUCTURAL_INSPECTION	STRUCTURAL_INSPECTION	NONE
+src/malak/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/app/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/app/cli.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/app/composition.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/app/internal_interaction.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/app/internal_interaction_test_v0.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/app/trace_view.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/capabilities/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
 src/malak/capabilities/_engineering_analysis.py	Aranwill/jarvis	code	implementation	direct_assessment_contract_baseline	FULL_READ	FULL_READ	assessor_contract
-src/malak/capabilities/_engineering_evidence.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/capabilities/conversation.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/capabilities/echo.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/capabilities/engineering_analyze.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/capabilities/engineering_inspect.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/capabilities/engineering_propose.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/contracts/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/contracts/capability.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/core/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
+src/malak/capabilities/_engineering_evidence.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/capabilities/conversation.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/capabilities/echo.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/capabilities/engineering_analyze.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/capabilities/engineering_inspect.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/capabilities/engineering_propose.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/contracts/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/contracts/capability.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/core/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
 src/malak/core/assurance_signal_projection.py	Aranwill/jarvis	code	implementation	forbidden_downstream_boundary	TARGETED_READ	TARGETED_READ	support_sufficient_out_of_scope
-src/malak/core/conversation.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/core/conversation_registry.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/core/llm_runtime.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
+src/malak/core/conversation.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/core/conversation_registry.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/core/llm_runtime.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
 src/malak/core/protected_finalization.py	Aranwill/jarvis	code	implementation	forbidden_downstream_boundary	TARGETED_READ	TARGETED_READ	support_sufficient_out_of_scope
-src/malak/core/request.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/core/response.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/core/types.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/events/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/identity/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/infrastructure/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/infrastructure/repository_reader.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/infrastructure/repository_structure.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/infrastructure/repository_structure_lookup.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/kernel/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/kernel/bootstrap.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/kernel/events.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/kernel/kernel.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/kernel/registry.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/knowledge/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/knowledge/knowledge_reader.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/assessment_producer_authorization.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/assessment_provenance.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/candidate_content_identity.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/episodic_admission.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/episodic_persistence_authorization.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/episodic_persistence_readiness.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/governed_input_projection.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/memory/governed_projection_consumption.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/execution_trace.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/execution_trace_projection.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/operational_event.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/operational_event_jsonl_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/operational_event_sink.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/operational_event_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/observability/safe_diagnostic.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/providers/runtime_provider.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/mock_llm_runtime.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/ollama_runtime.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_generation_contract.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_metric_jsonl_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_metric_sample.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_metric_sink.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_metric_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_metrics.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_performance_profile.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_performance_profiler.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/runtime/runtime_provenance.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/audit.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/clock.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/context_issuer.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/context_propagation.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/context_renewer.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/context_validator.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/contracts.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/pdp.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/security/pep.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/services/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/services/conversation_context.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/services/conversation_service.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/services/planner.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/services/self_review_evidence.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-src/malak/shared/logger.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ
-tests/test_app_composition.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_architecture_invariants.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_assessment_producer_authorization.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
+src/malak/core/request.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/core/response.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/core/types.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/events/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/identity/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/infrastructure/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/infrastructure/repository_reader.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/infrastructure/repository_structure.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/infrastructure/repository_structure_lookup.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/kernel/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/kernel/bootstrap.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/kernel/events.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/kernel/kernel.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/kernel/registry.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/knowledge/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/knowledge/knowledge_reader.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/assessment_producer_authorization.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/assessment_provenance.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/candidate_content_identity.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/episodic_admission.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/episodic_persistence_authorization.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/episodic_persistence_readiness.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/governed_input_projection.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/memory/governed_projection_consumption.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/execution_trace.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/execution_trace_projection.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/operational_event.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/operational_event_jsonl_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/operational_event_sink.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/operational_event_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/observability/safe_diagnostic.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/providers/runtime_provider.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/mock_llm_runtime.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/ollama_runtime.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_generation_contract.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_metric_jsonl_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_metric_sample.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_metric_sink.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_metric_store.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_metrics.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_performance_profile.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_performance_profiler.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/runtime/runtime_provenance.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/audit.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/clock.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/context_issuer.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/context_propagation.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/context_renewer.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/context_validator.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/contracts.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/pdp.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/security/pep.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/services/__init__.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/services/conversation_context.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/services/conversation_service.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/services/planner.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/services/self_review_evidence.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+src/malak/shared/logger.py	Aranwill/jarvis	code	implementation	compatibility_and_no_lateral_delta	TARGETED_READ	TARGETED_READ	NONE
+tests/test_app_composition.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_architecture_invariants.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_assessment_producer_authorization.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
 tests/test_assurance_signal_projection.py	Aranwill/jarvis	test	validation_evidence	forbidden_downstream_boundary	TARGETED_READ	TARGETED_READ	support_sufficient_out_of_scope
-tests/test_authorization_audit.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_authorization_contracts.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_candidate_content_identity.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_capability_registry.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_cli.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_cli_self_review_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_cli_trace_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_conversation_capability.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_conversation_context.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_conversation_contract.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_conversation_execution_path.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_conversation_registry.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_conversation_service.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
+tests/test_authorization_audit.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_authorization_contracts.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_candidate_content_identity.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_capability_registry.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_cli.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_cli_self_review_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_cli_trace_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_conversation_capability.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_conversation_context.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_conversation_contract.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_conversation_execution_path.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_conversation_registry.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_conversation_service.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
 tests/test_e2_structural_evidence_evaluation.py	Aranwill/jarvis	evaluation_pattern	implemented_evaluation_tooling	reuse_pattern_without_generic_framework	FULL_READ	FULL_READ	evaluation_pack_pattern
 tests/test_e3_governed_evidence_support_assessment_v0.py	Aranwill/jarvis	test	validation_evidence	direct_assessment_contract_baseline	FULL_READ	FULL_READ	assessor_contract
-tests/test_e3_governed_relation_consumption_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_e3_governed_relation_coverage_uniqueness_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_e3_structured_evidence_role_binding_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_engineering_analyze.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_engineering_inspect.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_engineering_propose.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_episodic_assessment_provenance.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_episodic_memory_admission.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_episodic_persistence_authorization.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_episodic_persistence_readiness.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_execution_trace_projection_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_execution_trace_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_governed_engineering_evidence_focus_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_governed_input_projection.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_governed_projection_consumption.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_internal_interaction_test_v0_harness.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_internal_interaction_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_kernel.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_knowledge_reader.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_llm_runtime.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_malak_evidence.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_ollama_runtime.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_operational_event.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_operational_event_jsonl_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_operational_event_sink.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_operational_event_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_planner.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_policy_decision_point.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_policy_enforcement_point.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
+tests/test_e3_governed_relation_consumption_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_e3_governed_relation_coverage_uniqueness_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_e3_structured_evidence_role_binding_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_engineering_analyze.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_engineering_inspect.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_engineering_propose.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_episodic_assessment_provenance.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_episodic_memory_admission.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_episodic_persistence_authorization.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_episodic_persistence_readiness.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_execution_trace_projection_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_execution_trace_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_governed_engineering_evidence_focus_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_governed_input_projection.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_governed_projection_consumption.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_internal_interaction_test_v0_harness.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_internal_interaction_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_kernel.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_knowledge_reader.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_llm_runtime.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_malak_evidence.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_ollama_runtime.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_operational_event.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_operational_event_jsonl_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_operational_event_sink.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_operational_event_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_planner.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_policy_decision_point.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_policy_enforcement_point.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
 tests/test_protected_finalization.py	Aranwill/jarvis	test	validation_evidence	forbidden_downstream_boundary	TARGETED_READ	TARGETED_READ	support_sufficient_out_of_scope
-tests/test_repository_reader.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_repository_structure.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_repository_structure_lookup.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_generation_contract_red.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_integration.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_metric_jsonl_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_metric_sample.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_metric_sink.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_metric_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_model_provenance_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_performance_profiler.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_runtime_provider.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_safe_diagnostic_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_security_clock.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_security_context_issuer.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_security_context_propagation.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_security_context_renewer.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_security_context_validator.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_self_review_evidence_packet_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
-tests/test_trace_view_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ
+tests/test_repository_reader.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_repository_structure.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_repository_structure_lookup.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_generation_contract_red.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_integration.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_metric_jsonl_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_metric_sample.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_metric_sink.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_metric_store.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_model_provenance_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_performance_profiler.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_runtime_provider.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_safe_diagnostic_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_security_clock.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_security_context_issuer.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_security_context_propagation.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_security_context_renewer.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_security_context_validator.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_self_review_evidence_packet_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
+tests/test_trace_view_v0.py	Aranwill/jarvis	test	validation_evidence	compatibility_baseline	TARGETED_READ	TARGETED_READ	NONE
