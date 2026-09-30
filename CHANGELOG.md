@@ -88,6 +88,15 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   canoniza el orden de findings al orden del catálogo. El path genérico con
   catálogo vacío y el contrato funcional de E4 permanecen sin cambios;
   `authority_effect` continúa en `none`.
+- PR #222 integró `E3 Structured Evidence Role Binding V0` en el path
+  E3 focalizado con catálogo gobernado: reemplaza el `evidence_refs`
+  model-facing plano por roles estructurados
+  `supporting_repository_refs`, `supporting_knowledge_refs`,
+  `limiting_or_counterevidence_refs` y `uncertainty_basis`, ligados a los
+  refs exactos del evidence packet y revalidados fail-closed por el parser.
+  El path genérico de E3 y el contrato funcional de E4 permanecen sin cambios,
+  se expone `semantic_assurance: NOT_VERIFIED` y
+  `authority_effect` continúa en `none`.
 
 ### Changed
 
@@ -177,6 +186,16 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - El merge de PR #218, `70989b1878f1f4f9289c65611c3d7b561d5ae286`, fue
   revalidado post-merge por Validation #668 con `1633 passed` en Ubuntu y
   Windows, `compileall`, candidate identity y candidate diff en PASS.
+- PR #222 cerró sobre candidate
+  `e4632bc4b94da93ce9003d066a47403c8e87b191` con Candidate FULL 4R PASS,
+  bounded correction 1/2 validada, RDD Stage 1 Candidate Conformance PASS y
+  Validation #681 candidate-bound: `1644 passed` en Ubuntu y Windows,
+  `compileall`, candidate identity y candidate diff en PASS.
+- El merge de PR #222,
+  `9b40820790a2179b1dc42c60a714ac3d1686b2e7`, conserva exactamente el árbol
+  del candidate validado y fue revalidado post-merge por Validation #682 con
+  `1644 passed` en Ubuntu y Windows, `compileall`, candidate identity y
+  candidate diff en PASS.
 - Las validaciones finales anteriores pasaron con candidate identity,
   `compileall` y candidate diff en PASS según sus gates.
 
@@ -209,12 +228,14 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   `7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL`.
 - La auditoría semántica posterior clasificó el resultado como
   `GAP_REQUIRES_HARDENING`; PR #212 integró la fundación del catálogo
-  gobernado de relaciones, PR #215 integró su consumo gobernado por E3 y
-  PR #218 endureció cobertura exacta, unicidad y orden canónico de esas
-  relaciones en el path focalizado. Este hardening reduce de forma determinista
-  la clase de inconsistencia estructural asociada a E008-SG-01, pero no
-  demuestra semantic entailment ni reevalúa el run histórico.
-  E008-SG-02 permanece abierto y E008-SG-03 continúa como boundary explícito.
+  gobernado de relaciones, PR #215 integró su consumo gobernado por E3,
+  PR #218 endureció cobertura exacta, unicidad y orden canónico y PR #222
+  añadió binding estructurado explícito por roles de evidencia en el path
+  focalizado. Estos hardenings reducen de forma determinista las clases
+  estructurales asociadas a E008-SG-01 y E008-SG-02, pero no demuestran
+  semantic entailment ni reevalúan el run histórico. E008-SG-02 permanece
+  abierto porque el soporte semántico claim→evidence aún no está verificado;
+  E008-SG-03 continúa como boundary explícito.
 - E4 no recibió consumo gobernado de `relation_id`; Structural Evidence
   E2→E3/E4 continúa diferida. Cualquier nueva ejecución de Runtime Self-Review
   requiere nueva admisión, preflight y autorización explícita del Owner.

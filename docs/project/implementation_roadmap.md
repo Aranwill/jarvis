@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-29
-as_of_commit: 70989b1878f1f4f9289c65611c3d7b561d5ae286
+as_of_commit: 9b40820790a2179b1dc42c60a714ac3d1686b2e7
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -40,7 +40,7 @@ gobernanza o contrato aprobado.
 ## Estado CURRENT reconciliado — 2026-09-29
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@70989b1878f1f4f9289c65611c3d7b561d5ae286`.
+`Aranwill/jarvis/main@9b40820790a2179b1dc42c60a714ac3d1686b2e7`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -241,6 +241,24 @@ E4        unchanged / no governed relation consumption
 RDD Stage 1 Candidate Conformance PASS
 authority_effect none
 
+E3 Structured Evidence Role Binding V0
+PR #222
+status    INTEGRATED
+candidate e4632bc4b94da93ce9003d066a47403c8e87b191
+merge     9b40820790a2179b1dc42c60a714ac3d1686b2e7
+validation Validation #681 / 1644 passed Ubuntu + Windows
+post-merge Validation #682 / 1644 passed Ubuntu + Windows
+contract  explicit repository support + knowledge support + limiting/counterevidence + uncertainty basis
+binding   exact packet refs / fail-closed role validation
+assurance semantic_assurance NOT_VERIFIED
+boundary  structural role binding != semantic entailment
+E008-SG-02 OPEN / deterministic structural hardening integrated
+E008-SG-03 assurance boundary preserved
+E4        unchanged / relation-less legacy analysis
+bounded correction 1/2 / tests and fixtures only
+RDD Stage 1 Candidate Conformance PASS
+authority_effect none
+
 Runtime Self-Review execution
 status    RUN 008 COMPLETE; ANY NEW RUN REQUIRES SEPARATE ADMISSION + PREFLIGHT + OWNER AUTHORIZATION
 
@@ -266,6 +284,8 @@ E3 Relation Consumption V0        Validation #659 / 1626 passed
 PR #215 post-merge                Validation #660 / 1626 passed
 E3 Relation Coverage & Uniqueness Validation #667 / 1633 passed
 PR #218 post-merge                Validation #668 / 1633 passed
+E3 Structured Evidence Role Binding Validation #681 / 1644 passed
+PR #222 post-merge                Validation #682 / 1644 passed
 ```
 
 Las validaciones finales indicadas pasaron en Ubuntu y Windows con
@@ -1778,10 +1798,10 @@ Las diferencias históricas deben conservar contexto temporal.
 
 ```text
 CURRENT INTEGRATED HEAD
-70989b1878f1f4f9289c65611c3d7b561d5ae286
+9b40820790a2179b1dc42c60a714ac3d1686b2e7
 
 CURRENT MATERIAL COGNITIVE HEAD
-70989b1878f1f4f9289c65611c3d7b561d5ae286
+9b40820790a2179b1dc42c60a714ac3d1686b2e7
 
 CURRENT EPISODIC PRODUCT HEAD
 39366da01f793cf8f5d3856c47457954ee758925
@@ -1802,7 +1822,7 @@ LAST COMPLETED NUMBERED SPRINT
 Sprint 7.11 — Reproducible Validation Pipeline Foundation
 
 LATEST FUNCTIONAL/RUNTIME CODE UNIT
-E3 Governed Relation Coverage & Uniqueness V0 — INTEGRATED — PR #218
+E3 Structured Evidence Role Binding V0 — INTEGRATED — PR #222
 
 LATEST EPISODIC PRODUCT UNIT
 G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
@@ -1839,7 +1859,12 @@ INTEGRATED — PR #215 / authority_effect none
 
 E3 GOVERNED RELATION COVERAGE & UNIQUENESS V0
 INTEGRATED — PR #218 / authority_effect none
-E008-SG-02 OPEN / E008-SG-03 boundary preserved
+
+E3 STRUCTURED EVIDENCE ROLE BINDING V0
+INTEGRATED — PR #222 / authority_effect none
+semantic_assurance NOT_VERIFIED
+E008-SG-02 OPEN / structural hardening integrated / semantic entailment not verified
+E008-SG-03 boundary preserved
 
 ENGINEERING INTELLIGENCE E4
 INTEGRATED
