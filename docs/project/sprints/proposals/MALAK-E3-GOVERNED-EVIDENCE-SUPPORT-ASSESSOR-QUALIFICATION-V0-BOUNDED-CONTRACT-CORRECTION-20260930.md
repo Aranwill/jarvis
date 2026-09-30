@@ -267,11 +267,15 @@ rationale <= 8 KiB UTF-8
 refs/role <= existing E3 bound
 ```
 
-## 9. Input digest
+## 9. Identidad de input y equivalencia semántica
 
-Cada input posee identidad independiente.
+Cada input posee dos digests distintos.
 
-`input_digest` se calcula sobre canonical JSON de:
+### 9.1 input_instance_digest
+
+Identifica la instancia exacta que debe haber sido evaluada.
+
+Se calcula sobre canonical JSON de:
 
 ```text
 subject
@@ -281,19 +285,51 @@ binding_expectation
 binding_prior
 ```
 
-Canonicalización:
+con:
 
 ```text
 UTF-8
 sort_keys = true
 separators = (",", ":")
-ref arrays canonicalizadas cuando su orden no es semántico
-evidence collections ordenadas por ref
+array order PRESERVED
+evidence collection order PRESERVED
 SHA-256 lowercase
 ```
 
-El artifact nunca puede suministrar su propio input material; sólo referencia el
-`input_digest` del case-set revisado.
+Por lo tanto, una permutación intencional de refs produce otro
+`input_instance_digest`.
+
+### 9.2 semantic_input_digest
+
+Identifica la forma semántica canonizada usada únicamente para demostrar
+equivalencia declarada.
+
+Se calcula sobre el mismo material, pero:
+
+```text
+ref arrays canonicalizadas
+evidence collections ordenadas por ref
+other arrays preserved unless explicitly declared order-insensitive
+SHA-256 lowercase
+```
+
+Para C13:
+
+```text
+C13.I01 input_instance_digest != C13.I02 input_instance_digest
+C13.I01 semantic_input_digest == C13.I02 semantic_input_digest
+```
+
+Esto demuestra:
+
+- dos inputs serializados distintos;
+- una equivalencia semántica congelada por el pack.
+
+No demuestra por sí solo estabilidad del assessor; para eso siguen siendo
+obligatorias dos observations.
+
+El artifact nunca puede suministrar su propio input material; sólo referencia los
+digests recomputados desde el case-set revisado.
 
 ## 10. Binding expectation
 
@@ -527,6 +563,13 @@ La única diferencia admitida es una transformación de equivalencia congelada:
 canonical ref permutation
 ```
 
+Deben cumplir primero:
+
+```text
+input_instance_digest I01 != input_instance_digest I02
+semantic_input_digest I01 == semantic_input_digest I02
+```
+
 Deben compartir:
 
 - statement;
@@ -575,7 +618,8 @@ Cada observation posee exactamente:
 
 ```text
 input_id
-input_digest
+input_instance_digest
+semantic_input_digest
 subject_fingerprint
 outcome
 reason_codes
@@ -587,7 +631,8 @@ Reglas:
 - ninguna faltante;
 - ninguna duplicada;
 - ninguna extra;
-- `input_digest` debe coincidir con el input exacto del case-set;
+- `input_instance_digest` debe coincidir con la instancia exacta del case-set;
+- `semantic_input_digest` debe coincidir con su canonical semantic form;
 - `subject_fingerprint` debe coincidir con el subject actual del input;
 - outcome/reasons deben satisfacer coherencia upstream.
 
@@ -901,32 +946,34 @@ R08  reviewer == runner implementation actor blocks PASS
 R09  reviewer == assessor mechanism blocks PASS
 R10  artifact unknown/missing field rejected
 R11  case-set digest mismatch blocks PASS
-R12  input digest mismatch blocks PASS
-R13  subject fingerprint mismatch blocks PASS
-R14  model-based artifact without complete provenance blocks PASS
-R15  mechanism producer == assessor subject cannot self-certify
-R16  exact support input can PASS
-R17  irrelevant/insufficient support cannot be promoted to SUPPORTED
-R18  compound partial support remains INCONCLUSIVE
-R19  unresolved counterevidence cannot become SUPPORTED
-R20  C05 contains resolved limiting material
-R21  C11 prior subject binding is recomputable and stale
-R22  C12 prior evidence-material binding is recomputable and stale
-R23  C13 requires two bound observations
-R24  C13 comparison uses observed outcome/reasons, not fingerprint equality
-R25  malformed/unavailable assessor remains non-positive
-R26  all metric formulas match frozen input-level denominators/numerators
-R27  any safety-floor violation prevents terminal PASS
-R28  authority_effect other than none rejected
-R29  runner performs no model/network/repo-write side effects
-R30  no case/input skip/filter/xfail path exists
-R31  PASS requires all 18 cases / 19 inputs valid and evaluable
+R12  input instance digest mismatch blocks PASS
+R13  semantic input digest mismatch blocks PASS
+R14  subject fingerprint mismatch blocks PASS
+R15  model-based artifact without complete provenance blocks PASS
+R16  mechanism producer == assessor subject cannot self-certify
+R17  exact support input can PASS
+R18  irrelevant/insufficient support cannot be promoted to SUPPORTED
+R19  compound partial support remains INCONCLUSIVE
+R20  unresolved counterevidence cannot become SUPPORTED
+R21  C05 contains resolved limiting material
+R22  C11 prior subject binding is recomputable and stale
+R23  C12 prior evidence-material binding is recomputable and stale
+R24  C13 has two distinct instance digests with one semantic digest
+R25  C13 requires two bound observations
+R26  C13 comparison uses observed outcome/reasons, not fingerprint equality
+R27  malformed/unavailable assessor remains non-positive
+R28  all metric formulas match frozen input-level denominators/numerators
+R29  any safety-floor violation prevents terminal PASS
+R30  authority_effect other than none rejected
+R31  runner performs no model/network/repo-write side effects
+R32  no case/input skip/filter/xfail path exists
+R33  PASS requires all 18 cases / 19 inputs valid and evaluable
 ```
 
 Nueva matrix:
 
 ```text
-R01-R31
+R01-R33
 ```
 
 ## 26. Invalidación de PR #230
@@ -948,7 +995,7 @@ Después de mergear esta corrección:
 ```text
 PR #230 must rebase/update to corrected main
 cases.json must become v0.1
-tests must implement R01-R31
+tests must implement R01-R33
 runner must implement v0.1
 new RED required
 new GREEN required
