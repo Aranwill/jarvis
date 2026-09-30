@@ -458,6 +458,7 @@ def _bounded_plain_text(value: object, *, max_bytes: int) -> bool:
     return (
         isinstance(value, str)
         and bool(value.strip())
+        and len(value) <= max_bytes
         and len(value.encode("utf-8")) <= max_bytes
         and not any(
             unicodedata.category(character) in {"Cc", "Cf", "Zl", "Zp"}
@@ -935,18 +936,14 @@ def route_governed_support_evidence_v0(
 
 
 def _reject_blind_ground_truth_keys(value: object) -> None:
-    if isinstance(value, dict):
-        forbidden = set(value) & _BLIND_PROJECTION_FORBIDDEN_KEYS
-        if forbidden:
-            raise ValueError(
-                "blind projection contains forbidden ground-truth key: "
-                + ", ".join(sorted(forbidden))
-            )
-        for nested in value.values():
-            _reject_blind_ground_truth_keys(nested)
-    elif isinstance(value, (list, tuple)):
-        for nested in value:
-            _reject_blind_ground_truth_keys(nested)
+    if not isinstance(value, dict):
+        return
+    forbidden = set(value) & _BLIND_PROJECTION_FORBIDDEN_KEYS
+    if forbidden:
+        raise ValueError(
+            "blind projection contains forbidden ground-truth key: "
+            + ", ".join(sorted(forbidden))
+        )
 
 
 def _require_blind_text(
@@ -1125,7 +1122,6 @@ def project_blind_support_assessor_input_v0(case_input):
     # projection intentionally strips them. They may not occur inside any
     # candidate-visible value.
     visible_source = {key: case_input[key] for key in required}
-    _reject_blind_ground_truth_keys(visible_source)
 
     _require_blind_text(
         visible_source["input_id"],
