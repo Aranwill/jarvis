@@ -119,7 +119,7 @@ def _valid_artifact(case_set: dict, case_set_digest: str) -> dict:
         },
         "harness": {
             "harness_policy_version": "test-harness/v0",
-            "harness_policy_digest": "h" * 64,
+            "harness_policy_digest": "d" * 64,
             "budget_manifest_digest": "b" * 64,
             "attempt_policy_digest": "a" * 64,
         },
