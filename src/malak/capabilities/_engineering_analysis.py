@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
@@ -401,6 +402,249 @@ def assess_governed_evidence_support_v0(
             limiting_or_counterevidence_refs
         ),
     )
+
+
+class GovernedSupportEvidenceRouteKind(str, __import__("enum").Enum):
+    DETERMINISTIC = "DETERMINISTIC"
+    INFERENTIAL = "INFERENTIAL"
+    INSUFFICIENT = "INSUFFICIENT"
+
+
+class GovernedSupportEvidenceRouteReason(str, __import__("enum").Enum):
+    DETERMINISTIC_ORACLE_ELIGIBLE = "DETERMINISTIC_ORACLE_ELIGIBLE"
+    INFERENTIAL_RESIDUAL = "INFERENTIAL_RESIDUAL"
+    EVIDENCE_INSUFFICIENT = "EVIDENCE_INSUFFICIENT"
+    POLICY_VERSION_MISMATCH = "POLICY_VERSION_MISMATCH"
+    SUBJECT_BINDING_MISMATCH = "SUBJECT_BINDING_MISMATCH"
+    ORACLE_CONTRACT_INVALID = "ORACLE_CONTRACT_INVALID"
+    ORACLE_QUALIFICATION_STALE = "ORACLE_QUALIFICATION_STALE"
+    ORACLE_AMBIGUOUS = "ORACLE_AMBIGUOUS"
+
+
+@dataclass(frozen=True)
+class GovernedDeterministicOracleQualificationV0:
+    qualification_id: str
+    oracle_id: str
+    oracle_version: str
+    oracle_content_digest: str
+    relation_id: str
+    evaluation_question_identity: str
+    input_contract_identity: str
+    output_contract_identity: str
+    coverage_claim: str
+    authority_effect: str = "none"
+
+    def __post_init__(self) -> None:
+        if self.authority_effect != "none":
+            raise ValueError("oracle qualification authority_effect must be none")
+        if self.coverage_claim not in {"FULL", "PARTIAL"}:
+            raise ValueError("oracle qualification coverage_claim must be FULL or PARTIAL")
+
+
+@dataclass(frozen=True)
+class GovernedDeterministicOracleContractV0:
+    oracle_id: str
+    oracle_version: str
+    oracle_content_digest: str
+    relation_id: str
+    evaluation_question_identity: str
+    input_contract_identity: str
+    output_contract_identity: str
+    coverage_claim: str
+    qualification: GovernedDeterministicOracleQualificationV0
+    authority_effect: str = "none"
+    side_effect_class: str = "NONE"
+
+    def __post_init__(self) -> None:
+        if self.authority_effect != "none":
+            raise ValueError("oracle authority_effect must be none")
+        if self.side_effect_class != "NONE":
+            raise ValueError("oracle side_effect_class must be NONE")
+        if self.coverage_claim not in {"FULL", "PARTIAL"}:
+            raise ValueError("oracle coverage_claim must be FULL or PARTIAL")
+
+
+@dataclass(frozen=True)
+class GovernedSupportEvidenceRoutingV0:
+    policy_version: str
+    baseline_commit: str
+    focus_id: str
+    evidence_set_digest: str
+    relation_id: str
+    evaluation_question_identity: str
+    finding_fingerprint: str
+    resolved_evidence_material_digest: str
+    route_kind: GovernedSupportEvidenceRouteKind | None
+    reason_code: GovernedSupportEvidenceRouteReason
+    selected_oracle_id: str | None = None
+    authority_effect: str = "none"
+
+
+_SUPPORT_ROUTING_POLICY_V0 = "e3-governed-support-routing/v0"
+
+
+def _support_routing_result(
+    subject,
+    *,
+    route_kind,
+    reason_code,
+    selected_oracle_id=None,
+):
+    return GovernedSupportEvidenceRoutingV0(
+        policy_version=str(subject.get("policy_version", "")),
+        baseline_commit=str(subject.get("baseline_commit", "")),
+        focus_id=str(subject.get("focus_id", "")),
+        evidence_set_digest=str(subject.get("evidence_set_digest", "")),
+        relation_id=str(subject.get("relation_id", "")),
+        evaluation_question_identity=str(
+            subject.get("evaluation_question_identity", "")
+        ),
+        finding_fingerprint=str(subject.get("finding_fingerprint", "")),
+        resolved_evidence_material_digest=str(
+            subject.get("resolved_evidence_material_digest", "")
+        ),
+        route_kind=route_kind,
+        reason_code=reason_code,
+        selected_oracle_id=selected_oracle_id,
+    )
+
+
+def _oracle_qualification_matches(
+    oracle: GovernedDeterministicOracleContractV0,
+) -> bool:
+    qualification = oracle.qualification
+    return (
+        isinstance(qualification, GovernedDeterministicOracleQualificationV0)
+        and qualification.oracle_id == oracle.oracle_id
+        and qualification.oracle_version == oracle.oracle_version
+        and qualification.oracle_content_digest == oracle.oracle_content_digest
+        and qualification.relation_id == oracle.relation_id
+        and qualification.evaluation_question_identity
+        == oracle.evaluation_question_identity
+        and qualification.input_contract_identity == oracle.input_contract_identity
+        and qualification.output_contract_identity == oracle.output_contract_identity
+        and qualification.coverage_claim == oracle.coverage_claim
+        and qualification.authority_effect == "none"
+    )
+
+
+def route_governed_support_evidence_v0(
+    *,
+    policy_version: str,
+    baseline_commit: str,
+    focus_id: str,
+    evidence_set_digest: str,
+    relation_id: str,
+    evaluation_question_identity: str,
+    finding_fingerprint: str,
+    resolved_evidence_material_digest: str,
+    declared_evidence_complete: bool,
+    scope_expansion_required: bool,
+    oracles,
+    expected_binding=None,
+):
+    subject = {
+        "policy_version": policy_version,
+        "baseline_commit": baseline_commit,
+        "focus_id": focus_id,
+        "evidence_set_digest": evidence_set_digest,
+        "relation_id": relation_id,
+        "evaluation_question_identity": evaluation_question_identity,
+        "finding_fingerprint": finding_fingerprint,
+        "resolved_evidence_material_digest": resolved_evidence_material_digest,
+    }
+
+    if policy_version != _SUPPORT_ROUTING_POLICY_V0:
+        return _support_routing_result(
+            subject,
+            route_kind=None,
+            reason_code=GovernedSupportEvidenceRouteReason.POLICY_VERSION_MISMATCH,
+        )
+
+    if expected_binding and any(
+        subject.get(key) != value for key, value in expected_binding.items()
+    ):
+        return _support_routing_result(
+            subject,
+            route_kind=None,
+            reason_code=GovernedSupportEvidenceRouteReason.SUBJECT_BINDING_MISMATCH,
+        )
+
+    eligible = []
+    for oracle in tuple(oracles):
+        if not isinstance(oracle, GovernedDeterministicOracleContractV0):
+            return _support_routing_result(
+                subject,
+                route_kind=None,
+                reason_code=GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID,
+            )
+        if (
+            oracle.authority_effect != "none"
+            or oracle.side_effect_class != "NONE"
+            or oracle.relation_id != relation_id
+            or oracle.evaluation_question_identity != evaluation_question_identity
+        ):
+            return _support_routing_result(
+                subject,
+                route_kind=None,
+                reason_code=GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID,
+            )
+        if not _oracle_qualification_matches(oracle):
+            return _support_routing_result(
+                subject,
+                route_kind=None,
+                reason_code=GovernedSupportEvidenceRouteReason.ORACLE_QUALIFICATION_STALE,
+            )
+        if oracle.coverage_claim == "FULL":
+            eligible.append(oracle)
+
+    if len(eligible) > 1:
+        return _support_routing_result(
+            subject,
+            route_kind=None,
+            reason_code=GovernedSupportEvidenceRouteReason.ORACLE_AMBIGUOUS,
+        )
+
+    if not declared_evidence_complete or scope_expansion_required:
+        return _support_routing_result(
+            subject,
+            route_kind=GovernedSupportEvidenceRouteKind.INSUFFICIENT,
+            reason_code=GovernedSupportEvidenceRouteReason.EVIDENCE_INSUFFICIENT,
+        )
+
+    if len(eligible) == 1:
+        return _support_routing_result(
+            subject,
+            route_kind=GovernedSupportEvidenceRouteKind.DETERMINISTIC,
+            reason_code=GovernedSupportEvidenceRouteReason.DETERMINISTIC_ORACLE_ELIGIBLE,
+            selected_oracle_id=eligible[0].oracle_id,
+        )
+
+    return _support_routing_result(
+        subject,
+        route_kind=GovernedSupportEvidenceRouteKind.INFERENTIAL,
+        reason_code=GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
+    )
+
+
+def project_blind_support_assessor_input_v0(case_input):
+    if not isinstance(case_input, dict):
+        raise TypeError("case_input must be a mapping")
+
+    required = (
+        "input_id",
+        "subject",
+        "repository_evidence",
+        "knowledge_evidence",
+        "binding_expectation",
+    )
+    if any(key not in case_input for key in required):
+        raise ValueError("case_input is missing required blind projection material")
+
+    return {
+        key: copy.deepcopy(case_input[key])
+        for key in required
+    }
 
 
 @dataclass(frozen=True)
