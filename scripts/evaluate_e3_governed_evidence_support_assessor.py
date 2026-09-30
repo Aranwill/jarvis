@@ -913,7 +913,7 @@ def _validate_artifact(
         )
 
         case_id = artifact_case["case_id"]
-        if case_id not in expected_cases:
+        if not isinstance(case_id, str) or case_id not in expected_cases:
             raise QualificationInputError("artifact_case_unknown")
         if case_id in observed_by_case:
             raise QualificationInputError("artifact_case_duplicate")
@@ -944,7 +944,10 @@ def _validate_artifact(
                 f"{case_id}_observation_{obs_index}",
             )
             input_id = observation["input_id"]
-            if input_id not in expected_inputs:
+            if (
+                not isinstance(input_id, str)
+                or input_id not in expected_inputs
+            ):
                 raise QualificationInputError(
                     f"{case_id}_observation_unknown_input"
                 )
