@@ -476,3 +476,21 @@ Estado reconciliado al baseline `main@7b1fe7621b1dad48cc8508390e2ad78faa3e3004`:
 - Sprint 7.12 permanece `NOT AUTHORIZED`.
 
 Esta reconciliación es derivada y no autoriza una nueva implementación.
+
+## Reconciliación CURRENT — E3 Assessor Qualification Pack V0.1
+
+Estado reconciliado al baseline integrado `main@ae22f3be23ff1c30093d071c74e86db84c34098e`:
+
+- PR #231 integró la bounded contract correction V0.1 que materializa inputs/observations reproducibles para C05/C11/C12/C13.
+- PR #230 integró `E3 Assessor Qualification Pack V0.1` sobre candidate `f65f591cd53c702949012836aace7a2cdd0013d0`.
+- El merge commit `ae22f3be23ff1c30093d071c74e86db84c34098e` conserva exactamente el tree `18a0eead6b98ec85c17f7450c4bcfc687bedb3e8` del candidate validado.
+- Validation #713 candidate-bound terminó PASS con `1730 passed` en Ubuntu y Windows, además de `compileall` y candidate diff.
+- Validation #714 post-merge terminó PASS con `1730 passed` en Ubuntu y Windows sobre el merge exacto.
+- El pack offline contiene 18 casos / 19 inputs, runner determinista de stdlib y evaluación fail-closed de schema, identity, bindings, métricas y estabilidad equivalente.
+- La unidad califica artifacts de mecanismos assessor; no selecciona, integra ni autoriza un assessor productivo, modelo o provider.
+- `E008-SG-02` permanece `OPEN`; `semantic_assurance` continúa `NOT_VERIFIED`.
+- `support_sufficient` permanece sin wiring y no autorizado.
+- `authority_effect = none`; RDD Stage 2 permanece `NOT AUTHORIZED`; Sprint 7.12 permanece `NOT AUTHORIZED`.
+
+Esta reconciliación es derivada. Qualification evidence no equivale a semantic truth, decisión, permiso ni autoridad.
+
