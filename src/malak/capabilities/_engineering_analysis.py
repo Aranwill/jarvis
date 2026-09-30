@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import unicodedata
@@ -149,6 +150,257 @@ ANALYZE_RESPONSE_JSON_SCHEMA = json.dumps(
     sort_keys=True,
     separators=(",", ":"),
 )
+
+
+class GovernedEvidenceSupportOutcome(str, __import__("enum").Enum):
+    SUPPORTED = "SUPPORTED"
+    INSUFFICIENT = "INSUFFICIENT"
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
+class GovernedEvidenceSupportReason(str, __import__("enum").Enum):
+    MATERIAL_SUPPORT_CONFIRMED = "MATERIAL_SUPPORT_CONFIRMED"
+    SUPPORTING_REFS_IRRELEVANT = "SUPPORTING_REFS_IRRELEVANT"
+    SUPPORTING_REFS_INSUFFICIENT = "SUPPORTING_REFS_INSUFFICIENT"
+    COMPOUND_CLAIM_NOT_FULLY_SUPPORTED = "COMPOUND_CLAIM_NOT_FULLY_SUPPORTED"
+    MATERIAL_COUNTEREVIDENCE_UNRESOLVED = "MATERIAL_COUNTEREVIDENCE_UNRESOLVED"
+    SUBJECT_BINDING_MISMATCH = "SUBJECT_BINDING_MISMATCH"
+    EVIDENCE_MATERIAL_INCOMPLETE = "EVIDENCE_MATERIAL_INCOMPLETE"
+    ASSESSOR_UNAVAILABLE = "ASSESSOR_UNAVAILABLE"
+    ASSESSOR_OUTPUT_INVALID = "ASSESSOR_OUTPUT_INVALID"
+    ASSESSMENT_SCOPE_EXCEEDED = "ASSESSMENT_SCOPE_EXCEEDED"
+
+
+@dataclass(frozen=True)
+class GovernedEvidenceSupportAssessmentV0:
+    policy_version: str
+    baseline_commit: str
+    focus_id: str
+    evidence_set_digest: str
+    relation_id: str
+    finding_fingerprint: str
+    outcome: GovernedEvidenceSupportOutcome
+    reason_codes: tuple[GovernedEvidenceSupportReason, ...]
+    assessed_supporting_repository_refs: tuple[str, ...]
+    assessed_supporting_knowledge_refs: tuple[str, ...]
+    assessed_limiting_or_counterevidence_refs: tuple[str, ...]
+    authority_effect: str = "none"
+
+
+_SUPPORT_POLICY_V0 = "e3-governed-evidence-support/v0"
+
+
+def _canonical_finding_material(
+    *,
+    relation_id: str,
+    classification: str,
+    statement: str,
+    rationale: str,
+    supporting_repository_refs,
+    supporting_knowledge_refs,
+    limiting_or_counterevidence_refs,
+    uncertainty_basis: str,
+) -> bytes:
+    payload = {
+        "classification": classification,
+        "limiting_or_counterevidence_refs": sorted(limiting_or_counterevidence_refs),
+        "rationale": rationale,
+        "relation_id": relation_id,
+        "statement": statement,
+        "supporting_knowledge_refs": sorted(supporting_knowledge_refs),
+        "supporting_repository_refs": sorted(supporting_repository_refs),
+        "uncertainty_basis": uncertainty_basis,
+    }
+    return json.dumps(
+        payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+
+
+def governed_evidence_support_finding_fingerprint(**subject) -> str:
+    return hashlib.sha256(
+        _canonical_finding_material(
+            relation_id=subject["relation_id"],
+            classification=subject["classification"],
+            statement=subject["statement"],
+            rationale=subject["rationale"],
+            supporting_repository_refs=subject["supporting_repository_refs"],
+            supporting_knowledge_refs=subject["supporting_knowledge_refs"],
+            limiting_or_counterevidence_refs=subject[
+                "limiting_or_counterevidence_refs"
+            ],
+            uncertainty_basis=subject["uncertainty_basis"],
+        )
+    ).hexdigest()
+
+
+def _inconclusive(subject, reason):
+    return GovernedEvidenceSupportAssessmentV0(
+        policy_version=str(subject.get("policy_version", _SUPPORT_POLICY_V0)),
+        baseline_commit=str(subject.get("baseline_commit", "")),
+        focus_id=str(subject.get("focus_id", "")),
+        evidence_set_digest=str(subject.get("evidence_set_digest", "")),
+        relation_id=str(subject.get("relation_id", "")),
+        finding_fingerprint=governed_evidence_support_finding_fingerprint(**subject),
+        outcome=GovernedEvidenceSupportOutcome.INCONCLUSIVE,
+        reason_codes=(reason,),
+        assessed_supporting_repository_refs=tuple(
+            subject.get("supporting_repository_refs", ())
+        ),
+        assessed_supporting_knowledge_refs=tuple(
+            subject.get("supporting_knowledge_refs", ())
+        ),
+        assessed_limiting_or_counterevidence_refs=tuple(
+            subject.get("limiting_or_counterevidence_refs", ())
+        ),
+    )
+
+
+def assess_governed_evidence_support_v0(
+    *,
+    policy_version: str,
+    baseline_commit: str,
+    focus_id: str,
+    evidence_set_digest: str,
+    relation_id: str,
+    classification: str,
+    statement: str,
+    rationale: str,
+    supporting_repository_refs,
+    supporting_knowledge_refs,
+    limiting_or_counterevidence_refs,
+    uncertainty_basis: str,
+    repository_evidence,
+    knowledge_evidence,
+    assessor_subject_id: str,
+    finding_producer_subject_id: str,
+    assessor,
+    expected_binding=None,
+):
+    subject = {
+        "policy_version": policy_version,
+        "baseline_commit": baseline_commit,
+        "focus_id": focus_id,
+        "evidence_set_digest": evidence_set_digest,
+        "relation_id": relation_id,
+        "classification": classification,
+        "statement": statement,
+        "rationale": rationale,
+        "supporting_repository_refs": tuple(supporting_repository_refs),
+        "supporting_knowledge_refs": tuple(supporting_knowledge_refs),
+        "limiting_or_counterevidence_refs": tuple(limiting_or_counterevidence_refs),
+        "uncertainty_basis": uncertainty_basis,
+        "repository_evidence": tuple(repository_evidence),
+        "knowledge_evidence": tuple(knowledge_evidence),
+    }
+    if policy_version != _SUPPORT_POLICY_V0:
+        return _inconclusive(
+            subject, GovernedEvidenceSupportReason.SUBJECT_BINDING_MISMATCH
+        )
+    if expected_binding and any(
+        subject.get(key) != value for key, value in expected_binding.items()
+    ):
+        return _inconclusive(
+            subject, GovernedEvidenceSupportReason.SUBJECT_BINDING_MISMATCH
+        )
+    if assessor_subject_id == finding_producer_subject_id:
+        return _inconclusive(
+            subject, GovernedEvidenceSupportReason.SUBJECT_BINDING_MISMATCH
+        )
+
+    repository_by_ref = {
+        str(item.get("ref")): item for item in subject["repository_evidence"]
+    }
+    knowledge_by_ref = {
+        str(item.get("ref")): item for item in subject["knowledge_evidence"]
+    }
+    if any(
+        ref not in repository_by_ref
+        for ref in subject["supporting_repository_refs"]
+    ) or any(
+        ref not in knowledge_by_ref
+        for ref in subject["supporting_knowledge_refs"]
+    ) or any(
+        ref not in repository_by_ref and ref not in knowledge_by_ref
+        for ref in subject["limiting_or_counterevidence_refs"]
+    ):
+        return _inconclusive(
+            subject, GovernedEvidenceSupportReason.EVIDENCE_MATERIAL_INCOMPLETE
+        )
+    if assessor is None:
+        return _inconclusive(
+            subject, GovernedEvidenceSupportReason.ASSESSOR_UNAVAILABLE
+        )
+
+    material = {
+        "relation_id": relation_id,
+        "classification": classification,
+        "statement": statement,
+        "rationale": rationale,
+        "supporting_repository_evidence": tuple(
+            repository_by_ref[ref]
+            for ref in subject["supporting_repository_refs"]
+        ),
+        "supporting_knowledge_evidence": tuple(
+            knowledge_by_ref[ref]
+            for ref in subject["supporting_knowledge_refs"]
+        ),
+        "limiting_or_counterevidence": tuple(
+            repository_by_ref.get(ref, knowledge_by_ref.get(ref))
+            for ref in subject["limiting_or_counterevidence_refs"]
+        ),
+        "uncertainty_basis": uncertainty_basis,
+    }
+    try:
+        raw = assessor(material)
+        if not isinstance(raw, dict) or set(raw) != {"outcome", "reason_codes"}:
+            raise ValueError("invalid assessor record")
+        outcome = GovernedEvidenceSupportOutcome(raw["outcome"])
+        reasons = tuple(
+            GovernedEvidenceSupportReason(value) for value in raw["reason_codes"]
+        )
+    except Exception:
+        return _inconclusive(
+            subject, GovernedEvidenceSupportReason.ASSESSOR_OUTPUT_INVALID
+        )
+
+    valid = (
+        outcome is GovernedEvidenceSupportOutcome.SUPPORTED
+        and reasons == (GovernedEvidenceSupportReason.MATERIAL_SUPPORT_CONFIRMED,)
+    ) or (
+        outcome is GovernedEvidenceSupportOutcome.INSUFFICIENT
+        and bool(reasons)
+        and all(
+            reason in {
+                GovernedEvidenceSupportReason.SUPPORTING_REFS_IRRELEVANT,
+                GovernedEvidenceSupportReason.SUPPORTING_REFS_INSUFFICIENT,
+            }
+            for reason in reasons
+        )
+    ) or (
+        outcome is GovernedEvidenceSupportOutcome.INCONCLUSIVE
+        and bool(reasons)
+        and GovernedEvidenceSupportReason.MATERIAL_SUPPORT_CONFIRMED not in reasons
+    )
+    if not valid:
+        return _inconclusive(
+            subject, GovernedEvidenceSupportReason.ASSESSOR_OUTPUT_INVALID
+        )
+
+    return GovernedEvidenceSupportAssessmentV0(
+        policy_version=policy_version,
+        baseline_commit=baseline_commit,
+        focus_id=focus_id,
+        evidence_set_digest=evidence_set_digest,
+        relation_id=relation_id,
+        finding_fingerprint=governed_evidence_support_finding_fingerprint(**subject),
+        outcome=outcome,
+        reason_codes=reasons,
+        assessed_supporting_repository_refs=tuple(supporting_repository_refs),
+        assessed_supporting_knowledge_refs=tuple(supporting_knowledge_refs),
+        assessed_limiting_or_counterevidence_refs=tuple(
+            limiting_or_counterevidence_refs
+        ),
+    )
 
 
 @dataclass(frozen=True)
