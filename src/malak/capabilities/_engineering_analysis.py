@@ -427,12 +427,11 @@ _SUPPORT_ROUTING_POLICY_V0 = "e3-governed-support-routing/v0"
 _SUPPORT_ROUTING_MAX_ORACLES = 16
 _SUPPORT_ROUTING_MAX_ID_BYTES = 256
 _SUPPORT_ROUTING_MAX_VERSION_BYTES = 128
-_SUPPORT_ROUTING_MAX_FOCUS_BYTES = 128
 _BLIND_PROJECTION_MAX_BYTES = 512 * 1024
 _BLIND_PROJECTION_MAX_REFS = 16
-_BLIND_PROJECTION_MAX_STATEMENT_BYTES = 4 * 1024
-_BLIND_PROJECTION_MAX_RATIONALE_BYTES = 8 * 1024
-_BLIND_PROJECTION_MAX_EVIDENCE_MATERIAL_BYTES = 64 * 1024
+_BLIND_PROJECTION_MAX_DEPTH = 8
+_BLIND_PROJECTION_MAX_NODES = 256
+_BLIND_PROJECTION_MAX_STRING_BYTES = 64 * 1024
 _BLIND_PROJECTION_FORBIDDEN_KEYS = frozenset(
     {
         "expected_outcome",
@@ -442,6 +441,29 @@ _BLIND_PROJECTION_FORBIDDEN_KEYS = frozenset(
         "expected_route",
         "reviewer_annotations",
         "qualification_thresholds",
+    }
+)
+_BLIND_SUBJECT_KEYS = frozenset(
+    {
+        "baseline_commit",
+        "focus_id",
+        "evidence_set_digest",
+        "relation_id",
+        "classification",
+        "statement",
+        "rationale",
+        "supporting_repository_refs",
+        "supporting_knowledge_refs",
+        "limiting_or_counterevidence_refs",
+        "uncertainty_basis",
+    }
+)
+_BLIND_EVIDENCE_KEYS = frozenset({"ref", "material"})
+_BLIND_BINDING_KEYS = frozenset(
+    {
+        "binding_kind",
+        "expected_subject_fingerprint",
+        "expected_evidence_material_digest",
     }
 )
 
@@ -454,7 +476,7 @@ def _is_lower_hex(value: object, length: int) -> bool:
     )
 
 
-def _bounded_plain_text(value: object, *, max_bytes: int) -> bool:
+def _bounded_plain_text(value: object, max_bytes: int) -> bool:
     return (
         isinstance(value, str)
         and bool(value.strip())
@@ -467,51 +489,52 @@ def _bounded_plain_text(value: object, *, max_bytes: int) -> bool:
     )
 
 
-def _require_oracle_text(value: object, *, field_name: str, max_bytes: int) -> str:
-    if not _bounded_plain_text(value, max_bytes=max_bytes):
-        raise ValueError(f"{field_name} must be a bounded non-empty string")
+def _require_bounded_text(value: object, label: str, max_bytes: int) -> str:
+    if not _bounded_plain_text(value, max_bytes):
+        raise ValueError(f"{label} must be a bounded non-empty string")
     return value
 
 
-def _require_sha256(value: object, *, field_name: str) -> str:
+def _require_sha256(value: object, label: str) -> str:
     if not _is_lower_hex(value, 64):
-        raise ValueError(f"{field_name} must be a lowercase sha256 digest")
+        raise ValueError(f"{label} must be a lowercase sha256 digest")
     return value
 
 
-def _qualification_identity_material(
+def _validate_oracle_identity(
     *,
-    oracle_id: str,
-    oracle_version: str,
-    oracle_content_digest: str,
-    relation_id: str,
-    evaluation_question_identity: str,
-    input_contract_identity: str,
-    output_contract_identity: str,
-    coverage_claim: str,
-    oracle_producer_subject_id: str,
-    qualifier_subject_id: str,
-    qualification_evidence_digest: str,
-) -> bytes:
-    payload = {
-        "coverage_claim": coverage_claim,
-        "evaluation_question_identity": evaluation_question_identity,
-        "input_contract_identity": input_contract_identity,
-        "oracle_content_digest": oracle_content_digest,
-        "oracle_id": oracle_id,
-        "oracle_producer_subject_id": oracle_producer_subject_id,
-        "oracle_version": oracle_version,
-        "output_contract_identity": output_contract_identity,
-        "qualification_evidence_digest": qualification_evidence_digest,
-        "qualifier_subject_id": qualifier_subject_id,
-        "relation_id": relation_id,
-    }
-    return json.dumps(
-        payload,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
+    oracle_id,
+    oracle_version,
+    oracle_content_digest,
+    relation_id,
+    evaluation_question_identity,
+    input_contract_identity,
+    output_contract_identity,
+    oracle_producer_subject_id,
+) -> None:
+    _require_bounded_text(oracle_id, "oracle_id", _SUPPORT_ROUTING_MAX_ID_BYTES)
+    _require_bounded_text(
+        oracle_version,
+        "oracle_version",
+        _SUPPORT_ROUTING_MAX_VERSION_BYTES,
+    )
+    _require_sha256(oracle_content_digest, "oracle_content_digest")
+    _require_bounded_text(
+        relation_id,
+        "relation_id",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
+    _require_sha256(
+        evaluation_question_identity,
+        "evaluation_question_identity",
+    )
+    _require_sha256(input_contract_identity, "input_contract_identity")
+    _require_sha256(output_contract_identity, "output_contract_identity")
+    _require_bounded_text(
+        oracle_producer_subject_id,
+        "oracle_producer_subject_id",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
 
 
 @dataclass(frozen=True)
@@ -531,50 +554,24 @@ class GovernedDeterministicOracleQualificationV0:
     qualification_identity: str = field(init=False)
 
     def __post_init__(self) -> None:
-        _require_oracle_text(
-            self.oracle_id,
-            field_name="oracle_id",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
+        _validate_oracle_identity(
+            oracle_id=self.oracle_id,
+            oracle_version=self.oracle_version,
+            oracle_content_digest=self.oracle_content_digest,
+            relation_id=self.relation_id,
+            evaluation_question_identity=self.evaluation_question_identity,
+            input_contract_identity=self.input_contract_identity,
+            output_contract_identity=self.output_contract_identity,
+            oracle_producer_subject_id=self.oracle_producer_subject_id,
         )
-        _require_oracle_text(
-            self.oracle_version,
-            field_name="oracle_version",
-            max_bytes=_SUPPORT_ROUTING_MAX_VERSION_BYTES,
-        )
-        _require_sha256(
-            self.oracle_content_digest,
-            field_name="oracle_content_digest",
-        )
-        _require_oracle_text(
-            self.relation_id,
-            field_name="relation_id",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
-        )
-        _require_sha256(
-            self.evaluation_question_identity,
-            field_name="evaluation_question_identity",
-        )
-        _require_sha256(
-            self.input_contract_identity,
-            field_name="input_contract_identity",
-        )
-        _require_sha256(
-            self.output_contract_identity,
-            field_name="output_contract_identity",
-        )
-        _require_oracle_text(
-            self.oracle_producer_subject_id,
-            field_name="oracle_producer_subject_id",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
-        )
-        _require_oracle_text(
+        _require_bounded_text(
             self.qualifier_subject_id,
-            field_name="qualifier_subject_id",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
+            "qualifier_subject_id",
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
         )
         _require_sha256(
             self.qualification_evidence_digest,
-            field_name="qualification_evidence_digest",
+            "qualification_evidence_digest",
         )
         if self.oracle_producer_subject_id == self.qualifier_subject_id:
             raise ValueError(
@@ -585,20 +582,26 @@ class GovernedDeterministicOracleQualificationV0:
         if self.coverage_claim not in {"FULL", "PARTIAL"}:
             raise ValueError("oracle qualification coverage_claim must be FULL or PARTIAL")
 
+        material = {
+            "coverage_claim": self.coverage_claim,
+            "evaluation_question_identity": self.evaluation_question_identity,
+            "input_contract_identity": self.input_contract_identity,
+            "oracle_content_digest": self.oracle_content_digest,
+            "oracle_id": self.oracle_id,
+            "oracle_producer_subject_id": self.oracle_producer_subject_id,
+            "oracle_version": self.oracle_version,
+            "output_contract_identity": self.output_contract_identity,
+            "qualification_evidence_digest": self.qualification_evidence_digest,
+            "qualifier_subject_id": self.qualifier_subject_id,
+            "relation_id": self.relation_id,
+        }
         identity = hashlib.sha256(
-            _qualification_identity_material(
-                oracle_id=self.oracle_id,
-                oracle_version=self.oracle_version,
-                oracle_content_digest=self.oracle_content_digest,
-                relation_id=self.relation_id,
-                evaluation_question_identity=self.evaluation_question_identity,
-                input_contract_identity=self.input_contract_identity,
-                output_contract_identity=self.output_contract_identity,
-                coverage_claim=self.coverage_claim,
-                oracle_producer_subject_id=self.oracle_producer_subject_id,
-                qualifier_subject_id=self.qualifier_subject_id,
-                qualification_evidence_digest=self.qualification_evidence_digest,
-            )
+            json.dumps(
+                material,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
         ).hexdigest()
         object.__setattr__(self, "qualification_identity", identity)
 
@@ -620,46 +623,17 @@ class GovernedDeterministicOracleContractV0:
     side_effect_class: str = "NONE"
 
     def __post_init__(self) -> None:
-        _require_oracle_text(
-            self.oracle_id,
-            field_name="oracle_id",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
+        _validate_oracle_identity(
+            oracle_id=self.oracle_id,
+            oracle_version=self.oracle_version,
+            oracle_content_digest=self.oracle_content_digest,
+            relation_id=self.relation_id,
+            evaluation_question_identity=self.evaluation_question_identity,
+            input_contract_identity=self.input_contract_identity,
+            output_contract_identity=self.output_contract_identity,
+            oracle_producer_subject_id=self.oracle_producer_subject_id,
         )
-        _require_oracle_text(
-            self.oracle_version,
-            field_name="oracle_version",
-            max_bytes=_SUPPORT_ROUTING_MAX_VERSION_BYTES,
-        )
-        _require_sha256(
-            self.oracle_content_digest,
-            field_name="oracle_content_digest",
-        )
-        _require_oracle_text(
-            self.relation_id,
-            field_name="relation_id",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
-        )
-        _require_sha256(
-            self.evaluation_question_identity,
-            field_name="evaluation_question_identity",
-        )
-        _require_sha256(
-            self.input_contract_identity,
-            field_name="input_contract_identity",
-        )
-        _require_sha256(
-            self.output_contract_identity,
-            field_name="output_contract_identity",
-        )
-        _require_oracle_text(
-            self.oracle_producer_subject_id,
-            field_name="oracle_producer_subject_id",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
-        )
-        _require_sha256(
-            self.qualification_identity,
-            field_name="qualification_identity",
-        )
+        _require_sha256(self.qualification_identity, "qualification_identity")
         if not isinstance(
             self.qualification,
             GovernedDeterministicOracleQualificationV0,
@@ -693,29 +667,23 @@ class GovernedSupportEvidenceRoutingV0:
             raise ValueError("routing authority_effect must be none")
 
 
-def _safe_routing_text(value: object) -> str:
-    return value if isinstance(value, str) else ""
+def _routing_result(subject, route_kind, reason_code, selected_oracle_id=None):
+    def text_value(name):
+        value = subject.get(name)
+        return value if isinstance(value, str) else ""
 
-
-def _support_routing_result(
-    subject,
-    *,
-    route_kind,
-    reason_code,
-    selected_oracle_id=None,
-):
     return GovernedSupportEvidenceRoutingV0(
-        policy_version=_safe_routing_text(subject.get("policy_version")),
-        baseline_commit=_safe_routing_text(subject.get("baseline_commit")),
-        focus_id=_safe_routing_text(subject.get("focus_id")),
-        evidence_set_digest=_safe_routing_text(subject.get("evidence_set_digest")),
-        relation_id=_safe_routing_text(subject.get("relation_id")),
-        evaluation_question_identity=_safe_routing_text(
-            subject.get("evaluation_question_identity")
+        policy_version=text_value("policy_version"),
+        baseline_commit=text_value("baseline_commit"),
+        focus_id=text_value("focus_id"),
+        evidence_set_digest=text_value("evidence_set_digest"),
+        relation_id=text_value("relation_id"),
+        evaluation_question_identity=text_value(
+            "evaluation_question_identity"
         ),
-        finding_fingerprint=_safe_routing_text(subject.get("finding_fingerprint")),
-        resolved_evidence_material_digest=_safe_routing_text(
-            subject.get("resolved_evidence_material_digest")
+        finding_fingerprint=text_value("finding_fingerprint"),
+        resolved_evidence_material_digest=text_value(
+            "resolved_evidence_material_digest"
         ),
         route_kind=route_kind,
         reason_code=reason_code,
@@ -723,32 +691,35 @@ def _support_routing_result(
     )
 
 
-def _routing_subject_schema_valid(subject, *, declared_evidence_complete, scope_expansion_required) -> bool:
+def _routing_subject_valid(subject, complete, scope_expansion) -> bool:
     return (
         _bounded_plain_text(
             subject.get("policy_version"),
-            max_bytes=_SUPPORT_ROUTING_MAX_VERSION_BYTES,
+            _SUPPORT_ROUTING_MAX_VERSION_BYTES,
         )
         and _is_lower_hex(subject.get("baseline_commit"), 40)
         and _bounded_plain_text(
             subject.get("focus_id"),
-            max_bytes=_SUPPORT_ROUTING_MAX_FOCUS_BYTES,
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
         )
         and _is_lower_hex(subject.get("evidence_set_digest"), 64)
         and _bounded_plain_text(
             subject.get("relation_id"),
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
         )
         and _is_lower_hex(subject.get("evaluation_question_identity"), 64)
         and _is_lower_hex(subject.get("finding_fingerprint"), 64)
-        and _is_lower_hex(subject.get("resolved_evidence_material_digest"), 64)
-        and isinstance(declared_evidence_complete, bool)
-        and isinstance(scope_expansion_required, bool)
+        and _is_lower_hex(
+            subject.get("resolved_evidence_material_digest"),
+            64,
+        )
+        and isinstance(complete, bool)
+        and isinstance(scope_expansion, bool)
     )
 
 
-def _expected_binding_schema_valid(expected_binding) -> bool:
-    expected_keys = {
+def _binding_valid(binding) -> bool:
+    keys = {
         "baseline_commit",
         "focus_id",
         "evidence_set_digest",
@@ -757,49 +728,43 @@ def _expected_binding_schema_valid(expected_binding) -> bool:
         "finding_fingerprint",
         "resolved_evidence_material_digest",
     }
-    if not isinstance(expected_binding, dict) or set(expected_binding) != expected_keys:
+    if not isinstance(binding, dict) or set(binding) != keys:
         return False
     return (
-        _is_lower_hex(expected_binding["baseline_commit"], 40)
+        _is_lower_hex(binding["baseline_commit"], 40)
         and _bounded_plain_text(
-            expected_binding["focus_id"],
-            max_bytes=_SUPPORT_ROUTING_MAX_FOCUS_BYTES,
+            binding["focus_id"],
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
         )
-        and _is_lower_hex(expected_binding["evidence_set_digest"], 64)
+        and _is_lower_hex(binding["evidence_set_digest"], 64)
         and _bounded_plain_text(
-            expected_binding["relation_id"],
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
+            binding["relation_id"],
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
         )
-        and _is_lower_hex(expected_binding["evaluation_question_identity"], 64)
-        and _is_lower_hex(expected_binding["finding_fingerprint"], 64)
+        and _is_lower_hex(binding["evaluation_question_identity"], 64)
+        and _is_lower_hex(binding["finding_fingerprint"], 64)
         and _is_lower_hex(
-            expected_binding["resolved_evidence_material_digest"],
+            binding["resolved_evidence_material_digest"],
             64,
         )
     )
 
 
-def _oracle_qualification_matches(
-    oracle: GovernedDeterministicOracleContractV0,
-) -> bool:
-    qualification = oracle.qualification
+def _qualification_matches(oracle) -> bool:
+    q = oracle.qualification
     return (
-        isinstance(qualification, GovernedDeterministicOracleQualificationV0)
-        and qualification.qualification_identity == oracle.qualification_identity
-        and qualification.oracle_id == oracle.oracle_id
-        and qualification.oracle_version == oracle.oracle_version
-        and qualification.oracle_content_digest == oracle.oracle_content_digest
-        and qualification.relation_id == oracle.relation_id
-        and qualification.evaluation_question_identity
-        == oracle.evaluation_question_identity
-        and qualification.input_contract_identity == oracle.input_contract_identity
-        and qualification.output_contract_identity == oracle.output_contract_identity
-        and qualification.coverage_claim == oracle.coverage_claim
-        and qualification.oracle_producer_subject_id
-        == oracle.oracle_producer_subject_id
-        and qualification.qualifier_subject_id
-        != oracle.oracle_producer_subject_id
-        and qualification.authority_effect == "none"
+        q.qualification_identity == oracle.qualification_identity
+        and q.oracle_id == oracle.oracle_id
+        and q.oracle_version == oracle.oracle_version
+        and q.oracle_content_digest == oracle.oracle_content_digest
+        and q.relation_id == oracle.relation_id
+        and q.evaluation_question_identity == oracle.evaluation_question_identity
+        and q.input_contract_identity == oracle.input_contract_identity
+        and q.output_contract_identity == oracle.output_contract_identity
+        and q.coverage_claim == oracle.coverage_claim
+        and q.oracle_producer_subject_id == oracle.oracle_producer_subject_id
+        and q.qualifier_subject_id != oracle.oracle_producer_subject_id
+        and q.authority_effect == "none"
     )
 
 
@@ -829,279 +794,194 @@ def route_governed_support_evidence_v0(
         "resolved_evidence_material_digest": resolved_evidence_material_digest,
     }
 
-    # P01 — strict top-level schema and hard bounds before policy/routing logic.
-    if not _routing_subject_schema_valid(
+    # P01: schema/bounds. Only materialized bounded collections are accepted.
+    if not _routing_subject_valid(
         subject,
-        declared_evidence_complete=declared_evidence_complete,
-        scope_expansion_required=scope_expansion_required,
-    ):
-        return _support_routing_result(
+        declared_evidence_complete,
+        scope_expansion_required,
+    ) or not _binding_valid(expected_binding):
+        return _routing_result(
             subject,
-            route_kind=None,
-            reason_code=GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
-        )
-    if not _expected_binding_schema_valid(expected_binding):
-        return _support_routing_result(
-            subject,
-            route_kind=None,
-            reason_code=GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
+            None,
+            GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
         )
     if not isinstance(oracles, (tuple, list)):
-        return _support_routing_result(
+        return _routing_result(
             subject,
-            route_kind=None,
-            reason_code=GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
+            None,
+            GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
         )
     if len(oracles) > _SUPPORT_ROUTING_MAX_ORACLES:
-        return _support_routing_result(
+        return _routing_result(
             subject,
-            route_kind=None,
-            reason_code=GovernedSupportEvidenceRouteReason.INPUT_BOUNDS_EXCEEDED,
+            None,
+            GovernedSupportEvidenceRouteReason.INPUT_BOUNDS_EXCEEDED,
         )
 
-    # P02 — exact routing policy version.
+    # P02–P05: policy and exact subject binding.
     if policy_version != _SUPPORT_ROUTING_POLICY_V0:
-        return _support_routing_result(
+        return _routing_result(
             subject,
-            route_kind=None,
-            reason_code=GovernedSupportEvidenceRouteReason.POLICY_VERSION_MISMATCH,
+            None,
+            GovernedSupportEvidenceRouteReason.POLICY_VERSION_MISMATCH,
         )
-
-    # P03–P05 — exact subject/evidence/relation/question binding.
     if any(subject[key] != value for key, value in expected_binding.items()):
-        return _support_routing_result(
+        return _routing_result(
             subject,
-            route_kind=None,
-            reason_code=GovernedSupportEvidenceRouteReason.SUBJECT_BINDING_MISMATCH,
+            None,
+            GovernedSupportEvidenceRouteReason.SUBJECT_BINDING_MISMATCH,
         )
 
-    # P06–P07 — exact oracle contract/qualification and FULL cardinality.
+    # P06–P07: oracle contract, independent qualification, FULL cardinality.
     eligible = []
     for oracle in oracles:
         if not isinstance(oracle, GovernedDeterministicOracleContractV0):
-            return _support_routing_result(
+            return _routing_result(
                 subject,
-                route_kind=None,
-                reason_code=GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID,
+                None,
+                GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID,
             )
         if (
-            oracle.authority_effect != "none"
-            or oracle.side_effect_class != "NONE"
-            or oracle.relation_id != relation_id
-            or oracle.evaluation_question_identity != evaluation_question_identity
+            oracle.relation_id != relation_id
+            or oracle.evaluation_question_identity
+            != evaluation_question_identity
+            or not _qualification_matches(oracle)
         ):
-            return _support_routing_result(
-                subject,
-                route_kind=None,
-                reason_code=GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID,
+            reason = (
+                GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID
+                if (
+                    oracle.relation_id != relation_id
+                    or oracle.evaluation_question_identity
+                    != evaluation_question_identity
+                )
+                else GovernedSupportEvidenceRouteReason.ORACLE_QUALIFICATION_STALE
             )
-        if not _oracle_qualification_matches(oracle):
-            return _support_routing_result(
-                subject,
-                route_kind=None,
-                reason_code=GovernedSupportEvidenceRouteReason.ORACLE_QUALIFICATION_STALE,
-            )
+            return _routing_result(subject, None, reason)
         if oracle.coverage_claim == "FULL":
             eligible.append(oracle)
 
     if len(eligible) > 1:
-        return _support_routing_result(
+        return _routing_result(
             subject,
-            route_kind=None,
-            reason_code=GovernedSupportEvidenceRouteReason.ORACLE_AMBIGUOUS,
+            None,
+            GovernedSupportEvidenceRouteReason.ORACLE_AMBIGUOUS,
         )
 
-    # P08 — bounded material completeness.
+    # P08–P09: material completeness, then route classification.
     if not declared_evidence_complete or scope_expansion_required:
-        return _support_routing_result(
+        return _routing_result(
             subject,
-            route_kind=GovernedSupportEvidenceRouteKind.INSUFFICIENT,
-            reason_code=GovernedSupportEvidenceRouteReason.EVIDENCE_INSUFFICIENT,
+            GovernedSupportEvidenceRouteKind.INSUFFICIENT,
+            GovernedSupportEvidenceRouteReason.EVIDENCE_INSUFFICIENT,
         )
-
-    # P09 — route classification only; no oracle/assessor/model execution occurs.
     if len(eligible) == 1:
-        return _support_routing_result(
+        return _routing_result(
             subject,
-            route_kind=GovernedSupportEvidenceRouteKind.DETERMINISTIC,
-            reason_code=GovernedSupportEvidenceRouteReason.DETERMINISTIC_ORACLE_ELIGIBLE,
-            selected_oracle_id=eligible[0].oracle_id,
+            GovernedSupportEvidenceRouteKind.DETERMINISTIC,
+            GovernedSupportEvidenceRouteReason.DETERMINISTIC_ORACLE_ELIGIBLE,
+            eligible[0].oracle_id,
         )
-
-    return _support_routing_result(
+    return _routing_result(
         subject,
-        route_kind=GovernedSupportEvidenceRouteKind.INFERENTIAL,
-        reason_code=GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
+        GovernedSupportEvidenceRouteKind.INFERENTIAL,
+        GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
     )
 
 
-def _reject_blind_ground_truth_keys(value: object) -> None:
-    if not isinstance(value, dict):
-        return
-    forbidden = set(value) & _BLIND_PROJECTION_FORBIDDEN_KEYS
-    if forbidden:
-        raise ValueError(
-            "blind projection contains forbidden ground-truth key: "
-            + ", ".join(sorted(forbidden))
+def _blind_tree_is_bounded(value: object) -> bool:
+    stack = [(value, 0)]
+    nodes = 0
+    while stack:
+        current, depth = stack.pop()
+        nodes += 1
+        if nodes > _BLIND_PROJECTION_MAX_NODES or depth > _BLIND_PROJECTION_MAX_DEPTH:
+            return False
+
+        if isinstance(current, dict):
+            if len(current) > _BLIND_PROJECTION_MAX_REFS:
+                return False
+            for key, nested in current.items():
+                if (
+                    not _bounded_plain_text(
+                        key,
+                        _SUPPORT_ROUTING_MAX_ID_BYTES,
+                    )
+                    or key in _BLIND_PROJECTION_FORBIDDEN_KEYS
+                ):
+                    return False
+                stack.append((nested, depth + 1))
+        elif isinstance(current, (list, tuple)):
+            if len(current) > _BLIND_PROJECTION_MAX_REFS:
+                return False
+            stack.extend((nested, depth + 1) for nested in current)
+        elif isinstance(current, str):
+            if len(current) > _BLIND_PROJECTION_MAX_STRING_BYTES:
+                return False
+            if len(current.encode("utf-8")) > _BLIND_PROJECTION_MAX_STRING_BYTES:
+                return False
+        elif current is not None and not isinstance(current, (bool, int)):
+            return False
+    return True
+
+
+def _blind_schema_valid(visible) -> bool:
+    subject = visible.get("subject")
+    repository = visible.get("repository_evidence")
+    knowledge = visible.get("knowledge_evidence")
+    binding = visible.get("binding_expectation")
+
+    if (
+        not _bounded_plain_text(
+            visible.get("input_id"),
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
         )
-
-
-def _require_blind_text(
-    value: object,
-    *,
-    field_name: str,
-    max_bytes: int,
-) -> str:
-    if not _bounded_plain_text(value, max_bytes=max_bytes):
-        raise ValueError(f"{field_name} must be a bounded non-empty string")
-    return value
-
-
-def _validate_blind_string_refs(value: object, *, field_name: str) -> tuple[str, ...]:
-    if not isinstance(value, list):
-        raise ValueError(f"{field_name} must be a list")
-    if len(value) > _BLIND_PROJECTION_MAX_REFS:
-        raise ValueError(f"{field_name} exceeds hard E3 blind projection limit")
-    if any(
-        not _bounded_plain_text(item, max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES)
-        for item in value
+        or not isinstance(subject, dict)
+        or set(subject) != _BLIND_SUBJECT_KEYS
+        or not isinstance(repository, list)
+        or not isinstance(knowledge, list)
+        or len(repository) > _BLIND_PROJECTION_MAX_REFS
+        or len(knowledge) > _BLIND_PROJECTION_MAX_REFS
+        or not isinstance(binding, dict)
+        or set(binding) != _BLIND_BINDING_KEYS
     ):
-        raise ValueError(f"{field_name} must contain bounded strings")
-    if len(set(value)) != len(value):
-        raise ValueError(f"{field_name} cannot contain duplicate refs")
-    return tuple(value)
+        return False
 
+    for item in repository + knowledge:
+        if (
+            not isinstance(item, dict)
+            or set(item) != _BLIND_EVIDENCE_KEYS
+            or not _bounded_plain_text(
+                item.get("ref"),
+                _SUPPORT_ROUTING_MAX_ID_BYTES,
+            )
+            or not _bounded_plain_text(
+                item.get("material"),
+                _BLIND_PROJECTION_MAX_STRING_BYTES,
+            )
+        ):
+            return False
 
-def _validate_blind_subject(value: object) -> dict[str, object]:
-    expected = {
-        "baseline_commit",
-        "focus_id",
-        "evidence_set_digest",
-        "relation_id",
-        "classification",
-        "statement",
-        "rationale",
+    ref_fields = (
         "supporting_repository_refs",
         "supporting_knowledge_refs",
         "limiting_or_counterevidence_refs",
-        "uncertainty_basis",
-    }
-    if not isinstance(value, dict) or set(value) != expected:
-        raise ValueError("blind subject schema is invalid")
-    _reject_blind_ground_truth_keys(value)
-
-    if not _is_lower_hex(value["baseline_commit"], 40):
-        raise ValueError("blind subject baseline_commit is invalid")
-    _require_blind_text(
-        value["focus_id"],
-        field_name="blind subject focus_id",
-        max_bytes=_SUPPORT_ROUTING_MAX_FOCUS_BYTES,
     )
-    if not _is_lower_hex(value["evidence_set_digest"], 64):
-        raise ValueError("blind subject evidence_set_digest is invalid")
-    _require_blind_text(
-        value["relation_id"],
-        field_name="blind subject relation_id",
-        max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
-    )
-    if value["classification"] not in {
-        "ALIGNED",
-        "PARTIAL",
-        "GAP",
-        "CONTRADICTION",
-        "UNRESOLVED",
-    }:
-        raise ValueError("blind subject classification is invalid")
-    _require_blind_text(
-        value["statement"],
-        field_name="blind subject statement",
-        max_bytes=_BLIND_PROJECTION_MAX_STATEMENT_BYTES,
-    )
-    _require_blind_text(
-        value["rationale"],
-        field_name="blind subject rationale",
-        max_bytes=_BLIND_PROJECTION_MAX_RATIONALE_BYTES,
-    )
-    _validate_blind_string_refs(
-        value["supporting_repository_refs"],
-        field_name="supporting_repository_refs",
-    )
-    _validate_blind_string_refs(
-        value["supporting_knowledge_refs"],
-        field_name="supporting_knowledge_refs",
-    )
-    _validate_blind_string_refs(
-        value["limiting_or_counterevidence_refs"],
-        field_name="limiting_or_counterevidence_refs",
-    )
-    if value["uncertainty_basis"] not in {
-        "NONE",
-        "CURRENT_MATERIAL_AMBIGUITY",
-        "INSUFFICIENT_SUPPLIED_EVIDENCE",
-        "UNRESOLVED_CURRENT_PRECEDENCE",
-    }:
-        raise ValueError("blind subject uncertainty_basis is invalid")
-    return value
-
-
-def _validate_blind_evidence(
-    value: object,
-    *,
-    collection: str,
-) -> tuple[dict[str, str], ...]:
-    if not isinstance(value, list):
-        raise ValueError(f"{collection} must be a list")
-    if len(value) > _BLIND_PROJECTION_MAX_REFS:
-        raise ValueError(f"{collection} exceeds hard E3 blind projection limit")
-
-    seen = set()
-    validated = []
-    for item in value:
-        if not isinstance(item, dict) or set(item) != {"ref", "material"}:
-            raise ValueError(f"{collection} evidence item schema is invalid")
-        _reject_blind_ground_truth_keys(item)
-        ref = _require_blind_text(
-            item["ref"],
-            field_name=f"{collection} ref",
-            max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
-        )
-        material = _require_blind_text(
-            item["material"],
-            field_name=f"{collection} material",
-            max_bytes=_BLIND_PROJECTION_MAX_EVIDENCE_MATERIAL_BYTES,
-        )
-        if ref in seen:
-            raise ValueError(f"{collection} contains duplicate refs")
-        seen.add(ref)
-        validated.append({"ref": ref, "material": material})
-    return tuple(validated)
-
-
-def _validate_blind_binding(value: object) -> dict[str, object]:
-    expected = {
-        "binding_kind",
-        "expected_subject_fingerprint",
-        "expected_evidence_material_digest",
-    }
-    if not isinstance(value, dict) or set(value) != expected:
-        raise ValueError("blind binding_expectation schema is invalid")
-    _reject_blind_ground_truth_keys(value)
-
-    kind = value["binding_kind"]
-    expected_subject = value["expected_subject_fingerprint"]
-    expected_evidence = value["expected_evidence_material_digest"]
-    if kind == "NONE":
-        if expected_subject is not None or expected_evidence is not None:
-            raise ValueError("blind NONE binding payload is invalid")
-    elif kind == "SUBJECT":
-        if not _is_lower_hex(expected_subject, 64) or expected_evidence is not None:
-            raise ValueError("blind SUBJECT binding payload is invalid")
-    elif kind == "EVIDENCE_MATERIAL":
-        if expected_subject is not None or not _is_lower_hex(expected_evidence, 64):
-            raise ValueError("blind EVIDENCE_MATERIAL binding payload is invalid")
-    else:
-        raise ValueError("blind binding_kind is invalid")
-    return value
+    for name in ref_fields:
+        refs = subject.get(name)
+        if (
+            not isinstance(refs, list)
+            or len(refs) > _BLIND_PROJECTION_MAX_REFS
+            or len(set(refs)) != len(refs)
+            or any(
+                not _bounded_plain_text(
+                    ref,
+                    _SUPPORT_ROUTING_MAX_ID_BYTES,
+                )
+                for ref in refs
+            )
+        ):
+            return False
+    return True
 
 
 def project_blind_support_assessor_input_v0(case_input):
@@ -1118,61 +998,21 @@ def project_blind_support_assessor_input_v0(case_input):
     if not required.issubset(case_input):
         raise ValueError("case_input is missing required blind projection material")
 
-    # Hidden qualification fields may exist at the case-input top level because
-    # projection intentionally strips them. They may not occur inside any
-    # candidate-visible value.
-    visible_source = {key: case_input[key] for key in required}
+    # Hidden qualification fields are deliberately stripped at this boundary.
+    visible = {key: case_input[key] for key in required}
+    if not _blind_schema_valid(visible) or not _blind_tree_is_bounded(visible):
+        raise ValueError("candidate-visible blind projection material is invalid")
 
-    _require_blind_text(
-        visible_source["input_id"],
-        field_name="blind input_id",
-        max_bytes=_SUPPORT_ROUTING_MAX_ID_BYTES,
-    )
-    subject = _validate_blind_subject(visible_source["subject"])
-    repository = _validate_blind_evidence(
-        visible_source["repository_evidence"],
-        collection="repository_evidence",
-    )
-    knowledge = _validate_blind_evidence(
-        visible_source["knowledge_evidence"],
-        collection="knowledge_evidence",
-    )
-    binding = _validate_blind_binding(visible_source["binding_expectation"])
-
-    repository_refs = {item["ref"] for item in repository}
-    knowledge_refs = {item["ref"] for item in knowledge}
-    if any(
-        ref not in repository_refs
-        for ref in subject["supporting_repository_refs"]
-    ):
-        raise ValueError("blind subject contains unresolved repository support ref")
-    if any(
-        ref not in knowledge_refs
-        for ref in subject["supporting_knowledge_refs"]
-    ):
-        raise ValueError("blind subject contains unresolved knowledge support ref")
-    if any(
-        ref not in repository_refs and ref not in knowledge_refs
-        for ref in subject["limiting_or_counterevidence_refs"]
-    ):
-        raise ValueError("blind subject contains unresolved limiting evidence ref")
-
-    projected = {
-        "input_id": copy.deepcopy(visible_source["input_id"]),
-        "subject": copy.deepcopy(subject),
-        "repository_evidence": copy.deepcopy(list(repository)),
-        "knowledge_evidence": copy.deepcopy(list(knowledge)),
-        "binding_expectation": copy.deepcopy(binding),
-    }
     encoded = json.dumps(
-        projected,
+        visible,
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
     if len(encoded) > _BLIND_PROJECTION_MAX_BYTES:
         raise ValueError("blind projection exceeds hard E3 byte limit")
-    return projected
+
+    return copy.deepcopy(visible)
 
 
 @dataclass(frozen=True)
