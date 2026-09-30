@@ -1730,3 +1730,10 @@ Estado reconciliado al baseline `main@7b1fe7621b1dad48cc8508390e2ad78faa3e3004`:
 - Sprint 7.12 permanece `NOT AUTHORIZED`.
 
 Esta reconciliación es derivada y no autoriza una nueva implementación.
+
+
+## Reconciliación de evidencia de proceso — PR #224
+
+La cobertura histórica de proceso de PR #224 fue reconciliada contra Construction Protocol §5.5 en `docs/project/status/MALAK-PR224-HISTORICAL-PROCESS-EVIDENCE-RECONCILIATION-20260930.md`.
+
+Disposición: `PARTIALLY_EVIDENCED` exclusivamente para certificabilidad histórica del flujo. Validation #685 candidate-bound y Validation #686 post-merge permanecen verificables; Candidate FULL 4R, independent validation post-GREEN y RDD Stage 1 Candidate Conformance no cuentan con evidencia persistida suficiente para reconstruir PASS. No se infiere fallo funcional ni se crea conformidad retroactiva.
