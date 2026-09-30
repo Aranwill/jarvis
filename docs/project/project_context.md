@@ -3,7 +3,7 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-09-30
-as_of_commit: 7b1fe7621b1dad48cc8508390e2ad78faa3e3004
+as_of_commit: ae22f3be23ff1c30093d071c74e86db84c34098e
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -251,8 +251,9 @@ E3 Governed Relation Consumption:  integrado — PR #215 / authority_effect none
 E3 Relation Coverage & Uniqueness:  integrado — PR #218 / authority_effect none
 E3 Structured Evidence Role Binding: integrado — PR #222 / authority_effect none
 E3 Governed Evidence Support Assessment: integrado — PR #224 / semantic_assurance NOT_VERIFIED / authority_effect none
-Última validación candidate-bound:  Validation #685 / 1670 passed Ubuntu + Windows
-Última validación post-merge:       Validation #686 / 1670 passed Ubuntu + Windows
+E3 Assessor Qualification Pack V0.1: integrado — PR #230 / offline evaluation / authority_effect none
+Última validación candidate-bound:  Validation #713 / 1730 passed Ubuntu + Windows
+Última validación post-merge:       Validation #714 / 1730 passed Ubuntu + Windows
 Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
 Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
@@ -260,7 +261,7 @@ Eighth U01:                        bootstrap-u01-20260927-008 / INCONCLUSIVE
 Eighth findings:                   7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL
 Semantic grounding audit:          histórico GAP_REQUIRES_HARDENING / sin nueva reevaluación runtime
 E008-SG-01 structural hardening:    PR #218 integrado / exact coverage + uniqueness + canonical order
-E008-SG-02 evidence binding:        OPEN / structural role binding PR #222 + bounded support assessment PR #224 integrados / semantic entailment NOT_VERIFIED
+E008-SG-02 evidence binding:        OPEN / structural role binding PR #222 + bounded support assessment PR #224 + offline qualification pack PR #230 integrados / semantic entailment NOT_VERIFIED
 E008-SG-03 assurance boundary:      preservado / GROUNDED != semantic entailment verified
 Relation catalog foundation:       integrado — PR #212
 E3 relation consumption:           integrado — PR #215 / relation identity != semantic truth
@@ -271,6 +272,7 @@ E4 relation consumption:           sin cambio / no relation-aware
 Runtime Self-Review:               run 008 ejecutado; nueva ejecución requiere admisión + preflight + autorización separada
 RDD Stage 1 PR #212:               PASS / authority_effect none
 RDD Stage 1 PR #222:               PASS / authority_effect none
+RDD Stage 1 PR #230:               PASS / authority_effect none
 Self-modification:                 no autorizada
 RDD Stage 2:                       no autorizado
 Structural Evidence E3/E4:         diferido / no propagado
@@ -1739,3 +1741,33 @@ Esta reconciliación es derivada y no autoriza una nueva implementación.
 La cobertura histórica de proceso de PR #224 fue reconciliada contra Construction Protocol §5.5 en `docs/project/status/MALAK-PR224-HISTORICAL-PROCESS-EVIDENCE-RECONCILIATION-20260930.md`.
 
 Disposición: `PARTIALLY_EVIDENCED` exclusivamente para certificabilidad histórica del flujo. Validation #685 candidate-bound y Validation #686 post-merge permanecen verificables; Candidate FULL 4R, independent validation post-GREEN y RDD Stage 1 Candidate Conformance no cuentan con evidencia persistida suficiente para reconstruir PASS. No se infiere fallo funcional ni se crea conformidad retroactiva.
+
+## Reconciliación CURRENT — E3 Assessor Qualification Pack V0.1
+
+Estado material verificado después de integrar PR #230:
+
+```text
+baseline integrado        main@ae22f3be23ff1c30093d071c74e86db84c34098e
+candidate validado        f65f591cd53c702949012836aace7a2cdd0013d0
+candidate tree            18a0eead6b98ec85c17f7450c4bcfc687bedb3e8
+merge tree                18a0eead6b98ec85c17f7450c4bcfc687bedb3e8
+Validation candidate      #713 / 1730 passed Ubuntu + Windows
+Validation post-merge     #714 / 1730 passed Ubuntu + Windows
+```
+
+PR #231 corrigió previamente el contrato de qualification a V0.1. PR #230 integró el pack offline resultante: case-set de 18 casos / 19 inputs, runner determinista y tests R01–R33 con Fix Validators adicionales. Candidate FULL 4R, affected independent validation y RDD Stage 1 Candidate Conformance quedaron en PASS antes de la revisión humana y el merge.
+
+La integración no agrega un assessor productivo. No selecciona modelo/provider, no ejecuta red, no modifica runtime, no produce `support_sufficient` y no promueve `semantic_assurance`.
+
+```text
+E008-SG-02          OPEN
+semantic_assurance  NOT_VERIFIED
+support_sufficient  NOT WIRED / NOT AUTHORIZED
+authority_effect    none
+RDD Stage 2         NOT AUTHORIZED
+Sprint 7.12         NOT AUTHORIZED
+```
+
+La unidad integrada permite calificar de forma reproducible artifacts de un futuro mecanismo assessor dentro del evaluation pack. Elegir, ejecutar o confiar en un mecanismo real requiere una admisión y gates separados.
+
+Esta sección supersede únicamente el snapshot CURRENT anterior para el estado del Assessor Qualification Pack; los registros históricos de PR #224/#229/#231 permanecen sin reescritura.

@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-09-30
-as_of_commit: 7b1fe7621b1dad48cc8508390e2ad78faa3e3004
+as_of_commit: ae22f3be23ff1c30093d071c74e86db84c34098e
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -288,6 +288,8 @@ E3 Structured Evidence Role Binding Validation #681 / 1644 passed
 PR #222 post-merge                Validation #682 / 1644 passed
 E3 Governed Evidence Support Assessment Validation #685 / 1670 passed
 PR #224 post-merge                Validation #686 / 1670 passed
+E3 Assessor Qualification V0.1    Validation #713 / 1730 passed
+PR #230 post-merge                Validation #714 / 1730 passed
 ```
 
 Las validaciones finales indicadas pasaron en Ubuntu y Windows con
@@ -1826,6 +1828,9 @@ Sprint 7.11 — Reproducible Validation Pipeline Foundation
 LATEST FUNCTIONAL/RUNTIME CODE UNIT
 E3 Governed Evidence Support Assessment V0 — INTEGRATED — PR #224
 
+LATEST OFFLINE EVALUATION / QUALIFICATION UNIT
+E3 Assessor Qualification Pack V0.1 — INTEGRATED — PR #230 / authority_effect none
+
 LATEST EPISODIC PRODUCT UNIT
 G2P-B — Episodic Persistence Authorization Request Composition — INTEGRATED / ISOLATED
 
@@ -1870,6 +1875,11 @@ INTEGRATED — PR #224 / authority_effect none
 semantic_assurance NOT_VERIFIED
 E008-SG-02 OPEN / bounded support assessment integrated / semantic entailment not verified
 E008-SG-03 boundary preserved
+
+E3 ASSESSOR QUALIFICATION PACK V0.1
+INTEGRATED — PR #230 / offline evaluation only / authority_effect none
+18 cases / 19 inputs / R01-R33 / final Validation #713 PASS / post-merge #714 PASS
+no productive assessor selected / no support_sufficient wiring / no semantic assurance promotion
 
 ENGINEERING INTELLIGENCE E4
 INTEGRATED
@@ -2009,3 +2019,49 @@ Esta reconciliación es derivada y no autoriza una nueva implementación.
 `E3 Governed Evidence Support Assessment V0` permanece integrado. La reconciliación histórica de su flujo §5.5 clasifica la evidencia de proceso como `PARTIALLY_EVIDENCED`: CI candidate-bound/post-merge está verificada, mientras Candidate FULL 4R, independent validation post-GREEN y RDD Stage 1 Candidate Conformance permanecen `UNCONFIRMED` por ausencia de evidencia persistida suficiente. Ver `docs/project/status/MALAK-PR224-HISTORICAL-PROCESS-EVIDENCE-RECONCILIATION-20260930.md`.
 
 Esta disposición no modifica E008-SG-02, no autoriza `support_sufficient`, no autoriza RDD Stage 2 y no implica defecto funcional demostrado.
+
+## Reconciliación CURRENT — E3 Assessor Qualification Pack V0.1
+
+El baseline vigente incorpora el qualification pack offline mediante PR #230:
+
+```text
+candidate                 f65f591cd53c702949012836aace7a2cdd0013d0
+merge                     ae22f3be23ff1c30093d071c74e86db84c34098e
+tree candidate/merge      18a0eead6b98ec85c17f7450c4bcfc687bedb3e8
+candidate validation      #713 / 1730 passed Ubuntu + Windows
+post-merge validation     #714 / 1730 passed Ubuntu + Windows
+RDD Candidate Conformance PASS
+authority_effect          none
+```
+
+La unidad materializa qualification reproducible para futuros mechanisms assessor:
+
+```text
+18 cases
+19 inputs
+case/result schema V0.1
+input instance identity
+semantic equivalence identity
+prior binding reproducibility
+observed-output stability
+fail-closed schema/binding validation
+R01-R33
+```
+
+Disposición de planificación:
+
+```text
+Assessor Qualification Pack V0.1       INTEGRATED
+real assessor mechanism selection       NOT AUTHORIZED BY THIS UNIT
+model/provider experiment               REQUIRES SEPARATE GATE
+runtime producer / adapter              NOT AUTHORIZED
+support_sufficient wiring               NOT AUTHORIZED
+semantic_assurance                       NOT_VERIFIED
+E008-SG-02                               OPEN
+RDD Stage 2                              NOT AUTHORIZED
+Sprint 7.12                              NOT AUTHORIZED
+```
+
+El pack reduce el gap de **evaluabilidad** de futuros mecanismos de soporte; no constituye por sí mismo verificación semántica, selección de assessor ni autorización productiva.
+
+Esta reconciliación es derivada y no crea automáticamente el siguiente gate.
