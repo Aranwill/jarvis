@@ -2065,4 +2065,3 @@ Sprint 7.12                              NOT AUTHORIZED
 El pack reduce el gap de **evaluabilidad** de futuros mecanismos de soporte; no constituye por sí mismo verificación semántica, selección de assessor ni autorización productiva.
 
 Esta reconciliación es derivada y no crea automáticamente el siguiente gate.
-
