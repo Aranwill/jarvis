@@ -789,7 +789,13 @@ def test_red_r33_pass_requires_all_18_cases_and_19_inputs(
 
 @pytest.mark.parametrize(
     "mutation",
-    ["binding_kind_list", "mechanism_kind_list", "outcome_list"],
+    [
+        "binding_kind_list",
+        "mechanism_kind_list",
+        "outcome_list",
+        "artifact_case_id_list",
+        "observation_input_id_list",
+    ],
 )
 def test_fix_validator_malformed_scalar_types_fail_closed(
     tmp_path: Path,
@@ -810,8 +816,12 @@ def test_fix_validator_malformed_scalar_types_fail_closed(
         artifact = _valid_artifact(case_set, _sha256(case_path))
         if mutation == "mechanism_kind_list":
             artifact["assessor_mechanism"]["mechanism_kind"] = []
-        else:
+        elif mutation == "outcome_list":
             _artifact_observation(artifact, "C01.I01")["outcome"] = []
+        elif mutation == "artifact_case_id_list":
+            artifact["case_results"][0]["case_id"] = []
+        else:
+            artifact["case_results"][0]["observations"][0]["input_id"] = []
         artifact_path = _write_json(tmp_path / "results.json", artifact)
 
     completed = _run_pack(
