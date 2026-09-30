@@ -785,3 +785,39 @@ def test_red_r33_pass_requires_all_18_cases_and_19_inputs(
         for item in case["input_results"]
     )
     assert all(case["case_result"] == "PASS" for case in payload["case_results"])
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["binding_kind_list", "mechanism_kind_list", "outcome_list"],
+)
+def test_fix_validator_malformed_scalar_types_fail_closed(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    case_set = _case_set_payload()
+
+    if mutation == "binding_kind_list":
+        case = _case(case_set, "C01")
+        case["inputs"][0]["binding_expectation"]["binding_kind"] = []
+        case_path = _write_json(tmp_path / "cases.json", case_set)
+        artifact_path = _write_json(
+            tmp_path / "results.json",
+            _valid_artifact(case_set, _sha256(case_path)),
+        )
+    else:
+        case_path = _write_json(tmp_path / "cases.json", case_set)
+        artifact = _valid_artifact(case_set, _sha256(case_path))
+        if mutation == "mechanism_kind_list":
+            artifact["assessor_mechanism"]["mechanism_kind"] = []
+        else:
+            _artifact_observation(artifact, "C01.I01")["outcome"] = []
+        artifact_path = _write_json(tmp_path / "results.json", artifact)
+
+    completed = _run_pack(
+        case_set_path=case_path,
+        artifact_path=artifact_path,
+    )
+    assert completed.returncode != 0
+    payload = json.loads(completed.stdout)
+    assert payload["qualification_result"] == "INCONCLUSIVE"
