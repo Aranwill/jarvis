@@ -1,47 +1,58 @@
 {
-  "schema_version": "MALAK-E3-SUPPORT-ASSESSOR-CASESET/v0",
+  "schema_version": "MALAK-E3-SUPPORT-ASSESSOR-CASESET/v0.1",
   "support_policy_version": "e3-governed-evidence-support/v0",
   "cases": [
     {
       "case_id": "C01",
       "case_class": "EXACT_SUPPORT",
       "critical_properties": [],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "SUPPORTED",
-      "expected_reason_codes": [
-        "MATERIAL_SUPPORT_CONFIRMED"
+      "inputs": [
+        {
+          "input_id": "C01.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "SUPPORTED",
+          "expected_reason_codes": [
+            "MATERIAL_SUPPORT_CONFIRMED"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C02",
@@ -50,42 +61,53 @@
         "FALSE_SUPPORT",
         "UNSUPPORTED_ESCAPE"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "An unrelated formatting note proves Kernel orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INSUFFICIENT",
-      "expected_reason_codes": [
-        "SUPPORTING_REFS_IRRELEVANT"
+      "inputs": [
+        {
+          "input_id": "C02.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "An unrelated formatting note proves Kernel orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INSUFFICIENT",
+          "expected_reason_codes": [
+            "SUPPORTING_REFS_IRRELEVANT"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C03",
@@ -94,42 +116,53 @@
         "FALSE_SUPPORT",
         "UNSUPPORTED_ESCAPE"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "A partial reference is enough to prove the whole responsibility.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INSUFFICIENT",
-      "expected_reason_codes": [
-        "SUPPORTING_REFS_INSUFFICIENT"
+      "inputs": [
+        {
+          "input_id": "C03.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "A partial reference proves the whole responsibility.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INSUFFICIENT",
+          "expected_reason_codes": [
+            "SUPPORTING_REFS_INSUFFICIENT"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C04",
@@ -138,83 +171,111 @@
         "FALSE_SUPPORT",
         "UNSUPPORTED_ESCAPE"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration and owns durable persistence.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C04_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "COMPOUND_CLAIM_NOT_FULLY_SUPPORTED"
+      "inputs": [
+        {
+          "input_id": "C04.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration and owns durable persistence.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "COMPOUND_CLAIM"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "COMPOUND_CLAIM_NOT_FULLY_SUPPORTED"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C05",
       "case_class": "COMPATIBLE_LIMITING_EVIDENCE",
       "critical_properties": [],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "SUPPORTED",
-      "expected_reason_codes": [
-        "MATERIAL_SUPPORT_CONFIRMED"
+      "inputs": [
+        {
+          "input_id": "C05.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [
+              "L1"
+            ],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            },
+            {
+              "ref": "L1",
+              "material": "Compatible limit: orchestration scope does not imply persistence authority."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "SUPPORTED",
+          "expected_reason_codes": [
+            "MATERIAL_SUPPORT_CONFIRMED"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C06",
@@ -222,48 +283,59 @@
       "critical_properties": [
         "UNRESOLVED_COUNTEREVIDENCE"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [
-          "K2"
-        ],
-        "uncertainty_basis": "C06_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        },
-        {
-          "ref": "K2",
-          "material": "Counterevidence: orchestration responsibility conflicts."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "MATERIAL_COUNTEREVIDENCE_UNRESOLVED"
+      "inputs": [
+        {
+          "input_id": "C06.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [
+              "K2"
+            ],
+            "uncertainty_basis": "UNRESOLVED_COUNTEREVIDENCE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            },
+            {
+              "ref": "K2",
+              "material": "Counterevidence: governed material conflicts with the orchestration claim."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "MATERIAL_COUNTEREVIDENCE_UNRESOLVED"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C07",
@@ -272,83 +344,105 @@
         "FALSE_SUPPORT",
         "UNSUPPORTED_ESCAPE"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "A normative document about naming proves runtime behavior.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INSUFFICIENT",
-      "expected_reason_codes": [
-        "SUPPORTING_REFS_IRRELEVANT"
+      "inputs": [
+        {
+          "input_id": "C07.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "A naming rule proves runtime orchestration behavior.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INSUFFICIENT",
+          "expected_reason_codes": [
+            "SUPPORTING_REFS_IRRELEVANT"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C08",
       "case_class": "LOW_AUTHORITY_RELEVANT_SUPPORT",
       "critical_properties": [],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "A low-authority contextual note materially supports this bounded claim.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "SUPPORTED",
-      "expected_reason_codes": [
-        "MATERIAL_SUPPORT_CONFIRMED"
+      "inputs": [
+        {
+          "input_id": "C08.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "A contextual note materially supports this bounded orchestration claim.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "SUPPORTED",
+          "expected_reason_codes": [
+            "MATERIAL_SUPPORT_CONFIRMED"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C09",
@@ -357,78 +451,100 @@
         "FALSE_SUPPORT",
         "UNSUPPORTED_ESCAPE"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "The rationale claims more than the bound evidence supports.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INSUFFICIENT",
-      "expected_reason_codes": [
-        "SUPPORTING_REFS_INSUFFICIENT"
+      "inputs": [
+        {
+          "input_id": "C09.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "This rationale deliberately overclaims beyond the supplied references.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INSUFFICIENT",
+          "expected_reason_codes": [
+            "SUPPORTING_REFS_INSUFFICIENT"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C10",
       "case_class": "MISSING_EVIDENCE_MATERIAL",
       "critical_properties": [],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C10_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "EVIDENCE_MATERIAL_INCOMPLETE"
+      "inputs": [
+        {
+          "input_id": "C10.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "EVIDENCE_MATERIAL_INCOMPLETE"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C11",
@@ -436,42 +552,73 @@
       "critical_properties": [
         "BINDING_DRIFT"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Changed statement with stale binding fingerprint.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C11_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "SUBJECT_BINDING_MISMATCH"
+      "inputs": [
+        {
+          "input_id": "C11.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration under the current wording.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "STALE_SUBJECT_BINDING"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "SUBJECT",
+            "expected_subject_fingerprint": "d3bb4bec055473b53ade5eab1ebd00ef27f4377b53a367221cdeace4222dbf8d",
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": {
+            "prior_subject": {
+              "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+              "focus_id": "U01",
+              "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+              "relation_id": "U01.KERNEL_RESPONSIBILITY",
+              "classification": "ALIGNED",
+              "statement": "Kernel coordinates orchestration under the prior wording.",
+              "rationale": "Bounded rationale for qualification ground truth.",
+              "supporting_repository_refs": [
+                "R1"
+              ],
+              "supporting_knowledge_refs": [
+                "K1"
+              ],
+              "limiting_or_counterevidence_refs": [],
+              "uncertainty_basis": "NONE"
+            },
+            "prior_repository_evidence": null,
+            "prior_knowledge_evidence": null
+          },
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "SUBJECT_BINDING_MISMATCH"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C12",
@@ -479,42 +626,67 @@
       "critical_properties": [
         "BINDING_DRIFT"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C12_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "SUBJECT_BINDING_MISMATCH"
+      "inputs": [
+        {
+          "input_id": "C12.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "STALE_EVIDENCE_MATERIAL_BINDING"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Current repository material: Kernel coordinates orchestration with revised wording."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "EVIDENCE_MATERIAL",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": "d69d55696933ea6178033dd09da0c157c41015b67d8deeade30ad4ae671c45d1"
+          },
+          "binding_prior": {
+            "prior_subject": null,
+            "prior_repository_evidence": [
+              {
+                "ref": "R1",
+                "material": "Prior repository material: Kernel coordinates orchestration."
+              }
+            ],
+            "prior_knowledge_evidence": [
+              {
+                "ref": "K1",
+                "material": "Governed knowledge material: Kernel coordinates orchestration."
+              }
+            ]
+          },
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "SUBJECT_BINDING_MISMATCH"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C13",
@@ -522,129 +694,219 @@
       "critical_properties": [
         "EQUIVALENT_INPUT_STABILITY"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R2",
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material A."
-        },
-        {
-          "ref": "R2",
-          "material": "Repository material B."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "SUPPORTED",
-      "expected_reason_codes": [
-        "MATERIAL_SUPPORT_CONFIRMED"
+      "inputs": [
+        {
+          "input_id": "C13.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1",
+              "R2"
+            ],
+            "supporting_knowledge_refs": [
+              "K1",
+              "K2"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material A."
+            },
+            {
+              "ref": "R2",
+              "material": "Repository material B."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Knowledge material A."
+            },
+            {
+              "ref": "K2",
+              "material": "Knowledge material B."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "SUPPORTED",
+          "expected_reason_codes": [
+            "MATERIAL_SUPPORT_CONFIRMED"
+          ]
+        },
+        {
+          "input_id": "C13.I02",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R2",
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K2",
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R2",
+              "material": "Repository material B."
+            },
+            {
+              "ref": "R1",
+              "material": "Repository material A."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K2",
+              "material": "Knowledge material B."
+            },
+            {
+              "ref": "K1",
+              "material": "Knowledge material A."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "SUPPORTED",
+          "expected_reason_codes": [
+            "MATERIAL_SUPPORT_CONFIRMED"
+          ]
+        }
       ],
-      "equivalence_group": "C13-REF-PERMUTATION"
+      "comparison_rule": "STABLE_OUTCOME_AND_REASONS"
     },
     {
       "case_id": "C14",
       "case_class": "ASSESSOR_UNAVAILABLE",
       "critical_properties": [],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C14_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "ASSESSOR_UNAVAILABLE"
+      "inputs": [
+        {
+          "input_id": "C14.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "ASSESSOR_UNAVAILABLE"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C15",
       "case_class": "MALFORMED_ASSESSOR_OUTPUT",
       "critical_properties": [],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C15_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "ASSESSOR_OUTPUT_INVALID"
+      "inputs": [
+        {
+          "input_id": "C15.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "ASSESSOR_OUTPUT_INVALID"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C16",
@@ -653,42 +915,53 @@
         "FALSE_SUPPORT",
         "UNSUPPORTED_ESCAPE"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "High evaluator confidence substitutes for material support.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "NONE"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INSUFFICIENT",
-      "expected_reason_codes": [
-        "SUPPORTING_REFS_INSUFFICIENT"
+      "inputs": [
+        {
+          "input_id": "C16.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "High evaluator confidence substitutes for material support.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INSUFFICIENT",
+          "expected_reason_codes": [
+            "SUPPORTING_REFS_INSUFFICIENT"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C17",
@@ -696,83 +969,105 @@
       "critical_properties": [
         "SELF_CERTIFICATION"
       ],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "Kernel coordinates orchestration.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C17_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "same-subject",
       "assessor_subject_id": "same-subject",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "SUBJECT_BINDING_MISMATCH"
+      "inputs": [
+        {
+          "input_id": "C17.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "Kernel coordinates orchestration.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "NONE"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "SUBJECT_BINDING_MISMATCH"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     },
     {
       "case_id": "C18",
       "case_class": "SCOPE_EXPANSION_REQUIRED",
       "critical_properties": [],
-      "subject": {
-        "baseline_commit": "0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627",
-        "focus_id": "U01",
-        "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "relation_id": "U01.KERNEL_RESPONSIBILITY",
-        "classification": "ALIGNED",
-        "statement": "The claim requires evidence outside the bounded packet.",
-        "rationale": "Bounded rationale for qualification ground truth.",
-        "supporting_repository_refs": [
-          "R1"
-        ],
-        "supporting_knowledge_refs": [
-          "K1"
-        ],
-        "limiting_or_counterevidence_refs": [],
-        "uncertainty_basis": "C18_BOUNDED_UNCERTAINTY"
-      },
-      "repository_evidence": [
-        {
-          "ref": "R1",
-          "material": "Repository material: Kernel coordinates orchestration."
-        }
-      ],
-      "knowledge_evidence": [
-        {
-          "ref": "K1",
-          "material": "Governed knowledge material: Kernel coordinates orchestration."
-        }
-      ],
       "finding_producer_subject_id": "finding-producer",
       "assessor_subject_id": "candidate-assessor",
-      "expected_outcome": "INCONCLUSIVE",
-      "expected_reason_codes": [
-        "ASSESSMENT_SCOPE_EXCEEDED"
+      "inputs": [
+        {
+          "input_id": "C18.I01",
+          "subject": {
+            "baseline_commit": "007e1eec65b4c71b99bffc880b2ea7124c921c07",
+            "focus_id": "U01",
+            "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "relation_id": "U01.KERNEL_RESPONSIBILITY",
+            "classification": "ALIGNED",
+            "statement": "The claim requires evidence outside the bounded packet.",
+            "rationale": "Bounded rationale for qualification ground truth.",
+            "supporting_repository_refs": [
+              "R1"
+            ],
+            "supporting_knowledge_refs": [
+              "K1"
+            ],
+            "limiting_or_counterevidence_refs": [],
+            "uncertainty_basis": "SCOPE_EXPANSION_REQUIRED"
+          },
+          "repository_evidence": [
+            {
+              "ref": "R1",
+              "material": "Repository material: Kernel coordinates orchestration."
+            }
+          ],
+          "knowledge_evidence": [
+            {
+              "ref": "K1",
+              "material": "Governed knowledge material: Kernel coordinates orchestration."
+            }
+          ],
+          "binding_expectation": {
+            "binding_kind": "NONE",
+            "expected_subject_fingerprint": null,
+            "expected_evidence_material_digest": null
+          },
+          "binding_prior": null,
+          "expected_outcome": "INCONCLUSIVE",
+          "expected_reason_codes": [
+            "ASSESSMENT_SCOPE_EXCEEDED"
+          ]
+        }
       ],
-      "equivalence_group": "NONE"
+      "comparison_rule": "NONE"
     }
   ]
 }

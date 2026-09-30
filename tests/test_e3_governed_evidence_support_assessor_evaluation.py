@@ -16,6 +16,10 @@ CASE_SET = ROOT / "evaluations" / "e3_governed_evidence_support_assessor_v0" / "
 RUNNER = ROOT / "scripts" / "evaluate_e3_governed_evidence_support_assessor.py"
 
 EXPECTED_CASE_IDS = {f"C{i:02d}" for i in range(1, 19)}
+EXPECTED_INPUT_IDS = {
+    *(f"C{i:02d}.I01" for i in range(1, 19)),
+    "C13.I02",
+}
 EXPECTED_OUTPUT_KEYS = {
     "schema_version",
     "malak_baseline_commit",
@@ -28,30 +32,35 @@ EXPECTED_OUTPUT_KEYS = {
     "assessor_mechanism_identity",
     "assessor_result_artifact_digest",
     "case_count",
+    "input_count",
     "case_results",
     "metrics",
     "qualification_result",
     "qualification_reasons",
     "authority_effect",
 }
-EXPECTED_CASE_RESULT_KEYS = {
-    "case_id",
-    "expected_disposition",
-    "observed_disposition",
-    "expected_reason_class",
-    "observed_reason_codes",
-    "case_result",
-    "mismatch_reasons",
+REQUIRED_PROPERTIES = {
+    "C02": {"FALSE_SUPPORT", "UNSUPPORTED_ESCAPE"},
+    "C03": {"FALSE_SUPPORT", "UNSUPPORTED_ESCAPE"},
+    "C04": {"FALSE_SUPPORT", "UNSUPPORTED_ESCAPE"},
+    "C06": {"UNRESOLVED_COUNTEREVIDENCE"},
+    "C07": {"FALSE_SUPPORT", "UNSUPPORTED_ESCAPE"},
+    "C09": {"FALSE_SUPPORT", "UNSUPPORTED_ESCAPE"},
+    "C11": {"BINDING_DRIFT"},
+    "C12": {"BINDING_DRIFT"},
+    "C13": {"EQUIVALENT_INPUT_STABILITY"},
+    "C16": {"FALSE_SUPPORT", "UNSUPPORTED_ESCAPE"},
+    "C17": {"SELF_CERTIFICATION"},
 }
 
 
 def _require_case_set() -> Path:
-    assert CASE_SET.is_file(), "R01: fixed C01-C18 case-set is absent"
+    assert CASE_SET.is_file(), "R01: fixed V0.1 C01-C18 case-set is absent"
     return CASE_SET
 
 
 def _require_runner() -> Path:
-    assert RUNNER.is_file(), "R01: qualification runner is absent"
+    assert RUNNER.is_file(), "R01: V0.1 qualification runner is absent"
     return RUNNER
 
 
@@ -76,11 +85,24 @@ def _write_json(path: Path, payload: dict) -> Path:
     return path
 
 
+def _sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return _sha256_bytes(path.read_bytes())
 
 
-def _fingerprint(subject: dict) -> str:
+def _canonical_json(value: object) -> bytes:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _subject_fingerprint(subject: dict) -> str:
     material = {
         "classification": subject["classification"],
         "limiting_or_counterevidence_refs": sorted(
@@ -95,22 +117,82 @@ def _fingerprint(subject: dict) -> str:
         ),
         "uncertainty_basis": subject["uncertainty_basis"],
     }
-    encoded = json.dumps(
-        material,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
+    return _sha256_bytes(_canonical_json(material))
+
+
+def _evidence_material_digest(
+    repository_evidence: list[dict],
+    knowledge_evidence: list[dict],
+) -> str:
+    material = {
+        "repository_evidence": sorted(
+            repository_evidence, key=lambda item: item["ref"]
+        ),
+        "knowledge_evidence": sorted(
+            knowledge_evidence, key=lambda item: item["ref"]
+        ),
+    }
+    return _sha256_bytes(_canonical_json(material))
+
+
+def _digest_material(input_record: dict) -> dict:
+    return {
+        "subject": copy.deepcopy(input_record["subject"]),
+        "repository_evidence": copy.deepcopy(input_record["repository_evidence"]),
+        "knowledge_evidence": copy.deepcopy(input_record["knowledge_evidence"]),
+        "binding_expectation": copy.deepcopy(input_record["binding_expectation"]),
+        "binding_prior": copy.deepcopy(input_record["binding_prior"]),
+    }
+
+
+def _canonicalize_subject_refs(subject: dict) -> None:
+    for name in (
+        "supporting_repository_refs",
+        "supporting_knowledge_refs",
+        "limiting_or_counterevidence_refs",
+    ):
+        subject[name] = sorted(subject[name])
+
+
+def _semantic_digest_material(input_record: dict) -> dict:
+    material = _digest_material(input_record)
+    _canonicalize_subject_refs(material["subject"])
+    material["repository_evidence"] = sorted(
+        material["repository_evidence"], key=lambda item: item["ref"]
+    )
+    material["knowledge_evidence"] = sorted(
+        material["knowledge_evidence"], key=lambda item: item["ref"]
+    )
+    prior = material["binding_prior"]
+    if isinstance(prior, dict):
+        if isinstance(prior["prior_subject"], dict):
+            _canonicalize_subject_refs(prior["prior_subject"])
+        if isinstance(prior["prior_repository_evidence"], list):
+            prior["prior_repository_evidence"] = sorted(
+                prior["prior_repository_evidence"], key=lambda item: item["ref"]
+            )
+        if isinstance(prior["prior_knowledge_evidence"], list):
+            prior["prior_knowledge_evidence"] = sorted(
+                prior["prior_knowledge_evidence"], key=lambda item: item["ref"]
+            )
+    return material
+
+
+def _input_instance_digest(input_record: dict) -> str:
+    return _sha256_bytes(_canonical_json(_digest_material(input_record)))
+
+
+def _semantic_input_digest(input_record: dict) -> str:
+    return _sha256_bytes(_canonical_json(_semantic_digest_material(input_record)))
 
 
 def _valid_artifact(case_set: dict, case_set_digest: str) -> dict:
     return {
-        "schema_version": "MALAK-E3-SUPPORT-ASSESSOR-RESULTS/v0",
+        "schema_version": "MALAK-E3-SUPPORT-ASSESSOR-RESULTS/v0.1",
         "case_set_digest": case_set_digest,
         "assessor_mechanism": {
             "mechanism_id": "test-assessor",
-            "mechanism_version": "v0",
+            "mechanism_version": "v0.1",
             "mechanism_kind": "DETERMINISTIC",
             "config_digest": "c" * 64,
             "producer_subject_id": "experiment-producer",
@@ -118,7 +200,7 @@ def _valid_artifact(case_set: dict, case_set_digest: str) -> dict:
             "model_provenance": None,
         },
         "harness": {
-            "harness_policy_version": "test-harness/v0",
+            "harness_policy_version": "test-harness/v0.1",
             "harness_policy_digest": "d" * 64,
             "budget_manifest_digest": "b" * 64,
             "attempt_policy_digest": "a" * 64,
@@ -126,9 +208,17 @@ def _valid_artifact(case_set: dict, case_set_digest: str) -> dict:
         "case_results": [
             {
                 "case_id": case["case_id"],
-                "subject_fingerprint": _fingerprint(case["subject"]),
-                "outcome": case["expected_outcome"],
-                "reason_codes": case["expected_reason_codes"],
+                "observations": [
+                    {
+                        "input_id": item["input_id"],
+                        "input_instance_digest": _input_instance_digest(item),
+                        "semantic_input_digest": _semantic_input_digest(item),
+                        "subject_fingerprint": _subject_fingerprint(item["subject"]),
+                        "outcome": item["expected_outcome"],
+                        "reason_codes": item["expected_reason_codes"],
+                    }
+                    for item in case["inputs"]
+                ],
             }
             for case in case_set["cases"]
         ],
@@ -192,8 +282,28 @@ def _run_payload(
     return completed, payload
 
 
-def _case(payload: dict, case_id: str) -> dict:
+def _case(case_set: dict, case_id: str) -> dict:
+    return next(item for item in case_set["cases"] if item["case_id"] == case_id)
+
+
+def _output_case(payload: dict, case_id: str) -> dict:
     return next(item for item in payload["case_results"] if item["case_id"] == case_id)
+
+
+def _output_input(payload: dict, input_id: str) -> dict:
+    for case in payload["case_results"]:
+        for item in case["input_results"]:
+            if item["input_id"] == input_id:
+                return item
+    raise AssertionError(f"missing input result: {input_id}")
+
+
+def _artifact_observation(artifact: dict, input_id: str) -> dict:
+    for case in artifact["case_results"]:
+        for observation in case["observations"]:
+            if observation["input_id"] == input_id:
+                return observation
+    raise AssertionError(f"missing artifact observation: {input_id}")
 
 
 def test_red_r01_required_artifacts_absent() -> None:
@@ -209,16 +319,18 @@ def test_red_r02_unknown_top_level_case_set_field_is_rejected(tmp_path: Path) ->
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-@pytest.mark.parametrize("mutation", ["missing", "wrong_type", "unknown"])
-def test_red_r03_case_schema_invalid_is_rejected(tmp_path: Path, mutation: str) -> None:
+@pytest.mark.parametrize("mutation", ["missing_case_field", "unknown_input", "wrong_type"])
+def test_red_r03_case_or_input_schema_invalid_is_rejected(
+    tmp_path: Path, mutation: str
+) -> None:
     case_set = _case_set_payload()
     case = case_set["cases"][0]
-    if mutation == "missing":
+    if mutation == "missing_case_field":
         del case["case_class"]
-    elif mutation == "wrong_type":
-        case["critical_properties"] = "FALSE_SUPPORT"
+    elif mutation == "unknown_input":
+        case["inputs"][0]["unexpected"] = True
     else:
-        case["unexpected"] = True
+        case["comparison_rule"] = 42
     completed, payload = _run_payload(tmp_path, case_set=case_set)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "INCONCLUSIVE"
@@ -234,13 +346,31 @@ def test_red_r04_case_catalog_must_be_exact(tmp_path: Path, mutation: str) -> No
     else:
         extra = copy.deepcopy(case_set["cases"][-1])
         extra["case_id"] = "C19"
+        extra["inputs"][0]["input_id"] = "C19.I01"
         case_set["cases"].append(extra)
     completed, payload = _run_payload(tmp_path, case_set=case_set)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r05_unsupported_schema_version_is_rejected(tmp_path: Path) -> None:
+@pytest.mark.parametrize("mutation", ["duplicate", "missing", "extra"])
+def test_red_r05_input_catalog_must_be_exact(tmp_path: Path, mutation: str) -> None:
+    case_set = _case_set_payload()
+    case = _case(case_set, "C01")
+    if mutation == "duplicate":
+        case["inputs"].append(copy.deepcopy(case["inputs"][0]))
+    elif mutation == "missing":
+        case["inputs"].clear()
+    else:
+        extra = copy.deepcopy(case["inputs"][0])
+        extra["input_id"] = "C01.I02"
+        case["inputs"].append(extra)
+    completed, payload = _run_payload(tmp_path, case_set=case_set)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+
+
+def test_red_r06_unsupported_schema_version_is_rejected(tmp_path: Path) -> None:
     case_set = _case_set_payload()
     case_set["schema_version"] = "future/v9"
     completed, payload = _run_payload(tmp_path, case_set=case_set)
@@ -248,7 +378,7 @@ def test_red_r05_unsupported_schema_version_is_rejected(tmp_path: Path) -> None:
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r06_ground_truth_digest_mismatch_blocks_pass(tmp_path: Path) -> None:
+def test_red_r07_ground_truth_digest_mismatch_blocks_pass(tmp_path: Path) -> None:
     case_set = _case_set_payload()
     case_path = _write_json(tmp_path / "cases.json", case_set)
     artifact_path = _write_json(
@@ -267,7 +397,7 @@ def test_red_r06_ground_truth_digest_mismatch_blocks_pass(tmp_path: Path) -> Non
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r07_reviewer_runner_actor_collision_blocks_pass(tmp_path: Path) -> None:
+def test_red_r08_reviewer_runner_actor_collision_blocks_pass(tmp_path: Path) -> None:
     case_set = _case_set_payload()
     case_path = _write_json(tmp_path / "cases.json", case_set)
     artifact_path = _write_json(
@@ -288,7 +418,7 @@ def test_red_r07_reviewer_runner_actor_collision_blocks_pass(tmp_path: Path) -> 
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r08_reviewer_assessor_collision_blocks_pass(tmp_path: Path) -> None:
+def test_red_r09_reviewer_assessor_collision_blocks_pass(tmp_path: Path) -> None:
     case_set = _case_set_payload()
     case_path = _write_json(tmp_path / "cases.json", case_set)
     artifact = _valid_artifact(case_set, _sha256(case_path))
@@ -306,7 +436,7 @@ def test_red_r08_reviewer_assessor_collision_blocks_pass(tmp_path: Path) -> None
 
 
 @pytest.mark.parametrize("mutation", ["missing", "unknown"])
-def test_red_r09_artifact_schema_invalid_is_rejected(
+def test_red_r10_artifact_schema_invalid_is_rejected(
     tmp_path: Path, mutation: str
 ) -> None:
     def mutate(artifact: dict) -> None:
@@ -320,7 +450,7 @@ def test_red_r09_artifact_schema_invalid_is_rejected(
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r10_artifact_case_set_digest_mismatch_blocks_pass(tmp_path: Path) -> None:
+def test_red_r11_artifact_case_set_digest_mismatch_blocks_pass(tmp_path: Path) -> None:
     def mutate(artifact: dict) -> None:
         artifact["case_set_digest"] = "0" * 64
 
@@ -329,16 +459,34 @@ def test_red_r10_artifact_case_set_digest_mismatch_blocks_pass(tmp_path: Path) -
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r11_subject_fingerprint_drift_blocks_pass(tmp_path: Path) -> None:
+def test_red_r12_input_instance_digest_mismatch_blocks_pass(tmp_path: Path) -> None:
     def mutate(artifact: dict) -> None:
-        artifact["case_results"][0]["subject_fingerprint"] = "0" * 64
+        _artifact_observation(artifact, "C01.I01")["input_instance_digest"] = "0" * 64
 
     completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r12_model_based_artifact_requires_complete_provenance(
+def test_red_r13_semantic_input_digest_mismatch_blocks_pass(tmp_path: Path) -> None:
+    def mutate(artifact: dict) -> None:
+        _artifact_observation(artifact, "C01.I01")["semantic_input_digest"] = "0" * 64
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+
+
+def test_red_r14_subject_fingerprint_mismatch_blocks_pass(tmp_path: Path) -> None:
+    def mutate(artifact: dict) -> None:
+        _artifact_observation(artifact, "C01.I01")["subject_fingerprint"] = "0" * 64
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+
+
+def test_red_r15_model_based_artifact_requires_complete_provenance(
     tmp_path: Path,
 ) -> None:
     def mutate(artifact: dict) -> None:
@@ -350,7 +498,7 @@ def test_red_r12_model_based_artifact_requires_complete_provenance(
     assert payload["qualification_result"] == "INCONCLUSIVE"
 
 
-def test_red_r13_mechanism_cannot_self_certify(tmp_path: Path) -> None:
+def test_red_r16_mechanism_cannot_self_certify(tmp_path: Path) -> None:
     def mutate(artifact: dict) -> None:
         artifact["assessor_mechanism"]["producer_subject_id"] = (
             artifact["assessor_mechanism"]["assessor_subject_id"]
@@ -361,93 +509,148 @@ def test_red_r13_mechanism_cannot_self_certify(tmp_path: Path) -> None:
     assert payload["qualification_result"] != "PASS"
 
 
-def test_red_r14_exact_support_case_can_pass(tmp_path: Path) -> None:
+def test_red_r17_exact_support_input_can_pass(tmp_path: Path) -> None:
     completed, payload = _run_payload(tmp_path)
     assert completed.returncode == 0
-    assert _case(payload, "C01")["case_result"] == "PASS"
+    assert _output_input(payload, "C01.I01")["input_result"] == "PASS"
 
 
 @pytest.mark.parametrize("case_id", ["C02", "C03", "C07", "C09", "C16"])
-def test_red_r15_unsupported_cases_cannot_be_promoted_to_supported(
+def test_red_r18_unsupported_inputs_cannot_be_promoted_to_supported(
     tmp_path: Path, case_id: str
 ) -> None:
     def mutate(artifact: dict) -> None:
-        result = next(x for x in artifact["case_results"] if x["case_id"] == case_id)
-        result["outcome"] = "SUPPORTED"
-        result["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
+        observation = _artifact_observation(artifact, f"{case_id}.I01")
+        observation["outcome"] = "SUPPORTED"
+        observation["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
 
     completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "FAIL"
-    assert _case(payload, case_id)["case_result"] == "FAIL"
+    assert _output_input(payload, f"{case_id}.I01")["input_result"] == "FAIL"
 
 
-def test_red_r16_compound_partial_support_remains_inconclusive(
+def test_red_r19_compound_partial_support_remains_inconclusive(
     tmp_path: Path,
 ) -> None:
     def mutate(artifact: dict) -> None:
-        result = next(x for x in artifact["case_results"] if x["case_id"] == "C04")
-        result["outcome"] = "SUPPORTED"
-        result["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
+        observation = _artifact_observation(artifact, "C04.I01")
+        observation["outcome"] = "SUPPORTED"
+        observation["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
 
     completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "FAIL"
 
 
-def test_red_r17_unresolved_counterevidence_cannot_be_supported(
+def test_red_r20_unresolved_counterevidence_cannot_be_supported(
     tmp_path: Path,
 ) -> None:
     def mutate(artifact: dict) -> None:
-        result = next(x for x in artifact["case_results"] if x["case_id"] == "C06")
-        result["outcome"] = "SUPPORTED"
-        result["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
+        observation = _artifact_observation(artifact, "C06.I01")
+        observation["outcome"] = "SUPPORTED"
+        observation["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
 
     completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "FAIL"
 
 
-@pytest.mark.parametrize("case_id", ["C11", "C12"])
-def test_red_r18_binding_drift_is_detected_fail_closed(
-    tmp_path: Path, case_id: str
-) -> None:
-    completed, payload = _run_payload(tmp_path)
-    assert completed.returncode == 0
-    assert _case(payload, case_id)["case_result"] == "PASS"
-    assert payload["metrics"]["binding_drift_detection_rate"] == 1
+def test_red_r21_c05_contains_resolved_limiting_material() -> None:
+    case = _case(_case_set_payload(), "C05")
+    item = case["inputs"][0]
+    limiting = item["subject"]["limiting_or_counterevidence_refs"]
+    assert limiting
+    evidence = {
+        entry["ref"]: entry["material"]
+        for entry in item["repository_evidence"] + item["knowledge_evidence"]
+    }
+    assert all(ref in evidence and evidence[ref] for ref in limiting)
 
 
-def test_red_r19_equivalent_ref_permutation_is_stable(tmp_path: Path) -> None:
-    baseline = _case_set_payload()
-    permuted = copy.deepcopy(baseline)
-    case = next(x for x in permuted["cases"] if x["case_id"] == "C13")
-    case["subject"]["supporting_repository_refs"].reverse()
-    case["repository_evidence"].reverse()
+def test_red_r22_c11_prior_subject_binding_is_recomputable_and_stale() -> None:
+    case = _case(_case_set_payload(), "C11")
+    item = case["inputs"][0]
+    prior = item["binding_prior"]["prior_subject"]
+    expected = item["binding_expectation"]["expected_subject_fingerprint"]
+    assert _subject_fingerprint(prior) == expected
+    assert _subject_fingerprint(item["subject"]) != expected
 
-    original_case = next(x for x in baseline["cases"] if x["case_id"] == "C13")
-    assert _fingerprint(original_case["subject"]) == _fingerprint(case["subject"])
 
-    completed, payload = _run_payload(tmp_path, case_set=permuted)
-    assert completed.returncode == 0
-    assert payload["metrics"]["assessment_stability_on_equivalent_inputs"] == 1
+def test_red_r23_c12_prior_evidence_binding_is_recomputable_and_stale() -> None:
+    case = _case(_case_set_payload(), "C12")
+    item = case["inputs"][0]
+    prior = item["binding_prior"]
+    expected = item["binding_expectation"]["expected_evidence_material_digest"]
+    prior_digest = _evidence_material_digest(
+        prior["prior_repository_evidence"],
+        prior["prior_knowledge_evidence"],
+    )
+    current_digest = _evidence_material_digest(
+        item["repository_evidence"],
+        item["knowledge_evidence"],
+    )
+    prior_refs = {
+        entry["ref"]
+        for entry in prior["prior_repository_evidence"]
+        + prior["prior_knowledge_evidence"]
+    }
+    current_refs = {
+        entry["ref"]
+        for entry in item["repository_evidence"] + item["knowledge_evidence"]
+    }
+    assert prior_digest == expected
+    assert prior_digest != current_digest
+    assert prior_refs == current_refs
+
+
+def test_red_r24_c13_has_distinct_instances_with_one_semantic_digest() -> None:
+    case = _case(_case_set_payload(), "C13")
+    assert case["comparison_rule"] == "STABLE_OUTCOME_AND_REASONS"
+    assert len(case["inputs"]) == 2
+    left, right = case["inputs"]
+    assert _input_instance_digest(left) != _input_instance_digest(right)
+    assert _semantic_input_digest(left) == _semantic_input_digest(right)
+
+
+def test_red_r25_c13_requires_two_bound_observations(tmp_path: Path) -> None:
+    def mutate(artifact: dict) -> None:
+        case = next(x for x in artifact["case_results"] if x["case_id"] == "C13")
+        case["observations"] = [case["observations"][0]]
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+
+
+def test_red_r26_c13_compares_observed_outcome_and_reasons(tmp_path: Path) -> None:
+    def mutate(artifact: dict) -> None:
+        observation = _artifact_observation(artifact, "C13.I02")
+        observation["outcome"] = "INSUFFICIENT"
+        observation["reason_codes"] = ["SUPPORTING_REFS_INSUFFICIENT"]
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "FAIL"
+    comparison = _output_case(payload, "C13")["comparison_result"]
+    assert comparison["result"] == "FAIL"
 
 
 @pytest.mark.parametrize("case_id", ["C14", "C15"])
-def test_red_r20_unavailable_or_malformed_assessor_remains_non_positive(
+def test_red_r27_unavailable_or_malformed_assessor_remains_non_positive(
     tmp_path: Path, case_id: str
 ) -> None:
     def mutate(artifact: dict) -> None:
-        result = next(x for x in artifact["case_results"] if x["case_id"] == case_id)
-        result["outcome"] = "SUPPORTED"
-        result["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
+        observation = _artifact_observation(artifact, f"{case_id}.I01")
+        observation["outcome"] = "SUPPORTED"
+        observation["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
 
     completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "FAIL"
 
 
-def test_red_r21_metric_formulas_match_frozen_expectations(tmp_path: Path) -> None:
+def test_red_r28_metric_formulas_match_frozen_input_populations(tmp_path: Path) -> None:
     completed, payload = _run_payload(tmp_path)
     assert completed.returncode == 0
     metrics = payload["metrics"]
@@ -459,27 +662,56 @@ def test_red_r21_metric_formulas_match_frozen_expectations(tmp_path: Path) -> No
     assert metrics["binding_drift_detection_rate"] == 1
 
 
-def test_red_r22_any_safety_floor_violation_prevents_pass(tmp_path: Path) -> None:
+def test_red_r28_required_metric_population_tags_are_present() -> None:
+    case_set = _case_set_payload()
+    for case_id, required in REQUIRED_PROPERTIES.items():
+        observed = set(_case(case_set, case_id)["critical_properties"])
+        assert required.issubset(observed)
+
+
+@pytest.mark.parametrize(
+    ("case_id", "property_name"),
+    [
+        ("C02", "UNSUPPORTED_ESCAPE"),
+        ("C06", "UNRESOLVED_COUNTEREVIDENCE"),
+        ("C11", "BINDING_DRIFT"),
+        ("C12", "BINDING_DRIFT"),
+        ("C13", "EQUIVALENT_INPUT_STABILITY"),
+        ("C17", "SELF_CERTIFICATION"),
+    ],
+)
+def test_red_r28_metric_population_tags_cannot_be_silently_removed(
+    tmp_path: Path,
+    case_id: str,
+    property_name: str,
+) -> None:
+    case_set = _case_set_payload()
+    case = _case(case_set, case_id)
+    case["critical_properties"].remove(property_name)
+    completed, payload = _run_payload(tmp_path, case_set=case_set)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+
+
+def test_red_r29_any_safety_floor_violation_prevents_pass(tmp_path: Path) -> None:
     def mutate(artifact: dict) -> None:
-        result = next(x for x in artifact["case_results"] if x["case_id"] == "C03")
-        result["outcome"] = "SUPPORTED"
-        result["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
+        observation = _artifact_observation(artifact, "C03.I01")
+        observation["outcome"] = "SUPPORTED"
+        observation["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
 
     completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
     assert completed.returncode != 0
     assert payload["qualification_result"] == "FAIL"
 
 
-def test_red_r23_authority_effect_is_fixed_to_none(tmp_path: Path) -> None:
+def test_red_r30_authority_effect_is_fixed_to_none(tmp_path: Path) -> None:
     completed, payload = _run_payload(tmp_path)
     assert completed.returncode == 0
     assert set(payload) == EXPECTED_OUTPUT_KEYS
     assert payload["authority_effect"] == "none"
-    for result in payload["case_results"]:
-        assert set(result) == EXPECTED_CASE_RESULT_KEYS
 
 
-def test_red_r24_runner_has_no_model_network_or_repo_write_side_effects(
+def test_red_r31_runner_has_no_model_network_or_repo_write_side_effects(
     tmp_path: Path,
 ) -> None:
     runner = _require_runner()
@@ -518,10 +750,11 @@ def test_red_r24_runner_has_no_model_network_or_repo_write_side_effects(
     assert before == after
 
 
-def test_red_r25_no_case_selection_or_skip_interface_exists() -> None:
+def test_red_r32_no_case_or_input_selection_interface_exists() -> None:
     source = _require_runner().read_text(encoding="utf-8")
     forbidden = (
         "--case-id",
+        "--input-id",
         "--filter",
         "--select",
         "--skip",
@@ -531,12 +764,24 @@ def test_red_r25_no_case_selection_or_skip_interface_exists() -> None:
     assert not any(marker in source for marker in forbidden)
 
 
-def test_red_r26_pass_requires_all_18_cases_valid_and_evaluable(
+def test_red_r33_pass_requires_all_18_cases_and_19_inputs(
     tmp_path: Path,
 ) -> None:
     completed, payload = _run_payload(tmp_path)
     assert completed.returncode == 0
     assert payload["qualification_result"] == "PASS"
     assert payload["case_count"] == 18
+    assert payload["input_count"] == 19
     assert {x["case_id"] for x in payload["case_results"]} == EXPECTED_CASE_IDS
-    assert all(x["case_result"] == "PASS" for x in payload["case_results"])
+    observed_inputs = {
+        item["input_id"]
+        for case in payload["case_results"]
+        for item in case["input_results"]
+    }
+    assert observed_inputs == EXPECTED_INPUT_IDS
+    assert all(
+        item["input_result"] == "PASS"
+        for case in payload["case_results"]
+        for item in case["input_results"]
+    )
+    assert all(case["case_result"] == "PASS" for case in payload["case_results"])
