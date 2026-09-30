@@ -214,7 +214,7 @@ def test_red_r03_case_schema_invalid_is_rejected(tmp_path: Path, mutation: str) 
     case_set = _case_set_payload()
     case = case_set["cases"][0]
     if mutation == "missing":
-        del case["subject"]
+        del case["case_class"]
     elif mutation == "wrong_type":
         case["critical_properties"] = "FALSE_SUPPORT"
     else:
