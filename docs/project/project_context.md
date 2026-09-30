@@ -260,7 +260,7 @@ Eighth U01:                        bootstrap-u01-20260927-008 / INCONCLUSIVE
 Eighth findings:                   7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL
 Semantic grounding audit:          histórico GAP_REQUIRES_HARDENING / sin nueva reevaluación runtime
 E008-SG-01 structural hardening:    PR #218 integrado / exact coverage + uniqueness + canonical order
-E008-SG-02 evidence binding:        OPEN / structural role binding hardening integrado — PR #222 / semantic entailment NOT_VERIFIED
+E008-SG-02 evidence binding:        OPEN / structural role binding PR #222 + bounded support assessment PR #224 integrados / semantic entailment NOT_VERIFIED
 E008-SG-03 assurance boundary:      preservado / GROUNDED != semantic entailment verified
 Relation catalog foundation:       integrado — PR #212
 E3 relation consumption:           integrado — PR #215 / relation identity != semantic truth
