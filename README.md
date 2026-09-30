@@ -493,4 +493,3 @@ Estado reconciliado al baseline integrado `main@ae22f3be23ff1c30093d071c74e86db8
 - `authority_effect = none`; RDD Stage 2 permanece `NOT AUTHORIZED`; Sprint 7.12 permanece `NOT AUTHORIZED`.
 
 Esta reconciliación es derivada. Qualification evidence no equivale a semantic truth, decisión, permiso ni autoridad.
-
