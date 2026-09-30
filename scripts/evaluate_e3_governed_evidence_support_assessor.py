@@ -284,7 +284,7 @@ def _validate_reason_coherence(
     *,
     label: str,
 ) -> None:
-    if outcome not in OUTCOMES:
+    if not isinstance(outcome, str) or outcome not in OUTCOMES:
         raise QualificationInputError(f"{label}_outcome")
     if not reasons or len(reasons) > MAX_REASON_CODES:
         raise QualificationInputError(f"{label}_reason_count")
@@ -506,7 +506,10 @@ def _validate_binding_expectation(
     )
 
     kind = value["binding_kind"]
-    if kind not in {"NONE", "SUBJECT", "EVIDENCE_MATERIAL"}:
+    if (
+        not isinstance(kind, str)
+        or kind not in {"NONE", "SUBJECT", "EVIDENCE_MATERIAL"}
+    ):
         raise QualificationInputError(f"{input_id}_binding_kind")
 
     expected_subject = value["expected_subject_fingerprint"]
@@ -861,13 +864,14 @@ def _validate_artifact(
             raise QualificationInputError(f"assessor_mechanism_{name}")
     if not _is_sha256(mechanism["config_digest"]):
         raise QualificationInputError("assessor_mechanism_config_digest")
-    if mechanism["mechanism_kind"] not in {
-        "DETERMINISTIC",
-        "MODEL_BASED",
-        "HUMAN_REVIEWED",
-    }:
+    mechanism_kind = mechanism["mechanism_kind"]
+    if (
+        not isinstance(mechanism_kind, str)
+        or mechanism_kind
+        not in {"DETERMINISTIC", "MODEL_BASED", "HUMAN_REVIEWED"}
+    ):
         raise QualificationInputError("assessor_mechanism_kind")
-    if mechanism["mechanism_kind"] == "MODEL_BASED":
+    if mechanism_kind == "MODEL_BASED":
         _validate_model_provenance(mechanism["model_provenance"])
     elif mechanism["model_provenance"] is not None:
         raise QualificationInputError(
