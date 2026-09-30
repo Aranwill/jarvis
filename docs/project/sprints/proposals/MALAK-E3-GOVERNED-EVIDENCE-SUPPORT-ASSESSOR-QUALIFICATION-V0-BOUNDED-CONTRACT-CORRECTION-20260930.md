@@ -7,6 +7,7 @@ baseline_commit: 0bf5fab6b4998b9ff8dbbabbb80e16bcddaf2627
 trigger_candidate: 655bde3a16e8d20047d6ee3286c6a4ff89a57294
 trigger_pr: 230
 trigger_validation: 702
+correction_round: 1/2
 authority_effect: none
 red_authorized: false
 green_authorized: false
@@ -192,6 +193,7 @@ subject
 repository_evidence
 knowledge_evidence
 binding_expectation
+binding_prior
 expected_outcome
 expected_reason_codes
 ```
@@ -276,6 +278,7 @@ subject
 repository_evidence
 knowledge_evidence
 binding_expectation
+binding_prior
 ```
 
 Canonicalización:
@@ -360,21 +363,73 @@ El digest debe:
 
 ## 11. Prior binding material
 
-Para C11 y C12, el case-set debe incluir dentro del input una representación
-reproducible del prior binding mediante un campo de evidence material reservado:
+Cada input posee además `binding_prior`.
+
+Para casos con `binding_kind = NONE`:
 
 ```text
-__binding_prior__
+binding_prior = null
 ```
 
-Este reservado NO es un evidence ref productivo.
+Para C11/C12, `binding_prior` es un object exacto:
 
-Su función es únicamente permitir que el reviewer y el runner reconstruyan el
-digest/fingerprint previo declarado.
+```text
+prior_subject
+prior_repository_evidence
+prior_knowledge_evidence
+```
 
-No puede ser pasado al assessor como evidence material.
+### 11.1 C11
 
-Si el prior binding no puede recomputarse:
+```text
+prior_subject                 = complete prior subject object
+prior_repository_evidence     = null
+prior_knowledge_evidence      = null
+```
+
+El runner recomputa el prior subject fingerprint usando la misma canonicalización
+del subject actual y exige coincidencia exacta con
+`expected_subject_fingerprint`.
+
+### 11.2 C12
+
+```text
+prior_subject                 = null
+prior_repository_evidence     = explicit prior repository evidence array
+prior_knowledge_evidence      = explicit prior knowledge evidence array
+```
+
+Al menos una de las dos evidence arrays debe contener material.
+
+El runner calcula `evidence_material_digest` sobre canonical JSON de:
+
+```text
+repository_evidence sorted by ref
+knowledge_evidence sorted by ref
+```
+
+con:
+
+```text
+UTF-8
+sort_keys = true
+separators = (",", ":")
+SHA-256 lowercase
+```
+
+El mismo algoritmo se aplica al evidence material actual.
+
+Para C12:
+
+```text
+prior refs logical set == current refs logical set
+prior evidence_material_digest != current evidence_material_digest
+```
+
+`binding_prior` es ground-truth material del evaluation pack y NO es evidence
+productivo ni puede pasarse al assessor candidate como evidence de soporte.
+
+Si prior binding no puede recomputarse:
 
 ```text
 → case-set invalid
@@ -730,17 +785,75 @@ repo writes             0
 
 ## 23. Output v0.1
 
-Top-level permanece conceptualmente igual, pero:
+Top-level exacto:
 
 ```text
-schema_version = MALAK-E3-SUPPORT-ASSESSOR-QUALIFICATION-OUTPUT/v0.1
-case_count = 18
-input_count = 19
+schema_version
+malak_baseline_commit
+case_set_schema_version
+case_set_digest
+reviewed_case_set_digest
+ground_truth_reviewer_id
+qualification_runner_version
+qualification_runner_digest
+assessor_mechanism_identity
+assessor_result_artifact_digest
+case_count
+input_count
+case_results
+metrics
+qualification_result
+qualification_reasons
+authority_effect
+```
+
+Valores:
+
+```text
+schema_version   = MALAK-E3-SUPPORT-ASSESSOR-QUALIFICATION-OUTPUT/v0.1
+case_count       = 18
+input_count      = 19
 authority_effect = none
 ```
 
-Cada case result debe incluir sus input results y comparison result cuando
-aplique.
+Cada case result posee exactamente:
+
+```text
+case_id
+input_results
+comparison_result
+case_result
+mismatch_reasons
+```
+
+Cada input result posee exactamente:
+
+```text
+input_id
+expected_disposition
+observed_disposition
+expected_reason_codes
+observed_reason_codes
+input_result
+mismatch_reasons
+```
+
+Para cases con `comparison_rule = NONE`:
+
+```text
+comparison_result = null
+```
+
+Para C13:
+
+```text
+comparison_result = {
+  rule,
+  input_ids,
+  result,
+  mismatch_reasons
+}
+```
 
 No existe output parcial etiquetado PASS.
 
@@ -948,6 +1061,7 @@ corregido es requerida si se mantiene el mismo nivel de assurance usado para
 ## 31. Gate result
 
 ```text
+correction round                       1/2
 bounded correction design              PASS
 affected four law questions            PASS
 affected Design 4R                     PASS
