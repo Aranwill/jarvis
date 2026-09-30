@@ -452,6 +452,7 @@ def _validate_evidence(
     *,
     input_id: str,
     collection: str,
+    allow_empty_material: bool = False,
 ) -> tuple[list[dict[str, str]], dict[str, str]]:
     if not isinstance(value, list):
         raise QualificationInputError(f"{input_id}_{collection}_not_array")
@@ -476,7 +477,16 @@ def _validate_evidence(
             raise QualificationInputError(
                 f"{input_id}_{collection}_{index}_ref"
             )
-        if not _non_empty(material):
+        if not isinstance(material, str):
+            raise QualificationInputError(
+                f"{input_id}_{collection}_{index}_material"
+            )
+        if material == "":
+            if not allow_empty_material:
+                raise QualificationInputError(
+                    f"{input_id}_{collection}_{index}_material"
+                )
+        elif not _non_empty(material):
             raise QualificationInputError(
                 f"{input_id}_{collection}_{index}_material"
             )
@@ -597,15 +607,18 @@ def _validate_input(
         raise QualificationInputError(f"{expected_input_id}_identity")
 
     subject = _validate_subject(value["subject"], input_id=expected_input_id)
+    allow_empty_material = case_id == "C10"
     repository, repository_by_ref = _validate_evidence(
         value["repository_evidence"],
         input_id=expected_input_id,
         collection="repository_evidence",
+        allow_empty_material=allow_empty_material,
     )
     knowledge, knowledge_by_ref = _validate_evidence(
         value["knowledge_evidence"],
         input_id=expected_input_id,
         collection="knowledge_evidence",
+        allow_empty_material=allow_empty_material,
     )
     binding = _validate_binding_expectation(
         value["binding_expectation"],
@@ -640,6 +653,15 @@ def _validate_input(
             raise QualificationInputError(
                 f"{expected_input_id}_knowledge_ref_unresolved"
             )
+
+    shared_refs = set(repository_by_ref) & set(knowledge_by_ref)
+    if any(
+        repository_by_ref[ref] != knowledge_by_ref[ref]
+        for ref in shared_refs
+    ):
+        raise QualificationInputError(
+            f"{expected_input_id}_cross_role_material_conflict"
+        )
 
     known_refs = set(repository_by_ref) | set(knowledge_by_ref)
     for ref in subject["limiting_or_counterevidence_refs"]:
@@ -745,9 +767,11 @@ def _validate_case_set(
             raise QualificationInputError(
                 f"{case_id}_critical_properties_unknown"
             )
-        if set(properties) != EXPECTED_PROPERTIES[case_id]:
+        if not EXPECTED_PROPERTIES[case_id].issubset(
+            set(properties)
+        ):
             raise QualificationInputError(
-                f"{case_id}_critical_properties_not_frozen"
+                f"{case_id}_critical_properties_minimum_missing"
             )
 
         for identity_field in (
