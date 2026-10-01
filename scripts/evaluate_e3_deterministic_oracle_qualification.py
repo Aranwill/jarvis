@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 from typing import Any
 
 
-SCHEMA_VERSION = "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-EVIDENCE/v0"
+SCHEMA_VERSION = "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-BUNDLE/v0"
+REVIEW_SCHEMA_VERSION = "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-REVIEW-EVIDENCE/v0"
+VALIDATOR_SCHEMA_VERSION = "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-STRUCTURAL-VALIDATOR/v0"
 QUALIFICATION_METHOD = "INDEPENDENT_REVIEWED_DETERMINISTIC_COVERAGE"
-INDEPENDENCE_EVIDENCE_KIND = "EXTERNAL_CANDIDATE_BOUND_ROLE_SEPARATION"
+RUNNER_VERSION = "e3-deterministic-oracle-qualification/v0"
 
 MAX_OBLIGATIONS = 32
 MAX_OBLIGATION_STATEMENT_BYTES = 4 * 1024
@@ -17,44 +20,33 @@ MAX_TEXT_BYTES = 4 * 1024
 
 RESULTS = {"PASS", "FAIL", "INCONCLUSIVE"}
 
-ARTIFACT_KEYS = {
+BUNDLE_KEYS = {
     "schema_version",
     "repository",
     "evaluated_candidate_commit",
+    "oracle_identity",
+    "governed_question_material",
+    "obligation_catalog",
+    "obligation_catalog_digest",
+    "coverage_entries",
+    "verification_evidence",
+    "verification_evidence_digest",
+    "qualification_material",
+    "qualification_material_digest",
+}
+
+ORACLE_IDENTITY_KEYS = {
     "oracle_id",
     "oracle_version",
     "oracle_content_digest",
     "oracle_producer_subject_id",
-    "relation_id",
-    "evaluation_question_identity",
-    "input_contract_identity",
-    "output_contract_identity",
-    "obligation_catalog_digest",
-    "obligation_count",
-    "coverage_entries",
-    "qualification_method",
-    "qualification_material_digest",
-    "qualification_runner_version",
-    "qualification_runner_digest",
-    "qualification_reviewer_id",
-    "qualification_validator_id",
-    "qualification_result",
-    "qualification_reasons",
-    "authority_effect",
 }
 
-EXPECTED_BINDING_KEYS = {
-    "repository",
-    "evaluated_candidate_commit",
-    "oracle_id",
-    "oracle_version",
-    "oracle_content_digest",
+QUESTION_KEYS = {
     "relation_id",
     "evaluation_question_identity",
     "input_contract_identity",
     "output_contract_identity",
-    "obligation_catalog_digest",
-    "obligation_catalog",
 }
 
 OBLIGATION_KEYS = {
@@ -74,24 +66,50 @@ COVERAGE_ENTRY_KEYS = {
     "entry_reasons",
 }
 
-INDEPENDENCE_KEYS = {
+VERIFICATION_EVIDENCE_KEYS = {
+    "evidence_id",
     "evidence_kind",
-    "evaluated_candidate_commit",
-    "oracle_producer_subject_id",
-    "qualification_reviewer_id",
-    "qualification_validator_id",
-    "review_evidence_digest",
-    "validation_evidence_digest",
-    "authority_effect",
+    "content_digest",
+    "content_or_bounded_material",
+    "candidate_binding",
 }
 
+QUALIFICATION_MATERIAL_KEYS = {
+    "qualification_method",
+    "executing_runner_version",
+    "executing_runner_digest",
+}
 
-def _result(result: str, *reasons: str) -> dict[str, object]:
-    return {
-        "qualification_result": result,
-        "qualification_reasons": list(reasons),
-        "authority_effect": "none",
-    }
+GOVERNED_BINDING_KEYS = {
+    "repository",
+    "evaluated_candidate_commit",
+    "oracle_identity",
+    "governed_question_material",
+    "obligation_catalog_digest",
+    "qualification_bundle_digest",
+}
+
+REVIEW_EVIDENCE_KEYS = {
+    "schema_version",
+    "repository",
+    "evaluated_candidate_commit",
+    "qualification_bundle_digest",
+    "reviewed_relation_id",
+    "reviewed_evaluation_question_identity",
+    "reviewed_obligation_catalog_digest",
+    "implementation_actor_id",
+    "qualification_reviewer_id",
+    "qualification_validator_id",
+    "structural_validator_result",
+    "structural_validator_evidence_reference",
+    "catalog_completeness_result",
+    "independence_review_result",
+    "verification_material_review_result",
+    "qualification_review_result",
+    "finding_refs",
+    "evidence_references",
+    "authority_effect",
+}
 
 
 def _canonical_json(value: object) -> bytes:
@@ -105,6 +123,10 @@ def _canonical_json(value: object) -> bytes:
 
 def _sha256(value: object) -> str:
     return hashlib.sha256(_canonical_json(value)).hexdigest()
+
+
+def _executing_runner_digest() -> str:
+    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
 def _is_exact_keys(value: object, keys: set[str]) -> bool:
@@ -145,135 +167,59 @@ def _is_identity64(value: object) -> bool:
     )
 
 
-def _artifact_within_bound(artifact: object) -> bool:
+def _within_artifact_bound(value: object) -> bool:
     try:
-        encoded = _canonical_json(artifact)
+        return len(_canonical_json(value)) <= MAX_ARTIFACT_BYTES
     except (TypeError, ValueError, OverflowError):
         return False
-    return len(encoded) <= MAX_ARTIFACT_BYTES
 
 
-def _validate_global_shape(
-    artifact: object,
-    expected_binding: object,
-) -> str | None:
-    if not _is_exact_keys(artifact, ARTIFACT_KEYS):
-        return "ARTIFACT_SCHEMA_INVALID"
-    if not _is_exact_keys(expected_binding, EXPECTED_BINDING_KEYS):
-        return "EXPECTED_BINDING_SCHEMA_INVALID"
-
-    assert isinstance(artifact, dict)
-    assert isinstance(expected_binding, dict)
-
-    if not _artifact_within_bound(artifact):
-        return "ARTIFACT_BOUND_EXCEEDED"
-    if artifact["schema_version"] != SCHEMA_VERSION:
-        return "SCHEMA_VERSION_INVALID"
-    if artifact["authority_effect"] != "none":
-        return "AUTHORITY_EFFECT_INVALID"
-    if artifact["qualification_method"] != QUALIFICATION_METHOD:
-        return "QUALIFICATION_METHOD_INVALID"
-    if artifact["qualification_result"] not in RESULTS:
-        return "DECLARED_RESULT_INVALID"
-    if not isinstance(artifact["qualification_reasons"], list):
-        return "DECLARED_REASONS_INVALID"
-
-    text_fields = (
-        "repository",
-        "oracle_id",
-        "oracle_version",
-        "oracle_producer_subject_id",
-        "relation_id",
-        "qualification_runner_version",
-        "qualification_reviewer_id",
-        "qualification_validator_id",
-    )
-    if any(not _bounded_text(artifact[name]) for name in text_fields):
-        return "IDENTITY_TEXT_INVALID"
-
-    if not _is_sha40(artifact["evaluated_candidate_commit"]):
-        return "CANDIDATE_IDENTITY_INVALID"
-
-    sha_fields = (
-        "oracle_content_digest",
-        "input_contract_identity",
-        "output_contract_identity",
-        "obligation_catalog_digest",
-        "qualification_material_digest",
-        "qualification_runner_digest",
-    )
-    if any(not _is_sha256(artifact[name]) for name in sha_fields):
-        return "DIGEST_IDENTITY_INVALID"
-
-    if not _is_identity64(artifact["evaluation_question_identity"]):
-        return "EVALUATION_QUESTION_IDENTITY_INVALID"
-
-    if not isinstance(artifact["obligation_count"], int):
-        return "OBLIGATION_COUNT_INVALID"
-    if isinstance(artifact["obligation_count"], bool):
-        return "OBLIGATION_COUNT_INVALID"
-    if artifact["obligation_count"] < 1 or artifact["obligation_count"] > MAX_OBLIGATIONS:
-        return "OBLIGATION_COUNT_OUT_OF_BOUNDS"
-
-    if not isinstance(artifact["coverage_entries"], list):
-        return "COVERAGE_ENTRIES_INVALID"
-    if len(artifact["coverage_entries"]) > MAX_OBLIGATIONS:
-        return "COVERAGE_ENTRIES_OUT_OF_BOUNDS"
-
-    return None
+def _safe_bundle_digest(artifact: object) -> str | None:
+    try:
+        return _sha256(artifact)
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
-def _validate_exact_binding(
-    artifact: dict[str, Any],
-    expected_binding: dict[str, Any],
-) -> str | None:
-    binding_fields = (
-        "repository",
-        "evaluated_candidate_commit",
-        "oracle_id",
-        "oracle_version",
-        "oracle_content_digest",
-        "relation_id",
-        "evaluation_question_identity",
-        "input_contract_identity",
-        "output_contract_identity",
-        "obligation_catalog_digest",
-    )
-    for name in binding_fields:
-        if artifact[name] != expected_binding[name]:
-            return "EXPECTED_BINDING_MISMATCH"
-
-    if not _bounded_text(expected_binding["repository"]):
-        return "EXPECTED_BINDING_INVALID"
-    if not _is_sha40(expected_binding["evaluated_candidate_commit"]):
-        return "EXPECTED_BINDING_INVALID"
-    if not _is_sha256(expected_binding["oracle_content_digest"]):
-        return "EXPECTED_BINDING_INVALID"
-    if not _is_identity64(expected_binding["evaluation_question_identity"]):
-        return "EXPECTED_BINDING_INVALID"
-    for name in (
-        "input_contract_identity",
-        "output_contract_identity",
-        "obligation_catalog_digest",
-    ):
-        if not _is_sha256(expected_binding[name]):
-            return "EXPECTED_BINDING_INVALID"
-
-    return None
+def _result(
+    *,
+    validator_result: str,
+    validator_reasons: list[str],
+    candidate_commit: object,
+    bundle_digest: str | None,
+    qualification_review_result: str = "INCONCLUSIVE",
+    qualification_review_reasons: list[str] | None = None,
+) -> dict[str, object]:
+    candidate = candidate_commit if _is_sha40(candidate_commit) else None
+    return {
+        "validator_schema": VALIDATOR_SCHEMA_VERSION,
+        "validator_result": validator_result,
+        "validator_reasons": validator_reasons,
+        "candidate_commit": candidate,
+        "qualification_bundle_digest": bundle_digest,
+        "executing_runner_version": RUNNER_VERSION,
+        "executing_runner_digest": _executing_runner_digest(),
+        "requires_external_validation": True,
+        "identity_independence_verified": False,
+        "qualification_review_result": qualification_review_result,
+        "qualification_review_reasons": (
+            qualification_review_reasons
+            if qualification_review_reasons is not None
+            else ["EXTERNAL_REVIEW_REQUIRED"]
+        ),
+        "authority_effect": "none",
+    }
 
 
 def _validate_catalog(
-    *,
     artifact: dict[str, Any],
-    expected_binding: dict[str, Any],
+    question: dict[str, Any],
 ) -> tuple[dict[str, dict[str, str]] | None, str | None]:
-    catalog = expected_binding["obligation_catalog"]
-    if not isinstance(catalog, list):
+    catalog = artifact["obligation_catalog"]
+    if not isinstance(catalog, list) or not catalog:
         return None, "OBLIGATION_CATALOG_INVALID"
-    if not catalog or len(catalog) > MAX_OBLIGATIONS:
+    if len(catalog) > MAX_OBLIGATIONS:
         return None, "OBLIGATION_CATALOG_OUT_OF_BOUNDS"
-    if artifact["obligation_count"] != len(catalog):
-        return None, "OBLIGATION_COUNT_MISMATCH"
 
     by_id: dict[str, dict[str, str]] = {}
     identities: set[str] = set()
@@ -289,7 +235,7 @@ def _validate_catalog(
 
         if not _bounded_text(obligation_id):
             return None, "OBLIGATION_ID_INVALID"
-        if obligation_id.lower() in {"other", "*"}:
+        if str(obligation_id).lower() in {"other", "*"}:
             return None, "OBLIGATION_CATCH_ALL_FORBIDDEN"
         if not _bounded_text(
             statement,
@@ -303,8 +249,8 @@ def _validate_catalog(
 
         expected_identity = _sha256(
             {
-                "relation_id": artifact["relation_id"],
-                "evaluation_question_identity": artifact[
+                "relation_id": question["relation_id"],
+                "evaluation_question_identity": question[
                     "evaluation_question_identity"
                 ],
                 "obligation_id": obligation_id,
@@ -314,65 +260,66 @@ def _validate_catalog(
         if identity != expected_identity:
             return None, "OBLIGATION_IDENTITY_MISMATCH"
 
-        by_id[obligation_id] = {
-            "obligation_id": obligation_id,
-            "obligation_statement": statement,
-            "obligation_identity": identity,
+        by_id[str(obligation_id)] = {
+            "obligation_id": str(obligation_id),
+            "obligation_statement": str(statement),
+            "obligation_identity": str(identity),
         }
-        identities.add(identity)
+        identities.add(str(identity))
+
+    if artifact["obligation_catalog_digest"] != _sha256(catalog):
+        return None, "OBLIGATION_CATALOG_DIGEST_MISMATCH"
 
     return by_id, None
 
 
-def _validate_independence(
-    *,
+def _validate_verification_evidence(
     artifact: dict[str, Any],
-    evidence: object,
-) -> str | None:
-    if not _is_exact_keys(evidence, INDEPENDENCE_KEYS):
-        return "INDEPENDENCE_EVIDENCE_INVALID"
+) -> tuple[set[str] | None, str | None]:
+    items = artifact["verification_evidence"]
+    if not isinstance(items, list) or not items:
+        return None, "VERIFICATION_EVIDENCE_INVALID"
 
-    assert isinstance(evidence, dict)
+    if artifact["verification_evidence_digest"] != _sha256(items):
+        return None, "VERIFICATION_EVIDENCE_DIGEST_MISMATCH"
 
-    if evidence["evidence_kind"] != INDEPENDENCE_EVIDENCE_KIND:
-        return "INDEPENDENCE_EVIDENCE_KIND_INVALID"
-    if evidence["authority_effect"] != "none":
-        return "INDEPENDENCE_AUTHORITY_INVALID"
-    if evidence["evaluated_candidate_commit"] != artifact["evaluated_candidate_commit"]:
-        return "INDEPENDENCE_CANDIDATE_MISMATCH"
+    candidate = artifact["evaluated_candidate_commit"]
+    evidence_ids: set[str] = set()
 
-    identity_fields = (
-        "oracle_producer_subject_id",
-        "qualification_reviewer_id",
-        "qualification_validator_id",
-    )
-    for name in identity_fields:
-        if not _bounded_text(evidence[name]):
-            return "INDEPENDENCE_IDENTITY_INVALID"
-        if evidence[name] != artifact[name]:
-            return "INDEPENDENCE_IDENTITY_MISMATCH"
+    for item in items:
+        if not _is_exact_keys(item, VERIFICATION_EVIDENCE_KEYS):
+            return None, "VERIFICATION_EVIDENCE_SCHEMA_INVALID"
+        assert isinstance(item, dict)
 
-    producer = artifact["oracle_producer_subject_id"]
-    reviewer = artifact["qualification_reviewer_id"]
-    validator = artifact["qualification_validator_id"]
-    if len({producer, reviewer, validator}) != 3:
-        return "ROLE_SEPARATION_NOT_DEMONSTRATED"
+        evidence_id = item["evidence_id"]
+        if not _bounded_text(evidence_id) or evidence_id in evidence_ids:
+            return None, "VERIFICATION_EVIDENCE_ID_INVALID"
+        if not _bounded_text(item["evidence_kind"]):
+            return None, "VERIFICATION_EVIDENCE_KIND_INVALID"
+        if not _is_sha256(item["content_digest"]):
+            return None, "VERIFICATION_EVIDENCE_CONTENT_DIGEST_INVALID"
+        if item["content_digest"] != _sha256(item["content_or_bounded_material"]):
+            return None, "VERIFICATION_EVIDENCE_CONTENT_DIGEST_MISMATCH"
+        if item["candidate_binding"] != candidate:
+            return None, "VERIFICATION_EVIDENCE_CANDIDATE_MISMATCH"
 
-    if not _is_sha256(evidence["review_evidence_digest"]):
-        return "REVIEW_EVIDENCE_DIGEST_INVALID"
-    if not _is_sha256(evidence["validation_evidence_digest"]):
-        return "VALIDATION_EVIDENCE_DIGEST_INVALID"
+        evidence_ids.add(str(evidence_id))
 
-    return None
+    return evidence_ids, None
 
 
 def _validate_coverage(
     *,
     artifact: dict[str, Any],
+    oracle: dict[str, Any],
+    question: dict[str, Any],
     catalog_by_id: dict[str, dict[str, str]],
-) -> tuple[list[str] | None, str | None]:
+    evidence_ids: set[str],
+) -> tuple[str | None, str | None]:
     entries = artifact["coverage_entries"]
-    if len(entries) != len(catalog_by_id):
+    if not isinstance(entries, list):
+        return None, "COVERAGE_ENTRIES_INVALID"
+    if len(entries) != len(catalog_by_id) or len(entries) > MAX_OBLIGATIONS:
         return None, "COVERAGE_CARDINALITY_MISMATCH"
 
     seen_ids: set[str] = set()
@@ -397,7 +344,7 @@ def _validate_coverage(
         if obligation_id not in catalog_by_id:
             return None, "COVERAGE_OBLIGATION_UNKNOWN"
 
-        catalog_item = catalog_by_id[obligation_id]
+        catalog_item = catalog_by_id[str(obligation_id)]
         if obligation_identity != catalog_item["obligation_identity"]:
             return None, "COVERAGE_OBLIGATION_IDENTITY_MISMATCH"
 
@@ -410,8 +357,8 @@ def _validate_coverage(
 
         expected_check_identity = _sha256(
             {
-                "oracle_id": artifact["oracle_id"],
-                "oracle_version": artifact["oracle_version"],
+                "oracle_id": oracle["oracle_id"],
+                "oracle_version": oracle["oracle_version"],
                 "check_id": check_id,
             }
         )
@@ -421,8 +368,8 @@ def _validate_coverage(
         expected_check_contract_digest = _sha256(
             {
                 "check_id": check_id,
-                "input_contract_identity": artifact["input_contract_identity"],
-                "output_contract_identity": artifact["output_contract_identity"],
+                "input_contract_identity": question["input_contract_identity"],
+                "output_contract_identity": question["output_contract_identity"],
             }
         )
         if check_contract_digest != expected_check_contract_digest:
@@ -436,6 +383,8 @@ def _validate_coverage(
             return None, "VERIFICATION_EVIDENCE_REF_INVALID"
         if len(set(refs)) != len(refs):
             return None, "VERIFICATION_EVIDENCE_REF_DUPLICATE"
+        if any(ref not in evidence_ids for ref in refs):
+            return None, "VERIFICATION_EVIDENCE_REF_UNRESOLVED"
 
         if entry_result not in RESULTS:
             return None, "ENTRY_RESULT_INVALID"
@@ -444,13 +393,249 @@ def _validate_coverage(
         if any(not _bounded_text(reason) for reason in entry_reasons):
             return None, "ENTRY_REASON_INVALID"
 
-        seen_ids.add(obligation_id)
-        outcomes.append(entry_result)
+        seen_ids.add(str(obligation_id))
+        outcomes.append(str(entry_result))
 
     if seen_ids != set(catalog_by_id):
         return None, "COVERAGE_SET_MISMATCH"
 
-    return outcomes, None
+    if "FAIL" in outcomes:
+        return "FAIL", None
+    if "INCONCLUSIVE" in outcomes:
+        return "INCONCLUSIVE", None
+    return "PASS", None
+
+
+def _validate_bundle(
+    artifact: object,
+) -> tuple[str, list[str], str | None, str | None]:
+    bundle_digest = _safe_bundle_digest(artifact)
+    if not _is_exact_keys(artifact, BUNDLE_KEYS):
+        return "INCONCLUSIVE", ["BUNDLE_SCHEMA_INVALID"], None, bundle_digest
+    assert isinstance(artifact, dict)
+
+    if not _within_artifact_bound(artifact):
+        return "INCONCLUSIVE", ["BUNDLE_BOUND_EXCEEDED"], None, bundle_digest
+    if artifact["schema_version"] != SCHEMA_VERSION:
+        return "INCONCLUSIVE", ["BUNDLE_SCHEMA_VERSION_INVALID"], None, bundle_digest
+    if not _bounded_text(artifact["repository"]):
+        return "INCONCLUSIVE", ["REPOSITORY_INVALID"], None, bundle_digest
+    if not _is_sha40(artifact["evaluated_candidate_commit"]):
+        return "INCONCLUSIVE", ["CANDIDATE_IDENTITY_INVALID"], None, bundle_digest
+
+    oracle = artifact["oracle_identity"]
+    if not _is_exact_keys(oracle, ORACLE_IDENTITY_KEYS):
+        return "INCONCLUSIVE", ["ORACLE_IDENTITY_SCHEMA_INVALID"], None, bundle_digest
+    assert isinstance(oracle, dict)
+    if any(
+        not _bounded_text(oracle[name])
+        for name in ("oracle_id", "oracle_version", "oracle_producer_subject_id")
+    ):
+        return "INCONCLUSIVE", ["ORACLE_IDENTITY_INVALID"], None, bundle_digest
+    if not _is_sha256(oracle["oracle_content_digest"]):
+        return "INCONCLUSIVE", ["ORACLE_CONTENT_DIGEST_INVALID"], None, bundle_digest
+
+    question = artifact["governed_question_material"]
+    if not _is_exact_keys(question, QUESTION_KEYS):
+        return "INCONCLUSIVE", ["QUESTION_MATERIAL_SCHEMA_INVALID"], None, bundle_digest
+    assert isinstance(question, dict)
+    if not _bounded_text(question["relation_id"]):
+        return "INCONCLUSIVE", ["RELATION_ID_INVALID"], None, bundle_digest
+    if not _is_identity64(question["evaluation_question_identity"]):
+        return "INCONCLUSIVE", ["EVALUATION_QUESTION_IDENTITY_INVALID"], None, bundle_digest
+    if not _is_sha256(question["input_contract_identity"]):
+        return "INCONCLUSIVE", ["INPUT_CONTRACT_IDENTITY_INVALID"], None, bundle_digest
+    if not _is_sha256(question["output_contract_identity"]):
+        return "INCONCLUSIVE", ["OUTPUT_CONTRACT_IDENTITY_INVALID"], None, bundle_digest
+
+    if not _is_sha256(artifact["obligation_catalog_digest"]):
+        return "INCONCLUSIVE", ["OBLIGATION_CATALOG_DIGEST_INVALID"], None, bundle_digest
+    catalog_by_id, error = _validate_catalog(artifact, question)
+    if error is not None or catalog_by_id is None:
+        return "INCONCLUSIVE", [error or "OBLIGATION_CATALOG_INVALID"], None, bundle_digest
+
+    if not _is_sha256(artifact["verification_evidence_digest"]):
+        return "INCONCLUSIVE", ["VERIFICATION_EVIDENCE_DIGEST_INVALID"], None, bundle_digest
+    evidence_ids, error = _validate_verification_evidence(artifact)
+    if error is not None or evidence_ids is None:
+        return "INCONCLUSIVE", [error or "VERIFICATION_EVIDENCE_INVALID"], None, bundle_digest
+
+    coverage_result, error = _validate_coverage(
+        artifact=artifact,
+        oracle=oracle,
+        question=question,
+        catalog_by_id=catalog_by_id,
+        evidence_ids=evidence_ids,
+    )
+    if error is not None or coverage_result is None:
+        return "INCONCLUSIVE", [error or "COVERAGE_INVALID"], None, bundle_digest
+
+    material = artifact["qualification_material"]
+    if not _is_exact_keys(material, QUALIFICATION_MATERIAL_KEYS):
+        return "INCONCLUSIVE", ["QUALIFICATION_MATERIAL_SCHEMA_INVALID"], None, bundle_digest
+    assert isinstance(material, dict)
+    if material["qualification_method"] != QUALIFICATION_METHOD:
+        return "INCONCLUSIVE", ["QUALIFICATION_METHOD_INVALID"], None, bundle_digest
+    if material["executing_runner_version"] != RUNNER_VERSION:
+        return "INCONCLUSIVE", ["RUNNER_VERSION_INVALID"], None, bundle_digest
+    if not _is_sha256(material["executing_runner_digest"]):
+        return "INCONCLUSIVE", ["RUNNER_DIGEST_INVALID"], None, bundle_digest
+    if material["executing_runner_digest"] != _executing_runner_digest():
+        return "INCONCLUSIVE", ["RUNNER_DIGEST_MISMATCH"], None, bundle_digest
+
+    if not _is_sha256(artifact["qualification_material_digest"]):
+        return "INCONCLUSIVE", ["QUALIFICATION_MATERIAL_DIGEST_INVALID"], None, bundle_digest
+    if artifact["qualification_material_digest"] != _sha256(material):
+        return "INCONCLUSIVE", ["QUALIFICATION_MATERIAL_DIGEST_MISMATCH"], None, bundle_digest
+
+    return "PASS", [], coverage_result, bundle_digest
+
+
+def _validate_governed_binding(
+    *,
+    artifact: dict[str, Any],
+    expected_binding: object,
+    bundle_digest: str,
+) -> str | None:
+    if not _is_exact_keys(expected_binding, GOVERNED_BINDING_KEYS):
+        return "GOVERNED_BINDING_SCHEMA_INVALID"
+    assert isinstance(expected_binding, dict)
+
+    if expected_binding["repository"] != artifact["repository"]:
+        return "GOVERNED_BINDING_REPOSITORY_MISMATCH"
+    if (
+        expected_binding["evaluated_candidate_commit"]
+        != artifact["evaluated_candidate_commit"]
+    ):
+        return "GOVERNED_BINDING_CANDIDATE_MISMATCH"
+    if expected_binding["oracle_identity"] != artifact["oracle_identity"]:
+        return "GOVERNED_BINDING_ORACLE_MISMATCH"
+    if (
+        expected_binding["governed_question_material"]
+        != artifact["governed_question_material"]
+    ):
+        return "GOVERNED_BINDING_QUESTION_MISMATCH"
+    if (
+        expected_binding["obligation_catalog_digest"]
+        != artifact["obligation_catalog_digest"]
+    ):
+        return "GOVERNED_BINDING_CATALOG_MISMATCH"
+    if expected_binding["qualification_bundle_digest"] != bundle_digest:
+        return "GOVERNED_BINDING_BUNDLE_MISMATCH"
+
+    return None
+
+
+def _validate_review_evidence(
+    *,
+    artifact: dict[str, Any],
+    review_evidence: object,
+    bundle_digest: str,
+    validator_result: str,
+    coverage_result: str,
+) -> tuple[str, list[str]]:
+    if review_evidence is None:
+        return "INCONCLUSIVE", ["EXTERNAL_REVIEW_REQUIRED"]
+    if not _is_exact_keys(review_evidence, REVIEW_EVIDENCE_KEYS):
+        return "INCONCLUSIVE", ["REVIEW_EVIDENCE_SCHEMA_INVALID"]
+    assert isinstance(review_evidence, dict)
+
+    if review_evidence["schema_version"] != REVIEW_SCHEMA_VERSION:
+        return "INCONCLUSIVE", ["REVIEW_SCHEMA_VERSION_INVALID"]
+    if review_evidence["authority_effect"] != "none":
+        return "INCONCLUSIVE", ["REVIEW_AUTHORITY_EFFECT_INVALID"]
+    if review_evidence["repository"] != artifact["repository"]:
+        return "INCONCLUSIVE", ["REVIEW_REPOSITORY_MISMATCH"]
+    if (
+        review_evidence["evaluated_candidate_commit"]
+        != artifact["evaluated_candidate_commit"]
+    ):
+        return "INCONCLUSIVE", ["REVIEW_CANDIDATE_MISMATCH"]
+    if review_evidence["qualification_bundle_digest"] != bundle_digest:
+        return "INCONCLUSIVE", ["REVIEW_BUNDLE_DIGEST_MISMATCH"]
+
+    question = artifact["governed_question_material"]
+    assert isinstance(question, dict)
+    if review_evidence["reviewed_relation_id"] != question["relation_id"]:
+        return "INCONCLUSIVE", ["REVIEW_RELATION_MISMATCH"]
+    if (
+        review_evidence["reviewed_evaluation_question_identity"]
+        != question["evaluation_question_identity"]
+    ):
+        return "INCONCLUSIVE", ["REVIEW_QUESTION_MISMATCH"]
+    if (
+        review_evidence["reviewed_obligation_catalog_digest"]
+        != artifact["obligation_catalog_digest"]
+    ):
+        return "INCONCLUSIVE", ["REVIEW_CATALOG_DIGEST_MISMATCH"]
+
+    role_fields = (
+        "implementation_actor_id",
+        "qualification_reviewer_id",
+        "qualification_validator_id",
+    )
+    if any(not _bounded_text(review_evidence[name]) for name in role_fields):
+        return "INCONCLUSIVE", ["REVIEW_ROLE_ID_INVALID"]
+
+    oracle = artifact["oracle_identity"]
+    assert isinstance(oracle, dict)
+    declared_roles = {
+        str(oracle["oracle_producer_subject_id"]),
+        *(str(review_evidence[name]) for name in role_fields),
+    }
+    if len(declared_roles) != 4:
+        return "INCONCLUSIVE", ["DECLARED_ROLE_SEPARATION_NOT_DEMONSTRATED"]
+
+    if not _bounded_text(review_evidence["structural_validator_evidence_reference"]):
+        return "INCONCLUSIVE", ["STRUCTURAL_VALIDATOR_EVIDENCE_REF_INVALID"]
+
+    if review_evidence["structural_validator_result"] not in RESULTS:
+        return "INCONCLUSIVE", ["REVIEW_STRUCTURAL_RESULT_INVALID"]
+    if review_evidence["structural_validator_result"] != validator_result:
+        return "INCONCLUSIVE", ["REVIEW_STRUCTURAL_RESULT_MISMATCH"]
+
+    dimension_fields = (
+        "catalog_completeness_result",
+        "independence_review_result",
+        "verification_material_review_result",
+    )
+    if any(review_evidence[name] not in RESULTS for name in dimension_fields):
+        return "INCONCLUSIVE", ["REVIEW_DIMENSION_RESULT_INVALID"]
+    if review_evidence["qualification_review_result"] not in RESULTS:
+        return "INCONCLUSIVE", ["REVIEW_TERMINAL_RESULT_INVALID"]
+
+    finding_refs = review_evidence["finding_refs"]
+    evidence_refs = review_evidence["evidence_references"]
+    if not isinstance(finding_refs, list) or any(
+        not _bounded_text(ref) for ref in finding_refs
+    ):
+        return "INCONCLUSIVE", ["REVIEW_FINDING_REFS_INVALID"]
+    if (
+        not isinstance(evidence_refs, list)
+        or not evidence_refs
+        or any(not _bounded_text(ref) for ref in evidence_refs)
+    ):
+        return "INCONCLUSIVE", ["REVIEW_EVIDENCE_REFS_INVALID"]
+
+    if validator_result != "PASS":
+        derived = validator_result
+    elif coverage_result == "FAIL":
+        derived = "FAIL"
+    elif coverage_result == "INCONCLUSIVE":
+        derived = "INCONCLUSIVE"
+    else:
+        dimensions = [str(review_evidence[name]) for name in dimension_fields]
+        if "FAIL" in dimensions:
+            derived = "FAIL"
+        elif "INCONCLUSIVE" in dimensions:
+            derived = "INCONCLUSIVE"
+        else:
+            derived = "PASS"
+
+    if review_evidence["qualification_review_result"] != derived:
+        return "INCONCLUSIVE", ["REVIEW_TERMINAL_RESULT_MISMATCH"]
+
+    return derived, []
 
 
 def evaluate_qualification_evidence_v0(
@@ -459,52 +644,67 @@ def evaluate_qualification_evidence_v0(
     expected_binding: object,
     independence_evidence: object,
 ) -> dict[str, object]:
-    """Evaluate bounded structural qualification evidence with zero authority effect."""
+    """Validate a bounded qualification bundle without acquiring authority."""
 
     try:
-        global_error = _validate_global_shape(artifact, expected_binding)
-        if global_error is not None:
-            return _result("INCONCLUSIVE", global_error)
+        validator_result, reasons, coverage_result, bundle_digest = _validate_bundle(
+            artifact
+        )
+
+        candidate_commit = (
+            artifact.get("evaluated_candidate_commit")
+            if isinstance(artifact, dict)
+            else None
+        )
+
+        if validator_result != "PASS" or coverage_result is None or bundle_digest is None:
+            return _result(
+                validator_result=validator_result,
+                validator_reasons=reasons,
+                candidate_commit=candidate_commit,
+                bundle_digest=bundle_digest,
+            )
 
         assert isinstance(artifact, dict)
-        assert isinstance(expected_binding, dict)
 
-        binding_error = _validate_exact_binding(artifact, expected_binding)
-        if binding_error is not None:
-            return _result("INCONCLUSIVE", binding_error)
-
-        catalog_by_id, catalog_error = _validate_catalog(
+        binding_error = _validate_governed_binding(
             artifact=artifact,
             expected_binding=expected_binding,
+            bundle_digest=bundle_digest,
         )
-        if catalog_error is not None or catalog_by_id is None:
+        if binding_error is not None:
             return _result(
-                "INCONCLUSIVE",
-                catalog_error or "OBLIGATION_CATALOG_INVALID",
+                validator_result="INCONCLUSIVE",
+                validator_reasons=[binding_error],
+                candidate_commit=candidate_commit,
+                bundle_digest=bundle_digest,
             )
 
-        independence_error = _validate_independence(
+        review_result, review_reasons = _validate_review_evidence(
             artifact=artifact,
-            evidence=independence_evidence,
+            review_evidence=independence_evidence,
+            bundle_digest=bundle_digest,
+            validator_result=validator_result,
+            coverage_result=coverage_result,
         )
-        if independence_error is not None:
-            return _result("INCONCLUSIVE", independence_error)
 
-        outcomes, coverage_error = _validate_coverage(
-            artifact=artifact,
-            catalog_by_id=catalog_by_id,
+        return _result(
+            validator_result=validator_result,
+            validator_reasons=[],
+            candidate_commit=candidate_commit,
+            bundle_digest=bundle_digest,
+            qualification_review_result=review_result,
+            qualification_review_reasons=review_reasons,
         )
-        if coverage_error is not None or outcomes is None:
-            return _result(
-                "INCONCLUSIVE",
-                coverage_error or "COVERAGE_INVALID",
-            )
-
-        if "FAIL" in outcomes:
-            return _result("FAIL", "MATERIAL_NON_COVERAGE")
-        if "INCONCLUSIVE" in outcomes:
-            return _result("INCONCLUSIVE", "COVERAGE_UNRESOLVED")
-
-        return _result("PASS", "FULL_COVERAGE_DERIVED")
-    except (AssertionError, KeyError, TypeError, ValueError, OverflowError):
-        return _result("INCONCLUSIVE", "QUALIFICATION_INPUT_INVALID")
+    except (AssertionError, KeyError, TypeError, ValueError, OverflowError, OSError):
+        candidate_commit = (
+            artifact.get("evaluated_candidate_commit")
+            if isinstance(artifact, dict)
+            else None
+        )
+        return _result(
+            validator_result="INCONCLUSIVE",
+            validator_reasons=["QUALIFICATION_INPUT_INVALID"],
+            candidate_commit=candidate_commit,
+            bundle_digest=_safe_bundle_digest(artifact),
+        )
