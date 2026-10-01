@@ -694,25 +694,27 @@ decisión de runtime.
 
 ## 19. Original artifact declared result
 
-El input no necesita ni confía en:
+El nuevo schema del Qualification Bundle V0 **NO admite**:
 
 ~~~text
 qualification_result
 qualification_reasons
 ~~~
 
-como afirmación del oracle/caller.
+como campos de input.
 
-Si se conserva por compatibilidad histórica:
+Regla congelada:
 
 ~~~text
-declared qualification result
-!= derived review result
+caller supplies qualification_result and/or qualification_reasons
+→ schema mismatch
+→ validator_result = INCONCLUSIVE
+→ qualification cannot PASS
 ~~~
 
-Debe ser ignorado para terminal aggregation o rechazado en el nuevo schema.
-
-La decisión exacta se congela antes de RED.
+No existe compatibilidad legacy dentro del Bundle V0 para estos campos.
+El resultado terminal sólo puede derivarse de Structural Validation +
+Independent Qualification Review Evidence bajo los bindings exactos aplicables.
 
 ## 20. Mapping de findings F237-F4R
 
@@ -962,6 +964,7 @@ TB-R17 external review INCONCLUSIVE propagates INCONCLUSIVE
 TB-R18 all exact dimensions PASS can support qualification review PASS
 TB-R19 authority_effect remains none
 TB-R20 no Stage 2 / runtime / routing wiring
+TB-R21 caller-declared qualification_result/reasons → schema mismatch → structural INCONCLUSIVE → no qualification PASS
 ~~~
 
 ## 26. Future implementation surface — NOT AUTHORIZED
