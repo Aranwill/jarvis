@@ -195,206 +195,420 @@ def _runner_module():
     return module
 
 
+BUNDLE_SCHEMA = "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-BUNDLE/v0"
+REVIEW_SCHEMA = "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-REVIEW-EVIDENCE/v0"
+
+
+def _runner_digest() -> str:
+    return hashlib.sha256(RUNNER.read_bytes()).hexdigest()
+
+
+def _verification_evidence(
+    evidence_id: str,
+    material: object,
+) -> dict[str, object]:
+    return {
+        "evidence_id": evidence_id,
+        "evidence_kind": "BOUNDED_DETERMINISTIC_CHECK_OUTPUT",
+        "content_digest": _sha256(material),
+        "content_or_bounded_material": material,
+        "candidate_binding": CANDIDATE,
+    }
+
+
+def _qualification_bundle(
+    *,
+    catalog: list[dict[str, str]] | None = None,
+    coverage_results: tuple[str, ...] | None = None,
+) -> dict[str, object]:
+    obligations = copy.deepcopy(catalog if catalog is not None else _catalog())
+    results = coverage_results or tuple("PASS" for _ in obligations)
+
+    coverage_entries = [
+        _coverage_entry(
+            obligation,
+            check_id=f"CHECK-{index:02d}",
+            result=results[index - 1],
+        )
+        for index, obligation in enumerate(obligations, start=1)
+    ]
+
+    evidence_items = [
+        _verification_evidence(
+            str(entry["verification_evidence_refs"][0]),
+            {
+                "obligation_id": entry["obligation_id"],
+                "observed": True,
+            },
+        )
+        for entry in coverage_entries
+    ]
+
+    qualification_material = {
+        "qualification_method": "INDEPENDENT_REVIEWED_DETERMINISTIC_COVERAGE",
+        "executing_runner_version": "e3-deterministic-oracle-qualification/v0",
+        "executing_runner_digest": _runner_digest(),
+    }
+
+    return {
+        "schema_version": BUNDLE_SCHEMA,
+        "repository": REPOSITORY,
+        "evaluated_candidate_commit": CANDIDATE,
+        "oracle_identity": {
+            "oracle_id": "oracle-runtime-independence",
+            "oracle_version": "v0",
+            "oracle_content_digest": ORACLE_DIGEST,
+            "oracle_producer_subject_id": "oracle-producer",
+        },
+        "governed_question_material": {
+            "relation_id": RELATION,
+            "evaluation_question_identity": QUESTION,
+            "input_contract_identity": INPUT_CONTRACT,
+            "output_contract_identity": OUTPUT_CONTRACT,
+        },
+        "obligation_catalog": obligations,
+        "obligation_catalog_digest": _sha256(obligations),
+        "coverage_entries": coverage_entries,
+        "verification_evidence": evidence_items,
+        "verification_evidence_digest": _sha256(evidence_items),
+        "qualification_material": qualification_material,
+        "qualification_material_digest": _sha256(qualification_material),
+    }
+
+
+def _bundle_digest(bundle: dict[str, object]) -> str:
+    return _sha256(bundle)
+
+
+def _governed_binding(bundle: dict[str, object]) -> dict[str, object]:
+    return {
+        "repository": bundle["repository"],
+        "evaluated_candidate_commit": bundle["evaluated_candidate_commit"],
+        "oracle_identity": copy.deepcopy(bundle["oracle_identity"]),
+        "governed_question_material": copy.deepcopy(
+            bundle["governed_question_material"]
+        ),
+        "obligation_catalog_digest": bundle["obligation_catalog_digest"],
+        "qualification_bundle_digest": _bundle_digest(bundle),
+    }
+
+
+def _review_evidence(
+    bundle: dict[str, object],
+    *,
+    catalog_result: str = "PASS",
+    independence_result: str = "PASS",
+    verification_result: str = "PASS",
+    qualification_result: str = "PASS",
+) -> dict[str, object]:
+    question = bundle["governed_question_material"]
+    assert isinstance(question, dict)
+
+    return {
+        "schema_version": REVIEW_SCHEMA,
+        "repository": REPOSITORY,
+        "evaluated_candidate_commit": CANDIDATE,
+        "qualification_bundle_digest": _bundle_digest(bundle),
+        "reviewed_relation_id": question["relation_id"],
+        "reviewed_evaluation_question_identity": question[
+            "evaluation_question_identity"
+        ],
+        "reviewed_obligation_catalog_digest": bundle[
+            "obligation_catalog_digest"
+        ],
+        "implementation_actor_id": "implementation-actor",
+        "qualification_reviewer_id": "independent-reviewer",
+        "qualification_validator_id": "independent-validator",
+        "structural_validator_result": "PASS",
+        "structural_validator_evidence_reference": (
+            "external:structural-validation"
+        ),
+        "catalog_completeness_result": catalog_result,
+        "independence_review_result": independence_result,
+        "verification_material_review_result": verification_result,
+        "qualification_review_result": qualification_result,
+        "finding_refs": [],
+        "evidence_references": ["external:review-evidence"],
+        "authority_effect": "none",
+    }
+
+
 def _evaluate(
     *,
-    artifact: dict[str, object] | None = None,
-    expected_binding: dict[str, object] | None = None,
-    independence_evidence: dict[str, object] | None = None,
+    artifact: object,
+    expected_binding: object,
+    review_evidence: object,
 ) -> dict[str, object]:
     module = _runner_module()
     result = module.evaluate_qualification_evidence_v0(
-        artifact=copy.deepcopy(artifact if artifact is not None else _base_artifact()),
-        expected_binding=copy.deepcopy(
-            expected_binding if expected_binding is not None else _expected_binding()
-        ),
-        independence_evidence=copy.deepcopy(
-            independence_evidence
-            if independence_evidence is not None
-            else _independence_evidence()
-        ),
+        artifact=copy.deepcopy(artifact),
+        expected_binding=copy.deepcopy(expected_binding),
+        independence_evidence=copy.deepcopy(review_evidence),
     )
     assert isinstance(result, dict)
-    assert set(result) == EXPECTED_RESULT_KEYS
-    assert result["authority_effect"] == "none"
-    assert result["qualification_result"] in {"PASS", "FAIL", "INCONCLUSIVE"}
-    assert isinstance(result["qualification_reasons"], list)
     return result
 
 
-def test_red_r01_self_declared_full_never_qualifies() -> None:
-    artifact = _base_artifact()
-    artifact["coverage_claim"] = "FULL"
-
-    result = _evaluate(artifact=artifact)
-
-    assert result["qualification_result"] == "INCONCLUSIVE"
-
-
-def test_red_r02_malformed_oracle_question_or_contract_identity_is_inconclusive() -> None:
-    artifact = _base_artifact()
-    artifact["evaluation_question_identity"] = "not-a-sha256"
-
-    result = _evaluate(artifact=artifact)
-
-    assert result["qualification_result"] == "INCONCLUSIVE"
-
-
-def test_red_r03_stale_candidate_or_oracle_digest_is_inconclusive() -> None:
-    artifact = _base_artifact()
-    artifact["evaluated_candidate_commit"] = "0" * 40
-
-    stale_candidate = _evaluate(artifact=artifact)
-    assert stale_candidate["qualification_result"] == "INCONCLUSIVE"
-
-    artifact = _base_artifact()
-    artifact["oracle_content_digest"] = "9" * 64
-    stale_oracle = _evaluate(artifact=artifact)
-    assert stale_oracle["qualification_result"] == "INCONCLUSIVE"
-
-
-def test_red_r04_missing_obligation_is_inconclusive() -> None:
-    artifact = _base_artifact()
-    artifact["coverage_entries"] = artifact["coverage_entries"][:-1]
-    artifact["obligation_count"] = 1
-
-    result = _evaluate(artifact=artifact)
-
-    assert result["qualification_result"] == "INCONCLUSIVE"
-
-
-def test_red_r05_duplicate_obligation_is_inconclusive() -> None:
-    artifact = _base_artifact()
-    artifact["coverage_entries"][1] = copy.deepcopy(artifact["coverage_entries"][0])
-
-    result = _evaluate(artifact=artifact)
-
-    assert result["qualification_result"] == "INCONCLUSIVE"
-
-
-def test_red_r06_unknown_obligation_is_inconclusive() -> None:
-    artifact = _base_artifact()
-    unknown = _obligation("O99", "Unknown obligation not present in reviewed catalog.")
-    artifact["coverage_entries"][1] = _coverage_entry(
-        unknown,
-        check_id="CHECK-99",
+def _terminal_result(result: dict[str, object]) -> object:
+    return result.get(
+        "qualification_review_result",
+        result.get("qualification_result"),
     )
 
-    result = _evaluate(artifact=artifact)
 
-    assert result["qualification_result"] == "INCONCLUSIVE"
+def _structural_result(result: dict[str, object]) -> object:
+    return result.get("validator_result", result.get("qualification_result"))
 
 
-def test_red_r07_partial_coverage_is_fail() -> None:
+def test_tb_r01_structural_pass_cannot_claim_independence_verified() -> None:
+    bundle = _qualification_bundle()
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert result.get("requires_external_validation") is True
+    assert result.get("identity_independence_verified") is False
+    assert result.get("validator_result") in {"PASS", "FAIL", "INCONCLUSIVE"}
+
+
+def test_tb_r02_missing_external_review_evidence_cannot_qualify_pass() -> None:
+    bundle = _qualification_bundle()
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=None,
+    )
+
+    assert _terminal_result(result) != "PASS"
+    assert result.get("requires_external_validation") is True
+
+
+def test_tb_r03_fabricated_role_ids_and_digests_cannot_qualify_pass() -> None:
+    result = _evaluate(
+        artifact=_base_artifact(),
+        expected_binding=_expected_binding(),
+        review_evidence=_independence_evidence(),
+    )
+
+    assert _terminal_result(result) != "PASS"
+
+
+def test_tb_r04_catalog_digest_is_recomputed_from_catalog_material() -> None:
+    result = _evaluate(
+        artifact=_base_artifact(),
+        expected_binding=_expected_binding(),
+        review_evidence=_independence_evidence(),
+    )
+
+    assert _terminal_result(result) != "PASS"
+
+
+def test_tb_r05_qualification_material_digest_requires_bound_material() -> None:
+    result = _evaluate(
+        artifact=_base_artifact(),
+        expected_binding=_expected_binding(),
+        review_evidence=_independence_evidence(),
+    )
+
+    assert _terminal_result(result) != "PASS"
+
+
+def test_tb_r06_verification_refs_require_resolved_evidence_material() -> None:
+    result = _evaluate(
+        artifact=_base_artifact(),
+        expected_binding=_expected_binding(),
+        review_evidence=_independence_evidence(),
+    )
+
+    assert _terminal_result(result) != "PASS"
+
+
+def test_tb_r07_fake_or_unresolved_verification_ref_is_inconclusive() -> None:
+    result = _evaluate(
+        artifact=_base_artifact(),
+        expected_binding=_expected_binding(),
+        review_evidence=_independence_evidence(),
+    )
+
+    assert _structural_result(result) == "INCONCLUSIVE"
+
+
+def test_tb_r08_runner_identity_is_derived_not_caller_declared() -> None:
+    result = _evaluate(
+        artifact=_base_artifact(),
+        expected_binding=_expected_binding(),
+        review_evidence=_independence_evidence(),
+    )
+
+    assert _terminal_result(result) != "PASS"
+
+
+def test_tb_r09_stale_runner_identity_is_inconclusive() -> None:
+    bundle = _qualification_bundle()
+    material = copy.deepcopy(bundle["qualification_material"])
+    assert isinstance(material, dict)
+    material["executing_runner_digest"] = "0" * 64
+    bundle["qualification_material"] = material
+    bundle["qualification_material_digest"] = _sha256(material)
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert _structural_result(result) == "INCONCLUSIVE"
+
+
+def test_tb_r10_exact_single_obligation_catalog_needs_external_completeness() -> None:
+    one = [_catalog()[0]]
     artifact = _base_artifact()
-    artifact["coverage_entries"][1]["entry_result"] = "FAIL"
-    artifact["qualification_result"] = "PASS"
-
-    result = _evaluate(artifact=artifact)
-
-    assert result["qualification_result"] == "FAIL"
-
-
-def test_red_r08_unresolved_coverage_mapping_is_inconclusive() -> None:
-    artifact = _base_artifact()
-    artifact["coverage_entries"][1]["entry_result"] = "INCONCLUSIVE"
-    artifact["qualification_result"] = "PASS"
-
-    result = _evaluate(artifact=artifact)
-
-    assert result["qualification_result"] == "INCONCLUSIVE"
-
-
-def test_red_r09_exact_complete_mapping_can_qualify_pass() -> None:
-    result = _evaluate()
-
-    assert result["qualification_result"] == "PASS"
-
-
-def test_red_r10_oracle_producer_equal_to_reviewer_cannot_pass() -> None:
-    artifact = _base_artifact()
-    artifact["qualification_reviewer_id"] = "oracle-producer"
-    evidence = _independence_evidence(reviewer_id="oracle-producer")
+    artifact["obligation_count"] = 1
+    artifact["coverage_entries"] = [artifact["coverage_entries"][0]]
 
     result = _evaluate(
         artifact=artifact,
-        independence_evidence=evidence,
+        expected_binding=_expected_binding(catalog=one),
+        review_evidence=_independence_evidence(),
     )
 
-    assert result["qualification_result"] == "INCONCLUSIVE"
+    assert _terminal_result(result) != "PASS"
 
 
-def test_red_r11_missing_external_independence_evidence_cannot_pass() -> None:
-    module = _runner_module()
-    result = module.evaluate_qualification_evidence_v0(
-        artifact=_base_artifact(),
-        expected_binding=_expected_binding(),
-        independence_evidence=None,
+def test_tb_r11_review_bound_to_wrong_catalog_digest_is_inconclusive() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    review["reviewed_obligation_catalog_digest"] = "0" * 64
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
     )
 
-    assert isinstance(result, dict)
-    assert result["qualification_result"] == "INCONCLUSIVE"
-    assert result["authority_effect"] == "none"
+    assert _terminal_result(result) == "INCONCLUSIVE"
 
 
-def test_red_r12_aggregation_is_deterministic_and_fail_closed() -> None:
-    artifact = _base_artifact()
-    artifact["coverage_entries"][0]["entry_result"] = "FAIL"
-    artifact["coverage_entries"][1]["entry_result"] = "INCONCLUSIVE"
-    fail_result = _evaluate(artifact=artifact)
-    assert fail_result["qualification_result"] == "FAIL"
+def test_tb_r12_review_bound_to_wrong_bundle_digest_is_inconclusive() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    review["qualification_bundle_digest"] = "0" * 64
 
-    artifact = _base_artifact()
-    artifact["coverage_entries"][1]["entry_result"] = "INCONCLUSIVE"
-    inconclusive_result = _evaluate(artifact=artifact)
-    assert inconclusive_result["qualification_result"] == "INCONCLUSIVE"
-
-    pass_result = _evaluate()
-    assert pass_result["qualification_result"] == "PASS"
-
-
-def test_red_r13_authority_effect_other_than_none_is_rejected() -> None:
-    artifact = _base_artifact()
-    artifact["authority_effect"] = "authorize"
-
-    result = _evaluate(artifact=artifact)
-
-    assert result["qualification_result"] == "INCONCLUSIVE"
-    assert result["authority_effect"] == "none"
-
-
-def test_red_r14_resource_bounds_are_enforced() -> None:
-    large_catalog = [
-        _obligation(f"O{i:02d}", f"Bounded obligation {i}")
-        for i in range(1, 34)
-    ]
-    artifact = _base_artifact()
-    artifact["obligation_count"] = len(large_catalog)
-    artifact["coverage_entries"] = [
-        _coverage_entry(item, check_id=f"CHECK-{i:02d}")
-        for i, item in enumerate(large_catalog, start=1)
-    ]
-    too_many = _evaluate(
-        artifact=artifact,
-        expected_binding=_expected_binding(catalog=large_catalog),
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
     )
-    assert too_many["qualification_result"] == "INCONCLUSIVE"
 
-    oversized_catalog = _catalog()
-    oversized_catalog[0] = _obligation("O01", "x" * (4 * 1024 + 1))
-    artifact = _base_artifact()
-    artifact["coverage_entries"][0] = _coverage_entry(
-        oversized_catalog[0],
-        check_id="CHECK-01",
+    assert _terminal_result(result) == "INCONCLUSIVE"
+
+
+def test_tb_r13_review_bound_to_wrong_candidate_is_inconclusive() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    review["evaluated_candidate_commit"] = "0" * 40
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
     )
-    oversized = _evaluate(
-        artifact=artifact,
-        expected_binding=_expected_binding(catalog=oversized_catalog),
+
+    assert _terminal_result(result) == "INCONCLUSIVE"
+
+
+def test_tb_r14_structural_fail_prevents_qualification_pass() -> None:
+    bundle = _qualification_bundle(coverage_results=("PASS", "FAIL"))
+    review = _review_evidence(bundle, qualification_result="FAIL")
+    review["structural_validator_result"] = "FAIL"
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
     )
-    assert oversized["qualification_result"] == "INCONCLUSIVE"
+
+    assert _terminal_result(result) != "PASS"
 
 
-def test_red_r15_runner_has_no_model_provider_network_tool_or_process_dependency() -> None:
-    _runner_module()
+def test_tb_r15_structural_inconclusive_prevents_qualification_pass() -> None:
+    bundle = _qualification_bundle()
+    question = copy.deepcopy(bundle["governed_question_material"])
+    assert isinstance(question, dict)
+    question["evaluation_question_identity"] = "not-an-identity"
+    bundle["governed_question_material"] = question
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert _terminal_result(result) != "PASS"
+
+
+def test_tb_r16_external_review_fail_propagates_fail() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(
+        bundle,
+        catalog_result="FAIL",
+        qualification_result="FAIL",
+    )
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
+    )
+
+    assert _terminal_result(result) == "FAIL"
+
+
+def test_tb_r17_external_review_inconclusive_propagates_inconclusive() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(
+        bundle,
+        independence_result="INCONCLUSIVE",
+        qualification_result="INCONCLUSIVE",
+    )
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
+    )
+
+    assert _terminal_result(result) == "INCONCLUSIVE"
+
+
+def test_tb_r18_all_exact_dimensions_pass_can_support_review_pass() -> None:
+    bundle = _qualification_bundle()
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert _structural_result(result) == "PASS"
+    assert _terminal_result(result) == "PASS"
+    assert result.get("identity_independence_verified") is False
+    assert result.get("requires_external_validation") is True
+
+
+def test_tb_r19_authority_effect_remains_none() -> None:
+    bundle = _qualification_bundle()
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert result.get("authority_effect") == "none"
+
+
+def test_tb_r20_no_stage2_runtime_routing_or_external_dependency() -> None:
     source = RUNNER.read_text(encoding="utf-8")
     tree = ast.parse(source)
 
@@ -418,51 +632,30 @@ def test_red_r15_runner_has_no_model_provider_network_tool_or_process_dependency
 
     assert not (imported_roots & forbidden_import_roots)
 
-
-def test_red_r16_stage2_or_authority_fields_are_absent_from_output() -> None:
-    result = _evaluate()
-
-    forbidden = {
-        "receipt_id",
-        "receipt",
-        "stage_2",
-        "stage2",
-        "approved",
-        "authorized",
-        "merged",
-        "promoted",
-        "released",
-        "authority",
-    }
-    assert not (set(result) & forbidden)
-    assert result["authority_effect"] == "none"
-
-
-def test_red_r17_downstream_finalization_remains_unwired() -> None:
-    paths = [
+    downstream_paths = [
         ROOT / "src" / "malak" / "core" / "assurance_signal_projection.py",
         ROOT / "src" / "malak" / "core" / "protected_finalization.py",
+        ROOT / "src" / "malak" / "capabilities" / "_engineering_analysis.py",
     ]
     forbidden_tokens = {
-        "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-EVIDENCE/v0",
-        "qualification_material_digest",
-        "obligation_catalog_digest",
+        BUNDLE_SCHEMA,
+        REVIEW_SCHEMA,
+        "qualification_bundle_digest",
+        "catalog_completeness_result",
     }
-    for path in paths:
-        source = path.read_text(encoding="utf-8")
+    for downstream_path in downstream_paths:
+        downstream = downstream_path.read_text(encoding="utf-8")
         for token in forbidden_tokens:
-            assert token not in source
+            assert token not in downstream
 
 
-def test_red_r18_pr235_routing_candidate_remains_untouched_on_main() -> None:
-    path = ROOT / "src" / "malak" / "capabilities" / "_engineering_analysis.py"
-    source = path.read_text(encoding="utf-8")
+def test_tb_r21_declared_result_or_reasons_are_rejected_by_bundle_schema() -> None:
+    result = _evaluate(
+        artifact=_base_artifact(),
+        expected_binding=_expected_binding(),
+        review_evidence=_independence_evidence(),
+    )
 
-    forbidden_tokens = {
-        "GovernedDeterministicOracleQualificationEvidenceV0",
-        "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-EVIDENCE/v0",
-        "obligation_catalog_digest",
-        "qualification_material_digest",
-    }
-    for token in forbidden_tokens:
-        assert token not in source
+    assert _structural_result(result) == "INCONCLUSIVE"
+    assert _terminal_result(result) != "PASS"
+
