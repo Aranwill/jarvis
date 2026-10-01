@@ -5,6 +5,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,8 @@ RUNNER = ROOT / "scripts" / "evaluate_e3_deterministic_oracle_qualification.py"
 
 SCHEMA = "MALAK-E3-DETERMINISTIC-ORACLE-QUALIFICATION-EVIDENCE/v0"
 REPOSITORY = "Aranwill/jarvis"
-CANDIDATE = "c86a9bc3e716046bd8c803e5893fc36289c1d485"
+LOCAL_TEST_CANDIDATE = "f" * 40
+CANDIDATE = os.environ.get("CANDIDATE_SHA", LOCAL_TEST_CANDIDATE)
 RELATION = "U01.RUNTIME_INDEPENDENCE"
 QUESTION = "q" * 64
 ORACLE_DIGEST = "a" * 64
@@ -206,13 +208,15 @@ def _runner_digest() -> str:
 def _verification_evidence(
     evidence_id: str,
     material: object,
+    *,
+    candidate: str = CANDIDATE,
 ) -> dict[str, object]:
     return {
         "evidence_id": evidence_id,
         "evidence_kind": "BOUNDED_DETERMINISTIC_CHECK_OUTPUT",
         "content_digest": _sha256(material),
         "content_or_bounded_material": material,
-        "candidate_binding": CANDIDATE,
+        "candidate_binding": candidate,
     }
 
 
@@ -220,6 +224,7 @@ def _qualification_bundle(
     *,
     catalog: list[dict[str, str]] | None = None,
     coverage_results: tuple[str, ...] | None = None,
+    candidate: str = CANDIDATE,
 ) -> dict[str, object]:
     obligations = copy.deepcopy(catalog if catalog is not None else _catalog())
     results = coverage_results or tuple("PASS" for _ in obligations)
@@ -240,6 +245,7 @@ def _qualification_bundle(
                 "obligation_id": entry["obligation_id"],
                 "observed": True,
             },
+            candidate=candidate,
         )
         for entry in coverage_entries
     ]
@@ -253,7 +259,7 @@ def _qualification_bundle(
     return {
         "schema_version": BUNDLE_SCHEMA,
         "repository": REPOSITORY,
-        "evaluated_candidate_commit": CANDIDATE,
+        "evaluated_candidate_commit": candidate,
         "oracle_identity": {
             "oracle_id": "oracle-runtime-independence",
             "oracle_version": "v0",
@@ -307,7 +313,7 @@ def _review_evidence(
     return {
         "schema_version": REVIEW_SCHEMA,
         "repository": REPOSITORY,
-        "evaluated_candidate_commit": CANDIDATE,
+        "evaluated_candidate_commit": bundle["evaluated_candidate_commit"],
         "qualification_bundle_digest": _bundle_digest(bundle),
         "reviewed_relation_id": question["relation_id"],
         "reviewed_evaluation_question_identity": question[
@@ -338,12 +344,14 @@ def _evaluate(
     artifact: object,
     expected_binding: object,
     review_evidence: object,
+    expected_candidate_commit: str = CANDIDATE,
 ) -> dict[str, object]:
     module = _runner_module()
     result = module.evaluate_qualification_evidence_v0(
         artifact=copy.deepcopy(artifact),
         expected_binding=copy.deepcopy(expected_binding),
         independence_evidence=copy.deepcopy(review_evidence),
+        expected_candidate_commit=expected_candidate_commit,
     )
     assert isinstance(result, dict)
     return result
@@ -385,65 +393,93 @@ def test_tb_r02_missing_external_review_evidence_cannot_qualify_pass() -> None:
     assert result.get("requires_external_validation") is True
 
 
-def test_tb_r03_fabricated_role_ids_and_digests_cannot_qualify_pass() -> None:
+def test_tb_r03_fabricated_role_claims_cannot_prove_independence() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    review["qualification_reviewer_id"] = review["implementation_actor_id"]
+
     result = _evaluate(
-        artifact=_base_artifact(),
-        expected_binding=_expected_binding(),
-        review_evidence=_independence_evidence(),
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
     )
 
-    assert _terminal_result(result) != "PASS"
-
+    assert _terminal_result(result) == "INCONCLUSIVE"
+    assert result.get("identity_independence_verified") is False
+    assert result.get("requires_external_validation") is True
 
 def test_tb_r04_catalog_digest_is_recomputed_from_catalog_material() -> None:
+    bundle = _qualification_bundle()
+    bundle["obligation_catalog_digest"] = "0" * 64
+
     result = _evaluate(
-        artifact=_base_artifact(),
-        expected_binding=_expected_binding(),
-        review_evidence=_independence_evidence(),
-    )
-
-    assert _terminal_result(result) != "PASS"
-
-
-def test_tb_r05_qualification_material_digest_requires_bound_material() -> None:
-    result = _evaluate(
-        artifact=_base_artifact(),
-        expected_binding=_expected_binding(),
-        review_evidence=_independence_evidence(),
-    )
-
-    assert _terminal_result(result) != "PASS"
-
-
-def test_tb_r06_verification_refs_require_resolved_evidence_material() -> None:
-    result = _evaluate(
-        artifact=_base_artifact(),
-        expected_binding=_expected_binding(),
-        review_evidence=_independence_evidence(),
-    )
-
-    assert _terminal_result(result) != "PASS"
-
-
-def test_tb_r07_fake_or_unresolved_verification_ref_is_inconclusive() -> None:
-    result = _evaluate(
-        artifact=_base_artifact(),
-        expected_binding=_expected_binding(),
-        review_evidence=_independence_evidence(),
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
     )
 
     assert _structural_result(result) == "INCONCLUSIVE"
+    assert "OBLIGATION_CATALOG_DIGEST_MISMATCH" in result["validator_reasons"]
 
+def test_tb_r05_qualification_material_digest_requires_bound_material() -> None:
+    bundle = _qualification_bundle()
+    bundle["qualification_material_digest"] = "0" * 64
 
-def test_tb_r08_runner_identity_is_derived_not_caller_declared() -> None:
     result = _evaluate(
-        artifact=_base_artifact(),
-        expected_binding=_expected_binding(),
-        review_evidence=_independence_evidence(),
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
     )
 
-    assert _terminal_result(result) != "PASS"
+    assert _structural_result(result) == "INCONCLUSIVE"
+    assert "QUALIFICATION_MATERIAL_DIGEST_MISMATCH" in result["validator_reasons"]
 
+def test_tb_r06_verification_refs_require_resolved_evidence_material() -> None:
+    bundle = _qualification_bundle()
+    evidence = bundle["verification_evidence"]
+    assert isinstance(evidence, list)
+    evidence[0]["evidence_id"] = "evidence:renamed"
+    bundle["verification_evidence_digest"] = _sha256(evidence)
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert _structural_result(result) == "INCONCLUSIVE"
+    assert "VERIFICATION_EVIDENCE_REF_UNRESOLVED" in result["validator_reasons"]
+
+def test_tb_r07_fake_or_unresolved_verification_ref_is_inconclusive() -> None:
+    bundle = _qualification_bundle()
+    coverage = bundle["coverage_entries"]
+    assert isinstance(coverage, list)
+    coverage[0]["verification_evidence_refs"] = ["evidence:fake"]
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert _structural_result(result) == "INCONCLUSIVE"
+    assert "VERIFICATION_EVIDENCE_REF_UNRESOLVED" in result["validator_reasons"]
+
+def test_tb_r08_runner_identity_is_derived_not_caller_declared() -> None:
+    bundle = _qualification_bundle()
+    material = bundle["qualification_material"]
+    assert isinstance(material, dict)
+    material["executing_runner_digest"] = "0" * 64
+    bundle["qualification_material_digest"] = _sha256(material)
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+    )
+
+    assert _structural_result(result) == "INCONCLUSIVE"
+    assert "RUNNER_DIGEST_MISMATCH" in result["validator_reasons"]
 
 def test_tb_r09_stale_runner_identity_is_inconclusive() -> None:
     bundle = _qualification_bundle()
@@ -463,19 +499,21 @@ def test_tb_r09_stale_runner_identity_is_inconclusive() -> None:
 
 
 def test_tb_r10_exact_single_obligation_catalog_needs_external_completeness() -> None:
-    one = [_catalog()[0]]
-    artifact = _base_artifact()
-    artifact["obligation_count"] = 1
-    artifact["coverage_entries"] = [artifact["coverage_entries"][0]]
-
-    result = _evaluate(
-        artifact=artifact,
-        expected_binding=_expected_binding(catalog=one),
-        review_evidence=_independence_evidence(),
+    bundle = _qualification_bundle(catalog=[_catalog()[0]])
+    review = _review_evidence(
+        bundle,
+        catalog_result="INCONCLUSIVE",
+        qualification_result="INCONCLUSIVE",
     )
 
-    assert _terminal_result(result) != "PASS"
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=review,
+    )
 
+    assert _structural_result(result) == "PASS"
+    assert _terminal_result(result) == "INCONCLUSIVE"
 
 def test_tb_r11_review_bound_to_wrong_catalog_digest_is_inconclusive() -> None:
     bundle = _qualification_bundle()
@@ -658,3 +696,50 @@ def test_tb_r21_declared_result_or_reasons_are_rejected_by_bundle_schema() -> No
 
     assert _structural_result(result) == "INCONCLUSIVE"
     assert _terminal_result(result) != "PASS"
+
+def test_tb_r22_expected_candidate_exact_match_is_required() -> None:
+    bundle = _qualification_bundle()
+
+    exact = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+        expected_candidate_commit=CANDIDATE,
+    )
+    assert _structural_result(exact) == "PASS"
+
+    wrong_expected = "0" * 40 if CANDIDATE != "0" * 40 else "1" * 40
+    mismatched = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+        expected_candidate_commit=wrong_expected,
+    )
+    assert _structural_result(mismatched) == "INCONCLUSIVE"
+    assert "EXPECTED_CANDIDATE_MISMATCH" in mismatched["validator_reasons"]
+
+
+def test_tb_r23_stale_coherent_candidate_material_cannot_pass() -> None:
+    stale = "0" * 40 if CANDIDATE != "0" * 40 else "1" * 40
+    bundle = _qualification_bundle(candidate=stale)
+
+    result = _evaluate(
+        artifact=bundle,
+        expected_binding=_governed_binding(bundle),
+        review_evidence=_review_evidence(bundle),
+        expected_candidate_commit=CANDIDATE,
+    )
+
+    assert _structural_result(result) == "INCONCLUSIVE"
+    assert _terminal_result(result) != "PASS"
+    assert "EXPECTED_CANDIDATE_MISMATCH" in result["validator_reasons"]
+
+
+def test_tb_r24_candidate_fixture_uses_validation_context_when_available() -> None:
+    validation_candidate = os.environ.get("CANDIDATE_SHA")
+
+    if validation_candidate is not None:
+        assert CANDIDATE == validation_candidate
+        assert CANDIDATE != "c86a9bc3e716046bd8c803e5893fc36289c1d485"
+    else:
+        assert CANDIDATE == LOCAL_TEST_CANDIDATE

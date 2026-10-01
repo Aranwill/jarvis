@@ -643,6 +643,7 @@ def evaluate_qualification_evidence_v0(
     artifact: object,
     expected_binding: object,
     independence_evidence: object,
+    expected_candidate_commit: object,
 ) -> dict[str, object]:
     """Validate a bounded qualification bundle without acquiring authority."""
 
@@ -656,6 +657,22 @@ def evaluate_qualification_evidence_v0(
             if isinstance(artifact, dict)
             else None
         )
+
+        if not _is_sha40(expected_candidate_commit):
+            return _result(
+                validator_result="INCONCLUSIVE",
+                validator_reasons=["EXPECTED_CANDIDATE_INVALID"],
+                candidate_commit=candidate_commit,
+                bundle_digest=bundle_digest,
+            )
+
+        if candidate_commit != expected_candidate_commit:
+            return _result(
+                validator_result="INCONCLUSIVE",
+                validator_reasons=["EXPECTED_CANDIDATE_MISMATCH"],
+                candidate_commit=candidate_commit,
+                bundle_digest=bundle_digest,
+            )
 
         if validator_result != "PASS" or coverage_result is None or bundle_digest is None:
             return _result(
