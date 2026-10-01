@@ -658,4 +658,3 @@ def test_tb_r21_declared_result_or_reasons_are_rejected_by_bundle_schema() -> No
 
     assert _structural_result(result) == "INCONCLUSIVE"
     assert _terminal_result(result) != "PASS"
-
