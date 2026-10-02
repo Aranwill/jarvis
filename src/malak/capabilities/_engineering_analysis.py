@@ -420,6 +420,7 @@ class GovernedSupportEvidenceRouteReason(str, __import__("enum").Enum):
     SUBJECT_BINDING_MISMATCH = "SUBJECT_BINDING_MISMATCH"
     ORACLE_CONTRACT_INVALID = "ORACLE_CONTRACT_INVALID"
     ORACLE_QUALIFICATION_STALE = "ORACLE_QUALIFICATION_STALE"
+    ORACLE_QUALIFICATION_UNEVIDENCED = "ORACLE_QUALIFICATION_UNEVIDENCED"
     ORACLE_AMBIGUOUS = "ORACLE_AMBIGUOUS"
 
 
@@ -535,6 +536,30 @@ def _validate_oracle_identity(
         "oracle_producer_subject_id",
         _SUPPORT_ROUTING_MAX_ID_BYTES,
     )
+
+
+@dataclass(frozen=True)
+class GovernedDeterministicOracleQualificationReviewEvidenceV0:
+    evaluated_candidate_commit: str
+    qualification_bundle_digest: str
+    reviewed_relation_id: str
+    reviewed_evaluation_question_identity: str
+    structural_validator_result: str
+    qualification_review_result: str
+    authority_effect: str = "none"
+
+    def __post_init__(self) -> None:
+        if not _is_lower_hex(self.evaluated_candidate_commit, 40):
+            raise ValueError("evaluated_candidate_commit must be a lowercase git sha")
+        _require_sha256(self.qualification_bundle_digest, "qualification_bundle_digest")
+        _require_bounded_text(self.reviewed_relation_id, "reviewed_relation_id", _SUPPORT_ROUTING_MAX_ID_BYTES)
+        _require_sha256(self.reviewed_evaluation_question_identity, "reviewed_evaluation_question_identity")
+        if self.structural_validator_result not in {"PASS", "FAIL", "INCONCLUSIVE"}:
+            raise ValueError("structural_validator_result must be closed")
+        if self.qualification_review_result not in {"PASS", "FAIL", "INCONCLUSIVE"}:
+            raise ValueError("qualification_review_result must be closed")
+        if self.authority_effect != "none":
+            raise ValueError("qualification review evidence authority_effect must be none")
 
 
 @dataclass(frozen=True)
@@ -768,6 +793,20 @@ def _qualification_matches(oracle) -> bool:
     )
 
 
+def _qualification_review_matches(oracle, review, baseline_commit) -> bool:
+    q = oracle.qualification
+    return (
+        isinstance(review, GovernedDeterministicOracleQualificationReviewEvidenceV0)
+        and review.evaluated_candidate_commit == baseline_commit
+        and review.qualification_bundle_digest == q.qualification_evidence_digest
+        and review.reviewed_relation_id == q.relation_id
+        and review.reviewed_evaluation_question_identity == q.evaluation_question_identity
+        and review.structural_validator_result == "PASS"
+        and review.qualification_review_result == "PASS"
+        and review.authority_effect == "none"
+    )
+
+
 def route_governed_support_evidence_v0(
     *,
     policy_version: str,
@@ -782,6 +821,7 @@ def route_governed_support_evidence_v0(
     scope_expansion_required: bool,
     oracles,
     expected_binding=None,
+    qualification_review_evidence=(),
 ):
     subject = {
         "policy_version": policy_version,
@@ -812,6 +852,18 @@ def route_governed_support_evidence_v0(
             GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
         )
     if len(oracles) > _SUPPORT_ROUTING_MAX_ORACLES:
+        return _routing_result(
+            subject,
+            None,
+            GovernedSupportEvidenceRouteReason.INPUT_BOUNDS_EXCEEDED,
+        )
+    if not isinstance(qualification_review_evidence, (tuple, list)):
+        return _routing_result(
+            subject,
+            None,
+            GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
+        )
+    if len(qualification_review_evidence) > _SUPPORT_ROUTING_MAX_ORACLES:
         return _routing_result(
             subject,
             None,
@@ -858,7 +910,19 @@ def route_governed_support_evidence_v0(
             )
             return _routing_result(subject, None, reason)
         if oracle.coverage_claim == "FULL":
-            eligible.append(oracle)
+            matching_reviews = [
+                review
+                for review in qualification_review_evidence
+                if _qualification_review_matches(oracle, review, baseline_commit)
+            ]
+            if len(matching_reviews) == 1:
+                eligible.append(oracle)
+            elif len(matching_reviews) > 1:
+                return _routing_result(
+                    subject,
+                    None,
+                    GovernedSupportEvidenceRouteReason.ORACLE_AMBIGUOUS,
+                )
 
     if len(eligible) > 1:
         return _routing_result(
