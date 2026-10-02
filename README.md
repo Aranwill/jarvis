@@ -523,4 +523,3 @@ positive qualification consumption trust boundary
 El objetivo de esa unidad futura es permitir que routing distinga evidencia de qualification gobernada y externa al caller sin convertir RDD-M1, strings `PASS`, hashes o provenance declarativa en credenciales runtime.
 
 Esta sección es derivada y no concede autoridad de RED, GREEN, implementación, Ready, Merge ni promoción.
-
