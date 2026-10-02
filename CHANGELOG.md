@@ -97,6 +97,10 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
   El path genérico de E3 y el contrato funcional de E4 permanecen sin cambios,
   se expone `semantic_assurance: NOT_VERIFIED` y
   `authority_effect` continúa en `none`.
+- PR #224 integró `E3 Governed Evidence Support Assessment V0` como assessment bounded `SUPPORTED | INSUFFICIENT | INCONCLUSIVE`, sin promover `semantic_assurance` ni producir `support_sufficient`.
+- PR #230 integró `E3 Assessor Qualification Pack V0.1` como evaluation tooling offline reproducible; no selecciona ni autoriza un assessor productivo, modelo o provider.
+- PR #235 integró `E3 Governed Support Evidence Routing V0` y absorbió la línea fail-closed de PR #240. Una qualification `FULL` coherente pero caller-controlled ya no habilita por sí misma `DETERMINISTIC`; mientras no exista una frontera positiva de consumo admitida separadamente, ese caso permanece `INFERENTIAL`.
+- PR #239 quedó cerrada sin merge y preservada únicamente como evidencia histórica del gap de self-certification. `support_sufficient`, Protected Finalization, RDD Stage 2 y Sprint 7.12 permanecen no autorizados por esta línea.
 
 ### Changed
 

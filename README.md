@@ -493,3 +493,33 @@ Estado reconciliado al baseline integrado `main@ae22f3be23ff1c30093d071c74e86db8
 - `authority_effect = none`; RDD Stage 2 permanece `NOT AUTHORIZED`; Sprint 7.12 permanece `NOT AUTHORIZED`.
 
 Esta reconciliación es derivada. Qualification evidence no equivale a semantic truth, decisión, permiso ni autoridad.
+
+## Reconciliación CURRENT — E3 Support Evidence Routing / Qualification Consumption V0
+
+Estado reconciliado al baseline integrado `main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e`:
+
+- PR #235 integró `E3 Governed Support Evidence Routing V0` sobre el candidate terminal `7e8ad3278c06cd1f44135e3c4dd59069c450f284`; el merge commit es `73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e`.
+- PR #240 quedó incorporada en la línea de #235 antes del merge y materializó `E3 Governed Qualification Consumption V0` con semántica fail-closed.
+- Una qualification `FULL` coherente pero controlada por el caller ya no habilita por sí misma `DETERMINISTIC`; mientras no exista una frontera positiva de consumo admitida separadamente, el routing permanece `INFERENTIAL` para ese caso.
+- PR #239 quedó cerrada sin merge y se conserva únicamente como evidencia histórica de la línea que demostró el gap de self-certification.
+- No se añadió wiring a Kernel, Planner, provider/model, Protected Finalization ni `support_sufficient`.
+- `E008-SG-02` permanece `OPEN`; `semantic_assurance` continúa `NOT_VERIFIED`.
+- `support_sufficient` permanece `NOT WIRED / NOT AUTHORIZED`.
+- RDD Stage 2 y Sprint 7.12 permanecen `NOT AUTHORIZED`.
+- Los runners post-merge fueron reportados por el Owner como completados; esta reconciliación no inventa un identificador de Validation ni métricas que no estén disponibles de forma reconstruible desde la interfaz consultada.
+
+Siguiente dirección de diseño, todavía no autorizada automáticamente por esta reconciliación:
+
+```text
+positive qualification consumption trust boundary
+→ separate G0 / admission
+→ G1 design
+→ Critical Contract Hardening
+→ Four Questions
+→ Design 4R
+→ RDD Stage 1 Design Check
+```
+
+El objetivo de esa unidad futura es permitir que routing distinga evidencia de qualification gobernada y externa al caller sin convertir RDD-M1, strings `PASS`, hashes o provenance declarativa en credenciales runtime.
+
+Esta sección es derivada y no concede autoridad de RED, GREEN, implementación, Ready, Merge ni promoción.
