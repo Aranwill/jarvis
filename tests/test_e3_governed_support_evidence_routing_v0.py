@@ -69,6 +69,20 @@ def _qualification(module, **changes):
     return module.GovernedDeterministicOracleQualificationV0(**values)
 
 
+def _review_evidence(module, qualification, **changes):
+    values = {
+        "evaluated_candidate_commit": BASELINE,
+        "qualification_bundle_digest": qualification.qualification_evidence_digest,
+        "reviewed_relation_id": qualification.relation_id,
+        "reviewed_evaluation_question_identity": qualification.evaluation_question_identity,
+        "structural_validator_result": "PASS",
+        "qualification_review_result": "PASS",
+        "authority_effect": "none",
+    }
+    values.update(changes)
+    return module.GovernedDeterministicOracleQualificationReviewEvidenceV0(**values)
+
+
 def _oracle(module, **changes):
     qualification = changes.pop("qualification", None)
     qualification_identity = changes.pop("qualification_identity", None)
@@ -134,6 +148,11 @@ def _route(module, **changes):
         },
     }
     values.update(changes)
+    if "qualification_review_evidence" not in changes and values["oracles"]:
+        values["qualification_review_evidence"] = tuple(
+            _review_evidence(module, oracle.qualification)
+            for oracle in values["oracles"]
+        )
     return module.route_governed_support_evidence_v0(**values)
 
 
