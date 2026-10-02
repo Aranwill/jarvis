@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-09-30
-as_of_commit: ae22f3be23ff1c30093d071c74e86db84c34098e
+as_of_date: 2026-10-02
+as_of_commit: 73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -1771,3 +1771,55 @@ Sprint 7.12         NOT AUTHORIZED
 La unidad integrada permite calificar de forma reproducible artifacts de un futuro mecanismo assessor dentro del evaluation pack. Elegir, ejecutar o confiar en un mecanismo real requiere una admisión y gates separados.
 
 Esta sección supersede únicamente el snapshot CURRENT anterior para el estado del Assessor Qualification Pack; los registros históricos de PR #224/#229/#231 permanecen sin reescritura.
+
+## Reconciliación CURRENT — E3 Support Evidence Routing / Qualification Consumption V0
+
+Estado material reconciliado después de integrar PR #235:
+
+```text
+baseline integrado              main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
+PR #235 candidate terminal      7e8ad3278c06cd1f44135e3c4dd59069c450f284
+PR #235 merge                   73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
+PR #240                         integrated into #235 line before merge
+PR #239                         CLOSED / NOT MERGED / historical evidence only
+authority_effect                none
+```
+
+La cadena integrada incorpora `E3 Governed Support Evidence Routing V0` y la corrección fail-closed de `E3 Governed Qualification Consumption V0`. La consecuencia material vigente es:
+
+```text
+caller-controlled coherent FULL qualification
+!= externally grounded qualification
+→ does not enable DETERMINISTIC
+→ bounded route remains INFERENTIAL
+```
+
+El enum `DETERMINISTIC | INFERENTIAL | INSUFFICIENT` permanece presente, pero el happy path positivo `DETERMINISTIC` no está autorizado por una qualification fabricable desde el mismo input/caller. Habilitar consumo positivo requiere una frontera separada con admisión propia y no puede resolverse mediante `verified=true`, strings `PASS`, igualdad de actor IDs, un token opaco ni reutilizando RDD-M1 como credencial runtime.
+
+Límites CURRENT preservados:
+
+```text
+Kernel / Planner wiring            NONE
+provider / model wiring            NONE
+Protected Finalization wiring      NONE
+support_sufficient                 NOT WIRED / NOT AUTHORIZED
+semantic_assurance                 NOT_VERIFIED
+E008-SG-02                         OPEN
+RDD Stage 2                        NOT AUTHORIZED
+Sprint 7.12                        NOT AUTHORIZED
+self-modification                  NOT AUTHORIZED
+authority_effect                   none
+```
+
+Los runners post-merge de #235 fueron reportados por el Owner como completados. Esta fuente derivada no asigna un número de Validation ni métricas no reconstruibles desde la interfaz consultada.
+
+Siguiente unidad candidata de planificación, sujeta a admisión separada:
+
+```text
+E3 Positive Qualification Consumption Trust Boundary V0
+```
+
+Debe estudiar primero si una frontera positiva puede componerse a partir de primitives ya existentes sin introducir store/registry/database, PKI/signatures, network verifier, nueva authority surface ni RDD Stage 2. Si esa separación no puede demostrarse dentro del scope bounded, corresponde `STOP → scope review`.
+
+Esta reconciliación no autoriza la unidad siguiente; únicamente actualiza CURRENT_STATE al baseline integrado.
+
