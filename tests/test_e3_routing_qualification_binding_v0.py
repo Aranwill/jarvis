@@ -77,6 +77,20 @@ def _oracle(module, **changes):
     return module.GovernedDeterministicOracleContractV0(**values)
 
 
+def _expected_binding(**changes):
+    values = {
+        "baseline_commit": BASELINE,
+        "focus_id": FOCUS_ID,
+        "evidence_set_digest": EVIDENCE_DIGEST,
+        "relation_id": RELATION_ID,
+        "evaluation_question_identity": QUESTION_ID,
+        "finding_fingerprint": FINDING_FINGERPRINT,
+        "resolved_evidence_material_digest": MATERIAL_DIGEST,
+    }
+    values.update(changes)
+    return values
+
+
 def _route(module, *, oracles=(), expected_binding=None, **changes):
     values = {
         "policy_version": POLICY_VERSION,
@@ -92,21 +106,9 @@ def _route(module, *, oracles=(), expected_binding=None, **changes):
         "oracles": oracles,
     }
     values.update(changes)
-    if expected_binding is None:
-        expected_binding = {
-            "baseline_commit": values["baseline_commit"],
-            "focus_id": values["focus_id"],
-            "evidence_set_digest": values["evidence_set_digest"],
-            "relation_id": values["relation_id"],
-            "evaluation_question_identity": values[
-                "evaluation_question_identity"
-            ],
-            "finding_fingerprint": values["finding_fingerprint"],
-            "resolved_evidence_material_digest": values[
-                "resolved_evidence_material_digest"
-            ],
-        }
-    values["expected_binding"] = expected_binding
+    values["expected_binding"] = (
+        _expected_binding() if expected_binding is None else expected_binding
+    )
     return module.route_governed_support_evidence_v0(**values)
 
 
@@ -130,23 +132,12 @@ def _review_evidence(**changes):
     return values
 
 
-def _route_with_reviews(module, reviews, *, oracle=None, **changes):
+def _assert_review_consumption_surface_deferred(module) -> None:
     signature = inspect.signature(module.route_governed_support_evidence_v0)
-    if "qualification_review_evidence" not in signature.parameters:
-        return None
-    if oracle is None:
-        oracle = _oracle(module)
-    return _route(
-        module,
-        oracles=(oracle,),
-        qualification_review_evidence=reviews,
-        **changes,
-    )
+    assert "qualification_review_evidence" not in signature.parameters
 
 
 def _assert_not_deterministic(result) -> None:
-    if result is None:
-        return
     assert result.route_kind is None or result.route_kind.value != "DETERMINISTIC"
 
 
@@ -167,52 +158,60 @@ def test_gc_r03_wrong_candidate_binding_no_deterministic() -> None:
     result = _route(
         module,
         baseline_commit="c" * 40,
+        expected_binding=_expected_binding(),
         oracles=(_oracle(module),),
     )
+    assert result.reason_code.value == "SUBJECT_BINDING_MISMATCH"
     _assert_not_deterministic(result)
 
 
 def test_gc_r04_wrong_bundle_digest_no_deterministic() -> None:
     module = _module()
-    review = _review_evidence(qualification_bundle_digest="7" * 64)
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(qualification_bundle_digest="7" * 64)
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
 def test_gc_r05_wrong_catalog_digest_no_deterministic() -> None:
     module = _module()
-    review = _review_evidence(reviewed_obligation_catalog_digest="7" * 64)
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(reviewed_obligation_catalog_digest="7" * 64)
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
 def test_gc_r06_structural_fail_no_deterministic() -> None:
     module = _module()
-    review = _review_evidence(structural_validator_result="FAIL")
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(structural_validator_result="FAIL")
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
 def test_gc_r07_structural_inconclusive_no_deterministic() -> None:
     module = _module()
-    review = _review_evidence(structural_validator_result="INCONCLUSIVE")
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(structural_validator_result="INCONCLUSIVE")
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
 @pytest.mark.parametrize("terminal", ["FAIL", "INCONCLUSIVE"])
 def test_gc_r08_completeness_nonpass_no_deterministic(terminal: str) -> None:
     module = _module()
-    review = _review_evidence(catalog_completeness_result=terminal)
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(catalog_completeness_result=terminal)
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
 @pytest.mark.parametrize("terminal", ["FAIL", "INCONCLUSIVE"])
 def test_gc_r09_independence_review_nonpass_no_deterministic(terminal: str) -> None:
     module = _module()
-    review = _review_evidence(independence_review_result=terminal)
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(independence_review_result=terminal)
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
@@ -221,8 +220,9 @@ def test_gc_r10_verification_material_review_nonpass_no_deterministic(
     terminal: str,
 ) -> None:
     module = _module()
-    review = _review_evidence(verification_material_review_result=terminal)
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(verification_material_review_result=terminal)
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
@@ -231,15 +231,18 @@ def test_gc_r11_qualification_review_nonpass_no_deterministic(
     terminal: str,
 ) -> None:
     module = _module()
-    review = _review_evidence(qualification_review_result=terminal)
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(qualification_review_result=terminal)
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
 def test_gc_r12_duplicate_matching_review_evidence_no_deterministic() -> None:
     module = _module()
     review = _review_evidence()
-    result = _route_with_reviews(module, (review, dict(review)))
+    assert review == dict(review)
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
@@ -249,15 +252,18 @@ def test_gc_r13_stale_candidate_or_material_no_deterministic() -> None:
         module,
         baseline_commit="c" * 40,
         resolved_evidence_material_digest="8" * 64,
+        expected_binding=_expected_binding(),
         oracles=(_oracle(module),),
     )
+    assert result.reason_code.value == "SUBJECT_BINDING_MISMATCH"
     _assert_not_deterministic(result)
 
 
 def test_gc_r14_exact_external_review_alone_no_deterministic() -> None:
     module = _module()
-    review = _review_evidence()
-    result = _route_with_reviews(module, (review,))
+    _review_evidence()
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
@@ -266,8 +272,9 @@ def test_gc_r15_authority_effect_other_than_none_rejected() -> None:
     with pytest.raises(ValueError):
         _qualification(module, authority_effect="allow")
 
-    review = _review_evidence(authority_effect="allow")
-    result = _route_with_reviews(module, (review,))
+    _review_evidence(authority_effect="allow")
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(_oracle(module),))
     _assert_not_deterministic(result)
 
 
@@ -335,9 +342,7 @@ def test_gc_r18_fabricated_matching_review_pass_exact_bindings_no_deterministic(
         qualification_review_result="PASS",
         authority_effect="none",
     )
-    result = _route_with_reviews(
-        module,
-        (fabricated_review,),
-        oracle=oracle,
-    )
+    assert fabricated_review["qualification_review_result"] == "PASS"
+    _assert_review_consumption_surface_deferred(module)
+    result = _route(module, oracles=(oracle,))
     _assert_not_deterministic(result)
