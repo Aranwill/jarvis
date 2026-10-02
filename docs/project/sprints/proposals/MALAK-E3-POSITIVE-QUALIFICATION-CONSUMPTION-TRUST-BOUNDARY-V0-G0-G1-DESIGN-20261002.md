@@ -122,7 +122,8 @@ G0 RESULT               PASS
 candidate disposition   ADAPT
 risk class              3 / HIGH
 critical contract       YES
-blocking findings       0
+independent blockers   3 on ae3fe7ed... / correction materialized
+blocker closure         PENDING INDEPENDENT RE-REVIEW
 implementation          NOT AUTHORIZED
 authority_effect        none
 ```
@@ -457,7 +458,7 @@ request cannot supply/override admitted trust material
 
 ---
 
-## 9. Decisión G1-D1 — trust material fuera del request path
+## 9. Decisión G1-D1 — Composition Admission Seam exacta
 
 La positive qualification evidence no será un parámetro model-facing ni
 request-facing.
@@ -466,23 +467,134 @@ Prohibido:
 
 ```text
 route(..., qualification_review_evidence=request.review)
+route(..., authorization_decision=request.decision)
+route(..., ready_admission=request.admission)
 ```
 
-Dirección G1:
+### 9.1 Actores y control de entrada
+
+V0 congela dos superficies distintas:
 
 ```text
-Application Composition
-        │
-        ├── admitted qualification review material
-        ├── governed authorization evidence
-        └── exact bindings
-                ↓
-GovernedQualificationConsumptionBoundaryV0
-                ↓
-route(request_material, oracles)
+REQUEST SURFACE
+- routing subject
+- bounded oracle contracts
+- declared evidence completeness
+- scope-expansion signal
+
+COMPOSITION / GOVERNED CONFIGURATION SURFACE
+- raw qualification review material selected/admitted by Owner/governed configuration
+- SecurityContext supplied by governed application configuration
+- configured PolicyDecisionPoint
+- configured SecurityContextValidator / Clock
 ```
 
-El caller del método de routing no puede inyectar el trust material por argumento.
+El actor/request que solicita routing:
+
+- no recibe referencia a la factory de admission;
+- no puede aportar ni sustituir el `SecurityContext` de admission;
+- no puede aportar el `AuthorizationRequest`;
+- no puede aportar el `AuthorizationDecision`;
+- no puede aportar `HumanConfirmationEvidence` a la llamada request-facing;
+- no puede aportar una `GovernedQualificationReviewAdmissionV0`;
+- no puede reemplazar la instancia de `GovernedQualificationConsumptionBoundaryV0`
+  ya compuesta.
+
+La distinción es una propiedad de la interfaz y de ownership de objetos, no una
+afirmación criptográfica sobre procesos Python.
+
+### 9.2 Operación gobernada de admisión
+
+PermissionScope V0 candidato y congelado para RED:
+
+```text
+resource = "engineering.qualification_review_consumption"
+action   = "admit"
+```
+
+La operación positiva se realiza exclusivamente en la seam de composition:
+
+```text
+governed configuration / Owner-selected review material
+        ↓
+derive canonical review-material digest
+        ↓
+derive AuthorizationOperationBinding internally
+        ↓
+construct AuthorizationRequest internally
+        ↓
+configured PDP.decide(request [, confirmation when policy requires])
+        ↓
+receive AuthorizationDecision from configured PDP
+        ↓
+validate exact request/decision/binding/permission/context coherence
+        ↓
+GovernedQualificationReviewAdmissionV0
+READY | HOLD | DENIED
+        ↓
+construct immutable GovernedQualificationConsumptionBoundaryV0
+```
+
+Ni el `AuthorizationOperationBinding` ni la decisión positiva se aceptan como
+datos terminales proporcionados por el routing request.
+
+### 9.3 Obtención y aplicación de la decisión
+
+La admission primitive/factory es responsable de:
+
+1. derivar el binding desde el material exacto que está siendo admitido;
+2. construir el `AuthorizationRequest` con el PermissionScope exacto;
+3. invocar el PDP configurado;
+4. recibir directamente su `AuthorizationDecision`;
+5. comprobar que `request_id`, permission, operation binding y SecurityContext
+   corresponden a la operación construida;
+6. materializar READY sólo si la decisión recibida permite esa operación y todas
+   las dimensiones de review obligatorias son PASS.
+
+Prohibido:
+
+```text
+caller creates AuthorizationDecision(allowed=True)
+→ admission accepts it as proof
+```
+
+### 9.4 Evento Human-in-Control / gobernado
+
+Para V0, la entrada del review material a la configuration surface es una acción
+gobernada separada del request y bajo control del Owner/proceso expresamente
+autorizado.
+
+Si la policy configurada exige confirmación humana, se reutiliza el mecanismo
+existente y su exact operation binding. Si la policy permite la operación sin
+confirmación adicional, esa decisión del PDP no elimina ni reemplaza la autoridad
+humana terminal sobre el proceso de desarrollo, Ready o Merge.
+
+```text
+Owner/governed configuration admission
+!= PR Ready
+!= Merge
+!= semantic truth
+```
+
+### 9.5 Propiedad de no sustitución
+
+Después de composition:
+
+```text
+request
+        ↓
+existing boundary instance
+        ↓
+route(request material, oracles)
+```
+
+No existe en la API request-facing un setter, factory argument, admission object,
+review object, decision object o configuration hook capaz de reemplazar el
+admitted set.
+
+Un test que sólo construya tipos equivalentes no satisface esta propiedad.
+El negativo debe intentar inyección/sustitución a través de la misma seam pública
+que usa el positivo y demostrar que no puede producir una admission READY.
 
 La creación de la boundary pertenece a composition/configuration, no al request.
 
@@ -578,8 +690,13 @@ DENIED / no DETERMINISTIC
 ## 12. Decisión G1-D4 — Human in Control
 
 Por riesgo HIGH y por tratarse de trust material que puede abrir
-`DETERMINISTIC`, el diseño candidato favorece una policy que pueda exigir
-confirmación humana explícita mediante el mecanismo existente.
+`DETERMINISTIC`, la admisión del review material ocurre exclusivamente desde
+la surface gobernada de composition/configuration. El Owner o proceso
+explícitamente autorizado controla qué material entra a esa surface.
+
+La policy configurada puede además exigir confirmación humana explícita mediante
+el mecanismo existente. Esa confirmación es un control de autorización de la
+operación exacta; no es el único elemento que separa request de configuration.
 
 Separación:
 
@@ -678,8 +795,13 @@ Responsabilidad:
 - validar permission scope;
 - validar request/decision coherence;
 - validar exact operation binding;
-- validar temporal coherence aplicable;
-- validar policy decision;
+- derivar internamente el canonical review-material digest;
+- derivar internamente el `AuthorizationOperationBinding`;
+- construir internamente el `AuthorizationRequest`;
+- invocar el PDP configurado y recibir directamente su decisión;
+- validar temporal coherence al momento de admission;
+- validar policy decision obtenida del PDP configurado;
+- retener el contexto temporal mínimo requerido para revalidación en consumo;
 - rechazar authority effect distinto de `none`;
 - producir una projection/admission inmutable.
 
@@ -691,11 +813,13 @@ No responsabilidad:
 - ejecutar red;
 - consultar store;
 - ejecutar modelo;
-- autorizar cambios.
+- autorizar cambios;
+- aceptar un `AuthorizationDecision` caller-supplied como evidencia de origen;
+- aceptar una admission READY caller-supplied como trust credential.
 
 ---
 
-## 15. Decisión G1-D7 — consumption boundary
+## 15. Decisión G1-D7 — consumption boundary y vigencia
 
 Nombre candidato:
 
@@ -718,6 +842,63 @@ no hidden mutable cache
 authority_effect = none
 ```
 
+### 15.1 Lifetime V0
+
+V0 adopta la semántica conservadora:
+
+```text
+positive admission lifetime
+<= lifetime of the SecurityContext that authorized its admission
+```
+
+Una admission READY retiene, como mínimo verificable:
+
+```text
+authorization_context_id
+authorization_subject_id
+authorization_context_issued_at
+authorization_context_expires_at
+admission_evaluated_at
+authorization_request_id
+authorization_operation_binding
+```
+
+La admission NO se convierte en snapshot durable que sobreviva automáticamente
+a la expiración del contexto de autorización.
+
+### 15.2 Clock y revalidación en consumo
+
+La boundary recibe en composition un `Clock` gobernado/injectable compatible con
+el modelo temporal existente. El request-facing route call no acepta
+`evaluated_at`, `now` ni otro valor temporal controlado por el caller.
+
+En cada consumo positivo candidato:
+
+```text
+consume_at = boundary.clock.now()
+
+authorization_context_issued_at
+<= admission_evaluated_at
+<= consume_at
+< authorization_context_expires_at
+```
+
+Si el contexto expiró entre creation y consumption:
+
+```text
+READY at creation
+        ↓ time
+expired at consumption
+        ↓
+ADMISSION_STALE
+        ↓
+no DETERMINISTIC
+```
+
+No se introduce store, revocation registry ni lifetime persistente nuevo.
+
+### 15.3 API request-facing
+
 La boundary expone conceptualmente:
 
 ```text
@@ -736,6 +917,9 @@ authorization_decision
 human_confirmation
 trusted_reviewer
 verified flag
+admission
+consume_at
+clock
 ```
 
 como parámetros del request-facing route call.
@@ -889,7 +1073,11 @@ permission mismatch
 operation binding mismatch
 → no DETERMINISTIC
 
-stale temporal/security context
+stale temporal/security context at admission
+→ no DETERMINISTIC
+
+context valid at admission but expired before consumption
+→ ADMISSION_STALE
 → no DETERMINISTIC
 
 duplicate READY admissions
@@ -969,7 +1157,8 @@ COMPOSITION-ADMITTED MATERIAL
 ```
 
 La API request-facing no debe tener campo/parámetro para inyectar el material
-admitido.
+admitido, su AuthorizationRequest/Decision, su SecurityContext, su Clock o la
+factory/configuration que produce la boundary.
 
 Si la implementación sólo cambia nombres pero sigue permitiendo:
 
@@ -1020,7 +1209,7 @@ IDs candidatos:
 ```text
 PQCTB-R01 caller-only FULL qualification → no DETERMINISTIC
 PQCTB-R02 caller-supplied review object → no DETERMINISTIC
-PQCTB-R03 caller-supplied fabricated READY admission → cannot enter request path
+PQCTB-R03 request cannot supply/replace admission factory, SecurityContext, PDP decision or boundary
 PQCTB-R04 missing composition admission → INFERENTIAL
 PQCTB-R05 wrong repository → no DETERMINISTIC
 PQCTB-R06 wrong candidate → no DETERMINISTIC
@@ -1028,27 +1217,27 @@ PQCTB-R07 wrong qualification identity/digest → no DETERMINISTIC
 PQCTB-R08 wrong oracle identity/content digest → no DETERMINISTIC
 PQCTB-R09 wrong relation/question/contract binding → no DETERMINISTIC
 PQCTB-R10 wrong catalog digest → no DETERMINISTIC
-PQCTB-R11 structural review FAIL/INCONCLUSIVE → no DETERMINISTIC
-PQCTB-R12 independence review FAIL/INCONCLUSIVE → no DETERMINISTIC
-PQCTB-R13 verification review FAIL/INCONCLUSIVE → no DETERMINISTIC
-PQCTB-R14 qualification review FAIL/INCONCLUSIVE → no DETERMINISTIC
-PQCTB-R15 missing authorization → no DETERMINISTIC
-PQCTB-R16 denied authorization → no DETERMINISTIC
-PQCTB-R17 permission mismatch → no DETERMINISTIC
-PQCTB-R18 operation binding mismatch → no DETERMINISTIC
-PQCTB-R19 stale context/admission → no DETERMINISTIC
-PQCTB-R20 duplicate READY admissions → no DETERMINISTIC
-PQCTB-R21 ambiguous FULL oracles → ORACLE_AMBIGUOUS
-PQCTB-R22 one FULL + one exact READY admission → DETERMINISTIC
-PQCTB-R23 positive route reports selected exact oracle_id
-PQCTB-R24 authority_effect != none rejected
-PQCTB-R25 no Kernel/Planner/model/provider/network/store/registry/Stage2 effect
-PQCTB-R26 route structural semantics P01–P09 remain regression-equivalent
-PQCTB-R27 request-facing signature exposes no review/admission trust input
-PQCTB-R28 raw RDD manifest/review references cannot act as runtime credential
-PQCTB-R29 composition admission mutation after construction impossible
-PQCTB-R30 material/candidate change invalidates prior admission
-```
+PQCTB-R11 catalog_completeness_result FAIL/INCONCLUSIVE with all other material PASS → no READY / no DETERMINISTIC
+PQCTB-R12 structural review FAIL/INCONCLUSIVE → no DETERMINISTIC
+PQCTB-R13 independence review FAIL/INCONCLUSIVE → no DETERMINISTIC
+PQCTB-R14 verification review FAIL/INCONCLUSIVE → no DETERMINISTIC
+PQCTB-R15 qualification review FAIL/INCONCLUSIVE → no DETERMINISTIC
+PQCTB-R16 missing authorization → no DETERMINISTIC
+PQCTB-R17 denied authorization → no DETERMINISTIC
+PQCTB-R18 permission mismatch → no DETERMINISTIC
+PQCTB-R19 operation binding mismatch → no DETERMINISTIC
+PQCTB-R20 context invalid/stale at admission → no DETERMINISTIC
+PQCTB-R21 context valid at admission then expired before consumption → ADMISSION_STALE / no DETERMINISTIC
+PQCTB-R22 duplicate READY admissions → no DETERMINISTIC
+PQCTB-R23 ambiguous FULL oracles → ORACLE_AMBIGUOUS
+PQCTB-R24 governed configuration + configured PDP + one exact READY + one exact FULL → DETERMINISTIC
+PQCTB-R25 positive route reports selected exact oracle_id
+PQCTB-R26 authority_effect != none rejected
+PQCTB-R27 no Kernel/Planner/model/provider/network/store/registry/Stage2 effect
+PQCTB-R28 route structural semantics P01–P09 remain regression-equivalent
+PQCTB-R29 request-facing signature exposes no review/admission/decision/context/clock trust input
+PQCTB-R30 raw RDD manifest/review references cannot act as runtime credential
+PQCTB-R31 material/candidate change invalidates prior admission```
 
 Estos tests son design candidates; no están autorizados.
 
@@ -1061,32 +1250,59 @@ Aunque esta unidad permanezca aislada de runtime, §5.5 exige no omitir E2E.
 E2E equivalente mínimo futuro:
 
 ```text
-raw qualification
-+
-raw review evidence
-+
-exact operation authorization
+Owner/governed configuration selects raw review material
         ↓
-admission/projection
+admission factory derives exact operation binding
         ↓
-composition-bound consumption boundary
+admission factory constructs AuthorizationRequest
         ↓
-routing subject + exact FULL oracle
+configured PDP returns AuthorizationDecision
+        ↓
+admission validates exact decision/binding/context/review dimensions
+        ↓
+READY admission
+        ↓
+composition constructs immutable consumption boundary with governed Clock
+        ↓
+request supplies only routing subject + exact FULL oracle
+        ↓
+boundary revalidates admission lifetime at consume time
         ↓
 DETERMINISTIC
 ```
 
-Y negative E2E:
+Negative E2E sobre la MISMA seam:
 
 ```text
-same request material
-+
-fabricated request-side review/admission
+request attempts to supply/replace:
+review material OR
+AuthorizationDecision OR
+SecurityContext OR
+READY admission OR
+consumption boundary
+        ↓
+no governed admission replacement path
+        ↓
+missing/non-matching composition admission
         ↓
 INFERENTIAL / blocked
 ```
 
-Debe ejecutarse sobre el candidate exacto.
+Temporal negative E2E:
+
+```text
+valid context
+→ READY admission
+→ advance governed Clock beyond context.expires_at
+→ consume same immutable boundary
+→ ADMISSION_STALE
+→ no DETERMINISTIC
+```
+
+Debe ejecutarse sobre el candidate exacto. El positivo y el negativo deben
+atravesar la misma composition admission seam; fixtures no pueden fabricar
+`AuthorizationDecision(allowed=True)` o READY como sustituto de la invocación
+del PDP configurado.
 
 ---
 
@@ -1111,9 +1327,10 @@ Kernel files                     0
 Planner files                    0
 runtime/provider files           0
 CLI/InternalInteraction files    0
-Security contract changes        0 preferred
-PDP changes                      0 preferred
+Security contract changes        0
+PDP/PEP semantic changes          0
 policy rule activation           separate explicit decision
+Clock                             existing governed primitive only
 max bounded correction rounds    2
 ```
 
@@ -1191,6 +1408,12 @@ Ambigüedades cerradas en Writer pass:
 10. Positive path requiere exact one FULL + exact one READY admission.
 11. InternalInteraction wiring queda separado.
 12. Security architecture escalation produce STOP.
+13. Composition, no request, construye AuthorizationRequest y obtiene directamente la decisión del PDP configurado.
+14. PermissionScope de admission queda congelado a engineering.qualification_review_consumption / admit.
+15. Request no puede suministrar/sustituir SecurityContext, AuthorizationDecision, admission, Clock o boundary.
+16. Admission positiva no sobrevive automáticamente a SecurityContext.expires_at.
+17. Consumption revalida lifetime mediante Clock gobernado no controlado por request.
+18. catalog_completeness FAIL/INCONCLUSIVE bloquea READY aun con digest correcto.
 
 Writer precheck:
 
@@ -1249,6 +1472,9 @@ Writer candidate: PASS.
 - deterministic matching;
 - no network/store;
 - stale evidence invalidation;
+- configured-PDP decision acquisition at composition seam;
+- governed Clock revalidation on every positive consumption;
+- catalog completeness causal rejection;
 - regression preservation P01–P09.
 
 Writer candidate: PASS.
@@ -1256,6 +1482,9 @@ Writer candidate: PASS.
 ### Resilience
 
 - missing/invalid/stale/duplicate/denied → no DETERMINISTIC;
+- valid-at-admission but expired-at-consumption → ADMISSION_STALE;
+- catalog completeness FAIL/INCONCLUSIVE → no READY;
+- request-side substitution attempts → no positive admission replacement;
 - no fallback que convierta ausencia de trust en positive route;
 - rollback local y sin migraciones.
 
@@ -1325,6 +1554,8 @@ support_sufficient coupling required
 InternalInteraction wiring required in same unit
 duplicated routing P01–P09 unavoidable
 request can still inject positive trust material
+governed decision cannot be obtained/applied without accepting caller-supplied AuthorizationDecision
+admission lifetime cannot be revalidated with existing governed Clock primitive
 ```
 
 Cada STOP exige scope review separado.
@@ -1360,10 +1591,14 @@ Four Questions                                  WRITER CANDIDATE PASS
 Design 4R                                       WRITER CANDIDATE PASS
 RDD Stage 1 Design Check                        WRITER CANDIDATE PASS
 
-Independent Critical Contract Hardening         PENDING
-Independent Four Questions                      PENDING
-Independent Design 4R                           PENDING
-Independent RDD Stage 1 Design Check            PENDING
+Independent review on ae3fe7ed...               FAIL / HISTORICAL
+F242-PRED-01 bounded design correction           MATERIALIZED / PENDING RE-REVIEW
+F242-PRED-02 bounded design correction           MATERIALIZED / PENDING RE-REVIEW
+F242-PRED-03 bounded design correction           MATERIALIZED / PENDING RE-REVIEW
+Independent Critical Contract Hardening         PENDING ON NEW CANDIDATE
+Independent Four Questions                      PENDING ON NEW CANDIDATE
+Independent Design 4R                           PENDING ON NEW CANDIDATE
+Independent RDD Stage 1 Design Check            PENDING ON NEW CANDIDATE
 PRE-RED ADMISSION                               PENDING
 
 RED                                              NOT AUTHORIZED
@@ -1378,8 +1613,62 @@ authority_effect                                 none
 ```
 
 ---
+## 34. Bounded correction — independent review F242-PRED-01/02/03
 
-## 34. Siguiente transición lícita
+El independent Pre-RED Design Review del candidate:
+
+```text
+ae3fe7ed7b68462f04c5ac676e9a5e11dc2d383f
+```
+
+emitió:
+
+```text
+PRE-RED DESIGN REVIEW = FAIL
+```
+
+con tres findings bloqueantes:
+
+```text
+F242-PRED-01  composition admission seam / configured PDP enforcement
+F242-PRED-02  admission lifetime / temporal revalidation
+F242-PRED-03  catalog completeness causal RED coverage
+```
+
+Esta revisión permanece evidencia histórica ligada exclusivamente a
+`ae3fe7ed...`.
+
+La bounded correction de este design record:
+
+- congela la composition admission seam;
+- define qué controla request y qué controla governed configuration;
+- congela PermissionScope `engineering.qualification_review_consumption/admit`;
+- exige derivación interna del operation binding;
+- exige que admission invoque el PDP configurado y reciba directamente su decisión;
+- prohíbe caller-supplied AuthorizationDecision/READY como prueba positiva;
+- congela lifetime máximo al SecurityContext de autorización;
+- exige revalidación en consumo mediante Clock gobernado no request-controlled;
+- agrega cobertura causal de catalog completeness FAIL/INCONCLUSIVE;
+- endurece Security contract changes y PDP/PEP semantic changes a límite 0.
+
+```text
+finding closure
+!= writer assertion
+```
+
+Por tanto:
+
+```text
+F242-PRED-01 = CORRECTION MATERIALIZED / PENDING INDEPENDENT RE-REVIEW
+F242-PRED-02 = CORRECTION MATERIALIZED / PENDING INDEPENDENT RE-REVIEW
+F242-PRED-03 = CORRECTION MATERIALIZED / PENDING INDEPENDENT RE-REVIEW
+```
+
+No se autoriza RED por esta corrección.
+
+---
+
+## 35. Siguiente transición lícita
 
 ```text
 independent read-only pre-RED review
