@@ -340,7 +340,18 @@ Estos IDs son design candidate, no RED ejecutado.
 
 ## 16. Correction Budget candidato
 
-Si el pre-RED gate autoriza implementación:
+El pre-RED gate produce evidencia de admisibilidad y NO concede autoridad de
+implementación.
+
+~~~text
+PRE-RED PASS != RED authorization
+RDD Stage 1 Design Check PASS != RED authorization
+validation evidence != authority
+~~~
+
+Si, y sólo si, después de `PRE-RED ADMISSION = PASS` el Owner autoriza
+explícitamente el RED y su alcance, el siguiente Correction Budget limita esa
+implementación autorizada:
 
 ~~~text
 allowed production files:
@@ -359,6 +370,9 @@ max bounded correction rounds: 2
 ~~~
 
 La necesidad de un segundo production file requiere STOP y scope review.
+
+Este presupuesto no autoriza por sí mismo RED, GREEN, implementación, Ready,
+Merge ni ampliación de scope.
 
 ## 17. Out of scope
 
