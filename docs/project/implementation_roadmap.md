@@ -2135,4 +2135,3 @@ Restricciones iniciales de planificación:
 - preservar §5.5 completo por tratarse de un contrato crítico.
 
 Esta reconciliación es derivada. La unidad siguiente requiere admisión humana separada antes de RED o implementación.
-
