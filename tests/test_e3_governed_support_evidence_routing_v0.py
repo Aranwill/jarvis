@@ -146,11 +146,11 @@ def test_red_r01_route_kind_enum_is_closed() -> None:
     }
 
 
-def test_red_r02_exact_unique_full_oracle_routes_deterministic() -> None:
+def test_red_r02_exact_unique_full_oracle_without_trust_boundary_is_inferential() -> None:
     module = _routing_api()
     result = _route(module, oracles=(_oracle(module),))
-    assert result.route_kind.value == "DETERMINISTIC"
-    assert result.reason_code.value == "DETERMINISTIC_ORACLE_ELIGIBLE"
+    assert result.route_kind.value == "INFERENTIAL"
+    assert result.reason_code.value == "INFERENTIAL_RESIDUAL"
     assert result.authority_effect == "none"
 
 
@@ -278,7 +278,7 @@ def test_red_r12_routing_performs_no_network_or_process_calls(
     monkeypatch.setattr(subprocess, "run", forbidden)
 
     result = _route(module, oracles=(_oracle(module),))
-    assert result.route_kind.value == "DETERMINISTIC"
+    assert result.route_kind.value == "INFERENTIAL"
 
 
 @pytest.mark.parametrize("route_kind", ["INFERENTIAL", "INSUFFICIENT"])
@@ -298,10 +298,10 @@ def test_red_r13_r14_non_deterministic_routes_have_no_assessor_or_model_callback
     assert result.route_kind.value == route_kind
 
 
-def test_red_r15_deterministic_selection_exposes_no_implicit_fallback_route() -> None:
+def test_red_r15_full_oracle_without_trust_boundary_exposes_no_deterministic_route() -> None:
     module = _routing_api()
     result = _route(module, oracles=(_oracle(module),))
-    assert result.route_kind.value == "DETERMINISTIC"
+    assert result.route_kind.value == "INFERENTIAL"
     assert not hasattr(result, "fallback_route_kind")
 
 
