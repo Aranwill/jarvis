@@ -875,11 +875,15 @@ def route_governed_support_evidence_v0(
             GovernedSupportEvidenceRouteReason.EVIDENCE_INSUFFICIENT,
         )
     if len(eligible) == 1:
+        # V0 is deliberately fail-closed for positive deterministic routing.
+        # A caller-controlled FULL qualification can establish structural
+        # coherence, but it cannot establish externally grounded provenance.
+        # Until a separate consumption trust boundary is admitted, the
+        # bounded fallback remains inferential.
         return _routing_result(
             subject,
-            GovernedSupportEvidenceRouteKind.DETERMINISTIC,
-            GovernedSupportEvidenceRouteReason.DETERMINISTIC_ORACLE_ELIGIBLE,
-            eligible[0].oracle_id,
+            GovernedSupportEvidenceRouteKind.INFERENTIAL,
+            GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
         )
     return _routing_result(
         subject,
