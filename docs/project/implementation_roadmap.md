@@ -40,7 +40,7 @@ gobernanza o contrato aprobado.
 ## Estado CURRENT reconciliado — 2026-10-02
 
 Esta sección representa el estado material vigente reconciliado contra
-Aranwill/jarvis/main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e.
+`Aranwill/jarvis/main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
