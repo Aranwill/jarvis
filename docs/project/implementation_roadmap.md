@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-09-30
-as_of_commit: ae22f3be23ff1c30093d071c74e86db84c34098e
+as_of_date: 2026-10-02
+as_of_commit: 73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -37,10 +37,10 @@ Este documento es deliberadamente **derivado y no normativo**.
 No reemplaza ni modifica ninguna fuente de ley, arquitectura, seguridad,
 gobernanza o contrato aprobado.
 
-## Estado CURRENT reconciliado — 2026-09-29
+## Estado CURRENT reconciliado — 2026-10-02
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@9b40820790a2179b1dc42c60a714ac3d1686b2e7`.
+Aranwill/jarvis/main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -2065,3 +2065,74 @@ Sprint 7.12                              NOT AUTHORIZED
 El pack reduce el gap de **evaluabilidad** de futuros mecanismos de soporte; no constituye por sí mismo verificación semántica, selección de assessor ni autorización productiva.
 
 Esta reconciliación es derivada y no crea automáticamente el siguiente gate.
+
+## Reconciliación CURRENT — E3 Support Evidence Routing / Qualification Consumption V0
+
+El baseline vigente incorpora el cierre de la línea E3 de routing mediante PR #235:
+
+```text
+E3 Governed Support Evidence Routing V0
+PR                         #235
+candidate terminal          7e8ad3278c06cd1f44135e3c4dd59069c450f284
+merge                       73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
+status                      INTEGRATED
+authority_effect            none
+```
+
+La PR #240 fue integrada en la línea de #235 antes de su merge y dejó materializado el comportamiento fail-closed de `E3 Governed Qualification Consumption V0`:
+
+```text
+caller-controlled FULL qualification
+→ never sufficient by itself for DETERMINISTIC
+→ INFERENTIAL while positive trust boundary is absent
+```
+
+PR #239 quedó cerrada sin merge y se conserva como evidencia histórica del gap de self-certification; no constituye baseline CURRENT.
+
+Disposición de planificación:
+
+```text
+Governed Support Evidence Routing V0             INTEGRATED
+Governed Qualification Consumption fail-closed   INTEGRATED
+positive DETERMINISTIC consumption boundary       REQUIRES SEPARATE G0 / G1
+support_sufficient wiring                         NOT AUTHORIZED
+Protected Finalization integration                NOT AUTHORIZED
+semantic_assurance                                NOT_VERIFIED
+E008-SG-02                                        OPEN
+model/provider experiment                         NOT AUTHORIZED BY THIS UNIT
+RDD Stage 2                                       NOT AUTHORIZED
+Sprint 7.12                                       NOT AUTHORIZED
+```
+
+Los runners post-merge fueron reportados por el Owner como completados. Esta reconciliación no fabrica un identificador de Validation ni un conteo de tests que no pueda reconstruirse desde la interfaz consultada.
+
+### Próxima unidad candidata
+
+La siguiente unidad lógica es una admisión/diseño separado para una frontera positiva de consumo de qualification, con working name:
+
+```text
+E3 Positive Qualification Consumption Trust Boundary V0
+```
+
+Objetivo de diseño:
+
+```text
+externally governed qualification evidence
+        ↓
+non-caller-controlled consumption boundary
+        ↓
+exact binding / fail-closed reconciliation
+        ↓
+routing eligibility
+```
+
+Restricciones iniciales de planificación:
+
+- no convertir RDD-M1 en credencial runtime;
+- no usar `PASS`, hashes, actor IDs o flags como prueba autosuficiente de externalidad;
+- no introducir store/registry/database, PKI/signatures, network verifier, Kernel/Planner wiring ni nueva authority surface sin `STOP → scope review`;
+- preservar `Evidence != Authority`;
+- preservar §5.5 completo por tratarse de un contrato crítico.
+
+Esta reconciliación es derivada. La unidad siguiente requiere admisión humana separada antes de RED o implementación.
+
