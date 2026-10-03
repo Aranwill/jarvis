@@ -3,7 +3,7 @@ id: DOC-AKS-003
 title: Engineering Knowledge Artifact Types
 artifact_type: Architecture Document
 status: Published
-version: 1.0.0
+version: 1.0.1
 domain: Knowledge
 technology: AKS
 tags:
@@ -15,193 +15,209 @@ related:
 author: Hector Rodriguez
 reviewed_by:
 created_at: 2026-07-09
-updated_at: 2026-07-09
+updated_at: 2026-10-03
+language: es
 ---
 
 # Engineering Knowledge Artifact Types
 
-## Purpose
+## Propósito
 
-This document defines the artifact taxonomy used by the Engineering Knowledge Library.
+Este documento define la taxonomía de artefactos utilizada por la Engineering
+Knowledge Library.
 
-Each artifact type has a specific purpose and should be used consistently throughout the project.
+Cada tipo de artefacto tiene un propósito específico y debería utilizarse de forma
+consistente en todo el proyecto.
 
-The goal is to ensure that engineering knowledge remains structured, reusable, searchable and easy to maintain.
+El objetivo es asegurar que el conocimiento de ingeniería permanezca
+estructurado, reutilizable, buscable y fácil de mantener.
 
 ---
 
-# Artifact Types
+# Tipos de artefactos
 
 ## STD — Standard
 
-Purpose
+### Propósito
 
-Defines mandatory engineering rules that must be followed.
+Define reglas obligatorias de ingeniería que deben cumplirse.
 
-Typical contents
+### Contenido típico
 
-- Coding standards
-- Naming conventions
-- Documentation rules
-- Security rules
-- Architectural constraints
+- estándares de código;
+- convenciones de nombres;
+- reglas de documentación;
+- reglas de seguridad;
+- restricciones arquitectónicas.
 
-Use when
+### Usar cuando
 
-The information describes requirements that every contributor must follow.
+La información describe requisitos que toda contribución debe cumplir.
 
 ---
 
 ## PAT — Pattern
 
-Purpose
+### Propósito
 
-Documents reusable architectural or design solutions.
+Documenta soluciones reutilizables de arquitectura o diseño.
 
-Typical contents
+### Contenido típico
 
-- Design patterns
-- Integration patterns
-- Architectural patterns
-- Communication patterns
+- patrones de diseño;
+- patrones de integración;
+- patrones arquitectónicos;
+- patrones de comunicación.
 
-Use when
+### Usar cuando
 
-The same solution is expected to be reused across multiple components.
+Se espera reutilizar la misma solución en múltiples componentes.
 
 ---
 
 ## REC — Recipe
 
-Purpose
+### Propósito
 
-Provides step-by-step implementation guides.
+Proporciona guías de implementación paso a paso.
 
-Typical contents
+### Contenido típico
 
-- How-to documents
-- Deployment procedures
-- Configuration guides
-- Development workflows
+- documentos how-to;
+- procedimientos de deployment;
+- guías de configuración;
+- flujos de desarrollo.
 
-Use when
+### Usar cuando
 
-A repeatable process needs to be executed consistently.
+Un proceso repetible necesita ejecutarse de forma consistente.
 
 ---
 
 ## EXP — Example
 
-Purpose
+### Propósito
 
-Provides concrete implementation examples.
+Proporciona ejemplos concretos de implementación.
 
-Typical contents
+### Contenido típico
 
-- Folder structures
-- Code snippets
-- API examples
-- Configuration examples
+- estructuras de carpetas;
+- snippets de código;
+- ejemplos de API;
+- ejemplos de configuración.
 
-Use when
+### Usar cuando
 
-Showing a practical reference is more effective than describing it.
+Mostrar una referencia práctica resulta más efectivo que describirla.
 
 ---
 
 ## TECH — Technology
 
-Purpose
+### Propósito
 
-Documents technologies adopted by the project.
+Documenta tecnologías adoptadas por el proyecto.
 
-Typical contents
+### Contenido típico
 
-- Framework baselines
-- Library evaluations
-- Version policies
-- Adoption rationale
+- baselines de frameworks;
+- evaluaciones de librerías;
+- políticas de versiones;
+- razones de adopción.
 
-Use when
+### Usar cuando
 
-The document explains how a technology is used within Malāk.
+El documento explica cómo se utiliza una tecnología dentro de Malāk.
 
 ---
 
 ## LPK — Learning Pack
 
-Purpose
+### Propósito
 
-Captures curated learning material for engineering topics.
+Captura material de aprendizaje curado sobre temas de ingeniería.
 
-Typical contents
+### Contenido típico
 
-- Best practices
-- Book summaries
-- Internal learning notes
-- Training references
+- buenas prácticas;
+- resúmenes de libros;
+- notas internas de aprendizaje;
+- referencias de formación.
 
-Use when
+### Usar cuando
 
-The objective is to preserve engineering knowledge rather than define project rules.
+El objetivo es preservar conocimiento de ingeniería y no definir reglas
+obligatorias del proyecto.
 
 ---
 
 ## REF — Reference
 
-Purpose
+### Propósito
 
-Stores trusted external references.
+Almacena referencias externas confiables.
 
-Typical contents
+### Contenido típico
 
-- RFCs
-- Official documentation
-- Standards
-- Academic papers
-- Technical articles
+- RFC;
+- documentación oficial;
+- estándares;
+- papers académicos;
+- artículos técnicos.
 
-Use when
+### Usar cuando
 
-The knowledge originates from an external authoritative source.
+El conocimiento proviene de una fuente externa autoritativa.
 
 ---
 
 ## GLO — Glossary
 
-Purpose
+### Propósito
 
-Defines terminology used across the project.
+Define terminología utilizada en el proyecto.
 
-Typical contents
+### Contenido típico
 
-- Acronyms
-- Architectural concepts
-- Domain terminology
-- Internal vocabulary
+- acrónimos;
+- conceptos arquitectónicos;
+- terminología de dominio;
+- vocabulario interno.
 
-Use when
+### Usar cuando
 
-A concept requires a canonical definition.
-
----
-
-# Design Principles
-
-Every artifact should:
-
-- Have a stable identifier.
-- Follow the common metadata template.
-- Declare explicit relationships.
-- Be version controlled.
-- Be independently understandable.
-- Be reusable.
-- Avoid duplicated knowledge.
+Un concepto requiere una definición canónica.
 
 ---
 
-# Future Evolution
+# Principios de diseño
 
-Additional artifact types may be introduced as the Engineering Knowledge Library evolves.
+Todo artefacto debería:
 
-New types must preserve backward compatibility and follow the same metadata model.
+- tener un identificador estable;
+- seguir el template común de metadata;
+- declarar relaciones explícitas;
+- estar bajo control de versiones;
+- poder comprenderse de forma independiente;
+- ser reutilizable;
+- evitar conocimiento duplicado.
+
+---
+
+# Evolución futura
+
+Podrán incorporarse tipos adicionales a medida que evolucione la Engineering
+Knowledge Library.
+
+Los nuevos tipos deben preservar compatibilidad hacia atrás y seguir el mismo
+modelo de metadata.
+
+---
+
+# Historial de revisiones
+
+| Versión | Fecha | Descripción |
+|---|---|---|
+| 1.0.0 | 2026-07-09 | Versión inicial. |
+| 1.0.1 | 2026-10-03 | Normalización del contenido explicativo al español, preservando términos técnicos canónicos en su idioma original. |

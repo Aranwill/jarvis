@@ -9,11 +9,14 @@ Estas instrucciones rigen el trabajo en el repositorio. No reemplazan, modifican
 ## Regla persistente de idioma
 
 - Todas las respuestas al propietario del proyecto deben estar en español.
-- Toda documentación nueva debe redactarse en español.
+- Toda documentación nueva debe redactar su **prosa explicativa en español**.
 - Los análisis, planes, informes, ADR, RFC, notas de diseño y propuestas deben estar en español.
-- Los nombres de clases, funciones, módulos, APIs, comandos, rutas y términos técnicos existentes pueden mantenerse en inglés.
-- No se deben traducir identificadores técnicos ni nombres existentes cuando hacerlo afecte la consistencia del código o del repositorio.
-- Cuando una fuente esté en inglés, su contenido debe explicarse en español.
+- Los términos técnicos canónicos deben conservarse en su idioma original cuando identifican una metodología, etapa, gate, componente, Capability, rol, schema, artifact type, status, contrato, enum, metadata key, archivo, ruta, comando, API, clase, función, módulo o identificador.
+- No se debe traducir un término técnico si la traducción puede colapsar conceptos distintos o cambiar fuerza normativa, identidad o semántica.
+- Separaciones como `Evidence != Receipt != Validation != Decision != Authority` deben conservar sus términos originales.
+- Los nombres existentes de metodologías, componentes y artefactos —por ejemplo `Receipt-Driven Development`, `Candidate Identity`, `Bounded Correction`, `Architecture Knowledge System`, `Knowledge Manager`, `Draft` o `Published`— no deben sustituirse por equivalentes españoles dentro de su uso técnico.
+- Los términos narrativos no canónicos pueden traducirse normalmente al español.
+- Cuando una fuente esté en inglés, su contenido debe explicarse en español preservando los términos técnicos originales; ante duda semántica, se conserva el término original y se explica en español.
 
 ## Raíz del repositorio
 
@@ -62,6 +65,7 @@ Las fuentes principales incluyen:
 - `docs/development/engineering_method.md`
 - `docs/development/development_checklist.md`
 - `docs/development/malak_construction_protocol.md`
+- `docs/development/malak_construction_preflight.md`
 - `SECURITY.md`
 
 Para revisiones de próxima implementación, seguridad, capacidades futuras o arquitectura de horizonte, deberá consultarse además de forma explícita:
@@ -79,8 +83,21 @@ Los snapshots históricos de release describen el estado certificado en su fecha
 ## Flujo de construcción canónico
 
 Antes de planificar, implementar, revisar o cerrar un cambio material, todo
-actor de desarrollo debe consultar `docs/development/malak_construction_protocol.md`
-y `docs/development/development_checklist.md`.
+actor de desarrollo debe ejecutar primero
+`docs/development/malak_construction_preflight.md` y consultar
+`docs/development/malak_construction_protocol.md` y
+`docs/development/development_checklist.md`.
+
+El preflight es una barrera de admisión fail-closed: demuestra que el actor
+recuperó el baseline y las reglas aplicables desde el repositorio antes de razonar
+sobre el cambio. No sustituye G0/G1, 4R, RDD, validación independiente, CI ni
+gobernanza humana.
+
+Esta obligación aplica también a asistentes, modelos y agentes automatizados que
+trabajen sobre Malāk, incluido el asistente utilizado por el Owner en una sesión
+de ChatGPT/Jarvis. La memoria del modelo y la conversación previa pueden ayudar
+a localizar fuentes, pero no constituyen baseline, autoridad ni evidencia de un
+gate.
 
 La secuencia detallada de contratos críticos vive **únicamente** en
 `malak_construction_protocol.md`, sección `5.5 Secuencia crítica obligatoria y no
@@ -97,13 +114,18 @@ no tratar tests verdes como cierre integral
 no usar fuentes externas de soporte como autoridad del proceso
 ```
 
-Si el actor no puede consultar o reconciliar el Construction Protocol aplicable:
+Si el actor no puede completar el Construction Preflight o consultar y
+reconciliar el Construction Protocol aplicable:
 
 ```text
 STOP
 → INCONCLUSIVE
 → no implementar / no promover / no cerrar
 ```
+
+El Owner no debe tener que recordar estas reglas en cada conversación. La
+obligación de ejecutar el preflight nace del repositorio y del tipo de trabajo,
+no de un recordatorio conversacional.
 
 El orden canónico, las disposiciones `N/A`, la invalidación por cambio de
 candidate, RDD Stage 1, 4R, Bounded Correction, E2E/CI y autoridad humana se
@@ -155,6 +177,7 @@ Malāk — source of truth
 ├── SECURITY.md                         ← política de seguridad obligatoria
 ├── docs/development/engineering_method.md
 ├── docs/development/malak_construction_protocol.md
+├── docs/development/malak_construction_preflight.md
 ├── especificaciones y contratos aplicables
 ├── baseline vigente
 ├── sprint vigente o último baseline cerrado
@@ -259,7 +282,7 @@ método de ingeniería, revisión, bounded correction y validación
 
 docs/development/malak_construction_protocol.md
         ↓
-cobertura exhaustiva, incorporación progresiva, gates, métricas y RDD experimental
+cobertura exhaustiva, incorporación progresiva, gates, métricas y RDD Stage 1 propio de Malāk
 ```
 
 También deberán revisarse el baseline vigente, la última ficha de sprint
@@ -386,8 +409,11 @@ candidate identity strategy   DEFINED
 La clasificación de riesgo determina la profundidad de revisión según
 `docs/development/engineering_method.md`,
 `docs/development/development_checklist.md` y
-`docs/development/malak_construction_protocol.md`. No puede omitirse porque el
-cambio parezca pequeño, documental o porque los tests estén verdes.
+`docs/development/malak_construction_protocol.md`. Las cuatro lentes 4R deben
+recibir disposición explícita en toda unidad; la proporcionalidad decide cuánto
+se profundiza cada una, no cuáles pueden desaparecer silenciosamente. No puede
+omitirse esta clasificación porque el cambio parezca pequeño, documental o
+porque los tests estén verdes.
 
 Para contratos críticos se conserva la separación obligatoria:
 
@@ -458,7 +484,9 @@ Gate N
 
 Cuando corresponda FULL 4R, `Risk`, `Readability`, `Reliability` y `Resilience` deben registrar evidencia separada; una única etiqueta `4R PASS` no basta como demostración.
 
-El perfil RDD de Malāk es progresivo: Candidate Identity, evidencia candidate-bound, validación independiente y receipts experimentales pueden utilizarse para mejorar trazabilidad, pero `Evidence != Receipt != Validation != Decision != Authority`. Ningún receipt puede aprobar, autorizar, promover o mergear un candidato.
+El perfil RDD de Malāk es progresivo y propio: **RDD Stage 1 — Structured Evidence Manifest está ADOPTED / ACTIVE**. Candidate Identity, evidencia candidate-bound, validación independiente, Bounded Correction y Candidate Conformance mejoran la trazabilidad, pero `Evidence != Receipt != Validation != Decision != Authority`. Stage 1 no produce autoridad ni autoriza receipts de Stage 2. **RDD Stage 2 permanece NOT AUTHORIZED**.
+
+En toda sesión de Malāk, `RDD` debe interpretarse primero como este perfil interno documentado y no como la metodología externa completa ni como una implementación concreta de terceros.
 
 Como adaptación incremental de RDD en Malāk, el alcance del candidate no debe expandirse durante implementación, corrección o review para incorporar mejoras laterales. Una necesidad nueva se registra y se somete a su propio gate; no se introduce silenciosamente en el candidate vigente. Esta regla no activa RDD Stage 2.
 

@@ -5,7 +5,7 @@ title: Creating a New Capability
 artifact_type: Recipe
 
 status: Published
-version: 1.0.0
+version: 1.0.1
 
 domain: Development
 
@@ -23,56 +23,61 @@ author: Hector Rodriguez
 reviewed_by:
 
 created_at: 2026-07-09
-updated_at: 2026-07-09
+updated_at: 2026-10-03
+language: es
 ---
 
-# Overview
+# Descripción general
 
-## Purpose
+## Propósito
 
-Provide a repeatable process for introducing a new capability into Malāk.
-
----
-
-## Scope
-
-Applies whenever a new capability is added to the system.
+Proporcionar un proceso repetible para introducir una nueva capability en
+Malāk.
 
 ---
 
-# Content
+## Alcance
 
-1. Define the capability responsibility.
-2. Create the implementation package.
-3. Register the capability.
-4. Implement unit tests.
-5. Update the Architecture Knowledge System if architectural knowledge was generated.
-6. Validate the complete test suite.
-7. Update project documentation when required.
+Aplica siempre que se agregue una nueva capability al sistema.
 
 ---
 
-# Design Considerations
+# Contenido
 
-Capabilities should remain independent and respect the Kernel contracts.
+1. Definir la responsabilidad de la capability.
+2. Crear el package de implementación.
+3. Registrar la capability.
+4. Implementar tests unitarios.
+5. Actualizar el Architecture Knowledge System si se generó conocimiento
+   arquitectónico.
+6. Validar la test suite completa.
+7. Actualizar la documentación del proyecto cuando corresponda.
 
 ---
 
-# Related Artifacts
+# Consideraciones de diseño
+
+Las capabilities deberían permanecer independientes y respetar los contratos del
+Kernel.
+
+---
+
+# Artefactos relacionados
 
 - STD-001
 
 ---
 
-# References
+# Referencias
 
 - Blueprint
 - Development Checklist
 
 ---
 
-# Revision History
+# Historial de revisiones
 
-| Version | Date | Description |
-|----------|------------|----------------|
-| 1.0.0 | 2026-07-09 | Initial version |
+| Versión | Fecha | Descripción |
+|---|---|---|
+| 1.0.0 | 2026-07-09 | Versión inicial. |
+| 1.0.1 | 2026-10-03 | Normalización del contenido explicativo al español, preservando términos técnicos canónicos en su idioma original. |

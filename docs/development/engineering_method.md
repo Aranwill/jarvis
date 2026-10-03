@@ -1,6 +1,6 @@
 # Malāk Engineering Method
 
-Versión: 0.1.1
+Versión: 0.1.2
 
 Estado: Activo
 
@@ -16,7 +16,7 @@ La metodología combina:
 - Test-Driven Development (TDD).
 - RDD Stage 1 adaptado a Malāk como control explícito de conformidad de diseño y de evidencia ligada al candidato, cuando aplique.
 - revisión basada en riesgo mediante las 4R.
-- corrección acotada (Bounded Correction).
+- Bounded Correction.
 - validación independiente de correcciones.
 - evidencia verificable asociada al candidato evaluado.
 - validación E2E y métricas cuando corresponda.
@@ -24,6 +24,12 @@ La metodología combina:
 Este documento no sustituye ni reinterpreta la Constitución Cognitiva, la Constitución de Gobernanza, el Blueprint, los ADR aceptados, los contratos públicos ni los Architecture Quality Gates.
 
 En caso de conflicto, prevalece la jerarquía documental oficial del proyecto.
+
+Para toda unidad material, la aplicación de este método comienza sólo después de
+superar `docs/development/malak_construction_preflight.md`. El preflight no agrega
+una autoridad nueva: operacionaliza la obligación de recuperar y reconciliar el
+baseline, las fuentes aplicables y los límites del trabajo antes de entrar al
+ciclo de ingeniería.
 
 ---
 
@@ -44,7 +50,7 @@ Implementación
         ↓
 Revisión proporcional al riesgo
         ↓
-Corrección acotada cuando corresponda
+Bounded Correction cuando corresponda
         ↓
 Validación independiente
         ↓
@@ -306,7 +312,43 @@ Pregunta central:
 
 # 7. Selección proporcional de lentes
 
-No todos los cambios requieren revisión 4R completa.
+La proporcionalidad modifica la **profundidad** de revisión, no permite que una
+lente desaparezca silenciosamente.
+
+Toda unidad de cambio debe considerar explícitamente las cuatro lentes:
+
+```text
+Risk
+Readability
+Reliability
+Resilience
+```
+
+Existen dos perfiles:
+
+```text
+PROPORTIONAL 4R
+→ las cuatro lentes reciben disposición explícita;
+→ se profundizan únicamente las materialmente aplicables;
+→ una lente no profundizada debe quedar como NOT_APPLICABLE_WITH_REASON
+  o con una justificación equivalente.
+
+FULL 4R
+→ las cuatro lentes se revisan en profundidad;
+→ cada una produce evidencia separada;
+→ cada una concluye PASS | FAIL | INCONCLUSIVE.
+```
+
+Una selección proporcional válida debe poder demostrar, como mínimo:
+
+```text
+risk_class
+lens
+disposition
+rationale
+evidence cuando aplique
+escalation_trigger cuando aplique
+```
 
 ## Nivel 0 — Trivial
 
@@ -319,8 +361,9 @@ Ejemplos:
 
 Revisión:
 
-- validación normal;
-- sin subagente 4R salvo señal de riesgo.
+- PROPORTIONAL 4R mínima;
+- las cuatro lentes reciben disposición explícita;
+- no se exige subagente 4R salvo señal de riesgo.
 
 ## Nivel 1 — Bajo
 
@@ -333,7 +376,9 @@ Ejemplos:
 
 Revisión:
 
-- un lente dominante.
+- PROPORTIONAL 4R;
+- una o más lentes pueden ser dominantes;
+- las lentes restantes no pueden omitirse: requieren disposición y razón.
 
 ## Nivel 2 — Estándar
 
@@ -347,8 +392,9 @@ Ejemplos:
 
 Revisión:
 
-- uno o más lentes según impacto;
-- posibilidad de escalamiento.
+- PROPORTIONAL 4R con profundidad por impacto;
+- posibilidad de escalamiento dinámico;
+- FULL 4R si aparece una señal material que eleva el riesgo.
 
 ## Nivel 3 — Alto
 
@@ -382,6 +428,16 @@ Revisión:
 - FULL 4R;
 - revisión humana obligatoria;
 - evaluación adversarial adicional cuando corresponda.
+
+Reglas adicionales:
+
+- un contrato crítico conserva los checkpoints Design 4R pre-RED y Candidate
+  FULL 4R post-GREEN definidos por el Construction Protocol, con independencia
+  de que el delta de código sea pequeño;
+- una lente marcada como no aplicable no equivale a no revisada: debe conservar
+  razón verificable;
+- si una lente detecta una señal de mayor riesgo, se aplica el escalamiento
+  dinámico de la sección siguiente.
 
 ---
 
@@ -445,7 +501,7 @@ La aceptación final pertenece a la gobernanza aplicable y, cuando corresponda, 
 
 ---
 
-# 10. Bounded Correction — Corrección acotada
+# 10. Bounded Correction
 
 ## 10.1 Objetivo
 
@@ -457,7 +513,7 @@ La corrección se realiza de forma acotada y no debe transformarse en un refacto
 
 ## 10.2 Correction Scope
 
-Toda corrección acotada debe indicar, cuando corresponda:
+Toda `Bounded Correction` debe indicar, cuando corresponda:
 
 ```text
 finding_id
@@ -658,9 +714,15 @@ candidate changes
 
 ## 15.1 Estado de RDD en Malāk
 
-Malāk adopta un **RDD Stage 1 adaptado a su propia lógica de ingeniería y gobernanza**. Esta adopción no equivale a incorporar automáticamente una implementación externa ni a adoptar Receipt-Driven Development como metodología integral.
+Malāk adopta un **RDD Stage 1 adaptado a su propia lógica de ingeniería y gobernanza**
+como parte activa de su método. Esta adopción se inspira en Receipt-Driven
+Development (RDD), pero no equivale a copiar ni incorporar automáticamente una
+implementación externa concreta.
 
-RDD Stage 1 es un control de evidencia separado de SDD, TDD, 4R, E2E y aprobación humana. Su definición canónica y su orden operativo se encuentran en `docs/development/malak_construction_protocol.md`, especialmente §§5.4–5.5. Esta sección resume el método y no sustituye ese protocolo.
+RDD Stage 1 es un control de Evidence separado de SDD, TDD, 4R, E2E y aprobación
+humana. Su definición canónica y su orden operativo se encuentran en
+`docs/development/malak_construction_protocol.md`, especialmente §§5.4–5.5.
+Esta sección resume el método y no sustituye ese protocolo.
 
 Para cambios materiales, cuando corresponda, existen dos checkpoints distintos:
 
@@ -672,25 +734,34 @@ post-GREEN / after required candidate validation / pre-human-review:
 RDD Stage 1 Candidate Conformance
 ```
 
-El **Design Check** comprueba antes de RED que el diseño preserve, según aplicabilidad:
+El **Design Check** comprueba antes de RED que el diseño preserve, según
+aplicabilidad:
 
-- estrategia de identidad del candidato;
-- binding baseline/candidate;
-- procedencia de evidencia;
+- Candidate Identity strategy;
+- baseline/candidate binding;
+- Evidence provenance;
 - separación Writer / Reviewer / Validator / Authority;
 - resultados terminales `PASS | FAIL | INCONCLUSIVE`;
 - `INCONCLUSIVE != PASS`;
-- invalidación de evidencia afectada cuando cambia el candidato;
-- bounded correction y correction budget cuando existan findings;
-- validación independiente de fixes cuando corresponda;
+- invalidación de Evidence afectada cuando cambia el candidate;
+- Bounded Correction y Correction Budget cuando existan findings;
+- independent fix validation cuando corresponda;
 - `authority_effect = none`;
 - RDD Stage 2 no autorizado.
 
-El **Candidate Conformance** comprueba sobre el candidato material exacto, después de las validaciones requeridas y antes de revisión humana, que el paquete de evidencia sea coherente, candidate-bound y trazable. Debe preservar como mínimo la identidad exacta de baseline/candidate, el vínculo de validaciones y 4R con ese candidato, findings y rondas de corrección, procedencia productor/validador, independencia exigida y agregación terminal correcta.
+El **Candidate Conformance** comprueba sobre el candidate material exacto,
+después de las validaciones requeridas y antes de human review, que el paquete
+de Evidence sea coherente, candidate-bound y trazable.
 
-Separaciones obligatorias:
+Separación obligatoria:
 
 ```text
+Evidence
+!= Receipt
+!= Validation
+!= Decision
+!= Authority
+
 RDD Stage 1 Design Check PASS
 != RDD Stage 1 Candidate Conformance PASS
 
@@ -704,88 +775,91 @@ candidate changes
 
 authority_effect = none
 RDD Stage 2 = NOT AUTHORIZED
+Stage 3+ = NOT AUTHORIZED
 ```
 
-Malāk adopta actualmente, dentro de este Stage 1 adaptado, los principios de:
+El perfil activo integra y endurece mecanismos que Malāk ya utilizaba:
 
+- Candidate Identity y candidate binding;
+- candidate-bound Evidence;
+- Evidence provenance;
 - revisión 4R basada en riesgo;
-- candidate identity y candidate binding;
-- evidence provenance;
-- bounded correction;
-- correction budget;
-- validación independiente;
-- `PASS / FAIL / INCONCLUSIVE`;
-- evidencia de fallo;
-- separación Writer / Reviewer / Validator / Authority.
+- Bounded Correction y Correction Budget;
+- independent validation;
+- `PASS | FAIL | INCONCLUSIVE`;
+- failure evidence;
+- separación Writer / Reviewer / Validator / Authority;
+- invalidación y revalidación de Evidence cuando cambia el candidate;
+- `MALAK-EVIDENCE-MANIFEST/v1`.
 
-La ausencia de evidencia requerida produce `INCONCLUSIVE`; nunca puede degradarse silenciosamente a `PASS`.
+La ausencia de Evidence requerida produce `INCONCLUSIVE`; nunca puede
+degradarse silenciosamente a `PASS`.
 
-Receipt-Driven Development como metodología externa completa, RDD Stage 2 y mecanismos avanzados de receipts o attestation permanecen fuera del baseline autorizado mientras no exista una decisión arquitectónica específica que los admita.
+La metodología externa completa y las implementaciones concretas de terceros
+permanecen como referencias de investigación `OBSERVE` hasta que una necesidad,
+Evidence y decisión arquitectónica específicas justifiquen evaluar alguna parte.
 
-## 15.2 Candidate-Bound Receipt
+## 15.2 Candidate-bound Evidence de Stage 1
 
-Como evolución prevista, una validación con resultado `PASS` podrá producir un receipt ligado al candidato.
+Stage 1 utiliza `MALAK-EVIDENCE-MANIFEST/v1`, definido en
+`docs/development/evidence_manifest.md`, o Evidence estructurada equivalente
+explícitamente aprobada que preserve las mismas invariantes.
 
-Ejemplo conceptual:
-
-```yaml
-receipt_id: RCP-7F19
-result: PASS
-
-candidate:
-  id: CANDIDATE-004
-  sha: c84e...
-
-risk:
-  level: 3
-
-review:
-  mode: 4R
-  lenses:
-    - risk
-    - readability
-    - reliability
-    - resilience
-
-fix:
-  rounds: 1
-  budget_used: 14
-
-validation:
-  tests: PASS
-  architecture: PASS
-  security: PASS
-
-authority:
-  reviewer: none
-  acceptance: owner_required
-```
-
-## 15.3 Invalidez por cambio de candidato
-
-Si el contenido cambia después del receipt:
+La Evidence debe ligar, como mínimo:
 
 ```text
-reviewed candidate hash != current candidate hash
+baseline exacto
+candidate exacto
+scope / specification / gate
+validations aplicables
+4R aplicable
+findings
+correction rounds
+producer / validator provenance
+terminal result
+authority_effect = none
 ```
 
-el receipt no debe considerarse prueba suficiente del nuevo candidato.
+Este manifest **no es** un Receipt de Stage 2.
 
-Debe producirse una nueva verificación o una validación explícita del delta.
+## 15.3 Invalidación por cambio de candidate
 
-## 15.4 Evolución futura
+Si cambia el candidate después de producir Evidence ligada a él:
 
-Las siguientes técnicas quedan fuera del alcance actual y podrán evaluarse posteriormente:
+```text
+reviewed candidate identity != current candidate identity
+```
 
+la Evidence anterior no debe considerarse prueba suficiente del nuevo candidate.
+
+Debe producirse una nueva verificación o una revalidación explícita de la
+Evidence afectada.
+
+La misma regla alcanzaría a un Receipt candidate-bound si Stage 2 fuera
+autorizado en el futuro: un Receipt nunca debe reinterpretarse como Validation ni
+como Authority.
+
+## 15.4 Receipts y evolución futura
+
+`Candidate-Bound Validation Receipt` pertenece a **RDD Stage 2**, que continúa
+`NOT AUTHORIZED`.
+
+Por tanto, un resultado `PASS` de Stage 1 no debe fabricar, inferir ni promover
+un Receipt de Stage 2.
+
+Las siguientes técnicas quedan fuera del alcance activo y sólo podrán evaluarse
+mediante admisión separada:
+
+- Stage 2 Receipts;
 - hash chaining;
 - firmas criptográficas;
-- receipts firmados;
+- signed Receipts;
 - transparencia basada en Merkle;
-- attestation externa;
+- external attestation;
 - hardware-backed attestation;
 - almacenamiento inmutable distribuido.
 
-No deben incorporarse prematuramente.
+Ninguna etapa posterior se incorpora por secuencia automática.
 
 ---
 

@@ -3,11 +3,12 @@ id: DOC-AKS-002
 title: Engineering Knowledge Library
 artifact_type: Architecture Document
 status: Published
-version: 1.0.0
+version: 1.0.1
 author: Hector Rodriguez
 reviewed_by:
 created_at: 2026-07-09
-updated_at: 2026-07-09
+updated_at: 2026-10-03
+language: es
 
 tags:
   - AKS
@@ -22,104 +23,122 @@ related:
 
 # Engineering Knowledge Library
 
-## Purpose
+## Propósito
 
-The Engineering Knowledge Library extends the Architecture Knowledge System (AKS) by providing a structured repository for reusable engineering knowledge.
+La Engineering Knowledge Library extiende el Architecture Knowledge System
+(AKS) mediante un repositorio estructurado de conocimiento de ingeniería
+reutilizable.
 
-Its objective is to preserve technical knowledge generated during the evolution of Malāk in a standardized, reusable and auditable way.
+Su objetivo es preservar el conocimiento técnico generado durante la evolución
+de Malāk de forma estandarizada, reutilizable y auditable.
 
-The library is intended for both humans and future automated capabilities such as Retrieval, Validation, GraphRAG and Knowledge Management.
-
----
-
-# Objectives
-
-The Engineering Knowledge Library aims to:
-
-- Centralize engineering knowledge.
-- Promote reuse instead of duplication.
-- Preserve architectural decisions.
-- Standardize documentation.
-- Improve onboarding.
-- Support future intelligent retrieval mechanisms.
-- Serve as the canonical engineering knowledge repository.
+La biblioteca está destinada tanto a personas como a futuras capabilities
+automatizadas de Retrieval, Validation, GraphRAG y Knowledge Management.
 
 ---
 
-# Artifact Categories
+# Objetivos
 
-The library is organized into different categories of engineering artifacts.
+La biblioteca busca:
 
-Examples include:
-
-- Standards
-- Patterns
-- Recipes
-- Examples
-- Technologies
-- Learning Packs
-- References
-- Glossary
-
-Each artifact belongs to one category and follows a common metadata structure.
+- centralizar conocimiento de ingeniería;
+- promover reutilización en lugar de duplicación;
+- preservar decisiones arquitectónicas;
+- estandarizar documentación;
+- mejorar el onboarding;
+- soportar futuros mecanismos de recuperación inteligente;
+- servir como `canonical engineering knowledge repository`.
 
 ---
 
-# Growth Strategy
+# Categorías de artefactos
 
-The Engineering Knowledge Library will evolve incrementally.
+La biblioteca se organiza en distintas categorías de artefactos de ingeniería.
 
-New artifact types may be introduced without affecting existing documents.
+Ejemplos:
 
-Future capabilities may include:
+- Standards;
+- Patterns;
+- Recipes;
+- Examples;
+- Technologies;
+- Learning Packs;
+- References;
+- Glossary.
 
-- Semantic search
-- Retrieval
-- Validation
-- GraphRAG
-- Knowledge Manager
-- Relationship discovery
-- Automated indexing
-
-These capabilities are intentionally outside the scope of this document.
-
----
-
-# What the Library Does NOT Store
-
-The Engineering Knowledge Library is not intended to store:
-
-- Runtime state
-- User conversations
-- Memory
-- Logs
-- Configuration files
-- Generated embeddings
-- Vector indexes
-- Graph databases
-- Temporary implementation notes
-
-Only curated engineering knowledge belongs in the library.
+Cada artefacto pertenece a una categoría y sigue una estructura común de
+metadata.
 
 ---
 
-# Relationship with Future GraphRAG
+# Estrategia de crecimiento
 
-The Engineering Knowledge Library is the authoritative source of engineering knowledge.
+La Engineering Knowledge Library evolucionará de forma incremental.
 
-Future GraphRAG, Retrieval and Knowledge Manager capabilities will consume this library as their primary input without changing its structure.
+Pueden incorporarse nuevos tipos de artefactos sin afectar los documentos
+existentes.
 
-The documents remain human-readable while also serving as machine-processable knowledge artifacts.
+Capabilities futuras pueden incluir:
+
+- Semantic search;
+- Retrieval;
+- Validation;
+- GraphRAG;
+- Knowledge Manager;
+- Relationship discovery;
+- Automated indexing.
+
+Estas capabilities permanecen intencionalmente fuera del alcance de este
+documento.
 
 ---
 
-# Design Principles
+# Qué NO almacena la biblioteca
 
-- Human first
-- Machine readable
-- Stable identifiers
-- Incremental evolution
-- Version controlled
-- Explicit relationships
-- Reusable knowledge
-- Architecture before automation
+La Engineering Knowledge Library no está destinada a almacenar:
+
+- Runtime state;
+- User conversations;
+- Memory;
+- Logs;
+- Configuration files;
+- Generated embeddings;
+- Vector indexes;
+- Graph databases;
+- Temporary implementation notes.
+
+Sólo pertenece a la biblioteca conocimiento de ingeniería curado.
+
+---
+
+# Relación con futuro GraphRAG
+
+La Engineering Knowledge Library es la `authoritative source of engineering knowledge`.
+
+Futuras capabilities de GraphRAG, Retrieval y Knowledge Manager consumirán
+esta biblioteca como su entrada principal sin cambiar su estructura.
+
+Los documentos permanecen legibles por humanos y, al mismo tiempo, utilizables
+como artefactos de conocimiento procesables por máquinas.
+
+---
+
+# Principios de diseño
+
+- Human first;
+- Machine readable;
+- Stable identifiers;
+- Incremental evolution;
+- Version controlled;
+- Explicit relationships;
+- Reusable knowledge;
+- Architecture before automation.
+
+---
+
+# Historial de revisiones
+
+| Versión | Fecha | Descripción |
+|---|---|---|
+| 1.0.0 | 2026-07-09 | Versión inicial. |
+| 1.0.1 | 2026-10-03 | Normalización del contenido explicativo al español, preservando términos técnicos canónicos en su idioma original. |

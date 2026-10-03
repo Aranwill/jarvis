@@ -45,7 +45,7 @@ graph:
 
 history:
   created: 2026-06-27
-  updated: 2026-09-13
+  updated: 2026-10-03
 ---
 
 # 1. Constitución Cognitiva
@@ -53,13 +53,13 @@ history:
 > [!NOTE]
 > **Migración de identidad del proyecto**
 >
-> Este documento fue creado originalmente cuando el proyecto se llamaba **Malāk**.
+> Este documento fue creado originalmente cuando el proyecto se llamaba **Jarvis**.
 >
 > A partir de la versión **v0.6.0-alpha**, el nombre oficial del proyecto es **Malāk**.
 >
 > Este cambio afecta únicamente la identidad del proyecto. La arquitectura, los principios y las decisiones técnicas permanecen sin modificaciones.
 
-**Versión:** 1.2.0
+**Versión:** 1.2.1
 
 ---
 

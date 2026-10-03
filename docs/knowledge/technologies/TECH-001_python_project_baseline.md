@@ -5,7 +5,7 @@ title: Python Project Baseline
 artifact_type: Technology
 
 status: Published
-version: 1.0.0
+version: 1.0.1
 
 domain: Development
 
@@ -26,50 +26,54 @@ author: Hector Rodriguez
 reviewed_by:
 
 created_at: 2026-07-09
-updated_at: 2026-07-09
+updated_at: 2026-10-03
+language: es
 ---
 
-# Overview
+# Descripción general
 
-## Purpose
+## Propósito
 
-Define the current technology baseline adopted by Malāk.
-
----
-
-## Scope
-
-This document describes the primary technologies currently used in the project.
+Definir el baseline tecnológico actual adoptado por Malāk.
 
 ---
 
-# Content
+## Alcance
 
-Current baseline:
-
-- Python 3.x
-- uv for dependency management
-- pytest for testing
-- Virtual environment isolation
-- Architecture based on modular components
-
-Future revisions will incorporate additional technologies as they become part of the project's accepted baseline.
+Este documento describe las tecnologías principales utilizadas actualmente en
+el proyecto.
 
 ---
 
-# Design Considerations
+# Contenido
 
-Technology adoption should be deliberate, documented and aligned with the project's architectural principles.
+Baseline actual:
+
+- Python 3.x;
+- uv para gestión de dependencias;
+- pytest para testing;
+- aislamiento mediante entorno virtual;
+- arquitectura basada en componentes modulares.
+
+Futuras revisiones incorporarán tecnologías adicionales cuando pasen a formar
+parte del baseline aceptado del proyecto.
 
 ---
 
-# Related Artifacts
+# Consideraciones de diseño
+
+La adopción tecnológica debería ser deliberada, documentada y alineada con los
+principios arquitectónicos del proyecto.
+
+---
+
+# Artefactos relacionados
 
 - STD-001
 
 ---
 
-# References
+# Referencias
 
 - Python Documentation
 - uv Documentation
@@ -77,8 +81,9 @@ Technology adoption should be deliberate, documented and aligned with the projec
 
 ---
 
-# Revision History
+# Historial de revisiones
 
-| Version | Date | Description |
-|----------|------------|----------------|
-| 1.0.0 | 2026-07-09 | Initial version |
+| Versión | Fecha | Descripción |
+|---|---|---|
+| 1.0.0 | 2026-07-09 | Versión inicial. |
+| 1.0.1 | 2026-10-03 | Normalización del contenido explicativo al español, preservando términos técnicos canónicos en su idioma original. |

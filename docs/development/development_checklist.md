@@ -14,7 +14,26 @@ Todo cambio deberá superar este checklist antes de considerarse finalizado.
 
 La metodología de ingeniería aplicable se define en `docs/development/engineering_method.md`.
 
-La disciplina transversal de revisión, incorporación progresiva de capacidades, gates, métricas, RDD experimental y reconciliación derivada se define en `docs/development/malak_construction_protocol.md`.
+La disciplina transversal de revisión, incorporación progresiva de capacidades, gates, métricas, RDD Stage 1 propio de Malāk —adoptado y activo— y reconciliación derivada se define en `docs/development/malak_construction_protocol.md`. RDD Stage 2 continúa no autorizado.
+
+La barrera de admisión repository-first previa a todo trabajo material se define
+en `docs/development/malak_construction_preflight.md`.
+
+---
+
+# Construction Preflight
+
+Antes de planificar, diseñar, implementar, revisar o cerrar una unidad material,
+validar:
+
+- [ ] El `Malāk Construction Preflight` fue ejecutado contra el baseline vigente.
+- [ ] La memoria del asistente o la conversación previa no fueron usadas como sustituto de baseline, autoridad o evidencia de gate.
+- [ ] Se identificaron y reconciliaron las fuentes normativas, arquitectónicas, de seguridad y de método aplicables.
+- [ ] La dirección de autoridad y comunicación aplicable fue contrastada contra Blueprint y `ADR-003` cuando corresponda: control/autoridad downstream; retorno upstream sólo informativo y sin autoridad.
+- [ ] Component / Logic Reuse Review y Necessity & Complexity Review fueron resueltos antes de admitir una superficie nueva.
+- [ ] Riesgo, contrato crítico, profundidad 4R, scope y estrategia de Candidate Identity quedaron declarados cuando corresponde.
+- [ ] Un ítem material faltante, ambiguo o no verificable produjo `INCONCLUSIVE → STOP` y no una inferencia optimista.
+- [ ] Un `Preflight PASS` no fue utilizado como sustituto de G0/G1, RED/GREEN, 4R, RDD, E2E/CI, validación independiente ni autoridad humana.
 
 ---
 
@@ -110,7 +129,7 @@ Cuando el cambio sea material, validar:
 
 - [ ] El plan fue dividido en gates pequeños, verificables y reversibles.
 - [ ] Cada gate declaró objetivo, precondiciones, alcance, fuera de alcance, validación, STOP condition y rollback cuando correspondía.
-- [ ] Se registró la identidad del candidato evaluado cuando correspondía.
+- [ ] Se registró la Candidate Identity evaluada cuando correspondía.
 - [ ] No se avanzó al gate siguiente con un `FAIL` bloqueante o un `INCONCLUSIVE` no resuelto.
 - [ ] Un fallo local no fue utilizado para ampliar automáticamente archivos, componentes, arquitectura o dependencias.
 - [ ] Las métricas aplicables del gate fueron registradas o marcadas explícitamente como `N/A`.
@@ -174,7 +193,8 @@ Cuando se audite la aplicación histórica del flujo, validar:
 Cuando corresponda, validar:
 
 - [ ] El cambio posee una clasificación de riesgo proporcional a su impacto.
-- [ ] La revisión utilizó los lentes 4R necesarios: Risk, Readability, Reliability y Resilience.
+- [ ] Las cuatro lentes 4R —Risk, Readability, Reliability y Resilience— recibieron disposición explícita; ninguna fue omitida silenciosamente.
+- [ ] En PROPORTIONAL 4R se profundizaron las lentes materialmente aplicables y toda lente no profundizada conservó `NOT_APPLICABLE_WITH_REASON` o justificación equivalente.
 - [ ] Cuando correspondió FULL 4R, cada lente produjo estado, preguntas evaluadas, findings y evidencia propios en lugar de una única etiqueta `4R PASS`.
 - [ ] Los cambios triviales no fueron sometidos a controles desproporcionados sin evidencia que justificara el escalamiento.
 - [ ] Los cambios de riesgo alto o crítico fueron sometidos a FULL 4R.
@@ -184,7 +204,7 @@ Cuando corresponda, validar:
 
 ---
 
-# Corrección acotada
+# Bounded Correction
 
 Cuando un finding requirió corrección, validar:
 
@@ -200,7 +220,7 @@ Cuando un finding requirió corrección, validar:
 
 # Validación independiente de correcciones
 
-Cuando hubo corrección acotada, validar:
+Cuando hubo Bounded Correction, validar:
 
 - [ ] Un Fix Validator verificó el delta resultante de forma independiente cuando el riesgo lo justificaba.
 - [ ] El validator comprobó que solo se modificaron archivos o componentes autorizados.
@@ -266,7 +286,7 @@ Cuando forme parte del alcance del cambio, validar:
 - [ ] Las pruebas E2E distinguen claramente comportamiento esperado, resultado y condiciones ambientales.
 - [ ] Las afirmaciones de mejora se apoyan en evidencia reproducible y no únicamente en apreciación cualitativa.
 - [ ] La evidencia no se interpreta como autorización para ampliar alcance o modificar gobernanza.
-- [ ] La identidad del candidato está registrada mediante commit SHA, hash u otro identificador verificable cuando corresponda.
+- [ ] La Candidate Identity está registrada mediante commit SHA, hash u otro identificador verificable cuando corresponda.
 - [ ] Si el candidato cambió después de una revisión o validación, la evidencia previa fue revalidada.
 - [ ] Los receipts, si existen, están ligados al candidato exacto y no sustituyen la aprobación humana requerida.
 
