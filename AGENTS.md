@@ -300,6 +300,108 @@ La clasificación organiza la decisión; no concede autorización.
 
 No se debe ignorar una intención futura ya preservada ni forzarla sobre un baseline que todavía no demuestra necesidad.
 
+### Revisión obligatoria de reutilización y justificación de componentes
+
+Antes de aceptar una siguiente implementación, congelar G0/G1 o abrir un Pull
+Request material, debe ejecutarse una **Component / Logic Reuse Review** sobre el
+baseline vigente.
+
+Esta revisión no se limita a buscar nombres similares. Debe recorrer y reconciliar,
+según aplicabilidad, las fuentes del Minimum Review Set y comprobar si la
+responsabilidad propuesta ya está total o parcialmente materializada mediante:
+
+```text
+componente existente
+primitive existente
+contrato existente
+Capability existente
+frontera de seguridad / autorización existente
+provenance / projection / consumption boundary existente
+helper o lógica interna reutilizable
+test / evaluation primitive existente
+patrón arquitectónico ya aprobado
+```
+
+El resultado debe clasificarse explícitamente como:
+
+```text
+REUSE    → la responsabilidad ya existe y puede reutilizarse sin nueva superficie
+ADAPT    → una primitive existente puede extenderse de forma acotada
+COMPOSE  → varias primitives existentes resuelven la necesidad sin nuevo subsistema
+NEW      → ninguna combinación existente satisface la responsabilidad demostrada
+```
+
+`REUSE / ADAPT / COMPOSE / NEW` describe una disposición de diseño y **no
+autoriza implementación**.
+
+No se debe abrir una PR para descubrir posteriormente si el componente que
+contiene era necesario. La necesidad y la reutilización deben evaluarse antes de
+crear la superficie material propuesta.
+
+Cuando el resultado candidato sea `NEW`, antes de aceptarlo debe existir una
+**New Component Justification** que demuestre, como mínimo:
+
+```text
+responsibility_unique          YES
+existing_component_fit         NO
+existing_primitive_fit         NO
+composition_sufficient         NO
+real_consumer                  YES
+need_demonstrated              YES
+testable_boundary              YES
+no_bypass_possible             YES
+architecture_cost_justified    YES
+risk_class                     DECLARED
+```
+
+Si no puede demostrarse que una responsabilidad es única, que no cabe en un
+componente o primitive existente y que la composición de superficies vigentes es
+insuficiente:
+
+```text
+NEW COMPONENT
+→ NOT ADMISSIBLE
+→ REUSE / ADAPT / COMPOSE o STOP
+```
+
+Esta revisión complementa el **Necessity & Complexity Review**. Ambas deben
+quedar resueltas antes de aceptar una nueva superficie; una no sustituye a la
+otra.
+
+Para toda implementación o PR material debe declararse además, **antes de abrir
+la PR**:
+
+```text
+risk_class
+risk_rationale
+critical_contract            YES | NO
+required_review_depth
+Design 4R applicability
+Candidate FULL 4R applicability
+scope                         FROZEN
+baseline                      EXACT
+candidate identity strategy   DEFINED
+```
+
+La clasificación de riesgo determina la profundidad de revisión según
+`docs/development/engineering_method.md`,
+`docs/development/development_checklist.md` y
+`docs/development/malak_construction_protocol.md`. No puede omitirse porque el
+cambio parezca pequeño, documental o porque los tests estén verdes.
+
+Para contratos críticos se conserva la separación obligatoria:
+
+```text
+Design 4R pre-RED
+!=
+Candidate FULL 4R post-GREEN
+```
+
+Una omisión de Component / Logic Reuse Review, New Component Justification
+cuando corresponda, Necessity & Complexity Review o clasificación de riesgo es
+un **finding de proceso** y bloquea la apertura de una PR material hasta su
+resolución.
+
 ### Planificación por gates cortos, deterministas y reversibles
 
 Todo plan de implementación material deberá dividirse en gates pequeños y
