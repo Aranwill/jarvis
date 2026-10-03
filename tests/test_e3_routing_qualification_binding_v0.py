@@ -348,43 +348,51 @@ def test_gc_r18_fabricated_matching_review_pass_exact_bindings_no_deterministic(
     _assert_not_deterministic(result)
 
 
-# RED — E3 governed qualification consumption via existing Security Control Plane.
-# These tests intentionally describe the missing composition. Production code
-# must not be added in the RED commit.
+# RED correction — positive qualification consumption remains fail-closed until
+# externality can be demonstrated by an admitted boundary.  In-memory caller
+# material is never sufficient to unlock DETERMINISTIC routing.
 
 
-def test_gc_red_r19_governed_consumption_operation_exists() -> None:
+def test_gc_red_r19_no_positive_consumption_surface_is_exposed_yet() -> None:
     module = _module()
-    assert hasattr(
-        module,
-        "GovernedQualificationConsumptionOperationV0",
-    ), "RED: missing bounded E3 qualification-consumption protected operation"
+    assert not hasattr(module, "GovernedQualificationConsumptionV0")
+    assert not hasattr(module, "GovernedQualificationConsumptionOperationV0")
+    assert not hasattr(module, "governed_qualification_consumption_binding_v0")
 
 
-def test_gc_red_r20_exact_qualification_authorization_binding_exists() -> None:
-    module = _module()
-    assert hasattr(
-        module,
-        "governed_qualification_consumption_binding_v0",
-    ), "RED: missing exact E3 qualification-consumption operation binding"
-
-
-def test_gc_red_r21_governed_consumption_declares_fixed_permission() -> None:
-    module = _module()
-    operation_type = getattr(
-        module,
-        "GovernedQualificationConsumptionOperationV0",
-        None,
-    )
-    assert operation_type is not None, "RED: protected operation is not implemented"
-    assert hasattr(
-        operation_type,
-        "required_permission",
-    ), "RED: protected operation must declare its own fixed PermissionScope"
-
-
-def test_gc_red_r22_router_does_not_accept_caller_authorization_decision() -> None:
+def test_gc_red_r20_router_has_no_caller_supplied_trust_or_authority_input() -> None:
     module = _module()
     signature = inspect.signature(module.route_governed_support_evidence_v0)
-    assert "authorization_decision" not in signature.parameters
-    assert "decision" not in signature.parameters
+    forbidden = {
+        "authorization_decision",
+        "decision",
+        "verified",
+        "trusted",
+        "review_pass",
+        "external_review",
+        "consumption_eligibility",
+        "qualification_consumption",
+    }
+    assert forbidden.isdisjoint(signature.parameters)
+
+
+def test_gc_red_r21_full_qualification_remains_inferential_without_admitted_externality() -> None:
+    module = _module()
+    qualification = _qualification(module)
+    oracle = _oracle(module, qualification=qualification)
+    result = _route(module, oracles=(oracle,))
+    assert result.route_kind is module.GovernedSupportEvidenceRouteKind.INFERENTIAL
+    assert result.reason_code is module.GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL
+
+
+def test_gc_red_r22_no_security_pep_pdp_dependency_added_to_pure_router() -> None:
+    module = _module()
+    source = inspect.getsource(module.route_governed_support_evidence_v0).lower()
+    for forbidden in (
+        "strictpolicyenforcementpoint",
+        "policydecisionpoint",
+        "authorizationdecision",
+        "authorizationrequest",
+        "permissionscope",
+    ):
+        assert forbidden not in source
