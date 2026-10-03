@@ -5,7 +5,7 @@ title: Knowledge Governance
 artifact_type: Governance
 
 status: Published
-version: 1.0.0
+version: 1.0.1
 
 domain: Knowledge
 
@@ -25,118 +25,130 @@ author: Hector Rodriguez
 reviewed_by:
 
 created_at: 2026-07-09
-updated_at: 2026-07-09
+updated_at: 2026-10-03
+language: es
 ---
 
 # Knowledge Governance
 
-## Purpose
+## Propósito
 
-Define the minimum governance rules for the Engineering Knowledge Library.
+Definir las reglas mínimas de gobernanza para la Engineering Knowledge Library.
 
-This document establishes what can enter the AKS, what must remain outside, how artifact status is interpreted, and who decides whether knowledge becomes part of the official project baseline.
-
----
-
-# What Enters the AKS
-
-The AKS may store curated engineering knowledge such as:
-
-- Architecture documents
-- Standards
-- Patterns
-- Recipes
-- Examples
-- Technology baselines
-- Learning packs
-- Glossary entries
-- Trusted references
-- Governance documents
-
-Knowledge must be useful, reusable, structured, and relevant to the evolution of Malāk.
+Este documento establece qué puede ingresar al AKS, qué debe permanecer fuera,
+cómo se interpreta el estado de un artefacto y quién decide si el conocimiento
+pasa a formar parte del baseline oficial del proyecto.
 
 ---
 
-# What Does Not Enter the AKS
+# Qué ingresa al AKS
 
-The AKS must not store:
+El AKS puede almacenar conocimiento de ingeniería curado, como:
 
-- Runtime state
-- Raw conversations
-- Temporary notes
-- Logs
-- Secrets
-- Credentials
-- Generated embeddings
-- Vector indexes
-- Graph databases
-- Unverified external content
-- Implementation noise without long-term value
+- Architecture documents;
+- Standards;
+- Patterns;
+- Recipes;
+- Examples;
+- Technology baselines;
+- Learning Packs;
+- Glossary entries;
+- Trusted references;
+- Governance documents.
 
----
-
-# Who Decides
-
-The project owner acts as the final authority for accepting, rejecting, deferring, or archiving AKS artifacts.
-
-Future governance mechanisms may introduce reviewers, automated validation, or approval workflows.
-
-For now, acceptance is manual and explicit.
+El conocimiento debe ser útil, reutilizable, estructurado y relevante para la
+evolución de Malāk.
 
 ---
 
-# Trusted Sources
+# Qué no ingresa al AKS
 
-A trusted source is a source that is reliable enough to support engineering decisions.
+El AKS no debe almacenar:
 
-Examples include:
-
-- Official documentation
-- Project source code
-- Accepted architecture documents
-- Published standards
-- Reviewed internal artifacts
-- Recognized technical books
-- Stable external references
-
-External content must not be treated as trusted by default.
+- Runtime state;
+- Raw conversations;
+- Temporary notes;
+- Logs;
+- Secrets;
+- Credentials;
+- Generated embeddings;
+- Vector indexes;
+- Graph databases;
+- Unverified external content;
+- Implementation noise without long-term value.
 
 ---
 
-# Artifact Status
+# Quién decide
+
+El Owner del proyecto actúa como autoridad final para aceptar, rechazar,
+diferir o archivar artefactos AKS.
+
+Futuros mecanismos de gobernanza podrán incorporar reviewers, automated
+validation o approval workflows.
+
+Por ahora, la aceptación es manual y explícita.
+
+---
+
+# Fuentes confiables
+
+Una fuente confiable es una fuente suficientemente fiable para respaldar decisiones
+de ingeniería.
+
+Ejemplos:
+
+- Official documentation;
+- Project source code;
+- Accepted architecture documents;
+- Published standards;
+- Reviewed internal artifacts;
+- Recognized technical books;
+- Stable external references.
+
+El contenido externo no debe tratarse como confiable por defecto.
+
+---
+
+# Estado de los artefactos
 
 ## Draft
 
-Draft means the artifact is still being evaluated.
+`Draft` significa que el artefacto todavía está siendo evaluado.
 
-A Draft artifact may contain incomplete knowledge, pending review, or early design proposals.
+Un artefacto Draft puede contener conocimiento incompleto, revisión pendiente o
+propuestas de diseño tempranas.
 
-Draft artifacts should not be considered official project baseline.
+Los artefactos Draft no deberían considerarse parte del baseline oficial del
+proyecto.
 
 ## Published
 
-Published means the artifact has been accepted as part of the official AKS baseline.
+`Published` significa que el artefacto fue aceptado como parte del baseline
+oficial del AKS.
 
-A Published artifact can be used as a reference for implementation, validation, planning, and future retrieval.
-
----
-
-# Minimum Requirements
-
-Every AKS artifact must:
-
-- Have YAML metadata.
-- Have a stable ID.
-- Declare its artifact type.
-- Declare its status.
-- Declare relationships when applicable.
-- Follow the official artifact template.
-- Be stored in the correct AKS category.
+Un artefacto Published puede utilizarse como referencia para implementación,
+validación, planificación y futura recuperación.
 
 ---
 
-# Revision History
+# Requisitos mínimos
 
-| Version | Date | Description |
-|----------|------------|----------------|
-| 1.0.0 | 2026-07-09 | Initial version |
+Todo artefacto AKS debe:
+
+- tener metadata YAML;
+- tener un ID estable;
+- declarar su tipo de artefacto;
+- declarar su estado;
+- declarar relaciones cuando corresponda;
+- seguir el template oficial de artefactos;
+- almacenarse en la categoría AKS correcta.
+
+---
+
+# Historial de revisiones
+
+| Versión | Fecha | Descripción |
+|---|---|---|
+| 1.0.0 | 2026-07-09 | Versión inicial. |
+| 1.0.1 | 2026-10-03 | Normalización del contenido explicativo al español, preservando términos técnicos canónicos en su idioma original. |

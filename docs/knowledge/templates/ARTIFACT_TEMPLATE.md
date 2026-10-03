@@ -20,56 +20,58 @@ reviewed_by:
 
 created_at:
 updated_at:
+language: es
 ---
 
-# Overview
+# Descripción general
 
-## Purpose
+## Propósito
 
-Describe the purpose of this artifact.
-
----
-
-## Scope
-
-Define exactly what is covered by this document.
-
-Also clarify what is intentionally outside its scope.
+Describir el propósito de este artefacto.
 
 ---
 
-# Content
+## Alcance
 
-Write the engineering knowledge here.
+Definir exactamente qué cubre este documento.
 
-Organize the content according to the needs of the artifact.
-
-Examples:
-
-- Standard
-- Pattern
-- Recipe
-- Example
-- Technology
-- Learning Pack
-- Reference
-- Glossary
+Aclarar también qué queda intencionalmente fuera de alcance.
 
 ---
 
-# Design Considerations
+# Contenido
 
-Describe architectural decisions, assumptions, trade-offs or implementation notes when applicable.
+Escribir aquí el conocimiento de ingeniería.
 
-If not applicable, this section may be omitted.
+Organizar el contenido según las necesidades del artefacto.
+
+Ejemplos:
+
+- Standard;
+- Pattern;
+- Recipe;
+- Example;
+- Technology;
+- Learning Pack;
+- Reference;
+- Glossary.
 
 ---
 
-# Related Artifacts
+# Consideraciones de diseño
 
-List the most relevant AKS artifacts related to this document.
+Describir decisiones arquitectónicas, supuestos, trade-offs o notas de
+implementación cuando corresponda.
 
-Example:
+Si no aplica, esta sección puede omitirse.
+
+---
+
+# Artefactos relacionados
+
+Listar los artefactos AKS más relevantes relacionados con este documento.
+
+Ejemplo:
 
 - STD-001
 - PAT-002
@@ -77,14 +79,15 @@ Example:
 
 ---
 
-# References
+# Referencias
 
-List official documentation, RFCs, books, articles or any external authoritative sources.
+Listar documentación oficial, RFC, libros, artículos o fuentes externas
+autoritativas.
 
 ---
 
-# Revision History
+# Historial de revisiones
 
-| Version | Date | Description |
-|----------|------------|-----------------------------|
-| 1.0.0 | YYYY-MM-DD | Initial version |
+| Versión | Fecha | Descripción |
+|---|---|---|
+| 1.0.0 | YYYY-MM-DD | Versión inicial. |

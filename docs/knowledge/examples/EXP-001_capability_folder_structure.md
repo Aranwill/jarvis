@@ -5,7 +5,7 @@ title: Capability Folder Structure
 artifact_type: Example
 
 status: Published
-version: 1.0.0
+version: 1.0.1
 
 domain: Development
 
@@ -25,26 +25,29 @@ author: Hector Rodriguez
 reviewed_by:
 
 created_at: 2026-07-09
-updated_at: 2026-07-09
+updated_at: 2026-10-03
+language: es
 ---
 
-# Overview
+# Descripción general
 
-## Purpose
+## Propósito
 
-Provide a reference folder structure for implementing new capabilities in Malāk.
-
----
-
-## Scope
-
-This example illustrates the recommended organization for a capability package.
+Proporcionar una estructura de carpetas de referencia para implementar nuevas
+capabilities en Malāk.
 
 ---
 
-# Content
+## Alcance
 
-Example:
+Este ejemplo ilustra la organización recomendada para el package de una
+capability.
+
+---
+
+# Contenido
+
+Ejemplo:
 
 ```text
 capabilities/
@@ -56,32 +59,35 @@ capabilities/
     └── tests/
 ```
 
-The structure may evolve over time, but should preserve separation of responsibilities and maintain consistency across capabilities.
+La estructura puede evolucionar con el tiempo, pero debería preservar la separación
+de responsabilidades y mantener consistencia entre capabilities.
 
 ---
 
-# Design Considerations
+# Consideraciones de diseño
 
-The goal is consistency, not rigidity. Additional files may be introduced when justified by the capability's complexity.
+El objetivo es la consistencia, no la rigidez. Pueden incorporarse archivos
+adicionales cuando la complejidad de la capability lo justifique.
 
 ---
 
-# Related Artifacts
+# Artefactos relacionados
 
 - STD-001
 - REC-001
 
 ---
 
-# References
+# Referencias
 
 - Project Blueprint
 - Development Checklist
 
 ---
 
-# Revision History
+# Historial de revisiones
 
-| Version | Date | Description |
-|----------|------------|----------------|
-| 1.0.0 | 2026-07-09 | Initial version |
+| Versión | Fecha | Descripción |
+|---|---|---|
+| 1.0.0 | 2026-07-09 | Versión inicial. |
+| 1.0.1 | 2026-10-03 | Normalización del contenido explicativo al español, preservando términos técnicos canónicos en su idioma original. |

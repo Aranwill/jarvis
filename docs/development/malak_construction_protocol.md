@@ -1,6 +1,6 @@
 # Malāk Construction Protocol
 
-Versión: 0.2.4
+Versión: 0.2.6
 
 Estado: Activo
 
@@ -10,7 +10,9 @@ Estado: Activo
 
 Este documento define la disciplina transversal utilizada para revisar el estado de Malāk, seleccionar trabajo futuro, ejecutar cambios por gates y producir evidencia verificable sin ampliar autoridad ni alcance de forma implícita.
 
-Complementa `docs/development/engineering_method.md` y `docs/development/development_checklist.md`.
+Complementa `docs/development/engineering_method.md`,
+`docs/development/development_checklist.md` y
+`docs/development/malak_construction_preflight.md`.
 
 No reemplaza ni reinterpreta:
 
@@ -30,6 +32,10 @@ En caso de conflicto prevalece la jerarquía documental oficial del proyecto.
 # 2. Principio de construcción
 
 Malāk debe crecer desde evidencia y necesidad real, reutilizando y revalidando la intención arquitectónica ya preservada antes de inventar una línea nueva.
+
+Antes de ingresar a este flujo, toda unidad material debe superar el
+`Malāk Construction Preflight`. El preflight verifica admisibilidad y contexto;
+no reemplaza ninguna etapa posterior de este protocolo.
 
 Flujo rector:
 
@@ -68,6 +74,42 @@ reconciliación derivada
 ```
 
 Para todo sprint material, este flujo constituye una obligación de ejecución y evidencia, no una guía aspiracional ni un checklist que dependa de un recordatorio conversacional del Owner. El asistente o agente debe aplicar automáticamente cada etapa que corresponda, demostrar su resultado o detenerse si no puede hacerlo.
+
+## 2.1 Construction Preflight obligatorio
+
+`docs/development/malak_construction_preflight.md` define la barrera operativa de
+entrada para actores humanos asistidos, asistentes, modelos y agentes de
+desarrollo.
+
+Regla:
+
+```text
+material work requested
+        ↓
+Construction Preflight
+        ↓
+PASS → continuar con el gate/protocolo aplicable
+FAIL | INCONCLUSIVE → STOP
+```
+
+El preflight debe resolverse desde el repositorio vigente. Memoria del modelo,
+conversación previa, una PR anterior, tests verdes o una conclusión histórica no
+pueden sustituir sus evidencias.
+
+Separación obligatoria:
+
+```text
+Preflight PASS
+!= G0/G1 PASS
+!= Design 4R PASS
+!= Candidate FULL 4R PASS
+!= RDD Candidate Conformance PASS
+!= CI PASS
+!= Owner approval
+```
+
+Si el baseline, el scope o una fuente de autoridad material cambian después del
+preflight, deben revalidarse las disposiciones afectadas antes de continuar.
 
 La existencia de una idea, concepto, research gap, roadmap o receipt no constituye autorización para implementar.
 
@@ -860,7 +902,7 @@ el Owner la autorice; no se incorpora silenciosamente al sprint que introdujo
 las reglas.
 
 ---
-# 6. Cuatro lentes obligatorios
+# 6. Cuatro lentes con profundidad proporcional
 
 Los cuatro lentes definidos por el Engineering Method son:
 
@@ -871,9 +913,31 @@ Reliability
 Resilience
 ```
 
-En todo sprint material, FULL 4R es obligatorio y cada lente debe producir evidencia separada.
+Toda unidad de cambio debe considerar las cuatro lentes. La proporcionalidad
+determina la profundidad de revisión; no autoriza omisiones silenciosas.
 
-Formato mínimo recomendado:
+Perfiles:
+
+```text
+PROPORTIONAL 4R
+→ las cuatro lentes reciben disposición explícita;
+→ se profundizan las materialmente aplicables;
+→ toda lente no profundizada conserva razón verificable.
+
+FULL 4R
+→ las cuatro lentes se revisan en profundidad;
+→ cada lente produce evidencia separada;
+→ cada lente concluye PASS | FAIL | INCONCLUSIVE.
+```
+
+FULL 4R es obligatorio cuando:
+
+- la clasificación de riesgo sea Nivel 3 / Alto o Nivel 4 / Crítico;
+- el Construction Protocol lo exija por tratarse de un contrato crítico;
+- una revisión proporcional escale por evidencia a riesgo alto o crítico;
+- una fuente superior o autorización humana aplicable lo requiera.
+
+Formato mínimo de evidencia para FULL 4R:
 
 ```text
 lens
@@ -884,11 +948,22 @@ evidence
 residual_risk
 ```
 
-No debe utilizarse `4R PASS` como única evidencia cuando el riesgo requiera demostrar qué fue revisado por cada lente.
+Para PROPORTIONAL 4R debe quedar, como mínimo:
 
-Para un microcambio no material aprobado explícitamente, la profundidad puede ser proporcional, pero las cuatro lentes deben al menos recibir disposición explícita; una lente omitida requiere justificación.
+```text
+lens
+disposition
+rationale
+evidence cuando aplique
+```
 
-El escalamiento dinámico de revisión continúa regido por `engineering_method.md`.
+No debe utilizarse `4R PASS` como única evidencia cuando corresponda FULL 4R.
+
+Una lente no profundizada no puede quedar implícita: requiere
+`NOT_APPLICABLE_WITH_REASON` o disposición equivalente.
+
+El escalamiento dinámico de revisión continúa regido por
+`engineering_method.md`.
 
 ---
 
@@ -931,7 +1006,7 @@ Las métricas son evidencia; no son autoridad.
 
 ## 8.1 Estado
 
-Malāk ha adoptado **RDD Stage 1 — Structured Evidence Manifest** como parte de su disciplina de construcción.
+Malāk ha adoptado **RDD Stage 1 — Structured Evidence Manifest** como parte activa de su disciplina de construcción y como adaptación propia de RDD al método de Malāk.
 
 Stage 1 utiliza `MALAK-EVIDENCE-MANIFEST/v1`, definido en `docs/development/evidence_manifest.md`, para ligar evidencia de construcción al candidato exacto evaluado.
 
