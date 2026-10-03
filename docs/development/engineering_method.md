@@ -1,6 +1,6 @@
 # Malāk Engineering Method
 
-Versión: 0.1.0
+Versión: 0.1.1
 
 Estado: Activo
 
@@ -14,6 +14,7 @@ La metodología combina:
 
 - Specification-Driven Development (SDD).
 - Test-Driven Development (TDD).
+- RDD Stage 1 adaptado a Malāk como control explícito de conformidad de diseño y de evidencia ligada al candidato, cuando aplique.
 - revisión basada en riesgo mediante las 4R.
 - corrección acotada (Bounded Correction).
 - validación independiente de correcciones.
@@ -33,7 +34,9 @@ La metodología de ingeniería de Malāk sigue esta cadena:
 ```text
 Evidencia / necesidad
         ↓
-Especificación
+Especificación + gates de diseño aplicables
+        ↓
+RDD Stage 1 Design Check cuando aplique
         ↓
 Pruebas
         ↓
@@ -45,7 +48,9 @@ Corrección acotada cuando corresponda
         ↓
 Validación independiente
         ↓
-E2E / métricas / evidencia
+E2E / métricas / evidencia candidate-bound
+        ↓
+RDD Stage 1 Candidate Conformance cuando aplique
         ↓
 Gobernanza humana
         ↓
@@ -54,13 +59,13 @@ Baseline estable
 
 Principio asociado:
 
-> La evidencia origina la hipótesis. La especificación define el comportamiento esperado. Los tests verifican el comportamiento. La revisión identifica riesgos y defectos. La corrección permanece acotada. La validación demuestra el resultado. La gobernanza decide la aceptación.
+> La evidencia origina la hipótesis. La especificación define el comportamiento esperado. RDD Stage 1 comprueba, cuando aplica, que el diseño y el paquete de evidencia preservan identidad, procedencia, separación de roles y vínculo con el candidato. Los tests verifican el comportamiento. La revisión identifica riesgos y defectos. La corrección permanece acotada. La validación demuestra el resultado. La gobernanza decide la aceptación.
 
 ---
 
 # 3. Relación con la autoridad del proyecto
 
-SDD, TDD, 4R y los mecanismos definidos en este documento son métodos de ingeniería.
+SDD, TDD, 4R, RDD Stage 1 adaptado a Malāk y los demás mecanismos definidos en este documento son métodos de ingeniería.
 
 No constituyen una autoridad superior a:
 
@@ -649,22 +654,73 @@ candidate changes
 
 ---
 
-# 15. Receipts y Receipt-Driven Development
+# 15. RDD adaptado a Malāk y Receipts
 
-## 15.1 Estado en Malāk
+## 15.1 Estado de RDD en Malāk
 
-Malāk adopta actualmente los principios de:
+Malāk adopta un **RDD Stage 1 adaptado a su propia lógica de ingeniería y gobernanza**. Esta adopción no equivale a incorporar automáticamente una implementación externa ni a adoptar Receipt-Driven Development como metodología integral.
+
+RDD Stage 1 es un control de evidencia separado de SDD, TDD, 4R, E2E y aprobación humana. Su definición canónica y su orden operativo se encuentran en `docs/development/malak_construction_protocol.md`, especialmente §§5.4–5.5. Esta sección resume el método y no sustituye ese protocolo.
+
+Para cambios materiales, cuando corresponda, existen dos checkpoints distintos:
+
+```text
+pre-RED:
+RDD Stage 1 Design Check
+
+post-GREEN / after required candidate validation / pre-human-review:
+RDD Stage 1 Candidate Conformance
+```
+
+El **Design Check** comprueba antes de RED que el diseño preserve, según aplicabilidad:
+
+- estrategia de identidad del candidato;
+- binding baseline/candidate;
+- procedencia de evidencia;
+- separación Writer / Reviewer / Validator / Authority;
+- resultados terminales `PASS | FAIL | INCONCLUSIVE`;
+- `INCONCLUSIVE != PASS`;
+- invalidación de evidencia afectada cuando cambia el candidato;
+- bounded correction y correction budget cuando existan findings;
+- validación independiente de fixes cuando corresponda;
+- `authority_effect = none`;
+- RDD Stage 2 no autorizado.
+
+El **Candidate Conformance** comprueba sobre el candidato material exacto, después de las validaciones requeridas y antes de revisión humana, que el paquete de evidencia sea coherente, candidate-bound y trazable. Debe preservar como mínimo la identidad exacta de baseline/candidate, el vínculo de validaciones y 4R con ese candidato, findings y rondas de corrección, procedencia productor/validador, independencia exigida y agregación terminal correcta.
+
+Separaciones obligatorias:
+
+```text
+RDD Stage 1 Design Check PASS
+!= RDD Stage 1 Candidate Conformance PASS
+
+RDD Stage 1 Candidate Conformance PASS
+!= FULL 4R PASS
+!= E2E PASS
+!= Owner approval
+
+candidate changes
+→ affected RDD evidence must be regenerated/revalidated
+
+authority_effect = none
+RDD Stage 2 = NOT AUTHORIZED
+```
+
+Malāk adopta actualmente, dentro de este Stage 1 adaptado, los principios de:
 
 - revisión 4R basada en riesgo;
-- candidate identity;
+- candidate identity y candidate binding;
+- evidence provenance;
 - bounded correction;
 - correction budget;
 - validación independiente;
-- PASS / FAIL / INCONCLUSIVE;
+- `PASS / FAIL / INCONCLUSIVE`;
 - evidencia de fallo;
 - separación Writer / Reviewer / Validator / Authority.
 
-Receipt-Driven Development como metodología completa y cualquier implementación externa concreta permanecen en observación hasta que exista suficiente madurez y una decisión arquitectónica específica.
+La ausencia de evidencia requerida produce `INCONCLUSIVE`; nunca puede degradarse silenciosamente a `PASS`.
+
+Receipt-Driven Development como metodología externa completa, RDD Stage 2 y mecanismos avanzados de receipts o attestation permanecen fuera del baseline autorizado mientras no exista una decisión arquitectónica específica que los admita.
 
 ## 15.2 Candidate-Bound Receipt
 
@@ -856,6 +912,8 @@ propuesta de mejora
         ↓
 SDD
         ↓
+RDD Stage 1 Design Check cuando aplique
+        ↓
 TDD
         ↓
 implementación experimental
@@ -870,7 +928,9 @@ E2E
         ↓
 métricas before/after
         ↓
-evidencia
+evidencia candidate-bound
+        ↓
+RDD Stage 1 Candidate Conformance cuando aplique
         ↓
 recomendación
         ↓
@@ -920,18 +980,20 @@ Un cambio significativo no debe considerarse terminado solamente porque el códi
 Cuando corresponda, debe existir:
 
 ```text
-Specification             PASS
-TDD / tests               PASS
-Architecture Gates        PASS
-4R Review                 PASS
-Bounded Fix Validation    PASS / N/A
-Security Tests            PASS
-Integration Tests         PASS
-Controlled E2E            PASS / N/A
-Metrics                   RECORDED / N/A
-Documentation             UPDATED
-Rollback                  DEFINED
-Human Review              COMPLETE
+Specification                    PASS
+RDD Stage 1 Design Check          PASS / N/A JUSTIFIED
+TDD / tests                       PASS
+Architecture Gates                PASS
+4R Review                         PASS
+Bounded Fix Validation            PASS / N/A
+Security Tests                    PASS
+Integration Tests                 PASS
+Controlled E2E                    PASS / N/A
+Metrics                           RECORDED / N/A
+RDD Stage 1 Candidate Conformance PASS / N/A JUSTIFIED
+Documentation                     UPDATED
+Rollback                          DEFINED
+Human Review                      COMPLETE
 ```
 
 Los elementos no aplicables deben registrarse como N/A con justificación cuando el riesgo del cambio lo permita.
@@ -981,6 +1043,8 @@ Si una respuesta es negativa, dudosa o carece de evidencia, el cambio debe deten
 Malāk adopta los siguientes principios de ingeniería:
 
 > Specification defines intent.
+
+> RDD Stage 1 verifies design and candidate-bound evidence without granting authority.
 
 > TDD proves behavior locally.
 
