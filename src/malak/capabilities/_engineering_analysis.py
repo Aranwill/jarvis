@@ -421,6 +421,10 @@ class GovernedSupportEvidenceRouteReason(str, __import__("enum").Enum):
     ORACLE_CONTRACT_INVALID = "ORACLE_CONTRACT_INVALID"
     ORACLE_QUALIFICATION_STALE = "ORACLE_QUALIFICATION_STALE"
     ORACLE_AMBIGUOUS = "ORACLE_AMBIGUOUS"
+    ADMISSION_AMBIGUOUS = "ADMISSION_AMBIGUOUS"
+    ADMISSION_STALE = "ADMISSION_STALE"
+    CLOCK_REVERSED = "CLOCK_REVERSED"
+    CLOCK_INVALID = "CLOCK_INVALID"
 
 
 _SUPPORT_ROUTING_POLICY_V0 = "e3-governed-support-routing/v0"
@@ -768,7 +772,13 @@ def _qualification_matches(oracle) -> bool:
     )
 
 
-def route_governed_support_evidence_v0(
+@dataclass(frozen=True)
+class _GovernedSupportStructuralEvaluationV0:
+    result: GovernedSupportEvidenceRoutingV0
+    selected_oracle: GovernedDeterministicOracleContractV0 | None = None
+
+
+def _evaluate_governed_support_evidence_structural_v0(
     *,
     policy_version: str,
     baseline_commit: str,
@@ -782,7 +792,7 @@ def route_governed_support_evidence_v0(
     scope_expansion_required: bool,
     oracles,
     expected_binding=None,
-):
+) -> _GovernedSupportStructuralEvaluationV0:
     subject = {
         "policy_version": policy_version,
         "baseline_commit": baseline_commit,
@@ -794,52 +804,70 @@ def route_governed_support_evidence_v0(
         "resolved_evidence_material_digest": resolved_evidence_material_digest,
     }
 
+    def evaluated(result, selected_oracle=None):
+        return _GovernedSupportStructuralEvaluationV0(
+            result=result,
+            selected_oracle=selected_oracle,
+        )
+
     # P01: schema/bounds. Only materialized bounded collections are accepted.
     if not _routing_subject_valid(
         subject,
         declared_evidence_complete,
         scope_expansion_required,
     ) or not _binding_valid(expected_binding):
-        return _routing_result(
-            subject,
-            None,
-            GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
+        return evaluated(
+            _routing_result(
+                subject,
+                None,
+                GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
+            )
         )
     if not isinstance(oracles, (tuple, list)):
-        return _routing_result(
-            subject,
-            None,
-            GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
+        return evaluated(
+            _routing_result(
+                subject,
+                None,
+                GovernedSupportEvidenceRouteReason.INPUT_SCHEMA_INVALID,
+            )
         )
     if len(oracles) > _SUPPORT_ROUTING_MAX_ORACLES:
-        return _routing_result(
-            subject,
-            None,
-            GovernedSupportEvidenceRouteReason.INPUT_BOUNDS_EXCEEDED,
+        return evaluated(
+            _routing_result(
+                subject,
+                None,
+                GovernedSupportEvidenceRouteReason.INPUT_BOUNDS_EXCEEDED,
+            )
         )
 
     # P02–P05: policy and exact subject binding.
     if policy_version != _SUPPORT_ROUTING_POLICY_V0:
-        return _routing_result(
-            subject,
-            None,
-            GovernedSupportEvidenceRouteReason.POLICY_VERSION_MISMATCH,
+        return evaluated(
+            _routing_result(
+                subject,
+                None,
+                GovernedSupportEvidenceRouteReason.POLICY_VERSION_MISMATCH,
+            )
         )
     if any(subject[key] != value for key, value in expected_binding.items()):
-        return _routing_result(
-            subject,
-            None,
-            GovernedSupportEvidenceRouteReason.SUBJECT_BINDING_MISMATCH,
+        return evaluated(
+            _routing_result(
+                subject,
+                None,
+                GovernedSupportEvidenceRouteReason.SUBJECT_BINDING_MISMATCH,
+            )
         )
 
     # P06–P07: oracle contract, independent qualification, FULL cardinality.
     eligible = []
     for oracle in oracles:
         if not isinstance(oracle, GovernedDeterministicOracleContractV0):
-            return _routing_result(
-                subject,
-                None,
-                GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID,
+            return evaluated(
+                _routing_result(
+                    subject,
+                    None,
+                    GovernedSupportEvidenceRouteReason.ORACLE_CONTRACT_INVALID,
+                )
             )
         if (
             oracle.relation_id != relation_id
@@ -856,40 +884,79 @@ def route_governed_support_evidence_v0(
                 )
                 else GovernedSupportEvidenceRouteReason.ORACLE_QUALIFICATION_STALE
             )
-            return _routing_result(subject, None, reason)
+            return evaluated(_routing_result(subject, None, reason))
         if oracle.coverage_claim == "FULL":
             eligible.append(oracle)
 
     if len(eligible) > 1:
-        return _routing_result(
-            subject,
-            None,
-            GovernedSupportEvidenceRouteReason.ORACLE_AMBIGUOUS,
+        return evaluated(
+            _routing_result(
+                subject,
+                None,
+                GovernedSupportEvidenceRouteReason.ORACLE_AMBIGUOUS,
+            )
         )
 
     # P08–P09: material completeness, then route classification.
     if not declared_evidence_complete or scope_expansion_required:
-        return _routing_result(
-            subject,
-            GovernedSupportEvidenceRouteKind.INSUFFICIENT,
-            GovernedSupportEvidenceRouteReason.EVIDENCE_INSUFFICIENT,
+        return evaluated(
+            _routing_result(
+                subject,
+                GovernedSupportEvidenceRouteKind.INSUFFICIENT,
+                GovernedSupportEvidenceRouteReason.EVIDENCE_INSUFFICIENT,
+            )
         )
     if len(eligible) == 1:
-        # V0 is deliberately fail-closed for positive deterministic routing.
-        # A caller-controlled FULL qualification can establish structural
-        # coherence, but it cannot establish externally grounded provenance.
-        # Until a separate consumption trust boundary is admitted, the
-        # bounded fallback remains inferential.
-        return _routing_result(
+        # The free route remains deliberately fail-closed.  The selected
+        # oracle is exposed only to the internal consumption boundary so the
+        # exact same P01–P09 evaluation can be reused without a second
+        # selection algorithm.
+        return evaluated(
+            _routing_result(
+                subject,
+                GovernedSupportEvidenceRouteKind.INFERENTIAL,
+                GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
+            ),
+            eligible[0],
+        )
+    return evaluated(
+        _routing_result(
             subject,
             GovernedSupportEvidenceRouteKind.INFERENTIAL,
             GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
         )
-    return _routing_result(
-        subject,
-        GovernedSupportEvidenceRouteKind.INFERENTIAL,
-        GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
     )
+
+
+def route_governed_support_evidence_v0(
+    *,
+    policy_version: str,
+    baseline_commit: str,
+    focus_id: str,
+    evidence_set_digest: str,
+    relation_id: str,
+    evaluation_question_identity: str,
+    finding_fingerprint: str,
+    resolved_evidence_material_digest: str,
+    declared_evidence_complete: bool,
+    scope_expansion_required: bool,
+    oracles,
+    expected_binding=None,
+):
+    return _evaluate_governed_support_evidence_structural_v0(
+        policy_version=policy_version,
+        baseline_commit=baseline_commit,
+        focus_id=focus_id,
+        evidence_set_digest=evidence_set_digest,
+        relation_id=relation_id,
+        evaluation_question_identity=evaluation_question_identity,
+        finding_fingerprint=finding_fingerprint,
+        resolved_evidence_material_digest=resolved_evidence_material_digest,
+        declared_evidence_complete=declared_evidence_complete,
+        scope_expansion_required=scope_expansion_required,
+        oracles=oracles,
+        expected_binding=expected_binding,
+    ).result
 
 
 def _blind_tree_is_bounded(value: object) -> bool:
