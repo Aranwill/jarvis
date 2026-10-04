@@ -112,6 +112,110 @@ Describa brevemente el objetivo de este Pull Request.
 
 
 
+\## Governed Construction
+
+
+
+Identifique el rol de este PR dentro del Construction Protocol.
+
+
+
+\- \[ ] Design / Documentation PR
+
+\- \[ ] Implementation / Governed Construction Cycle PR
+
+\- \[ ] Cambio proporcional al que no aplica el modelo de dos fases; razón documentada abajo.
+
+
+
+\### Identidad y lineage
+
+
+
+\- Baseline exacto: `<sha>`
+
+\- Candidate actual: `<sha>`
+
+\- Design PR / specification reference: `<ref o N/A con razón>`
+
+\- Risk class: `<0..4>`
+
+\- Critical contract: `YES | NO`
+
+\- Authority effect: `none`
+
+
+
+\### Gate ledger
+
+
+
+Para Design / Documentation PR, registrar según aplicabilidad:
+
+
+
+```text
+Construction Preflight:
+G0 / admission:
+G1 design:
+Malāk Alignment Matrix:
+Critical Contract Hardening:
+Cuatro preguntas de ley:
+Design 4R:
+RDD Stage 1 Design Check:
+Human review:
+Ready / Merge: OWNER ONLY
+```
+
+
+
+Para Implementation PR, registrar según aplicabilidad:
+
+
+
+```text
+RED candidate:
+RED result:
+Owner GREEN authorization:
+GREEN candidate:
+targeted validation:
+Candidate FULL 4R:
+Bounded Correction / Fix Validator:
+E2E / integration:
+CI / candidate-bound evidence:
+independent validation:
+RDD Stage 1 Candidate Conformance:
+Human review:
+Ready / Merge: OWNER ONLY
+post-merge validation: NOT EXECUTED until merge
+```
+
+
+
+\### Invariantes del ledger
+
+
+
+\- \[ ] `gate separation != PR separation`.
+
+\- \[ ] RED y GREEN conservan candidate identity y Evidence propias.
+
+\- \[ ] Compartir branch o PR no se interpreta como autorización para avanzar.
+
+\- \[ ] El body referencia Evidence; no la sustituye ni crea Authority.
+
+\- \[ ] La Implementation PR permanece Draft hasta promoción manual del Owner.
+
+\- \[ ] Una PR adicional para la misma unidad tiene frontera material o excepción explícita documentada.
+
+\- \[ ] RDD Stage 2 permanece `NOT AUTHORIZED` salvo autorización normativa futura explícita.
+
+
+
+\---
+
+
+
 \## Observaciones
 
 
