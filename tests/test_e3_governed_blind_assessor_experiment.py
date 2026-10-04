@@ -14,6 +14,12 @@ ROOT = Path(__file__).resolve().parents[1]
 CASE_SET = ROOT / "evaluations" / "e3_governed_evidence_support_assessor_v0" / "cases.json"
 PROFILE = ROOT / "evaluations" / "e3_governed_evidence_support_assessor_v0" / "experiment_profile.json"
 RUNNER = ROOT / "scripts" / "run_e3_governed_blind_assessor_experiment.py"
+GITATTRIBUTES = ROOT / ".gitattributes"
+QUALIFICATION_RUNNER = ROOT / "scripts" / "evaluate_e3_governed_evidence_support_assessor.py"
+EXPECTED_CASE_SET_DIGEST = "23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83"
+EXACT_GITATTRIBUTES_RULE = (
+    "/evaluations/e3_governed_evidence_support_assessor_v0/cases.json text eol=lf"
+)
 
 PROFILE_SCHEMA = "MALAK-E3-BLIND-ASSESSOR-EXPERIMENT-PROFILE/v0"
 HARNESS_POLICY_VERSION = "e3-governed-blind-assessor-experiment-harness/v0"
@@ -78,6 +84,7 @@ REQUIREMENT_COVERAGE = {
     **{f"R{i:02d}": "artifact/mechanism/digest contract" for i in range(19, 28)},
     **{f"R{i:02d}": "harness identity/budget/attempt/E2E" for i in range(28, 36)},
     **{f"R{i:02d}": "side-effect/hard-zero/authority guards" for i in range(36, 41)},
+    **{f"R{i:02d}": "cross-platform raw-byte identity amendment" for i in range(41, 46)},
 }
 
 
@@ -183,7 +190,7 @@ def _observations(artifact: dict) -> dict[str, dict]:
 
 
 def test_red_requirement_matrix_has_no_silent_omissions() -> None:
-    assert set(REQUIREMENT_COVERAGE) == {f"R{i:02d}" for i in range(1, 41)}
+    assert set(REQUIREMENT_COVERAGE) == {f"R{i:02d}" for i in range(1, 46)}
 
 
 def test_red_profile_instance_is_exact_and_contains_no_ground_truth() -> None:
@@ -388,6 +395,42 @@ def test_red_artifact_size_is_bounded_and_no_subset_is_certified() -> None:
     ).encode("utf-8")
     assert len(encoded) <= _profile()["artifact_max_bytes"]
     assert len(_observations(artifact)) == 19
+
+
+def test_red_r41_gitattributes_rule_is_exact_and_path_scoped() -> None:
+    assert GITATTRIBUTES.is_file()
+    assert GITATTRIBUTES.read_text(encoding="utf-8") == EXACT_GITATTRIBUTES_RULE + "\n"
+
+
+def test_red_r42_r43_case_set_raw_bytes_are_lf_and_match_frozen_digest() -> None:
+    raw = _case_set_bytes()
+    assert b"\r" not in raw
+    assert _sha256(raw) == EXPECTED_CASE_SET_DIGEST
+    assert _profile()["expected_case_set_digest"] == EXPECTED_CASE_SET_DIGEST
+
+
+def test_red_r44_crlf_variant_is_not_normalized_by_harness(tmp_path: Path) -> None:
+    raw = _case_set_bytes()
+    assert b"\r" not in raw
+    crlf_path = tmp_path / "cases-crlf.json"
+    crlf_path.write_bytes(raw.replace(b"\n", b"\r\n"))
+    spy = SpyAssessor()
+    module = _runner_module()
+    with pytest.raises(ValueError):
+        module.run_governed_blind_assessor_experiment_v0(
+            case_set_path=crlf_path,
+            profile_path=PROFILE,
+            assessor=spy,
+        )
+    assert spy.calls == []
+
+
+def test_red_r45_qualification_pack_retains_raw_byte_digest_contract() -> None:
+    source = QUALIFICATION_RUNNER.read_text(encoding="utf-8")
+    assert "raw = path.read_bytes()" in source
+    assert "return payload, raw" in source
+    assert "case_digest = _sha256_bytes(case_bytes)" in source
+    assert 'payload["case_set_digest"] != case_set_digest' in source
 
 
 def test_red_hard_zero_and_authority_guards_remain_explicit() -> None:
