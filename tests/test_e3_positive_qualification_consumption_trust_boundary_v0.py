@@ -1387,3 +1387,207 @@ def test_pqctb_r52_consumption_uses_exact_frozen_security_context() -> None:
     assert _value(
         _boundary_route(boundary, (_oracle(bundle),)).route_kind
     ) == "DETERMINISTIC"
+
+def test_f250_4r_01_malformed_coverage_result_returns_hold() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    coverage = copy.deepcopy(bundle["coverage_entries"])
+    assert isinstance(coverage, list)
+    coverage[0]["entry_result"] = []
+    bundle["coverage_entries"] = coverage
+
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-01-COVERAGE",
+        bundle=bundle,
+        review=review,
+    )
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "ENTRY_RESULT_INVALID"
+
+
+def test_f250_4r_01_malformed_review_result_returns_hold() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    review["catalog_completeness_result"] = []
+
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-01-REVIEW",
+        bundle=bundle,
+        review=review,
+    )
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "REVIEW_RESULT_INVALID"
+
+
+def test_f250_4r_01_nonserializable_bundle_material_returns_hold() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    coverage = copy.deepcopy(bundle["coverage_entries"])
+    assert isinstance(coverage, list)
+    coverage[0]["entry_reasons"] = {"not-json-serializable"}
+    bundle["coverage_entries"] = coverage
+
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-01-NONSERIALIZABLE",
+        bundle=bundle,
+        review=review,
+    )
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "BUNDLE_MATERIAL_INVALID"
+
+
+def test_f250_4r_01_invalid_unicode_bundle_material_returns_hold() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+    bundle["repository"] = "\ud800"
+
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-01-UNICODE",
+        bundle=bundle,
+        review=review,
+    )
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "BUNDLE_MATERIAL_INVALID"
+
+
+def test_f250_4r_02_review_aggregate_bound_returns_hold() -> None:
+    bundle = _qualification_bundle()
+
+    refs = []
+    for index in range(130):
+        prefix = f"external:review-{index:03d}:"
+        refs.append(prefix + ("x" * (4096 - len(prefix))))
+    review = _review_evidence(bundle, evidence_references=refs)
+
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-02-SIZE",
+        bundle=bundle,
+        review=review,
+    )
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "REVIEW_BOUND_EXCEEDED"
+
+
+def test_f250_4r_02_review_reference_cardinality_is_bounded() -> None:
+    bundle = _qualification_bundle()
+
+    at_limit = _review_evidence(
+        bundle,
+        evidence_references=[
+            f"external:review-{index:03d}"
+            for index in range(512)
+        ],
+    )
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-02-CARDINALITY-LIMIT",
+        bundle=bundle,
+        review=at_limit,
+    )
+    assert _outcome(_single_admission(boundary, api)) == "READY"
+
+    over_limit = _review_evidence(
+        bundle,
+        evidence_references=[
+            f"external:review-{index:03d}"
+            for index in range(513)
+        ],
+    )
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-02-CARDINALITY-OVER",
+        bundle=bundle,
+        review=over_limit,
+    )
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "REVIEW_REFERENCES_OUT_OF_BOUNDS"
+
+
+def test_f250_4r_02_duplicate_review_references_return_hold() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(
+        bundle,
+        evidence_references=[
+            "external:review-duplicate",
+            "external:review-duplicate",
+        ],
+    )
+
+    boundary, api, _, _, _, _ = _compose(
+        "F250-4R-02-DUPLICATE",
+        bundle=bundle,
+        review=review,
+    )
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "REVIEW_REFERENCE_DUPLICATE"
+
+def test_f250_fv_01_deep_nested_verification_material_returns_hold() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+
+    nested: object = 0
+    for _ in range(10000):
+        nested = [nested]
+
+    evidence = copy.deepcopy(bundle["verification_evidence"])
+    assert isinstance(evidence, list)
+    evidence[0]["content_or_bounded_material"] = nested
+    bundle["verification_evidence"] = evidence
+
+    red_id = "F250-FV-01-BUNDLE-DEEP"
+    clock = MutableClock()
+    context = _context()
+    pdp = _recording_pdp(clock)
+    audit = InMemoryAuthorizationAuditStore()
+    factory = _composition_factory(red_id)
+    boundary = factory(
+        qualification_bundle=bundle,
+        qualification_review_evidence=review,
+        expected_repository=REPOSITORY,
+        expected_candidate_commit=CANDIDATE,
+        security_context=context,
+        policy_decision_point=pdp,
+        authorization_audit_sink=audit,
+        clock=clock,
+    )
+    api = _trust_api(red_id)
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "BUNDLE_MATERIAL_INVALID"
+
+
+def test_f250_fv_01_deep_nested_review_material_returns_hold() -> None:
+    bundle = _qualification_bundle()
+    review = _review_evidence(bundle)
+
+    nested: object = 0
+    for _ in range(10000):
+        nested = [nested]
+
+    review["finding_refs"] = nested
+
+    red_id = "F250-FV-01-REVIEW-DEEP"
+    clock = MutableClock()
+    context = _context()
+    pdp = _recording_pdp(clock)
+    audit = InMemoryAuthorizationAuditStore()
+    factory = _composition_factory(red_id)
+    boundary = factory(
+        qualification_bundle=bundle,
+        qualification_review_evidence=review,
+        expected_repository=REPOSITORY,
+        expected_candidate_commit=CANDIDATE,
+        security_context=context,
+        policy_decision_point=pdp,
+        authorization_audit_sink=audit,
+        clock=clock,
+    )
+    api = _trust_api(red_id)
+    admission = _single_admission(boundary, api)
+    assert _outcome(admission) == "HOLD"
+    assert admission.reason_code == "REVIEW_MATERIAL_INVALID"

@@ -8,6 +8,14 @@ from malak.capabilities._engineering_evidence import GovernedEngineeringEvidence
 from malak.capabilities.engineering_analyze import EngineeringAnalyzeCapability
 from malak.capabilities.engineering_inspect import EngineeringInspectCapability
 from malak.capabilities.engineering_propose import EngineeringProposeCapability
+from malak.capabilities._engineering_qualification_consumption import (
+    GovernedQualificationConsumptionBoundaryV0,
+    compose_governed_qualification_consumption_boundary_v0 as _compose_governed_qualification_consumption_boundary_v0,
+)
+from malak.security.audit import AuthorizationAuditSink
+from malak.security.clock import Clock
+from malak.security.contracts import HumanConfirmationEvidence, SecurityContext
+from malak.security.pdp import PolicyDecisionPoint
 from malak.infrastructure.repository_reader import GitRepositoryReader
 from malak.infrastructure.repository_structure import RepositoryStructuralProjector
 from malak.kernel.kernel import Kernel
@@ -175,4 +183,31 @@ def build_engineering_kernel_set(
         _service=service,
         _provider_name=provider_name,
         _model=model,
+    )
+
+
+def compose_governed_qualification_consumption_boundary_v0(
+    *,
+    qualification_bundle,
+    qualification_review_evidence,
+    expected_repository: str,
+    expected_candidate_commit: str,
+    security_context: SecurityContext,
+    policy_decision_point: PolicyDecisionPoint,
+    authorization_audit_sink: AuthorizationAuditSink,
+    clock: Clock,
+    human_confirmation_evidence: HumanConfirmationEvidence | None = None,
+) -> GovernedQualificationConsumptionBoundaryV0:
+    """Compose the governed E3 positive qualification consumption boundary."""
+
+    return _compose_governed_qualification_consumption_boundary_v0(
+        qualification_bundle=qualification_bundle,
+        qualification_review_evidence=qualification_review_evidence,
+        expected_repository=expected_repository,
+        expected_candidate_commit=expected_candidate_commit,
+        security_context=security_context,
+        policy_decision_point=policy_decision_point,
+        authorization_audit_sink=authorization_audit_sink,
+        clock=clock,
+        human_confirmation_evidence=human_confirmation_evidence,
     )
