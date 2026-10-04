@@ -56,6 +56,34 @@ experiment Evidence != Authority
 more cognition != more authority
 ~~~
 
+### 1.1 Bounded Design Correction — independent review round 1
+
+El independent pre-RED Design Review del candidate
+`889a9df1db482fe56253f1c01b0dd4e20fadc74c` terminó:
+
+~~~text
+INDEPENDENT PRE-RED DESIGN REVIEW = FAIL
+F253-PRED-01  MATERIAL
+F253-PRED-02  MATERIAL
+F253-PRED-03  MINOR
+~~~
+
+El FAIL histórico se preserva y no se reinterpreta como PASS.
+
+~~~text
+design correction round = 1 / 2
+RED                     = NOT AUTHORIZED
+GREEN                   = NOT AUTHORIZED
+authority_effect        = none
+~~~
+
+Esta corrección bounded:
+1. separa observation/case-set binding del expected-profile binding;
+2. congela el schema del experiment profile y sus tres recetas de digest;
+3. congela 19 inputs / 19 observations / 13 candidate invocations elegibles;
+4. endurece R02/R16/R26/R28-R30/R35;
+5. conserva el future three-file scope.
+
 ## 2. Corrección del working name post-PR #252
 
 PR #252 registró provisionalmente:
@@ -457,6 +485,20 @@ Cuando una condición estructural ya determina una salida:
 candidate invocation count = 0
 ~~~
 
+Counters exactos para el corpus V0.1:
+
+~~~text
+inputs processed                  19
+observations produced             19
+structural zero-call inputs       4  (C10, C11, C12, C17)
+fault-injection zero-call inputs  2  (C14, C15)
+candidate-eligible inputs         13
+real candidate invocations        exactly 13 when all eligible calls return
+~~~
+
+`attempt`, `envelope invocation` y `real candidate invocation` son
+contadores distintos. Un input elegible no puede omitirse silenciosamente.
+
 ### 6.4 Binding expectation
 
 SUBJECT:
@@ -570,68 +612,92 @@ reason_codes
 
 No se crea schema paralelo.
 
-### 6.9 Digest semantics
+### 6.9 Digest semantics y límites del consumer existente
 
 El producer debe ser regression-equivalent al Qualification Pack para:
 
-- case_set_digest;
-- input_instance_digest;
-- semantic_input_digest;
-- subject_fingerprint.
+- `case_set_digest`;
+- `input_instance_digest`;
+- `semantic_input_digest`;
+- `subject_fingerprint`.
 
-El producer calcula. El consumer recomputa.
-
-~~~text
-producer digest
-!= trusted assertion
-
-consumer recomputation mismatch
-→ no PASS
-~~~
-
-### 6.10 Harness identity
-
-El artifact existente exige:
+El producer calcula estos valores desde material trusted-side y el Qualification
+Pack los recomputa de forma independiente.
 
 ~~~text
-harness_policy_version
-harness_policy_digest
-budget_manifest_digest
-attempt_policy_digest
+producer observation digest != trusted assertion
+consumer recomputation mismatch → no PASS
 ~~~
 
-Esos digests deben derivarse del exact experiment profile o de subsets
-versionados del mismo; no pueden ser opacos supplied-by-caller.
+Límite explícito del consumer actual:
 
-Perfil mínimo:
+El Qualification Pack valida la **forma** SHA-256 de
+`assessor_mechanism.config_digest`,
+`harness_policy_digest`, `budget_manifest_digest` y
+`attempt_policy_digest`, pero no conoce el expected experiment profile ni
+recomputa esos bindings contra un profile externo.
+
+~~~text
+Qualification Pack observation/case-set binding
+!= expected-profile binding
+~~~
+
+El governed experiment path V0 agrega antes del consumer un seam harness-side:
+
+~~~text
+exact experiment profile
++ expected mechanism descriptor
++ candidate artifact
+        ↓
+verify_expected_experiment_binding_v0(...)
+        ↓
+MATCH    → eligible for Qualification Pack
+MISMATCH → fail closed / no profile-bound qualification claim
+~~~
+
+Invocar directamente al Qualification Pack sin ese seam puede conservar sus
+garantías propias, pero no permite reclamar `profile-bound governed experiment`.
+
+### 6.10 Experiment profile V0 — schema cerrado
+
+Top-level exacto:
 
 ~~~text
 schema_version
 harness_policy_version
+expected_case_set_schema_version
+expected_case_set_digest
 execution_order
 max_attempts_per_input
-max_candidate_invocations
-fault_modes
+expected_input_count
+expected_observation_count
+expected_candidate_invocations
 artifact_max_bytes
 candidate_argument_policy
+expected_mechanism
+fault_modes
 ~~~
 
 Valores V0:
 
 ~~~text
-execution_order           SEQUENTIAL
-max_attempts_per_input    1
-max_candidate_invocations <= 17 NORMAL inputs
-artifact_max_bytes        512 KiB
-candidate_argument_policy EXISTING_SUPPORT_ASSESSMENT_MATERIAL_ONLY
+schema_version                   = "MALAK-E3-BLIND-ASSESSOR-EXPERIMENT-PROFILE/v0"
+harness_policy_version           = "e3-governed-blind-assessor-experiment-harness/v0"
+expected_case_set_schema_version = "MALAK-E3-SUPPORT-ASSESSOR-CASESET/v0.1"
+execution_order                  = "CASESET_INPUT_ORDER_SEQUENTIAL"
+max_attempts_per_input           = 1
+expected_input_count             = 19
+expected_observation_count       = 19
+expected_candidate_invocations   = 13
+artifact_max_bytes               = 524288
+candidate_argument_policy        = "EXISTING_SUPPORT_ASSESSMENT_MATERIAL_ONLY"
 ~~~
 
-No se congela token budget, temperatura ni provider retry policy de un modelo
-real.
+`expected_case_set_digest` debe ser SHA-256 lowercase de los **bytes exactos**
+del `cases.json` leído. Mismatch antes de procesar inputs → fail closed.
 
-### 6.11 Mechanism identity
-
-Metadata:
+`expected_mechanism` usa exactamente el schema `assessor_mechanism` de
+RESULTS/v0.1:
 
 ~~~text
 mechanism_id
@@ -643,9 +709,142 @@ assessor_subject_id
 model_provenance
 ~~~
 
-El harness no decide trust.
+El artifact debe contener igualdad estructural exacta:
 
-MODEL_BASED metadata completa tampoco autoriza ejecutar un modelo en esta unidad.
+~~~text
+artifact.assessor_mechanism == profile.expected_mechanism
+~~~
+
+Metadata formalmente válida pero diferente del mechanism/config esperado:
+`expected experiment binding FAIL`.
+
+Esto es binding declarativo, no autenticación ni trust.
+
+`fault_modes` es un array exacto de 19 entries, en el mismo orden del traversal.
+Cada entry posee exactamente:
+
+~~~text
+input_id
+mode
+~~~
+
+`input_id`: uno-a-uno con los 19 inputs; sin faltantes, extras ni duplicados.
+
+`mode` enum:
+
+~~~text
+NORMAL
+FORCE_UNAVAILABLE
+FORCE_MALFORMED_OUTPUT
+~~~
+
+Mapping V0:
+
+~~~text
+C14.I01 → FORCE_UNAVAILABLE
+C15.I01 → FORCE_MALFORMED_OUTPUT
+remaining 17 entries → NORMAL
+~~~
+
+NORMAL no obliga candidate call si un structural precheck cerró el input; por eso
+17 NORMAL entries producen 13 candidate-eligible invocations.
+
+Validación del profile:
+
+- UTF-8 válido;
+- top-level object;
+- exact keys;
+- duplicate JSON object keys rechazadas;
+- tipos exactos; integers no aceptan booleans;
+- strings non-empty y trimmed;
+- unknown schema/version/enum rechazado;
+- counts y bounds deben coincidir exactamente con V0;
+- fault map incompleto, extra, duplicado, reordenado o desplazado falla cerrado.
+
+### 6.10.1 Canonical JSON común
+
+~~~text
+json.dumps(
+    value,
+    ensure_ascii=False,
+    sort_keys=True,
+    separators=(",", ":"),
+).encode("utf-8")
+~~~
+
+Todos los digests: SHA-256 lowercase hex.
+
+### 6.10.2 harness_policy_digest
+
+~~~text
+harness_policy_digest =
+SHA256(canonical_json(ENTIRE_VALIDATED_PROFILE_OBJECT))
+~~~
+
+Cualquier cambio semántico válido del profile cambia este digest.
+
+### 6.10.3 budget_manifest_digest
+
+Material exacto:
+
+~~~json
+{
+  "artifact_max_bytes": 524288,
+  "expected_candidate_invocations": 13,
+  "expected_input_count": 19,
+  "expected_observation_count": 19
+}
+~~~
+
+~~~text
+budget_manifest_digest = SHA256(canonical_json(exact_budget_object))
+~~~
+
+### 6.10.4 attempt_policy_digest
+
+Material exacto:
+
+~~~json
+{
+  "execution_order": "CASESET_INPUT_ORDER_SEQUENTIAL",
+  "max_attempts_per_input": 1
+}
+~~~
+
+~~~text
+attempt_policy_digest = SHA256(canonical_json(exact_attempt_object))
+~~~
+
+Los tres digests:
+
+- son derivados por el harness, no supplied-as-authority por el caller;
+- se copian a RESULTS/v0.1;
+- se recomputan en `verify_expected_experiment_binding_v0`;
+- un SHA-256 formalmente válido pero diferente falla cerrado.
+
+### 6.11 Mechanism identity y expected binding
+
+Para `DETERMINISTIC` o `HUMAN_REVIEWED`:
+`model_provenance = null`.
+
+Para `MODEL_BASED`, el provenance schema existente debe ser completo, pero:
+
+~~~text
+MODEL_BASED descriptor valid != authorization to execute model/provider
+~~~
+
+PR-A y future PR-B de infraestructura no autorizan una ejecución MODEL_BASED real.
+
+El expected-binding seam exige:
+
+~~~text
+artifact.assessor_mechanism == profile.expected_mechanism
+~~~
+
+por igualdad estructural exacta después de validar schemas.
+
+`config_digest` continúa siendo binding declarativo; el harness no afirma
+autenticidad, origen ni trust del mechanism.
 
 ### 6.12 Side effects
 
@@ -727,7 +926,12 @@ H02 input/case ID lookup: IDs remain harness-side; absent from callable.
 
 H03 nested ground truth: existing projection rejects forbidden keys recursively.
 
-H04 forged digests: producer recomputes; consumer independently recomputes.
+H04 forged digests:
+
+- observation/case-set digests: producer calcula y Qualification Pack recomputa;
+- profile/harness digests: producer calcula y
+  `verify_expected_experiment_binding_v0` recomputa contra el profile esperado;
+- el Qualification Pack no se presenta como verifier de profile.
 
 H05 self-certification: role collision cannot become positive.
 
@@ -760,7 +964,18 @@ H11 malformed candidate output: ASSESSOR_OUTPUT_INVALID.
 H12 ambient capabilities: explicitly outside V0 claim; blocks real provider execution
 without separate gate.
 
-H13 harness profile drift: changes identity/digests and invalidates Evidence.
+H13 harness profile drift:
+
+~~~text
+validated profile change → harness_policy_digest changes
+budget subset change     → budget_manifest_digest changes
+attempt subset change    → attempt_policy_digest changes
+artifact/profile mismatch
+→ verify_expected_experiment_binding_v0 FAIL
+→ no profile-bound qualification claim
+~~~
+
+Esta responsabilidad no se atribuye al Qualification Pack.
 
 H14 case-set drift: changes digest; stale artifact rejected.
 
@@ -784,46 +999,70 @@ Cognitive Constitution: PASS.
 Governance Constitution: PASS.
 Kernel complexity: PASS / NO DELTA.
 
-## 11. Design 4R
+## 11. Design 4R — bounded correction writer revalidation
 
-### Risk — PASS
+### Risk — PASS para re-review independiente
 
-Revisados: leakage, lookup side channels, nested leakage, forged digests,
-self-certification, skip/retry gaming, malformed outputs, identity drift, ambient
-capabilities y Authority laundering.
+F253-PRED-01 se corrige separando garantías: el Qualification Pack recomputa
+case-set/observation bindings; el nuevo expected-binding seam recomputa profile
+digests y compara mechanism exacto.
 
-Residual risk explícito: V0 no es OS/process sandbox. No bloquea el harness
-evaluation-side; sí impide overclaim y ejecución real de provider sin gate propio.
+F253-PRED-02 se corrige congelando schema/version, exact keys, fault map,
+canonical JSON y las tres recetas de digest.
 
-### Readability — PASS
+Persisten como límites explícitos: argument blindness no es sandboxing; identidad
+declarada no es autenticación; real model/provider requiere gate separado.
+
+### Readability — PASS para re-review independiente
 
 ~~~text
-case-set / ground truth
+case-set / hidden ground truth
 != blind projection
-!= experiment harness
+!= experiment profile
+!= experiment harness producer
+!= expected-profile/mechanism verifier
 != candidate assessor
 != result artifact
-!= qualification runner
+!= Qualification Pack
 != runtime admission
 != authority
 ~~~
 
-### Reliability — PASS
-
-Schemas existentes, 19/19 inputs, attempts=1, sequential, producer/consumer
-binding independiente y candidate/profile invalidation explícita.
-
-### Resilience — PASS
-
-Invalid input, binding drift, self-certification, unavailable/malformed assessor,
-exceptions, incomplete artifact, oversize y consumer mismatch son fail-closed.
-
-Terminal Writer:
+### Reliability — PASS para re-review independiente
 
 ~~~text
-DESIGN 4R — WRITER CANDIDATE = PASS
-blocking design findings = 0
-independent pre-RED review = PENDING
+18 cases
+19 inputs processed
+19 observations
+13 exact candidate invocations when eligible fixture execution completes
+6 zero-call inputs:
+  C10/C11/C12/C17 structural
+  C14/C15 fault injection
+one attempt per input
+sequential traversal
+exact profile schema
+exact digest recipes
+exact expected mechanism binding
+~~~
+
+Missing eligible invocation es failure.
+
+### Resilience — PASS para re-review independiente
+
+Fail-closed ante malformed/unknown profile, duplicate/missing/extra keys,
+fault-map drift, case-set digest mismatch, mechanism mismatch, valid-looking but
+wrong harness digests, structural drift, self-certification, unavailable/malformed
+assessor, exception, missing/duplicate observations, oversize y consumer mismatch.
+
+Terminal Writer after bounded correction:
+
+~~~text
+DESIGN 4R — CORRECTED WRITER CANDIDATE = PASS FOR RE-REVIEW
+prior independent review               FAIL preserved
+design correction round                1 / 2
+claimed corrected                      F253-PRED-01 / F253-PRED-02 / F253-PRED-03
+independent re-review                   REQUIRED
+authority_effect                        none
 ~~~
 
 ## 12. RDD Stage 1 Design Check
@@ -844,16 +1083,18 @@ RDD Stage 2                            NOT AUTHORIZED
 overall                                PASS
 ~~~
 
-Este Writer Design Check no sustituye independent pre-RED review.
+Este Writer Design Check no sustituye independent pre-RED review. El FAIL del
+candidate anterior permanece histórico y este candidate corregido requiere
+re-review independiente de las superficies afectadas.
 
 ## 13. Future RED requirements
 
 Sólo después de review/merge humano de PR-A y autorización separada de RED:
 
 ~~~text
-GBAEH-R01 exact case-set V0.1 required
-GBAEH-R02 exact experiment-profile schema/version required
-GBAEH-R03 18 cases / 19 inputs / zero skip
+GBAEH-R01 exact case-set V0.1 bytes/schema required
+GBAEH-R02 exact profile schema/version/keys/types; duplicates/extras/missing/unknown values rejected
+GBAEH-R03 exactly 18 cases / 19 inputs processed / 19 observations / zero skip
 GBAEH-R04 reuse existing blind projection; no duplicate algorithm
 GBAEH-R05 nested forbidden ground truth never reaches candidate
 GBAEH-R06 candidate never receives input_id/case_id
@@ -864,59 +1105,92 @@ GBAEH-R10 candidate never receives full case-set/path/profile
 GBAEH-R11 SUBJECT drift closes before candidate invocation
 GBAEH-R12 EVIDENCE_MATERIAL drift closes before candidate invocation
 GBAEH-R13 role self-certification closes before candidate invocation
-GBAEH-R14 FORCE_UNAVAILABLE calls real candidate zero times
-GBAEH-R15 FORCE_MALFORMED_OUTPUT calls real candidate zero times
-GBAEH-R16 NORMAL input calls candidate at most once
-GBAEH-R17 candidate exception has no retry and remains non-positive
-GBAEH-R18 malformed candidate record remains non-positive
-GBAEH-R19 output obeys existing support-assessment result contract
-GBAEH-R20 case_set_digest exact
+GBAEH-R14 FORCE_UNAVAILABLE: real candidate zero calls; governed non-positive result
+GBAEH-R15 FORCE_MALFORMED_OUTPUT: real candidate zero calls; governed non-positive result
+GBAEH-R16 exactly 13 eligible real candidate invocations; no unexpected omission; never >1/input
+GBAEH-R17 candidate exception: no retry, non-positive
+GBAEH-R18 malformed output rejected; candidate mutation cannot alter trusted source material
+GBAEH-R19 output obeys existing support-assessment result/reason contract
+GBAEH-R20 case_set_digest equals exact case-set bytes and expected profile binding
 GBAEH-R21 input_instance_digest regression-equivalent to consumer
 GBAEH-R22 semantic_input_digest regression-equivalent to consumer
 GBAEH-R23 subject_fingerprint regression-equivalent to consumer
-GBAEH-R24 observation digests producer-computed, not caller-supplied
-GBAEH-R25 exact RESULTS/v0.1 schema
-GBAEH-R26 exact mechanism metadata schema
-GBAEH-R27 incomplete MODEL_BASED metadata rejected
-GBAEH-R28 harness_policy_digest derived from exact profile
-GBAEH-R29 budget_manifest_digest derived
-GBAEH-R30 attempt_policy_digest derived
-GBAEH-R31 execution order SEQUENTIAL
-GBAEH-R32 one attempt / no automatic retry
-GBAEH-R33 generated artifact <= 512 KiB
-GBAEH-R34 existing Qualification Pack accepts valid generated artifact
-GBAEH-R35 artifact mutation rejected by existing Qualification Pack
-GBAEH-R36 no network/tool/repo/Memory/Knowledge side effects by harness
+GBAEH-R24 observation digests producer-computed, never caller-supplied
+GBAEH-R25 exact MALAK-E3-SUPPORT-ASSESSOR-RESULTS/v0.1 schema
+GBAEH-R26 artifact mechanism metadata exactly equals profile.expected_mechanism; valid-but-different rejected
+GBAEH-R27 incomplete MODEL_BASED provenance rejected; valid descriptor grants no execution authority
+GBAEH-R28 harness_policy_digest equals SHA256 canonical entire validated profile; valid-but-wrong digest rejected by expected-binding seam
+GBAEH-R29 budget_manifest_digest equals exact frozen budget object digest; valid-but-wrong rejected
+GBAEH-R30 attempt_policy_digest equals exact frozen attempt object digest; valid-but-wrong rejected
+GBAEH-R31 execution order CASESET_INPUT_ORDER_SEQUENTIAL
+GBAEH-R32 max_attempts_per_input=1; automatic retry=0; attempt != candidate invocation
+GBAEH-R33 emitted artifact <= 524288 bytes
+GBAEH-R34 existing Qualification Pack accepts structurally valid generated artifact under its own contract
+GBAEH-R35 mutation disposition is split: consumer-contract mutations rejected by Qualification Pack; profile/mechanism-valid-looking mutations rejected by verify_expected_experiment_binding_v0 before consumer
+GBAEH-R36 harness performs no network/tool/repo/Memory/Knowledge side effects; no claim about arbitrary callable ambient effects
 GBAEH-R37 Kernel/Planner/Conversation/runtime/provider code delta = 0
 GBAEH-R38 support_sufficient / Protected Finalization wiring = 0
 GBAEH-R39 RDD Stage 2 delta = 0
 GBAEH-R40 authority_effect = none
 ~~~
 
-Causal RED debe provenir de ausencia del harness/profile, no de romper tests ya
-verdes.
+Additional causal negatives embedded in R02/R16/R26/R28-R30/R35:
+
+- fault map missing/extra/duplicate/reordered/shifted;
+- profile valid but different from expected;
+- harness digests replaced by other valid SHA-256 values;
+- mechanism metadata valid but different from expected identity/config;
+- candidate mutates received material;
+- candidate invocation omitted for an eligible input.
+
+Causal RED debe provenir de ausencia del harness/profile/expected-binding behavior,
+no de romper tests ya verdes.
 
 ## 14. Future E2E-equivalent
 
 ~~~text
 exact case-set
-→ exact experiment profile
+→ exact closed experiment profile
+→ recompute expected case-set binding
 → existing blind projection
 → structural checks
 → existing support-assessment envelope
 → bounded deterministic test assessor
+→ exactly 13 eligible real candidate calls
 → 19 bound observations
 → exact V0.1 result artifact
-→ existing Assessor Qualification Pack
+→ verify_expected_experiment_binding_v0
+→ existing Qualification Pack
 → deterministic terminal qualification
 ~~~
 
-Un deterministic test assessor basta para validar infraestructura. Su PASS no es
-evidencia de un assessor productivo.
+El deterministic test assessor valida infraestructura, no desempeño productivo.
 
-Negativos: leakage, role collision, binding drift, unavailable, malformed,
-exception, artifact mutation, profile/case drift, missing/duplicate observation y
-oversize.
+Negativos obligatorios:
+
+- ground-truth/ID leakage;
+- profile unknown/missing/extra/duplicate/type drift;
+- fault-map missing/extra/duplicate/reordered/shifted;
+- role collision;
+- SUBJECT/EVIDENCE_MATERIAL drift;
+- unavailable/malformed/exception;
+- missing eligible candidate invocation;
+- candidate mutation of received material;
+- case-set drift;
+- mechanism valid-but-different from expected;
+- harness/budget/attempt digest replaced by other valid SHA-256;
+- observation/case-set mutation;
+- missing/duplicate observation;
+- oversize artifact.
+
+El E2E debe distinguir:
+
+~~~text
+expected-binding verifier rejection
+!= Qualification Pack rejection
+~~~
+
+y registrar cuál frontera produjo el fail-closed.
 
 ## 15. Correction Budget
 
@@ -939,14 +1213,21 @@ STOP → scope review
 Invalidan Evidence afectada:
 
 - Git candidate;
-- case-set bytes;
-- experiment profile;
+- case-set bytes/schema;
+- any validated experiment profile semantic field;
+- expected mechanism descriptor/config;
 - harness/attempt/budget policy;
 - blind projection semantics;
 - support-assessment envelope;
 - artifact schema;
-- digest semantics;
-- mechanism/config identity.
+- digest recipes/canonicalization;
+- candidate mechanism/config identity.
+
+Un profile change puede conservar algunos subset digests si el subset no cambia,
+pero siempre cambia `harness_policy_digest` porque éste cubre el profile validado
+completo.
+
+No se reutiliza PASS stale.
 
 ## 17. File Coverage
 
@@ -970,13 +1251,15 @@ G0 / admission                         WRITER CANDIDATE PASS
 Component / Logic Reuse Review         REUSE / COMPOSE / ADAPT
 Necessity & Complexity Review          WRITER CANDIDATE PASS
 Security Horizon Check                 WRITER CANDIDATE PASS
-G1 design                              WRITER CANDIDATE PASS
+G1 design                              CORRECTED WRITER CANDIDATE PASS
 Malāk Alignment Matrix                 COMPLETE
-Critical Contract Hardening            WRITER CANDIDATE PASS
+Critical Contract Hardening            CORRECTED WRITER CANDIDATE PASS
 Four Questions                         PASS / PASS / PASS / PASS
-Design 4R                              WRITER CANDIDATE PASS
-RDD Stage 1 Design Check               WRITER CANDIDATE PASS
-independent pre-RED review              PENDING
+Design 4R                              CORRECTED WRITER PASS FOR RE-REVIEW
+RDD Stage 1 Design Check               CORRECTED WRITER PASS FOR RE-REVIEW
+prior independent pre-RED review       FAIL — preserved
+bounded design correction              ROUND 1 / 2
+independent pre-RED re-review           PENDING
 RED                                    NOT AUTHORIZED
 GREEN                                  NOT AUTHORIZED
 Implementation PR                      NOT CREATED
@@ -987,6 +1270,7 @@ authority_effect                       none
 ~~~
 
 ## 19. Next lawful transition
+
 
 ~~~text
 independent pre-RED Design Review on exact PR-A candidate
