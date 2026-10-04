@@ -1,6 +1,6 @@
 # Malāk Construction Protocol
 
-Versión: 0.2.6
+Versión: 0.2.7
 
 Estado: Activo
 
@@ -520,6 +520,98 @@ No basta con mencionar RDD, 4R o E2E en una ficha o PR. Debe existir evidencia v
 
 El E2E no puede omitirse silenciosamente. Cuando no exista un runtime E2E aplicable, el cierre debe registrar la razón y ejecutar la validación end-to-end equivalente de la cadena realmente afectada —por ejemplo coherencia entre documentos, contratos, estados o artefactos— en lugar de declarar simplemente `N/A` sin evidencia.
 
+### 5.1.1 Topología canónica de Pull Requests
+
+Para una unidad material que requiera una especificación formal G0/G1 y una
+implementación posterior, la topología Git predeterminada es de **dos Pull
+Requests como máximo en el flujo normal**:
+
+```text
+PR-A — Design / Documentation
+        ↓
+Construction Preflight
+G0 / admission
+G1 design
+Malāk Alignment Matrix
+Critical Contract Hardening cuando aplique
+Cuatro preguntas de ley
+Design 4R
+RDD Stage 1 Design Check
+        ↓
+human review
+Owner Ready / Merge
+        ↓
+main reconciliado con design aprobado
+        ↓
+PR-B — Implementation / Governed Construction Cycle
+        ↓
+RED candidate
+Owner GREEN authorization
+GREEN candidate
+targeted validation
+Candidate FULL 4R
+Bounded Correction / Fix Validator / affected revalidation cuando aplique
+E2E / integration
+CI / candidate-bound evidence
+independent validation cuando aplique
+RDD Stage 1 Candidate Conformance
+human review
+Owner Ready / Merge
+post-merge validation / reconciliation
+```
+
+Esta topología separa **fases de promoción** sin convertir cada gate en una
+rama o PR independiente.
+
+Separaciones obligatorias:
+
+```text
+gate separation != PR separation
+candidate separation != PR separation
+evidence separation != PR separation
+role independence != PR separation
+```
+
+Dentro de la PR-B:
+
+- RED y GREEN deben conservar SHA/candidate identity y evidencia propias;
+- el RED debe quedar ejecutado y dispuesto antes de cualquier autorización
+  humana para GREEN;
+- GREEN no puede inferirse autorizado por compartir branch o PR con RED;
+- cada Bounded Correction que cambie el candidate invalida la evidencia afectada
+  y debe producir su revalidación correspondiente;
+- FULL 4R, Fix Validator, E2E, CI, independent validation y RDD Stage 1 Candidate
+  Conformance pueden ejecutarse sobre la misma PR siempre que cada resultado esté
+  ligado al candidate exacto aplicable;
+- la PR debe permanecer `Draft` durante el ciclo controlado hasta que el Owner
+  ejecute la promoción humana prevista;
+- el body de la PR puede funcionar como **construction ledger** para estado,
+  lineage, SHAs, gates y referencias de evidencia, pero no sustituye la evidencia
+  fuente ni crea autoridad.
+
+Una PR adicional sólo se justifica cuando existe una frontera material real, por
+ejemplo:
+
+```text
+scope invalidado o ampliado
+design invalidado
+Correction Budget agotado → ESCALATE
+cambio arquitectónico o de contrato que exige volver a G0/G1
+candidate abandonado y reemplazo que no conserva el envelope aprobado
+separación requerida por una política superior o por decisión explícita del Owner
+```
+
+La creación de una PR por cada gate, por cada validator o sólo para transportar
+un estado RED intermedio **no es el comportamiento predeterminado**.
+
+Un candidate RED histórico conserva su valor por identidad Git y evidencia
+candidate-bound; no necesita una PR RED independiente ni un merge independiente
+si permanece como ancestro verificable del candidate de implementación.
+
+Los cambios puramente documentales, microcambios aprobados o unidades para las
+que no corresponda una implementación posterior siguen el flujo proporcional
+aplicable y no están obligados a fabricar dos PR artificialmente.
+
 ---
 
 ## 5.2 Critical Contract Hardening Gate
@@ -764,6 +856,12 @@ Para todo cambio material que afecte un contrato crítico, la secuencia aplicabl
 debe quedar registrada explícitamente. No puede depender de memoria del operador,
 del contexto conversacional ni de interpretación de un agente/modelo.
 
+La topología de §5.1.1 no modifica esta secuencia. Los gates hasta
+`RDD Stage 1 Design Check` pertenecen a la fase de Design; desde `RED` hasta
+`RDD Stage 1 Candidate Conformance` pertenecen normalmente a una única
+Implementation PR en Draft. La frontera de PR no sustituye ningún gate y ningún
+gate requiere por sí solo una PR nueva.
+
 ```text
 G0 / admission
         ↓
@@ -834,7 +932,18 @@ Reglas:
 12. un finding bloqueante de Candidate FULL 4R obliga a Bounded Correction o
     ESCALATE; nunca puede saltarse directamente a E2E/CI;
 13. toda corrección que cambie el candidate invalida la evidencia afectada y
-    obliga a revalidar el candidate corregido antes de continuar.
+    obliga a revalidar el candidate corregido antes de continuar;
+14. separar gates no implica crear ramas o PRs separadas;
+15. RED y GREEN pueden vivir en una misma Implementation PR sólo si conservan
+    candidates, evidencia y autorización de transición explícitamente separados;
+16. una Implementation PR no puede avanzar de RED a GREEN sin autorización humana
+    aplicable aunque el branch y la PR ya existan;
+17. el body de una PR es ledger y referencia de estado, no fuente de autoridad ni
+    sustituto de Evidence;
+18. una PR adicional exige una frontera material o excepción explícitamente
+    justificada;
+19. Ready y Merge continúan siendo acciones humanas separadas y no se derivan del
+    cierre técnico de los gates.
 
 Cuando una etapa sea realmente no aplicable, debe registrarse:
 

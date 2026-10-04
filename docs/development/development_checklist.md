@@ -172,6 +172,23 @@ Para cambios materiales sobre contratos críticos, validar:
 - [ ] `tests green` no fue utilizado como sustituto del cierre integral.
 - [ ] Ready y merge permanecieron bajo autoridad humana.
 
+### Topología de Pull Requests
+
+Cuando la unidad material requirió design formal + implementación, validar:
+
+- [ ] La fase Design/Documentation se mantuvo separada de la fase de implementación.
+- [ ] La Design PR cerró los gates pre-RED aplicables antes de iniciar la Implementation PR.
+- [ ] La Implementation PR partió del baseline reconciliado que contiene el design aprobado.
+- [ ] RED y GREEN conservaron candidates exactos y evidencia propia aunque vivieran en la misma Implementation PR.
+- [ ] El paso RED → GREEN requirió autorización humana aplicable; compartir branch/PR no fue tratado como autorización.
+- [ ] FULL 4R, Bounded Correction, Fix Validator, E2E, CI, independent validation y RDD Candidate Conformance permanecieron separados por evidencia y candidate binding, no por PR artificiales.
+- [ ] La Implementation PR permaneció Draft durante el ciclo controlado hasta la decisión humana de Ready.
+- [ ] El body de la PR se utilizó como construction ledger y referencias, no como sustituto de Evidence ni como fuente de autoridad.
+- [ ] No se creó una PR adicional por un gate aislado salvo frontera material o excepción explícitamente justificada.
+- [ ] Si hubo una PR adicional, la razón quedó ligada a scope/design invalidado, Correction Budget agotado, cambio arquitectónico/contractual, candidate abandonado o política/decisión humana equivalente.
+- [ ] Un RED candidate histórico quedó preservado por lineage Git + Evidence; no se exigió un merge RED independiente sólo para conservar trazabilidad.
+- [ ] Se preservó `gate separation != PR separation`.
+
 ---
 
 # Auditoría retrospectiva de implementaciones
