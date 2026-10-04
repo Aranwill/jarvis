@@ -465,6 +465,49 @@ Reglas operativas:
 - la suite completa y la validación de integración corresponden al cierre o a
   puntos de riesgo que realmente lo justifiquen.
 
+### Topología canónica de PR para una unidad material
+
+Cuando una unidad material requiere design formal y posterior implementación, se
+aplica el modelo de dos fases definido por
+`docs/development/malak_construction_protocol.md §5.1.1`:
+
+```text
+PR-A — Design / Documentation
+→ gates pre-RED
+→ human Ready / Merge
+
+PR-B — Implementation / Governed Construction Cycle
+→ RED
+→ Owner GREEN authorization
+→ GREEN
+→ candidate-bound validation / corrections / validators
+→ E2E / CI
+→ RDD Stage 1 Candidate Conformance
+→ human Ready / Merge
+```
+
+Reglas de interpretación:
+
+```text
+gate != PR
+validator != PR
+candidate checkpoint != PR
+separate Evidence != separate PR
+```
+
+La Implementation PR permanece `Draft` durante el ciclo gobernado. RED, GREEN
+y los candidates corregidos pueden coexistir en su lineage siempre que cada uno
+conserve identidad y evidencia propias y que ninguna transición de autoridad se
+infiera de compartir branch o PR.
+
+No se debe crear una PR separada sólo para materializar RED, FULL 4R, Fix
+Validator, E2E, CI o RDD Candidate Conformance. Una PR adicional requiere una
+frontera material real o una excepción explícita documentada por el Construction
+Protocol.
+
+El body de la PR puede mantener el construction ledger del ciclo, pero no
+sustituye Evidence, Validation, Decision ni Authority.
+
 Formato conceptual recomendado:
 
 ```text
@@ -698,19 +741,42 @@ No mezcles limpieza, refactorización o cambios documentales no relacionados con
 
 ## Disciplina de Git y sprints
 
-El flujo de trabajo permanente es:
+Para una unidad material con design formal, el flujo Git se divide en dos fases
+y **no** en una PR por gate:
 
 ```text
-Un sprint
-→ una rama dedicada
-→ un alcance explícitamente aprobado
-→ una validación completa
+Design / Documentation
+→ una rama documental dedicada
+→ un alcance pre-RED explícitamente aprobado
 → un Pull Request en Draft
+→ revisión explícita
+→ Ready / merge humanos
+        ↓
+main reconciliado
+        ↓
+Implementation sprint
+→ una rama de implementación dedicada
+→ un alcance explícitamente aprobado
+→ una única Implementation Pull Request en Draft
+→ RED / GREEN / corrections / validations como checkpoints candidate-bound
 → revisión explícita
 → Ready for Review con autorización humana
 → merge con autorización humana separada
 → un punto claro de rollback
 ```
+
+La regla `un sprint → una rama dedicada → una Implementation PR` se conserva
+para la fase de implementación. La Design PR previa no convierte cada gate en
+un sprint ni autoriza ramas/PRs adicionales por validator o checkpoint.
+
+```text
+gate separation != branch separation
+gate separation != PR separation
+candidate identity separation != PR separation
+```
+
+Una tercera PR o posterior para la misma unidad requiere una frontera material
+o excepción explícitamente justificada según el Construction Protocol.
 
 No realices ninguna de las siguientes acciones sin autorización explícita:
 
