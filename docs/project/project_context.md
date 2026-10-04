@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-10-02
-as_of_commit: 73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
+as_of_date: 2026-10-04
+as_of_commit: a05aa5f081971f36c133ac50dc0756f938a26a1a
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -228,7 +228,8 @@ Repositorio oficial:               Aranwill/jarvis
 Raíz Git local:                    D:\Ollama\jarvis
 Rama permanente:                   main
 Commit integración Sprint 7.11:   3413e8ccb348440aea757d1feccde25c65be011f
-Baseline material/productivo reconciliado: 7b1fe7621b1dad48cc8508390e2ad78faa3e3004
+Main HEAD reconciliado:             a05aa5f081971f36c133ac50dc0756f938a26a1a
+Baseline material/productivo reconciliado: e1a1973b7b6cf635337a77e81410ebb873f57bde
 Baseline nominal:                  v0.6.0-alpha
 Último sprint numerado integrado:  Sprint 7.11 — Reproducible Validation Pipeline Foundation
 Última ruta conversacional:        Sprint 7.10 — Conversation Session Isolation Foundation
@@ -252,8 +253,12 @@ E3 Relation Coverage & Uniqueness:  integrado — PR #218 / authority_effect non
 E3 Structured Evidence Role Binding: integrado — PR #222 / authority_effect none
 E3 Governed Evidence Support Assessment: integrado — PR #224 / semantic_assurance NOT_VERIFIED / authority_effect none
 E3 Assessor Qualification Pack V0.1: integrado — PR #230 / offline evaluation / authority_effect none
-Última validación candidate-bound:  Validation #713 / 1730 passed Ubuntu + Windows
-Última validación post-merge:       Validation #714 / 1730 passed Ubuntu + Windows
+E3 Governed Support Evidence Routing V0: integrado — PR #235 / authority_effect none
+E3 Governed Qualification Consumption V0: integrado en línea #235/#240 / fail-closed
+E3 Positive Qualification Consumption Trust Boundary V0: integrado — PR #250 / authority_effect none
+Construction two-PR model:          integrado — PR #251 / process-only
+Última validación candidate-bound:  Validation #37169199842 / 1875 passed Ubuntu + Windows
+Última validación post-merge:       Validation #37208582290 / 1875 passed Ubuntu + Windows
 Seventh U01:                       bootstrap-u01-20260926-007 / INCONCLUSIVE
 Seventh findings:                  3 ALIGNED + 3 UNRESOLVED
 U007-F05 / KAF-01 / E3 Calibration: cerrados e integrados
@@ -261,7 +266,7 @@ Eighth U01:                        bootstrap-u01-20260927-008 / INCONCLUSIVE
 Eighth findings:                   7 ALIGNED + 1 UNRESOLVED + 1 PARTIAL
 Semantic grounding audit:          histórico GAP_REQUIRES_HARDENING / sin nueva reevaluación runtime
 E008-SG-01 structural hardening:    PR #218 integrado / exact coverage + uniqueness + canonical order
-E008-SG-02 evidence binding:        OPEN / structural role binding PR #222 + bounded support assessment PR #224 + offline qualification pack PR #230 integrados / semantic entailment NOT_VERIFIED
+E008-SG-02 evidence binding:        OPEN / PR #222 + #224 + #230 + #235 + #250 integrados; positive qualification consumption existe, semantic entailment NOT_VERIFIED y no hay assessor productivo autorizado
 E008-SG-03 assurance boundary:      preservado / GROUNDED != semantic entailment verified
 Relation catalog foundation:       integrado — PR #212
 E3 relation consumption:           integrado — PR #215 / relation identity != semantic truth
@@ -273,6 +278,7 @@ Runtime Self-Review:               run 008 ejecutado; nueva ejecución requiere 
 RDD Stage 1 PR #212:               PASS / authority_effect none
 RDD Stage 1 PR #222:               PASS / authority_effect none
 RDD Stage 1 PR #230:               PASS / authority_effect none
+RDD Stage 1 PR #250:               PASS / authority_effect none
 Self-modification:                 no autorizada
 RDD Stage 2:                       no autorizado
 Structural Evidence E3/E4:         diferido / no propagado
@@ -1772,53 +1778,70 @@ La unidad integrada permite calificar de forma reproducible artifacts de un futu
 
 Esta sección supersede únicamente el snapshot CURRENT anterior para el estado del Assessor Qualification Pack; los registros históricos de PR #224/#229/#231 permanecen sin reescritura.
 
-## Reconciliación CURRENT — E3 Support Evidence Routing / Qualification Consumption V0
+## Reconciliación CURRENT — E3 Qualification Consumption / Positive Trust Boundary V0
 
-Estado material reconciliado después de integrar PR #235:
-
-```text
-baseline integrado              main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
-PR #235 candidate terminal      7e8ad3278c06cd1f44135e3c4dd59069c450f284
-PR #235 merge                   73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
-PR #240                         integrated into #235 line before merge
-PR #239                         CLOSED / NOT MERGED / historical evidence only
-authority_effect                none
-```
-
-La cadena integrada incorpora `E3 Governed Support Evidence Routing V0` y la corrección fail-closed de `E3 Governed Qualification Consumption V0`. La consecuencia material vigente es:
+Estado material reconciliado después de #250 y reconciliación de proceso #251:
 
 ```text
-caller-controlled coherent FULL qualification
-!= externally grounded qualification
-→ does not enable DETERMINISTIC
-→ bounded route remains INFERENTIAL
+main HEAD                                  a05aa5f081971f36c133ac50dc0756f938a26a1a
+último baseline material/productivo       e1a1973b7b6cf635337a77e81410ebb873f57bde
+candidate funcional validado              1143ce2c7818096c393d2fb0cb2986f48440eb93
+post-merge Validation                     #37208582290
+positive qualification consumption        INTEGRATED
+construction two-PR model                 INTEGRATED / PROCESS ONLY
 ```
 
-El enum `DETERMINISTIC | INFERENTIAL | INSUFFICIENT` permanece presente, pero el happy path positivo `DETERMINISTIC` no está autorizado por una qualification fabricable desde el mismo input/caller. Habilitar consumo positivo requiere una frontera separada con admisión propia y no puede resolverse mediante `verified=true`, strings `PASS`, igualdad de actor IDs, un token opaco ni reutilizando RDD-M1 como credencial runtime.
+PR #250 cierra la necesidad de una frontera positiva de consumo: un caller ya no puede convertir por sí mismo una qualification `FULL` en ruta `DETERMINISTIC`, mientras que material externo/admitido y ligado exactamente puede ser consumido mediante composition-owned admission, PDP/PEP, READY gobernado, binding exacto y validación temporal.
 
-Límites CURRENT preservados:
+La integración no selecciona ni ejecuta un support assessor productivo y no demuestra semantic entailment.
+
+Límites CURRENT:
 
 ```text
 Kernel / Planner wiring            NONE
 provider / model wiring            NONE
-Protected Finalization wiring      NONE
+productive support assessor        NOT SELECTED / NOT AUTHORIZED
 support_sufficient                 NOT WIRED / NOT AUTHORIZED
 semantic_assurance                 NOT_VERIFIED
 E008-SG-02                         OPEN
+Protected Finalization wiring      NONE
 RDD Stage 2                        NOT AUTHORIZED
 Sprint 7.12                        NOT AUTHORIZED
 self-modification                  NOT AUTHORIZED
 authority_effect                   none
 ```
 
-Los runners post-merge de #235 fueron reportados por el Owner como completados. Esta fuente derivada no asigna un número de Validation ni métricas no reconstruibles desde la interfaz consultada.
-
-Siguiente unidad candidata de planificación, sujeta a admisión separada:
+La siguiente dirección candidata de planificación es:
 
 ```text
-E3 Positive Qualification Consumption Trust Boundary V0
+E3 Blind Assessor Experiment Boundary V0
 ```
 
-Debe estudiar primero si una frontera positiva puede componerse a partir de primitives ya existentes sin introducir store/registry/database, PKI/signatures, network verifier, nueva authority surface ni RDD Stage 2. Si esa separación no puede demostrarse dentro del scope bounded, corresponde `STOP → scope review`.
+Su necesidad preliminar deriva de que el case-set de Assessor Qualification contiene inputs y ground truth en el mismo artefacto. Antes de ejecutar un assessor real debe existir una proyección determinista que entregue únicamente el material permitido al mecanismo candidato y preserve ocultos `expected_outcome`, `expected_reason_codes` y cualquier metadata equivalente.
 
-Esta reconciliación no autoriza la unidad siguiente; únicamente actualiza CURRENT_STATE al baseline integrado.
+La unidad deberá intentar componerse con primitives existentes:
+
+```text
+existing case-set
++ existing Assessor Qualification Pack V0.1
++ existing identity/provenance/digest contracts
++ bounded result artifact
+→ blind experiment boundary
+```
+
+No justifica por sí misma nuevo model/provider, red, store/registry/database, nueva Capability, Kernel/Planner wiring, `support_sufficient`, semantic truth, Protected Finalization ni RDD Stage 2.
+
+Estado:
+
+```text
+Construction Preflight                    NOT EXECUTED FOR NEW UNIT
+G0 / admission                            NOT EXECUTED
+G1 design                                 NOT EXECUTED
+implementation                            NOT AUTHORIZED
+RED                                       NOT AUTHORIZED
+GREEN                                     NOT AUTHORIZED
+Ready / Merge                             OWNER ONLY
+authority_effect                          none
+```
+
+Esta reconciliación actualiza CURRENT_STATE; no autoriza la unidad candidata.

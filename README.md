@@ -494,32 +494,62 @@ Estado reconciliado al baseline integrado `main@ae22f3be23ff1c30093d071c74e86db8
 
 Esta reconciliación es derivada. Qualification evidence no equivale a semantic truth, decisión, permiso ni autoridad.
 
-## Reconciliación CURRENT — E3 Support Evidence Routing / Qualification Consumption V0
+## Reconciliación CURRENT — E3 Qualification Consumption / Positive Trust Boundary V0
 
-Estado reconciliado al baseline integrado `main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e`:
-
-- PR #235 integró `E3 Governed Support Evidence Routing V0` sobre el candidate terminal `7e8ad3278c06cd1f44135e3c4dd59069c450f284`; el merge commit es `73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e`.
-- PR #240 quedó incorporada en la línea de #235 antes del merge y materializó `E3 Governed Qualification Consumption V0` con semántica fail-closed.
-- Una qualification `FULL` coherente pero controlada por el caller ya no habilita por sí misma `DETERMINISTIC`; mientras no exista una frontera positiva de consumo admitida separadamente, el routing permanece `INFERENTIAL` para ese caso.
-- PR #239 quedó cerrada sin merge y se conserva únicamente como evidencia histórica de la línea que demostró el gap de self-certification.
-- No se añadió wiring a Kernel, Planner, provider/model, Protected Finalization ni `support_sufficient`.
-- `E008-SG-02` permanece `OPEN`; `semantic_assurance` continúa `NOT_VERIFIED`.
-- `support_sufficient` permanece `NOT WIRED / NOT AUTHORIZED`.
-- RDD Stage 2 y Sprint 7.12 permanecen `NOT AUTHORIZED`.
-- Los runners post-merge fueron reportados por el Owner como completados; esta reconciliación no inventa un identificador de Validation ni métricas que no estén disponibles de forma reconstruible desde la interfaz consultada.
-
-Siguiente dirección de diseño, todavía no autorizada automáticamente por esta reconciliación:
+Estado reconciliado al baseline actual:
 
 ```text
-positive qualification consumption trust boundary
-→ separate G0 / admission
-→ G1 design
-→ Critical Contract Hardening
-→ Four Questions
-→ Design 4R
-→ RDD Stage 1 Design Check
+main HEAD                           a05aa5f081971f36c133ac50dc0756f938a26a1a
+último baseline material/producto  e1a1973b7b6cf635337a77e81410ebb873f57bde
+último candidate funcional         1143ce2c7818096c393d2fb0cb2986f48440eb93
+post-merge Validation              #37208582290 / 1875 passed Ubuntu + Windows
+authority_effect                    none
 ```
 
-El objetivo de esa unidad futura es permitir que routing distinga evidencia de qualification gobernada y externa al caller sin convertir RDD-M1, strings `PASS`, hashes o provenance declarativa en credenciales runtime.
+- PR #235 integró `E3 Governed Support Evidence Routing V0` y la línea fail-closed de qualification consumption.
+- PR #250 integró `E3 Positive Qualification Consumption Trust Boundary V0` sobre el candidate exacto `1143ce2c7818096c393d2fb0cb2986f48440eb93`; el merge commit es `e1a1973b7b6cf635337a77e81410ebb873f57bde`.
+- La validación post-merge #37208582290 concluyó PASS con `1875/1875` tests en Ubuntu y Windows, además de `compileall` y diff-check.
+- El path positivo ya puede alcanzar `DETERMINISTIC` únicamente mediante material de qualification ligado exactamente, admission composition-owned, PDP/PEP, READY gobernado, RuntimeQualificationBindingV0 exacto y validación temporal de consumo.
+- Una qualification `FULL` controlada por el caller, ambigua, stale, con identity/binding drift o sin admission positiva continúa sin habilitar `DETERMINISTIC`.
+- PR #251 formalizó la topología gobernada `Design / Documentation PR → Implementation / Governed Construction Cycle PR` sin modificar runtime, seguridad ni autoridad.
 
-Esta sección es derivada y no concede autoridad de RED, GREEN, implementación, Ready, Merge ni promoción.
+Estado epistemológico preservado:
+
+```text
+E008-SG-02             OPEN
+semantic_assurance     NOT_VERIFIED
+support_sufficient     NOT WIRED / NOT AUTHORIZED
+productive assessor    NOT SELECTED / NOT AUTHORIZED
+RDD Stage 2            NOT AUTHORIZED
+Sprint 7.12            NOT AUTHORIZED
+self-modification      NOT AUTHORIZED
+authority_effect       none
+```
+
+La siguiente dirección **candidata de planificación**, todavía no autorizada, es estudiar una frontera ciega de experimento para assessor, con working name:
+
+```text
+E3 Blind Assessor Experiment Boundary V0
+```
+
+Objetivo provisional:
+
+```text
+full governed case set + hidden ground truth
+        ↓
+assessor-visible blind projection
+        ↓
+separately authorized assessor experiment
+        ↓
+bound assessor-result artifact
+        ↓
+existing Assessor Qualification Pack V0.1
+        ↓
+PASS | FAIL | INCONCLUSIVE
+        ↓
+Evidence for later human admission
+```
+
+La unidad candidata debe reutilizar el corpus, schemas, qualification runner, identities y Evidence existentes; no autoriza selección de model/provider, red, nueva Capability, store/registry, `support_sufficient`, semantic truth, runtime wiring ni RDD Stage 2.
+
+Esta reconciliación es derivada y no concede autoridad de Design, RED, GREEN, implementación, Ready, Merge ni promoción.
