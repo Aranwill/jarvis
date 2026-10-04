@@ -1,0 +1,9 @@
+path	repository	category	role	review_mode	disposition	notes
+docs/project/sprints/proposals/MALAK-E3-GOVERNED-BLIND-ASSESSOR-CASESET-BYTE-STABILITY-DESIGN-AMENDMENT-20261004.md	Aranwill/jarvis	documentation	design_amendment	FULL_READ	CANDIDATE	F254-RED-01 scope/design amendment.
+docs/project/sprints/proposals/MALAK-E3-GOVERNED-BLIND-ASSESSOR-CASESET-BYTE-STABILITY-DESIGN-AMENDMENT-20261004-FILE-COVERAGE.tsv	Aranwill/jarvis	documentation	file_coverage	FULL_READ	CANDIDATE	Amendment file coverage.
+.gitattributes	Aranwill/jarvis	repository_config	future_pr_b_scope	STRUCTURAL_INSPECTION	TO_IMPLEMENT_AFTER_AUTHORIZATION	Exact future path-specific eol=lf rule only.
+evaluations/e3_governed_evidence_support_assessor_v0/cases.json	Aranwill/jarvis	evaluation_fixture	protected_identity_source	FULL_READ	NO_CONTENT_CHANGE	Current LF blob; exact bytes remain protected.
+scripts/evaluate_e3_governed_evidence_support_assessor.py	Aranwill/jarvis	evaluation_tooling	existing_consumer	FULL_READ	NO_CHANGE	Qualification Pack raw-byte digest behavior preserved.
+evaluations/e3_governed_evidence_support_assessor_v0/experiment_profile.json	Aranwill/jarvis	evaluation_fixture	frozen_pr_b_scope	STRUCTURAL_INSPECTION	NO_CHANGE_IN_AMENDMENT	Existing RED profile remains frozen.
+scripts/run_e3_governed_blind_assessor_experiment.py	Aranwill/jarvis	evaluation_tooling	frozen_pr_b_scope	STRUCTURAL_INSPECTION	NO_CHANGE_IN_AMENDMENT	Existing RED harness remains frozen.
+tests/test_e3_governed_blind_assessor_experiment.py	Aranwill/jarvis	test	frozen_pr_b_scope	STRUCTURAL_INSPECTION	NO_CHANGE_IN_AMENDMENT	Existing RED tests remain frozen.
