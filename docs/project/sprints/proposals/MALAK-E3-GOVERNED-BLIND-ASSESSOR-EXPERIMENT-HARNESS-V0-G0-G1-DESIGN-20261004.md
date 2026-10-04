@@ -84,6 +84,36 @@ Esta corrección bounded:
 4. endurece R02/R16/R26/R28-R30/R35;
 5. conserva el future three-file scope.
 
+### 1.2 Bounded Design Correction — independent re-review round 2
+
+El independent re-review del candidate
+`7728ac47cb014b34b279001eee95c323ffcca716` terminó:
+
+~~~text
+INDEPENDENT PRE-RED DESIGN REVIEW = FAIL
+F253-RR-01  MATERIAL
+F253-RR-02  MINOR
+~~~
+
+El re-review confirmó como cerrados `F253-PRED-02` y `F253-PRED-03`, y confirmó
+la corrección de atribución original de `F253-PRED-01`. El único blocker material
+remanente es el binding explícito de `artifact.harness.harness_policy_version`.
+
+~~~text
+design correction round = 2 / 2
+RED                     = NOT AUTHORIZED
+GREEN                   = NOT AUTHORIZED
+authority_effect        = none
+~~~
+
+Corrección bounded final:
+
+1. derivar un `expected_harness` completo desde el profile validado;
+2. exigir igualdad estructural exacta de `artifact.harness == expected_harness`;
+3. exigir en particular igualdad de `harness_policy_version`;
+4. agregar causal negative de versión distinta con hashes correctos;
+5. preservar el three-file scope y el Qualification Pack intacto.
+
 ## 2. Corrección del working name post-PR #252
 
 PR #252 registró provisionalmente:
@@ -655,6 +685,38 @@ MATCH    → eligible for Qualification Pack
 MISMATCH → fail closed / no profile-bound qualification claim
 ~~~
 
+El verifier construye el objeto esperado completo:
+
+~~~text
+expected_harness = {
+  "harness_policy_version": profile.harness_policy_version,
+  "harness_policy_digest": recomputed_harness_policy_digest,
+  "budget_manifest_digest": recomputed_budget_manifest_digest,
+  "attempt_policy_digest": recomputed_attempt_policy_digest
+}
+~~~
+
+y exige:
+
+~~~text
+artifact.harness == expected_harness
+~~~
+
+por igualdad estructural exacta.
+
+En particular:
+
+~~~text
+artifact.harness.harness_policy_version
+==
+profile.harness_policy_version
+==
+"e3-governed-blind-assessor-experiment-harness/v0"
+~~~
+
+Una versión non-empty/formalmente válida pero distinta falla cerrado aunque los
+tres digests y el mechanism sean correctos.
+
 Invocar directamente al Qualification Pack sin ese seam puede conservar sus
 garantías propias, pero no permite reclamar `profile-bound governed experiment`.
 
@@ -822,6 +884,47 @@ Los tres digests:
 - se recomputan en `verify_expected_experiment_binding_v0`;
 - un SHA-256 formalmente válido pero diferente falla cerrado.
 
+### 6.10.5 Expected harness object
+
+Después de validar el profile y recomputar los tres digests:
+
+~~~text
+expected_harness = {
+    "harness_policy_version":
+        "e3-governed-blind-assessor-experiment-harness/v0",
+    "harness_policy_digest":
+        SHA256(canonical_json(ENTIRE_VALIDATED_PROFILE_OBJECT)),
+    "budget_manifest_digest":
+        SHA256(canonical_json(exact_budget_object)),
+    "attempt_policy_digest":
+        SHA256(canonical_json(exact_attempt_object))
+}
+~~~
+
+El artifact RESULTS/v0.1 debe satisfacer:
+
+~~~text
+artifact.harness == expected_harness
+~~~
+
+No basta con que los tres hashes coincidan.
+
+Negative obligatorio:
+
+~~~text
+artifact.harness.harness_policy_version =
+  "e3-governed-blind-assessor-experiment-harness/v-other"
+
+all three artifact harness digests = correct
+artifact.assessor_mechanism = correct
+profile = unchanged
+
+→ verify_expected_experiment_binding_v0 FAIL
+→ Qualification Pack not invoked for a profile-bound qualification claim
+~~~
+
+El rechazo pertenece al expected-binding verifier, no al consumer existente.
+
 ### 6.11 Mechanism identity y expected binding
 
 Para `DETERMINISTIC` o `HUMAN_REVIEWED`:
@@ -931,6 +1034,8 @@ H04 forged digests:
 - observation/case-set digests: producer calcula y Qualification Pack recomputa;
 - profile/harness digests: producer calcula y
   `verify_expected_experiment_binding_v0` recomputa contra el profile esperado;
+- `harness_policy_version`: el verifier exige igualdad exacta con la versión
+  congelada del profile, independientemente de que los tres hashes coincidan;
 - el Qualification Pack no se presenta como verifier de profile.
 
 H05 self-certification: role collision cannot become positive.
@@ -971,6 +1076,10 @@ validated profile change → harness_policy_digest changes
 budget subset change     → budget_manifest_digest changes
 attempt subset change    → attempt_policy_digest changes
 artifact/profile mismatch
+→ verify_expected_experiment_binding_v0 FAIL
+→ no profile-bound qualification claim
+
+artifact harness version mismatch with correct hashes
 → verify_expected_experiment_binding_v0 FAIL
 → no profile-bound qualification claim
 ~~~
@@ -1061,7 +1170,9 @@ DESIGN 4R — CORRECTED WRITER CANDIDATE = PASS FOR RE-REVIEW
 prior independent review               FAIL preserved
 design correction round                1 / 2
 claimed corrected                      F253-PRED-01 / F253-PRED-02 / F253-PRED-03
-independent re-review                   REQUIRED
+second-round claimed corrected          F253-RR-01
+metadata-only correction                F253-RR-02
+independent final re-review             REQUIRED
 authority_effect                        none
 ~~~
 
@@ -1083,9 +1194,9 @@ RDD Stage 2                            NOT AUTHORIZED
 overall                                PASS
 ~~~
 
-Este Writer Design Check no sustituye independent pre-RED review. El FAIL del
-candidate anterior permanece histórico y este candidate corregido requiere
-re-review independiente de las superficies afectadas.
+Este Writer Design Check no sustituye independent pre-RED review. Los FAIL de
+los candidates anteriores permanecen históricos. El candidate round-2 requiere
+final re-review independiente de F253-RR-01, R35, §14 y las lentes 4R afectadas.
 
 ## 13. Future RED requirements
 
@@ -1126,7 +1237,7 @@ GBAEH-R31 execution order CASESET_INPUT_ORDER_SEQUENTIAL
 GBAEH-R32 max_attempts_per_input=1; automatic retry=0; attempt != candidate invocation
 GBAEH-R33 emitted artifact <= 524288 bytes
 GBAEH-R34 existing Qualification Pack accepts structurally valid generated artifact under its own contract
-GBAEH-R35 mutation disposition is split: consumer-contract mutations rejected by Qualification Pack; profile/mechanism-valid-looking mutations rejected by verify_expected_experiment_binding_v0 before consumer
+GBAEH-R35 mutation disposition is split: consumer-contract mutations rejected by Qualification Pack; profile/mechanism/harness-identity mutations rejected by verify_expected_experiment_binding_v0 before consumer; artifact.harness must equal exact expected_harness including harness_policy_version plus all three recomputed digests
 GBAEH-R36 harness performs no network/tool/repo/Memory/Knowledge side effects; no claim about arbitrary callable ambient effects
 GBAEH-R37 Kernel/Planner/Conversation/runtime/provider code delta = 0
 GBAEH-R38 support_sufficient / Protected Finalization wiring = 0
@@ -1140,6 +1251,7 @@ Additional causal negatives embedded in R02/R16/R26/R28-R30/R35:
 - profile valid but different from expected;
 - harness digests replaced by other valid SHA-256 values;
 - mechanism metadata valid but different from expected identity/config;
+- artifact harness_policy_version different while all three harness digests remain correct;
 - candidate mutates received material;
 - candidate invocation omitted for an eligible input.
 
@@ -1178,6 +1290,7 @@ Negativos obligatorios:
 - candidate mutation of received material;
 - case-set drift;
 - mechanism valid-but-different from expected;
+- harness_policy_version valid/non-empty but different while all three hashes are correct;
 - harness/budget/attempt digest replaced by other valid SHA-256;
 - observation/case-set mutation;
 - missing/duplicate observation;
@@ -1258,8 +1371,11 @@ Four Questions                         PASS / PASS / PASS / PASS
 Design 4R                              CORRECTED WRITER PASS FOR RE-REVIEW
 RDD Stage 1 Design Check               CORRECTED WRITER PASS FOR RE-REVIEW
 prior independent pre-RED review       FAIL — preserved
-bounded design correction              ROUND 1 / 2
-independent pre-RED re-review           PENDING
+first independent re-review             FAIL — preserved
+bounded design correction              ROUND 2 / 2
+F253-RR-01                              MATERIAL — claimed corrected
+F253-RR-02                              MINOR — body metadata correction required
+independent final pre-RED re-review     PENDING
 RED                                    NOT AUTHORIZED
 GREEN                                  NOT AUTHORIZED
 Implementation PR                      NOT CREATED
@@ -1273,7 +1389,7 @@ authority_effect                       none
 
 
 ~~~text
-independent pre-RED Design Review on exact PR-A candidate
+independent final pre-RED Design RE-REVIEW on exact round-2 candidate
 → PASS | FAIL | INCONCLUSIVE
 ~~~
 
