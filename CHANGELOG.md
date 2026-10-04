@@ -101,6 +101,8 @@ La versión nominal vigente continúa siendo `v0.6.0-alpha`.
 - PR #230 integró `E3 Assessor Qualification Pack V0.1` como evaluation tooling offline reproducible; no selecciona ni autoriza un assessor productivo, modelo o provider.
 - PR #235 integró `E3 Governed Support Evidence Routing V0` y absorbió la línea fail-closed de PR #240. Una qualification `FULL` coherente pero caller-controlled ya no habilita por sí misma `DETERMINISTIC`; mientras no exista una frontera positiva de consumo admitida separadamente, ese caso permanece `INFERENTIAL`.
 - PR #239 quedó cerrada sin merge y preservada únicamente como evidencia histórica del gap de self-certification. `support_sufficient`, Protected Finalization, RDD Stage 2 y Sprint 7.12 permanecen no autorizados por esta línea.
+- PR #250 integró `E3 Positive Qualification Consumption Trust Boundary V0` sobre el candidate terminal `1143ce2c7818096c393d2fb0cb2986f48440eb93`, con Candidate FULL 4R, E2E / integration y RDD Stage 1 Candidate Conformance en PASS; la validación post-merge #37208582290 pasó `1875/1875` tests en Ubuntu y Windows. La unidad habilita únicamente consumo positivo gobernado y ligado exactamente; no selecciona assessor productivo ni promueve `semantic_assurance`.
+- PR #251 formalizó el modelo gobernado de dos fases `Design / Documentation PR → Implementation / Governed Construction Cycle PR`, preservando separación de gates, candidates, Evidence, roles y Authority sin exigir una PR independiente por checkpoint. Ready y Merge continúan bajo autoridad exclusiva del Owner.
 
 ### Changed
 

@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-10-02
-as_of_commit: 73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
+as_of_date: 2026-10-04
+as_of_commit: a05aa5f081971f36c133ac50dc0756f938a26a1a
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -37,10 +37,10 @@ Este documento es deliberadamente **derivado y no normativo**.
 No reemplaza ni modifica ninguna fuente de ley, arquitectura, seguridad,
 gobernanza o contrato aprobado.
 
-## Estado CURRENT reconciliado — 2026-10-02
+## Estado CURRENT reconciliado — 2026-10-04
 
 Esta sección representa el estado material vigente reconciliado contra
-`Aranwill/jarvis/main@73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e`.
+`Aranwill/jarvis/main@a05aa5f081971f36c133ac50dc0756f938a26a1a`.
 
 Los snapshots históricos conservados más abajo no deben utilizarse como
 sustituto de este estado CURRENT.
@@ -2066,72 +2066,106 @@ El pack reduce el gap de **evaluabilidad** de futuros mecanismos de soporte; no 
 
 Esta reconciliación es derivada y no crea automáticamente el siguiente gate.
 
-## Reconciliación CURRENT — E3 Support Evidence Routing / Qualification Consumption V0
+## Reconciliación CURRENT — E3 Qualification Consumption / Positive Trust Boundary V0
 
-El baseline vigente incorpora el cierre de la línea E3 de routing mediante PR #235:
+El baseline vigente incorpora la línea E3 de routing y qualification consumption hasta PR #250:
 
 ```text
-E3 Governed Support Evidence Routing V0
-PR                         #235
-candidate terminal          7e8ad3278c06cd1f44135e3c4dd59069c450f284
-merge                       73ad23b1c3fb30d0e0ce4a5160f480f00f1fc79e
-status                      INTEGRATED
+PR #235  E3 Governed Support Evidence Routing V0             INTEGRATED
+PR #240  Governed Qualification Consumption fail-closed      CONTAINED / INTEGRATED THROUGH #235
+PR #250  Positive Qualification Consumption Trust Boundary   INTEGRATED
+PR #251  Two-PR Governed Construction Model                  INTEGRATED / PROCESS ONLY
+```
+
+Identidad de la última unidad funcional:
+
+```text
+candidate                  1143ce2c7818096c393d2fb0cb2986f48440eb93
+merge                      e1a1973b7b6cf635337a77e81410ebb873f57bde
+post-merge Validation      #37208582290
+Ubuntu                     1875/1875 PASS
+Windows                    1875/1875 PASS
+Candidate FULL 4R          PASS
+E2E / integration          PASS
+RDD Stage 1 Conformance    PASS
 authority_effect            none
 ```
-
-La PR #240 fue integrada en la línea de #235 antes de su merge y dejó materializado el comportamiento fail-closed de `E3 Governed Qualification Consumption V0`:
-
-```text
-caller-controlled FULL qualification
-→ never sufficient by itself for DETERMINISTIC
-→ INFERENTIAL while positive trust boundary is absent
-```
-
-PR #239 quedó cerrada sin merge y se conserva como evidencia histórica del gap de self-certification; no constituye baseline CURRENT.
 
 Disposición de planificación:
 
 ```text
 Governed Support Evidence Routing V0             INTEGRATED
 Governed Qualification Consumption fail-closed   INTEGRATED
-positive DETERMINISTIC consumption boundary       REQUIRES SEPARATE G0 / G1
-support_sufficient wiring                         NOT AUTHORIZED
-Protected Finalization integration                NOT AUTHORIZED
-semantic_assurance                                NOT_VERIFIED
-E008-SG-02                                        OPEN
-model/provider experiment                         NOT AUTHORIZED BY THIS UNIT
-RDD Stage 2                                       NOT AUTHORIZED
-Sprint 7.12                                       NOT AUTHORIZED
+positive DETERMINISTIC consumption boundary      INTEGRATED — PR #250
+productive assessor mechanism                    NOT SELECTED / NOT AUTHORIZED
+blind assessor experiment boundary               CANDIDATE FOR SEPARATE ADMISSION
+support_sufficient wiring                        NOT AUTHORIZED
+Protected Finalization integration               NOT AUTHORIZED
+semantic_assurance                               NOT_VERIFIED
+E008-SG-02                                       OPEN
+model/provider experiment                        NOT AUTHORIZED
+RDD Stage 2                                      NOT AUTHORIZED
+Sprint 7.12                                      NOT AUTHORIZED
 ```
-
-Los runners post-merge fueron reportados por el Owner como completados. Esta reconciliación no fabrica un identificador de Validation ni un conteo de tests que no pueda reconstruirse desde la interfaz consultada.
 
 ### Próxima unidad candidata
 
-La siguiente unidad lógica es una admisión/diseño separado para una frontera positiva de consumo de qualification, con working name:
+La siguiente unidad lógica de planificación es evaluar, mediante Construction Preflight y G0/G1 separados, una frontera que permita ejecutar un mecanismo assessor sin exponerle el ground truth usado posteriormente para calificarlo.
+
+Working name:
 
 ```text
-E3 Positive Qualification Consumption Trust Boundary V0
+E3 Blind Assessor Experiment Boundary V0
 ```
 
-Objetivo de diseño:
+Problema exacto:
 
 ```text
-externally governed qualification evidence
+current governed case set
+contains assessor input + expected outcome/reasons
         ↓
-non-caller-controlled consumption boundary
+direct exposure would leak ground truth
         ↓
-exact binding / fail-closed reconciliation
-        ↓
-routing eligibility
+self-certification / contaminated qualification risk
 ```
 
-Restricciones iniciales de planificación:
+Dirección mínima candidata:
 
-- no convertir RDD-M1 en credencial runtime;
-- no usar `PASS`, hashes, actor IDs o flags como prueba autosuficiente de externalidad;
-- no introducir store/registry/database, PKI/signatures, network verifier, Kernel/Planner wiring ni nueva authority surface sin `STOP → scope review`;
-- preservar `Evidence != Authority`;
-- preservar §5.5 completo por tratarse de un contrato crítico.
+```text
+governed case set
+        ↓
+deterministic blind projection
+        ↓
+assessor-visible input only
+        ↓
+separately authorized experiment
+        ↓
+result artifact bound to case-set/projection/mechanism/execution identity
+        ↓
+existing Assessor Qualification Pack V0.1 compares against hidden ground truth
+```
 
-Esta reconciliación es derivada. La unidad siguiente requiere admisión humana separada antes de RED o implementación.
+Component / Logic Reuse Review preliminar:
+
+- corpus de evaluación: `REUSE`;
+- ground truth: `REUSE`;
+- Assessor Qualification Pack V0.1: `REUSE`;
+- result artifact contract: `ADAPT`;
+- candidate/provenance/digest primitives: `REUSE`;
+- nueva Capability: `NOT JUSTIFIED`;
+- Kernel/Planner change: `NO`;
+- store/registry/database: `NO`;
+- model/provider selection: `NO`;
+- network: `NO`;
+- RDD Stage 2: `NO`.
+
+Restricciones iniciales:
+
+- `qualification PASS != production authorization`;
+- `assessor result != semantic truth`;
+- `same-model agreement != independence`;
+- el assessor candidato no debe recibir `expected_outcome`, `expected_reason_codes` ni metadata equivalente que revele ground truth;
+- la ejecución real de cualquier model/provider requiere una admisión posterior propia y Security Horizon Check;
+- no introducir `support_sufficient`, Protected Finalization, nuevas authority surfaces ni runtime wiring en esta unidad.
+
+Esta sección es derivada. `E3 Blind Assessor Experiment Boundary V0` permanece **NOT AUTHORIZED** hasta completar su admisión y revisión humana correspondiente.
