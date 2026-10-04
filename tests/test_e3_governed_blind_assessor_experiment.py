@@ -5,6 +5,8 @@ import hashlib
 import importlib.util
 import inspect
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -187,6 +189,105 @@ def _observations(artifact: dict) -> dict[str, dict]:
         for case in artifact["case_results"]
         for observation in case["observations"]
     }
+
+
+def _candidate_material_from_input(input_record: dict) -> dict:
+    subject = input_record["subject"]
+    repository_by_ref = {
+        item["ref"]: item for item in input_record["repository_evidence"]
+    }
+    knowledge_by_ref = {
+        item["ref"]: item for item in input_record["knowledge_evidence"]
+    }
+    return {
+        "relation_id": subject["relation_id"],
+        "classification": subject["classification"],
+        "statement": subject["statement"],
+        "rationale": subject["rationale"],
+        "supporting_repository_evidence": tuple(
+            repository_by_ref[ref]
+            for ref in subject["supporting_repository_refs"]
+        ),
+        "supporting_knowledge_evidence": tuple(
+            knowledge_by_ref[ref]
+            for ref in subject["supporting_knowledge_refs"]
+        ),
+        "limiting_or_counterevidence": tuple(
+            repository_by_ref.get(ref, knowledge_by_ref.get(ref))
+            for ref in subject["limiting_or_counterevidence_refs"]
+        ),
+        "uncertainty_basis": subject["uncertainty_basis"],
+    }
+
+
+def _material_key(material: dict) -> bytes:
+    return _canonical_json(material)
+
+
+def _qualification_oracle():
+    structural_or_fault = {
+        "C10.I01",
+        "C11.I01",
+        "C12.I01",
+        "C14.I01",
+        "C15.I01",
+        "C17.I01",
+    }
+    expected: dict[bytes, dict] = {}
+    for case in _case_set()["cases"]:
+        for input_record in case["inputs"]:
+            if input_record["input_id"] in structural_or_fault:
+                continue
+            key = _material_key(_candidate_material_from_input(input_record))
+            assert key not in expected
+            expected[key] = {
+                "outcome": input_record["expected_outcome"],
+                "reason_codes": list(input_record["expected_reason_codes"]),
+            }
+    assert len(expected) == 13
+
+    calls: list[dict] = []
+
+    def assessor(material: dict) -> dict:
+        calls.append(copy.deepcopy(material))
+        key = _material_key(material)
+        assert key in expected
+        return copy.deepcopy(expected[key])
+
+    return assessor, calls
+
+
+def _qualification_pack(artifact: dict, tmp_path: Path) -> subprocess.CompletedProcess[str]:
+    artifact_path = tmp_path / "assessor-results.json"
+    artifact_path.write_text(
+        json.dumps(
+            artifact,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ) + "\n",
+        encoding="utf-8",
+    )
+    return subprocess.run(
+        [
+            sys.executable,
+            str(QUALIFICATION_RUNNER),
+            "--case-set",
+            str(CASE_SET),
+            "--assessor-results",
+            str(artifact_path),
+            "--ground-truth-reviewer-id",
+            "independent-ground-truth-reviewer",
+            "--runner-implementation-actor-id",
+            "green-e2e-runner",
+            "--reviewed-case-set-digest",
+            EXPECTED_CASE_SET_DIGEST,
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
 
 def test_red_requirement_matrix_has_no_silent_omissions() -> None:
@@ -431,6 +532,54 @@ def test_red_r45_qualification_pack_retains_raw_byte_digest_contract() -> None:
     assert "return payload, raw" in source
     assert "case_digest = _sha256_bytes(case_bytes)" in source
     assert 'payload["case_set_digest"] != case_set_digest' in source
+
+
+def test_green_e2e_generated_artifact_passes_existing_qualification_pack(
+    tmp_path: Path,
+) -> None:
+    assessor, calls = _qualification_oracle()
+    module = _runner_module()
+    artifact = module.run_governed_blind_assessor_experiment_v0(
+        case_set_path=CASE_SET,
+        profile_path=PROFILE,
+        assessor=assessor,
+    )
+    assert len(calls) == 13
+    assert module.verify_expected_experiment_binding_v0(
+        profile=_profile(),
+        artifact=artifact,
+    ) is None
+
+    completed = _qualification_pack(artifact, tmp_path)
+    assert completed.returncode == 0, completed.stderr or completed.stdout
+    output = json.loads(completed.stdout)
+    assert output["qualification_result"] == "PASS"
+    assert output["qualification_reasons"] == []
+    assert output["case_count"] == 18
+    assert output["input_count"] == 19
+    assert output["case_set_digest"] == EXPECTED_CASE_SET_DIGEST
+    assert output["authority_effect"] == "none"
+
+
+def test_green_e2e_consumer_contract_mutation_is_rejected_by_qualification_pack(
+    tmp_path: Path,
+) -> None:
+    assessor, _calls = _qualification_oracle()
+    artifact = _runner_module().run_governed_blind_assessor_experiment_v0(
+        case_set_path=CASE_SET,
+        profile_path=PROFILE,
+        assessor=assessor,
+    )
+    artifact["case_set_digest"] = "0" * 64
+
+    completed = _qualification_pack(artifact, tmp_path)
+    assert completed.returncode == 2
+    output = json.loads(completed.stdout)
+    assert output["qualification_result"] == "INCONCLUSIVE"
+    assert output["qualification_reasons"] == [
+        "assessor_results_case_set_digest"
+    ]
+    assert output["authority_effect"] == "none"
 
 
 def test_red_hard_zero_and_authority_guards_remain_explicit() -> None:
