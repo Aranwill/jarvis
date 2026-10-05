@@ -25,6 +25,20 @@ HARNESS_POLICY_VERSION = "e3-governed-blind-assessor-experiment-harness/v0"
 RESULTS_SCHEMA = "MALAK-E3-SUPPORT-ASSESSOR-RESULTS/v0.1"
 CASE_SET_SCHEMA = "MALAK-E3-SUPPORT-ASSESSOR-CASESET/v0.1"
 SUPPORT_POLICY_VERSION = "e3-governed-evidence-support/v0"
+MAX_REASON_CODES = 10
+RESULT_OUTCOMES = {"SUPPORTED", "INSUFFICIENT", "INCONCLUSIVE"}
+RESULT_REASONS = {
+    "MATERIAL_SUPPORT_CONFIRMED",
+    "SUPPORTING_REFS_IRRELEVANT",
+    "SUPPORTING_REFS_INSUFFICIENT",
+    "COMPOUND_CLAIM_NOT_FULLY_SUPPORTED",
+    "MATERIAL_COUNTEREVIDENCE_UNRESOLVED",
+    "SUBJECT_BINDING_MISMATCH",
+    "EVIDENCE_MATERIAL_INCOMPLETE",
+    "ASSESSOR_UNAVAILABLE",
+    "ASSESSOR_OUTPUT_INVALID",
+    "ASSESSMENT_SCOPE_EXCEEDED",
+}
 
 CASE_IDS = tuple(f"C{i:02d}" for i in range(1, 19))
 EXPECTED_INPUT_IDS = (
@@ -559,6 +573,38 @@ def _malformed_fault_stub(_material: dict[str, Any]) -> dict[str, Any]:
     return {"malformed": True}
 
 
+def _validate_observation_output_contract(
+    *,
+    outcome: str,
+    reason_codes: list[str],
+) -> None:
+    """Enforce the existing RESULTS/v0.1 consumer contract before return."""
+    if outcome not in RESULT_OUTCOMES:
+        raise ExperimentBindingError("observation_outcome_invalid")
+    if not reason_codes or len(reason_codes) > MAX_REASON_CODES:
+        raise ExperimentBindingError("observation_reason_count_invalid")
+    if any(reason not in RESULT_REASONS for reason in reason_codes):
+        raise ExperimentBindingError("observation_reason_unknown")
+    if len(set(reason_codes)) != len(reason_codes):
+        raise ExperimentBindingError("observation_reason_duplicate")
+
+    if outcome == "SUPPORTED":
+        if reason_codes != ["MATERIAL_SUPPORT_CONFIRMED"]:
+            raise ExperimentBindingError("observation_supported_reason_invalid")
+        return
+
+    if "MATERIAL_SUPPORT_CONFIRMED" in reason_codes:
+        raise ExperimentBindingError("observation_positive_reason_mismatch")
+
+    if outcome == "INSUFFICIENT":
+        allowed = {
+            "SUPPORTING_REFS_IRRELEVANT",
+            "SUPPORTING_REFS_INSUFFICIENT",
+        }
+        if any(reason not in allowed for reason in reason_codes):
+            raise ExperimentBindingError("observation_insufficient_reason_invalid")
+
+
 def run_governed_blind_assessor_experiment_v0(
     *,
     case_set_path: Path,
@@ -613,14 +659,20 @@ def run_governed_blind_assessor_experiment_v0(
                 assessor=selected_assessor,
                 force_binding_mismatch=force_binding_mismatch,
             )
+            outcome_value = result.outcome.value
+            reason_values = [reason.value for reason in result.reason_codes]
+            _validate_observation_output_contract(
+                outcome=outcome_value,
+                reason_codes=reason_values,
+            )
             observations.append(
                 {
                     "input_id": input_id,
                     "input_instance_digest": _input_instance_digest(input_record),
                     "semantic_input_digest": _semantic_input_digest(input_record),
                     "subject_fingerprint": _subject_fingerprint(visible["subject"]),
-                    "outcome": result.outcome.value,
-                    "reason_codes": [reason.value for reason in result.reason_codes],
+                    "outcome": outcome_value,
+                    "reason_codes": reason_values,
                 }
             )
             observations_produced += 1
