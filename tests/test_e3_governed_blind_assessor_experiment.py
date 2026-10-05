@@ -89,6 +89,20 @@ REQUIREMENT_COVERAGE = {
     **{f"R{i:02d}": "cross-platform raw-byte identity amendment" for i in range(41, 46)},
 }
 
+REQUIREMENT_COVERAGE.update(
+    {
+        "R16": "test_correction_omitted_eligible_invocation_fails_closed",
+        "R18": "test_correction_runner_rejects_consumer_invalid_reason_codes",
+        "R19": "test_correction_runner_rejects_consumer_invalid_reason_codes",
+        "R25": "test_correction_runner_rejects_consumer_invalid_reason_codes",
+        "R26": "test_correction_binding_rejects_valid_but_different_mechanism",
+        "R28": "test_correction_binding_rejects_other_valid_harness_digest",
+        "R29": "test_correction_binding_rejects_other_valid_harness_digest",
+        "R30": "test_correction_binding_rejects_other_valid_harness_digest",
+        "R35": "test_correction_binding_rejects_stale_artifact_after_valid_profile_change",
+    }
+)
+
 
 def _runner_module():
     assert RUNNER.is_file(), "RED scope requires the harness runner seam"
@@ -294,6 +308,11 @@ def test_red_requirement_matrix_has_no_silent_omissions() -> None:
     assert set(REQUIREMENT_COVERAGE) == {f"R{i:02d}" for i in range(1, 46)}
 
 
+def test_correction_requirement_matrix_points_to_causal_assertions() -> None:
+    for requirement in ("R16", "R18", "R19", "R25", "R26", "R28", "R29", "R30", "R35"):
+        assert REQUIREMENT_COVERAGE[requirement].startswith("test_correction_")
+
+
 def test_red_profile_instance_is_exact_and_contains_no_ground_truth() -> None:
     profile = _profile()
     case_set = _case_set()
@@ -431,6 +450,66 @@ def test_red_binding_accepts_only_exact_expected_harness_and_mechanism() -> None
     assert module.verify_expected_experiment_binding_v0(profile=profile, artifact=artifact) is None
 
 
+@pytest.mark.parametrize(
+    "field",
+    [
+        "harness_policy_digest",
+        "budget_manifest_digest",
+        "attempt_policy_digest",
+    ],
+)
+def test_correction_binding_rejects_other_valid_harness_digest(field: str) -> None:
+    module = _runner_module()
+    profile = _profile()
+    artifact = {
+        "assessor_mechanism": copy.deepcopy(profile["expected_mechanism"]),
+        "harness": _expected_harness_from_profile(profile),
+    }
+    artifact["harness"][field] = "0" * 64
+    assert artifact["harness"][field] != _expected_harness_from_profile(profile)[field]
+    with pytest.raises(module.ExperimentBindingError, match="harness_binding_mismatch"):
+        module.verify_expected_experiment_binding_v0(profile=profile, artifact=artifact)
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("mechanism_id", "e3-blind-assessor-deterministic-test-other"),
+        ("config_digest", "1" * 64),
+    ],
+)
+def test_correction_binding_rejects_valid_but_different_mechanism(
+    field: str,
+    replacement: str,
+) -> None:
+    module = _runner_module()
+    profile = _profile()
+    artifact = {
+        "assessor_mechanism": copy.deepcopy(profile["expected_mechanism"]),
+        "harness": _expected_harness_from_profile(profile),
+    }
+    artifact["assessor_mechanism"][field] = replacement
+    with pytest.raises(module.ExperimentBindingError, match="assessor_mechanism_mismatch"):
+        module.verify_expected_experiment_binding_v0(profile=profile, artifact=artifact)
+
+
+def test_correction_binding_rejects_stale_artifact_after_valid_profile_change() -> None:
+    module = _runner_module()
+    profile = _profile()
+    artifact = {
+        "assessor_mechanism": copy.deepcopy(profile["expected_mechanism"]),
+        "harness": _expected_harness_from_profile(profile),
+    }
+    changed_profile = copy.deepcopy(profile)
+    changed_profile["expected_case_set_digest"] = "1" * 64
+    assert module.load_experiment_profile_v0(PROFILE) == profile
+    with pytest.raises(module.ExperimentBindingError, match="harness_binding_mismatch"):
+        module.verify_expected_experiment_binding_v0(
+            profile=changed_profile,
+            artifact=artifact,
+        )
+
+
 def test_red_full_corpus_produces_exact_counts_and_result_schema() -> None:
     artifact, spy = _run()
     assert artifact["schema_version"] == RESULTS_SCHEMA
@@ -469,6 +548,73 @@ def test_red_candidate_exception_is_one_call_no_retry_and_nonpositive() -> None:
     eligible = set(EXPECTED_INPUT_IDS) - STRUCTURAL_ZERO_CALL - FAULT_ZERO_CALL
     for input_id in eligible:
         assert observations[input_id]["outcome"] != "SUPPORTED"
+
+
+@pytest.mark.parametrize(
+    "reason_codes",
+    [
+        ["ASSESSMENT_SCOPE_EXCEEDED", "ASSESSMENT_SCOPE_EXCEEDED"],
+        ["ASSESSMENT_SCOPE_EXCEEDED"] * 11,
+    ],
+)
+def test_correction_runner_rejects_consumer_invalid_reason_codes(
+    reason_codes: list[str],
+) -> None:
+    calls: list[dict] = []
+
+    def assessor(material: dict) -> dict:
+        calls.append(copy.deepcopy(material))
+        return {
+            "outcome": "INCONCLUSIVE",
+            "reason_codes": list(reason_codes),
+        }
+
+    module = _runner_module()
+    with pytest.raises(
+        module.ExperimentBindingError,
+        match="observation_reason_(duplicate|count_invalid)",
+    ):
+        module.run_governed_blind_assessor_experiment_v0(
+            case_set_path=CASE_SET,
+            profile_path=PROFILE,
+            assessor=assessor,
+        )
+    assert len(calls) == 1
+
+
+def test_correction_omitted_eligible_invocation_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _runner_module()
+    original_assessment = module._assessment
+    omitted = False
+
+    def omit_once(**kwargs):
+        nonlocal omitted
+        if (
+            not omitted
+            and kwargs["assessor"] is not None
+            and kwargs["force_binding_mismatch"] is False
+        ):
+            omitted = True
+            altered = dict(kwargs)
+            altered["assessor"] = None
+            return original_assessment(**altered)
+        return original_assessment(**kwargs)
+
+    monkeypatch.setattr(module, "_assessment", omit_once)
+    spy = SpyAssessor()
+    with pytest.raises(
+        module.ExperimentBindingError,
+        match="candidate_invocation_count_mismatch",
+    ):
+        module.run_governed_blind_assessor_experiment_v0(
+            case_set_path=CASE_SET,
+            profile_path=PROFILE,
+            assessor=spy,
+        )
+    assert omitted is True
+    assert len(spy.calls) == 12
 
 
 def test_red_candidate_mutation_cannot_modify_trusted_corpus() -> None:
