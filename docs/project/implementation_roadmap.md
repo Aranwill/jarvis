@@ -2169,3 +2169,130 @@ Restricciones iniciales:
 - no introducir `support_sufficient`, Protected Finalization, nuevas authority surfaces ni runtime wiring en esta unidad.
 
 Esta sección es derivada. `E3 Blind Assessor Experiment Boundary V0` permanece **NOT AUTHORIZED** hasta completar su admisión y revisión humana correspondiente.
+
+## Reconciliación CURRENT — E3 Governed Blind Assessor Experiment Harness V0
+
+PR #254 integró la unidad que el roadmap anterior mantenía como frontera ciega
+candidata.
+
+Identidad de integración:
+
+```text
+candidate                         49d54b9069c71abb53e203d21a3acad2b1e62dfe
+merge                             c5be9c8463ee599530412bfb890180a03e8557e4
+candidate tree / merge tree       e0421161015f6ee4131a3e8cf6ab6ad4ba91cb6d
+candidate Validation              #803 / run 37249290867 / SUCCESS
+post-merge Validation             #804 / run 37853781224 / SUCCESS
+Ubuntu                            1915/1915 PASS
+Windows                           1915/1915 PASS
+Affected Candidate FULL 4R        PASS
+E2E / Integration                 PASS
+Independent Validation            PASS
+RDD Stage 1 Conformance            PASS
+authority_effect                   none
+```
+
+Disposición de planificación actualizada:
+
+```text
+Governed Blind Assessor Experiment Harness V0    INTEGRATED — PR #254
+governed experiment artifact producer             INTEGRATED
+blind ground-truth separation                      INTEGRATED
+Assessor Qualification Pack consumption            INTEGRATED
+productive assessor mechanism                      NOT SELECTED / NOT AUTHORIZED
+real model/provider experiment                     CANDIDATE FOR SEPARATE ADMISSION
+network                                            NOT AUTHORIZED
+runtime producer / adapter                         NOT AUTHORIZED
+support_sufficient wiring                          NOT AUTHORIZED
+Protected Finalization integration                 NOT AUTHORIZED
+semantic_assurance                                 NOT_VERIFIED
+E008-SG-02                                         OPEN
+RDD Stage 2                                        NOT AUTHORIZED
+Sprint 7.12                                        NOT AUTHORIZED
+```
+
+### Próxima unidad candidata
+
+La siguiente pregunta ya no es cómo construir el laboratorio de evaluación, sino
+si un mecanismo assessor real puede atravesarlo sin romper sus fronteras:
+
+```text
+real candidate mechanism
+        ↓
+blind governed input only
+        ↓
+bounded experiment execution
+        ↓
+bound RESULTS/v0.1 artifact
+        ↓
+existing Qualification Pack
+        ↓
+PASS | FAIL | INCONCLUSIVE
+        ↓
+Evidence for later human admission
+```
+
+Working name de planificación:
+
+```text
+E3 Governed Assessor Model/Provider Experiment Admission V0
+```
+
+Problema exacto:
+
+```text
+the harness can evaluate a bounded callable
+but no real assessor/model/provider is selected or authorized
+        ↓
+real execution adds provider/network/runtime/security concerns
+        ↓
+those concerns require a separate admission boundary
+```
+
+La admisión deberá decidir, sin implementar todavía:
+
+- mecanismo candidato y su identidad/configuración exacta;
+- necesidad real de provider externo o ejecución local;
+- necesidad de red y sus límites;
+- invocation budget / timeout / retry policy;
+- reproducibilidad y captura de provenance;
+- condiciones de abort y fail-closed;
+- separación entre experiment Evidence y cualquier autoridad productiva;
+- Security Horizon Check específico para el mecanismo elegido.
+
+Hard-zero inicial:
+
+```text
+Kernel delta                 0
+Planner delta                0
+authority delta              0
+support_sufficient wiring    0
+Protected Finalization       0
+production admission         0
+self-modification            0
+RDD Stage 2                  0
+```
+
+`qualification PASS != production authorization` permanece invariante.
+
+No corresponde promover RDD Stage 2 por secuencia. Los Receipts de Stage 2
+continúan `NOT AUTHORIZED` y deberán justificar una admisión propia si la
+evidencia futura demuestra una necesidad recurrente.
+
+Estado del próximo gate:
+
+```text
+Construction Preflight      PENDING / NOT AUTHORIZED
+G0 / admission              PENDING / NOT AUTHORIZED
+G1 design                   PENDING / NOT AUTHORIZED
+Security Horizon Check      PENDING
+model/provider experiment   NOT AUTHORIZED
+implementation              NOT AUTHORIZED
+RED                         NOT AUTHORIZED
+GREEN                       NOT AUTHORIZED
+Ready / Merge               OWNER ONLY
+authority_effect            none
+```
+
+Esta reconciliación supersede el snapshot de planificación que mantenía la
+frontera ciega como próxima unidad. No autoriza el siguiente experimento.
