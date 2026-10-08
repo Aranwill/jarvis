@@ -1,0 +1,43 @@
+{
+  "schema_version": "MALAK-E3-BLIND-ASSESSOR-EXPERIMENT-PROFILE/v0",
+  "harness_policy_version": "e3-governed-blind-assessor-experiment-harness/v0",
+  "expected_case_set_schema_version": "MALAK-E3-SUPPORT-ASSESSOR-CASESET/v0.1",
+  "expected_case_set_digest": "23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83",
+  "execution_order": "CASESET_INPUT_ORDER_SEQUENTIAL",
+  "max_attempts_per_input": 1,
+  "expected_input_count": 19,
+  "expected_observation_count": 19,
+  "expected_candidate_invocations": 13,
+  "artifact_max_bytes": 524288,
+  "candidate_argument_policy": "EXISTING_SUPPORT_ASSESSMENT_MATERIAL_ONLY",
+  "expected_mechanism": {
+    "mechanism_id": "e3-blind-assessor-deterministic-test",
+    "mechanism_version": "v0",
+    "mechanism_kind": "DETERMINISTIC",
+    "config_digest": "a3e4398f023180e6f788a564ed0a4712f139d6091900f53fc7de9d54ac6b913f",
+    "producer_subject_id": "experiment-producer",
+    "assessor_subject_id": "candidate-assessor",
+    "model_provenance": null
+  },
+  "fault_modes": [
+    {"input_id": "C01.I01", "mode": "NORMAL"},
+    {"input_id": "C02.I01", "mode": "NORMAL"},
+    {"input_id": "C03.I01", "mode": "NORMAL"},
+    {"input_id": "C04.I01", "mode": "NORMAL"},
+    {"input_id": "C05.I01", "mode": "NORMAL"},
+    {"input_id": "C06.I01", "mode": "NORMAL"},
+    {"input_id": "C07.I01", "mode": "NORMAL"},
+    {"input_id": "C08.I01", "mode": "NORMAL"},
+    {"input_id": "C09.I01", "mode": "NORMAL"},
+    {"input_id": "C10.I01", "mode": "NORMAL"},
+    {"input_id": "C11.I01", "mode": "NORMAL"},
+    {"input_id": "C12.I01", "mode": "NORMAL"},
+    {"input_id": "C13.I01", "mode": "NORMAL"},
+    {"input_id": "C13.I02", "mode": "NORMAL"},
+    {"input_id": "C14.I01", "mode": "FORCE_UNAVAILABLE"},
+    {"input_id": "C15.I01", "mode": "FORCE_MALFORMED_OUTPUT"},
+    {"input_id": "C16.I01", "mode": "NORMAL"},
+    {"input_id": "C17.I01", "mode": "NORMAL"},
+    {"input_id": "C18.I01", "mode": "NORMAL"}
+  ]
+}
