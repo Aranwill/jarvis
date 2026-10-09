@@ -789,3 +789,199 @@ def test_red_r31_r32_ci_boundary_and_authority_are_hard_zero(
     assert module.MODEL_PROMOTION_AUTHORIZED is False
     assert module.RDD_STAGE_2_AUTHORIZED is False
     assert module.AUTHORITY_EFFECT == "none"
+
+def test_green_r14_unavailable_provenance_stops_before_generation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    contract = RuntimeGenerationContract(8192, 256, False)
+    provenance = RuntimeModelProvenance(
+        schema=RUNTIME_MODEL_PROVENANCE_SCHEMA,
+        captured_at=datetime(2026, 10, 9, 12, 0, tzinfo=UTC),
+        runtime_class="OllamaRuntime",
+        provider="ollama",
+        requested_model="example:model",
+        resolved_model=None,
+        model_digest=None,
+        model_identity_strength="UNAVAILABLE",
+        runtime_version=None,
+        declared_context_window=None,
+        context_window_source="unavailable",
+        generation_options=contract.to_generation_options(),
+        timeout_seconds=300,
+        keep_alive=0,
+        max_request_bytes=1048576,
+        max_response_bytes=65536,
+        provenance_status="UNAVAILABLE",
+        authority_effect="none",
+    )
+    module = _adapter_module()
+    runtime = FakeRuntime(provenance=provenance)
+    _install_runtime(monkeypatch, module, runtime)
+    with pytest.raises(module.LocalOllamaExperimentError, match="provenance|model"):
+        module.run_governed_local_ollama_assessor_experiment_v0(
+            model="example:model",
+            output_dir=tmp_path / "run",
+        )
+    assert runtime.generate_calls == []
+
+
+def test_green_r14_missing_runtime_version_stops_before_generation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    contract = RuntimeGenerationContract(8192, 256, False)
+    provenance = RuntimeModelProvenance(
+        schema=RUNTIME_MODEL_PROVENANCE_SCHEMA,
+        captured_at=datetime(2026, 10, 9, 12, 0, tzinfo=UTC),
+        runtime_class="OllamaRuntime",
+        provider="ollama",
+        requested_model="example:model",
+        resolved_model="example:model",
+        model_digest="sha256:" + ("a" * 64),
+        model_identity_strength="TAG_DIGEST_BOUND",
+        runtime_version=None,
+        declared_context_window=262144,
+        context_window_source="ollama:model_info",
+        generation_options=contract.to_generation_options(),
+        timeout_seconds=300,
+        keep_alive=0,
+        max_request_bytes=1048576,
+        max_response_bytes=65536,
+        provenance_status="READY",
+        authority_effect="none",
+    )
+    module = _adapter_module()
+    runtime = FakeRuntime(provenance=provenance)
+    _install_runtime(monkeypatch, module, runtime)
+    with pytest.raises(module.LocalOllamaExperimentError, match="runtime version"):
+        module.run_governed_local_ollama_assessor_experiment_v0(
+            model="example:model",
+            output_dir=tmp_path / "run",
+        )
+    assert runtime.generate_calls == []
+
+
+@pytest.mark.parametrize("drift_at_capture", [2, 3, 28])
+def test_green_r16_drift_before_after_or_final_never_commits(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    drift_at_capture: int,
+) -> None:
+    module = _adapter_module()
+    runtime = FakeRuntime(drift_at_capture=drift_at_capture)
+    _install_runtime(monkeypatch, module, runtime)
+    output_dir = tmp_path / f"drift-{drift_at_capture}"
+    with pytest.raises(module.LocalOllamaExperimentError, match="provenance.*drift"):
+        module.run_governed_local_ollama_assessor_experiment_v0(
+            model="example:model",
+            output_dir=output_dir,
+        )
+    assert not (output_dir / "assessor_results.json").exists()
+
+
+@pytest.mark.parametrize(
+    "seam",
+    [
+        "write_runtime_model_provenance",
+        "_write_json_file",
+        "_strict_reread_equal",
+    ],
+)
+def test_green_r28_staging_failure_never_publishes_final_result(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    seam: str,
+) -> None:
+    module = _adapter_module()
+    runtime = FakeRuntime()
+    _install_runtime(monkeypatch, module, runtime)
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise OSError(f"controlled staging failure at {seam}")
+
+    monkeypatch.setattr(module, seam, fail)
+    output_dir = tmp_path / seam
+    with pytest.raises(module.LocalOllamaExperimentError):
+        module.run_governed_local_ollama_assessor_experiment_v0(
+            model="example:model",
+            output_dir=output_dir,
+        )
+    assert not (output_dir / "assessor_results.json").exists()
+
+
+def test_green_r28_cleanup_failure_remains_noncommitted(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _adapter_module()
+    runtime = FakeRuntime()
+    _install_runtime(monkeypatch, module, runtime)
+
+    def fail_precommit(*args: object, **kwargs: object) -> None:
+        raise OSError("controlled precommit failure")
+
+    def fail_cleanup(*args: object, **kwargs: object) -> None:
+        raise OSError("controlled cleanup failure")
+
+    monkeypatch.setattr(module, "_verify_precommit_root_v0", fail_precommit)
+    monkeypatch.setattr(module, "_cleanup_precommit_v0", fail_cleanup)
+    output_dir = tmp_path / "cleanup-failure"
+    with pytest.raises(
+        module.LocalOllamaExperimentError,
+        match="cleanup failed",
+    ):
+        module.run_governed_local_ollama_assessor_experiment_v0(
+            model="example:model",
+            output_dir=output_dir,
+        )
+    assert not (output_dir / "assessor_results.json").exists()
+
+
+def test_green_r28_r29_publication_order_and_commit_point_are_exact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _adapter_module()
+    runtime = FakeRuntime()
+    _install_runtime(monkeypatch, module, runtime)
+
+    real_replace = module._atomic_replace_v0
+    targets: list[str] = []
+
+    def recording_replace(source: Path, target: Path) -> None:
+        targets.append(target.name)
+        real_replace(source, target)
+
+    monkeypatch.setattr(module, "_atomic_replace_v0", recording_replace)
+    output_dir = tmp_path / "ordered-publication"
+    module.run_governed_local_ollama_assessor_experiment_v0(
+        model="example:model",
+        output_dir=output_dir,
+    )
+
+    assert targets == [
+        "runtime_provenance.json",
+        "experiment_profile.json",
+        ".assessor_results.pending",
+        "assessor_results.json",
+    ]
+    assert {path.name for path in output_dir.iterdir()} == {
+        "runtime_provenance.json",
+        "experiment_profile.json",
+        "assessor_results.json",
+    }
+
+
+def test_green_r28_no_prompt_or_hidden_ground_truth_is_persisted(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module, _, output_dir, _ = _run(tmp_path, monkeypatch)
+    combined = b"\n".join(
+        path.read_bytes()
+        for path in sorted(output_dir.iterdir())
+    )
+    assert module.EXACT_SYSTEM_PROMPT.encode("utf-8") not in combined
+    assert b'"expected_outcome"' not in combined
+    assert b'"expected_reason_codes"' not in combined
