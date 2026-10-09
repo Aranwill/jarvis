@@ -267,6 +267,10 @@ def _validate_baseline_provenance(
     *,
     model: str,
 ) -> None:
+    if provenance.runtime_class != "OllamaRuntime":
+        raise LocalOllamaExperimentError(
+            "baseline provenance runtime class is invalid"
+        )
     if provenance.provider != "ollama":
         raise LocalOllamaExperimentError(
             "baseline provenance provider is invalid"
@@ -476,8 +480,20 @@ def _reserve_output_dir_v0(output_dir: Path) -> Path:
 
     try:
         final.mkdir(exist_ok=False)
+    except OSError as exc:
+        raise LocalOllamaExperimentError(
+            "output directory exclusive reservation failed"
+        ) from exc
+
+    try:
         (final / ".staging").mkdir(exist_ok=False)
     except OSError as exc:
+        try:
+            final.rmdir()
+        except OSError as cleanup_exc:
+            raise LocalOllamaExperimentError(
+                "output reservation failed and cleanup failed"
+            ) from cleanup_exc
         raise LocalOllamaExperimentError(
             "output directory exclusive reservation failed"
         ) from exc
