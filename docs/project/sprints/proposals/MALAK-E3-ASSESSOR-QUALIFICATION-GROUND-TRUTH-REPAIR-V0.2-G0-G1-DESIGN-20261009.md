@@ -12,6 +12,7 @@ critical_contract: true
 runtime_delta: 0
 kernel_delta: 0
 authority_effect: none
+design_correction_round: 1
 rdd_stage_2_authorized: false
 ---
 
@@ -102,16 +103,22 @@ Fuentes CURRENT y contractuales directas:
 - `experiment_profile.json`;
 - qualification runner y tests afectados.
 
-La cobertura recursiva del baseline detectó:
+La cobertura recursiva preserva dos identidades distintas y explícitas:
 
 ```text
-tracked blobs discovered = 379
-tracked blobs classified = 379
-silently omitted files   = 0
-recursive tree truncated = false
+baseline tracked blobs discovered = 379
+baseline tracked blobs classified = 379
+baseline silently omitted files   = 0
+
+candidate tracked blobs discovered = 381
+candidate tracked blobs classified = 381
+candidate-only artifacts           = 2
+candidate silently omitted files   = 0
+
+recursive tree truncated           = false
 ```
 
-El detalle vive en el File Coverage Ledger de esta PR-A.
+Los 379 paths del baseline permanecen inventariados sin sustitución silenciosa del denominador. El File Coverage Ledger añade además clasificación candidate-bound explícita para los dos artifacts nuevos de esta PR-A y marca únicamente esos dos paths con `change_scope = ALLOW_PR_A_NEW`.
 
 P1 = PASS.
 
@@ -231,6 +238,48 @@ Construction Preflight = PASS
 implementation          = NOT AUTHORIZED BY THIS PR-A
 authority_effect        = none
 ```
+
+## 2.1 Bounded Design Correction — Round 1
+
+La Independent Design Review del candidate anterior:
+
+```text
+reviewer        PR262-DESIGN-REVIEWER-A-20261009
+review comment  6091193993
+candidate       061946ebe035b0ccc09c774a165147ad432a4f24
+terminal        FAIL
+authority_effect none
+```
+
+produjo:
+
+```text
+F262-IDR-01 MATERIAL     OPEN
+F262-IDR-02 MINOR        OPEN
+F262-IDR-03 MINOR        OPEN
+F262-IDR-04 OBSERVATION  RECORDED
+```
+
+Esta ronda corrige exclusivamente los tres findings abiertos:
+
+1. `F262-IDR-01`: el ledger conserva los 379 paths del baseline y añade las 2 superficies candidate-only, con clasificación y `change_scope = ALLOW_PR_A_NEW`;
+2. `F262-IDR-02`: la matriz RED incorpora una obligación causal explícita para soporte material C01;
+3. `F262-IDR-03`: el Correction Budget queda explícitamente subordinado al allowlist PR-B; nunca amplía scope por sí solo.
+
+Correction Scope:
+
+```text
+allowed files      = Design + File Coverage Ledger
+runtime delta      = 0
+evaluation corpus  = 0
+scripts            = 0
+tests              = 0
+law docs           = 0
+new dependencies   = 0
+authority delta    = 0
+```
+
+El candidate anterior y su review FAIL se preservan como evidencia histórica. El cambio de candidate invalida esa review como certificación del nuevo head y exige affected revalidation por un actor independiente.
 
 ## 3. Principios no negociables del repair
 
@@ -374,6 +423,8 @@ tests/test_e3_governed_blind_assessor_experiment.py
 tests/test_e3_governed_blind_assessor_ollama_experiment.py
 ```
 
+El allowlist inicial de cuatro archivos es cerrado para PR-B hasta que una re-admisión explícita autorice otra superficie. Ni el Correction Budget ni un finding local pueden ampliarlo implícitamente.
+
 Hard-zero inicial:
 
 ```text
@@ -433,6 +484,7 @@ La futura PR-B debe materializar RED causal que demuestre, como mínimo:
 ```text
 GTR-R01 old expected case-set digest rejected after corpus change
 GTR-R02 new raw-byte digest bound exactly through profile/tests
+GTR-R26 C01 materializes direct, explicit and sufficient support independently of expected labels
 GTR-R03 C02 materializes actual irrelevant evidence
 GTR-R04 C03 materializes actual partial/insufficient evidence
 GTR-R05 C04 materializes compound partial support
@@ -482,12 +534,13 @@ Future PR-B:
 max bounded correction rounds = 2
 ```
 
-Correcciones admisibles dentro del budget:
+Correcciones admisibles dentro del budget **únicamente dentro del allowlist PR-B ya admitido**:
 
 - case-set fixture;
 - profile digest binding;
-- tests directamente ligados al repair;
-- documentación del candidate cuando sea necesaria para trazabilidad.
+- tests directamente ligados al repair.
+
+El Correction Budget **no amplía el scope**. La documentación adicional del candidate, un quinto archivo o cualquier superficie fuera del allowlist inicial requieren STOP + re-admisión explícita antes de ser modificados.
 
 STOP inmediato si aparece necesidad de:
 
@@ -552,6 +605,7 @@ FAIL/INCONCLUSIVE del ground-truth review bloquea qualification. No existe fallb
 
 ```text
 Design 4R = WRITER PASS CANDIDATE
+design_correction_round = 1
 ```
 
 Requiere Independent Design Review antes de revisión humana.
@@ -569,6 +623,7 @@ case-set identity invalidation         PASS
 blindness / anti-contamination         PASS
 future RED causal matrix               PASS
 correction budget                      PASS
+design correction round 1              RECORDED / affected revalidation required
 independent validation requirement     PASS
 authority_effect                       none
 overall                                WRITER PASS CANDIDATE
