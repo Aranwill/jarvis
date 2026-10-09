@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from json import JSONDecodeError
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 from malak.core.conversation import (
     ConversationRequest,
@@ -21,6 +21,60 @@ from malak.runtime.runtime_provenance import (
     RUNTIME_MODEL_PROVENANCE_SCHEMA,
     RuntimeModelProvenance,
 )
+
+
+class _RejectRedirectHandler(HTTPRedirectHandler):
+    """Fail closed on every HTTP redirect."""
+
+    def redirect_request(
+        self,
+        req: object,
+        fp: object,
+        code: int,
+        msg: str,
+        headers: object,
+        newurl: str,
+    ) -> None:
+        return None
+
+
+def _strict_json_object(
+    raw: bytes,
+    *,
+    invalid_json_message: str,
+    invalid_root_message: str,
+) -> dict[str, object]:
+    def reject_duplicate_keys(
+        pairs: list[tuple[str, object]],
+    ) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate JSON key: {key}")
+            result[key] = value
+        return result
+
+    def reject_non_finite(value: str) -> object:
+        raise ValueError(f"non-finite JSON constant: {value}")
+
+    try:
+        decoded = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=reject_duplicate_keys,
+            parse_constant=reject_non_finite,
+        )
+    except (
+        UnicodeDecodeError,
+        JSONDecodeError,
+        ValueError,
+        RecursionError,
+    ) as exc:
+        raise RuntimeError(invalid_json_message) from exc
+
+    if not isinstance(decoded, dict):
+        raise RuntimeError(invalid_root_message)
+
+    return decoded
 
 
 class OllamaRuntime(LLMRuntime):
@@ -73,6 +127,10 @@ class OllamaRuntime(LLMRuntime):
         self._metric_store = metric_store
         self._max_request_bytes = max_request_bytes
         self._max_response_bytes = max_response_bytes
+        self._http_opener = build_opener(
+            ProxyHandler({}),
+            _RejectRedirectHandler(),
+        )
         self._last_metrics: RuntimeMetrics | None = None
 
     def capture_provenance(
@@ -255,10 +313,21 @@ class OllamaRuntime(LLMRuntime):
         )
 
         try:
-            with urlopen(
+            with self._http_opener.open(
                 request,
                 timeout=self._timeout_seconds,
             ) as response:
+                final_url_reader = getattr(response, "geturl", None)
+                if callable(final_url_reader):
+                    final_url = final_url_reader()
+                    if (
+                        final_url is not None
+                        and final_url != request.full_url
+                    ):
+                        raise RuntimeError(
+                            "Ollama introspection redirect/final URL mismatch"
+                        )
+
                 raw = response.read(self._max_response_bytes + 1)
                 if len(raw) > self._max_response_bytes:
                     raise RuntimeError(
@@ -278,18 +347,15 @@ class OllamaRuntime(LLMRuntime):
                 "Ollama provenance introspection timed out"
             ) from exc
 
-        try:
-            decoded = json.loads(raw.decode("utf-8"))
-        except (UnicodeDecodeError, JSONDecodeError) as exc:
-            raise RuntimeError(
+        return _strict_json_object(
+            raw,
+            invalid_json_message=(
                 "Ollama provenance introspection returned invalid JSON"
-            ) from exc
-
-        if not isinstance(decoded, dict):
-            raise RuntimeError(
+            ),
+            invalid_root_message=(
                 "Ollama provenance introspection payload is invalid"
-            )
-        return decoded
+            ),
+        )
 
     @property
     def last_metrics(self) -> RuntimeMetrics | None:
@@ -393,10 +459,21 @@ class OllamaRuntime(LLMRuntime):
         )
 
         try:
-            with urlopen(
+            with self._http_opener.open(
                 http_request,
                 timeout=self._timeout_seconds,
             ) as http_response:
+                final_url_reader = getattr(http_response, "geturl", None)
+                if callable(final_url_reader):
+                    final_url = final_url_reader()
+                    if (
+                        final_url is not None
+                        and final_url != http_request.full_url
+                    ):
+                        raise RuntimeError(
+                            "Ollama redirect/final URL mismatch"
+                        )
+
                 raw_response = http_response.read(
                     self._max_response_bytes + 1
                 )
@@ -423,18 +500,15 @@ class OllamaRuntime(LLMRuntime):
                 f"Ollama request exceeded {self._timeout_seconds} seconds"
             ) from exc
 
-        try:
-            response_payload = json.loads(raw_response.decode("utf-8"))
-
-        except (UnicodeDecodeError, JSONDecodeError) as exc:
-            raise RuntimeError(
+        response_payload = _strict_json_object(
+            raw_response,
+            invalid_json_message=(
                 "Ollama returned an invalid JSON response"
-            ) from exc
-
-        if not isinstance(response_payload, dict):
-            raise RuntimeError(
+            ),
+            invalid_root_message=(
                 "Ollama returned an invalid response payload"
-            )
+            ),
+        )
 
         if generation_contract is not None:
             done = response_payload.get("done")
@@ -507,8 +581,19 @@ class OllamaRuntime(LLMRuntime):
 
         response_model = response_payload.get("model")
 
-        if not isinstance(response_model, str) or not response_model:
-            response_model = model
+        if (
+            not isinstance(response_model, str)
+            or not response_model
+            or response_model.strip() != response_model
+        ):
+            raise RuntimeError(
+                "Ollama response model must be a non-empty trimmed string"
+            )
+
+        if response_model != model:
+            raise RuntimeError(
+                "Ollama response model does not match requested model"
+            )
 
         metrics = RuntimeMetrics.from_ollama_payload(
             model=response_model,
