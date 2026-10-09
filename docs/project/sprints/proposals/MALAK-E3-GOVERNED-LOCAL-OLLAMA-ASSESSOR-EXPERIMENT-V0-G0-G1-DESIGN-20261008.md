@@ -1556,4 +1556,3 @@ No finding is CLOSED by the Writer. Closure belongs to the fresh independent
 re-review on the exact corrected candidate.
 
 `authority_effect = none`
-
