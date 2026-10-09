@@ -573,7 +573,7 @@ existing RESULTS/v0.1 + Qualification Pack
 Estado integrado más reciente:
 
 ```text
-main HEAD                         0a40aa1143f120f7b5a4b544ea49f4b352254b5a
+baseline material reconciliado   0a40aa1143f120f7b5a4b544ea49f4b352254b5a
 PR #259 candidate                 4bedb40a2d52b1bebad45f796ab9dbf2e5de1663
 candidate / merge tree            b14287fa66303c0e4f1c6c62c0af47f08a5dbd8f
 post-merge Validation #824        SUCCESS
