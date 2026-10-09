@@ -29,6 +29,26 @@ class FakeHTTPResponse:
         return self._raw_payload[:size]
 
 
+def _install_fake_transport(
+    monkeypatch: pytest.MonkeyPatch,
+    responder: object,
+) -> None:
+    """Install a fake private opener without touching real network."""
+
+    class _FakeOpener:
+        def open(
+            self,
+            request: object,
+            timeout: float,
+        ) -> object:
+            return responder(request, timeout)  # type: ignore[operator]
+
+    monkeypatch.setattr(
+        "malak.runtime.ollama_runtime.build_opener",
+        lambda *handlers: _FakeOpener(),
+    )
+
+
 def test_ollama_runtime_generates_conversation_response(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -51,10 +71,7 @@ def test_ollama_runtime_generates_conversation_response(
             }
         )
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     runtime = OllamaRuntime(
         base_url="http://localhost:11434/",
@@ -162,10 +179,7 @@ def test_ollama_runtime_rejects_response_without_content(
             }
         )
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     runtime = OllamaRuntime(
         keep_alive=0,
@@ -205,10 +219,7 @@ def test_ollama_runtime_captures_execution_metrics(
             }
         )
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     runtime = OllamaRuntime()
 
@@ -255,10 +266,7 @@ def test_ollama_runtime_appends_metric_sample_to_store(
             }
         )
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     store = InMemoryRuntimeMetricStore()
 
@@ -363,10 +371,7 @@ def test_ollama_runtime_allows_request_at_exact_byte_limit(
             }
         )
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     runtime = OllamaRuntime(
         keep_alive=0,
@@ -411,10 +416,7 @@ def test_ollama_runtime_rejects_request_above_byte_limit_before_urlopen(
         called = True
         raise AssertionError("urlopen must not be called")
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     runtime = OllamaRuntime(
         keep_alive=0,
@@ -450,10 +452,7 @@ def test_ollama_runtime_allows_response_at_exact_byte_limit(
     ) -> FakeHTTPResponse:
         return fake_response
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     runtime = OllamaRuntime(
         max_response_bytes=len(raw_response),
@@ -490,10 +489,7 @@ def test_ollama_runtime_rejects_response_above_byte_limit(
     ) -> FakeHTTPResponse:
         return fake_response
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     max_response_bytes = len(raw_response) - 1
 
@@ -536,10 +532,7 @@ def test_analyze_structured_output_red_s02_ollama_maps_schema_to_format(
             }
         )
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     schema = '{"additionalProperties":false,"type":"object"}'
     request = ConversationRequest(
@@ -580,10 +573,7 @@ def test_analyze_structured_output_red_s05_generic_ollama_request_has_no_format(
             }
         )
 
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        fake_urlopen,
-    )
+    _install_fake_transport(monkeypatch, fake_urlopen)
 
     OllamaRuntime().generate(
         ConversationRequest(
@@ -649,13 +639,8 @@ def _patch_b1_transport(
             return responder(request, timeout)  # type: ignore[operator]
 
     monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        responder,
-    )
-    monkeypatch.setattr(
         "malak.runtime.ollama_runtime.build_opener",
         lambda *handlers: _FakeOpener(),
-        raising=False,
     )
 
 
@@ -688,11 +673,6 @@ def test_ollama_runtime_red_r02_uses_private_proxy_free_transport(
         captured["handlers"] = handlers
         return _FakeOpener()
 
-    def forbidden_global_urlopen(*args: object, **kwargs: object) -> object:
-        raise AssertionError(
-            "global urlopen inherits process proxy/redirect policy"
-        )
-
     monkeypatch.setenv("HTTP_PROXY", "http://127.0.0.1:65530")
     monkeypatch.setenv("HTTPS_PROXY", "http://127.0.0.1:65531")
     monkeypatch.setenv("ALL_PROXY", "http://127.0.0.1:65532")
@@ -701,11 +681,6 @@ def test_ollama_runtime_red_r02_uses_private_proxy_free_transport(
         fake_build_opener,
         raising=False,
     )
-    monkeypatch.setattr(
-        "malak.runtime.ollama_runtime.urlopen",
-        forbidden_global_urlopen,
-    )
-
     response = OllamaRuntime().generate(
         ConversationRequest(
             prompt="Hola Malak",
