@@ -8,10 +8,10 @@ baseline_commit: 56c32e75602afaea64f5d41993c9e488932913f8
 branch_role: PR-A Design / Documentation
 risk_class: 3
 critical_contract: true
-bounded_design_correction_round: 1
-previous_candidate: 4531a74bdeb4958137263302c6f92a37127baf4c
+bounded_design_correction_round: 2
+previous_candidate: 4ab66113ac7c45acbd8a65df2364061451a03be8
 previous_independent_review: FAIL
-previous_material_findings: GLOAE-B-F01,GLOAE-B-F02,GLOAE-B-F03,GLOAE-B-F04,GLOAE-B-F05
+previous_material_findings: GLOAE-C-F01,GLOAE-C-F02
 runtime_delta: 0
 implementation_authorized: false
 red_authorized: false
@@ -732,7 +732,7 @@ runtime and requires:
 requested_model == resolved_model
 model_identity_strength == TAG_DIGEST_BOUND
 provenance_status == READY
-model_digest present
+model_digest present and ^sha256:[0-9a-f]{64}$
 runtime_version present
 declared_context_window present
 declared_context_window >= 8192
@@ -777,8 +777,9 @@ Any observed drift:
 
 ~~~text
 → invalidate entire run
-→ do not publish assessor_results
-→ clean staging on handled failure
+→ no commit point
+→ no final assessor_results.json
+→ handled-failure cleanup
 → terminal non-zero outcome
 ~~~
 
@@ -786,22 +787,64 @@ This detects observed tag/runtime/context drift. It is **not attestation** and
 cannot cryptographically exclude an ABA change between observations. That
 residual limitation remains explicit and cannot be converted into model trust.
 
-MODEL_BASED mechanism mapping remains:
+#### Exact MODEL_BASED mapping
+
+The final harness/qualification `model_provenance` object is derived
+deterministically from the baseline provenance plus the exact digests in §5.9:
 
 ~~~text
-mechanism_id      = "e3-blind-assessor-ollama-local"
-mechanism_version = "v0"
-mechanism_kind    = "MODEL_BASED"
-producer_subject_id = "experiment-producer"
-assessor_subject_id = "candidate-assessor"
+provider_id
+  = "ollama"
+
+model_id
+  = baseline_provenance.resolved_model
+
+model_version
+  = baseline_provenance.requested_model
+
+model_artifact_digest
+  = capture group 1 from
+    ^sha256:([0-9a-f]{64})$
+    applied to baseline_provenance.model_digest
+
+prompt_template_digest
+  = PROMPT_TEMPLATE_DIGEST
+
+runtime_settings_digest
+  = RUNTIME_SETTINGS_DIGEST
+
+execution_profile_digest
+  = EXECUTION_PROFILE_DIGEST
 ~~~
 
-`model_provenance` is derived from the baseline tuple only after all mandatory
-fields pass and remains invalid if any temporal check fails.
+Because baseline admission already requires
+`requested_model == resolved_model`, `model_id` and `model_version` are
+intentionally equal in V0. The two fields remain distinct because the existing
+RESULTS/Qualification contract requires both.
+
+No prefix stripping is permitted unless the runtime digest first matches the
+exact `sha256:<64 lowercase hex>` form. The harness field stores only the
+captured 64-hex group.
+
+The complete final mechanism descriptor has exactly:
+
+~~~text
+{
+  "mechanism_id": "e3-blind-assessor-ollama-local",
+  "mechanism_version": "v0",
+  "mechanism_kind": "MODEL_BASED",
+  "config_digest": CONFIG_DIGEST,
+  "producer_subject_id": "experiment-producer",
+  "assessor_subject_id": "candidate-assessor",
+  "model_provenance": EXACT_MODEL_PROVENANCE_OBJECT
+}
+~~~
+
+`model_provenance` is invalid if any temporal provenance check fails.
 
 ### 5.9 Canonical digest recipes
 
-Canonical JSON:
+Canonical JSON for every V0 digest:
 
 ~~~text
 json.dumps(
@@ -813,8 +856,10 @@ json.dumps(
 ~~~
 
 All SHA-256 digests are lowercase hex without prefix, except the existing
-`RuntimeModelProvenance.model_digest` field, which remains
+`RuntimeModelProvenance.model_digest` source field, which remains
 `sha256:<64 lowercase hex>`.
+
+#### Prompt template digest
 
 Prompt bundle:
 
@@ -826,15 +871,18 @@ Prompt bundle:
 }
 ~~~
 
-The exact prompt bundle defined by §5.5 has expected SHA-256:
+Expected:
 
 ~~~text
+PROMPT_TEMPLATE_DIGEST =
 dd4c405ce5a0b56601978437311e32bee89084d367db71a82850f55eccb3bdb6
 ~~~
 
 PR-B2 must recompute it from source constants and fail tests if it differs.
 
-Runtime settings:
+#### Runtime settings digest
+
+Exact preimage:
 
 ~~~text
 {
@@ -849,7 +897,14 @@ Runtime settings:
 }
 ~~~
 
-Execution settings:
+~~~text
+RUNTIME_SETTINGS_DIGEST =
+SHA256(canonical_json(EXACT_RUNTIME_SETTINGS_OBJECT))
+~~~
+
+#### Execution profile digest
+
+Exact preimage:
 
 ~~~text
 {
@@ -863,10 +918,99 @@ Execution settings:
 }
 ~~~
 
-`config_digest` remains SHA256(canonical_json(exact mechanism descriptor)).
+~~~text
+EXECUTION_PROFILE_DIGEST =
+SHA256(canonical_json(EXACT_EXECUTION_SETTINGS_OBJECT))
+~~~
+
+#### Acyclic config_digest recipe
+
+`config_digest` MUST NOT hash an object containing itself.
+
+Define exactly:
+
+~~~text
+MECHANISM_CONFIG_PREIMAGE_V0 = {
+  "mechanism_id": "e3-blind-assessor-ollama-local",
+  "mechanism_version": "v0",
+  "mechanism_kind": "MODEL_BASED",
+  "producer_subject_id": "experiment-producer",
+  "assessor_subject_id": "candidate-assessor",
+  "model_provenance": {
+    "provider_id": "ollama",
+    "model_id": baseline_provenance.resolved_model,
+    "model_version": baseline_provenance.requested_model,
+    "model_artifact_digest": MODEL_ARTIFACT_DIGEST_BARE_HEX,
+    "prompt_template_digest": PROMPT_TEMPLATE_DIGEST,
+    "runtime_settings_digest": RUNTIME_SETTINGS_DIGEST,
+    "execution_profile_digest": EXECUTION_PROFILE_DIGEST
+  }
+}
+~~~
+
+The preimage has **no `config_digest` key**.
+
+Then:
+
+~~~text
+CONFIG_DIGEST =
+SHA256(canonical_json(MECHANISM_CONFIG_PREIMAGE_V0))
+~~~
+
+Only after that digest exists is the final harness descriptor created:
+
+~~~text
+FINAL_MECHANISM_DESCRIPTOR =
+copy(MECHANISM_CONFIG_PREIMAGE_V0)
++ {"config_digest": CONFIG_DIGEST}
+~~~
+
+This is construction order, not a recursive definition.
+
+#### Deterministic construction vector
+
+This vector exists only to test the recipe. It is **not** a model allowlist,
+promotion, live-run admission or statement about the Owner's installed model.
+
+Vector inputs:
+
+~~~text
+CAPTURED_RUNTIME_VERSION = "0.34.4"
+requested_model          = "example:model"
+resolved_model           = "example:model"
+runtime model_digest     = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+MODEL_ARTIFACT_DIGEST_BARE_HEX =
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+~~~
+
+For those exact vector inputs:
+
+~~~text
+RUNTIME_SETTINGS_DIGEST =
+c92049b5955643b1f64479893d9dfcadb24cb90291e11157c399b89edb015f26
+
+EXECUTION_PROFILE_DIGEST =
+2408de43b52e35a0072da3cf235ebc65b0debaee0066583ff15ea39490519c4f
+
+PROMPT_TEMPLATE_DIGEST =
+dd4c405ce5a0b56601978437311e32bee89084d367db71a82850f55eccb3bdb6
+
+CONFIG_DIGEST =
+e3e93e754332bb14b74a22ecacb8a7b317af5b98b5eb74cc7804d04a228f3bd7
+~~~
+
+The canonical `MECHANISM_CONFIG_PREIMAGE_V0` bytes for the vector are:
+
+~~~json
+{"assessor_subject_id":"candidate-assessor","mechanism_id":"e3-blind-assessor-ollama-local","mechanism_kind":"MODEL_BASED","mechanism_version":"v0","model_provenance":{"execution_profile_digest":"2408de43b52e35a0072da3cf235ebc65b0debaee0066583ff15ea39490519c4f","model_artifact_digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","model_id":"example:model","model_version":"example:model","prompt_template_digest":"dd4c405ce5a0b56601978437311e32bee89084d367db71a82850f55eccb3bdb6","provider_id":"ollama","runtime_settings_digest":"c92049b5955643b1f64479893d9dfcadb24cb90291e11157c399b89edb015f26"},"producer_subject_id":"experiment-producer"}
+~~~
+
+PR-B2 tests must independently reconstruct the vector and exact digest rather
+than copying only the expected digest constant.
+
 A change to prompt bytes, transport policy, temporal provenance policy,
-runtime version, model digest or generation settings changes the applicable
-mechanism/config identity and invalidates stale Evidence.
+runtime version, model identity/digest, or generation settings changes the
+applicable mechanism/config identity and invalidates stale Evidence.
 
 ### 5.10 Ephemeral experiment profile
 
@@ -906,33 +1050,80 @@ Before model execution:
 
 This early directory creation is a **reservation**, not publication.
 
+The V0 threat model does not claim isolation against an adversarial concurrent
+local process changing filesystem topology after resolution.
+
 #### Staging
 
 Inside the exclusively reserved output directory PR-B2 creates a private
 `.staging` child.
 
-Before the harness runs, staging may contain only:
+All three complete candidate artifacts are first written and strict-re-read
+from staging:
 
 ~~~text
-runtime_provenance.json
-experiment_profile.json
+.staging/runtime_provenance.json
+.staging/experiment_profile.json
+.staging/assessor_results.json
 ~~~
 
-The harness receives the staged `experiment_profile.json`.
+Before publication the adapter requires:
 
-No final `assessor_results.json` exists before a valid experiment result.
+- provenance artifact strict-valid;
+- staged profile strict-valid and deep-equal to trusted template except
+  `expected_mechanism`;
+- staged RESULTS/v0.1 strict-valid;
+- expected experiment binding PASS;
+- temporal provenance latch still valid;
+- no final-root artifact name present.
 
-#### Success publication
+No prompt, chain-of-thought or hidden ground truth is persisted.
 
-After:
+#### Pre-commit publication
 
-- all temporal provenance checks pass;
-- harness result is valid;
-- expected experiment binding passes;
+Publication has a fixed order.
 
-PR-B2 writes the final three allowed artifacts using temp-file + replace within
-the already exclusive output directory, removes `.staging`, and requires the
-exact final file set:
+~~~text
+1. atomic replace
+   .staging/runtime_provenance.json
+   → runtime_provenance.json
+
+2. atomic replace
+   .staging/experiment_profile.json
+   → experiment_profile.json
+
+3. atomic replace
+   .staging/assessor_results.json
+   → .assessor_results.pending
+
+4. remove now-empty .staging
+
+5. verify PRE-COMMIT root set exactly:
+   runtime_provenance.json
+   experiment_profile.json
+   .assessor_results.pending
+~~~
+
+Any failure in steps 1–5 is **before commit**.
+
+The final public name `assessor_results.json` MUST NOT exist during any of
+steps 1–5.
+
+#### Commit point
+
+The only commit operation is:
+
+~~~text
+atomic replace
+.assessor_results.pending
+→ assessor_results.json
+~~~
+
+A successful return from that atomic replace is the **commit point**.
+
+Immediately before the commit operation, the exact pre-commit set has already
+been verified. Therefore the successful rename deterministically yields the
+exact committed set:
 
 ~~~text
 runtime_provenance.json
@@ -940,29 +1131,62 @@ experiment_profile.json
 assessor_results.json
 ~~~
 
-No prompts, chain-of-thought or hidden ground truth are persisted.
+and removes `.assessor_results.pending`.
 
-#### Failure
+No additional operation, cleanup, verification or metadata write is required
+to make the run valid after the commit point. The adapter returns success
+immediately from the committed state.
 
-On a handled failure:
+For V0:
 
-- no `assessor_results.json` is published;
-- staging is removed;
-- the reserved output directory is removed if empty;
-- no overwrite/reuse is attempted.
+~~~text
+assessor_results.json present under this lifecycle
+= commit point reached
+~~~
 
-An abrupt process/OS crash can leave an incomplete reserved directory. Such a
-directory is never a valid result because the exact final file set is absent,
-and a rerun refuses to overwrite it.
+The Qualification Pack is invoked only from a committed current-run result.
+
+#### Handled failure before commit
+
+For any handled exception before successful commit:
+
+1. the adapter records terminal failure in process state only;
+2. it MUST ensure `assessor_results.json` is absent;
+3. it attempts removal of every artifact name created by this run:
+   - `.assessor_results.pending`;
+   - `runtime_provenance.json`;
+   - `experiment_profile.json`;
+   - staged files / `.staging`;
+4. it removes the reserved output directory if empty;
+5. it returns non-zero.
+
+If cleanup itself fails, the run still fails. A leftover reservation containing
+provenance/profile/pending/staging is **invalid and non-committed** because
+`assessor_results.json` is absent. No retry may reuse or overwrite that
+directory.
+
+If the final commit replace raises, it is handled as a pre-commit failure;
+the handler requires/remediates absence of `assessor_results.json` before
+returning failure.
+
+#### Crash residual
+
+A process/OS crash can leave filesystem state.
+
+- crash **before** commit may leave a reservation, staging, provenance/profile
+  or pending result, but no valid committed result;
+- crash **after** the atomic commit may leave the exact committed three-file
+  set even if the caller did not observe normal process return.
+
+This is an explicit local-filesystem residual, not a transactional filesystem
+or durability claim. V0 introduces no marker artifact, database, journal or
+new dependency.
 
 Repository writes remain:
 
 ~~~text
 0
 ~~~
-
-This corrected lifecycle supersedes the round-0 statement that output-dir was
-created only after experiment result; that statement was circular.
 
 ### 5.12 Qualification
 
@@ -1128,37 +1352,58 @@ Security Horizon = WRITER CORRECTED CANDIDATE PASS.
 
 ## 8. Critical Contract Hardening
 
-Round-0 independent review `MALAK-PR257-INDEPENDENT-PRE-RED-DESIGN-REVIEW-B-4531A74B.md`
-reported five MATERIAL findings. This round claims bounded corrections:
+### Historical round 0 → round 1
 
-| Finding | Corrected contract |
-| --- | --- |
-| GLOAE-B-F01 | PR-B1 owns direct/no-proxy/no-redirect runtime hardening; PR-B2 exact 127.0.0.1 endpoint |
-| GLOAE-B-F02 | PR-B1 strict outer JSON + mandatory raw response model; fallback removed |
-| GLOAE-B-F03 | provenance tuple before/after every eligible generation + final check; ABA residual explicit |
-| GLOAE-B-F04 | exclusive output reservation + staged profile + success publication + failure cleanup |
-| GLOAE-B-F05 | exact system prompt, user prefix, JSON Schema and expected prompt digest frozen in §5.5/§5.9 |
+Candidate `4531a74b...` produced five MATERIAL findings
+`GLOAE-B-F01..F05`.
 
-Additional hard boundaries remain:
-
-1. model selection is explicit Owner input; no routing;
-2. model pull/download is forbidden;
-3. retry = 0 and parallelism = 1;
-4. hidden ground truth does not cross the existing blind projection;
-5. deterministic envelope owns structural/fault reason codes;
-6. qualification consumer remains unchanged;
-7. CI has zero live Ollama/model calls;
-8. support_sufficient, Protected Finalization, production admission and RDD Stage 2 remain zero;
-9. PR-B1 and PR-B2 are separate candidate-bound units;
-10. any need outside their ALLOW scopes triggers STOP.
-
-Known MATERIAL ambiguity claimed unresolved by Writer after correction: 0.
-
-This is **not** independent closure. Critical Contract Hardening status:
+Reviewer-C on round-1 candidate `4ab66113...` independently disposed them:
 
 ~~~text
-WRITER CORRECTED CANDIDATE PASS
-independent re-review REQUIRED
+GLOAE-B-F01 = CLOSED
+GLOAE-B-F02 = CLOSED
+GLOAE-B-F03 = CLOSED
+GLOAE-B-F04 = PARTIALLY_CLOSED
+GLOAE-B-F05 = CLOSED
+~~~
+
+Those dispositions remain historical evidence.
+
+### Reviewer-C findings driving round 2
+
+`MALAK-PR257-INDEPENDENT-PRE-RED-DESIGN-REREVIEW-C-4AB66113.md`
+reported:
+
+~~~text
+GLOAE-C-F01  MATERIAL
+config_digest recipe circular / MODEL_BASED mapping incomplete
+
+GLOAE-C-F02  MATERIAL
+multi-file publication lacks closed commit/rollback semantics
+
+GLOAE-C-F03  MINOR
+PR body stale candidate / ahead-behind metadata
+~~~
+
+Round 2 claims only these bounded corrections:
+
+| Finding | Round-2 correction |
+| --- | --- |
+| GLOAE-C-F01 | exact acyclic preimage excludes config_digest; exact MODEL_BASED field mapping; deterministic vector |
+| GLOAE-C-F02 | stage all artifacts; fixed pre-commit order; assessor_results final rename is sole commit point; no fallible required post-commit operation; explicit pre-commit rollback/fail-closed behavior |
+| GLOAE-C-F03 | PR body reconciled to final candidate metadata after this commit/CI |
+
+No new runtime/provider/dependency/harness/schema/qualification subsystem is
+introduced.
+
+Known MATERIAL ambiguity claimed unresolved by Writer after round 2: 0.
+
+This is a Writer claim only:
+
+~~~text
+Critical Contract Hardening =
+WRITER ROUND-2 CORRECTED CANDIDATE PASS
+independent Reviewer-D required
 ~~~
 
 ## 9. Cuatro preguntas de ley
@@ -1185,7 +1430,7 @@ Four Questions = PASS / PASS / PASS / PASS
 authority_effect = none
 ~~~
 
-## 10. Design 4R — Writer corrected candidate
+## 10. Design 4R — Writer round-2 corrected candidate
 
 ### Risk
 
@@ -1251,11 +1496,11 @@ residual_risk:
 ~~~
 
 ~~~text
-Design 4R = WRITER CORRECTED CANDIDATE PASS
+Design 4R = WRITER ROUND-2 CORRECTED CANDIDATE PASS
 independent pre-RED re-review = REQUIRED
 ~~~
 
-## 11. RDD Stage 1 Design Check — Writer corrected candidate
+## 11. RDD Stage 1 Design Check — Writer round-2 corrected candidate
 
 ~~~text
 baseline exact                         PASS
@@ -1270,7 +1515,7 @@ Bounded Correction defined             PASS
 independent validation required        PASS
 authority_effect                       none
 RDD Stage 2                            NOT AUTHORIZED
-overall                                WRITER CORRECTED CANDIDATE PASS
+overall                                WRITER ROUND-2 CORRECTED CANDIDATE PASS
 ~~~
 
 Este Design Check no sustituye independent pre-RED review ni human review.
@@ -1312,11 +1557,11 @@ GLOAE-R21 inner content strict parser rejects duplicates/nonfinite/extras/types/
 GLOAE-R22 existing deterministic envelope remains owner of structural/fault reason codes.
 GLOAE-R23 generation exception/malformed response is non-positive; automatic retry=0; parallelism=1.
 GLOAE-R24 staged experiment profile differs from integrated profile only in expected_mechanism; every other field deep-equal.
-GLOAE-R25 exact MODEL_BASED provenance/config digests bind model, prompt, transport and temporal-check policy.
+GLOAE-R25 exact MODEL_BASED mapping and acyclic MECHANISM_CONFIG_PREIMAGE_V0 bind model, prompt, transport and temporal-check policy; deterministic vector digest e3e93e754332bb14b74a22ecacb8a7b317af5b98b5eb74cc7804d04a228f3bd7.
 GLOAE-R26 harness preserves exact 19 observations / 13 eligible generations and six zero-generation inputs C10/C11/C12/C14/C15/C17.
 GLOAE-R27 output parent resolves outside repo; final output dir must not exist and is exclusively reserved with mkdir(exist_ok=False).
-GLOAE-R28 staged profile/provenance precede harness; no assessor_results before valid result; handled failure cleans staging/no overwrite.
-GLOAE-R29 success publishes exactly runtime_provenance.json, experiment_profile.json, assessor_results.json; no prompt/CoT/hidden data artifact.
+GLOAE-R28 all three complete artifacts strict-validate in staging; fixed pre-commit publication order; any handled failure before commit keeps/remediates assessor_results.json absent and never reuses output dir.
+GLOAE-R29 sole commit point is atomic .assessor_results.pending → assessor_results.json after exact pre-commit set verification; no required fallible operation after commit; final set exactly three allowed artifacts.
 GLOAE-R30 existing Qualification Pack consumes generated RESULTS/v0.1 unchanged.
 GLOAE-R31 CI uses fakes and denies live Ollama/model/network behavior; no dependency or src/malak/** delta in PR-B2.
 GLOAE-R32 support_sufficient / Protected Finalization / model promotion / production admission / RDD Stage2 / authority delta = 0.
@@ -1377,7 +1622,9 @@ Negatives include:
 - profile drift;
 - output path inside repo;
 - pre-existing output dir;
-- handled partial failure;
+- fault injection at each staging/publish/remove/pre-commit step proving assessor_results.json absent before commit;
+- commit-point rename success yielding exact three-file set with no required post-commit operation;
+- cleanup failure leaving only non-committed state without assessor_results.json;
 - unexpected extra/omitted model invocation.
 
 Live Ollama execution never substitutes deterministic E2E.
@@ -1424,20 +1671,43 @@ production authorization, support_sufficient or Authority.
 
 ~~~text
 Design correction budget: 2 rounds
-current round: 1 / 2
-historical independent candidate: 4531a74b... = FAIL
-historical MATERIAL findings: F01..F05
+current round: 2 / 2
+round 0 candidate: 4531a74b... = Independent Review FAIL
+round 1 candidate: 4ab66113... = Independent Re-review FAIL
+round 1 substantive result:
+  B-F01 CLOSED
+  B-F02 CLOSED
+  B-F03 CLOSED
+  B-F04 PARTIALLY_CLOSED
+  B-F05 CLOSED
+round 2 trigger:
+  GLOAE-C-F01 MATERIAL
+  GLOAE-C-F02 MATERIAL
+  GLOAE-C-F03 MINOR
 ~~~
 
-Round 1 is bounded to correcting those five findings and the construction scope
-they invalidated.
+Round 2 is the final bounded Design correction round and is restricted to:
+
+- acyclic config digest + exact MODEL_BASED mapping/vector;
+- artifact publication commit/rollback semantics;
+- PR metadata reconciliation.
 
 No implementation is allowed in this PR-A.
 
-Future correction inside PR-B1/PR-B2 is governed independently by their own
-candidate-bound validation. Any demand for another runtime/provider, dependency,
+If Reviewer-D finds any unresolved/new BLOCKING or MATERIAL issue, this
+correction budget is exhausted:
+
+~~~text
+STOP
+→ no RED
+→ Owner decides whether to abandon, redesign, or explicitly admit a new Design cycle
+~~~
+
+No automatic round 3 exists.
+
+Any demand for another runtime/provider, dependency,
 Kernel/Planner/Security changes, harness/case-set/qualification changes,
-support_sufficient or RDD Stage 2:
+support_sufficient or RDD Stage 2 also requires:
 
 ~~~text
 STOP → new scope/admission
@@ -1482,45 +1752,59 @@ recursive tree truncated = false
 concept files explicitly inventoried = 7
 ~~~
 
-## 18. Gate state — PR-A corrected writer candidate
+## 18. Gate state — PR-A round-2 corrected writer candidate
 
 ~~~text
-historical candidate 4531a74b...      INDEPENDENT REVIEW FAIL
-GLOAE-B-F01..F05                      MATERIAL / correction claimed round 1
-Construction Preflight               WRITER CORRECTED CANDIDATE PASS
-G0 / admission                       WRITER CORRECTED CANDIDATE PASS
-Component / Logic Reuse Review       REUSE / HARDEN / COMPOSE
-Security Horizon Check               WRITER CORRECTED CANDIDATE PASS
-G1 design                            WRITER CORRECTED CANDIDATE PASS
-Critical Contract Hardening          WRITER CORRECTED CANDIDATE PASS
-Design 4R                            WRITER CORRECTED CANDIDATE PASS
-RDD Stage 1 Design Check             WRITER CORRECTED CANDIDATE PASS
-independent pre-RED re-review         PENDING / REQUIRED
-PR-B1 RED                            NOT AUTHORIZED
-PR-B2 RED                            NOT AUTHORIZED
-GREEN                                NOT AUTHORIZED
-live model execution                 NOT AUTHORIZED
-model promotion                      NOT AUTHORIZED
-support_sufficient                   NOT AUTHORIZED
-RDD Stage 2                          NOT AUTHORIZED
-Ready / Merge                        OWNER ONLY
-authority_effect                     none
+round 0 candidate 4531a74b...         INDEPENDENT REVIEW FAIL
+round 1 candidate 4ab66113...         INDEPENDENT RE-REVIEW FAIL
+B-F01                                   CLOSED by Reviewer-C
+B-F02                                   CLOSED by Reviewer-C
+B-F03                                   CLOSED by Reviewer-C
+B-F04                                   PARTIALLY_CLOSED by Reviewer-C
+B-F05                                   CLOSED by Reviewer-C
+C-F01                                   MATERIAL / correction claimed round 2
+C-F02                                   MATERIAL / correction claimed round 2
+C-F03                                   MINOR / metadata reconciliation required
+Construction Preflight                 WRITER ROUND-2 CORRECTED PASS
+G0 / admission                         WRITER ROUND-2 CORRECTED PASS
+Component / Logic Reuse Review         REUSE / HARDEN / COMPOSE
+Security Horizon Check                 WRITER ROUND-2 CORRECTED PASS
+G1 design                              WRITER ROUND-2 CORRECTED PASS
+Critical Contract Hardening            WRITER ROUND-2 CORRECTED PASS
+Design 4R                              WRITER ROUND-2 CORRECTED PASS
+RDD Stage 1 Design Check               WRITER ROUND-2 CORRECTED PASS
+independent Reviewer-D re-review       PENDING / REQUIRED
+PR-B1 RED                              NOT AUTHORIZED
+PR-B2 RED                              NOT AUTHORIZED
+GREEN                                  NOT AUTHORIZED
+live model execution                   NOT AUTHORIZED
+model promotion                        NOT AUTHORIZED
+support_sufficient                     NOT AUTHORIZED
+RDD Stage 2                            NOT AUTHORIZED
+Ready / Merge                          OWNER ONLY
+authority_effect                       none
 ~~~
 
-Historical FAIL remains evidence and is not reinterpreted.
+Historical FAIL results remain evidence and are not reinterpreted.
 
 ## 19. Next lawful transition
 
-After this corrected candidate obtains candidate-bound CI:
+After the round-2 corrected candidate obtains candidate-bound CI:
 
 ~~~text
-fresh independent pre-RED Design RE-REVIEW
-→ verify closure of GLOAE-B-F01..F05
-→ verify revised PR-B1/PR-B2 decomposition
+fresh independent Reviewer-D
+→ verify candidate identity
+→ verify CI
+→ verify GLOAE-C-F01 closure
+→ verify GLOAE-C-F02 closure
+→ verify GLOAE-C-F03 metadata reconciliation
+→ re-evaluate historical B-F04 as CLOSED | OPEN | PARTIALLY_CLOSED | INCONCLUSIVE
+→ verify R25 / R28 / R29
+→ verify Four Questions + independent Design 4R
 → PASS | FAIL | INCONCLUSIVE
 ~~~
 
-Even an independent PASS:
+A Reviewer-D PASS:
 
 ~~~text
 != PR-B1 RED authorization
@@ -1529,6 +1813,10 @@ Even an independent PASS:
 != live model execution
 != Ready / Merge
 ~~~
+
+If Reviewer-D returns FAIL because of any BLOCKING/MATERIAL issue, the
+two-round correction budget is exhausted and the lawful transition is STOP,
+not another automatic correction.
 
 Owner / Authority retains every transition decision.
 
@@ -1556,3 +1844,65 @@ No finding is CLOSED by the Writer. Closure belongs to the fresh independent
 re-review on the exact corrected candidate.
 
 `authority_effect = none`
+
+## 21. Bounded Design Correction Round 2 record
+
+Trigger:
+
+`MALAK-PR257-INDEPENDENT-PRE-RED-DESIGN-REREVIEW-C-4AB66113.md`
+
+Reviewer-C terminal historical disposition:
+
+`INDEPENDENT PRE-RED DESIGN RE-REVIEW = FAIL`
+
+Reviewer-C evidence identity:
+
+~~~text
+reviewed candidate  4ab66113ac7c45acbd8a65df2364061451a03be8
+report SHA256       07c16a314d09572274fbf042a18619ff32d2bbc54f671d5e3d64cd5a894521c7
+report size         29104 bytes
+~~~
+
+Historical closure:
+
+~~~text
+GLOAE-B-F01 → CLOSED
+GLOAE-B-F02 → CLOSED
+GLOAE-B-F03 → CLOSED
+GLOAE-B-F04 → PARTIALLY_CLOSED
+GLOAE-B-F05 → CLOSED
+~~~
+
+Round-2 findings and Writer dispositions:
+
+~~~text
+GLOAE-C-F01 MATERIAL
+→ CORRECTED BY DESIGN
+→ acyclic config preimage
+→ exact MODEL_BASED mapping
+→ deterministic vector
+
+GLOAE-C-F02 MATERIAL
+→ CORRECTED BY DESIGN
+→ complete staging
+→ exact pre-commit set
+→ sole atomic assessor_results commit point
+→ no required fallible post-commit operation
+→ fail-closed cleanup semantics
+
+GLOAE-C-F03 MINOR
+→ to be reconciled in PR body against final round-2 candidate metadata
+~~~
+
+No finding is CLOSED by the Writer. Closure belongs to fresh Reviewer-D bound
+to the exact round-2 candidate.
+
+~~~text
+correction budget = 2 / 2 EXHAUSTED after this round
+PR-B1 RED = NOT AUTHORIZED
+PR-B2 RED = NOT AUTHORIZED
+GREEN = NOT AUTHORIZED
+live model execution = NOT AUTHORIZED
+Ready / Merge = OWNER ONLY
+authority_effect = none
+~~~
