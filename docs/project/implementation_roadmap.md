@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-10-04
-as_of_commit: a05aa5f081971f36c133ac50dc0756f938a26a1a
+as_of_date: 2026-10-09
+as_of_commit: 0a40aa1143f120f7b5a4b544ea49f4b352254b5a
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -2296,3 +2296,79 @@ authority_effect            none
 
 Esta reconciliación supersede el snapshot de planificación que mantenía la
 frontera ciega como próxima unidad. No autoriza el siguiente experimento.
+
+
+## Reconciliación CURRENT — E3 Governed Local Ollama Assessor Experiment V0
+
+Baseline material reconciliado:
+
+`main@0a40aa1143f120f7b5a4b544ea49f4b352254b5a`
+
+La admisión que el snapshot anterior mantenía como futura ya recorrió su ciclo
+gobernado mediante tres PR separadas:
+
+```text
+PR #257  Design                                      INTEGRATED
+PR #258  OllamaRuntime Local Trust Boundary          INTEGRATED
+PR #259  Governed Local Ollama Assessor Adapter      INTEGRATED
+#824     post-merge Validation                       PASS
+```
+
+Evidencia terminal de PR #259:
+
+```text
+candidate                              4bedb40a2d52b1bebad45f796ab9dbf2e5de1663
+merge                                  0a40aa1143f120f7b5a4b544ea49f4b352254b5a
+candidate tree / merge tree            b14287fa66303c0e4f1c6c62c0af47f08a5dbd8f
+candidate Validation                   #823 / SUCCESS
+post-merge Validation                  #824 / SUCCESS
+Ubuntu                                 1981/1981 PASS
+Windows                                1981/1981 PASS
+Independent PR-B2 Validation           PASS
+RDD Stage 1 Candidate Conformance      PASS
+authority_effect                        none
+```
+
+Disposición de planificación actualizada:
+
+```text
+Governed Blind Assessor Experiment Harness V0     INTEGRATED — PR #254
+OllamaRuntime Local Trust Boundary Hardening V0    INTEGRATED — PR #258
+Governed Local Ollama Assessor Adapter V0          INTEGRATED — PR #259
+local loopback experiment path                     IMPLEMENTED / NOT LIVE-AUTHORIZED
+exact local assessor model                         NOT SELECTED / NOT AUTHORIZED
+live Ollama assessor experiment                    NEXT POSSIBLE TRANSITION / NOT AUTHORIZED
+remote provider experiment                         NOT AUTHORIZED
+support_sufficient wiring                          NOT AUTHORIZED
+Protected Finalization integration                 NOT AUTHORIZED
+model promotion                                    NOT AUTHORIZED
+production admission                               NOT AUTHORIZED
+semantic_assurance                                 NOT_VERIFIED
+E008-SG-02                                         OPEN
+RDD Stage 2                                        NOT AUTHORIZED
+Sprint 7.12                                        NOT AUTHORIZED
+authority_effect                                   none
+```
+
+### Siguiente transición posible
+
+El Design integrado conserva como siguiente transición únicamente:
+
+```text
+separate Owner instruction naming exact local model
+        ↓
+live experiment
+        ↓
+PASS | FAIL | INCONCLUSIVE
+        ↓
+Evidence for later human decision
+```
+
+Esta transición no nace del merge ni de la qualification offline. Requiere una
+instrucción humana separada que identifique el modelo exacto y no autoriza por sí
+misma model promotion, production admission, `support_sufficient`, Protected
+Finalization ni RDD Stage 2.
+
+Cualquier nueva construcción más allá del adapter ya integrado requiere su
+propia admisión según el Construction Protocol. Esta reconciliación no abre
+automáticamente un sprint ni autoriza RED/GREEN adicional.

@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-10-04
-as_of_commit: a05aa5f081971f36c133ac50dc0756f938a26a1a
+as_of_date: 2026-10-09
+as_of_commit: 0a40aa1143f120f7b5a4b544ea49f4b352254b5a
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -1933,3 +1933,95 @@ Esta sección supersede únicamente el snapshot CURRENT anterior para la próxim
 unidad E3; los registros históricos y los estados previos permanecen
 preservados. No autoriza Design, RED, GREEN, experimento, Ready, Merge ni
 promoción.
+
+
+## Reconciliación CURRENT — E3 Governed Local Ollama Assessor Experiment V0
+
+Estado reconciliado al baseline integrado `main@0a40aa1143f120f7b5a4b544ea49f4b352254b5a`.
+
+Cadena de construcción integrada:
+
+```text
+PR #257  Design — E3 Governed Local Ollama Assessor Experiment V0
+          merge 4c3249452d06d3f894f6fb0bc4bfd6bf3be4a788
+
+PR #258  OllamaRuntime Local Trust Boundary Hardening V0
+          candidate 61c7c6927ad9457dc6f64e261ab335d420412033
+          merge     1706cf8dec221ab47e49f4be96da80ace5083d27
+          post-merge Validation #819 SUCCESS
+
+PR #259  Governed Local Ollama Assessor Experiment Adapter V0
+          candidate 4bedb40a2d52b1bebad45f796ab9dbf2e5de1663
+          merge     0a40aa1143f120f7b5a4b544ea49f4b352254b5a
+          candidate Validation #823 SUCCESS
+          post-merge Validation #824 SUCCESS
+```
+
+El tree del merge de PR #259 coincide exactamente con el tree del candidate
+validado:
+
+```text
+candidate tree = b14287fa66303c0e4f1c6c62c0af47f08a5dbd8f
+merge tree     = b14287fa66303c0e4f1c6c62c0af47f08a5dbd8f
+```
+
+Validation #824 ejecutó sobre el merge commit exacto:
+
+```text
+Ubuntu   1981/1981 PASS
+Windows  1981/1981 PASS
+candidate identity PASS
+compileall         PASS
+candidate diff     PASS
+```
+
+PR #259 cerró además, antes del merge:
+
+```text
+Candidate FULL 4R                      PASS
+Offline Integration / E2E             PASS
+Independent PR-B2 Validation           PASS
+RDD Stage 1 Candidate Conformance      PASS
+BLOCKING / MATERIAL / MINOR findings   0 / 0 / 0
+authority_effect                        none
+```
+
+Estado material resultante:
+
+- el harness gobernado de assessor ciego permanece integrado;
+- `OllamaRuntime` incorpora el hardening local de transport, parsing e identidad
+  requerido por el Design;
+- el adapter experimental evaluation-side para Ollama local está integrado y
+  compone el runtime endurecido, el blind harness y el Qualification Pack
+  existentes;
+- PR #259 no introdujo delta bajo `src/malak/**`, dependencias, Kernel, Planner,
+  Capability ni superficies nuevas de autoridad;
+- la ejecución de CI del adapter permanece fake-only y no constituye una
+  ejecución de modelo real.
+
+Límites CURRENT preservados:
+
+```text
+exact local model for assessor experiment   NOT SELECTED / NOT AUTHORIZED
+live Ollama assessor experiment             NOT AUTHORIZED
+remote provider / remote assessor network   NOT AUTHORIZED
+semantic_assurance                          NOT_VERIFIED
+E008-SG-02                                  OPEN
+support_sufficient                          NOT WIRED / NOT AUTHORIZED
+Protected Finalization                      NOT AUTHORIZED
+model promotion                             NOT AUTHORIZED
+production admission                        NOT AUTHORIZED
+self-modification                           NOT AUTHORIZED
+RDD Stage 2                                 NOT AUTHORIZED
+Sprint 7.12                                 NOT AUTHORIZED
+authority_effect                            none
+```
+
+La transición siguiente prevista por el Design no es otra implementación
+automática. Sólo puede considerarse mediante una instrucción separada del Owner
+que nombre el modelo local exacto para un live experiment. Esa ejecución deberá
+preservar los límites ya integrados y no convierte un resultado de qualification
+en semantic truth, model promotion, `support_sufficient` ni autoridad.
+
+Esta reconciliación es derivada, no normativa, y no autoriza el live experiment
+ni ninguna unidad posterior.

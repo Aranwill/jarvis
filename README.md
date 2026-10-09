@@ -553,3 +553,51 @@ Evidence for later human admission
 La unidad candidata debe reutilizar el corpus, schemas, qualification runner, identities y Evidence existentes; no autoriza selección de model/provider, red, nueva Capability, store/registry, `support_sufficient`, semantic truth, runtime wiring ni RDD Stage 2.
 
 Esta reconciliación es derivada y no concede autoridad de Design, RED, GREEN, implementación, Ready, Merge ni promoción.
+
+
+## Reconciliación CURRENT — E3 Governed Local Ollama Assessor Experiment V0
+
+El baseline actual incorpora la cadena gobernada diseñada e integrada mediante
+PR #257, PR #258 y PR #259:
+
+```text
+Governed Blind Assessor Experiment Harness V0
+        ↓
+hardened OllamaRuntime local trust boundary
+        ↓
+Governed Local Ollama Assessor Adapter V0
+        ↓
+existing RESULTS/v0.1 + Qualification Pack
+```
+
+Estado integrado más reciente:
+
+```text
+main HEAD                         0a40aa1143f120f7b5a4b544ea49f4b352254b5a
+PR #259 candidate                 4bedb40a2d52b1bebad45f796ab9dbf2e5de1663
+candidate / merge tree            b14287fa66303c0e4f1c6c62c0af47f08a5dbd8f
+post-merge Validation #824        SUCCESS
+Ubuntu                            1981/1981 PASS
+Windows                           1981/1981 PASS
+authority_effect                  none
+```
+
+El adapter es una superficie experimental evaluation-side y no convierte a
+Ollama ni a ningún modelo en mecanismo productivo de Malāk. La ejecución real
+del experimento permanece separada.
+
+```text
+live Ollama assessor experiment   NOT AUTHORIZED
+exact assessor model              NOT SELECTED / NOT AUTHORIZED
+semantic_assurance                NOT_VERIFIED
+support_sufficient                NOT WIRED / NOT AUTHORIZED
+Protected Finalization            NOT AUTHORIZED
+model promotion                   NOT AUTHORIZED
+production admission              NOT AUTHORIZED
+RDD Stage 2                       NOT AUTHORIZED
+```
+
+La siguiente transición sólo puede considerarse mediante una instrucción
+separada del Owner que nombre el modelo local exacto para un live experiment.
+Qualification evidence continúa siendo Evidence y no semantic truth, permiso,
+promoción ni Authority.
