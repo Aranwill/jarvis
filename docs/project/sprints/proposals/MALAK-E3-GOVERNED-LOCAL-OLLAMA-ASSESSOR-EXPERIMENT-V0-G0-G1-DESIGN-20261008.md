@@ -982,24 +982,30 @@ qualification != support_sufficient
 
 ### 5.13 Live execution boundary
 
-PR-B futura implementa el adapter y tests con HTTP simulado.
-
-CI:
+Construction remains split:
 
 ~~~text
-live Ollama calls 0
-network calls     0
-model execution   0
+PR-B1
+→ runtime hardening only
+→ deterministic fake HTTP tests
+→ zero live Ollama/model calls
+
+PR-B2
+→ experiment adapter only
+→ deterministic hardened-runtime fakes
+→ zero live Ollama/model calls
 ~~~
 
-La **primera live model execution** requiere una instrucción humana posterior,
-sobre adapter ya integrado/validado y con modelo exacto indicado por el Owner.
+The first live model execution requires both units to be independently
+validated, integrated and post-merge green, followed by a separate Owner
+instruction naming the exact local model.
 
-Por tanto:
+Therefore:
 
 ~~~text
 PR-A Design PASS
-!= PR-B implementation authorization
+!= PR-B1 RED authorization
+!= PR-B2 RED authorization
 != live model execution authorization
 ~~~
 
@@ -1090,11 +1096,11 @@ No auto-escalation on resource exhaustion.
 
 - Owner chooses exact model/run.
 - PR-A no autoriza ejecución.
-- PR-B no promociona modelo.
+- PR-B1/PR-B2 no promocionan modelo.
 - qualification no concede producción.
 - future production use requires separate admission.
 
-Security Horizon = WRITER CANDIDATE PASS.
+Security Horizon = WRITER CORRECTED CANDIDATE PASS.
 
 ## 7. Malāk Alignment Matrix
 
@@ -1102,15 +1108,15 @@ Security Horizon = WRITER CANDIDATE PASS.
 | --- | --- | --- | --- | --- |
 | Cognitive Constitution | normativa | evidence, proportionality, Generation != Finalization | ADOPT | model output remains evidence |
 | Governance Constitution | normativa | Human in Control | ADOPT | Owner retains execution/promotion authority |
-| Blueprint | normativa | Kernel First, Capability First, Runtime Independence | ADOPT | scripts-only adapter |
+| Blueprint | normativa | Kernel First, Capability First, Runtime Independence | ADOPT | harden existing runtime boundary, then scripts-only adapter |
 | Kernel Specification | normativa subordinada | minimal Kernel / no authority drift | ADOPT | Kernel delta 0 |
 | Architecture Quality Gates | arquitectura | bounded, replaceable, testable | ADOPT | one adapter / no new service |
 | ADR-002 | accepted ADR | enforcement separation | OBSERVE / N/A | no protected production operation |
 | ADR-003 | accepted ADR | evidence upward, authority downward | ADOPT | output never controls upstream |
 | ADR-004 | accepted ADR | Specification & Verification First | ADOPT | exact RED contract |
-| SECURITY.md | protected policy | Zero Trust / prompt / supply chain / resources | ADOPT | loopback + provenance + bounds |
+| SECURITY.md | protected policy | Zero Trust / prompt / supply chain / resources | ADOPT | direct/no-proxy/no-redirect loopback + temporal provenance + bounds |
 | PR #254 harness | current implementation | blind bounded producer | REUSE | unchanged |
-| OllamaRuntime | current implementation | local model generation | REUSE | no runtime delta |
+| OllamaRuntime | current implementation | local model generation | REUSE + HARDEN | PR-B1 closes transport/raw-identity gaps; no parallel runtime |
 | RuntimeModelProvenance | current implementation | local identity/provenance | REUSE | required READY |
 | Assessor Qualification Pack | current contract | hidden-ground-truth qualification | REUSE | unchanged consumer |
 | configs/models.yaml | repository config | lab candidates | OBSERVE | not authority/allowlist |
@@ -1172,15 +1178,14 @@ PASS. Ningún resultado autoriza ejecución, promoción o merge.
 
 ### Q4 — ¿Mantiene o reduce complejidad?
 
-PASS. Reutiliza cinco superficies existentes y agrega sólo un adapter experimental
-en `scripts/` con un test file.
+PASS. Reutiliza las superficies existentes, endurece el runtime ya existente en una unidad acotada y luego agrega sólo un adapter experimental en `scripts/`; no crea un segundo runtime, provider, service o registry.
 
 ~~~text
 Four Questions = PASS / PASS / PASS / PASS
 authority_effect = none
 ~~~
 
-## 10. Design 4R — Writer candidate
+## 10. Design 4R — Writer corrected candidate
 
 ### Risk
 
@@ -1246,11 +1251,11 @@ residual_risk:
 ~~~
 
 ~~~text
-Design 4R = WRITER CANDIDATE PASS
-independent pre-RED review = REQUIRED
+Design 4R = WRITER CORRECTED CANDIDATE PASS
+independent pre-RED re-review = REQUIRED
 ~~~
 
-## 11. RDD Stage 1 Design Check — Writer candidate
+## 11. RDD Stage 1 Design Check — Writer corrected candidate
 
 ~~~text
 baseline exact                         PASS
@@ -1265,7 +1270,7 @@ Bounded Correction defined             PASS
 independent validation required        PASS
 authority_effect                       none
 RDD Stage 2                            NOT AUTHORIZED
-overall                                WRITER CANDIDATE PASS
+overall                                WRITER CORRECTED CANDIDATE PASS
 ~~~
 
 Este Design Check no sustituye independent pre-RED review ni human review.
@@ -1379,32 +1384,41 @@ Live Ollama execution never substitutes deterministic E2E.
 
 ## 14. Live experiment after implementation
 
-La primera ejecución real sólo podrá evaluarse después de:
+The first real execution may be considered only after:
 
 ~~~text
-PR-A merged
-→ PR-B RED
-→ Owner GREEN authorization
-→ PR-B GREEN
-→ Candidate FULL 4R
-→ E2E / CI
-→ independent validation
-→ RDD Stage 1 Candidate Conformance
-→ human review
-→ Owner Ready / Merge
+PR-A corrected Design
+→ independent pre-RED re-review PASS
+→ Owner human review / Ready / Merge
 → post-merge validation
+
+→ separate PR-B1
+→ PR-B1 RED only after Owner transition
+→ GREEN / Candidate FULL 4R / E2E / independent validation
+→ RDD Stage 1 Candidate Conformance
+→ Owner human review / Ready / Merge
+→ post-merge validation
+
+→ separate PR-B2
+→ PR-B2 RED only after Owner transition
+→ GREEN / Candidate FULL 4R / E2E / independent validation
+→ RDD Stage 1 Candidate Conformance
+→ Owner human review / Ready / Merge
+→ post-merge validation
+
 → separate Owner instruction naming exact local model
 → live experiment
 ~~~
 
-Resultado del live experiment:
+Live result:
 
 ~~~text
 PASS | FAIL | INCONCLUSIVE
 ~~~
 
-Ese resultado califica al mecanismo **sólo para el case-set/profile exacto**.
-No constituye model promotion ni production authorization.
+It qualifies only the exact model artifact/runtime/prompt/profile/case-set
+combination observed by the bounded experiment. It is not model promotion,
+production authorization, support_sufficient or Authority.
 
 ## 15. Correction Budget
 
@@ -1431,25 +1445,28 @@ STOP → new scope/admission
 
 ## 16. Candidate invalidation
 
-Invalidan Evidence afectada:
+Affected Evidence is invalidated by changes to:
 
-- Design candidate;
-- future PR-B candidate SHA;
-- prompt template;
-- response JSON schema;
-- generation contract;
-- runtime bounds;
+- PR-A Design candidate SHA;
+- PR-B1 candidate SHA or hardened transport/raw identity semantics;
+- PR-B2 candidate SHA;
+- exact prompt bytes or response schema;
+- generation contract / resource bounds;
+- transport policy;
+- temporal provenance policy;
 - adapter policy version;
 - base profile bytes/semantics;
 - case-set bytes/schema;
 - harness semantics;
 - model requested/resolved identity;
 - model artifact digest;
-- runtime version/settings;
+- runtime version/context;
 - expected mechanism descriptor;
-- digest recipes.
+- digest recipes;
+- output lifecycle/publication semantics.
 
-No se reutiliza PASS stale.
+PR-B2 cannot reuse validation tied to a different PR-B1 runtime baseline.
+No stale PASS is reused.
 
 ## 17. File Coverage
 
@@ -1540,14 +1557,3 @@ re-review on the exact corrected candidate.
 
 `authority_effect = none`
 
-
-
-~~~text
-independent pre-RED Design Review
-on exact PR-A candidate
-→ PASS | FAIL | INCONCLUSIVE
-~~~
-
-Un PASS independiente no autoriza RED automáticamente. Después corresponde human
-review y las decisiones Owner-only de Ready/Merge. Future PR-B nace únicamente
-desde el Design integrado en `main`.
