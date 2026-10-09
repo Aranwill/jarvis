@@ -38,6 +38,26 @@ class _RejectRedirectHandler(HTTPRedirectHandler):
         return None
 
 
+def urlopen(
+    request: Request,
+    timeout: float,
+):
+    """
+    Backward-compatible transport seam backed by an explicit local policy.
+
+    This is intentionally not urllib.request.urlopen: environment proxies are
+    disabled and redirects are rejected before every request.
+    """
+    opener = build_opener(
+        ProxyHandler({}),
+        _RejectRedirectHandler(),
+    )
+    return opener.open(
+        request,
+        timeout=timeout,
+    )
+
+
 def _strict_json_object(
     raw: bytes,
     *,
@@ -127,10 +147,6 @@ class OllamaRuntime(LLMRuntime):
         self._metric_store = metric_store
         self._max_request_bytes = max_request_bytes
         self._max_response_bytes = max_response_bytes
-        self._http_opener = build_opener(
-            ProxyHandler({}),
-            _RejectRedirectHandler(),
-        )
         self._last_metrics: RuntimeMetrics | None = None
 
     def capture_provenance(
@@ -313,7 +329,7 @@ class OllamaRuntime(LLMRuntime):
         )
 
         try:
-            with self._http_opener.open(
+            with urlopen(
                 request,
                 timeout=self._timeout_seconds,
             ) as response:
@@ -459,7 +475,7 @@ class OllamaRuntime(LLMRuntime):
         )
 
         try:
-            with self._http_opener.open(
+            with urlopen(
                 http_request,
                 timeout=self._timeout_seconds,
             ) as http_response:
