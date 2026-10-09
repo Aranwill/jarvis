@@ -889,6 +889,8 @@ Exact preimage:
   "base_url": "http://127.0.0.1:11434",
   "runtime_class": "OllamaRuntime",
   "runtime_version": CAPTURED_RUNTIME_VERSION,
+  "declared_context_window": BASELINE_DECLARED_CONTEXT_WINDOW,
+  "context_window_source": BASELINE_CONTEXT_WINDOW_SOURCE,
   "transport_policy": "DIRECT_NO_PROXY_NO_REDIRECT",
   "timeout_seconds": 300,
   "keep_alive": 0,
@@ -975,10 +977,12 @@ promotion, live-run admission or statement about the Owner's installed model.
 Vector inputs:
 
 ~~~text
-CAPTURED_RUNTIME_VERSION = "0.34.4"
-requested_model          = "example:model"
-resolved_model           = "example:model"
-runtime model_digest     = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+CAPTURED_RUNTIME_VERSION   = "0.34.4"
+BASELINE_DECLARED_CONTEXT_WINDOW = 262144
+BASELINE_CONTEXT_WINDOW_SOURCE   = "ollama:model_info"
+requested_model            = "example:model"
+resolved_model             = "example:model"
+runtime model_digest       = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 MODEL_ARTIFACT_DIGEST_BARE_HEX =
   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 ~~~
@@ -987,7 +991,7 @@ For those exact vector inputs:
 
 ~~~text
 RUNTIME_SETTINGS_DIGEST =
-c92049b5955643b1f64479893d9dfcadb24cb90291e11157c399b89edb015f26
+77233dead8e55c6776fb37ff15bf993b8cb356e62b3b37b79da1da357fd4e4be
 
 EXECUTION_PROFILE_DIGEST =
 2408de43b52e35a0072da3cf235ebc65b0debaee0066583ff15ea39490519c4f
@@ -996,13 +1000,17 @@ PROMPT_TEMPLATE_DIGEST =
 dd4c405ce5a0b56601978437311e32bee89084d367db71a82850f55eccb3bdb6
 
 CONFIG_DIGEST =
-e3e93e754332bb14b74a22ecacb8a7b317af5b98b5eb74cc7804d04a228f3bd7
+6d2182a850460c377c45fae63ffc59a3ddc460654bfa11869722724fd6e026ba
 ~~~
+
+The runtime-settings vector above includes the declared model context and its
+source so the config identity binds the observed context metadata in addition
+to the requested generation budget.
 
 The canonical `MECHANISM_CONFIG_PREIMAGE_V0` bytes for the vector are:
 
 ~~~json
-{"assessor_subject_id":"candidate-assessor","mechanism_id":"e3-blind-assessor-ollama-local","mechanism_kind":"MODEL_BASED","mechanism_version":"v0","model_provenance":{"execution_profile_digest":"2408de43b52e35a0072da3cf235ebc65b0debaee0066583ff15ea39490519c4f","model_artifact_digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","model_id":"example:model","model_version":"example:model","prompt_template_digest":"dd4c405ce5a0b56601978437311e32bee89084d367db71a82850f55eccb3bdb6","provider_id":"ollama","runtime_settings_digest":"c92049b5955643b1f64479893d9dfcadb24cb90291e11157c399b89edb015f26"},"producer_subject_id":"experiment-producer"}
+{"assessor_subject_id":"candidate-assessor","mechanism_id":"e3-blind-assessor-ollama-local","mechanism_kind":"MODEL_BASED","mechanism_version":"v0","model_provenance":{"execution_profile_digest":"2408de43b52e35a0072da3cf235ebc65b0debaee0066583ff15ea39490519c4f","model_artifact_digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","model_id":"example:model","model_version":"example:model","prompt_template_digest":"dd4c405ce5a0b56601978437311e32bee89084d367db71a82850f55eccb3bdb6","provider_id":"ollama","runtime_settings_digest":"77233dead8e55c6776fb37ff15bf993b8cb356e62b3b37b79da1da357fd4e4be"},"producer_subject_id":"experiment-producer"}
 ~~~
 
 PR-B2 tests must independently reconstruct the vector and exact digest rather
@@ -1058,24 +1066,43 @@ local process changing filesystem topology after resolution.
 Inside the exclusively reserved output directory PR-B2 creates a private
 `.staging` child.
 
-All three complete candidate artifacts are first written and strict-re-read
-from staging:
+The staging sequence is exact:
+
+~~~text
+A. after baseline provenance + mechanism/profile construction:
+   write .staging/runtime_provenance.json
+   write .staging/experiment_profile.json
+   strict re-read both
+
+B. invoke the existing harness with:
+   profile_path = .staging/experiment_profile.json
+   assessor     = bounded local callable
+
+C. keep the harness RESULTS/v0.1 in memory until:
+   - harness result is valid;
+   - expected experiment binding PASS;
+   - temporal provenance latch remains valid;
+   - final provenance check equals baseline;
+
+D. only then:
+   write .staging/assessor_results.json
+   strict re-read it
+
+E. before publication:
+   strict re-read all three staged artifacts again
+   require no final-root artifact name present
+~~~
+
+Thus `.staging/assessor_results.json` **cannot exist before the harness has
+produced a valid bound result and all temporal provenance checks have passed**.
+
+The three complete staged artifacts are:
 
 ~~~text
 .staging/runtime_provenance.json
 .staging/experiment_profile.json
 .staging/assessor_results.json
 ~~~
-
-Before publication the adapter requires:
-
-- provenance artifact strict-valid;
-- staged profile strict-valid and deep-equal to trusted template except
-  `expected_mechanism`;
-- staged RESULTS/v0.1 strict-valid;
-- expected experiment binding PASS;
-- temporal provenance latch still valid;
-- no final-root artifact name present.
 
 No prompt, chain-of-thought or hidden ground truth is persisted.
 
@@ -1557,7 +1584,7 @@ GLOAE-R21 inner content strict parser rejects duplicates/nonfinite/extras/types/
 GLOAE-R22 existing deterministic envelope remains owner of structural/fault reason codes.
 GLOAE-R23 generation exception/malformed response is non-positive; automatic retry=0; parallelism=1.
 GLOAE-R24 staged experiment profile differs from integrated profile only in expected_mechanism; every other field deep-equal.
-GLOAE-R25 exact MODEL_BASED mapping and acyclic MECHANISM_CONFIG_PREIMAGE_V0 bind model, prompt, transport and temporal-check policy; deterministic vector digest e3e93e754332bb14b74a22ecacb8a7b317af5b98b5eb74cc7804d04a228f3bd7.
+GLOAE-R25 exact MODEL_BASED mapping and acyclic MECHANISM_CONFIG_PREIMAGE_V0 bind model artifact, observed runtime version/context metadata, prompt, transport and temporal-check policy; deterministic vector digest 6d2182a850460c377c45fae63ffc59a3ddc460654bfa11869722724fd6e026ba.
 GLOAE-R26 harness preserves exact 19 observations / 13 eligible generations and six zero-generation inputs C10/C11/C12/C14/C15/C17.
 GLOAE-R27 output parent resolves outside repo; final output dir must not exist and is exclusively reserved with mkdir(exist_ok=False).
 GLOAE-R28 all three complete artifacts strict-validate in staging; fixed pre-commit publication order; any handled failure before commit keeps/remediates assessor_results.json absent and never reuses output dir.
