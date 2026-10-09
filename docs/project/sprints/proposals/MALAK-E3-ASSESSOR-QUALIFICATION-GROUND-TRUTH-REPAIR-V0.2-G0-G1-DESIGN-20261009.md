@@ -484,7 +484,6 @@ La futura PR-B debe materializar RED causal que demuestre, como mínimo:
 ```text
 GTR-R01 old expected case-set digest rejected after corpus change
 GTR-R02 new raw-byte digest bound exactly through profile/tests
-GTR-R26 C01 materializes direct, explicit and sufficient support independently of expected labels
 GTR-R03 C02 materializes actual irrelevant evidence
 GTR-R04 C03 materializes actual partial/insufficient evidence
 GTR-R05 C04 materializes compound partial support
@@ -508,6 +507,7 @@ GTR-R22 ground-truth fields remain absent from blind assessor input
 GTR-R23 repair tests do not inspect prior assessor_results
 GTR-R24 Qualification Pack consumer remains unchanged
 GTR-R25 authority_effect remains none
+GTR-R26 C01 materializes direct, explicit and sufficient support independently of expected labels
 ```
 
 ## 9. Independent ground-truth review obligatorio
