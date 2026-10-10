@@ -822,7 +822,8 @@ def test_ground_truth_repair_red_gtr_r05_r06_r08_r09_limits_conflict_authority_a
 def test_ground_truth_repair_red_gtr_r10_r18_r20_overclaim_confidence_and_scope_are_concrete() -> None:
     c09 = _repair_input("C09")
     assert "durable persistence authority" in c09["subject"]["statement"]
-    assert "therefore Kernel owns durable persistence authority" in c09["subject"]["rationale"]\n    assert "overclaim" not in c09["subject"]["rationale"].lower()
+    assert "therefore Kernel owns durable persistence authority" in c09["subject"]["rationale"]
+    assert "overclaim" not in c09["subject"]["rationale"].lower()
     assert any(
         "does not establish durable persistence authority" in material
         for material in _repair_materials(c09)
