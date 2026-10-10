@@ -179,6 +179,17 @@ Stage 2 V1 sólo puede emitir un Receipt cuando existen:
 9. referencia externa al resultado de Candidate Conformance;
 10. `authority_effect = none`.
 
+La emisión requiere dos resultados separados:
+
+```text
+Stage 1 Manifest structural validator result = PASS
+Stage 1 Manifest top-level result            = PASS | FAIL | INCONCLUSIVE
+```
+
+El primero demuestra que el Manifest es estructuralmente válido y candidate-bound.
+El segundo es Evidence preservada y **no** debe reescribirse ni confundirse con el
+resultado del validator.
+
 ### 7.1 Hardening crítico
 
 Para Stage 2 V1 no se acepta como input una colección informal de comments ni una
@@ -187,12 +198,64 @@ representación equivalente no materializada.
 ```text
 risk 3/4 + Stage 2
 → MALAK-EVIDENCE-MANIFEST/v1 required
-→ no comment-only equivalent
+→ no comment-only structured equivalent
 → no inferred package
 ```
 
 Una futura versión podrá evaluar un equivalent canonicalizado si existe evidencia
 de necesidad. V1 prioriza claridad y fail-closed.
+
+### 7.2 Matriz normativa Manifest ↔ Receipt
+
+Los campos repetidos **no son caller-controlled overrides**. Deben derivarse del
+Manifest validado o coincidir exactamente con él.
+
+| Campo Receipt | Fuente normativa | Regla |
+|---|---|---|
+| `repository` | `manifest.repository` | igualdad exacta y además `Aranwill/jarvis` |
+| `baseline_commit` | `manifest.baseline_commit` | igualdad exacta |
+| `candidate_commit` | `manifest.candidate_commit` | igualdad exacta |
+| `unit_id` | `manifest.unit_id` | igualdad exacta |
+| `risk_class` | `manifest.risk_class` | igualdad exacta; no downgrade |
+| `specification_reference` | `manifest.specification_reference` | igualdad exacta |
+| `scope_reference` | `manifest.scope_reference` | igualdad exacta |
+| `correction_round` | `manifest.correction_round` | igualdad exacta |
+| `finding_refs` | `manifest.finding_refs` | array exacto, mismo orden y contenido |
+| `stage1_manifest_schema` | `manifest.schema` | exactamente `MALAK-EVIDENCE-MANIFEST/v1` |
+| `stage1_manifest_result` | `manifest.result` | igualdad exacta; no usar validator_result |
+| `stage1_manifest_digest` | Manifest completo canonicalizado | recomputado; nunca caller-trusted |
+| `candidate_tree` | Git tree de `candidate_commit` | derivado por Git; nunca caller-trusted |
+
+Campos que **no** se derivan del Manifest:
+
+- `candidate_conformance_result`: terminal externo del checkpoint Candidate
+  Conformance, preservado como `PASS | FAIL | INCONCLUSIVE`;
+- `candidate_conformance_reference`: referencia externa a ese terminal;
+- `validator`: provenance declarada del productor/validator del Receipt;
+- `independence_reference`: referencia externa a la Evidence de independencia
+  cuando sea requerida;
+- `evidence_references`: referencias adicionales de auditoría;
+- `issued_at`: timestamp de emisión;
+- `receipt_digest`: digest del Receipt según §9.
+
+El helper debe **derivar** los campos Manifest-bound cuando sea posible. Si una API
+acepta además un valor esperado para alguno de ellos, cualquier mismatch produce
+FAIL; nunca se normaliza ni se prefiere silenciosamente un lado.
+
+### 7.3 Regla de riesgo y FULL 4R
+
+`risk_class` del Receipt es exactamente el del Manifest.
+
+```text
+Receipt risk 3/4
+→ Manifest risk 3/4 exacto
+→ FULL 4R requerido en el Manifest
+→ risk/readability/reliability/resilience presentes
+→ no downgrade mediante input del Receipt
+```
+
+La validación Stage 1 existente sigue gobernando la completitud de FULL 4R; Stage 2
+no inventa una segunda semántica de agregación.
 
 ## 8. Schema propuesto
 
@@ -208,56 +271,141 @@ Shape exacto propuesto:
 {
   "schema": "MALAK-RDD-VALIDATION-RECEIPT/v1",
   "repository": "Aranwill/jarvis",
-  "baseline_commit": "<40-char sha>",
-  "candidate_commit": "<40-char sha>",
-  "candidate_tree": "<40-char sha>",
-  "unit_id": "<non-empty>",
+  "baseline_commit": "<40-char lowercase git sha>",
+  "candidate_commit": "<40-char lowercase git sha>",
+  "candidate_tree": "<40-char lowercase git sha>",
+  "unit_id": "<non-empty string>",
   "risk_class": 3,
-  "specification_reference": "<non-empty>",
-  "scope_reference": "<non-empty>",
+  "specification_reference": "<non-empty string>",
+  "scope_reference": "<non-empty string>",
   "stage1_manifest_schema": "MALAK-EVIDENCE-MANIFEST/v1",
-  "stage1_manifest_digest": "<sha256>",
+  "stage1_manifest_digest": "<64-char lowercase sha256>",
   "stage1_manifest_result": "PASS",
   "candidate_conformance_result": "PASS",
-  "candidate_conformance_reference": "<external evidence ref>",
+  "candidate_conformance_reference": "<non-empty external evidence ref>",
   "correction_round": 0,
   "finding_refs": [],
-  "validator": "<validator provenance>",
-  "independence_reference": "<external evidence ref>",
-  "evidence_references": ["<ref>"],
-  "issued_at": "<UTC ISO-8601>",
-  "receipt_digest": "<sha256>",
+  "validator": "<non-empty validator provenance>",
+  "independence_reference": "<non-empty external evidence ref>",
+  "evidence_references": ["<non-empty ref>"],
+  "issued_at": "2026-10-10T15:00:00Z",
+  "receipt_digest": "<64-char lowercase sha256>",
   "authority_effect": "none"
 }
 ```
 
-No se permiten keys extra en V1.
+No se permiten keys extra ni keys faltantes en V1.
+
+### 8.1 Dominio de tipos y valores
+
+El parser V1 es estricto:
+
+- todos los objects JSON rechazan duplicate keys, también en niveles anidados;
+- sólo se admite JSON estándar; `NaN`, `Infinity` y `-Infinity` se rechazan;
+- `schema`, `repository`, refs y provenance son strings no vacíos, sin whitespace
+  exterior;
+- `baseline_commit`, `candidate_commit` y `candidate_tree` son lowercase hex
+  de exactamente 40 caracteres;
+- `stage1_manifest_digest` y `receipt_digest` son lowercase hex de exactamente
+  64 caracteres;
+- `risk_class` es integer `0..4`; `bool` es inválido aunque Python lo trate
+  como subtipo de `int`;
+- `correction_round` es integer `>= 0`; `bool` es inválido;
+- `stage1_manifest_result` y `candidate_conformance_result` son exclusivamente
+  `PASS | FAIL | INCONCLUSIVE`;
+- `finding_refs` es array de strings no vacíos y preserva orden;
+- `evidence_references` es array no vacío de strings no vacíos; V1 rechaza
+  duplicados exactos;
+- `issued_at` usa UTC RFC3339 canónico `YYYY-MM-DDTHH:MM:SSZ`, sin offset
+  alternativo ni timezone implícita;
+- `authority_effect` es exactamente `none`.
+
+`stage1_manifest_schema` es exactamente `MALAK-EVIDENCE-MANIFEST/v1`.
+
+### 8.2 Orden de validación
+
+Los errores de parseo/estructura ocurren **antes** de cualquier canonicalización o
+digest:
+
+```text
+bytes
+→ strict JSON parse
+→ duplicate-key / non-standard-number rejection
+→ exact schema + type/range validation
+→ Manifest↔Receipt equality/projection checks
+→ Git binding checks
+→ canonicalization
+→ digest recomputation
+→ applicability result
+```
+
+Códigos mínimos propuestos:
+
+```text
+INVALID_JSON
+DUPLICATE_KEY
+NON_STANDARD_JSON_NUMBER
+INVALID_KEYS
+INVALID_FIELD
+INVALID_RESULT
+INVALID_TIMESTAMP
+INVALID_COMMIT_SHA
+INVALID_DIGEST
+MANIFEST_RECEIPT_MISMATCH
+STALE_CANDIDATE
+AUTHORITY_EFFECT_INVALID
+DIGEST_MISMATCH
+```
+
+La implementación puede factorizar errores sin cambiar su semántica fail-closed.
 
 ## 9. Canonicalización e integridad
 
-### 9.1 Stage 1 manifest digest
+### 9.1 Stage 1 Manifest digest
 
-El digest se calcula sobre el JSON parseado del Manifest serializado de forma
-canónica:
+El digest se calcula **sólo después** de strict parse + validación estructural del
+Manifest.
+
+La serialización canónica usa:
 
 ```text
 UTF-8
 sort_keys = true
 separators = (",", ":")
 ensure_ascii = false
+allow_nan = false
 no insignificant whitespace
-SHA-256
+SHA-256 lowercase hex
 ```
 
 Por tanto, cambios de indentación no cambian el digest, pero cualquier cambio
-semántico sí.
+semántico sí. Duplicate keys y JSON no estándar son inválidos antes de llegar a
+canonicalización; no se canonicalizan para "resolverlos".
+
+`stage1_manifest_result` preserva exactamente `manifest.result`. El PASS del
+validator estructural del Manifest es una precondición separada y no sustituye ese
+resultado.
 
 ### 9.2 Receipt digest
 
-`receipt_digest` se calcula sobre el Receipt canónico excluyendo únicamente el
-campo `receipt_digest`.
+`receipt_digest` se calcula sobre el Receipt ya validado y canonicalizado,
+excluyendo únicamente el campo `receipt_digest`, con las mismas reglas de
+serialización canónica.
 
 El validator debe recomputarlo y fallar ante mismatch.
+
+### 9.3 Propiedad que el hash NO demuestra
+
+```text
+SHA-256 integrity / consistency
+!= producer authenticity
+!= independent actor identity
+!= truth of referenced external Evidence
+!= Authority
+```
+
+V1 no incorpora firma, PKI, registry ni attestation. Esa limitación debe permanecer
+visible en cualquier reporte de validación.
 
 ## 10. Resultado vs validez
 
@@ -309,8 +457,8 @@ candidate changes
 
 ## 12. Anti-recursion / ubicación del artifact
 
-El Receipt **no puede escribirse dentro del árbol Git trackeado del candidate que
-describe**.
+El Receipt **no puede escribirse por el helper dentro del repository root** que
+contiene el candidate.
 
 V1 debe usar:
 
@@ -320,20 +468,47 @@ OR
 explicit --output outside repository root
 ```
 
-El helper debe rechazar un output path dentro del repository root.
+Para `--output`, el helper debe:
 
-Motivo:
+- resolver el path efectivo antes de escribir;
+- rechazar el repository root y cualquiera de sus descendientes;
+- rechazar symlink/reparse-point/junction resolution que termine dentro del repo
+  cuando la plataforma permita comprobarlo;
+- impedir sobrescritura destructiva del Manifest/Receipt input;
+- escribir de forma temporal y publicar mediante replace/rename sólo después de
+  completar validación y serialización, cuando el filesystem lo permita;
+- fallar closed si no puede establecer de forma confiable la frontera requerida.
+
+Una comparación lexical de strings de path no es suficiente.
+
+### 12.1 Límite de stdout
+
+El helper controla lo que escribe mediante `--output`, pero **no puede controlar
+la redirección de stdout realizada por el caller**:
 
 ```text
-write receipt into candidate tree
-→ candidate identity changes
-→ receipt stale at birth
-→ REJECT
+malak_rdd_receipt.py ... > path/dentro/del/repo.json
 ```
 
-Persistencia/publicación remota del Receipt queda fuera de V1. GitHub artifacts,
-PR comments, external archive o mecanismos posteriores pueden evaluarse
-separadamente.
+Esa redirección es responsabilidad del caller y no debe anunciarse como garantía
+del helper. `--require-current` puede detectar posteriormente un worktree dirty,
+pero no convierte stdout en un sandbox.
+
+### 12.2 Git identity vs working tree
+
+Escribir un archivo no cambia retroactivamente un commit/tree Git inmutable.
+
+```text
+write into working tree
+→ may dirty working tree
+→ future commit may create new candidate identity
+```
+
+La prohibición de output dentro del repo evita contaminación operativa y la
+tentación de versionar el Receipt junto al candidate que describe; no se formula
+como si una escritura por sí sola cambiara el SHA de un commit ya existente.
+
+Persistencia/publicación remota del Receipt queda fuera de V1.
 
 ## 13. Validator / producer propuesto
 
@@ -430,25 +605,81 @@ Blueprint ni ADR delta.
 
 RED debe demostrar al menos:
 
+### 17.1 Schema / strict JSON
+
 - missing required key rejected;
 - extra key rejected;
 - wrong schema rejected;
 - wrong repository rejected;
-- invalid SHA rejected;
+- duplicate top-level Receipt key rejected;
+- duplicate nested Receipt key rejected;
+- duplicate top-level Manifest key rejected antes de digest;
+- duplicate nested Manifest key rejected antes de digest;
+- `NaN`, `Infinity` y `-Infinity` rejected;
+- boolean-as-integer para `risk_class` rejected;
+- boolean-as-integer para `correction_round` rejected;
+- wrong scalar/list/object types rejected;
+- empty/whitespace-only required strings rejected;
+- enum inválido rejected;
+- timestamp inválido rejected;
+- timestamp válido pero no UTC/canonical-`Z` rejected;
+- SHA malformed/uppercase/wrong length rejected;
+- digest malformed/uppercase/wrong length rejected;
+- duplicate `evidence_references` rejected;
+- `authority_effect != none` rejected.
+
+### 17.2 Git / candidate binding
+
 - missing candidate/baseline Git object rejected;
 - baseline not ancestor rejected;
 - wrong candidate tree rejected;
-- invalid Stage 1 Manifest rejected;
-- Manifest candidate mismatch rejected;
-- Manifest digest mismatch rejected;
-- Receipt digest mismatch rejected;
 - stale expected candidate rejected;
-- dirty worktree with `--require-current` rejected;
-- output inside repository root rejected;
-- `authority_effect != none` rejected;
-- PASS/FAIL/INCONCLUSIVE conformance preserved exactly;
-- risk 3/4 without FULL 4R Manifest cannot issue;
-- receipt validator PASS does not rewrite conformance result.
+- dirty worktree with `--require-current` rejected.
+
+### 17.3 Manifest ↔ Receipt substitution matrix
+
+Con el **mismo candidate**, cada caso debe fallar de forma independiente:
+
+- Manifest baseline B1 / Receipt baseline B2;
+- repository mismatch;
+- `unit_id` mismatch;
+- `risk_class` mismatch;
+- risk downgrade `3/4 → 0/1/2`;
+- `specification_reference` mismatch;
+- `scope_reference` mismatch;
+- `correction_round` mismatch;
+- `finding_refs` omission, addition, reorder o substitution;
+- `stage1_manifest_schema` mismatch;
+- `stage1_manifest_result != manifest.result`;
+- Manifest candidate mismatch;
+- Manifest digest mismatch.
+
+Para risk 3/4, un Manifest sin FULL 4R completo no puede emitir Receipt.
+
+### 17.4 Result separation
+
+- Receipt con `candidate_conformance_result=PASS` preservado exactamente;
+- Receipt con `candidate_conformance_result=FAIL` preservado exactamente;
+- Receipt con `candidate_conformance_result=INCONCLUSIVE` preservado exactamente;
+- receipt validator PASS no reescribe ninguno de esos tres resultados;
+- Manifest validator PASS no reescribe `manifest.result`;
+- structural validity PASS con conformance FAIL sigue bloqueante para Ready
+  applicability.
+
+### 17.5 Integrity / output
+
+- Receipt digest mismatch rejected;
+- Manifest semantic mutation changes canonical Manifest digest;
+- whitespace-only JSON reformat preserves canonical Manifest digest;
+- output dentro del repository root rejected;
+- symlink/reparse/junction hacia repo rejected cuando sea comprobable;
+- output no puede sobrescribir input;
+- partial/temp output no se presenta como Receipt final ante fallo;
+- stdout guarantee se limita explícitamente a contenido emitido, no al destino de
+  una redirección externa.
+
+No se exige demostrar seguridad contra un actor local hostil capaz de modificar el
+filesystem concurrentemente; ese adversario queda fuera del threat model V1.
 
 ## 18. GREEN acceptance
 
@@ -532,13 +763,23 @@ Antes de RED de PR-B debe revalidarse:
 
 - ninguna key/secret;
 - ninguna network call;
-- output path confinement;
-- no symlink/path escape que permita escribir dentro del repo;
-- canonicalization determinista;
+- strict JSON parse antes de canonicalización/digest;
+- duplicate-key rejection en Manifest y Receipt;
+- dominio de tipos/rangos exacto;
+- Manifest↔Receipt equality/projection matrix;
+- no risk downgrade;
+- output path confinement por path resuelto, no lexical-only;
+- symlink/reparse/junction checks proporcionales a Windows/Linux;
+- no sobrescritura destructiva de inputs;
+- publicación de `--output` mediante temp + replace/rename cuando sea posible;
+- límite explícito de stdout/caller redirection;
 - subprocess Git con argv fijo/no shell;
 - no trust en Receipt fields para autoridad;
 - no persistent registry;
 - no external dependency.
+
+El Security Horizon no debe convertir ausencia de PKI/firma en finding de V1: el
+contrato declara explícitamente que SHA-256 protege integridad, no autenticidad.
 
 ## 22. Correction Budget
 
@@ -588,7 +829,7 @@ high/critical risk
 ## 24. Terminal Design state
 
 ```text
-Design candidate = DRAFT
+Design candidate = CORRECTION_ROUND_1
 implementation = NOT YET AUTHORIZED BY DESIGN MERGE
 RED = NOT YET AUTHORIZED
 GREEN = NOT YET AUTHORIZED
