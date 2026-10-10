@@ -18,7 +18,7 @@ PROFILE = ROOT / "evaluations" / "e3_governed_evidence_support_assessor_v0" / "e
 RUNNER = ROOT / "scripts" / "run_e3_governed_blind_assessor_experiment.py"
 GITATTRIBUTES = ROOT / ".gitattributes"
 QUALIFICATION_RUNNER = ROOT / "scripts" / "evaluate_e3_governed_evidence_support_assessor.py"
-EXPECTED_CASE_SET_DIGEST = "23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83"
+EXPECTED_CASE_SET_DIGEST = "c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77"
 EXACT_GITATTRIBUTES_RULE = (
     "/evaluations/e3_governed_evidence_support_assessor_v0/cases.json text eol=lf"
 )
@@ -736,3 +736,161 @@ def test_red_hard_zero_and_authority_guards_remain_explicit() -> None:
     assert module.MODEL_PROVIDER_EXECUTION_AUTHORIZED is False
     assert module.RDD_STAGE_2_AUTHORIZED is False
     assert module.AUTHORITY_EFFECT == "none"
+
+
+LEGACY_GROUND_TRUTH_DIGEST_PR262 = (
+    "23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83"
+)
+
+
+def _repair_case(case_id: str) -> dict:
+    cases = {case["case_id"]: case for case in _case_set()["cases"]}
+    return cases[case_id]
+
+
+def _repair_input(case_id: str, input_id: str | None = None) -> dict:
+    case = _repair_case(case_id)
+    if input_id is None:
+        assert len(case["inputs"]) == 1
+        return case["inputs"][0]
+    return next(item for item in case["inputs"] if item["input_id"] == input_id)
+
+
+def _repair_materials(input_record: dict) -> list[str]:
+    return [
+        item["material"]
+        for item in (
+            list(input_record["repository_evidence"])
+            + list(input_record["knowledge_evidence"])
+        )
+    ]
+
+
+def test_ground_truth_repair_red_gtr_r01_legacy_oracle_bytes_are_rejected() -> None:
+    assert _sha256(_case_set_bytes()) != LEGACY_GROUND_TRUTH_DIGEST_PR262
+
+
+def test_ground_truth_repair_red_gtr_r26_c01_material_support_is_explicit() -> None:
+    item = _repair_input("C01")
+    assert item["subject"]["statement"] == (
+        "Kernel coordinates orchestration between Planner and registered Capabilities."
+    )
+    material = " ".join(_repair_materials(item))
+    assert "Kernel coordinates orchestration between Planner and registered Capabilities" in material
+    assert "does not establish durable persistence authority" in material
+
+
+def test_ground_truth_repair_red_gtr_r03_r04_irrelevant_and_insufficient_are_materialized() -> None:
+    c02 = _repair_input("C02")
+    c02_material = " ".join(_repair_materials(c02))
+    assert "Formatting note:" in c02_material
+    assert "Naming guideline:" in c02_material
+    assert "orchestration" not in c02_material.lower()
+
+    c03 = _repair_input("C03")
+    assert "complete execution lifecycle" in c03["subject"]["statement"]
+    c03_material = " ".join(_repair_materials(c03))
+    assert "dispatches planned Capabilities" in c03_material
+    assert "does not establish ownership of the complete execution lifecycle" in c03_material
+
+
+def test_ground_truth_repair_red_gtr_r05_r06_r08_r09_limits_conflict_authority_and_context_are_visible() -> None:
+    c05 = _repair_input("C05")
+    assert any(
+        "does not grant durable persistence authority" in material
+        for material in _repair_materials(c05)
+    )
+
+    c06 = _repair_input("C06")
+    assert any(
+        "Kernel does not coordinate Capability execution" in material
+        for material in _repair_materials(c06)
+    )
+
+    c07 = _repair_input("C07")
+    c07_material = " ".join(_repair_materials(c07))
+    assert "Authoritative naming rule:" in c07_material
+    assert "Governance formatting rule:" in c07_material
+    assert "orchestration" not in c07_material.lower()
+
+    c08 = _repair_input("C08")
+    c08_material = " ".join(_repair_materials(c08))
+    assert "Contextual developer note (non-normative):" in c08_material
+    assert "Kernel -> Planner -> CapabilityRegistry -> Capability" in c08_material
+
+
+def test_ground_truth_repair_red_gtr_r10_r18_r20_overclaim_confidence_and_scope_are_concrete() -> None:
+    c09 = _repair_input("C09")
+    assert "durable persistence authority" in c09["subject"]["statement"]
+    assert "therefore Kernel owns durable persistence authority" in c09["subject"]["rationale"]
+    assert "overclaim" not in c09["subject"]["rationale"].lower()
+    assert any(
+        "does not establish durable persistence authority" in material
+        for material in _repair_materials(c09)
+    )
+
+    c16 = _repair_input("C16")
+    assert "Evaluator confidence 0.99" in c16["subject"]["rationale"]
+    assert "durable persistence authorization" in c16["subject"]["statement"]
+    assert all(
+        "durable persistence authorization" not in material
+        for material in _repair_materials(c16)
+    )
+
+    c18 = _repair_input("C18")
+    c18_material = " ".join(_repair_materials(c18))
+    assert "production deployment logs are outside this packet" in c18_material
+    assert "cannot be verified from this bounded packet" in c18_material
+
+
+def test_ground_truth_repair_red_gtr_r12_r13_binding_priors_are_material_and_recomputable() -> None:
+    module = _runner_module()
+
+    c11 = _repair_input("C11")
+    prior_subject = c11["binding_prior"]["prior_subject"]
+    assert prior_subject["statement"] != c11["subject"]["statement"]
+    assert "Planner owns orchestration" in c11["subject"]["statement"]
+    assert "Kernel coordinates orchestration" in prior_subject["statement"]
+    assert (
+        module._subject_fingerprint(prior_subject)
+        == c11["binding_expectation"]["expected_subject_fingerprint"]
+    )
+
+    c12 = _repair_input("C12")
+    prior_repository = c12["binding_prior"]["prior_repository_evidence"]
+    prior_knowledge = c12["binding_prior"]["prior_knowledge_evidence"]
+    assert any("Kernel coordinates orchestration" in item["material"] for item in prior_repository)
+    assert any("Planner coordinates orchestration directly" in item["material"] for item in c12["repository_evidence"])
+    assert (
+        module._evidence_material_digest(prior_repository, prior_knowledge)
+        == c12["binding_expectation"]["expected_evidence_material_digest"]
+    )
+    assert module._evidence_material_digest(
+        c12["repository_evidence"],
+        c12["knowledge_evidence"],
+    ) != c12["binding_expectation"]["expected_evidence_material_digest"]
+
+
+def test_ground_truth_repair_red_gtr_r14_r15_c13_equivalence_also_has_material_support() -> None:
+    first = _repair_input("C13", "C13.I01")
+    second = _repair_input("C13", "C13.I02")
+    for item in (first, second):
+        material = " ".join(_repair_materials(item))
+        assert item["subject"]["statement"] == (
+            "Kernel coordinates orchestration between Planner and registered Capabilities."
+        )
+        assert "Kernel coordinates orchestration between Planner and registered Capabilities" in material
+        assert "Repository execution path:" in material
+        assert "Architecture summary:" in material
+
+    module = _runner_module()
+    assert module._input_instance_digest(first) != module._input_instance_digest(second)
+    assert module._semantic_input_digest(first) == module._semantic_input_digest(second)
+
+
+def test_ground_truth_repair_red_gtr_r19_c17_self_certification_identity_is_explicit() -> None:
+    case = _repair_case("C17")
+    item = _repair_input("C17")
+    assert case["finding_producer_subject_id"] == "same-subject"
+    assert case["assessor_subject_id"] == "same-subject"
+    assert "same subject" in item["subject"]["rationale"].lower()

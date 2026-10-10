@@ -2,7 +2,7 @@
   "schema_version": "MALAK-E3-BLIND-ASSESSOR-EXPERIMENT-PROFILE/v0",
   "harness_policy_version": "e3-governed-blind-assessor-experiment-harness/v0",
   "expected_case_set_schema_version": "MALAK-E3-SUPPORT-ASSESSOR-CASESET/v0.1",
-  "expected_case_set_digest": "23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83",
+  "expected_case_set_digest": "c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77",
   "execution_order": "CASESET_INPUT_ORDER_SEQUENTIAL",
   "max_attempts_per_input": 1,
   "expected_input_count": 19,

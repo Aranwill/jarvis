@@ -17,8 +17,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "The bounded statement is directly supported by the supplied repository and architecture material.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -31,13 +31,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Architecture summary: Kernel coordinates orchestration between Planner and registered Capabilities; this statement does not establish durable persistence authority."
             }
           ],
           "binding_expectation": {
@@ -72,8 +72,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "An unrelated formatting note proves Kernel orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "The supplied references are authoritative-looking but unrelated to the orchestration statement.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -86,13 +86,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Formatting note: Markdown headings use sentence case and one blank line between sections."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Naming guideline: Python modules use lowercase snake_case filenames."
             }
           ],
           "binding_expectation": {
@@ -127,8 +127,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "A partial reference proves the whole responsibility.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel owns the complete execution lifecycle for every Capability.",
+            "rationale": "The packet shows one dispatch responsibility but not end-to-end lifecycle ownership.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -141,13 +141,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository observation: Kernel dispatches planned Capabilities to registered handlers."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Bounded note: dispatch evidence does not establish ownership of the complete execution lifecycle."
             }
           ],
           "binding_expectation": {
@@ -182,8 +182,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration and owns durable persistence.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration and owns durable persistence authorization.",
+            "rationale": "Only the orchestration clause is materially supported inside this packet.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -196,13 +196,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Scope note: this bounded material does not establish durable persistence authority."
             }
           ],
           "binding_expectation": {
@@ -234,8 +234,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "The limiting material narrows authority without contradicting the orchestration statement.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -250,17 +250,17 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             },
             {
               "ref": "L1",
-              "material": "Compatible limit: orchestration scope does not imply persistence authority."
+              "material": "Compatible limit: orchestration responsibility does not grant durable persistence authority."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Architecture summary: Kernel coordinates orchestration while persistence authority remains a separate concern."
             }
           ],
           "binding_expectation": {
@@ -294,8 +294,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "The packet contains direct support and direct unresolved counterevidence.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -310,17 +310,17 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Architecture summary: Kernel coordinates orchestration between Planner and registered Capabilities."
             },
             {
               "ref": "K2",
-              "material": "Counterevidence: governed material conflicts with the orchestration claim."
+              "material": "Counterevidence: an unresolved architecture note states Planner invokes registered Capabilities directly and Kernel does not coordinate Capability execution."
             }
           ],
           "binding_expectation": {
@@ -355,8 +355,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "A naming rule proves runtime orchestration behavior.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates runtime orchestration between Planner and registered Capabilities.",
+            "rationale": "Authority of a source does not make its unrelated naming or formatting content support runtime behavior.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -369,13 +369,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Authoritative naming rule: public Python classes use PascalCase and modules use lowercase snake_case."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Governance formatting rule: normative documents use stable headings and explicit status metadata."
             }
           ],
           "binding_expectation": {
@@ -407,8 +407,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "A contextual note materially supports this bounded orchestration claim.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "The material is explicitly contextual and non-normative, but directly relevant to the bounded factual statement.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -421,13 +421,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Contextual developer note (non-normative): observed execution path is Kernel -> Planner -> CapabilityRegistry -> Capability."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Derived status note (non-normative): Kernel coordinates invocation of registered Capabilities from the plan returned by Planner."
             }
           ],
           "binding_expectation": {
@@ -462,8 +462,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "This rationale deliberately overclaims beyond the supplied references.",
+            "statement": "Kernel coordinates orchestration and owns durable persistence authority.",
+            "rationale": "Kernel coordinates orchestration between Planner and registered Capabilities; therefore Kernel owns durable persistence authority.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -476,13 +476,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Architecture note: orchestration evidence does not establish durable persistence authority."
             }
           ],
           "binding_expectation": {
@@ -563,8 +563,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration under the current wording.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Planner owns orchestration and invokes registered Capabilities without Kernel coordination.",
+            "rationale": "Current subject materially reverses orchestration ownership while retaining a prior subject binding.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -577,18 +577,18 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Current repository material: Planner owns orchestration and invokes registered Capabilities without Kernel coordination."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Current architecture material: orchestration ownership is assigned to Planner in this current subject."
             }
           ],
           "binding_expectation": {
             "binding_kind": "SUBJECT",
-            "expected_subject_fingerprint": "d3bb4bec055473b53ade5eab1ebd00ef27f4377b53a367221cdeace4222dbf8d",
+            "expected_subject_fingerprint": "1464b7fdc967563bb61b185b87a4409944546b37243d2530f0561af6eea0a603",
             "expected_evidence_material_digest": null
           },
           "binding_prior": {
@@ -598,8 +598,8 @@
               "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
               "relation_id": "U01.KERNEL_RESPONSIBILITY",
               "classification": "ALIGNED",
-              "statement": "Kernel coordinates orchestration under the prior wording.",
-              "rationale": "Bounded rationale for qualification ground truth.",
+              "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+              "rationale": "Prior subject assigns orchestration coordination to Kernel.",
               "supporting_repository_refs": [
                 "R1"
               ],
@@ -637,8 +637,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "The logical refs are unchanged but their bound evidence material has materially changed.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -651,32 +651,32 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Current repository material: Kernel coordinates orchestration with revised wording."
+              "material": "Current repository material: Planner coordinates orchestration directly; Kernel no longer coordinates Capability execution."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Current knowledge material: orchestration responsibility is assigned to Planner rather than Kernel."
             }
           ],
           "binding_expectation": {
             "binding_kind": "EVIDENCE_MATERIAL",
             "expected_subject_fingerprint": null,
-            "expected_evidence_material_digest": "d69d55696933ea6178033dd09da0c157c41015b67d8deeade30ad4ae671c45d1"
+            "expected_evidence_material_digest": "7312837476881ac738f3e16b38fd181a18c9821c8df02d06c678decb20e76ef6"
           },
           "binding_prior": {
             "prior_subject": null,
             "prior_repository_evidence": [
               {
                 "ref": "R1",
-                "material": "Prior repository material: Kernel coordinates orchestration."
+                "material": "Prior repository material: Kernel coordinates orchestration between Planner and registered Capabilities."
               }
             ],
             "prior_knowledge_evidence": [
               {
                 "ref": "K1",
-                "material": "Governed knowledge material: Kernel coordinates orchestration."
+                "material": "Prior knowledge material: Kernel coordinates execution of registered Capabilities from Planner output."
               }
             ]
           },
@@ -705,8 +705,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "All supplied materials directly support the same bounded orchestration statement; input ordering is semantically irrelevant.",
             "supporting_repository_refs": [
               "R1",
               "R2"
@@ -721,21 +721,21 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material A."
+              "material": "Repository execution path: Kernel receives a request, asks Planner for a plan, and coordinates invocation of registered Capabilities."
             },
             {
               "ref": "R2",
-              "material": "Repository material B."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Knowledge material A."
+              "material": "Architecture summary: Kernel coordinates orchestration between Planner and registered Capabilities."
             },
             {
               "ref": "K2",
-              "material": "Knowledge material B."
+              "material": "Knowledge note: Planner selects work while Kernel coordinates execution of the selected registered Capabilities."
             }
           ],
           "binding_expectation": {
@@ -757,8 +757,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "All supplied materials directly support the same bounded orchestration statement; input ordering is semantically irrelevant.",
             "supporting_repository_refs": [
               "R2",
               "R1"
@@ -773,21 +773,21 @@
           "repository_evidence": [
             {
               "ref": "R2",
-              "material": "Repository material B."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             },
             {
               "ref": "R1",
-              "material": "Repository material A."
+              "material": "Repository execution path: Kernel receives a request, asks Planner for a plan, and coordinates invocation of registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K2",
-              "material": "Knowledge material B."
+              "material": "Knowledge note: Planner selects work while Kernel coordinates execution of the selected registered Capabilities."
             },
             {
               "ref": "K1",
-              "material": "Knowledge material A."
+              "material": "Architecture summary: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "binding_expectation": {
@@ -926,8 +926,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "High evaluator confidence substitutes for material support.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel owns durable persistence authorization for every durable write.",
+            "rationale": "Evaluator confidence 0.99 is asserted, but confidence cannot substitute for material evidence.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -940,13 +940,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository material: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Architecture material: Planner supplies a plan and Kernel coordinates registered Capability execution."
             }
           ],
           "binding_expectation": {
@@ -980,8 +980,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "Kernel coordinates orchestration between Planner and registered Capabilities.",
+            "rationale": "Finding producer and assessor are the same subject; the same subject must not self-certify this finding.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -994,13 +994,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Architecture summary: Kernel coordinates orchestration between Planner and registered Capabilities."
             }
           ],
           "binding_expectation": {
@@ -1032,8 +1032,8 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "The claim requires evidence outside the bounded packet.",
-            "rationale": "Bounded rationale for qualification ground truth.",
+            "statement": "The production deployment enforces persistence authorization on every durable write.",
+            "rationale": "The bounded packet contains design material only; production enforcement requires evidence outside this packet.",
             "supporting_repository_refs": [
               "R1"
             ],
@@ -1046,13 +1046,13 @@
           "repository_evidence": [
             {
               "ref": "R1",
-              "material": "Repository material: Kernel coordinates orchestration."
+              "material": "Design note: repository contracts specify intended persistence authorization behavior, but production deployment logs are outside this packet."
             }
           ],
           "knowledge_evidence": [
             {
               "ref": "K1",
-              "material": "Governed knowledge material: Kernel coordinates orchestration."
+              "material": "Verification note: actual production enforcement requires deployment telemetry not present here and cannot be verified from this bounded packet."
             }
           ],
           "binding_expectation": {
