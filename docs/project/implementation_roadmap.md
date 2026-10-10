@@ -4,7 +4,7 @@ status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
 as_of_date: 2026-10-09
-as_of_commit: 0a40aa1143f120f7b5a4b544ea49f4b352254b5a
+as_of_commit: 82d79484630b8636582971e37678f16daf5f1c6c
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -2372,3 +2372,81 @@ Finalization ni RDD Stage 2.
 Cualquier nueva construcción más allá del adapter ya integrado requiere su
 propia admisión según el Construction Protocol. Esta reconciliación no abre
 automáticamente un sprint ni autoriza RED/GREEN adicional.
+
+## Reconciliación CURRENT de planificación — Ground-Truth Repair V0.2
+
+Baseline reconciliado: `main@82d79484630b8636582971e37678f16daf5f1c6c`.
+
+PR #262 cerró la fase PR-A / G0-G1 Design para reparar el ground truth del Assessor Qualification Pack. El diseño fue integrado después de una Correction Round 1 y una Independent Design Fix Validation terminal `PASS`.
+
+```text
+main baseline                         82d79484630b8636582971e37678f16daf5f1c6c
+PR #262 candidate                     971a2b8d9a1f7e2a7042640dbad23aa11d180e6e
+candidate / merge tree                96fd81cf6d29d0e346392ec6b4e422dacb996903
+Independent Design Fix Validation B   PASS
+candidate Validation #831             SUCCESS
+post-merge Validation #832            SUCCESS
+Ubuntu / Windows                      1981/1981 PASS
+authority_effect                      none
+```
+
+Estado de planificación resultante:
+
+```text
+Ground-Truth Repair V0.2 Design       INTEGRATED — PR #262
+old case-set digest                    23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83
+independent old ground-truth review    FAIL
+qualification against old oracle       BLOCKED
+assessor semantic qualification        UNKNOWN
+prior live Run #3                      HISTORICAL EXECUTION EVIDENCE ONLY
+historical experimental model          qwen3.5:9b / NOT PROMOTED
+future PR-B                             NOT AUTHORIZED
+repaired case-set digest                NOT CREATED
+new live experiment / rerun             NOT AUTHORIZED
+semantic_assurance                      NOT_VERIFIED
+E008-SG-02                              OPEN
+support_sufficient                      NOT WIRED / NOT AUTHORIZED
+Protected Finalization                  NOT AUTHORIZED
+model promotion                         NOT AUTHORIZED
+production admission                    NOT AUTHORIZED
+RDD Stage 2                             NOT AUTHORIZED
+authority_effect                        none
+```
+
+La línea de planificación anterior que proponía como siguiente transición seleccionar un exact local model para un primer live experiment queda **históricamente superada**. Ya existe una ejecución live histórica; sin embargo, su resultado no puede calificarse contra el oracle viejo porque el ground truth falló la revisión independiente.
+
+La transición activa pasa a ser:
+
+```text
+CURRENT:
+Ground-Truth Repair V0.2 Design integrated
+
+NEXT POSSIBLE:
+separate Owner authorization for PR-B
+
+PR-B bounded initial allowlist:
+- cases.json
+- experiment_profile.json
+- blind harness test
+- Ollama adapter test
+
+PR-B required sequence:
+RED
+→ GREEN
+→ targeted validation
+→ Candidate FULL 4R
+→ independent ground-truth review on NEW digest
+→ independent candidate validation
+→ RDD Stage 1 Candidate Conformance
+→ human review
+→ Owner Ready / Merge
+→ post-merge reconciliation
+
+ONLY AFTER THAT:
+separately authorized new live model experiment
+→ Qualification Pack
+→ PASS | FAIL | INCONCLUSIVE
+```
+
+No existe autorización implícita para PR-B, model rerun, model promotion, `support_sufficient`, Protected Finalization, production admission o RDD Stage 2.
+

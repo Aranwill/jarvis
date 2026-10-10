@@ -601,3 +601,75 @@ La siguiente transición sólo puede considerarse mediante una instrucción
 separada del Owner que nombre el modelo local exacto para un live experiment.
 Qualification evidence continúa siendo Evidence y no semantic truth, permiso,
 promoción ni Authority.
+
+## Reconciliación CURRENT — E3 Assessor Qualification Ground-Truth Repair V0.2
+
+Esta sección **supersede para el estado CURRENT** las transiciones descritas en reconciliaciones anteriores que todavía presentaban el live Ollama experiment como no ejecutado o el exact model como no seleccionado.
+
+PR #262 integró únicamente el G0/G1 Design de `E3 Assessor Qualification Ground-Truth Repair V0.2`. El merge conserva exactamente el árbol del candidate validado:
+
+```text
+main baseline                         82d79484630b8636582971e37678f16daf5f1c6c
+PR #262 candidate                     971a2b8d9a1f7e2a7042640dbad23aa11d180e6e
+candidate / merge tree                96fd81cf6d29d0e346392ec6b4e422dacb996903
+Independent Design Fix Validation B   PASS
+candidate Validation #831             SUCCESS
+post-merge Validation #832            SUCCESS
+Ubuntu / Windows                      1981/1981 PASS
+authority_effect                      none
+```
+
+El trigger del repair es un `FAIL` independiente del ground truth ligado al case-set digest histórico. Ese resultado **no es un FAIL de qwen3.5:9b ni de otro assessor**. Impide usar el oracle viejo para producir una qualification semántica defendible.
+
+```text
+Ground-Truth Repair V0.2 Design       INTEGRATED — PR #262
+old case-set digest                    23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83
+independent old ground-truth review    FAIL
+qualification against old oracle       BLOCKED
+assessor semantic qualification        UNKNOWN
+prior live Run #3                      HISTORICAL EXECUTION EVIDENCE ONLY
+historical experimental model          qwen3.5:9b / NOT PROMOTED
+future PR-B                             NOT AUTHORIZED
+repaired case-set digest                NOT CREATED
+new live experiment / rerun             NOT AUTHORIZED
+semantic_assurance                      NOT_VERIFIED
+E008-SG-02                              OPEN
+support_sufficient                      NOT WIRED / NOT AUTHORIZED
+Protected Finalization                  NOT AUTHORIZED
+model promotion                         NOT AUTHORIZED
+production admission                    NOT AUTHORIZED
+RDD Stage 2                             NOT AUTHORIZED
+authority_effect                        none
+```
+
+El Design integrado congela:
+
+```text
+scenario label != scenario evidence
+expected outcome != proof of expected outcome
+contract validity != semantic validity
+equivalence != material support
+```
+
+El resultado live previo permanece preservado sólo como evidencia histórica de ejecución. Sus respuestas no pueden utilizarse para construir o ajustar el ground truth reparado.
+
+La siguiente transición legal es:
+
+```text
+separate Owner authorization for PR-B
+→ RED
+→ GREEN
+→ targeted validation
+→ Candidate FULL 4R
+→ independent ground-truth review on NEW exact digest
+→ independent candidate validation
+→ RDD Stage 1 Candidate Conformance
+→ Owner review / Ready / Merge
+→ post-merge reconciliation
+→ separately authorized new live model experiment
+→ Qualification Pack
+→ PASS | FAIL | INCONCLUSIVE
+```
+
+PR #262 no autoriza ninguna de esas etapas posteriores.
+
