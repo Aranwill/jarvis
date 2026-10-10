@@ -18,7 +18,7 @@ PROFILE = ROOT / "evaluations" / "e3_governed_evidence_support_assessor_v0" / "e
 RUNNER = ROOT / "scripts" / "run_e3_governed_blind_assessor_experiment.py"
 GITATTRIBUTES = ROOT / ".gitattributes"
 QUALIFICATION_RUNNER = ROOT / "scripts" / "evaluate_e3_governed_evidence_support_assessor.py"
-EXPECTED_CASE_SET_DIGEST = "23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83"
+EXPECTED_CASE_SET_DIGEST = "ef4253478ae27d86121318356c2031ae64f8855e687153b3cff673e3ae8ccb10"
 EXACT_GITATTRIBUTES_RULE = (
     "/evaluations/e3_governed_evidence_support_assessor_v0/cases.json text eol=lf"
 )
@@ -893,4 +893,3 @@ def test_ground_truth_repair_red_gtr_r19_c17_self_certification_identity_is_expl
     assert case["finding_producer_subject_id"] == "same-subject"
     assert case["assessor_subject_id"] == "same-subject"
     assert "same subject" in item["subject"]["rationale"].lower()
-
