@@ -2092,4 +2092,3 @@ tests/test_e3_governed_blind_assessor_ollama_experiment.py
 Cualquier necesidad de una quinta superficie, runner, harness, runtime, `src/malak/**`, dependencia o documento de ley exige STOP + re-admisión.
 
 Esta reconciliación es derivada, no normativa y no concede autoridad de implementación.
-

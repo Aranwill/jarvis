@@ -672,4 +672,3 @@ separate Owner authorization for PR-B
 ```
 
 PR #262 no autoriza ninguna de esas etapas posteriores.
-
