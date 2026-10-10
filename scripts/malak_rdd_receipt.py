@@ -107,6 +107,8 @@ def strict_load(path: Path) -> Any:
         raise
     except json.JSONDecodeError as exc:
         fail("INVALID_JSON", f"invalid JSON: {exc.msg}")
+    except ValueError as exc:
+        fail("INVALID_JSON", f"invalid JSON value: {exc}")
 
 
 def exact_dict(value: Any, keys: set[str], name: str) -> dict[str, Any]:
@@ -190,9 +192,9 @@ def canonical_bytes(payload: Any) -> bytes:
             separators=(",", ":"),
             allow_nan=False,
         )
-    except (TypeError, ValueError) as exc:
-        raise CheckError("INVALID_FIELD", "payload is not canonically serializable") from exc
-    return value.encode("utf-8")
+        return value.encode("utf-8")
+    except (TypeError, ValueError, UnicodeError) as exc:
+        raise CheckError("INVALID_FIELD", "payload is not canonically serializable as UTF-8") from exc
 
 
 def sha256_payload(payload: Any) -> str:
@@ -264,16 +266,27 @@ def validate_manifest_git(
     *,
     expected_candidate: str | None,
     require_current: bool,
-) -> str | None:
+) -> tuple[str | None, Path]:
     try:
-        return stage1.validate_git(
+        expected = stage1.validate_git(
             repo,
             checked,
             expected_candidate=expected_candidate,
             require_current=require_current,
         )
+        root_text = stage1.git(repo, "rev-parse", "--show-toplevel")
     except stage1.CheckError as exc:
         raise translate_stage1_error(exc) from exc
+
+    try:
+        effective_root = Path(root_text).resolve(strict=True)
+    except (OSError, RuntimeError) as exc:
+        raise CheckError(
+            "GIT_ROOT_UNRESOLVED",
+            "effective Git repository root could not be resolved safely",
+            inconclusive=True,
+        ) from exc
+    return expected, effective_root
 
 
 def candidate_tree(repo: Path, candidate: str) -> str:
@@ -475,7 +488,7 @@ def parser() -> argparse.ArgumentParser:
 def run_issue(args: argparse.Namespace) -> int:
     manifest_payload = strict_load(args.manifest)
     manifest, checked = validate_manifest(manifest_payload)
-    validate_manifest_git(
+    _, effective_root = validate_manifest_git(
         args.repo_root,
         checked,
         expected_candidate=args.expected_candidate,
@@ -483,7 +496,7 @@ def run_issue(args: argparse.Namespace) -> int:
     )
     receipt = build_receipt(
         manifest,
-        args.repo_root,
+        effective_root,
         candidate_conformance_result=args.candidate_conformance_result,
         candidate_conformance_reference=args.candidate_conformance_reference,
         validator=args.validator,
@@ -496,7 +509,7 @@ def run_issue(args: argparse.Namespace) -> int:
         print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
         return 0
 
-    target = output_target(args.output, args.repo_root, [args.manifest])
+    target = output_target(args.output, effective_root, [args.manifest])
     write_atomic_json(target, receipt)
     print(report(
         "PASS",
@@ -514,13 +527,13 @@ def run_validate(args: argparse.Namespace) -> int:
     manifest, checked = validate_manifest(manifest_payload)
 
     validate_cross_binding(receipt, manifest)
-    validate_manifest_git(
+    _, effective_root = validate_manifest_git(
         args.repo_root,
         checked,
         expected_candidate=args.expected_candidate,
         require_current=args.require_current,
     )
-    validate_tree(args.repo_root, receipt)
+    validate_tree(effective_root, receipt)
     validate_manifest_digest(receipt, manifest)
     validate_receipt_digest(receipt)
 

@@ -14,7 +14,8 @@ La metodología combina:
 
 - Specification-Driven Development (SDD).
 - Test-Driven Development (TDD).
-- RDD Stage 1 adaptado a Malāk como control explícito de conformidad de diseño y de Evidence ligada al candidate, cuando aplique.\n- RDD Stage 2 adaptado a Malāk como `Candidate-Bound Validation Receipt` para riesgo 3/4 y por admisión explícita en riesgo 2.
+- RDD Stage 1 adaptado a Malāk como control explícito de conformidad de diseño y de Evidence ligada al candidate, cuando aplique.
+- RDD Stage 2 adaptado a Malāk como `Candidate-Bound Validation Receipt` para riesgo 3/4 y por admisión explícita en riesgo 2.
 - revisión basada en riesgo mediante las 4R.
 - Bounded Correction.
 - validación independiente de correcciones.
@@ -774,7 +775,7 @@ candidate changes
 → affected RDD evidence must be regenerated/revalidated
 
 authority_effect = none
-RDD Stage 2 = NOT AUTHORIZED
+RDD Stage 2 = ADOPTED / ACTIVE with proportional applicability
 Stage 3+ = NOT AUTHORIZED
 ```
 
@@ -835,9 +836,9 @@ la Evidence anterior no debe considerarse prueba suficiente del nuevo candidate.
 Debe producirse una nueva verificación o una revalidación explícita de la
 Evidence afectada.
 
-La misma regla alcanzaría a un Receipt candidate-bound si Stage 2 fuera
-autorizado en el futuro: un Receipt nunca debe reinterpretarse como Validation ni
-como Authority.
+La misma regla alcanza al Receipt candidate-bound de Stage 2: un Receipt nunca
+debe reinterpretarse como Validation ni como Authority. Su aplicabilidad se rige
+por §15.4.
 
 ## 15.4 RDD Stage 2 — Candidate-Bound Validation Receipt
 

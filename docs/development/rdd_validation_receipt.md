@@ -165,7 +165,8 @@ fuera de la garantía de confinement del helper.
 
 Con `--output`:
 
-- el destino debe estar fuera del repository root;
+- `--repo-root` puede apuntar a la raíz o a una subcarpeta del repository; el helper deriva la raíz Git efectiva mediante `git rev-parse --show-toplevel`;
+- el destino debe estar fuera de esa raíz Git efectiva, no sólo fuera del path declarado por el caller;
 - se usa el path resuelto, no una comparación lexical;
 - aliases/symlinks hacia el repo se rechazan cuando el sistema permite resolverlos;
 - no se sobrescriben inputs ni archivos existentes;

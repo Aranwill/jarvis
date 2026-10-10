@@ -14,7 +14,7 @@ Todo cambio deberá superar este checklist antes de considerarse finalizado.
 
 La metodología de ingeniería aplicable se define en `docs/development/engineering_method.md`.
 
-La disciplina transversal de revisión, incorporación progresiva de capacidades, gates, métricas, RDD Stage 1 propio de Malāk —adoptado y activo— y reconciliación derivada se define en `docs/development/malak_construction_protocol.md`. RDD Stage 2 continúa no autorizado.
+La disciplina transversal de revisión, incorporación progresiva de capacidades, gates, métricas, RDD Stage 1 propio de Malāk —adoptado y activo—, RDD Stage 2 —adoptado y activo con aplicabilidad proporcional— y reconciliación derivada se define en `docs/development/malak_construction_protocol.md`. Stage 3+ continúa no autorizado.
 
 La barrera de admisión repository-first previa a todo trabajo material se define
 en `docs/development/malak_construction_preflight.md`.

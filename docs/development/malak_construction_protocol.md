@@ -746,7 +746,7 @@ candidate change invalidates affected evidence
 bounded correction / correction budget when findings occur
 independent fix validation when applicable
 authority_effect = none
-RDD Stage 2 remains NOT AUTHORIZED
+RDD Stage 2 applicability follows §5.5.1; Receipt remains authority-free
 ```
 
 Resultados permitidos:
@@ -1171,7 +1171,7 @@ Malāk ha adoptado **RDD Stage 1 — Structured Evidence Manifest** como parte a
 
 Stage 1 utiliza `MALAK-EVIDENCE-MANIFEST/v1`, definido en `docs/development/evidence_manifest.md`, para ligar evidencia de construcción al candidato exacto evaluado.
 
-Malāk no adopta Receipt-Driven Development como metodología externa completa ni concede autoridad a RDD. **RDD Stage 2 no está autorizado.**
+Malāk no adopta Receipt-Driven Development como metodología externa completa ni concede autoridad a RDD. **RDD Stage 2 está ADOPTED / ACTIVE únicamente como Candidate-Bound Validation Receipt con la aplicabilidad proporcional de §5.5.1.** Stage 3+ permanece no autorizado.
 
 El perfil activo conserva:
 

@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "malak_rdd_receipt.py"
 
 
@@ -511,7 +513,7 @@ def test_output_symlink_into_repo_is_rejected_when_supported(tmp_path):
     try:
         link.symlink_to(repo, target_is_directory=True)
     except OSError:
-        return
+        pytest.skip("symlink creation unavailable on this platform/environment")
 
     output = link / "receipt.json"
     code, report = issue(
@@ -606,3 +608,111 @@ def test_stdout_issue_does_not_claim_destination_confinement(tmp_path):
     assert receipt["schema"] == "MALAK-RDD-VALIDATION-RECEIPT/v1"
     assert "output_path" not in receipt
     assert receipt["authority_effect"] == "none"
+
+
+def test_repo_root_subdirectory_uses_effective_git_root_for_output_confinement(tmp_path):
+    repo, baseline, candidate = make_repo(tmp_path)
+    subdir = repo / "nested"
+    subdir.mkdir()
+    payload = manifest(baseline, candidate)
+    manifest_path = write_json(tmp_path / "manifest-subdir.json", payload)
+    output = repo / "receipt-sibling.json"
+
+    code, report = run_cli(
+        "issue",
+        "--manifest", str(manifest_path),
+        "--repo-root", str(subdir),
+        "--candidate-conformance-result", "PASS",
+        "--candidate-conformance-reference", "ref",
+        "--validator", "validator",
+        "--independence-reference", "independent",
+        "--evidence-reference", "evidence",
+        "--issued-at", "2026-10-10T15:00:00Z",
+        "--output", str(output),
+    )
+
+    assert code == 1
+    assert report["code"] == "OUTPUT_INSIDE_REPOSITORY"
+    assert not output.exists()
+
+
+def test_large_integer_json_returns_machine_readable_failure(tmp_path):
+    repo, baseline, candidate = make_repo(tmp_path)
+    payload = manifest(baseline, candidate)
+    raw = json.dumps(payload)
+    raw = raw.replace('"risk_class": 3', '"risk_class": ' + ("1" * 5000), 1)
+    path = tmp_path / "huge-int-manifest.json"
+    path.write_text(raw, encoding="utf-8")
+
+    code, output = run_cli(
+        "issue",
+        "--manifest", str(path),
+        "--repo-root", str(repo),
+        "--candidate-conformance-result", "PASS",
+        "--candidate-conformance-reference", "ref",
+        "--validator", "validator",
+        "--independence-reference", "independent",
+        "--evidence-reference", "evidence",
+        "--issued-at", "2026-10-10T15:00:00Z",
+    )
+
+    assert code == 1
+    assert output["validator_result"] == "FAIL"
+    assert output["code"] == "INVALID_JSON"
+
+
+def test_unpaired_surrogate_returns_machine_readable_failure(tmp_path):
+    repo, baseline, candidate = make_repo(tmp_path)
+    payload = manifest(baseline, candidate)
+    payload["scope_reference"] = "\ud800"
+    path = tmp_path / "surrogate-manifest.json"
+    path.write_text(json.dumps(payload, ensure_ascii=True), encoding="ascii")
+
+    code, output = run_cli(
+        "issue",
+        "--manifest", str(path),
+        "--repo-root", str(repo),
+        "--candidate-conformance-result", "PASS",
+        "--candidate-conformance-reference", "ref",
+        "--validator", "validator",
+        "--independence-reference", "independent",
+        "--evidence-reference", "evidence",
+        "--issued-at", "2026-10-10T15:00:00Z",
+    )
+
+    assert code == 1
+    assert output["validator_result"] == "FAIL"
+    assert output["code"] == "INVALID_FIELD"
+
+
+def test_all_non_finite_json_constants_fail_closed(tmp_path):
+    repo, baseline, candidate = make_repo(tmp_path)
+    payload = manifest(baseline, candidate)
+    for token in ("NaN", "Infinity", "-Infinity"):
+        raw = json.dumps(payload).replace('"risk_class": 3', f'"risk_class": {token}', 1)
+        path = tmp_path / f"non-finite-{token.replace('-', 'minus')}.json"
+        path.write_text(raw, encoding="utf-8")
+        code, output = run_cli(
+            "issue",
+            "--manifest", str(path),
+            "--repo-root", str(repo),
+            "--candidate-conformance-result", "PASS",
+            "--candidate-conformance-reference", "ref",
+            "--validator", "validator",
+            "--independence-reference", "independent",
+            "--evidence-reference", "evidence",
+            "--issued-at", "2026-10-10T15:00:00Z",
+        )
+        assert code == 1, token
+        assert output["code"] == "NON_STANDARD_JSON_NUMBER", (token, output)
+
+
+def test_manifest_result_fail_and_inconclusive_are_preserved(tmp_path):
+    repo, baseline, candidate = make_repo(tmp_path)
+    for manifest_result in ("FAIL", "INCONCLUSIVE"):
+        payload = manifest(baseline, candidate)
+        payload["validations"][0]["result"] = manifest_result
+        payload["result"] = manifest_result
+        receipt = issue_receipt(tmp_path, repo, payload, result="PASS")
+        assert receipt["stage1_manifest_result"] == manifest_result
+        assert receipt["candidate_conformance_result"] == "PASS"
