@@ -652,7 +652,7 @@ def test_red_r41_gitattributes_rule_is_exact_and_path_scoped() -> None:
 def test_red_r42_r43_case_set_raw_bytes_are_lf_and_match_frozen_digest() -> None:
     raw = _case_set_bytes()
     assert b"\r" not in raw
-    assert _sha256(raw) == EXPECTED_CASE_SET_DIGEST
+    assert _sha256(raw) == EXPECTED_CASE_SET_DIGEST, f"actual_case_set_digest={_sha256(raw)}"
     assert _profile()["expected_case_set_digest"] == EXPECTED_CASE_SET_DIGEST
 
 
