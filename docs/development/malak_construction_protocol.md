@@ -1255,7 +1255,7 @@ Estado y ruta de maduración:
 ```text
 Stage 0 — Candidate Identity + evidencia base          integrado históricamente
 Stage 1 — Structured Evidence Manifest                 ADOPTED / ACTIVE
-Stage 2 — Candidate-Bound Validation Receipt           NOT AUTHORIZED
+Stage 2 — Candidate-Bound Validation Receipt           ADOPTED / ACTIVE
 Stage 3 — Candidate Evidence Package                   future candidate
 Stage 4 — Integrity hardening                          future candidate
 Stage 5 — agent-produced candidates + external validation
