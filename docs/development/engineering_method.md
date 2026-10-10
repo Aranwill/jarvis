@@ -14,7 +14,7 @@ La metodología combina:
 
 - Specification-Driven Development (SDD).
 - Test-Driven Development (TDD).
-- RDD Stage 1 adaptado a Malāk como control explícito de conformidad de diseño y de evidencia ligada al candidato, cuando aplique.
+- RDD Stage 1 adaptado a Malāk como control explícito de conformidad de diseño y de Evidence ligada al candidate, cuando aplique.\n- RDD Stage 2 adaptado a Malāk como `Candidate-Bound Validation Receipt` para riesgo 3/4 y por admisión explícita en riesgo 2.
 - revisión basada en riesgo mediante las 4R.
 - Bounded Correction.
 - validación independiente de correcciones.
@@ -747,7 +747,7 @@ aplicabilidad:
 - Bounded Correction y Correction Budget cuando existan findings;
 - independent fix validation cuando corresponda;
 - `authority_effect = none`;
-- RDD Stage 2 no autorizado.
+- aplicabilidad de RDD Stage 2 declarada sin convertir Receipt en Authority.
 
 El **Candidate Conformance** comprueba sobre el candidate material exacto,
 después de las validaciones requeridas y antes de human review, que el paquete
@@ -839,25 +839,62 @@ La misma regla alcanzaría a un Receipt candidate-bound si Stage 2 fuera
 autorizado en el futuro: un Receipt nunca debe reinterpretarse como Validation ni
 como Authority.
 
-## 15.4 Receipts y evolución futura
+## 15.4 RDD Stage 2 — Candidate-Bound Validation Receipt
 
-`Candidate-Bound Validation Receipt` pertenece a **RDD Stage 2**, que continúa
-`NOT AUTHORIZED`.
+RDD Stage 2 está **ADOPTED / ACTIVE** mediante
+`MALAK-RDD-VALIDATION-RECEIPT/v1`, definido en
+`docs/development/rdd_validation_receipt.md`.
 
-Por tanto, un resultado `PASS` de Stage 1 no debe fabricar, inferir ni promover
-un Receipt de Stage 2.
+Aplicabilidad:
 
-Las siguientes técnicas quedan fuera del alcance activo y sólo podrán evaluarse
-mediante admisión separada:
+```text
+risk_class 0  → NOT_APPLICABLE
+risk_class 1  → NOT_APPLICABLE
+risk_class 2  → OPTIONAL / explicit admission only
+risk_class 3  → REQUIRED
+risk_class 4  → REQUIRED
+```
 
-- Stage 2 Receipts;
+Stage 2 ocurre después de RDD Stage 1 Candidate Conformance. Para riesgo 3/4 exige
+un `MALAK-EVIDENCE-MANIFEST/v1` real y válido; una colección informal de comments
+o un structured equivalent no materializado no constituye input de Stage 2 V1.
+
+El Receipt preserva:
+
+```text
+exact baseline/candidate/tree
+Manifest canonical digest
+Manifest terminal result
+Candidate Conformance terminal result
+correction/findings context
+provenance references
+authority_effect = none
+```
+
+```text
+Receipt validator PASS
+!= Candidate Conformance PASS
+!= Owner approval
+!= Ready
+!= Merge
+```
+
+Cambio de candidate invalida la aplicabilidad del Receipt anterior y obliga a
+revalidar la Evidence afectada antes de emitir otro Receipt cuando Stage 2 aplique.
+
+Continúan fuera del alcance activo y requieren admisión separada:
+
 - hash chaining;
-- firmas criptográficas;
-- signed Receipts;
+- firmas criptográficas / signed Receipts;
 - transparencia basada en Merkle;
-- external attestation;
-- hardware-backed attestation;
-- almacenamiento inmutable distribuido.
+- external/hardware-backed attestation;
+- registry/store/database;
+- network publication;
+- runtime consumption;
+- Cognitive Receipt;
+- Protected Finalization;
+- Persistence Authorization;
+- RDD Stage 3+.
 
 Ninguna etapa posterior se incorpora por secuencia automática.
 

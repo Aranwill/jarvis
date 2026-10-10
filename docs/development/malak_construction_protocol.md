@@ -957,6 +957,58 @@ authority_effect: none
 
 `N/A` sin razón y evidencia no es válido.
 
+### 5.5.1 RDD Stage 2 — Candidate-Bound Validation Receipt
+
+RDD Stage 2 utiliza `MALAK-RDD-VALIDATION-RECEIPT/v1`.
+
+```text
+risk 0/1 → NOT_APPLICABLE
+risk 2   → OPTIONAL / explicit admission only
+risk 3/4 → REQUIRED
+```
+
+Para risk 3/4, la emisión requiere:
+
+```text
+real valid MALAK-EVIDENCE-MANIFEST/v1
+RDD Stage 1 Candidate Conformance terminal
+exact repository/baseline/candidate/tree binding
+Manifest↔Receipt equality/projection
+canonical Manifest digest
+authority_effect = none
+```
+
+El Receipt puede preservar `PASS | FAIL | INCONCLUSIVE`, pero sólo
+`candidate_conformance_result = PASS` permite satisfacer esta precondición para
+human Ready. La validez estructural del Receipt no convierte FAIL o INCONCLUSIVE
+en PASS.
+
+```text
+Receipt validator PASS
+!= Candidate Conformance PASS
+!= Ready
+!= Merge
+!= Authority
+```
+
+Cambio de candidate:
+
+```text
+candidate changes
+→ prior Receipt remains historical
+→ prior Receipt is not applicable
+→ affected Stage 1 Evidence revalidated
+→ new Candidate Conformance
+→ new Receipt when Stage 2 applies
+```
+
+Stage 2 V1 es tooling de desarrollo. No introduce runtime consumer, network,
+registry/store, signatures, Cognitive Receipt, Protected Finalization,
+Persistence Authorization ni Stage 3+.
+
+El contrato operativo y la CLI se definen en
+`docs/development/rdd_validation_receipt.md`.
+
 ## 5.6 Auditoría retrospectiva del flujo de construcción
 
 Después de introducir o endurecer controles transversales del proceso de
