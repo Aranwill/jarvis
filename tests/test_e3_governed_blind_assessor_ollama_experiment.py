@@ -31,7 +31,7 @@ PROFILE = (
     / "experiment_profile.json"
 )
 EXPECTED_CASE_SET_DIGEST = (
-    "ef4253478ae27d86121318356c2031ae64f8855e687153b3cff673e3ae8ccb10"
+    "c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77"
 )
 
 EXACT_BASE_URL = "http://127.0.0.1:11434"

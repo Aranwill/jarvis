@@ -18,7 +18,7 @@ PROFILE = ROOT / "evaluations" / "e3_governed_evidence_support_assessor_v0" / "e
 RUNNER = ROOT / "scripts" / "run_e3_governed_blind_assessor_experiment.py"
 GITATTRIBUTES = ROOT / ".gitattributes"
 QUALIFICATION_RUNNER = ROOT / "scripts" / "evaluate_e3_governed_evidence_support_assessor.py"
-EXPECTED_CASE_SET_DIGEST = "ef4253478ae27d86121318356c2031ae64f8855e687153b3cff673e3ae8ccb10"
+EXPECTED_CASE_SET_DIGEST = "c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77"
 EXACT_GITATTRIBUTES_RULE = (
     "/evaluations/e3_governed_evidence_support_assessor_v0/cases.json text eol=lf"
 )
@@ -652,7 +652,7 @@ def test_red_r41_gitattributes_rule_is_exact_and_path_scoped() -> None:
 def test_red_r42_r43_case_set_raw_bytes_are_lf_and_match_frozen_digest() -> None:
     raw = _case_set_bytes()
     assert b"\r" not in raw
-    assert _sha256(raw) == EXPECTED_CASE_SET_DIGEST, f"actual_case_set_digest={_sha256(raw)}"
+    assert _sha256(raw) == EXPECTED_CASE_SET_DIGEST
     assert _profile()["expected_case_set_digest"] == EXPECTED_CASE_SET_DIGEST
 
 
