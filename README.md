@@ -604,33 +604,40 @@ promoción ni Authority.
 
 ## Reconciliación CURRENT — E3 Assessor Qualification Ground-Truth Repair V0.2
 
-Esta sección **supersede para el estado CURRENT** las transiciones descritas en reconciliaciones anteriores que todavía presentaban el live Ollama experiment como no ejecutado o el exact model como no seleccionado.
+Esta sección **supersede para el estado CURRENT** la reconciliación post-PR #262
+que todavía presentaba PR-B como futura y el case-set reparado como inexistente.
 
-PR #262 integró únicamente el G0/G1 Design de `E3 Assessor Qualification Ground-Truth Repair V0.2`. El merge conserva exactamente el árbol del candidate validado:
+PR #262 integró el G0/G1 Design y PR #264 integró la implementación acotada del
+repair sobre el allowlist cerrado de cuatro archivos. El merge de PR #264 conserva
+exactamente el contenido del candidate validado:
 
 ```text
-main baseline                         82d79484630b8636582971e37678f16daf5f1c6c
-PR #262 candidate                     971a2b8d9a1f7e2a7042640dbad23aa11d180e6e
-candidate / merge tree                96fd81cf6d29d0e346392ec6b4e422dacb996903
-Independent Design Fix Validation B   PASS
-candidate Validation #831             SUCCESS
-post-merge Validation #832            SUCCESS
-Ubuntu / Windows                      1981/1981 PASS
-authority_effect                      none
+main reconciliado                       73f3a953a1e49a6eb1fac61978e29af1a8d9cc37
+PR #264 candidate                       01c159f989f9c2d845d504b0a847ee58b618f56e
+candidate → merge content               IDENTICAL / 0 file delta
+repaired case-set digest                c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77
+Ground-Truth Review B                   PASS
+Corrected Candidate FULL 4R             PASS
+Independent Candidate Revalidation C    PASS
+RDD Stage 1 Candidate Conformance       PASS
+candidate Validation #842               SUCCESS / 1989 passed Ubuntu + Windows
+post-merge Validation #843              SUCCESS / 1989 passed Ubuntu + Windows
+authority_effect                        none
 ```
 
-El trigger del repair es un `FAIL` independiente del ground truth ligado al case-set digest histórico. Ese resultado **no es un FAIL de qwen3.5:9b ni de otro assessor**. Impide usar el oracle viejo para producir una qualification semántica defendible.
+Disposición CURRENT:
 
 ```text
-Ground-Truth Repair V0.2 Design       INTEGRATED — PR #262
-old case-set digest                    23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83
-independent old ground-truth review    FAIL
-qualification against old oracle       BLOCKED
-assessor semantic qualification        UNKNOWN
-prior live Run #3                      HISTORICAL EXECUTION EVIDENCE ONLY
-historical experimental model          qwen3.5:9b / NOT PROMOTED
-future PR-B                             NOT AUTHORIZED
-repaired case-set digest                NOT CREATED
+Ground-Truth Repair V0.2 Design         INTEGRATED — PR #262
+Ground-Truth Repair V0.2 implementation INTEGRATED — PR #264
+old case-set digest                     HISTORICAL / SUPERSEDED FOR NEW QUALIFICATION
+independent old ground-truth review     FAIL — HISTORICAL
+qualification against old oracle        BLOCKED — HISTORICAL
+prior live Run #3                       HISTORICAL EXECUTION EVIDENCE ONLY
+historical experimental model           qwen3.5:9b / NOT PROMOTED
+repaired case-set digest                c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77
+repaired case-set                       INTEGRATED / candidate-bound validation PASS
+new assessor semantic qualification     NOT YET RE-RUN
 new live experiment / rerun             NOT AUTHORIZED
 semantic_assurance                      NOT_VERIFIED
 E008-SG-02                              OPEN
@@ -642,33 +649,27 @@ RDD Stage 2                             NOT AUTHORIZED
 authority_effect                        none
 ```
 
-El Design integrado congela:
+El FAIL histórico del oracle viejo no es un FAIL de qwen3.5:9b ni de otro
+assessor. Run #3 permanece sólo como Evidence histórica y sus respuestas no
+certifican el case-set reparado.
+
+La siguiente transición posible requiere una instrucción humana separada:
 
 ```text
-scenario label != scenario evidence
-expected outcome != proof of expected outcome
-contract validity != semantic validity
-equivalence != material support
+Ground-Truth Repair V0.2 integrated
+        ↓
+separately authorized new live model experiment / qualification rerun
+        ↓
+bound assessor-result artifact
+        ↓
+existing Qualification Pack
+        ↓
+PASS | FAIL | INCONCLUSIVE
+        ↓
+Evidence for later human decision
 ```
 
-El resultado live previo permanece preservado sólo como evidencia histórica de ejecución. Sus respuestas no pueden utilizarse para construir o ajustar el ground truth reparado.
-
-La siguiente transición legal es:
-
-```text
-separate Owner authorization for PR-B
-→ RED
-→ GREEN
-→ targeted validation
-→ Candidate FULL 4R
-→ independent ground-truth review on NEW exact digest
-→ independent candidate validation
-→ RDD Stage 1 Candidate Conformance
-→ Owner review / Ready / Merge
-→ post-merge reconciliation
-→ separately authorized new live model experiment
-→ Qualification Pack
-→ PASS | FAIL | INCONCLUSIVE
-```
-
-PR #262 no autoriza ninguna de esas etapas posteriores.
+El merge de PR #264 no autoriza ese experimento, selección/promoción de modelo,
+`support_sufficient`, Protected Finalization, production admission ni RDD Stage 2.
+Qualification evidence continúa siendo Evidence y no semantic truth, permiso,
+decisión o Authority.

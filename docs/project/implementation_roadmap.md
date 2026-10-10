@@ -2375,33 +2375,39 @@ automáticamente un sprint ni autoriza RED/GREEN adicional.
 
 ## Reconciliación CURRENT de planificación — Ground-Truth Repair V0.2
 
-Baseline reconciliado: `main@82d79484630b8636582971e37678f16daf5f1c6c`.
+Baseline reconciliado:
+`main@73f3a953a1e49a6eb1fac61978e29af1a8d9cc37`.
 
-PR #262 cerró la fase PR-A / G0-G1 Design para reparar el ground truth del Assessor Qualification Pack. El diseño fue integrado después de una Correction Round 1 y una Independent Design Fix Validation terminal `PASS`.
+PR #262 cerró e integró el G0/G1 Design. PR #264 cerró e integró la
+implementación acotada del repair sobre el allowlist aprobado de cuatro archivos.
+El contenido del candidate validado y el merge es idéntico.
 
 ```text
-main baseline                         82d79484630b8636582971e37678f16daf5f1c6c
-PR #262 candidate                     971a2b8d9a1f7e2a7042640dbad23aa11d180e6e
-candidate / merge tree                96fd81cf6d29d0e346392ec6b4e422dacb996903
-Independent Design Fix Validation B   PASS
-candidate Validation #831             SUCCESS
-post-merge Validation #832            SUCCESS
-Ubuntu / Windows                      1981/1981 PASS
-authority_effect                      none
+PR #262 Design                         INTEGRATED
+PR #264 candidate                      01c159f989f9c2d845d504b0a847ee58b618f56e
+PR #264 merge/main                     73f3a953a1e49a6eb1fac61978e29af1a8d9cc37
+candidate → merge content              IDENTICAL / 0 file delta
+repaired case-set digest               c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77
+Ground-Truth Review B                  PASS
+Corrected Candidate FULL 4R            PASS
+Independent Candidate Revalidation C   PASS
+RDD Stage 1 Candidate Conformance      PASS
+candidate Validation #842              SUCCESS / 1989 passed Ubuntu + Windows
+post-merge Validation #843             SUCCESS / 1989 passed Ubuntu + Windows
+authority_effect                       none
 ```
 
 Estado de planificación resultante:
 
 ```text
-Ground-Truth Repair V0.2 Design       INTEGRATED — PR #262
-old case-set digest                    23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83
-independent old ground-truth review    FAIL
-qualification against old oracle       BLOCKED
-assessor semantic qualification        UNKNOWN
-prior live Run #3                      HISTORICAL EXECUTION EVIDENCE ONLY
-historical experimental model          qwen3.5:9b / NOT PROMOTED
-future PR-B                             NOT AUTHORIZED
-repaired case-set digest                NOT CREATED
+Ground-Truth Repair V0.2 Design         INTEGRATED — PR #262
+Ground-Truth Repair V0.2 implementation INTEGRATED — PR #264
+old case-set digest                     HISTORICAL / SUPERSEDED FOR NEW QUALIFICATION
+prior live Run #3                       HISTORICAL EXECUTION EVIDENCE ONLY
+historical experimental model           qwen3.5:9b / NOT PROMOTED
+repaired case-set digest                c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77
+repaired case-set                       INTEGRATED / candidate-bound validation PASS
+new assessor semantic qualification     NOT YET RE-RUN
 new live experiment / rerun             NOT AUTHORIZED
 semantic_assurance                      NOT_VERIFIED
 E008-SG-02                              OPEN
@@ -2410,42 +2416,36 @@ Protected Finalization                  NOT AUTHORIZED
 model promotion                         NOT AUTHORIZED
 production admission                    NOT AUTHORIZED
 RDD Stage 2                             NOT AUTHORIZED
+Sprint 7.12                             NOT AUTHORIZED
 authority_effect                        none
 ```
 
-La línea de planificación anterior que proponía como siguiente transición seleccionar un exact local model para un primer live experiment queda **históricamente superada**. Ya existe una ejecución live histórica; sin embargo, su resultado no puede calificarse contra el oracle viejo porque el ground truth falló la revisión independiente.
-
-La transición activa pasa a ser:
+La etapa de planificación que indicaba `separate Owner authorization for PR-B`
+queda cerrada por PR #264 y debe leerse como historia. La transición activa ya no
+es construir el repair.
 
 ```text
 CURRENT:
-Ground-Truth Repair V0.2 Design integrated
+Ground-Truth Repair V0.2 integrated
+post-merge Validation #843 PASS
 
-NEXT POSSIBLE:
-separate Owner authorization for PR-B
-
-PR-B bounded initial allowlist:
-- cases.json
-- experiment_profile.json
-- blind harness test
-- Ollama adapter test
-
-PR-B required sequence:
-RED
-→ GREEN
-→ targeted validation
-→ Candidate FULL 4R
-→ independent ground-truth review on NEW digest
-→ independent candidate validation
-→ RDD Stage 1 Candidate Conformance
-→ human review
-→ Owner Ready / Merge
-→ post-merge reconciliation
-
-ONLY AFTER THAT:
-separately authorized new live model experiment
-→ Qualification Pack
-→ PASS | FAIL | INCONCLUSIVE
+NEXT POSSIBLE — NOT AUTHORIZED:
+separately authorized new live model experiment / qualification rerun
+        ↓
+bound assessor-result artifact
+        ↓
+existing Qualification Pack
+        ↓
+PASS | FAIL | INCONCLUSIVE
+        ↓
+Evidence for later human decision
 ```
 
-No existe autorización implícita para PR-B, model rerun, model promotion, `support_sufficient`, Protected Finalization, production admission o RDD Stage 2.
+Ese NEXT POSSIBLE no es una obligación de roadmap ni una autorización implícita.
+Antes de ejecutarlo debe existir instrucción humana separada y admisión
+proporcional al cambio real.
+
+No existe autorización implícita para model rerun, model promotion,
+`support_sufficient`, Protected Finalization, production admission, Sprint 7.12
+o RDD Stage 2. Esta reconciliación sólo alinea planificación derivada con el
+baseline material integrado.
