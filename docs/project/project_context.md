@@ -3,7 +3,7 @@ title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
 as_of_date: 2026-10-09
-as_of_commit: 0a40aa1143f120f7b5a4b544ea49f4b352254b5a
+as_of_commit: 82d79484630b8636582971e37678f16daf5f1c6c
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -2025,3 +2025,70 @@ en semantic truth, model promotion, `support_sufficient` ni autoridad.
 
 Esta reconciliación es derivada, no normativa, y no autoriza el live experiment
 ni ninguna unidad posterior.
+
+## Reconciliación CURRENT — PR #262 / Ground-Truth Repair V0.2 Design
+
+Estado derivado reconciliado contra `main@82d79484630b8636582971e37678f16daf5f1c6c`.
+
+PR #262 integró el diseño gobernado de reparación del ground truth del `E3 Assessor Qualification Pack V0.1`, después de que una revisión independiente del oracle exacto concluyera `FAIL` por insuficiencia semántica del propio benchmark. El finding no se atribuye al assessor.
+
+```text
+main baseline                         82d79484630b8636582971e37678f16daf5f1c6c
+PR #262 candidate                     971a2b8d9a1f7e2a7042640dbad23aa11d180e6e
+candidate / merge tree                96fd81cf6d29d0e346392ec6b4e422dacb996903
+Independent Design Fix Validation B   PASS
+candidate Validation #831             SUCCESS
+post-merge Validation #832            SUCCESS
+Ubuntu / Windows                      1981/1981 PASS
+authority_effect                      none
+```
+
+Disposición CURRENT:
+
+```text
+Ground-Truth Repair V0.2 Design       INTEGRATED — PR #262
+old case-set digest                    23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83
+independent old ground-truth review    FAIL
+qualification against old oracle       BLOCKED
+assessor semantic qualification        UNKNOWN
+prior live Run #3                      HISTORICAL EXECUTION EVIDENCE ONLY
+historical experimental model          qwen3.5:9b / NOT PROMOTED
+future PR-B                             NOT AUTHORIZED
+repaired case-set digest                NOT CREATED
+new live experiment / rerun             NOT AUTHORIZED
+semantic_assurance                      NOT_VERIFIED
+E008-SG-02                              OPEN
+support_sufficient                      NOT WIRED / NOT AUTHORIZED
+Protected Finalization                  NOT AUTHORIZED
+model promotion                         NOT AUTHORIZED
+production admission                    NOT AUTHORIZED
+RDD Stage 2                             NOT AUTHORIZED
+authority_effect                        none
+```
+
+La ejecución live previa queda reconocida únicamente como evidencia histórica de ejecución/publicación ligada al corpus viejo. El Design prohíbe consumir sus `assessor_results` o respuestas por caso durante la construcción y revisión del nuevo ground truth.
+
+El corpus vigente aún **no está reparado**. Los bytes actuales y su digest histórico permanecen sin cambios en PR #262. Por ello:
+
+```text
+PR #262 merge
+!= ground-truth implementation
+!= repaired oracle
+!= qwen qualification
+!= model promotion
+!= support_sufficient
+!= production admission
+```
+
+La próxima unidad material posible es PR-B, pero requiere instrucción separada del Owner. Su allowlist inicial permanece limitado a:
+
+```text
+evaluations/e3_governed_evidence_support_assessor_v0/cases.json
+evaluations/e3_governed_evidence_support_assessor_v0/experiment_profile.json
+tests/test_e3_governed_blind_assessor_experiment.py
+tests/test_e3_governed_blind_assessor_ollama_experiment.py
+```
+
+Cualquier necesidad de una quinta superficie, runner, harness, runtime, `src/malak/**`, dependencia o documento de ley exige STOP + re-admisión.
+
+Esta reconciliación es derivada, no normativa y no concede autoridad de implementación.
