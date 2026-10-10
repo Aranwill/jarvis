@@ -2026,35 +2026,44 @@ en semantic truth, model promotion, `support_sufficient` ni autoridad.
 Esta reconciliación es derivada, no normativa, y no autoriza el live experiment
 ni ninguna unidad posterior.
 
-## Reconciliación CURRENT — PR #262 / Ground-Truth Repair V0.2 Design
+## Reconciliación CURRENT — PR #264 / Ground-Truth Repair V0.2
 
-Estado derivado reconciliado contra `main@82d79484630b8636582971e37678f16daf5f1c6c`.
+Estado derivado reconciliado contra
+`main@73f3a953a1e49a6eb1fac61978e29af1a8d9cc37`.
 
-PR #262 integró el diseño gobernado de reparación del ground truth del `E3 Assessor Qualification Pack V0.1`, después de que una revisión independiente del oracle exacto concluyera `FAIL` por insuficiencia semántica del propio benchmark. El finding no se atribuye al assessor.
+PR #262 integró el diseño gobernado del repair. PR #264 integró la
+implementación acotada del ground truth reparado después de Ground-Truth Review,
+Candidate FULL 4R, Independent Candidate Validation y RDD Stage 1 Candidate
+Conformance sobre el candidate exacto.
 
 ```text
-main baseline                         82d79484630b8636582971e37678f16daf5f1c6c
-PR #262 candidate                     971a2b8d9a1f7e2a7042640dbad23aa11d180e6e
-candidate / merge tree                96fd81cf6d29d0e346392ec6b4e422dacb996903
-Independent Design Fix Validation B   PASS
-candidate Validation #831             SUCCESS
-post-merge Validation #832            SUCCESS
-Ubuntu / Windows                      1981/1981 PASS
-authority_effect                      none
+PR #262 Design                         INTEGRATED
+PR #264 candidate                      01c159f989f9c2d845d504b0a847ee58b618f56e
+PR #264 merge/main                     73f3a953a1e49a6eb1fac61978e29af1a8d9cc37
+candidate → merge content              IDENTICAL / 0 file delta
+repaired case-set digest               c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77
+Ground-Truth Review B                  PASS
+Corrected Candidate FULL 4R            PASS
+Independent Candidate Revalidation C   PASS
+RDD Stage 1 Candidate Conformance      PASS
+candidate Validation #842              SUCCESS / 1989 passed Ubuntu + Windows
+post-merge Validation #843             SUCCESS / 1989 passed Ubuntu + Windows
+authority_effect                       none
 ```
 
 Disposición CURRENT:
 
 ```text
-Ground-Truth Repair V0.2 Design       INTEGRATED — PR #262
-old case-set digest                    23e045b5e5aede8341323c486e77893d7161899f0c20870703efff28789f3f83
-independent old ground-truth review    FAIL
-qualification against old oracle       BLOCKED
-assessor semantic qualification        UNKNOWN
-prior live Run #3                      HISTORICAL EXECUTION EVIDENCE ONLY
-historical experimental model          qwen3.5:9b / NOT PROMOTED
-future PR-B                             NOT AUTHORIZED
-repaired case-set digest                NOT CREATED
+Ground-Truth Repair V0.2 Design         INTEGRATED — PR #262
+Ground-Truth Repair V0.2 implementation INTEGRATED — PR #264
+old case-set digest                     HISTORICAL / SUPERSEDED FOR NEW QUALIFICATION
+independent old ground-truth review     FAIL — HISTORICAL
+qualification against old oracle        BLOCKED — HISTORICAL
+prior live Run #3                       HISTORICAL EXECUTION EVIDENCE ONLY
+historical experimental model           qwen3.5:9b / NOT PROMOTED
+repaired case-set digest                c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77
+repaired case-set                       INTEGRATED / candidate-bound validation PASS
+new assessor semantic qualification     NOT YET RE-RUN
 new live experiment / rerun             NOT AUTHORIZED
 semantic_assurance                      NOT_VERIFIED
 E008-SG-02                              OPEN
@@ -2066,29 +2075,19 @@ RDD Stage 2                             NOT AUTHORIZED
 authority_effect                        none
 ```
 
-La ejecución live previa queda reconocida únicamente como evidencia histórica de ejecución/publicación ligada al corpus viejo. El Design prohíbe consumir sus `assessor_results` o respuestas por caso durante la construcción y revisión del nuevo ground truth.
+La ejecución live previa continúa reconocida exclusivamente como Evidence
+histórica ligada al corpus viejo. El FAIL independiente del oracle histórico no
+se atribuye al assessor ni puede reinterpretarse como un FAIL de qwen3.5:9b.
 
-El corpus vigente aún **no está reparado**. Los bytes actuales y su digest histórico permanecen sin cambios en PR #262. Por ello:
+El corpus reparado sí está ahora integrado en `main`; eso no constituye por sí
+mismo una nueva qualification semántica. No se ejecutó ni autorizó un nuevo
+assessor experiment durante PR #264.
 
-```text
-PR #262 merge
-!= ground-truth implementation
-!= repaired oracle
-!= qwen qualification
-!= model promotion
-!= support_sufficient
-!= production admission
-```
+La próxima transición material posible requiere una nueva instrucción del Owner
+que autorice explícitamente el live model experiment / qualification rerun y
+delimite el mecanismo candidato aplicable. Esa transición deberá reutilizar el
+case-set reparado y los contracts/harness/qualification existentes, sin inferir
+`support_sufficient`, promoción, producción, Protected Finalization o RDD Stage 2.
 
-La próxima unidad material posible es PR-B, pero requiere instrucción separada del Owner. Su allowlist inicial permanece limitado a:
-
-```text
-evaluations/e3_governed_evidence_support_assessor_v0/cases.json
-evaluations/e3_governed_evidence_support_assessor_v0/experiment_profile.json
-tests/test_e3_governed_blind_assessor_experiment.py
-tests/test_e3_governed_blind_assessor_ollama_experiment.py
-```
-
-Cualquier necesidad de una quinta superficie, runner, harness, runtime, `src/malak/**`, dependencia o documento de ley exige STOP + re-admisión.
-
-Esta reconciliación es derivada, no normativa y no concede autoridad de implementación.
+Esta reconciliación es derivada, no normativa y no concede autoridad de
+implementación, experimento, Ready, Merge o promoción.
