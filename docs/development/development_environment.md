@@ -407,7 +407,7 @@ Estas prácticas no modifican el Runtime ni el Kernel y no constituyen una fuent
 
 OpenSpec, Gentle AI y otras herramientas externas relacionadas con SDD, TDD, 4R o Receipt-Driven Development no forman parte del baseline oficial mientras no sean evaluadas, aprobadas y documentadas explícitamente.
 
-Malāk adoptó RDD Stage 1 para evidencia estructurada candidate-bound. RDD Stage 2 y etapas posteriores permanecen no autorizadas hasta una admisión independiente.
+Malāk adoptó RDD Stage 1 para evidencia estructurada candidate-bound. RDD Stage 2 también está `ADOPTED / ACTIVE` como tooling de desarrollo candidate-bound y se aplica según la clasificación de riesgo y la admission vigente; RDD Stage 3+ permanece no autorizado.
 
 ---
 
