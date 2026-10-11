@@ -985,3 +985,131 @@ def test_green_r28_no_prompt_or_hidden_ground_truth_is_persisted(
     assert module.EXACT_SYSTEM_PROMPT.encode("utf-8") not in combined
     assert b'"expected_outcome"' not in combined
     assert b'"expected_reason_codes"' not in combined
+class InvalidContentRuntime(FakeRuntime):
+    def __init__(self, raw_content: str) -> None:
+        super().__init__()
+        self.raw_content = raw_content
+
+    def generate(self, request: object) -> ConversationResponse:
+        self.generate_calls.append(request)
+        return ConversationResponse(
+            content=self.raw_content,
+            model=request.model,  # type: ignore[attr-defined]
+            provider="ollama",
+        )
+
+
+def test_u07_red_safe_diagnostics_classify_invalid_json_without_persisting_raw(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _adapter_module()
+    raw_marker = "U07_RAW_MODEL_OUTPUT_MUST_NOT_PERSIST"
+    runtime = InvalidContentRuntime(raw_marker)
+    _install_runtime(monkeypatch, module, runtime)
+    diagnostics: list[str] = []
+    output_dir = tmp_path / "safe-diagnostics-invalid-json"
+
+    artifact = module.run_governed_local_ollama_assessor_experiment_v0(
+        model="example:model",
+        output_dir=output_dir,
+        diagnostic_sink=diagnostics.append,
+    )
+
+    assert diagnostics == ["MODEL_OUTPUT_INVALID_JSON"] * 13
+    summary = module.build_safe_diagnostic_summary_v0(diagnostics)
+    assert summary == {
+        "schema": "MALAK-U07-SAFE-ASSESSOR-DIAGNOSTICS/v0",
+        "failure_counts": {"MODEL_OUTPUT_INVALID_JSON": 13},
+        "authority_effect": "none",
+    }
+
+    observations = [
+        item
+        for case in artifact["case_results"]
+        for item in case["observations"]
+    ]
+    eligible = [
+        item
+        for item in observations
+        if item["input_id"] not in ZERO_GENERATION_INPUTS
+    ]
+    assert len(eligible) == 13
+    assert all(
+        item["outcome"] == "INCONCLUSIVE"
+        and item["reason_codes"] == ["ASSESSOR_OUTPUT_INVALID"]
+        for item in eligible
+    )
+
+    combined = b"\n".join(
+        path.read_bytes()
+        for path in sorted(output_dir.iterdir())
+    )
+    assert raw_marker.encode("utf-8") not in combined
+    assert raw_marker not in json.dumps(summary, sort_keys=True)
+
+
+def test_u07_red_safe_diagnostics_classify_outcome_reason_contract_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _adapter_module()
+    runtime = InvalidContentRuntime(
+        json.dumps(
+            {
+                "outcome": "INCONCLUSIVE",
+                "reason_codes": ["MATERIAL_SUPPORT_CONFIRMED"],
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    )
+    _install_runtime(monkeypatch, module, runtime)
+    diagnostics: list[str] = []
+
+    artifact = module.run_governed_local_ollama_assessor_experiment_v0(
+        model="example:model",
+        output_dir=tmp_path / "safe-diagnostics-pair-mismatch",
+        diagnostic_sink=diagnostics.append,
+    )
+
+    assert diagnostics == ["OUTCOME_REASON_CONTRACT_INVALID"] * 13
+    summary = module.build_safe_diagnostic_summary_v0(diagnostics)
+    assert summary["failure_counts"] == {
+        "OUTCOME_REASON_CONTRACT_INVALID": 13
+    }
+
+    observations = [
+        item
+        for case in artifact["case_results"]
+        for item in case["observations"]
+        if item["input_id"] not in ZERO_GENERATION_INPUTS
+    ]
+    assert len(observations) == 13
+    assert all(
+        item["outcome"] == "INCONCLUSIVE"
+        and item["reason_codes"] == ["ASSESSOR_OUTPUT_INVALID"]
+        for item in observations
+    )
+
+
+def test_u07_red_safe_diagnostics_classify_runtime_generation_exception(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _adapter_module()
+    runtime = FakeRuntime(raise_generation=True)
+    _install_runtime(monkeypatch, module, runtime)
+    diagnostics: list[str] = []
+
+    module.run_governed_local_ollama_assessor_experiment_v0(
+        model="example:model",
+        output_dir=tmp_path / "safe-diagnostics-runtime-error",
+        diagnostic_sink=diagnostics.append,
+    )
+
+    assert diagnostics == ["RUNTIME_GENERATION_EXCEPTION"] * 13
+    assert module.build_safe_diagnostic_summary_v0(diagnostics)[
+        "failure_counts"
+    ] == {"RUNTIME_GENERATION_EXCEPTION": 13}
+
