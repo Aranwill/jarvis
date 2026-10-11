@@ -527,11 +527,11 @@ Gate N
 
 Cuando corresponda FULL 4R, `Risk`, `Readability`, `Reliability` y `Resilience` deben registrar evidencia separada; una única etiqueta `4R PASS` no basta como demostración.
 
-El perfil RDD de Malāk es progresivo y propio: **RDD Stage 1 — Structured Evidence Manifest está ADOPTED / ACTIVE**. Candidate Identity, evidencia candidate-bound, validación independiente, Bounded Correction y Candidate Conformance mejoran la trazabilidad, pero `Evidence != Receipt != Validation != Decision != Authority`. Stage 1 no produce autoridad ni autoriza receipts de Stage 2. **RDD Stage 2 permanece NOT AUTHORIZED**.
+El perfil RDD de Malāk es progresivo y propio: **RDD Stage 1 — Structured Evidence Manifest está ADOPTED / ACTIVE** y **RDD Stage 2 — Candidate-Bound Validation Receipt está ADOPTED / ACTIVE** con aplicabilidad proporcional: risk 0/1 `NOT_APPLICABLE`, risk 2 `OPTIONAL / explicit admission only`, risk 3/4 `REQUIRED`. Candidate Identity, Evidence candidate-bound, validación independiente, Bounded Correction, Candidate Conformance y Receipt mejoran la trazabilidad, pero `Evidence != Receipt != Validation != Decision != Authority`. Ningún Stage concede Ready, Merge ni Authority.
 
 En toda sesión de Malāk, `RDD` debe interpretarse primero como este perfil interno documentado y no como la metodología externa completa ni como una implementación concreta de terceros.
 
-Como adaptación incremental de RDD en Malāk, el alcance del candidate no debe expandirse durante implementación, corrección o review para incorporar mejoras laterales. Una necesidad nueva se registra y se somete a su propio gate; no se introduce silenciosamente en el candidate vigente. Esta regla no activa RDD Stage 2.
+Como adaptación incremental de RDD en Malāk, el alcance del candidate no debe expandirse durante implementación, corrección o review para incorporar mejoras laterales. Una necesidad nueva se registra y se somete a su propio gate; no se introduce silenciosamente en el candidate vigente. Esta regla no cambia por sí sola la aplicabilidad de RDD Stage 2 ni autoriza Stage 3+.
 
 Esta disciplina operacional complementa
 `docs/development/engineering_method.md` y `docs/development/malak_construction_protocol.md`; no las reemplaza ni eleva la autoridad de `AGENTS.md` sobre las fuentes normativas.

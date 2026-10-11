@@ -14,7 +14,7 @@ Todo cambio deberá superar este checklist antes de considerarse finalizado.
 
 La metodología de ingeniería aplicable se define en `docs/development/engineering_method.md`.
 
-La disciplina transversal de revisión, incorporación progresiva de capacidades, gates, métricas, RDD Stage 1 propio de Malāk —adoptado y activo— y reconciliación derivada se define en `docs/development/malak_construction_protocol.md`. RDD Stage 2 continúa no autorizado.
+La disciplina transversal de revisión, incorporación progresiva de capacidades, gates, métricas, RDD Stage 1 propio de Malāk —adoptado y activo—, RDD Stage 2 —adoptado y activo con aplicabilidad proporcional— y reconciliación derivada se define en `docs/development/malak_construction_protocol.md`. Stage 3+ continúa no autorizado.
 
 La barrera de admisión repository-first previa a todo trabajo material se define
 en `docs/development/malak_construction_preflight.md`.
@@ -322,7 +322,7 @@ Para todo cambio material sujeto a RDD Stage 1, validar los checkpoints por sepa
 - [ ] Se definió que un cambio de candidate invalida la evidencia afectada.
 - [ ] Findings y bounded correction no pueden ampliar scope automáticamente.
 - [ ] `authority_effect` permanece `none`.
-- [ ] RDD Stage 2 permanece explícitamente no autorizado.
+- [ ] La aplicabilidad de RDD Stage 2 quedó declarada sin convertir Receipt en Authority.
 - [ ] Un resultado distinto de PASS bloquea RED.
 
 ### Post-GREEN / after required candidate validation / pre-human-review — RDD Stage 1 Candidate Conformance
@@ -338,8 +338,26 @@ Para todo cambio material sujeto a RDD Stage 1, validar los checkpoints por sepa
 - [ ] Producer/validator provenance está presente y la independencia real fue demostrada cuando correspondía.
 - [ ] El resultado terminal fue agregado correctamente.
 - [ ] `authority_effect` es exactamente `none`.
-- [ ] No aparecieron estados/campos/efectos de RDD Stage 2.
+- [ ] El Manifest Stage 1 no embebe campos/efectos de Stage 2; el Receipt, cuando aplica, permanece como artifact separado.
 - [ ] Si el candidate cambió, se regeneró/revalidó la evidencia RDD afectada.
+
+### RDD Stage 2 — Candidate-Bound Validation Receipt
+
+Cuando Stage 2 aplique:
+
+- [ ] risk 0/1 quedó N/A; risk 2 tiene admisión explícita; risk 3/4 lo ejecuta.
+- [ ] Existe un `MALAK-EVIDENCE-MANIFEST/v1` real y válido para risk 3/4.
+- [ ] Candidate Conformance Stage 1 ya terminó antes de emitir el Receipt.
+- [ ] Repository, baseline, candidate, tree, unit, risk, spec, scope, correction round, findings y Manifest result están ligados sin overrides silenciosos.
+- [ ] Strict JSON rechazó duplicate keys y non-standard numbers antes de canonicalización/digest.
+- [ ] Manifest digest y Receipt digest fueron recomputados de forma determinista.
+- [ ] `PASS | FAIL | INCONCLUSIVE` se preservó sin reinterpretación.
+- [ ] El Receipt es aplicable al candidate exacto actual; stale Receipt no se reutiliza.
+- [ ] `--output`, si se usa, queda fuera del repository root y no sobrescribe inputs.
+- [ ] Se conserva `SHA-256 integrity != authenticity != Authority`.
+- [ ] `authority_effect` es exactamente `none`.
+- [ ] Receipt validator PASS no se presenta como Ready, Merge ni aprobación humana.
+- [ ] Stage 3+, Cognitive Receipt, Protected Finalization y Persistence Authorization permanecen fuera de scope.
 
 Además, validar las invariantes transversales:
 
