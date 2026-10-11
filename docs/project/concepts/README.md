@@ -114,7 +114,18 @@ Memory/Knowledge poisoning, supply chain de AI, identidad y delegación,
 contención sistémica de componentes comprometidos, deception/forensics,
 interoperabilidad gobernada y evolución controlada.
 
-No crea nuevas capabilities ni autoriza implementación.
+También preserva un `Research Incubation Backlog` sin autoridad operativa para:
+
+- Software Quality Assurance, métricas, Test Coverage, Mutation Testing,
+  Property-Based Testing, Quality Baseline/Regression/Drift y mantenibilidad;
+- Dream-RSI únicamente como insumo para Governed Counterfactual Replay;
+- research loops tipo AutoResearch subordinados a evidencia y gobernanza;
+- Reverse Engineering / Methodology Distillation sobre material público o autorizado;
+- Cognitive Dataset, cross-model invariants, evaluator awareness y líneas
+  causal/mechanistic en `RESEARCH / WATCH`;
+- ODD en `OBSERVE`, sin introducir un framework ODD dentro de Malāk.
+
+No crea nuevas capabilities, sistemas, managers, dependencias ni autoriza implementación.
 
 Estado:
 
