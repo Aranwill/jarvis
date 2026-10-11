@@ -258,7 +258,11 @@ def _emit_safe_diagnostic_v0(
     if code not in _SAFE_DIAGNOSTIC_CODES:
         raise RuntimeError("internal safe diagnostic code mismatch")
     if diagnostic_sink is not None:
-        diagnostic_sink(code)
+        try:
+            diagnostic_sink(code)
+        except Exception:
+            # Diagnostic observation is best-effort and non-authoritative.
+            return
 
 
 def build_safe_diagnostic_summary_v0(
@@ -983,12 +987,16 @@ def main(argv: list[str] | None = None) -> int:
     except LocalOllamaExperimentError as exc:
         print(str(exc), file=__import__("sys").stderr)
         return 1
-    summary = build_safe_diagnostic_summary_v0(diagnostic_codes)
-    print(
-        "MALAK_U07_SAFE_DIAGNOSTICS="
-        + _canonical_json(summary).decode("utf-8"),
-        file=__import__("sys").stderr,
-    )
+    try:
+        summary = build_safe_diagnostic_summary_v0(diagnostic_codes)
+        print(
+            "MALAK_U07_SAFE_DIAGNOSTICS="
+            + _canonical_json(summary).decode("utf-8"),
+            file=__import__("sys").stderr,
+        )
+    except Exception:
+        # A committed experiment must not be invalidated by diagnostics I/O.
+        pass
     return 0
 
 

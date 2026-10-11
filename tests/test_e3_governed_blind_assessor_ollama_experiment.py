@@ -1112,3 +1112,44 @@ def test_u07_red_safe_diagnostics_classify_runtime_generation_exception(
     assert module.build_safe_diagnostic_summary_v0(diagnostics)[
         "failure_counts"
     ] == {"RUNTIME_GENERATION_EXCEPTION": 13}
+
+def test_u07_safe_diagnostic_sink_failure_cannot_change_assessor_result(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _adapter_module()
+    runtime = InvalidContentRuntime("not-json")
+    _install_runtime(monkeypatch, module, runtime)
+
+    calls = 0
+
+    def failing_sink(_code: str) -> None:
+        nonlocal calls
+        calls += 1
+        raise RuntimeError("diagnostic sink unavailable")
+
+    output_dir = tmp_path / "safe-diagnostics-failing-sink"
+    artifact = module.run_governed_local_ollama_assessor_experiment_v0(
+        model="example:model",
+        output_dir=output_dir,
+        diagnostic_sink=failing_sink,
+    )
+
+    assert calls == 13
+    observations = [
+        item
+        for case in artifact["case_results"]
+        for item in case["observations"]
+        if item["input_id"] not in ZERO_GENERATION_INPUTS
+    ]
+    assert len(observations) == 13
+    assert all(
+        item["outcome"] == "INCONCLUSIVE"
+        and item["reason_codes"] == ["ASSESSOR_OUTPUT_INVALID"]
+        for item in observations
+    )
+    assert {path.name for path in output_dir.iterdir()} == {
+        "runtime_provenance.json",
+        "experiment_profile.json",
+        "assessor_results.json",
+    }
