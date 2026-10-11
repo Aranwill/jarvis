@@ -2450,7 +2450,7 @@ No existe autorización implícita para model rerun, model promotion,
 o RDD Stage 2. Esta reconciliación sólo alinea planificación derivada con el
 baseline material integrado.
 
-## Reconciliación CURRENT — PR #267 / RDD Stage 2 + Research Incubation
+## Reconciliación CURRENT — PR #267 / RDD Stage 2
 
 Esta sección supersede para planificación CURRENT las declaraciones previas que
 mantenían RDD Stage 2 como no autorizado.
@@ -2469,20 +2469,3 @@ Stage 3+                            NOT AUTHORIZED
 authority_effect                    none
 ```
 
-Esta actualización **no promueve Research al roadmap**. El Research Horizon
-mantiene un backlog de incubación no normativo para QA/Software Quality,
-Dream-RSI / Governed Counterfactual Replay, investigación tipo AutoResearch,
-Reverse Engineering / Methodology Distillation y líneas cognitivas/WATCH.
-
-```text
-research backlog != implementation roadmap
-research finding != admitted work
-quality metric != refactor authorization
-counterfactual replay != Memory / Knowledge / Authority
-external methodology != Malāk authority
-```
-
-Cualquier transición desde esas líneas hacia trabajo operativo deberá volver a
-pasar por baseline vigente, Construction Preflight, Reuse Review,
-Necessity & Complexity Review, clasificación ADOPT/ADAPT/OBSERVE/REJECT y
-autorización explícita del Owner.

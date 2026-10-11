@@ -4,8 +4,8 @@ status: activo
 authority: no normativa
 document_role: anexo de captura y seguimiento
 introduced_in: Sprint 7.4
-as_of_date: 2026-08-12
-as_of_commit: 48d6ea2de9d7bd60495208b77d81175415bc3350
+as_of_date: 2026-10-10
+as_of_commit: 02daf578012c662f0686357aa48b25722897c82a
 branch: main
 language: es
 ---
@@ -229,6 +229,15 @@ El ciclo no deberá depender de conversaciones completas ni de la cadena de pens
 - gobernanza humana;
 - trazabilidad y rollback.
 
+**Referencia conceptual de investigación**
+
+El `Research Incubation Backlog` de
+`docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md` conserva Dream-RSI /
+`Governed Counterfactual Replay` y research loops como insumos para evaluar
+mejoras mediante replay, experimentación acotada y evidencia. Esa referencia no
+crea una nueva iniciativa ni autoriza self-modification, Memory, Knowledge
+promotion o cambio automático de policy.
+
 **Próximo paso gobernado**
 
 Mantenerla en planificación futura. No diseñar ni implementar el loop dentro del Sprint 7.4.
@@ -435,6 +444,36 @@ Consolidar herramientas de calidad y desarrollo reproducibles sin instalar contr
 - integración local y CI;
 - reglas de calidad reproducibles;
 - política de adopción y rollback.
+
+**Quality Assurance y medición candidatas**
+
+La iniciativa también conserva para evaluación futura, sin seleccionar todavía
+herramientas concretas:
+
+- procedimientos de QA y quality gates reproducibles;
+- line coverage, branch coverage, coverage delta y critical-contract coverage;
+- Mutation Testing, mutation score y análisis de surviving mutants;
+- Property-Based Testing, invariant, boundary y negative testing;
+- flaky-test detection, runtime y reproducibilidad de la suite;
+- métricas de complejidad, duplicación, coupling/cohesion, maintainability y
+  change blast radius;
+- linting, type checking, dead-code, dependency y security/static analysis;
+- Quality Baseline, Quality Regression y Quality Drift.
+
+Principios:
+
+```text
+coverage != test quality
+mutation score != correctness
+lint PASS != maintainability
+quality metric != Authority
+code smell != authorization to refactor
+```
+
+Estas líneas deben evaluarse junto con IDEA-011, IDEA-014, los estándares de
+código existentes y el Engineering Method. `pytest-cov`, frameworks de Mutation
+Testing, Hypothesis, Ruff, mypy u otras herramientas son candidates; no están
+seleccionadas ni autorizadas por esta entrada.
 
 **Restricciones**
 
@@ -736,6 +775,16 @@ Cada Implementation Packet podrá declarar:
 - alternativa más simple evaluada;
 - necesidad de revisión arquitectónica profunda.
 
+**Relación con Quality Metrics**
+
+El Complexity Budget podrá consumir evidencia de complejidad ciclomática o
+cognitiva, duplicación, coupling/cohesion, crecimiento de superficie pública,
+dependencias y blast radius únicamente como señales de coste y evolución.
+
+Las métricas no deben transformarse en scoring universal ni autorizar
+refactorizaciones por sí mismas. Un delta de calidad sólo puede originar un
+finding o una hipótesis de mejora que deberá demostrar necesidad y beneficio.
+
 **Restricciones**
 
 - no convertir el presupuesto en una métrica rígida o universal;
@@ -895,6 +944,33 @@ REQUIRES_RESEARCH
 DEFERRED
 BLOCKING
 ```
+
+**Métodos de investigación candidatos**
+
+Cuando una pregunta concreta lo justifique, esta iniciativa puede emplear de
+forma acotada:
+
+- research loops de hipótesis → experimento → evidencia → finding → propuesta;
+- Reverse Engineering sobre sistemas, repositorios, interfaces y entornos
+  públicos o expresamente autorizados;
+- Methodology Distillation para extraer invariantes y propiedades sin copiar una
+  implementación externa;
+- cross-source corroboration;
+- comparación sistemática contra el baseline vigente de Malāk;
+- clasificación final `ADOPT | ADAPT | OBSERVE | REJECT`.
+
+Guardrails:
+
+```text
+reverse-engineered observation != truth
+distilled methodology != architecture authority
+external implementation != Malāk baseline
+research finding != implementation authorization
+```
+
+No se utilizará esta línea para recuperar secretos, interfaces ocultas,
+credenciales, material protegido ni contenido incompatible con autorización o
+licencia.
 
 **Reglas**
 

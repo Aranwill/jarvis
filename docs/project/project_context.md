@@ -2092,7 +2092,7 @@ case-set reparado y los contracts/harness/qualification existentes, sin inferir
 Esta reconciliación es derivada, no normativa y no concede autoridad de
 implementación, experimento, Ready, Merge o promoción.
 
-## Reconciliación CURRENT — PR #267 / RDD Stage 2 y Research Horizon
+## Reconciliación CURRENT — PR #267 / RDD Stage 2
 
 Estado derivado vigente contra `main@02daf578012c662f0686357aa48b25722897c82a`.
 
@@ -2120,18 +2120,3 @@ Los bloques CURRENT anteriores que contienen `RDD Stage 2 = NOT AUTHORIZED`
 se conservan como trazabilidad del estado que describían en su momento; esta
 sección los supersede para interpretar el estado presente.
 
-El Research Horizon fue revalidado contra este baseline y conserva, sin crear
-arquitectura nueva:
-
-- Software Quality Assurance & Engineering Research;
-- cobertura de tests, Mutation Testing, Property-Based Testing y métricas de calidad;
-- Quality Baseline / Quality Regression / Quality Drift;
-- Clean Code como sublínea de mantenibilidad y no como dogma;
-- Dream-RSI adaptado sólo como investigación de Governed Counterfactual Replay;
-- investigación tipo AutoResearch subordinada a IDEA-002 / IDEA-017;
-- Reverse Engineering / Methodology Distillation sobre sistemas públicos o autorizados;
-- Cognitive Dataset / cross-model invariants, evaluator awareness y causal/mechanistic interpretability como líneas Research/WATCH;
-- ODD en OBSERVE, sin crear un framework ODD dentro de Malāk.
-
-Ninguna de estas líneas autoriza tooling, refactor, nueva Capability, componente,
-runtime, agente, persistencia, promoción de conocimiento o self-modification.

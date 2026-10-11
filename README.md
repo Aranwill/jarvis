@@ -34,7 +34,7 @@ Sprint 7.10 — Conversation Session Isolation Foundation
 
 Después de Sprint 7.11 se integraron unidades aisladas de Memory y Cognitive Assurance sin constituir Sprint 7.12. El baseline actual incluye `EpisodicCandidateContentIdentity` y su propagación/binding gobernado a través de la cadena episódica, además de G2A — Protected Finalization Foundation y G2 — Assurance Signal Authority & Projection Foundation en aislamiento.
 
-CAL-014 — Protected Durable Reliance está activado normativamente mediante CC-013, R-023 y ADR-006. Esa activación no autoriza Persistence Authorization, Persistent Memory, Conversation G2B, RDD Stage 2 ni Sprint 7.12.
+CAL-014 — Protected Durable Reliance está activado normativamente mediante CC-013, R-023 y ADR-006. Esa activación, por sí sola, no autoriza Persistence Authorization, Persistent Memory, Conversation G2B ni Sprint 7.12. RDD Stage 2 fue adoptado posteriormente y de forma separada mediante PR #267.
 
 La interfaz disponible actualmente es una CLI técnica que conserva la ruta conversacional y expone, además, superficies read-only de Engineering, Explorer, Trace y Governed Self-Review.
 
@@ -675,7 +675,7 @@ El merge de PR #264 no autoriza ese experimento, selección/promoción de modelo
 Qualification evidence continúa siendo Evidence y no semantic truth, permiso,
 decisión o Authority.
 
-## Reconciliación CURRENT — PR #267 / RDD Stage 2 y Research Horizon
+## Reconciliación CURRENT — PR #267 / RDD Stage 2
 
 Esta sección supersede **únicamente para el estado CURRENT** las declaraciones
 anteriores que todavía presentan RDD Stage 2 como `NOT AUTHORIZED`. Los registros
@@ -712,12 +712,5 @@ Manifest Stage 1. Continúa vigente:
 Evidence != Receipt != Validation != Decision != Authority
 Receipt validator PASS != Ready != Merge != Authority
 ```
-
-La actualización del Research Horizon preserva Software Quality Assurance,
-Dream-RSI / Governed Counterfactual Replay, investigación tipo AutoResearch,
-Reverse Engineering / Methodology Distillation y líneas cognitivas pendientes
-como **Research / WATCH / REINFORCE_EXISTING** según corresponda. Su registro no
-crea capabilities, componentes, sprints, dependencias ni autorización de
-implementación.
 
 Esta reconciliación es derivada y no normativa.
