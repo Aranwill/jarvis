@@ -13,6 +13,7 @@ import hashlib
 import importlib.util
 import json
 import re
+from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +57,16 @@ PROTECTED_FINALIZATION_WIRING_AUTHORIZED = False
 MODEL_PROMOTION_AUTHORIZED = False
 RDD_STAGE_2_AUTHORIZED = False
 AUTHORITY_EFFECT = "none"
+
+SAFE_DIAGNOSTIC_SCHEMA = "MALAK-U07-SAFE-ASSESSOR-DIAGNOSTICS/v0"
+_SAFE_DIAGNOSTIC_CODES = frozenset(
+    {
+        "RUNTIME_GENERATION_EXCEPTION",
+        "RUNTIME_RESPONSE_IDENTITY_INVALID",
+        "MODEL_OUTPUT_PARSE_OR_SCHEMA_INVALID",
+        "OUTCOME_REASON_CONTRACT_INVALID",
+    }
+)
 
 EXACT_SYSTEM_PROMPT = "\n".join(
     (
@@ -218,6 +229,56 @@ def parse_model_assessor_output_v0(raw: str) -> dict[str, object]:
     return {
         "outcome": outcome,
         "reason_codes": list(reasons),
+    }
+
+
+def _model_output_pair_is_valid_v0(value: dict[str, object]) -> bool:
+    outcome = value["outcome"]
+    reasons = value["reason_codes"]
+    assert isinstance(outcome, str)
+    assert isinstance(reasons, list)
+    if outcome == "SUPPORTED":
+        return reasons == ["MATERIAL_SUPPORT_CONFIRMED"]
+    if outcome == "INSUFFICIENT":
+        return all(
+            reason
+            in {
+                "SUPPORTING_REFS_IRRELEVANT",
+                "SUPPORTING_REFS_INSUFFICIENT",
+            }
+            for reason in reasons
+        )
+    return "MATERIAL_SUPPORT_CONFIRMED" not in reasons
+
+
+def _emit_safe_diagnostic_v0(
+    diagnostic_sink: Callable[[str], None] | None,
+    code: str,
+) -> None:
+    if code not in _SAFE_DIAGNOSTIC_CODES:
+        raise RuntimeError("internal safe diagnostic code mismatch")
+    if diagnostic_sink is not None:
+        try:
+            diagnostic_sink(code)
+        except Exception:
+            # Diagnostic observation is best-effort and non-authoritative.
+            return
+
+
+def build_safe_diagnostic_summary_v0(
+    codes: Iterable[str],
+) -> dict[str, object]:
+    counts: dict[str, int] = {}
+    for code in codes:
+        if code not in _SAFE_DIAGNOSTIC_CODES:
+            raise ValueError("unsafe or unknown diagnostic code")
+        counts[code] = counts.get(code, 0) + 1
+    return {
+        "schema": SAFE_DIAGNOSTIC_SCHEMA,
+        "failure_counts": {
+            code: counts[code] for code in sorted(counts)
+        },
+        "authority_effect": "none",
     }
 
 
@@ -613,6 +674,7 @@ def run_governed_local_ollama_assessor_experiment_v0(
     *,
     model: str,
     output_dir: Path,
+    diagnostic_sink: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
     if (
         not isinstance(model, str)
@@ -622,6 +684,8 @@ def run_governed_local_ollama_assessor_experiment_v0(
         raise LocalOllamaExperimentError(
             "model must be an exact non-empty trimmed string"
         )
+    if diagnostic_sink is not None and not callable(diagnostic_sink):
+        raise TypeError("diagnostic_sink must be callable or None")
 
     reserved = _reserve_output_dir_v0(Path(output_dir))
     staging = reserved / ".staging"
@@ -739,19 +803,44 @@ def run_governed_local_ollama_assessor_experiment_v0(
             )
 
             if generation_error is not None:
+                _emit_safe_diagnostic_v0(
+                    diagnostic_sink,
+                    "RUNTIME_GENERATION_EXCEPTION",
+                )
                 raise generation_error
             assert response is not None
             if response.model != model:
+                _emit_safe_diagnostic_v0(
+                    diagnostic_sink,
+                    "RUNTIME_RESPONSE_IDENTITY_INVALID",
+                )
                 raise LocalOllamaExperimentError(
                     "runtime response model mismatch"
                 )
             if response.provider != "ollama":
+                _emit_safe_diagnostic_v0(
+                    diagnostic_sink,
+                    "RUNTIME_RESPONSE_IDENTITY_INVALID",
+                )
                 raise LocalOllamaExperimentError(
                     "runtime response provider mismatch"
                 )
-            return parse_model_assessor_output_v0(
-                response.content
-            )
+            try:
+                parsed = parse_model_assessor_output_v0(
+                    response.content
+                )
+            except LocalOllamaExperimentError:
+                _emit_safe_diagnostic_v0(
+                    diagnostic_sink,
+                    "MODEL_OUTPUT_PARSE_OR_SCHEMA_INVALID",
+                )
+                raise
+            if not _model_output_pair_is_valid_v0(parsed):
+                _emit_safe_diagnostic_v0(
+                    diagnostic_sink,
+                    "OUTCOME_REASON_CONTRACT_INVALID",
+                )
+            return parsed
 
         artifact = (
             harness.run_governed_blind_assessor_experiment_v0(
@@ -888,14 +977,26 @@ def build_argument_parser_v0() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_argument_parser_v0().parse_args(argv)
+    diagnostic_codes: list[str] = []
     try:
         run_governed_local_ollama_assessor_experiment_v0(
             model=args.model,
             output_dir=args.output_dir,
+            diagnostic_sink=diagnostic_codes.append,
         )
     except LocalOllamaExperimentError as exc:
         print(str(exc), file=__import__("sys").stderr)
         return 1
+    try:
+        summary = build_safe_diagnostic_summary_v0(diagnostic_codes)
+        print(
+            "MALAK_U07_SAFE_DIAGNOSTICS="
+            + _canonical_json(summary).decode("utf-8"),
+            file=__import__("sys").stderr,
+        )
+    except Exception:
+        # A committed experiment must not be invalidated by diagnostics I/O.
+        pass
     return 0
 
 
