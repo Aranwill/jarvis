@@ -645,14 +645,16 @@ Estado actual:
 
 ```text
 concept preserved: YES
-constitutional promotion: NOT STARTED
-ADR: NOT CREATED
-Blueprint amendment: NOT AUTHORIZED
-Cognitive Constitution amendment: NOT AUTHORIZED
-response assurance implementation: NOT AUTHORIZED
+constitutional promotion: PARTIALLY MATERIALIZED / ACTIVE
+CC-011 / CC-012: ACTIVE
+Blueprint R-022: ACTIVE
+ADR-005: ACCEPTED
+Protected Finalization Foundation: INTEGRATED / ISOLATED
+CAL-014 / CC-013 / R-023 / ADR-006: ACTIVE / ACCEPTED — separate durable-reliance boundary
+response assurance completion: NOT_VERIFIED — E008-SG-02 OPEN
 RAG: NOT AUTHORIZED BY THIS DOCUMENT
 persistent Memory: NOT AUTHORIZED BY THIS DOCUMENT
-RDD Stage 2: NOT AUTHORIZED
+RDD Stage 2: ADOPTED / ACTIVE — development tooling only
 ```
 
 Este documento no modifica autoridad ni baseline por sí mismo.

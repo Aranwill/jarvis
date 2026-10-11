@@ -3338,7 +3338,9 @@ Cuando dos diseños satisfagan los mismos requisitos de seguridad, gobernanza, t
 
 **Aplicación a las futuras CLI**
 
-La existencia de IDEA-021 e IDEA-022 no autoriza construir CLIs completas de forma anticipada.
+La existencia de IDEA-021 no autoriza construir CLIs completas de forma anticipada.
+
+La referencia histórica `IDEA-022` usada previamente en esta sección no corresponde a una entrada definida en este backlog al baseline vigente. Su intención permanece `UNCONFIRMED`: no debe interpretarse como iniciativa, dependencia, roadmap ni autorización, y no se le asigna nombre o alcance por inferencia.
 
 La CLI de Malāk deberá crecer únicamente junto con capacidades reales ya existentes. Una progresión candidata es:
 
