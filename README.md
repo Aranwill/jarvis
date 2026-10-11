@@ -591,7 +591,8 @@ live Ollama assessor experiment   NOT AUTHORIZED
 exact assessor model              NOT SELECTED / NOT AUTHORIZED
 semantic_assurance                NOT_VERIFIED
 support_sufficient                NOT WIRED / NOT AUTHORIZED
-Protected Finalization            NOT AUTHORIZED
+Protected Finalization Foundation  INTEGRATED / ISOLATED
+Protected Finalization productive wiring/use beyond foundation  NOT AUTHORIZED
 model promotion                   NOT AUTHORIZED
 production admission              NOT AUTHORIZED
 RDD Stage 2                       NOT AUTHORIZED

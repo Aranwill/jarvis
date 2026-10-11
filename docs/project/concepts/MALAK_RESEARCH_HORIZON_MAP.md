@@ -1032,7 +1032,6 @@ aprobación o autoridad.
 | `EXT-25` | Gentleman Programming — Gentle AI ODD/RDD, `main` revisado 2026-09-20 | ODD separa autorización, exploración, incertidumbre, proporcionalidad y ejecución; RDD revisa candidatos terminados con identidad/evidencia acotada | separar método de trabajo, assurance y delivery evita convertir una metodología externa en autoridad; formalizar sólo cuando complejidad/recoverability lo justifiquen | Engineering Method / future RDD / Engineering Intelligence | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar ODD/RDD como framework, copiar Engram como Task State o importar sus heurísticas numéricas |
 
 | `EXT-26` | Stanford MAST — Agent JIT Compilation, ICML 2026 | planes ejecutables con pre/postcondiciones, validación contra tools y selección considerando coste | planes y decisiones de ejecución pueden expresarse mediante contratos verificables antes de delegar razonamiento libre | Execution Contracts / Planning / deterministic validation | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | adoptar su planner, compiler, tool protocol o arquitectura completa |
-| `EXT-27` | Zheng et al. — *Dream-RSI: Recursive Self-Improvement through Evolving Worlds*, arXiv:2609.14858 + official `zhengkid/Dream-RSI`, revisados 2026-10-10 | historial de discovery como replay simulator y evaluación off-policy de políticas de exploración sin modificar el coding agent subyacente | estudiar replay contrafactual gobernado para comparar estrategias de exploración con evidencia histórica antes de ejecutar nuevas trayectorias costosas | IDEA-002 / Governed Self-Review / Trace & Replay / future Sandbox | `CORROBORATION` + `RESEARCH_INPUT` | adoptar recursive self-modification, promoción automática de policy, tratar replay como verdad/memoria/autoridad o introducir un `DreamManager` |
 
 
 ### 19.3. Regla de revalidación
@@ -1169,6 +1168,11 @@ seleccionadas ni autorizadas.
 #### B. Dream-RSI → Governed Counterfactual Replay
 
 **Disposición:** `ADAPT / RESEARCH`.
+
+Fuente de investigación preservada en este mismo backlog, sin crear una entrada
+`EXT` adicional: Zheng et al., *Dream-RSI: Recursive Self-Improvement through
+Evolving Worlds*, arXiv:2609.14858, junto con el repositorio oficial
+`zhengkid/Dream-RSI`, revisados 2026-10-10.
 
 Dream-RSI aporta como señal útil la separación entre el coding agent y una
 política de exploración que puede evaluarse contra discovery histories
