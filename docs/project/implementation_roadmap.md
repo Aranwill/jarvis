@@ -2468,4 +2468,3 @@ risk 3/4                            REQUIRED
 Stage 3+                            NOT AUTHORIZED
 authority_effect                    none
 ```
-

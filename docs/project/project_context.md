@@ -2119,4 +2119,3 @@ risk 3/4 → REQUIRED
 Los bloques CURRENT anteriores que contienen `RDD Stage 2 = NOT AUTHORIZED`
 se conservan como trazabilidad del estado que describían en su momento; esta
 sección los supersede para interpretar el estado presente.
-
