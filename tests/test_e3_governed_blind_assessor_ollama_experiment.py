@@ -1112,4 +1112,3 @@ def test_u07_red_safe_diagnostics_classify_runtime_generation_exception(
     assert module.build_safe_diagnostic_summary_v0(diagnostics)[
         "failure_counts"
     ] == {"RUNTIME_GENERATION_EXCEPTION": 13}
-
