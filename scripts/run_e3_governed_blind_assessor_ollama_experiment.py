@@ -62,17 +62,7 @@ SAFE_DIAGNOSTIC_SCHEMA = "MALAK-U07-SAFE-ASSESSOR-DIAGNOSTICS/v0"
 _SAFE_DIAGNOSTIC_CODES = frozenset(
     {
         "RUNTIME_GENERATION_EXCEPTION",
-        "RESPONSE_MODEL_MISMATCH",
-        "RESPONSE_PROVIDER_MISMATCH",
-        "MODEL_OUTPUT_EMPTY",
-        "MODEL_OUTPUT_NOT_UTF8",
-        "MODEL_OUTPUT_TOO_LARGE",
-        "MODEL_OUTPUT_INVALID_JSON",
-        "MODEL_OUTPUT_INVALID_ROOT",
-        "MODEL_OUTPUT_KEYS_MISMATCH",
-        "MODEL_OUTPUT_OUTCOME_INVALID",
-        "MODEL_OUTPUT_REASON_CODES_INVALID",
-        "MODEL_OUTPUT_REASON_CODE_UNKNOWN",
+        "RUNTIME_RESPONSE_IDENTITY_INVALID",
         "MODEL_OUTPUT_PARSE_OR_SCHEMA_INVALID",
         "OUTCOME_REASON_CONTRACT_INVALID",
     }
@@ -240,28 +230,6 @@ def parse_model_assessor_output_v0(raw: str) -> dict[str, object]:
         "outcome": outcome,
         "reason_codes": list(reasons),
     }
-
-
-def _safe_diagnostic_code_for_assessor_exception_v0(
-    exc: Exception,
-) -> str:
-    if not isinstance(exc, LocalOllamaExperimentError):
-        return "RUNTIME_GENERATION_EXCEPTION"
-    by_message = {
-        "model assessor output is empty": "MODEL_OUTPUT_EMPTY",
-        "model assessor output is not valid UTF-8 text": "MODEL_OUTPUT_NOT_UTF8",
-        "model assessor output exceeds hard byte limit": "MODEL_OUTPUT_TOO_LARGE",
-        "model assessor output is invalid JSON": "MODEL_OUTPUT_INVALID_JSON",
-        "model assessor output root must be an object": "MODEL_OUTPUT_INVALID_ROOT",
-        "model assessor output keys mismatch": "MODEL_OUTPUT_KEYS_MISMATCH",
-        "model assessor outcome is invalid": "MODEL_OUTPUT_OUTCOME_INVALID",
-        "model assessor reason_codes are invalid": "MODEL_OUTPUT_REASON_CODES_INVALID",
-        "model assessor reason code is invalid": "MODEL_OUTPUT_REASON_CODE_UNKNOWN",
-    }
-    return by_message.get(
-        str(exc),
-        "MODEL_OUTPUT_PARSE_OR_SCHEMA_INVALID",
-    )
 
 
 def _model_output_pair_is_valid_v0(value: dict[str, object]) -> bool:
@@ -840,7 +808,7 @@ def run_governed_local_ollama_assessor_experiment_v0(
             if response.model != model:
                 _emit_safe_diagnostic_v0(
                     diagnostic_sink,
-                    "RESPONSE_MODEL_MISMATCH",
+                    "RUNTIME_RESPONSE_IDENTITY_INVALID",
                 )
                 raise LocalOllamaExperimentError(
                     "runtime response model mismatch"
@@ -848,7 +816,7 @@ def run_governed_local_ollama_assessor_experiment_v0(
             if response.provider != "ollama":
                 _emit_safe_diagnostic_v0(
                     diagnostic_sink,
-                    "RESPONSE_PROVIDER_MISMATCH",
+                    "RUNTIME_RESPONSE_IDENTITY_INVALID",
                 )
                 raise LocalOllamaExperimentError(
                     "runtime response provider mismatch"
@@ -857,10 +825,10 @@ def run_governed_local_ollama_assessor_experiment_v0(
                 parsed = parse_model_assessor_output_v0(
                     response.content
                 )
-            except LocalOllamaExperimentError as exc:
+            except LocalOllamaExperimentError:
                 _emit_safe_diagnostic_v0(
                     diagnostic_sink,
-                    _safe_diagnostic_code_for_assessor_exception_v0(exc),
+                    "MODEL_OUTPUT_PARSE_OR_SCHEMA_INVALID",
                 )
                 raise
             if not _model_output_pair_is_valid_v0(parsed):

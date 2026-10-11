@@ -1016,11 +1016,11 @@ def test_u07_red_safe_diagnostics_classify_invalid_json_without_persisting_raw(
         diagnostic_sink=diagnostics.append,
     )
 
-    assert diagnostics == ["MODEL_OUTPUT_INVALID_JSON"] * 13
+    assert diagnostics == ["MODEL_OUTPUT_PARSE_OR_SCHEMA_INVALID"] * 13
     summary = module.build_safe_diagnostic_summary_v0(diagnostics)
     assert summary == {
         "schema": "MALAK-U07-SAFE-ASSESSOR-DIAGNOSTICS/v0",
-        "failure_counts": {"MODEL_OUTPUT_INVALID_JSON": 13},
+        "failure_counts": {"MODEL_OUTPUT_PARSE_OR_SCHEMA_INVALID": 13},
         "authority_effect": "none",
     }
 
