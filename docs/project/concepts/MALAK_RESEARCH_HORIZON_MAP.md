@@ -5,8 +5,9 @@ authority: non_normative
 document_role: research_horizon_reconciliation
 language: es
 created: 2026-09-09
+updated: 2026-10-10
 as_of_branch: main
-as_of_commit: cc9c7373879555a3eb267cd91be5228207427ae8
+as_of_commit: 02daf578012c662f0686357aa48b25722897c82a
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md
@@ -343,16 +344,12 @@ Consumption EVALUATED != persistence authorization
 ELIGIBLE != persistence authorization
 ```
 
-El residual inmediato ya no es `Projection → Admission`. PR #93 demostró que
-`candidate_id` binding no equivale a identidad del contenido del candidate y
-seleccionó G0/G1 para un `EpisodicCandidateContentIdentity` determinista y
-versionado. G2, implementación y propagación de esa identidad permanecen sin
-autorización. Persistence Authorization continúa diferida hasta que exista
-binding end-to-end suficiente.
-
-Después de esa frontera, el trabajo restante incluye propagar de forma gobernada
-trust, taint, revocation y quarantine hacia persistencia, retrieval y promoción a
-Knowledge.
+El residual inmediato ya no es `Projection → Admission` ni Candidate Content
+Identity. El baseline actual ya materializa identidad de contenido episódico,
+su propagación/binding, Persistence Readiness y la composición gobernada del
+`AuthorizationRequest` de persistencia. La frontera productiva continúa detenida
+antes de la decisión/enforcement de autorización y antes de cualquier durable
+write.
 
 La futura Memory no deberá reducirse a almacenamiento y similarity search.
 
@@ -377,30 +374,40 @@ Governed projection consumption
       ↓
 Admission evaluation
       ↓
-Persistence authorization
+Persistence readiness
       ↓
-Stored Memory
+Persistence AuthorizationRequest composition
+      ↓
+PDP decision / PEP enforcement              ← NOT PRODUCTIVELY WIRED
+      ↓
+Protected durable write                      ← NOT AUTHORIZED
+      ↓
+Stored Memory                                ← NOT AUTHORIZED
       ↓
 Trust-aware retrieval eligibility
       ↓
 Knowledge candidate when applicable
 ```
 
-Estado material observado a `cc9c7373879555a3eb267cd91be5228207427ae8`:
+Estado material observado a `02daf578012c662f0686357aa48b25722897c82a`:
 
 ```text
-candidate contracts                       implemented
-admission policy                          implemented
-assessment provenance                     implemented
-assessment producer authorization         implemented
-governed input projection                 implemented
-projection -> admission consumption       implemented
-candidate content identity                G0/G1 ONLY
-content identity propagation              NOT DESIGNED / NOT AUTHORIZED
-persistence authorization                 NOT AUTHORIZED
-persistent Memory                         NOT AUTHORIZED
-retrieval                                 NOT AUTHORIZED
-Knowledge promotion                       NOT AUTHORIZED
+candidate contracts                         implemented
+admission policy                            implemented
+assessment provenance                       implemented
+assessment producer authorization           implemented
+governed input projection                   implemented
+projection -> admission consumption         implemented
+candidate content identity                  implemented
+content identity propagation                implemented
+episodic persistence readiness              implemented
+Persistence AuthorizationRequest composer   implemented / isolated
+PDP / PEP security primitives               implemented generically
+persistence decision/enforcement wiring      NOT AUTHORIZED
+protected durable write                     NOT AUTHORIZED
+persistent Memory                           NOT AUTHORIZED
+retrieval                                   NOT AUTHORIZED
+Knowledge promotion                         NOT AUTHORIZED
 ```
 
 Separación obligatoria:
@@ -1047,3 +1054,226 @@ Si una futura admission review necesita comprobar que una propiedad externa sigu
 vigente, cambió materialmente o requiere mayor detalle, esa comprobación debe ser
 una acción de research nueva, explícita y acotada. El contenido nuevo no sustituye
 silenciosamente lo registrado aquí.
+
+### 19.4. Research Incubation Backlog — QA, Dreams y Methodology Distillation
+
+Este backlog preserva líneas solicitadas por el Owner para futuras evaluaciones.
+No crea una `EXT`, Capability, subsystem, service, manager, sprint ni dependencia.
+
+Frontera común:
+
+```text
+research entry != roadmap
+research method != capability
+metric != proof of quality
+finding != refactor authorization
+counterfactual != fact
+external system != authority
+```
+
+#### A. Software Quality Assurance & Engineering Research
+
+**Disposición:** `ADAPT / REINFORCE_EXISTING / RESEARCH`.
+
+Dueños existentes que deben reutilizarse antes de crear cualquier superficie:
+
+- IDEA-009 — Development Tooling Foundation;
+- IDEA-014 — Complexity Budget Foundation;
+- IDEA-017 — External Research & Assurance Review;
+- `STD-001 Coding Standards`;
+- `LPK-001 Clean Code - Functions`;
+- Engineering Method, Construction Protocol, 4R y candidate-bound validation.
+
+Líneas a investigar y medir de forma proporcional:
+
+```text
+QA procedures
+├── quality planning / acceptance criteria
+├── verification strategy
+├── regression strategy
+├── defect classification
+├── candidate/release quality evidence
+└── quality gates
+
+Test Coverage
+├── line coverage
+├── branch coverage
+├── coverage delta
+├── critical-contract coverage
+└── uncovered-risk analysis
+
+Test Effectiveness
+├── Mutation Testing
+├── mutation score
+├── surviving-mutant analysis
+├── weak-test detection
+└── redundant-test detection when demonstrable
+
+Advanced Testing
+├── Property-Based Testing
+├── invariant testing
+├── boundary / negative testing
+├── regression testing
+└── fuzzing when applicable
+
+Quality Metrics
+├── cyclomatic / cognitive complexity
+├── duplication
+├── coupling / cohesion
+├── maintainability
+├── public-surface growth
+├── dependency growth
+└── change blast radius
+
+Test Health
+├── flaky-test detection
+├── test runtime
+├── failure / regression rate
+└── deterministic reproducibility
+
+Static Quality
+├── linting
+├── type checking
+├── dead-code detection
+├── dependency analysis
+└── security/static analysis
+
+Quality Evolution
+├── Quality Baseline
+├── candidate vs baseline
+├── Quality Regression
+└── Quality Drift
+```
+
+`Clean Code` se conserva como sublínea de mantenibilidad, no como autoridad ni
+dogma. La meta es evidencia de legibilidad, simplicidad, coupling, cohesión,
+duplicación y coste de cambio, no una refactorización estética automática.
+
+Guardrails:
+
+```text
+coverage != test quality
+mutation score != correctness
+lint PASS != maintainability
+quality metric != Authority
+code smell != authorization to refactor
+```
+
+El baseline actual sólo integra `pytest` como dependencia de desarrollo y la CI
+vigente ejecuta pytest, compileall, Candidate Identity y diff validation.
+Herramientas como `pytest-cov`, Mutation Testing frameworks, Hypothesis, Ruff,
+mypy u otras permanecen **candidates de investigación/tooling**, no dependencias
+seleccionadas ni autorizadas.
+
+#### B. Dream-RSI → Governed Counterfactual Replay
+
+**Disposición:** `ADAPT / RESEARCH`.
+
+Fuente de investigación preservada en este mismo backlog, sin crear una entrada
+`EXT` adicional: Zheng et al., *Dream-RSI: Recursive Self-Improvement through
+Evolving Worlds*, arXiv:2609.14858, junto con el repositorio oficial
+`zhengkid/Dream-RSI`, revisados 2026-10-10.
+
+Dream-RSI aporta como señal útil la separación entre el coding agent y una
+política de exploración que puede evaluarse contra discovery histories
+reutilizadas como replay simulators. Malāk no debe adoptar su framing de
+recursive self-improvement como autoridad ni permitir auto-promoción.
+
+Adaptación conceptual candidata:
+
+```text
+bounded historical trace / discovery evidence
+        ↓
+isolated replay representation
+        ↓
+counterfactual exploration variants
+        ↓
+objective / independent evaluation
+        ↓
+candidate lesson or proposal
+        ↓
+human-governed admission
+```
+
+Separaciones obligatorias:
+
+```text
+replay != Memory
+counterfactual != fact
+candidate lesson != Knowledge
+policy improvement != self-modification
+evaluation result != promotion
+Evidence != Authority
+```
+
+Antes de crear cualquier componente nuevo deberán evaluarse REUSE/COMPOSE de
+IDEA-002, Governed Self-Review, Trace/Replay y la futura Sandbox/Evaluation
+Evidence Foundation.
+
+#### C. Research loops / AutoResearch-style exploration
+
+**Disposición:** `REINFORCE_EXISTING`.
+
+La propiedad útil es un ciclo acotado:
+
+```text
+question / hypothesis
+→ bounded experiment
+→ reproducible evidence
+→ compare against baseline
+→ finding
+→ proposal
+→ Owner / governance
+```
+
+Debe reutilizar IDEA-002 e IDEA-017. No autoriza adquisición autónoma ilimitada,
+promoción automática de findings, modificación de código ni self-improvement.
+
+#### D. Reverse Engineering / Methodology Distillation
+
+**Disposición:** `RESEARCH METHOD`.
+
+Aplicable únicamente a sistemas, repositorios, papers, interfaces o entornos
+públicos o expresamente autorizados.
+
+```text
+observable behavior / public contracts / docs / traces
+        ↓
+candidate invariants
+        ↓
+cross-source corroboration
+        ↓
+Methodology Distillation
+        ↓
+compare with Malāk baseline
+        ↓
+ADOPT | ADAPT | OBSERVE | REJECT
+        ↓
+bounded experiment only when separately admitted
+```
+
+La finalidad es extraer propiedades y metodología, no copiar implementaciones.
+No debe intentar recuperar secretos, interfaces ocultas, credenciales,
+información protegida ni material incompatible con licencia o autorización.
+
+```text
+reverse-engineered observation != truth
+distilled methodology != architecture authority
+external implementation != Malāk baseline
+```
+
+#### E. Cognitive / evaluator research pendiente
+
+Se preservan como `RESEARCH / WATCH`:
+
+- Cognitive Dataset y cross-model invariants;
+- evaluator awareness / metagaming;
+- causal o mechanistic interpretability cuando la evidencia observable externa
+  resulte insuficiente para una pregunta concreta;
+- comparación de comportamiento entre runtimes/modelos sin convertir el modelo
+  en autoridad;
+- ODD permanece `OBSERVE`: sus propiedades útiles se contrastan con Preflight,
+  admission, proporcionalidad, 4R y RDD ya existentes; no se crea un sistema ODD.
+
+Estas líneas deberán demostrar una pregunta concreta, beneficio, coste,
+testabilidad y ausencia de duplicación antes de promoverse.

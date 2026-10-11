@@ -2,8 +2,8 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-10-09
-as_of_commit: 82d79484630b8636582971e37678f16daf5f1c6c
+as_of_date: 2026-10-10
+as_of_commit: 02daf578012c662f0686357aa48b25722897c82a
 branch: main
 certification_branch: null
 candidate_commit: null
@@ -1474,7 +1474,7 @@ PERSISTENT MEMORY
 NOT AUTHORIZED
 
 RDD STAGE 2
-NOT AUTHORIZED
+ADOPTED / ACTIVE — proportional applicability
 ```
 
 La fuente derivada canónica para planificación es:
@@ -2091,3 +2091,31 @@ case-set reparado y los contracts/harness/qualification existentes, sin inferir
 
 Esta reconciliación es derivada, no normativa y no concede autoridad de
 implementación, experimento, Ready, Merge o promoción.
+
+## Reconciliación CURRENT — PR #267 / RDD Stage 2
+
+Estado derivado vigente contra `main@02daf578012c662f0686357aa48b25722897c82a`.
+
+```text
+main tree                           f5e3788f6990a549238c41a8a946861ddedb5ef6
+PR #267 candidate                  48b147e69812f29bd94e9f2df236f9cc357921b2
+Independent Stage 2 Validation G   PASS / comment 6100167920
+post-merge Validation #853         SUCCESS
+Ubuntu / Windows                   2016 passed / 2016 passed
+RDD Stage 1                        ADOPTED / ACTIVE
+RDD Stage 2                        ADOPTED / ACTIVE — proportional
+RDD Stage 3+                       NOT AUTHORIZED
+authority_effect                   none
+```
+
+Aplicabilidad vigente de Stage 2:
+
+```text
+risk 0/1 → NOT_APPLICABLE
+risk 2   → OPTIONAL / explicit admission only
+risk 3/4 → REQUIRED
+```
+
+Los bloques CURRENT anteriores que contienen `RDD Stage 2 = NOT AUTHORIZED`
+se conservan como trazabilidad del estado que describían en su momento; esta
+sección los supersede para interpretar el estado presente.

@@ -114,7 +114,12 @@ Memory/Knowledge poisoning, supply chain de AI, identidad y delegación,
 contención sistémica de componentes comprometidos, deception/forensics,
 interoperabilidad gobernada y evolución controlada.
 
-No crea nuevas capabilities ni autoriza implementación.
+También preserva un `Research Incubation Backlog` para Software Quality
+Assurance, Dream-RSI / Governed Counterfactual Replay, research loops,
+Reverse Engineering / Methodology Distillation y líneas cognitivas/evaluator
+en `RESEARCH / WATCH`, sin convertirlas en arquitectura, roadmap o autorización.
+
+No crea nuevas capabilities, sistemas, managers, dependencias ni autoriza implementación.
 
 Estado:
 

@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-10-09
-as_of_commit: 82d79484630b8636582971e37678f16daf5f1c6c
+as_of_date: 2026-10-10
+as_of_commit: 02daf578012c662f0686357aa48b25722897c82a
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -1951,7 +1951,7 @@ PERSISTENT MEMORY
 NOT AUTHORIZED
 
 RDD STAGE 2
-NOT AUTHORIZED
+ADOPTED / ACTIVE — proportional applicability
 
 CURRENT CI MATRIX
 ubuntu-latest / windows-latest
@@ -2449,3 +2449,22 @@ No existe autorización implícita para model rerun, model promotion,
 `support_sufficient`, Protected Finalization, production admission, Sprint 7.12
 o RDD Stage 2. Esta reconciliación sólo alinea planificación derivada con el
 baseline material integrado.
+
+## Reconciliación CURRENT — PR #267 / RDD Stage 2
+
+Esta sección supersede para planificación CURRENT las declaraciones previas que
+mantenían RDD Stage 2 como no autorizado.
+
+```text
+baseline/current main               02daf578012c662f0686357aa48b25722897c82a
+tree                                f5e3788f6990a549238c41a8a946861ddedb5ef6
+PR #267                             MERGED
+post-merge Validation #853          SUCCESS / 2016 passed both OS
+RDD Stage 1                         ADOPTED / ACTIVE
+RDD Stage 2                         ADOPTED / ACTIVE
+risk 0/1                            NOT_APPLICABLE
+risk 2                              OPTIONAL / explicit admission only
+risk 3/4                            REQUIRED
+Stage 3+                            NOT AUTHORIZED
+authority_effect                    none
+```

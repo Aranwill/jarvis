@@ -34,7 +34,7 @@ Sprint 7.10 — Conversation Session Isolation Foundation
 
 Después de Sprint 7.11 se integraron unidades aisladas de Memory y Cognitive Assurance sin constituir Sprint 7.12. El baseline actual incluye `EpisodicCandidateContentIdentity` y su propagación/binding gobernado a través de la cadena episódica, además de G2A — Protected Finalization Foundation y G2 — Assurance Signal Authority & Projection Foundation en aislamiento.
 
-CAL-014 — Protected Durable Reliance está activado normativamente mediante CC-013, R-023 y ADR-006. Esa activación no autoriza Persistence Authorization, Persistent Memory, Conversation G2B, RDD Stage 2 ni Sprint 7.12.
+CAL-014 — Protected Durable Reliance está activado normativamente mediante CC-013, R-023 y ADR-006. Esa activación, por sí sola, no autoriza Persistence Authorization, Persistent Memory, Conversation G2B ni Sprint 7.12. RDD Stage 2 fue adoptado posteriormente y de forma separada mediante PR #267.
 
 La interfaz disponible actualmente es una CLI técnica que conserva la ruta conversacional y expone, además, superficies read-only de Engineering, Explorer, Trace y Governed Self-Review.
 
@@ -591,7 +591,8 @@ live Ollama assessor experiment   NOT AUTHORIZED
 exact assessor model              NOT SELECTED / NOT AUTHORIZED
 semantic_assurance                NOT_VERIFIED
 support_sufficient                NOT WIRED / NOT AUTHORIZED
-Protected Finalization            NOT AUTHORIZED
+Protected Finalization Foundation  INTEGRATED / ISOLATED
+Protected Finalization productive wiring/use beyond foundation  NOT AUTHORIZED
 model promotion                   NOT AUTHORIZED
 production admission              NOT AUTHORIZED
 RDD Stage 2                       NOT AUTHORIZED
@@ -673,3 +674,43 @@ El merge de PR #264 no autoriza ese experimento, selección/promoción de modelo
 `support_sufficient`, Protected Finalization, production admission ni RDD Stage 2.
 Qualification evidence continúa siendo Evidence y no semantic truth, permiso,
 decisión o Authority.
+
+## Reconciliación CURRENT — PR #267 / RDD Stage 2
+
+Esta sección supersede **únicamente para el estado CURRENT** las declaraciones
+anteriores que todavía presentan RDD Stage 2 como `NOT AUTHORIZED`. Los registros
+históricos conservan el estado que era correcto para su candidate/baseline y no
+deben reescribirse retroactivamente.
+
+Estado reconciliado:
+
+```text
+main HEAD                           02daf578012c662f0686357aa48b25722897c82a
+main tree                           f5e3788f6990a549238c41a8a946861ddedb5ef6
+PR #267 candidate                  48b147e69812f29bd94e9f2df236f9cc357921b2
+PR #267 candidate tree             f5e3788f6990a549238c41a8a946861ddedb5ef6
+post-merge Validation #853         SUCCESS
+Ubuntu                             2016/2016 PASS
+Windows                            2016/2016 PASS
+RDD Stage 1                       ADOPTED / ACTIVE
+RDD Stage 2                       ADOPTED / ACTIVE
+risk 0/1                          NOT_APPLICABLE
+risk 2                            OPTIONAL / explicit admission only
+risk 3/4                          REQUIRED
+RDD Stage 3+                      NOT AUTHORIZED
+Cognitive Receipt                 NOT AUTHORIZED
+Protected Finalization            NOT AUTHORIZED
+Persistence Authorization decision/enforcement  NOT AUTHORIZED
+Persistent Memory                 NOT AUTHORIZED
+authority_effect                  none
+```
+
+RDD Stage 2 materializa un `Candidate-Bound Validation Receipt` separado del
+Manifest Stage 1. Continúa vigente:
+
+```text
+Evidence != Receipt != Validation != Decision != Authority
+Receipt validator PASS != Ready != Merge != Authority
+```
+
+Esta reconciliación es derivada y no normativa.
