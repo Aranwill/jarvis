@@ -55,7 +55,7 @@ def _observation(module, visible: dict, hidden: dict, **changes):
         relation_id=visible["relation_id"],
         finding_fingerprint=visible["finding_fingerprint"],
         evidence_ref=visible["evidence_ref"],
-        claim_part_id=visible["claim_part_id"],
+        claim_part_id=visible.get("claim_part_id"),
         material_bearing=module.SemanticMaterialBearingV0(
             hidden["expected_material_bearing"]
         ),
@@ -258,3 +258,22 @@ def test_red_hvc_a_20_unknown_enum_vector_is_contract_invalid() -> None:
     module = _api()
     with pytest.raises(ValueError):
         module.SemanticStanceV0("MAYBE")
+
+def test_red_hvc_a_21_root_claim_allows_claim_part_id_to_be_absent() -> None:
+    module = _api()
+    visible, hidden = _case("HVC-A-C01")
+    assert "claim_part_id" not in visible
+    projected = module.project_hvc_a_visible_semantic_observation_case_v0(visible)
+    assert projected["claim_part_id"] is None
+    observation = _observation(module, visible, hidden)
+    assert observation.claim_part_id is None
+    assert module.validate_hvc_a_semantic_observation_v0(observation, visible) is observation
+
+
+def test_red_hvc_a_22_upstream_claim_part_remains_explicit_when_present() -> None:
+    module = _api()
+    visible, hidden = _case("HVC-A-C10")
+    assert visible["claim_part_id"] == "clause-orchestration"
+    projected = module.project_hvc_a_visible_semantic_observation_case_v0(visible)
+    assert projected["claim_part_id"] == "clause-orchestration"
+    assert _observation(module, visible, hidden).claim_part_id == "clause-orchestration"
