@@ -311,6 +311,12 @@ se representa mediante su propia observación bound al mismo subject/claim cuand
 corresponda. La combinación de múltiples observaciones, resolución de conflicto,
 agregación o settlement pertenece a HVC-C y queda fuera de HVC-A.
 
+`evidence_ref` debe pertenecer al evidence set exacto representado por
+`evidence_set_digest` y resolver al material bound de esa referencia. Una ref
+fuera del set, ausente o con material distinto constituye binding inválido. Esta
+regla reutiliza la validación existente de refs y no crea una nueva identidad de
+evidencia.
+
 `claim_part_id` no autoriza decomposición. Si upstream no aporta partes
 estructuradas, la observación se liga al claim raíz mediante el
 `finding_fingerprint`.
@@ -628,6 +634,11 @@ NO. UNKNOWN no expresa cobertura afirmativa conocida.
 ### A17 — ¿una observación puede agregar múltiples evidence refs?
 NO en HVC-A. Cada `SemanticObservationV0` queda ligada a exactamente un
 `evidence_ref`; agregación y settlement pertenecen a HVC-C.
+
+### A18 — ¿evidence_ref puede apuntar fuera del evidence set bound?
+NO. Debe pertenecer al set identificado por `evidence_set_digest` y resolver al
+material bound correspondiente; una ref fuera del set o con material distinto es
+binding inválido.
 
 Resultado:
 
