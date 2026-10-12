@@ -1234,17 +1234,10 @@ class SemanticObservationV0:
 @dataclass(frozen=True)
 class _HvcABoundSemanticObservationCaseV0:
     case_id: str
-    policy_version: str
-    baseline_commit: str
-    focus_id: str
-    evidence_set_digest: str
-    relation_id: str
-    finding_fingerprint: str
-    claim: str
+    evidence_focus: GovernedEngineeringEvidenceFocus
+    evidence_bundle: FocusedEngineeringEvidenceBundle
+    finding: _Finding
     evidence_ref: str
-    evidence_material: str
-    claim_part_id: str | None = None
-    authority_effect: str = "none"
 
 
 def _hvc_a_focused_evidence_set_digest_v0(
@@ -1305,9 +1298,64 @@ def _hvc_a_focused_evidence_set_digest_v0(
     return hashlib.sha256(canonical).hexdigest()
 
 
+def _hvc_a_validate_canonical_evidence_refs_v0(
+    items,
+    *,
+    prefix: str,
+) -> None:
+    if not isinstance(items, tuple):
+        raise TypeError("HVC-A evidence collection must be a tuple")
+    expected_refs = []
+    seen_identity: set[tuple[str, int, str]] = set()
+    sortable = []
+    for item in items:
+        if not isinstance(item, dict):
+            raise TypeError("HVC-A evidence item must be a mapping")
+        path = item.get("path")
+        line_number = item.get("line_number")
+        line = item.get("line")
+        if not isinstance(path, str) or not path:
+            raise ValueError("HVC-A evidence path is invalid")
+        if not isinstance(line_number, int) or isinstance(line_number, bool) or line_number <= 0:
+            raise ValueError("HVC-A evidence line_number is invalid")
+        _require_bounded_text(
+            line,
+            "HVC-A evidence material",
+            _BLIND_PROJECTION_MAX_STRING_BYTES,
+        )
+        identity = (path, line_number, line)
+        if identity in seen_identity:
+            raise ValueError("HVC-A evidence material identity must be unique")
+        seen_identity.add(identity)
+        sortable.append(
+            (
+                path,
+                line_number,
+                line,
+                not bool(item.get("required", False)),
+                item,
+            )
+        )
+    ordered = [entry[-1] for entry in sorted(sortable, key=lambda entry: entry[:-1])]
+    if list(items) != ordered:
+        raise ValueError("HVC-A evidence collection is not in canonical order")
+    for index, item in enumerate(items, start=1):
+        expected_ref = f"{prefix}{index}"
+        if item.get("ref") != expected_ref:
+            raise ValueError("HVC-A evidence ref assignment is not canonical")
+
+
 def _hvc_a_bound_evidence_by_ref_v0(
     evidence_bundle: FocusedEngineeringEvidenceBundle,
 ) -> dict[str, dict[str, object]]:
+    _hvc_a_validate_canonical_evidence_refs_v0(
+        evidence_bundle.repository_evidence,
+        prefix="R",
+    )
+    _hvc_a_validate_canonical_evidence_refs_v0(
+        evidence_bundle.knowledge_evidence,
+        prefix="K",
+    )
     items = (
         *evidence_bundle.repository_evidence,
         *evidence_bundle.knowledge_evidence,
@@ -1338,7 +1386,6 @@ def bind_hvc_a_semantic_observation_case_v0(
     evidence_bundle: FocusedEngineeringEvidenceBundle,
     finding: _Finding,
     evidence_ref: str,
-    upstream_route: GovernedSupportEvidenceRoutingV0,
 ) -> _HvcABoundSemanticObservationCaseV0:
     if not isinstance(evidence_focus, GovernedEngineeringEvidenceFocus):
         raise TypeError("evidence_focus must be GovernedEngineeringEvidenceFocus")
@@ -1346,10 +1393,6 @@ def bind_hvc_a_semantic_observation_case_v0(
         raise TypeError("evidence_bundle must be FocusedEngineeringEvidenceBundle")
     if not isinstance(finding, _Finding):
         raise TypeError("finding must be an E3 _Finding")
-    if not isinstance(upstream_route, GovernedSupportEvidenceRoutingV0):
-        raise TypeError(
-            "upstream_route must be GovernedSupportEvidenceRoutingV0"
-        )
     _require_bounded_text(
         case_id,
         "HVC-A case_id",
@@ -1398,40 +1441,6 @@ def bind_hvc_a_semantic_observation_case_v0(
     )
     _require_sha256(fingerprint, "HVC-A finding_fingerprint")
 
-    if upstream_route.policy_version != _SUPPORT_ROUTING_POLICY_V0:
-        raise ValueError("HVC-A upstream routing policy_version mismatch")
-    if upstream_route.authority_effect != "none":
-        raise ValueError("HVC-A upstream routing authority_effect must be none")
-    if (
-        upstream_route.route_kind
-        is not GovernedSupportEvidenceRouteKind.INFERENTIAL
-        or upstream_route.reason_code
-        is not GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL
-    ):
-        raise ValueError(
-            "HVC-A requires the exact upstream inferential residual route"
-        )
-    expected_route_binding = {
-        "baseline_commit": evidence_bundle.baseline_commit,
-        "focus_id": evidence_bundle.focus_id,
-        "evidence_set_digest": recomputed_digest,
-        "relation_id": finding.relation_id,
-        "finding_fingerprint": fingerprint,
-    }
-    if any(
-        getattr(upstream_route, field_name) != expected
-        for field_name, expected in expected_route_binding.items()
-    ):
-        raise ValueError("HVC-A upstream routing binding mismatch")
-    _require_sha256(
-        upstream_route.evaluation_question_identity,
-        "HVC-A upstream evaluation_question_identity",
-    )
-    _require_sha256(
-        upstream_route.resolved_evidence_material_digest,
-        "HVC-A upstream resolved_evidence_material_digest",
-    )
-
     _require_bounded_text(
         evidence_ref,
         "HVC-A evidence_ref",
@@ -1449,42 +1458,127 @@ def bind_hvc_a_semantic_observation_case_v0(
 
     return _HvcABoundSemanticObservationCaseV0(
         case_id=case_id,
-        policy_version=_HVC_A_POLICY_VERSION,
-        baseline_commit=evidence_bundle.baseline_commit,
-        focus_id=evidence_bundle.focus_id,
-        evidence_set_digest=recomputed_digest,
-        relation_id=finding.relation_id,
-        finding_fingerprint=fingerprint,
-        claim=finding.statement,
+        evidence_focus=evidence_focus,
+        evidence_bundle=evidence_bundle,
+        finding=finding,
         evidence_ref=evidence_ref,
-        evidence_material=material,
-        claim_part_id=None,
-        authority_effect="none",
     )
 
 
-def project_hvc_a_visible_semantic_observation_case_v0(bound_case):
+def _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case):
     if not isinstance(bound_case, _HvcABoundSemanticObservationCaseV0):
         raise TypeError(
             "HVC-A visible projection requires an upstream-bound HVC-A case"
         )
-    visible = {
-        "case_id": bound_case.case_id,
-        "policy_version": bound_case.policy_version,
-        "baseline_commit": bound_case.baseline_commit,
-        "focus_id": bound_case.focus_id,
-        "evidence_set_digest": bound_case.evidence_set_digest,
-        "relation_id": bound_case.relation_id,
-        "finding_fingerprint": bound_case.finding_fingerprint,
-        "claim": bound_case.claim,
-        "evidence_ref": bound_case.evidence_ref,
-        "evidence_material_by_ref": {
-            bound_case.evidence_ref: bound_case.evidence_material,
-        },
-        "authority_effect": bound_case.authority_effect,
+    evidence_focus = bound_case.evidence_focus
+    evidence_bundle = bound_case.evidence_bundle
+    finding = bound_case.finding
+    evidence_ref = bound_case.evidence_ref
+
+    if not isinstance(evidence_focus, GovernedEngineeringEvidenceFocus):
+        raise TypeError("HVC-A bound focus type is invalid")
+    if not isinstance(evidence_bundle, FocusedEngineeringEvidenceBundle):
+        raise TypeError("HVC-A bound evidence bundle type is invalid")
+    if not isinstance(finding, _Finding):
+        raise TypeError("HVC-A bound finding type is invalid")
+    _require_bounded_text(
+        bound_case.case_id,
+        "HVC-A case_id",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
+    if not evidence_bundle.complete or evidence_bundle.context_truncated:
+        raise ValueError("HVC-A requires complete focused evidence")
+    if evidence_bundle.authority_effect != "none":
+        raise ValueError("HVC-A evidence bundle authority_effect must be none")
+    if (
+        evidence_bundle.focus_id != evidence_focus.focus_id
+        or evidence_bundle.subject != evidence_focus.subject
+    ):
+        raise ValueError("HVC-A focused evidence binding mismatch")
+    if not _is_lower_hex(evidence_bundle.baseline_commit, 40):
+        raise ValueError("HVC-A evidence baseline_commit is invalid")
+
+    recomputed_digest = _hvc_a_focused_evidence_set_digest_v0(
+        evidence_focus=evidence_focus,
+        evidence_bundle=evidence_bundle,
+    )
+    if recomputed_digest != evidence_bundle.evidence_set_digest:
+        raise ValueError("HVC-A evidence_set_digest does not match bound material")
+
+    governed_relation_ids = {
+        relation.relation_id for relation in evidence_focus.governed_relations
     }
-    if bound_case.claim_part_id is not None:
-        visible["claim_part_id"] = bound_case.claim_part_id
+    if finding.relation_id is None or finding.relation_id not in governed_relation_ids:
+        raise ValueError("HVC-A finding relation is not governed by the focus")
+    if finding.uncertainty_basis is None:
+        raise ValueError("HVC-A requires structured upstream finding roles")
+    if finding.claim_part_id is not None:
+        raise ValueError(
+            "HVC-A V0 has no authorized upstream claim-part provider"
+        )
+
+    fingerprint = governed_evidence_support_finding_fingerprint(
+        relation_id=finding.relation_id,
+        classification=finding.classification,
+        statement=finding.statement,
+        rationale=finding.rationale,
+        supporting_repository_refs=finding.supporting_repository_refs,
+        supporting_knowledge_refs=finding.supporting_knowledge_refs,
+        limiting_or_counterevidence_refs=finding.limiting_or_counterevidence_refs,
+        uncertainty_basis=finding.uncertainty_basis,
+    )
+    _require_sha256(fingerprint, "HVC-A finding_fingerprint")
+
+    _require_bounded_text(
+        evidence_ref,
+        "HVC-A evidence_ref",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
+    if evidence_ref not in finding.evidence_refs:
+        raise ValueError("HVC-A evidence_ref is not bound to the finding")
+
+    by_ref = _hvc_a_bound_evidence_by_ref_v0(evidence_bundle)
+    item = by_ref.get(evidence_ref)
+    if item is None:
+        raise ValueError("HVC-A evidence_ref is absent from bound evidence")
+    material = item["line"]
+    assert isinstance(material, str)
+
+    return {
+        "case_id": bound_case.case_id,
+        "policy_version": _HVC_A_POLICY_VERSION,
+        "baseline_commit": evidence_bundle.baseline_commit,
+        "focus_id": evidence_bundle.focus_id,
+        "evidence_set_digest": recomputed_digest,
+        "relation_id": finding.relation_id,
+        "finding_fingerprint": fingerprint,
+        "claim": finding.statement,
+        "evidence_ref": evidence_ref,
+        "evidence_material": material,
+        "claim_part_id": None,
+        "authority_effect": "none",
+    }
+
+
+def project_hvc_a_visible_semantic_observation_case_v0(bound_case):
+    resolved = _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case)
+    visible = {
+        "case_id": resolved["case_id"],
+        "policy_version": resolved["policy_version"],
+        "baseline_commit": resolved["baseline_commit"],
+        "focus_id": resolved["focus_id"],
+        "evidence_set_digest": resolved["evidence_set_digest"],
+        "relation_id": resolved["relation_id"],
+        "finding_fingerprint": resolved["finding_fingerprint"],
+        "claim": resolved["claim"],
+        "evidence_ref": resolved["evidence_ref"],
+        "evidence_material_by_ref": {
+            resolved["evidence_ref"]: resolved["evidence_material"],
+        },
+        "authority_effect": resolved["authority_effect"],
+    }
+    if resolved["claim_part_id"] is not None:
+        visible["claim_part_id"] = resolved["claim_part_id"]
 
     if any(key in _HVC_A_FORBIDDEN_VISIBLE_KEYS for key in visible):
         raise ValueError("HVC-A visible case contains hidden ground-truth material")
@@ -1503,20 +1597,17 @@ def project_hvc_a_visible_semantic_observation_case_v0(bound_case):
 def validate_hvc_a_semantic_observation_v0(observation, bound_case):
     if not isinstance(observation, SemanticObservationV0):
         raise TypeError("observation must be one SemanticObservationV0")
-    if not isinstance(bound_case, _HvcABoundSemanticObservationCaseV0):
-        raise TypeError(
-            "HVC-A validation requires an upstream-bound HVC-A case"
-        )
+    resolved = _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case)
     bindings = {
-        "policy_version": bound_case.policy_version,
-        "baseline_commit": bound_case.baseline_commit,
-        "focus_id": bound_case.focus_id,
-        "evidence_set_digest": bound_case.evidence_set_digest,
-        "relation_id": bound_case.relation_id,
-        "finding_fingerprint": bound_case.finding_fingerprint,
-        "evidence_ref": bound_case.evidence_ref,
-        "claim_part_id": bound_case.claim_part_id,
-        "authority_effect": bound_case.authority_effect,
+        "policy_version": resolved["policy_version"],
+        "baseline_commit": resolved["baseline_commit"],
+        "focus_id": resolved["focus_id"],
+        "evidence_set_digest": resolved["evidence_set_digest"],
+        "relation_id": resolved["relation_id"],
+        "finding_fingerprint": resolved["finding_fingerprint"],
+        "evidence_ref": resolved["evidence_ref"],
+        "claim_part_id": resolved["claim_part_id"],
+        "authority_effect": resolved["authority_effect"],
     }
     for field_name, expected in bindings.items():
         if getattr(observation, field_name) != expected:
