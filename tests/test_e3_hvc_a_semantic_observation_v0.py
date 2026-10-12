@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from malak.capabilities._engineering_evidence import (
+    EvidenceSelectorResult,
     FocusedEngineeringEvidenceBundle,
     GovernedEngineeringEvidenceFocus,
     GovernedEngineeringRelation,
@@ -81,12 +82,25 @@ def _focused_digest(
     focus: GovernedEngineeringEvidenceFocus,
     repository_evidence: tuple[dict[str, object], ...],
     knowledge_evidence: tuple[dict[str, object], ...] = (),
+    selector_results: tuple[EvidenceSelectorResult, ...] = (),
+    supplemental_truncated: bool = False,
 ) -> str:
     payload = {
         "baseline_commit": visible["baseline_commit"],
         "focus_id": focus.focus_id,
         "subject": focus.subject,
-        "selector_results": [],
+        "selector_results": [
+            {
+                "source_kind": result.source_kind,
+                "selector_kind": result.selector_kind,
+                "selector_value": result.selector_value,
+                "status": result.status,
+                "matched_paths": list(result.matched_paths),
+                "match_count": result.match_count,
+                "selected_count": result.selected_count,
+            }
+            for result in selector_results
+        ],
         "repository_evidence": [
             {key: value for key, value in item.items() if key != "ref"}
             for item in repository_evidence
@@ -95,7 +109,7 @@ def _focused_digest(
             {key: value for key, value in item.items() if key != "ref"}
             for item in knowledge_evidence
         ],
-        "supplemental_truncated": False,
+        "supplemental_truncated": supplemental_truncated,
         "authority_effect": "none",
         "governed_relations": [
             {
@@ -820,3 +834,181 @@ def test_hvc_a_f03_r4_08_role_overlap_is_rejected_after_replace() -> None:
     tampered = replace(bound, finding=tampered_finding)
     with pytest.raises(ValueError):
         module.project_hvc_a_visible_semantic_observation_case_v0(tampered)
+
+
+def _r5_selector_result(status: str) -> EvidenceSelectorResult:
+    return EvidenceSelectorResult(
+        source_kind="repository",
+        selector_kind="EXACT_PATH",
+        selector_value="tests/hvc_a_fixture.md",
+        status=status,
+        matched_paths=("tests/hvc_a_fixture.md",),
+        match_count=2 if status == "TRUNCATED" else 1,
+        selected_count=1,
+    )
+
+
+def _r5_bundle_with_selector_status(
+    visible: dict,
+    *,
+    status: str,
+    complete: bool,
+    context_truncated: bool,
+) -> tuple[
+    GovernedEngineeringEvidenceFocus,
+    FocusedEngineeringEvidenceBundle,
+]:
+    focus = _focus(visible)
+    repository_evidence = (
+        {
+            "ref": "R1",
+            "path": "tests/hvc_a_fixture.md",
+            "blob_sha": "b" * 40,
+            "line_number": 1,
+            "line": visible["evidence_material_by_ref"]["R1"],
+            "line_truncated": False,
+            "required": True,
+        },
+    )
+    selector_result = _r5_selector_result(status)
+    digest = _focused_digest(
+        visible=visible,
+        focus=focus,
+        repository_evidence=repository_evidence,
+        selector_results=(selector_result,),
+    )
+    bundle = FocusedEngineeringEvidenceBundle(
+        baseline_commit=visible["baseline_commit"],
+        focus_id=focus.focus_id,
+        subject=focus.subject,
+        repository_evidence=repository_evidence,
+        knowledge_evidence=(),
+        selector_results=(selector_result,),
+        repository_match_count=1,
+        knowledge_match_count=0,
+        repository_skipped_unreadable=0,
+        context_truncated=context_truncated,
+        supplemental_truncated=False,
+        complete=complete,
+        evidence_set_digest=digest,
+        authority_effect="none",
+    )
+    return focus, bundle
+
+
+def _r5_finding(module, visible: dict):
+    return module._Finding(
+        classification="UNRESOLVED",
+        statement=visible["claim"],
+        rationale="bounded upstream finding",
+        evidence_refs=("R1",),
+        relation_id=visible["relation_id"],
+        supporting_repository_refs=("R1",),
+        supporting_knowledge_refs=(),
+        limiting_or_counterevidence_refs=(),
+        uncertainty_basis="INSUFFICIENT_SUPPLIED_EVIDENCE",
+    )
+
+
+def test_hvc_a_f03_r5_01_truncated_required_selector_cannot_fake_completeness() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus, original_bundle = _r5_bundle_with_selector_status(
+        visible,
+        status="TRUNCATED",
+        complete=False,
+        context_truncated=True,
+    )
+
+    with pytest.raises(ValueError, match="requires complete focused evidence"):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=original_bundle,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+    tampered = replace(
+        original_bundle,
+        complete=True,
+        context_truncated=False,
+    )
+    assert tampered.evidence_set_digest == original_bundle.evidence_set_digest
+
+    with pytest.raises(ValueError, match="complete flag does not match selector_results"):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=tampered,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+
+def test_hvc_a_f03_r5_02_context_truncated_must_match_selector_results() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus, bundle = _r5_bundle_with_selector_status(
+        visible,
+        status="TRUNCATED",
+        complete=False,
+        context_truncated=False,
+    )
+    with pytest.raises(
+        ValueError,
+        match="context_truncated flag does not match selector_results",
+    ):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=bundle,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+
+def test_hvc_a_f03_r5_03_complete_must_match_selector_results() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus, bundle = _r5_bundle_with_selector_status(
+        visible,
+        status="RESOLVED",
+        complete=False,
+        context_truncated=False,
+    )
+    with pytest.raises(
+        ValueError,
+        match="complete flag does not match selector_results",
+    ):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=bundle,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+
+def test_hvc_a_f03_r5_04_resolved_selector_control_remains_valid() -> None:
+    module = _api()
+    visible, hidden = _case("HVC-A-C01")
+    focus, bundle = _r5_bundle_with_selector_status(
+        visible,
+        status="RESOLVED",
+        complete=True,
+        context_truncated=False,
+    )
+    bound = module.bind_hvc_a_semantic_observation_case_v0(
+        case_id=visible["case_id"],
+        evidence_focus=focus,
+        evidence_bundle=bundle,
+        finding=_r5_finding(module, visible),
+        evidence_ref="R1",
+    )
+    projected = module.project_hvc_a_visible_semantic_observation_case_v0(bound)
+    observation = _observation(module, projected, hidden)
+    assert module.validate_hvc_a_semantic_observation_v0(
+        observation,
+        bound,
+    ) is observation
