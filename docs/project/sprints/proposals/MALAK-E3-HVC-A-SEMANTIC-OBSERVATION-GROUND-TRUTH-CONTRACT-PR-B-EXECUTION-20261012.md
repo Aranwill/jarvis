@@ -273,53 +273,65 @@ new_identity    NO
 authority_expansion NO
 ```
 
-Root cause after reconciliation:
+Detailed independent transcript established that the required probe families
+1–10 were already blocked by round 3. The surviving bypasses were:
 
 ```text
-round 3
-recomputed internal consistency
-!=
-exact upstream binding expectation
+F03-R3-A
+dataclasses.replace(bound_case, ...)
+could replace derived claim / evidence_material / claim_part_id while retaining
+the original evidence_set_digest and finding_fingerprint.
+
+F03-R3-B
+permuting canonical R1/R2 assignment could change ref -> material resolution
+without changing evidence_set_digest or finding_fingerprint because focused
+evidence digest intentionally strips ephemeral refs.
 ```
 
-A caller could still construct a new internally self-consistent focused bundle/finding
-and thereby self-certify new digests/fingerprints because HVC-A had no required
-reference to the routing result that preceded the inferential residual.
+Therefore round 4 does NOT introduce a new upstream identity or routing layer.
+The speculative upstream-route requirement was rejected as broader than the
+independent finding required.
 
-Bounded Correction round 4 reuses the existing `GovernedSupportEvidenceRoutingV0`
-surface as the upstream binding expectation. No new evidence identity is introduced.
-
-New binder precondition:
+Selected minimal correction:
 
 ```text
-upstream_route
-  policy_version == e3-governed-support-routing/v0
-  route_kind == INFERENTIAL
-  reason_code == INFERENTIAL_RESIDUAL
-  authority_effect == none
+bound case stores source objects only:
+  case_id
+  evidence_focus
+  evidence_bundle
+  structured finding
+  evidence_ref
 
-and exact equality:
-  baseline_commit
-  focus_id
-  evidence_set_digest
-  relation_id
-  finding_fingerprint
+projection / validation:
+  re-resolve source objects
+  recompute existing evidence_set_digest
+  recompute existing finding_fingerprint
+  resolve material from exact canonical ref assignment
+  reject claim_part_id until upstream provider exists
+
+derived claim/material/digests are NOT stored as replaceable bound-case fields
+new evidence identity = NO
+new component/service/manager = NO
 ```
 
-The bundle digest and finding fingerprint are still recomputed from exact material.
-Mutation + coordinated recomputation is valid only when accompanied by a correspondingly
-new upstream route identity; reuse of a prior route fails closed.
+Canonical ref enforcement mirrors collector assignment semantics:
 
-Round-4 tests add:
+- repository evidence must be canonical-order and exactly `R1..Rn`;
+- knowledge evidence must be canonical-order and exactly `K1..Kn`;
+- duplicate `(path, line_number, line)` material identity is rejected;
+- ref permutation with unchanged digest fails closed.
 
-- changed claim + prior route -> reject;
-- changed evidence + recomputed digest + prior route -> reject;
-- baseline/focus/evidence digest/relation/fingerprint route drift -> reject;
-- non-INFERENTIAL_RESIDUAL route -> reject;
-- missing upstream route -> reject;
-- coordinated new identity + matching new route -> distinct identity, allowed.
+Round-4 regression tests cover:
+
+- `dataclasses.replace` cannot set claim/evidence_material/claim_part_id or IDs
+  because those derived fields no longer exist on the bound object;
+- replacing the structured finding changes the recomputed finding fingerprint;
+- replacing evidence material while retaining prior digest is rejected;
+- invented claim_part_id through replaced finding is rejected;
+- R1/R2 ref permutation is rejected;
+- noncanonical evidence order is rejected.
 
 Ground Truth and visible semantic cases remain unchanged.
 
-Any new candidate supersedes #899 and all independent review packets bound to
-`fbaa76c3e722e11aab9166fcdecde5e1ace68d8f`.
+Any candidate produced by this correction requires fresh candidate-bound CI,
+independent Fix Validator, FULL 4R and blind Ground-Truth review.
