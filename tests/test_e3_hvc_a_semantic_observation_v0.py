@@ -220,3 +220,41 @@ def test_red_hvc_a_15_ground_truth_boundaries_are_discriminable(left: str, right
         "expected_coverage",
     )
     assert tuple(lhs[k] for k in dimensions) != tuple(rhs[k] for k in dimensions)
+
+def test_red_hvc_a_16_structural_adversarials_are_frozen_in_ground_truth() -> None:
+    _, hidden = _data()
+    vectors = {item["adversarial_id"]: item for item in hidden["contract_adversarials"]}
+    assert set(vectors) == {"HVC-A-A01", "HVC-A-A02", "HVC-A-A03", "HVC-A-A04"}
+    assert all(item["expected_validation"] == "INVALID" for item in vectors.values())
+    assert all(item["authority_effect"] == "none" for item in vectors.values())
+
+
+def test_red_hvc_a_17_missing_material_vector_fails_before_semantic_unknown() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C09")
+    invalid = copy.deepcopy(visible)
+    invalid["evidence_material_by_ref"].pop("R1")
+    with pytest.raises(ValueError):
+        module.project_hvc_a_visible_semantic_observation_case_v0(invalid)
+
+
+def test_red_hvc_a_18_binding_drift_vector_fails_closed() -> None:
+    module = _api()
+    visible, hidden = _case("HVC-A-C01")
+    observation = _observation(module, visible, hidden, finding_fingerprint="f" * 64)
+    with pytest.raises(ValueError):
+        module.validate_hvc_a_semantic_observation_v0(observation, visible)
+
+
+def test_red_hvc_a_19_duplicate_observation_vector_is_outside_hvc_a() -> None:
+    module = _api()
+    visible, hidden = _case("HVC-A-C01")
+    observation = _observation(module, visible, hidden)
+    with pytest.raises((TypeError, ValueError)):
+        module.validate_hvc_a_semantic_observation_v0([observation, observation], visible)
+
+
+def test_red_hvc_a_20_unknown_enum_vector_is_contract_invalid() -> None:
+    module = _api()
+    with pytest.raises(ValueError):
+        module.SemanticStanceV0("MAYBE")
