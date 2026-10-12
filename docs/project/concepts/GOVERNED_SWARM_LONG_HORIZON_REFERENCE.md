@@ -5,6 +5,7 @@ authority: non_normative
 document_role: conceptual_reference
 language: es
 created: 2026-08-14
+updated: 2026-10-12
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_EPHEMERAL_AGENT_EXECUTION_EVIDENCE_REFERENCE.md
@@ -652,7 +653,108 @@ Principio:
 
 ---
 
-## 23. Estado
+## 23. Corroboración externa — SwarmForge (2026-10-12)
+
+Se revisó como evidencia externa no normativa:
+
+```text
+repository  unclebob/swarm-forge
+snapshot    f4f5fbcae0de6f7dcc26e82400334227647cfdb2
+reviewed    2026-10-12
+authority   none
+```
+
+El snapshot observado materializa o documenta en `main`:
+
+- worktrees aislados por rol;
+- configuración explícita de roles, backends, receive mode y propagation;
+- handoffs estructurados y durables ligados a commits;
+- estado de transporte separado del source del producto;
+- una constitución compartida más prompts de rol con ownership acotado;
+- audit gate previo al `git_handoff` que liga la revisión al candidate exacto;
+- invalidación de la revisión previa cuando cambia el candidate;
+- operator clarification ante ambigüedad, contradicción o conflicto
+  specification/test;
+- variantes de pack de diferente tamaño, evidencia de que una topología agentic
+  no necesita ser universal.
+
+Estas propiedades corroboran, sin reemplazar, varias decisiones ya preservadas
+por Malāk:
+
+```text
+structured handoff
+        ≈ REINFORCE_EXISTING
+
+candidate-bound audit
+        ≈ RDD / Candidate Identity corroboration
+
+operator approval / clarification
+        ≈ Human in Control
+
+role-specific ownership
+        ≈ specialization without inherited authority
+
+durable transport state outside agent chat
+        ≈ system-owned Task State direction
+
+multiple pack sizes
+        ≈ proportional agentic composition
+```
+
+### 23.1. Distinción implementation vs proposal
+
+`swarmforge/handoff-protocol.md`, el runtime compartido y la configuración
+observada en el snapshot se consideran evidencia de una implementación/repositorio
+real.
+
+En cambio, `platoon-brainstorm.md` se clasifica como propuesta de diseño.
+Sus ideas sobre Lieutenant, squads, component plans o contract milestones no
+deben citarse como comportamiento implementado mientras no exista evidencia
+adicional candidate-bound que lo demuestre.
+
+### 23.2. Adaptación para Malāk
+
+No se adopta SwarmForge como runtime ni como arquitectura. La evidencia refuerza
+las responsabilidades existentes y no crea:
+
+- Agent Swarm actual;
+- Mission Controller;
+- Handoff Manager;
+- Task Board independiente;
+- daemon de coordinación;
+- tmux/worktree dependency;
+- nuevo authority plane.
+
+Se conserva la dirección:
+
+```text
+external implementation
+        ↓
+corroboration / implementation input
+        ↓
+DIFF contra Malāk
+        ↓
+existing conceptual owner
+        ↓
+future admission only if need is demonstrated
+```
+
+Además, SwarmForge explicita que passing checks no establece completeness. La
+adaptación Malāk permanece más estricta:
+
+```text
+checks PASS
+!=
+complete review
+!=
+Validation
+!=
+Authority
+```
+
+---
+
+## 24. Estado
 
 ```text
 Documento: referencia conceptual

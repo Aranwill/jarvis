@@ -5,9 +5,9 @@ authority: non_normative
 document_role: research_horizon_reconciliation
 language: es
 created: 2026-09-09
-updated: 2026-10-10
+updated: 2026-10-12
 as_of_branch: main
-as_of_commit: 02daf578012c662f0686357aa48b25722897c82a
+as_of_commit: 30d9b931fbb2f063c2126dddd03e2c8324ccbe87
 related:
   - documents/projects/jarvis/ideas.md
   - docs/project/concepts/GOVERNED_SWARM_LONG_HORIZON_REFERENCE.md
@@ -1032,6 +1032,10 @@ aprobación o autoridad.
 | `EXT-25` | Gentleman Programming — Gentle AI ODD/RDD, `main` revisado 2026-09-20 | ODD separa autorización, exploración, incertidumbre, proporcionalidad y ejecución; RDD revisa candidatos terminados con identidad/evidencia acotada | separar método de trabajo, assurance y delivery evita convertir una metodología externa en autoridad; formalizar sólo cuando complejidad/recoverability lo justifiquen | Engineering Method / future RDD / Engineering Intelligence | `CORROBORATION` + `IMPLEMENTATION_INPUT` | adoptar ODD/RDD como framework, copiar Engram como Task State o importar sus heurísticas numéricas |
 
 | `EXT-26` | Stanford MAST — Agent JIT Compilation, ICML 2026 | planes ejecutables con pre/postcondiciones, validación contra tools y selección considerando coste | planes y decisiones de ejecución pueden expresarse mediante contratos verificables antes de delegar razonamiento libre | Execution Contracts / Planning / deterministic validation | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | adoptar su planner, compiler, tool protocol o arquitectura completa |
+| `EXT-27` | Uncle Bob / SwarmForge — `unclebob/swarm-forge@f4f5fbcae0de6f7dcc26e82400334227647cfdb2` — revisado 2026-10-12 | configuración de roles/worktrees, handoffs durables estructurados, audit gate ligado al candidate exacto, approvals/clarifications de operador y separación entre constitución compartida y prompts de rol | coordinación agentic puede conservar Task State/handoffs fuera del chat, exigir candidate audit antes del handoff y mantener al operador como frontera de aprobación; pasar checks no establece completeness | Governed Swarm / Long Horizon / RDD / Structured Agent Communication | `CORROBORATION` + `IMPLEMENTATION_INPUT` | copiar SwarmForge, tmux/worktrees, topologías, backends, prompts o su control plane; interpretar `platoon-brainstorm.md` como implementación vigente |
+| `EXT-28` | Uncle Bob / Acceptance Pipeline Specification — `unclebob/Acceptance-Pipeline-Specification@accaa33d503340c56513ef387258f8da929ba902` — revisado 2026-10-12 | Gherkin → canonical JSON IR → generated acceptance entrypoints; mutation determinista de un solo example cell; stable mutation identity; generated-files `implementation_hash` | source mutation y specification/acceptance mutation son instrumentos distintos; mutar datos de specification puede revelar acceptance wiring débil o assertions desconectadas sin mutar production source | Software QA / Test Effectiveness / future HVC research | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | adoptar Gherkin, Babashka, su IR, mutator, thresholds o pipeline como dependencia obligatoria; introducir mutation tooling en HVC-A |
+| `EXT-29` | Uncle Bob / Negative Test Experiment — `unclebob/negative-test-experiment@faf9df06f381883349650de4f0037a77f5e297af` — 2026-08-17 / revisado 2026-10-12 | ocho implementaciones independientes; acceptance 25/0 en todas; CRAP-on elevó coverage y fragmentación sin elevar design score y redujo cleanliness en el experimento | métricas/thresholds pueden mejorar una medida y degradar legibilidad o diseño; acceptance PASS y coverage alto no prueban calidad del test suite ni arquitectura | Complexity Budget / QA / Clean Code research | `CORROBORATION` | convertir CRAP, coverage o cualquier score en gate universal, autoridad o autorización automática de refactor |
+| `EXT-30` | Uncle Bob / dependency-checker — `unclebob/dependency-checker@61097ea222a377b781f003712bc54a73bb8a2d4d` — revisado 2026-10-12 | allowed/forbidden dependency edges, cycle detection, fan-in/fan-out, instability, abstractness, distance y zones `healthy/pain/useless` | dependency direction, cycles y abstraction/instability pueden aportar señales reproducibles al Complexity Budget y Architecture Review, pero una métrica o zone no demuestra por sí sola necesidad de cambio | Complexity Budget / Architecture Quality / Static Quality | `IMPLEMENTATION_INPUT` + `WATCH_SIGNAL` | portar el checker, adoptar sus thresholds o zones como ley, o crear abstracciones para optimizar una métrica |
 
 
 ### 19.3. Regla de revalidación
@@ -1103,10 +1107,12 @@ Test Coverage
 └── uncovered-risk analysis
 
 Test Effectiveness
-├── Mutation Testing
+├── Source Mutation Testing
+├── Specification / Acceptance Mutation
 ├── mutation score
 ├── surviving-mutant analysis
 ├── weak-test detection
+├── disconnected-assertion / weak-acceptance wiring detection
 └── redundant-test detection when demonstrable
 
 Advanced Testing
@@ -1120,6 +1126,8 @@ Quality Metrics
 ├── cyclomatic / cognitive complexity
 ├── duplication
 ├── coupling / cohesion
+├── dependency direction / cycle analysis
+├── abstractness / instability as advisory signals
 ├── maintainability
 ├── public-surface growth
 ├── dependency growth
@@ -1153,11 +1161,37 @@ Guardrails:
 
 ```text
 coverage != test quality
+acceptance PASS != test effectiveness
 mutation score != correctness
+metric threshold != design quality
 lint PASS != maintainability
 quality metric != Authority
 code smell != authorization to refactor
 ```
+
+La evidencia externa commit-bound revisada el 2026-10-12 refuerza dos
+separaciones adicionales:
+
+```text
+prompt / instruction digest = identity + provenance
+prompt wording              != proof of behavior
+
+source mutation             != specification / acceptance mutation
+```
+
+La regla de SwarmForge de no fijar prose de prompts mediante tests se adapta a
+Malāk de forma acotada: los digests exactos pueden seguir ligando
+`Candidate Identity`, reproducibilidad y qualification, pero la calidad
+semántica de un mecanismo debe demostrarse mediante comportamiento, contracts y
+evidence, no por igualdad textual del prompt. Esta observación queda como
+`REINFORCE_EXISTING / WATCH` para futuras unidades como HVC-B; no modifica
+HVC-A ni reinterpreta qualification histórica.
+
+La línea de `Specification / Acceptance Mutation` se incorpora como
+`GAP_CANDIDATE` pequeño dentro de Test Effectiveness, no como componente ni
+tool seleccionado. Su objetivo potencial es medir si cambios materiales en
+datos derivados de specification son realmente detectados por el acceptance
+harness.
 
 El baseline actual sólo integra `pytest` como dependencia de desarrollo y la CI
 vigente ejecuta pytest, compileall, Candidate Identity y diff validation.
