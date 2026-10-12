@@ -18,7 +18,7 @@ PROFILE = ROOT / "evaluations" / "e3_governed_evidence_support_assessor_v0" / "e
 RUNNER = ROOT / "scripts" / "run_e3_governed_blind_assessor_experiment.py"
 GITATTRIBUTES = ROOT / ".gitattributes"
 QUALIFICATION_RUNNER = ROOT / "scripts" / "evaluate_e3_governed_evidence_support_assessor.py"
-EXPECTED_CASE_SET_DIGEST = "c76e47c7a788173f5ae137094f0fd0d2bbb1076a799d5b265b6e17a4841cdb77"
+EXPECTED_CASE_SET_DIGEST = "4ec4d152af884b50d7bfa8c9d14eaaabb93b6e306ea5e7bd0361b326bb053bba"
 EXACT_GITATTRIBUTES_RULE = (
     "/evaluations/e3_governed_evidence_support_assessor_v0/cases.json text eol=lf"
 )
@@ -894,3 +894,16 @@ def test_ground_truth_repair_red_gtr_r19_c17_self_certification_identity_is_expl
     assert case["finding_producer_subject_id"] == "same-subject"
     assert case["assessor_subject_id"] == "same-subject"
     assert "same subject" in item["subject"]["rationale"].lower()
+def test_u07_v03_c09_rationale_overclaim_is_not_a_compound_statement() -> None:
+    case = next(item for item in _case_set()["cases"] if item["case_id"] == "C09")
+    subject = case["inputs"][0]["subject"]
+
+    assert subject["statement"] == "Kernel owns durable persistence authority."
+    assert subject["rationale"] == (
+        "Kernel coordinates orchestration between Planner and registered "
+        "Capabilities; therefore Kernel owns durable persistence authority."
+    )
+    assert case["inputs"][0]["expected_outcome"] == "INSUFFICIENT"
+    assert case["inputs"][0]["expected_reason_codes"] == [
+        "SUPPORTING_REFS_INSUFFICIENT"
+    ]
