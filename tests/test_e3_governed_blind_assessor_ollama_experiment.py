@@ -1161,3 +1161,14 @@ def test_u07_safe_diagnostic_sink_failure_cannot_change_assessor_result(
         "experiment_profile.json",
         "assessor_results.json",
     }
+def test_u07_v03_scope_reason_requires_explicit_external_dependency() -> None:
+    module = _adapter_module()
+
+    assert (
+        "ASSESSMENT_SCOPE_EXCEEDED -> INCONCLUSIVE: use only when the packet "
+        "explicitly identifies a named evidence dependency outside the bounded "
+        "packet or stated scope; ordinary relevant-but-insufficient support is "
+        "SUPPORTING_REFS_INSUFFICIENT, not scope exceeded."
+        in module.EXACT_SYSTEM_PROMPT
+    )
+
