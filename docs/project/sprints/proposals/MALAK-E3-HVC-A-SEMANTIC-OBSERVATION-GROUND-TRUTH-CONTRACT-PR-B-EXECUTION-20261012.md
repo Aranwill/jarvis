@@ -1,0 +1,570 @@
+---
+title: Malāk E3 HVC-A — PR-B Execution / RED→GREEN Ledger
+status: implementation_draft
+authority: non_normative
+language: es
+date: 2026-10-12
+baseline_commit: b5d2c39c32033e8df51b8101ec87606c2c0dcb59
+baseline_tree: 6931188572dce6836bff5c388fd7a4d21fe0d5aa
+trigger_issue: 282
+risk_class: 3_HIGH
+critical_contract: true
+authority_effect: none
+correction_round: 5
+---
+
+# HVC-A PR-B — Execution / RED→GREEN Ledger
+
+## 1. Propósito
+
+Materializar el contrato HVC-A integrado en PR #283 sin seleccionar verifier,
+model/provider ni introducir settlement. Esta PR conserva candidates RED y GREEN
+separados dentro de una única Draft PR conforme Construction Protocol §5.5.
+
+## 2. Human authorization
+
+La instrucción del Owner del 2026-10-12, “avancemos … quiero seguir avanzando
+con Malāk”, queda registrada en issue #282 como autorización para iniciar PR-B y
+transicionar RED→GREEN con evidencia candidate-bound separada.
+
+No concede Ready/Merge ni amplía autoridad.
+
+## 3. Preflight PR-B
+
+```text
+repository                    Aranwill/jarvis
+baseline                      b5d2c39c32033e8df51b8101ec87606c2c0dcb59
+tree                          6931188572dce6836bff5c388fd7a4d21fe0d5aa
+tracked baseline files        391
+recursive tree truncated      false
+PR-A design                   INTEGRATED / PR #283
+Research Horizon update       INTEGRATED / PR #284
+
+P0 baseline                   PASS
+P1 sources/hierarchy          PASS
+P2 invariants                 PASS
+P3 authority direction        PASS
+P4 reuse/necessity            PASS / ADAPT existing E3 contract surface
+P5 risk                       3_HIGH
+critical_contract             YES
+P6 scope                      FROZEN
+P7 result                     PASS
+
+Critical Contract Hardening   PASS / inherited design + no new semantics
+law questions                 PASS / unchanged
+Design 4R                     PASS / integrated PR-A
+RDD Stage 1 Design Check      PASS / integrated PR-A
+RED                           AUTHORIZED
+GREEN                         AUTHORIZED after preserved RED evidence
+Candidate FULL 4R             REQUIRED after GREEN
+independent GT validation     REQUIRED
+RDD Stage 1 Candidate         REQUIRED
+RDD Stage 2 Receipt           REQUIRED
+Ready / Merge                 OWNER ONLY
+```
+
+## 4. Reuse / complexity
+
+```text
+SemanticObservationV0             ADAPT existing _engineering_analysis.py
+existing binding primitives       REUSE
+blind projection pattern          REUSE / ADAPT
+V0.4                              PRESERVE / REFERENCE
+new Capability                    NO
+new service/manager/layer         NO
+Kernel/Planner                    NO_CHANGE
+support_sufficient                NO_CHANGE
+Protected Finalization            NO_CHANGE
+U08                               BLOCKED
+```
+
+## 5. PR-B file budget
+
+Allowed add:
+
+- `docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-PR-B-EXECUTION-20261012.md`
+- `docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-PR-B-FILE-COVERAGE-20261012.tsv`
+- `evaluations/e3_hvc_a_semantic_observation_v0/visible_cases.json`
+- `evaluations/e3_hvc_a_semantic_observation_v0/ground_truth.json`
+- `tests/test_e3_hvc_a_semantic_observation_v0.py`
+
+Allowed modify in GREEN only:
+
+- `src/malak/capabilities/_engineering_analysis.py`
+
+All other baseline files are forbidden for PR-B absent Bounded Correction and
+explicit scope reopening.
+
+## 6. RED contract
+
+RED must demonstrate that the baseline lacks the HVC-A public contract while the
+tests encode:
+
+- exact enum domains;
+- one observation ↔ one evidence_ref;
+- authority_effect = none;
+- NON_MATERIAL / UNKNOWN / PARTIAL fail-closed combinations;
+- LIMITS != CONTRADICTS;
+- scope NONE != sufficiency;
+- EXTERNAL_REQUIRED and UNKNOWN remain non-positive;
+- evidence_ref must resolve inside visible case material;
+- hidden ground-truth keys cannot cross the visible projection;
+- claim_part_id is accepted only when already supplied;
+- list/multi-observation settlement is outside HVC-A;
+- ground-truth discriminability pairs remain distinct.
+
+Expected RED reason: missing HVC-A symbols on the exact RED candidate, not an
+unrelated regression.
+
+## 7. GREEN boundary
+
+GREEN may only add the minimal contract and deterministic validation/projection
+helpers required by RED. It may not add inference, model calls, scoring,
+aggregation, settlement or finalization.
+
+## 8. Independent Ground-Truth Review
+
+The blind reviewer receives `evaluations/e3_hvc_a_semantic_observation_v0/visible_cases.json` only. The hidden file
+`evaluations/e3_hvc_a_semantic_observation_v0/ground_truth.json` and model outputs/qualification results are prohibited inputs.
+
+Independent validation remains PENDING until performed by an actor distinct from
+the writer. This document does not self-certify that gate.
+
+## 9. Stage 2
+
+Risk 3 requires a valid external `MALAK-EVIDENCE-MANIFEST/v1`, terminal
+RDD Stage 1 Candidate Conformance and
+`MALAK-RDD-VALIDATION-RECEIPT/v1` before human Ready.
+
+Receipt != Ready != Merge != Authority.
+
+## 10. Candidate FULL 4R — preliminary review / Bounded Correction round 1
+
+GREEN inicial:
+
+```text
+candidate       03c446cdfdeafb2a120fc0ba5998c9c2150acbb0
+tree            0ed15f001351b4ecf817c6a4e4f456e5429fce0a
+Ubuntu tests    2052 / 2052 PASS
+compileall      PASS
+diff validation PASS
+```
+
+FULL 4R preliminar encontró un finding bloqueante acotado:
+
+```text
+HVC-A-PRB-F01
+type        evaluation-pack completeness
+runtime     unaffected
+problem     matrix items 6/7/9/10 existed as tests but were not frozen as
+            explicit contract adversarial vectors in Ground Truth
+disposition BOUNDED_CORRECTION
+```
+
+Corrección:
+
+- freeze MISSING_EVIDENCE_MATERIAL_VS_SEMANTIC_UNKNOWN;
+- freeze EXACT_BINDING_VS_BINDING_DRIFT;
+- freeze ONE_VALID_OBSERVATION_VS_DUPLICATE_SET;
+- freeze VALID_ABSTAINING_OBSERVATION_VS_UNKNOWN_ENUM;
+- preserve all four as deterministic INVALID contract adversarials;
+- no semantic labels are changed;
+- no production behavior or authority is added.
+
+El corrected candidate requiere affected revalidation y un nuevo Candidate FULL 4R.
+
+## 11. Candidate pre-review / Bounded Correction round 2
+
+Se detectó un segundo finding de fidelidad contractual antes de independent review:
+
+```text
+HVC-A-PRB-F02
+type        contract fidelity / optional field
+design      claim_part_id? is optional and only present when upstream supplies it
+problem     visible projection required the key even for root-claim cases
+impact      representation was stricter than integrated G1
+disposition BOUNDED_CORRECTION
+```
+
+Corrección:
+
+- root-claim visible cases omit claim_part_id;
+- projection accepts absence and normalizes it internally to None;
+- upstream-authorized claim part remains explicit when present;
+- unknown extra keys still fail closed;
+- no new semantics, component, authority or dependency.
+
+Any review/evidence bound to candidate d3b6309646d3c672f9818d9f63be37b59bdc4a67 is superseded.
+
+## 12. Independent FULL 4R FAIL / Bounded Correction round 3
+
+Independent issue #288 reviewed candidate:
+
+```text
+candidate       0eb173d9b5cb1ae83ff119cdf54afee9f1cd1c64
+tree            89c3ddd67100ce3c36a870bd53909c5a74a4f2f6
+Risk            FAIL
+Readability     PASS
+Reliability     FAIL
+Resilience      FAIL
+FULL_4R_RESULT  FAIL
+```
+
+Blocking finding:
+
+```text
+HVC-A-PRB-4R-R2-F03
+type        provenance / binding
+severity    HIGH
+blocking    YES
+problem     free caller-visible material can be substituted while inherited
+            evidence/finding identities remain unchanged
+```
+
+Bounded Correction round 3 remains inside the existing PR-B file/component budget.
+
+Selected correction:
+
+```text
+caller dict provenance              REJECT
+existing focused evidence identity  REUSE + RECOMPUTE
+existing finding fingerprint        REUSE + RECOMPUTE
+selected evidence_ref               RESOLVE from exact focused bundle
+claim                               DERIVE from exact structured finding
+claim_part_id                       FAIL CLOSED until an authorized upstream
+                                    provider exists
+new evidence identity               NO
+new component/service/manager       NO
+```
+
+`project_hvc_a_visible_semantic_observation_case_v0` no longer accepts a free
+mapping. A bound case must first be derived from the existing
+`GovernedEngineeringEvidenceFocus`, `FocusedEngineeringEvidenceBundle` and
+structured `_Finding` surfaces. The existing focused evidence digest is
+recomputed from the exact bundle/focus material before projection. The existing
+finding fingerprint is recomputed from the exact finding material.
+
+F03-specific validation covers:
+
+- free visible dict rejected as provenance;
+- changed claim cannot preserve finding fingerprint;
+- changed evidence material with old evidence_set_digest rejected;
+- coordinated changed evidence material requires a new evidence_set_digest;
+- caller-invented claim_part_id rejected because no upstream authorized provider
+  exists in this baseline;
+- projected claim/material are derived from the bound upstream objects.
+
+Ground Truth labels and visible semantic cases were not changed by this correction.
+
+The corrected candidate requires full affected revalidation, fresh independent
+FULL 4R, and a fresh blind Ground-Truth review bound to the new candidate.
+
+## 13. Independent Fix Validator FAIL_OPEN / Bounded Correction round 4
+
+Issue #292 independently validated round-3 candidate and returned:
+
+```text
+candidate       fbaa76c3e722e11aab9166fcdecde5e1ace68d8f
+tree            94afc6b89a6c130d3a5e50c98c1039823a2cd534
+F03_result      FAIL_OPEN
+bypass_remaining YES
+probes          13 adversarial families + valid control
+new_identity    NO
+authority_expansion NO
+```
+
+Detailed independent transcript established that the required probe families
+1–10 were already blocked by round 3. The surviving bypasses were:
+
+```text
+F03-R3-A
+dataclasses.replace(bound_case, ...)
+could replace derived claim / evidence_material / claim_part_id while retaining
+the original evidence_set_digest and finding_fingerprint.
+
+F03-R3-B
+permuting canonical R1/R2 assignment could change ref -> material resolution
+without changing evidence_set_digest or finding_fingerprint because focused
+evidence digest intentionally strips ephemeral refs.
+```
+
+Therefore round 4 does NOT introduce a new upstream identity or routing layer.
+The speculative upstream-route requirement was rejected as broader than the
+independent finding required.
+
+Selected minimal correction:
+
+```text
+bound case stores source objects only:
+  case_id
+  evidence_focus
+  evidence_bundle
+  structured finding
+  evidence_ref
+
+projection / validation:
+  re-resolve source objects
+  recompute existing evidence_set_digest
+  recompute existing finding_fingerprint
+  resolve material from exact canonical ref assignment
+  reject claim_part_id until upstream provider exists
+
+derived claim/material/digests are NOT stored as replaceable bound-case fields
+new evidence identity = NO
+new component/service/manager = NO
+```
+
+Canonical ref enforcement mirrors collector assignment semantics:
+
+- repository evidence must be canonical-order and exactly `R1..Rn`;
+- knowledge evidence must be canonical-order and exactly `K1..Kn`;
+- duplicate `(path, line_number, line)` material identity is rejected;
+- ref permutation with unchanged digest fails closed.
+
+Round-4 regression tests cover:
+
+- `dataclasses.replace` cannot set claim/evidence_material/claim_part_id or IDs
+  because those derived fields no longer exist on the bound object;
+- replacing the structured finding changes the recomputed finding fingerprint;
+- replacing evidence material while retaining prior digest is rejected;
+- invented claim_part_id through replaced finding is rejected;
+- R1/R2 ref permutation is rejected;
+- noncanonical evidence order is rejected.
+
+Ground Truth and visible semantic cases remain unchanged.
+
+Any candidate produced by this correction requires fresh candidate-bound CI,
+independent Fix Validator, FULL 4R and blind Ground-Truth review.
+
+### Round-4 proportionality cleanup
+
+`bind_hvc_a_semantic_observation_case_v0` and projection initially duplicated the
+same source validation logic. Before final candidate freeze, the duplicate path
+was removed:
+
+```text
+bind -> construct source-bound object -> single resolver
+project -> same single resolver
+validate observation -> same single resolver
+```
+
+This is a readability/reliability reduction only; no contract, scope, identity
+or authority change.
+
+### Round-4 nested finding-role hardening
+
+Writer pre-review identified one additional identity-preserving path inside the
+same F03 class: `_Finding.evidence_refs` is derived by the structured parser but
+is not itself part of the finding fingerprint. A replaced `_Finding` could try
+to add a different evidence ref while leaving the fingerprinted role-ref sets
+unchanged.
+
+Correction:
+
+- require `finding.evidence_refs` to equal exactly
+  `supporting_repository_refs + supporting_knowledge_refs + limiting_or_counterevidence_refs`;
+- require role tuples and per-role uniqueness;
+- require supporting repository refs to resolve in repository evidence;
+- require supporting knowledge refs to resolve in knowledge evidence;
+- require limiting/counterevidence refs to resolve in either bound source;
+- reject supporting/limiting overlap;
+- selected `evidence_ref` therefore cannot escape the fingerprinted role set.
+
+Regression coverage includes a two-ref packet where R2 exists in the bundle but
+is not fingerprint-bound; replacing only `evidence_refs` and selecting R2 must
+fail closed.
+
+
+## 14. Independent FULL 4R FAIL / Bounded Correction round 5
+
+Issue #297 independently reviewed round-4 candidate:
+
+```text
+candidate       2695138ad8e26d25d0582359eb72eade85878024
+tree            13949eb394ae5f829ad92e9050a130cdec7cc55d
+Risk            FAIL
+Readability     PASS
+Reliability     FAIL
+Resilience      FAIL
+FULL_4R_RESULT  FAIL
+blocking        1
+non_blocking    0
+```
+
+The residual blocker remained inside F03 provenance/binding:
+
+```text
+collector result:
+  selector_results contains TRUNCATED
+  complete = false
+  context_truncated = true
+
+round-4 bypass:
+  replace bundle complete -> true
+  replace bundle context_truncated -> false
+  keep selector_results unchanged
+  keep evidence_set_digest unchanged
+  bind/project/validate admitted
+```
+
+Root cause: the collector derives `complete` and required
+`context_truncated` from `selector_results`, and `selector_results` is
+already bound by `evidence_set_digest`. HVC-A nevertheless trusted the two
+caller-replaceable derived booleans directly.
+
+Bounded Correction round 5 is intentionally narrower than a digest or collector
+change:
+
+```text
+expected_complete =
+  all(selector_result.status == "RESOLVED")
+
+expected_context_truncated =
+  any(selector_result.status == "TRUNCATED")
+
+bundle.complete must equal expected_complete
+bundle.context_truncated must equal expected_context_truncated
+```
+
+The resolver requires exact `EvidenceSelectorResult` instances and fails closed
+on any derived-state mismatch before relying on completeness.
+
+This preserves:
+
+- the existing collector digest and identity;
+- collector semantics for required-selector completeness/truncation;
+- no new evidence identity;
+- no new service/manager/layer;
+- no Kernel/Planner delta;
+- authority_effect = none.
+
+Regression coverage freezes:
+
+- original required TRUNCATED packet remains rejected;
+- replacing both flags while preserving the same digest is rejected;
+- isolated `context_truncated` mismatch is rejected;
+- isolated `complete` mismatch is rejected;
+- a RESOLVED control remains bind/project/validate valid.
+
+`supplemental_truncated` remains distinct: it is already included directly in
+the focused evidence digest and is not reclassified as required-selector
+`context_truncated`.
+
+Ground Truth and visible semantic cases remain unchanged.
+
+Any round-5 candidate requires fresh candidate-bound CI, independent Fix
+Validator, FULL 4R, and blind Ground-Truth review.
+
+
+## 15. Final bounded correction — round 6
+
+Round 5 independent public-archive validation completed with a reproducible blocker:
+
+```text
+finding_id   HVC-A-PRB-F03-R5-REQ-CORRESPONDENCE-01
+severity     HIGH
+blocking     YES
+result       FAIL_OPEN
+```
+
+Failure mode:
+
+```text
+focus declares required selectors
++
+caller supplies an incomplete/empty selector_results sequence
++
+caller recomputes a coherent evidence_set_digest
++
+complete = true
+→ HVC-A previously admitted bind → project → validate
+```
+
+The defect is local to the HVC-A admission boundary. The collector already emits one
+`EvidenceSelectorResult` per required selector in deterministic order, but HVC-A did
+not verify that the supplied results exactly corresponded to the required selectors
+declared by the bound `GovernedEngineeringEvidenceFocus`.
+
+### Final Correction Budget
+
+```yaml
+correction_round: 6
+max_fix_rounds: 1
+finding_id: HVC-A-PRB-F03-R5-REQ-CORRESPONDENCE-01
+allowed_production_files:
+  - src/malak/capabilities/_engineering_analysis.py
+allowed_test_files:
+  - tests/test_e3_hvc_a_semantic_observation_v0.py
+allowed_ledger_files:
+  - docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-PR-B-EXECUTION-20261012.md
+new_dependencies: 0
+new_identity: 0
+architecture_changes: 0
+exhaustion_action: STOP_PR_B_AND_REOPEN_DESIGN
+authority_effect: none
+```
+
+No round 7 is authorized.
+
+### Round-6 correction
+
+HVC-A now validates, before completeness derivation, that
+`evidence_bundle.selector_results` exactly matches the focus-required selector
+sequence:
+
+```text
+repository_required_selectors in declared order
+then
+knowledge_required_selectors in declared order
+```
+
+For every result, the following identity tuple must match exactly:
+
+```text
+(source_kind, selector_kind, selector_value)
+```
+
+Therefore omissions, extra results, duplicates that alter cardinality/order,
+reordering, source-kind substitution, selector-kind substitution and selector-value
+substitution fail closed before `complete` / `context_truncated` are trusted.
+
+The boundary also rejects non-canonical selector-result representations observed by
+the round-5 validator:
+
+- `matched_paths` must be a tuple of non-empty strings;
+- `match_count` must be a non-negative integer and not bool;
+- `selected_count` must be a non-negative integer, not bool, and cannot exceed
+  `match_count`;
+- `MISSING` cannot carry matched paths or non-zero counts.
+
+This does not modify the collector, evidence-set digest algorithm, finding
+fingerprint, Kernel, Planner, routing, aggregation, settlement, support_sufficient,
+Protected Finalization or U08.
+
+### Round-6 focused tests
+
+New tests cover:
+
+1. omitted required selector;
+2. empty selector_results with non-empty required focus;
+3. reordered required results;
+4. source-kind mismatch;
+5. list-valued matched_paths;
+6. negative match_count;
+7. bool selected_count;
+8. valid required-selector control.
+
+Expected disposition:
+
+```text
+fresh candidate-bound CI
+→ fresh independent Fix Validator
+→ fresh Candidate FULL 4R
+
+any new material blocker
+→ Correction Budget exhausted
+→ STOP PR-B
+→ reopen G0/G1 / Design Amendment
+```
+
+authority_effect = none
