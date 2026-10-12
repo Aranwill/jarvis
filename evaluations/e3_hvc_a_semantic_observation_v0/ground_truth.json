@@ -104,5 +104,47 @@
       "reviewer_rationale": "Ground truth frozen for UPSTREAM_AUTHORIZED_CLAIM_PART; no model output was used.",
       "authority_effect": "none"
     }
+  ],
+  "contract_adversarials": [
+    {
+      "adversarial_id": "HVC-A-A01",
+      "boundary": "MISSING_EVIDENCE_MATERIAL_VS_SEMANTIC_UNKNOWN",
+      "base_case_id": "HVC-A-C09",
+      "mutation": {
+        "remove_evidence_material_ref": "R1"
+      },
+      "expected_validation": "INVALID",
+      "authority_effect": "none"
+    },
+    {
+      "adversarial_id": "HVC-A-A02",
+      "boundary": "EXACT_BINDING_VS_BINDING_DRIFT",
+      "base_case_id": "HVC-A-C01",
+      "mutation": {
+        "finding_fingerprint": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "expected_validation": "INVALID",
+      "authority_effect": "none"
+    },
+    {
+      "adversarial_id": "HVC-A-A03",
+      "boundary": "ONE_VALID_OBSERVATION_VS_DUPLICATE_SET",
+      "base_case_id": "HVC-A-C01",
+      "mutation": {
+        "observation_container": "LIST_DUPLICATE"
+      },
+      "expected_validation": "INVALID",
+      "authority_effect": "none"
+    },
+    {
+      "adversarial_id": "HVC-A-A04",
+      "boundary": "VALID_ABSTAINING_OBSERVATION_VS_UNKNOWN_ENUM",
+      "base_case_id": "HVC-A-C09",
+      "mutation": {
+        "semantic_stance": "MAYBE"
+      },
+      "expected_validation": "INVALID",
+      "authority_effect": "none"
+    }
   ]
 }
