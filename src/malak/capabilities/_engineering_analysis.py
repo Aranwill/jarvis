@@ -1338,6 +1338,7 @@ def bind_hvc_a_semantic_observation_case_v0(
     evidence_bundle: FocusedEngineeringEvidenceBundle,
     finding: _Finding,
     evidence_ref: str,
+    upstream_route: GovernedSupportEvidenceRoutingV0,
 ) -> _HvcABoundSemanticObservationCaseV0:
     if not isinstance(evidence_focus, GovernedEngineeringEvidenceFocus):
         raise TypeError("evidence_focus must be GovernedEngineeringEvidenceFocus")
@@ -1345,6 +1346,10 @@ def bind_hvc_a_semantic_observation_case_v0(
         raise TypeError("evidence_bundle must be FocusedEngineeringEvidenceBundle")
     if not isinstance(finding, _Finding):
         raise TypeError("finding must be an E3 _Finding")
+    if not isinstance(upstream_route, GovernedSupportEvidenceRoutingV0):
+        raise TypeError(
+            "upstream_route must be GovernedSupportEvidenceRoutingV0"
+        )
     _require_bounded_text(
         case_id,
         "HVC-A case_id",
@@ -1392,6 +1397,40 @@ def bind_hvc_a_semantic_observation_case_v0(
         uncertainty_basis=finding.uncertainty_basis,
     )
     _require_sha256(fingerprint, "HVC-A finding_fingerprint")
+
+    if upstream_route.policy_version != _SUPPORT_ROUTING_POLICY_V0:
+        raise ValueError("HVC-A upstream routing policy_version mismatch")
+    if upstream_route.authority_effect != "none":
+        raise ValueError("HVC-A upstream routing authority_effect must be none")
+    if (
+        upstream_route.route_kind
+        is not GovernedSupportEvidenceRouteKind.INFERENTIAL
+        or upstream_route.reason_code
+        is not GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL
+    ):
+        raise ValueError(
+            "HVC-A requires the exact upstream inferential residual route"
+        )
+    expected_route_binding = {
+        "baseline_commit": evidence_bundle.baseline_commit,
+        "focus_id": evidence_bundle.focus_id,
+        "evidence_set_digest": recomputed_digest,
+        "relation_id": finding.relation_id,
+        "finding_fingerprint": fingerprint,
+    }
+    if any(
+        getattr(upstream_route, field_name) != expected
+        for field_name, expected in expected_route_binding.items()
+    ):
+        raise ValueError("HVC-A upstream routing binding mismatch")
+    _require_sha256(
+        upstream_route.evaluation_question_identity,
+        "HVC-A upstream evaluation_question_identity",
+    )
+    _require_sha256(
+        upstream_route.resolved_evidence_material_digest,
+        "HVC-A upstream resolved_evidence_material_digest",
+    )
 
     _require_bounded_text(
         evidence_ref,
