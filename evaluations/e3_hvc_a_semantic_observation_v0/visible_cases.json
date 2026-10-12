@@ -13,7 +13,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "1111111111111111111111111111111111111111111111111111111111111111",
       "claim": "Kernel coordinates orchestration between Planner and registered Capabilities.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
@@ -29,7 +28,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "2222222222222222222222222222222222222222222222222222222222222222",
       "claim": "Kernel coordinates orchestration and owns durable persistence authorization.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "Repository contract: Kernel coordinates orchestration between Planner and registered Capabilities."
@@ -45,7 +43,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "3333333333333333333333333333333333333333333333333333333333333333",
       "claim": "Kernel coordinates runtime orchestration.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "Authoritative formatting rule: Markdown headings use sentence case."
@@ -61,7 +58,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "4444444444444444444444444444444444444444444444444444444444444444",
       "claim": "Kernel owns the complete execution lifecycle for every Capability.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "Bounded architecture note: dispatch evidence does not establish complete lifecycle ownership."
@@ -77,7 +73,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "5555555555555555555555555555555555555555555555555555555555555555",
       "claim": "Kernel coordinates orchestration and owns durable persistence authorization.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "Repository contract directly establishes orchestration; it says nothing about durable persistence authorization."
@@ -93,7 +88,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "6666666666666666666666666666666666666666666666666666666666666666",
       "claim": "Kernel coordinates orchestration between Planner and registered Capabilities.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "Compatible limit: orchestration does not grant persistence or deployment authority."
@@ -109,7 +103,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "7777777777777777777777777777777777777777777777777777777777777777",
       "claim": "Kernel coordinates orchestration between Planner and registered Capabilities.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "Counterevidence states Planner invokes registered Capabilities directly and Kernel does not coordinate execution."
@@ -125,7 +118,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "8888888888888888888888888888888888888888888888888888888888888888",
       "claim": "The production deployment path preserves this Kernel orchestration behavior.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "This repository packet does not contain the named production deployment telemetry required to establish the claim."
@@ -141,7 +133,6 @@
       "relation_id": "U01.KERNEL_RESPONSIBILITY",
       "finding_fingerprint": "9999999999999999999999999999999999999999999999999999999999999999",
       "claim": "Kernel coordinates orchestration under every runtime condition.",
-      "claim_part_id": null,
       "evidence_ref": "R1",
       "evidence_material_by_ref": {
         "R1": "The bounded packet contains one normal-path observation but does not establish whether an external dependency is needed."
