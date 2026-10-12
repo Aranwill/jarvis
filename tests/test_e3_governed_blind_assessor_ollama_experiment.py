@@ -1171,3 +1171,25 @@ def test_u07_v03_scope_reason_requires_explicit_external_dependency() -> None:
         "SUPPORTING_REFS_INSUFFICIENT, not scope exceeded."
         in module.EXACT_SYSTEM_PROMPT
     )
+
+def test_u07_v04_irrelevant_vs_insufficient_uses_material_bearing() -> None:
+    module = _adapter_module()
+
+    assert (
+        "SUPPORTING_REFS_IRRELEVANT -> INSUFFICIENT: use only when none of the "
+        "supplied supporting references materially bear on the statement or its "
+        "evidentiary sufficiency."
+        in module.EXACT_SYSTEM_PROMPT
+    )
+    assert (
+        "SUPPORTING_REFS_INSUFFICIENT -> INSUFFICIENT: use when at least one "
+        "supplied supporting reference materially bears on the statement, "
+        "including by directly describing a limitation or non-establishment, "
+        "but the packet does not establish it."
+        in module.EXACT_SYSTEM_PROMPT
+    )
+    assert (
+        "If any supplied supporting reference materially bears on the statement, "
+        "do not use SUPPORTING_REFS_IRRELEVANT."
+        in module.EXACT_SYSTEM_PROMPT
+    )
