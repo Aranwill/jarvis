@@ -1087,7 +1087,7 @@ def project_blind_support_assessor_input_v0(case_input):
 
 
 _HVC_A_POLICY_VERSION = "e3-hvc-a-semantic-observation/v0"
-_HVC_A_VISIBLE_CASE_KEYS = frozenset(
+_HVC_A_VISIBLE_CASE_REQUIRED_KEYS = frozenset(
     {
         "case_id",
         "policy_version",
@@ -1097,12 +1097,12 @@ _HVC_A_VISIBLE_CASE_KEYS = frozenset(
         "relation_id",
         "finding_fingerprint",
         "claim",
-        "claim_part_id",
         "evidence_ref",
         "evidence_material_by_ref",
         "authority_effect",
     }
 )
+_HVC_A_VISIBLE_CASE_OPTIONAL_KEYS = frozenset({"claim_part_id"})
 _HVC_A_FORBIDDEN_VISIBLE_KEYS = frozenset(
     {
         "expected_material_bearing",
@@ -1264,36 +1264,44 @@ def project_hvc_a_visible_semantic_observation_case_v0(case_input):
         raise TypeError("HVC-A visible case must be a mapping")
     if _hvc_a_contains_forbidden_visible_key(case_input):
         raise ValueError("HVC-A visible case contains hidden ground-truth material")
-    if set(case_input) != _HVC_A_VISIBLE_CASE_KEYS:
+    actual_keys = set(case_input)
+    allowed_keys = _HVC_A_VISIBLE_CASE_REQUIRED_KEYS | _HVC_A_VISIBLE_CASE_OPTIONAL_KEYS
+    if (
+        not _HVC_A_VISIBLE_CASE_REQUIRED_KEYS.issubset(actual_keys)
+        or not actual_keys.issubset(allowed_keys)
+    ):
         raise ValueError("HVC-A visible case keys do not match the V0 contract")
 
-    if case_input["policy_version"] != _HVC_A_POLICY_VERSION:
+    visible = copy.deepcopy(case_input)
+    visible.setdefault("claim_part_id", None)
+
+    if visible["policy_version"] != _HVC_A_POLICY_VERSION:
         raise ValueError("HVC-A visible case policy_version is unsupported")
     _require_bounded_text(
-        case_input["case_id"],
+        visible["case_id"],
         "HVC-A case_id",
         _SUPPORT_ROUTING_MAX_ID_BYTES,
     )
-    if not _is_lower_hex(case_input["baseline_commit"], 40):
+    if not _is_lower_hex(visible["baseline_commit"], 40):
         raise ValueError("HVC-A visible baseline_commit is invalid")
     _require_bounded_text(
-        case_input["focus_id"],
+        visible["focus_id"],
         "HVC-A focus_id",
         _SUPPORT_ROUTING_MAX_ID_BYTES,
     )
-    _require_sha256(case_input["evidence_set_digest"], "HVC-A evidence_set_digest")
+    _require_sha256(visible["evidence_set_digest"], "HVC-A evidence_set_digest")
     _require_bounded_text(
-        case_input["relation_id"],
+        visible["relation_id"],
         "HVC-A relation_id",
         _SUPPORT_ROUTING_MAX_ID_BYTES,
     )
-    _require_sha256(case_input["finding_fingerprint"], "HVC-A finding_fingerprint")
+    _require_sha256(visible["finding_fingerprint"], "HVC-A finding_fingerprint")
     _require_bounded_text(
-        case_input["claim"],
+        visible["claim"],
         "HVC-A claim",
         _BLIND_PROJECTION_MAX_STRING_BYTES,
     )
-    claim_part_id = case_input["claim_part_id"]
+    claim_part_id = visible["claim_part_id"]
     if claim_part_id is not None:
         _require_bounded_text(
             claim_part_id,
@@ -1301,11 +1309,11 @@ def project_hvc_a_visible_semantic_observation_case_v0(case_input):
             _SUPPORT_ROUTING_MAX_ID_BYTES,
         )
     evidence_ref = _require_bounded_text(
-        case_input["evidence_ref"],
+        visible["evidence_ref"],
         "HVC-A evidence_ref",
         _SUPPORT_ROUTING_MAX_ID_BYTES,
     )
-    materials = case_input["evidence_material_by_ref"]
+    materials = visible["evidence_material_by_ref"]
     if (
         not isinstance(materials, dict)
         or not materials
@@ -1325,18 +1333,18 @@ def project_hvc_a_visible_semantic_observation_case_v0(case_input):
         )
     if evidence_ref not in materials:
         raise ValueError("HVC-A evidence_ref does not resolve in the visible case")
-    if case_input["authority_effect"] != "none":
+    if visible["authority_effect"] != "none":
         raise ValueError("HVC-A visible authority_effect must be none")
 
     encoded = json.dumps(
-        case_input,
+        visible,
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
     if len(encoded) > _BLIND_PROJECTION_MAX_BYTES:
         raise ValueError("HVC-A visible case exceeds hard byte limit")
-    return copy.deepcopy(case_input)
+    return visible
 
 
 def validate_hvc_a_semantic_observation_v0(observation, visible_case):
