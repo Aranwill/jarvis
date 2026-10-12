@@ -907,4 +907,3 @@ def test_u07_v03_c09_rationale_overclaim_is_not_a_compound_statement() -> None:
     assert case["inputs"][0]["expected_reason_codes"] == [
         "SUPPORTING_REFS_INSUFFICIENT"
     ]
-
