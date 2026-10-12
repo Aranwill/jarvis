@@ -350,3 +350,26 @@ validate observation -> same single resolver
 
 This is a readability/reliability reduction only; no contract, scope, identity
 or authority change.
+
+### Round-4 nested finding-role hardening
+
+Writer pre-review identified one additional identity-preserving path inside the
+same F03 class: `_Finding.evidence_refs` is derived by the structured parser but
+is not itself part of the finding fingerprint. A replaced `_Finding` could try
+to add a different evidence ref while leaving the fingerprinted role-ref sets
+unchanged.
+
+Correction:
+
+- require `finding.evidence_refs` to equal exactly
+  `supporting_repository_refs + supporting_knowledge_refs + limiting_or_counterevidence_refs`;
+- require role tuples and per-role uniqueness;
+- require supporting repository refs to resolve in repository evidence;
+- require supporting knowledge refs to resolve in knowledge evidence;
+- require limiting/counterevidence refs to resolve in either bound source;
+- reject supporting/limiting overlap;
+- selected `evidence_ref` therefore cannot escape the fingerprinted role set.
+
+Regression coverage includes a two-ref packet where R2 exists in the bundle but
+is not fingerprint-bound; replacing only `evidence_refs` and selecting R2 must
+fail closed.
