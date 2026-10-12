@@ -69,6 +69,12 @@ fue leído ni procesado.
 El File Coverage Ledger de esta unidad clasifica 389/389
 blobs del baseline y registra separadamente los dos candidate additions.
 
+`review_depth` se registra de forma conservadora según la profundidad
+demostrable de esta revisión. Una fuente obligatoria puede quedar reconciliada
+mediante `TARGETED_READ` sin afirmar `FULL_READ` cuando una lectura integral no
+sea necesaria o no esté demostrada. Exhaustive inventory no implica exhaustive
+full-text reading.
+
 ## 3. Construction Preflight
 
 ```text
@@ -292,6 +298,19 @@ claim_part_id?          # sólo si upstream ya provee una parte autorizada
 authority_effect = none
 ```
 
+Cardinalidad congelada para HVC-A:
+
+```text
+1 SemanticObservationV0
+↔
+exactly 1 evidence_ref
+```
+
+Si un packet contiene múltiples referencias visibles, cada referencia material
+se representa mediante su propia observación bound al mismo subject/claim cuando
+corresponda. La combinación de múltiples observaciones, resolución de conflicto,
+agregación o settlement pertenece a HVC-C y queda fuera de HVC-A.
+
 `claim_part_id` no autoriza decomposición. Si upstream no aporta partes
 estructuradas, la observación se liga al claim raíz mediante el
 `finding_fingerprint`.
@@ -366,6 +385,38 @@ al nivel de evaluación aplicable.
 
 Existe soporte visible para al menos una proposición material, pero no para todas.
 
+**semantic_stance = UNKNOWN**
+
+El material visible no permite establecer de forma segura `SUPPORTS`, `LIMITS`
+o `CONTRADICTS` sin asumir información no presente en la observación acotada.
+`UNKNOWN` no representa neutralidad favorable ni ausencia de riesgo.
+
+**scope_dependency = NONE**
+
+La observación visible no identifica una dependencia externa necesaria para
+resolver esa observación. `NONE` no significa que el packet completo sea
+suficiente ni que exista soporte positivo.
+
+**scope_dependency = UNKNOWN**
+
+La observación visible no permite determinar si existe una dependencia externa
+necesaria sin asumir información adicional. No puede tratarse como `NONE`.
+
+**coverage = UNKNOWN**
+
+No puede establecerse de forma segura cobertura afirmativa `FULL` o `PARTIAL`,
+o la dimensión de cobertura afirmativa no aplica porque la stance no es
+`SUPPORTS`.
+
+Semántica de `coverage`:
+
+```text
+coverage measures affirmative support coverage only
+coverage != relevance
+coverage != contradiction strength
+coverage != scope sufficiency
+```
+
 ### 8.4 Combinaciones fail-closed
 
 ```text
@@ -382,6 +433,13 @@ FULL | PARTIAL
 
 LIMITS | CONTRADICTS
 → coverage = UNKNOWN
+
+scope_dependency = NONE
+→ does NOT imply evidence sufficiency or positive support
+
+scope_dependency = UNKNOWN
+→ cannot be coerced to NONE
+→ no positive settlement by default
 
 scope_dependency = EXTERNAL_REQUIRED
 → positive settlement later is prohibited until resolved
@@ -557,6 +615,20 @@ NO.
 ### A13 — ¿HVC-A desbloquea U08?
 NO.
 
+### A14 — ¿scope_dependency = NONE equivale a soporte suficiente?
+NO. Sólo significa que esa observación no identifica una dependencia externa
+necesaria.
+
+### A15 — ¿scope_dependency = UNKNOWN puede normalizarse a NONE?
+NO. Debe conservar incertidumbre y bloquear positive settlement por default.
+
+### A16 — ¿coverage = UNKNOWN puede reinterpretarse como PARTIAL?
+NO. UNKNOWN no expresa cobertura afirmativa conocida.
+
+### A17 — ¿una observación puede agregar múltiples evidence refs?
+NO en HVC-A. Cada `SemanticObservationV0` queda ligada a exactamente un
+`evidence_ref`; agregación y settlement pertenecen a HVC-C.
+
 Resultado:
 
 ```text
@@ -711,6 +783,8 @@ law delta              0
 Kernel delta           0
 Planner delta          0
 max design fix rounds  2
+correction_round        1
+correction_findings     HVC-A-R01; HVC-A-R02
 authority_effect       none
 ```
 
