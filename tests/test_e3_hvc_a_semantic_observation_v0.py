@@ -859,7 +859,17 @@ def _r5_bundle_with_selector_status(
     GovernedEngineeringEvidenceFocus,
     FocusedEngineeringEvidenceBundle,
 ]:
-    focus = _focus(visible)
+    focus = replace(
+        _focus(visible),
+        repository_required_selectors=(
+            EvidenceSelector(
+                kind="EXACT_PATH",
+                value="tests/hvc_a_fixture.md",
+                terms=("support",),
+                max_matches=8,
+            ),
+        ),
+    )
     repository_evidence = (
         {
             "ref": "R1",
