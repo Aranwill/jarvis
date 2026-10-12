@@ -1086,6 +1086,284 @@ def project_blind_support_assessor_input_v0(case_input):
     return copy.deepcopy(visible)
 
 
+_HVC_A_POLICY_VERSION = "e3-hvc-a-semantic-observation/v0"
+_HVC_A_VISIBLE_CASE_KEYS = frozenset(
+    {
+        "case_id",
+        "policy_version",
+        "baseline_commit",
+        "focus_id",
+        "evidence_set_digest",
+        "relation_id",
+        "finding_fingerprint",
+        "claim",
+        "claim_part_id",
+        "evidence_ref",
+        "evidence_material_by_ref",
+        "authority_effect",
+    }
+)
+_HVC_A_FORBIDDEN_VISIBLE_KEYS = frozenset(
+    {
+        "expected_material_bearing",
+        "expected_semantic_stance",
+        "expected_scope_dependency",
+        "expected_coverage",
+        "expected_outcome",
+        "expected_reason_codes",
+        "case_class",
+        "reviewer_annotations",
+        "qualification_thresholds",
+        "ground_truth",
+        "oracle_label",
+    }
+)
+
+
+class SemanticMaterialBearingV0(str, __import__("enum").Enum):
+    MATERIAL = "MATERIAL"
+    NON_MATERIAL = "NON_MATERIAL"
+    UNKNOWN = "UNKNOWN"
+
+
+class SemanticStanceV0(str, __import__("enum").Enum):
+    SUPPORTS = "SUPPORTS"
+    LIMITS = "LIMITS"
+    CONTRADICTS = "CONTRADICTS"
+    UNKNOWN = "UNKNOWN"
+
+
+class SemanticScopeDependencyV0(str, __import__("enum").Enum):
+    NONE = "NONE"
+    EXTERNAL_REQUIRED = "EXTERNAL_REQUIRED"
+    UNKNOWN = "UNKNOWN"
+
+
+class SemanticCoverageV0(str, __import__("enum").Enum):
+    FULL = "FULL"
+    PARTIAL = "PARTIAL"
+    UNKNOWN = "UNKNOWN"
+
+
+@dataclass(frozen=True)
+class SemanticObservationV0:
+    policy_version: str
+    baseline_commit: str
+    focus_id: str
+    evidence_set_digest: str
+    relation_id: str
+    finding_fingerprint: str
+    evidence_ref: str
+    material_bearing: SemanticMaterialBearingV0
+    semantic_stance: SemanticStanceV0
+    scope_dependency: SemanticScopeDependencyV0
+    coverage: SemanticCoverageV0
+    claim_part_id: str | None = None
+    rationale: str | None = None
+    authority_effect: str = "none"
+
+    def __post_init__(self) -> None:
+        if self.policy_version != _HVC_A_POLICY_VERSION:
+            raise ValueError("semantic observation policy_version is unsupported")
+        if not _is_lower_hex(self.baseline_commit, 40):
+            raise ValueError("semantic observation baseline_commit is invalid")
+        _require_bounded_text(
+            self.focus_id,
+            "semantic observation focus_id",
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
+        )
+        _require_sha256(
+            self.evidence_set_digest,
+            "semantic observation evidence_set_digest",
+        )
+        _require_bounded_text(
+            self.relation_id,
+            "semantic observation relation_id",
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
+        )
+        _require_sha256(
+            self.finding_fingerprint,
+            "semantic observation finding_fingerprint",
+        )
+        _require_bounded_text(
+            self.evidence_ref,
+            "semantic observation evidence_ref",
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
+        )
+        if self.claim_part_id is not None:
+            _require_bounded_text(
+                self.claim_part_id,
+                "semantic observation claim_part_id",
+                _SUPPORT_ROUTING_MAX_ID_BYTES,
+            )
+        if self.rationale is not None:
+            _require_bounded_text(
+                self.rationale,
+                "semantic observation rationale",
+                _BLIND_PROJECTION_MAX_STRING_BYTES,
+            )
+        if not isinstance(self.material_bearing, SemanticMaterialBearingV0):
+            raise TypeError("material_bearing must use SemanticMaterialBearingV0")
+        if not isinstance(self.semantic_stance, SemanticStanceV0):
+            raise TypeError("semantic_stance must use SemanticStanceV0")
+        if not isinstance(self.scope_dependency, SemanticScopeDependencyV0):
+            raise TypeError(
+                "scope_dependency must use SemanticScopeDependencyV0"
+            )
+        if not isinstance(self.coverage, SemanticCoverageV0):
+            raise TypeError("coverage must use SemanticCoverageV0")
+        if self.authority_effect != "none":
+            raise ValueError("semantic observation authority_effect must be none")
+
+        if self.material_bearing is SemanticMaterialBearingV0.NON_MATERIAL:
+            if (
+                self.semantic_stance is not SemanticStanceV0.UNKNOWN
+                or self.coverage is not SemanticCoverageV0.UNKNOWN
+            ):
+                raise ValueError(
+                    "NON_MATERIAL requires UNKNOWN stance and coverage"
+                )
+
+        if (
+            self.semantic_stance is SemanticStanceV0.SUPPORTS
+            and self.material_bearing is not SemanticMaterialBearingV0.MATERIAL
+        ):
+            raise ValueError("SUPPORTS requires MATERIAL bearing")
+
+        if self.coverage in {
+            SemanticCoverageV0.FULL,
+            SemanticCoverageV0.PARTIAL,
+        } and (
+            self.semantic_stance is not SemanticStanceV0.SUPPORTS
+            or self.material_bearing is not SemanticMaterialBearingV0.MATERIAL
+        ):
+            raise ValueError("affirmative coverage requires MATERIAL SUPPORTS")
+
+        if self.semantic_stance in {
+            SemanticStanceV0.LIMITS,
+            SemanticStanceV0.CONTRADICTS,
+        } and self.coverage is not SemanticCoverageV0.UNKNOWN:
+            raise ValueError("LIMITS or CONTRADICTS requires UNKNOWN coverage")
+
+
+def _hvc_a_contains_forbidden_visible_key(value) -> bool:
+    if isinstance(value, dict):
+        if any(key in _HVC_A_FORBIDDEN_VISIBLE_KEYS for key in value):
+            return True
+        return any(
+            _hvc_a_contains_forbidden_visible_key(item)
+            for item in value.values()
+        )
+    if isinstance(value, (list, tuple)):
+        return any(_hvc_a_contains_forbidden_visible_key(item) for item in value)
+    return False
+
+
+def project_hvc_a_visible_semantic_observation_case_v0(case_input):
+    if not isinstance(case_input, dict):
+        raise TypeError("HVC-A visible case must be a mapping")
+    if _hvc_a_contains_forbidden_visible_key(case_input):
+        raise ValueError("HVC-A visible case contains hidden ground-truth material")
+    if set(case_input) != _HVC_A_VISIBLE_CASE_KEYS:
+        raise ValueError("HVC-A visible case keys do not match the V0 contract")
+
+    if case_input["policy_version"] != _HVC_A_POLICY_VERSION:
+        raise ValueError("HVC-A visible case policy_version is unsupported")
+    _require_bounded_text(
+        case_input["case_id"],
+        "HVC-A case_id",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
+    if not _is_lower_hex(case_input["baseline_commit"], 40):
+        raise ValueError("HVC-A visible baseline_commit is invalid")
+    _require_bounded_text(
+        case_input["focus_id"],
+        "HVC-A focus_id",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
+    _require_sha256(case_input["evidence_set_digest"], "HVC-A evidence_set_digest")
+    _require_bounded_text(
+        case_input["relation_id"],
+        "HVC-A relation_id",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
+    _require_sha256(case_input["finding_fingerprint"], "HVC-A finding_fingerprint")
+    _require_bounded_text(
+        case_input["claim"],
+        "HVC-A claim",
+        _BLIND_PROJECTION_MAX_STRING_BYTES,
+    )
+    claim_part_id = case_input["claim_part_id"]
+    if claim_part_id is not None:
+        _require_bounded_text(
+            claim_part_id,
+            "HVC-A claim_part_id",
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
+        )
+    evidence_ref = _require_bounded_text(
+        case_input["evidence_ref"],
+        "HVC-A evidence_ref",
+        _SUPPORT_ROUTING_MAX_ID_BYTES,
+    )
+    materials = case_input["evidence_material_by_ref"]
+    if (
+        not isinstance(materials, dict)
+        or not materials
+        or len(materials) > _BLIND_PROJECTION_MAX_REFS
+    ):
+        raise ValueError("HVC-A evidence material map is invalid")
+    for ref, material in materials.items():
+        _require_bounded_text(
+            ref,
+            "HVC-A evidence material ref",
+            _SUPPORT_ROUTING_MAX_ID_BYTES,
+        )
+        _require_bounded_text(
+            material,
+            "HVC-A evidence material",
+            _BLIND_PROJECTION_MAX_STRING_BYTES,
+        )
+    if evidence_ref not in materials:
+        raise ValueError("HVC-A evidence_ref does not resolve in the visible case")
+    if case_input["authority_effect"] != "none":
+        raise ValueError("HVC-A visible authority_effect must be none")
+
+    encoded = json.dumps(
+        case_input,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    if len(encoded) > _BLIND_PROJECTION_MAX_BYTES:
+        raise ValueError("HVC-A visible case exceeds hard byte limit")
+    return copy.deepcopy(case_input)
+
+
+def validate_hvc_a_semantic_observation_v0(observation, visible_case):
+    if not isinstance(observation, SemanticObservationV0):
+        raise TypeError("observation must be one SemanticObservationV0")
+    visible = project_hvc_a_visible_semantic_observation_case_v0(visible_case)
+    bindings = {
+        "policy_version": "policy_version",
+        "baseline_commit": "baseline_commit",
+        "focus_id": "focus_id",
+        "evidence_set_digest": "evidence_set_digest",
+        "relation_id": "relation_id",
+        "finding_fingerprint": "finding_fingerprint",
+        "evidence_ref": "evidence_ref",
+        "claim_part_id": "claim_part_id",
+        "authority_effect": "authority_effect",
+    }
+    for observation_field, visible_field in bindings.items():
+        if getattr(observation, observation_field) != visible[visible_field]:
+            raise ValueError(
+                f"HVC-A observation binding drift: {observation_field}"
+            )
+    if observation.evidence_ref not in visible["evidence_material_by_ref"]:
+        raise ValueError("HVC-A observation evidence_ref is unresolved")
+    return observation
+
+
 @dataclass(frozen=True)
 class _Finding:
     classification: str
