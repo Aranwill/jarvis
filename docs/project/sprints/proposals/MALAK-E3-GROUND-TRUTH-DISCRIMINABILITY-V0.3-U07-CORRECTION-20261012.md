@@ -52,6 +52,10 @@ prompt_template_digest  d33b9d310e50d475c17e935ae7bcdd55cbdf123c6e3663a0d4050b47
 example_config_digest   51272bab0b799a16d28fbaad1f3f69dfd04eb5b2f853203ae4534455bec85524
 ```
 
+## Digest verification
+
+The prompt/config digest calculation was cross-checked against the previously integrated V0.1 prompt digest before binding this candidate. Candidate identity uses exact repository canonical JSON and raw case-set bytes.
+
 ## Frozen surfaces
 
 No change to expected outcomes/reason labels, qualification thresholds, safety floor, RuntimeGenerationContract, retry/fallback, response schema, Kernel, Planner, Capability, persistence or authority.
