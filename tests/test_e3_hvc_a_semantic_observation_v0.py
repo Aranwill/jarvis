@@ -115,42 +115,6 @@ def _focused_digest(
     return hashlib.sha256(canonical).hexdigest()
 
 
-def _upstream_route(
-    module,
-    *,
-    visible: dict,
-    digest: str,
-    finding,
-    **changes,
-):
-    fingerprint = module.governed_evidence_support_finding_fingerprint(
-        relation_id=finding.relation_id,
-        classification=finding.classification,
-        statement=finding.statement,
-        rationale=finding.rationale,
-        supporting_repository_refs=finding.supporting_repository_refs,
-        supporting_knowledge_refs=finding.supporting_knowledge_refs,
-        limiting_or_counterevidence_refs=finding.limiting_or_counterevidence_refs,
-        uncertainty_basis=finding.uncertainty_basis,
-    )
-    values = {
-        "policy_version": "e3-governed-support-routing/v0",
-        "baseline_commit": visible["baseline_commit"],
-        "focus_id": visible["focus_id"],
-        "evidence_set_digest": digest,
-        "relation_id": visible["relation_id"],
-        "evaluation_question_identity": "1" * 64,
-        "finding_fingerprint": fingerprint,
-        "resolved_evidence_material_digest": "2" * 64,
-        "route_kind": module.GovernedSupportEvidenceRouteKind.INFERENTIAL,
-        "reason_code": module.GovernedSupportEvidenceRouteReason.INFERENTIAL_RESIDUAL,
-        "selected_oracle_id": None,
-        "authority_effect": "none",
-    }
-    values.update(changes)
-    return module.GovernedSupportEvidenceRoutingV0(**values)
-
-
 def _bound_fixture(
     module,
     visible: dict,
@@ -161,9 +125,6 @@ def _bound_fixture(
     reuse_digest: str | None = None,
     include_evidence: bool = True,
     evidence_ref: str = "R1",
-    upstream_route=None,
-    route_changes: dict[str, object] | None = None,
-    return_route: bool = False,
 ):
     focus = _focus(visible)
     repository_evidence: tuple[dict[str, object], ...]
@@ -218,24 +179,13 @@ def _bound_fixture(
         uncertainty_basis="INSUFFICIENT_SUPPLIED_EVIDENCE",
         claim_part_id=claim_part_id,
     )
-    route = upstream_route or _upstream_route(
-        module,
-        visible=visible,
-        digest=digest,
-        finding=finding,
-        **(route_changes or {}),
-    )
-    bound = module.bind_hvc_a_semantic_observation_case_v0(
+    return module.bind_hvc_a_semantic_observation_case_v0(
         case_id=visible["case_id"],
         evidence_focus=focus,
         evidence_bundle=bundle,
         finding=finding,
         evidence_ref=evidence_ref,
-        upstream_route=route,
     )
-    if return_route:
-        return bound, route
-    return bound
 
 
 def _observation(module, binding: dict, hidden: dict, **changes):
@@ -585,97 +535,113 @@ def test_hvc_a_f03_07_finding_role_ref_must_match_selected_ref() -> None:
         _bound_fixture(module, visible, evidence_ref="K404")
 
 
-def test_hvc_a_f03_r4_01_changed_claim_with_prior_route_is_rejected() -> None:
+def test_hvc_a_f03_r4_01_bound_object_exposes_no_replaceable_derived_fields() -> None:
     module = _api()
     visible, _ = _case("HVC-A-C01")
-    _, prior_route = _bound_fixture(module, visible, return_route=True)
-    with pytest.raises(ValueError, match="upstream routing binding mismatch"):
-        _bound_fixture(
-            module,
-            visible,
-            claim="Kernel grants unrestricted persistence and deployment authority.",
-            upstream_route=prior_route,
-        )
+    bound = _bound_fixture(module, visible)
+
+    for field_name, value in (
+        ("claim", "substituted claim"),
+        ("evidence_material", "substituted material"),
+        ("claim_part_id", "caller-invented-part"),
+        ("finding_fingerprint", "f" * 64),
+        ("evidence_set_digest", "e" * 64),
+    ):
+        with pytest.raises(TypeError):
+            replace(bound, **{field_name: value})
 
 
-def test_hvc_a_f03_r4_02_changed_material_with_recomputed_digest_and_prior_route_is_rejected() -> None:
+def test_hvc_a_f03_r4_02_replaced_finding_recomputes_identity() -> None:
     module = _api()
     visible, _ = _case("HVC-A-C01")
-    _, prior_route = _bound_fixture(module, visible, return_route=True)
-    with pytest.raises(ValueError, match="upstream routing binding mismatch"):
-        _bound_fixture(
-            module,
-            visible,
-            material="Arbitrary substituted content unrelated to the original evidence.",
-            upstream_route=prior_route,
-        )
+    bound = _bound_fixture(module, visible)
+    original = module.project_hvc_a_visible_semantic_observation_case_v0(bound)
+
+    changed_finding = replace(
+        bound.finding,
+        statement="Kernel grants unrestricted persistence and deployment authority.",
+    )
+    changed_bound = replace(bound, finding=changed_finding)
+    changed = module.project_hvc_a_visible_semantic_observation_case_v0(
+        changed_bound
+    )
+
+    assert changed["claim"] != original["claim"]
+    assert changed["finding_fingerprint"] != original["finding_fingerprint"]
+    assert changed["evidence_set_digest"] == original["evidence_set_digest"]
 
 
-@pytest.mark.parametrize(
-    "field,value",
-    [
-        ("baseline_commit", "c" * 40),
-        ("focus_id", "U99"),
-        ("evidence_set_digest", "9" * 64),
-        ("relation_id", "U01.OTHER_RELATION"),
-        ("finding_fingerprint", "8" * 64),
-    ],
-)
-def test_hvc_a_f03_r4_03_upstream_binding_drift_is_rejected(
-    field: str,
-    value: object,
-) -> None:
+def test_hvc_a_f03_r4_03_replaced_bundle_material_cannot_preserve_digest() -> None:
     module = _api()
     visible, _ = _case("HVC-A-C01")
-    with pytest.raises(ValueError, match="upstream routing binding mismatch"):
-        _bound_fixture(
-            module,
-            visible,
-            route_changes={field: value},
-        )
+    bound = _bound_fixture(module, visible)
+    original = module.project_hvc_a_visible_semantic_observation_case_v0(bound)
+
+    changed_item = dict(bound.evidence_bundle.repository_evidence[0])
+    changed_item["line"] = "Arbitrary substituted content unrelated to the original evidence."
+    changed_bundle = replace(
+        bound.evidence_bundle,
+        repository_evidence=(changed_item,),
+    )
+    changed_bound = replace(bound, evidence_bundle=changed_bundle)
+
+    with pytest.raises(ValueError, match="evidence_set_digest"):
+        module.project_hvc_a_visible_semantic_observation_case_v0(changed_bound)
+
+    assert original["authority_effect"] == "none"
 
 
-def test_hvc_a_f03_r4_04_non_inferential_route_is_rejected() -> None:
+def test_hvc_a_f03_r4_04_invented_claim_part_in_replaced_finding_is_rejected() -> None:
     module = _api()
     visible, _ = _case("HVC-A-C01")
-    with pytest.raises(ValueError, match="inferential residual"):
-        _bound_fixture(
-            module,
-            visible,
-            route_changes={
-                "route_kind": module.GovernedSupportEvidenceRouteKind.INSUFFICIENT,
-                "reason_code": module.GovernedSupportEvidenceRouteReason.EVIDENCE_INSUFFICIENT,
-            },
-        )
+    bound = _bound_fixture(module, visible)
+    changed_bound = replace(
+        bound,
+        finding=replace(bound.finding, claim_part_id="caller-invented-part"),
+    )
+    with pytest.raises(ValueError, match="no authorized upstream claim-part provider"):
+        module.project_hvc_a_visible_semantic_observation_case_v0(changed_bound)
 
 
-def test_hvc_a_f03_r4_05_missing_upstream_route_is_rejected() -> None:
+def test_hvc_a_f03_r4_05_permuted_ref_to_material_assignment_is_rejected() -> None:
     module = _api()
     visible, _ = _case("HVC-A-C01")
     focus = _focus(visible)
-    repository_evidence = (
+    canonical_evidence = (
         {
             "ref": "R1",
-            "path": "tests/hvc_a_fixture.md",
+            "path": "tests/a_hvc_a_fixture.md",
+            "blob_sha": "a" * 40,
+            "line_number": 1,
+            "line": "first canonical material",
+            "line_truncated": False,
+        },
+        {
+            "ref": "R2",
+            "path": "tests/b_hvc_a_fixture.md",
             "blob_sha": "b" * 40,
             "line_number": 1,
-            "line": visible["evidence_material_by_ref"]["R1"],
+            "line": "second canonical material",
             "line_truncated": False,
         },
     )
     digest = _focused_digest(
         visible=visible,
         focus=focus,
-        repository_evidence=repository_evidence,
+        repository_evidence=canonical_evidence,
+    )
+    permuted_refs = (
+        {**canonical_evidence[0], "ref": "R2"},
+        {**canonical_evidence[1], "ref": "R1"},
     )
     bundle = FocusedEngineeringEvidenceBundle(
         baseline_commit=visible["baseline_commit"],
         focus_id=focus.focus_id,
         subject=focus.subject,
-        repository_evidence=repository_evidence,
+        repository_evidence=permuted_refs,
         knowledge_evidence=(),
         selector_results=(),
-        repository_match_count=1,
+        repository_match_count=2,
         knowledge_match_count=0,
         repository_skipped_unreadable=0,
         context_truncated=False,
@@ -688,44 +654,82 @@ def test_hvc_a_f03_r4_05_missing_upstream_route_is_rejected() -> None:
         classification="UNRESOLVED",
         statement=visible["claim"],
         rationale="bounded upstream finding",
-        evidence_refs=("R1",),
+        evidence_refs=("R1", "R2"),
         relation_id=visible["relation_id"],
-        supporting_repository_refs=("R1",),
+        supporting_repository_refs=("R1", "R2"),
+        supporting_knowledge_refs=(),
+        limiting_or_counterevidence_refs=(),
         uncertainty_basis="INSUFFICIENT_SUPPLIED_EVIDENCE",
     )
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError, match="ref assignment is not canonical"):
         module.bind_hvc_a_semantic_observation_case_v0(
             case_id=visible["case_id"],
             evidence_focus=focus,
             evidence_bundle=bundle,
             finding=finding,
             evidence_ref="R1",
-            upstream_route=None,
         )
 
 
-def test_hvc_a_f03_r4_06_coordinated_new_identity_requires_matching_new_route() -> None:
+def test_hvc_a_f03_r4_06_noncanonical_evidence_order_is_rejected() -> None:
     module = _api()
     visible, _ = _case("HVC-A-C01")
-    original, prior_route = _bound_fixture(module, visible, return_route=True)
-    changed, changed_route = _bound_fixture(
-        module,
-        visible,
-        claim="Kernel grants unrestricted persistence and deployment authority.",
-        material="Arbitrary substituted content unrelated to the original evidence.",
-        return_route=True,
+    focus = _focus(visible)
+    evidence = (
+        {
+            "ref": "R1",
+            "path": "tests/b_hvc_a_fixture.md",
+            "blob_sha": "b" * 40,
+            "line_number": 1,
+            "line": "second material",
+            "line_truncated": False,
+        },
+        {
+            "ref": "R2",
+            "path": "tests/a_hvc_a_fixture.md",
+            "blob_sha": "a" * 40,
+            "line_number": 1,
+            "line": "first material",
+            "line_truncated": False,
+        },
     )
-    original_projection = module.project_hvc_a_visible_semantic_observation_case_v0(
-        original
+    digest = _focused_digest(
+        visible=visible,
+        focus=focus,
+        repository_evidence=evidence,
     )
-    changed_projection = module.project_hvc_a_visible_semantic_observation_case_v0(
-        changed
+    bundle = FocusedEngineeringEvidenceBundle(
+        baseline_commit=visible["baseline_commit"],
+        focus_id=focus.focus_id,
+        subject=focus.subject,
+        repository_evidence=evidence,
+        knowledge_evidence=(),
+        selector_results=(),
+        repository_match_count=2,
+        knowledge_match_count=0,
+        repository_skipped_unreadable=0,
+        context_truncated=False,
+        supplemental_truncated=False,
+        complete=True,
+        evidence_set_digest=digest,
+        authority_effect="none",
     )
-    assert changed_route.finding_fingerprint != prior_route.finding_fingerprint
-    assert changed_route.evidence_set_digest != prior_route.evidence_set_digest
-    assert changed_projection["finding_fingerprint"] != original_projection[
-        "finding_fingerprint"
-    ]
-    assert changed_projection["evidence_set_digest"] != original_projection[
-        "evidence_set_digest"
-    ]
+    finding = module._Finding(
+        classification="UNRESOLVED",
+        statement=visible["claim"],
+        rationale="bounded upstream finding",
+        evidence_refs=("R1", "R2"),
+        relation_id=visible["relation_id"],
+        supporting_repository_refs=("R1", "R2"),
+        supporting_knowledge_refs=(),
+        limiting_or_counterevidence_refs=(),
+        uncertainty_basis="INSUFFICIENT_SUPPLIED_EVIDENCE",
+    )
+    with pytest.raises(ValueError, match="canonical order"):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=bundle,
+            finding=finding,
+            evidence_ref="R1",
+        )
