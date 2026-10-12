@@ -10,7 +10,7 @@ trigger_issue: 282
 risk_class: 3_HIGH
 critical_contract: true
 authority_effect: none
-correction_round: 4
+correction_round: 5
 ---
 
 # HVC-A PR-B — Execution / RED→GREEN Ledger
@@ -373,3 +373,84 @@ Correction:
 Regression coverage includes a two-ref packet where R2 exists in the bundle but
 is not fingerprint-bound; replacing only `evidence_refs` and selecting R2 must
 fail closed.
+
+
+## 14. Independent FULL 4R FAIL / Bounded Correction round 5
+
+Issue #297 independently reviewed round-4 candidate:
+
+```text
+candidate       2695138ad8e26d25d0582359eb72eade85878024
+tree            13949eb394ae5f829ad92e9050a130cdec7cc55d
+Risk            FAIL
+Readability     PASS
+Reliability     FAIL
+Resilience      FAIL
+FULL_4R_RESULT  FAIL
+blocking        1
+non_blocking    0
+```
+
+The residual blocker remained inside F03 provenance/binding:
+
+```text
+collector result:
+  selector_results contains TRUNCATED
+  complete = false
+  context_truncated = true
+
+round-4 bypass:
+  replace bundle complete -> true
+  replace bundle context_truncated -> false
+  keep selector_results unchanged
+  keep evidence_set_digest unchanged
+  bind/project/validate admitted
+```
+
+Root cause: the collector derives `complete` and required
+`context_truncated` from `selector_results`, and `selector_results` is
+already bound by `evidence_set_digest`. HVC-A nevertheless trusted the two
+caller-replaceable derived booleans directly.
+
+Bounded Correction round 5 is intentionally narrower than a digest or collector
+change:
+
+```text
+expected_complete =
+  all(selector_result.status == "RESOLVED")
+
+expected_context_truncated =
+  any(selector_result.status == "TRUNCATED")
+
+bundle.complete must equal expected_complete
+bundle.context_truncated must equal expected_context_truncated
+```
+
+The resolver requires exact `EvidenceSelectorResult` instances and fails closed
+on any derived-state mismatch before relying on completeness.
+
+This preserves:
+
+- the existing collector digest and identity;
+- collector semantics for required-selector completeness/truncation;
+- no new evidence identity;
+- no new service/manager/layer;
+- no Kernel/Planner delta;
+- authority_effect = none.
+
+Regression coverage freezes:
+
+- original required TRUNCATED packet remains rejected;
+- replacing both flags while preserving the same digest is rejected;
+- isolated `context_truncated` mismatch is rejected;
+- isolated `complete` mismatch is rejected;
+- a RESOLVED control remains bind/project/validate valid.
+
+`supplemental_truncated` remains distinct: it is already included directly in
+the focused evidence digest and is not reclassified as required-selector
+`context_truncated`.
+
+Ground Truth and visible semantic cases remain unchanged.
+
+Any round-5 candidate requires fresh candidate-bound CI, independent Fix
+Validator, FULL 4R, and blind Ground-Truth review.
