@@ -1387,82 +1387,15 @@ def bind_hvc_a_semantic_observation_case_v0(
     finding: _Finding,
     evidence_ref: str,
 ) -> _HvcABoundSemanticObservationCaseV0:
-    if not isinstance(evidence_focus, GovernedEngineeringEvidenceFocus):
-        raise TypeError("evidence_focus must be GovernedEngineeringEvidenceFocus")
-    if not isinstance(evidence_bundle, FocusedEngineeringEvidenceBundle):
-        raise TypeError("evidence_bundle must be FocusedEngineeringEvidenceBundle")
-    if not isinstance(finding, _Finding):
-        raise TypeError("finding must be an E3 _Finding")
-    _require_bounded_text(
-        case_id,
-        "HVC-A case_id",
-        _SUPPORT_ROUTING_MAX_ID_BYTES,
-    )
-    if not evidence_bundle.complete or evidence_bundle.context_truncated:
-        raise ValueError("HVC-A requires complete focused evidence")
-    if evidence_bundle.authority_effect != "none":
-        raise ValueError("HVC-A evidence bundle authority_effect must be none")
-    if (
-        evidence_bundle.focus_id != evidence_focus.focus_id
-        or evidence_bundle.subject != evidence_focus.subject
-    ):
-        raise ValueError("HVC-A focused evidence binding mismatch")
-    if not _is_lower_hex(evidence_bundle.baseline_commit, 40):
-        raise ValueError("HVC-A evidence baseline_commit is invalid")
-
-    recomputed_digest = _hvc_a_focused_evidence_set_digest_v0(
-        evidence_focus=evidence_focus,
-        evidence_bundle=evidence_bundle,
-    )
-    if recomputed_digest != evidence_bundle.evidence_set_digest:
-        raise ValueError("HVC-A evidence_set_digest does not match bound material")
-
-    governed_relation_ids = {
-        relation.relation_id for relation in evidence_focus.governed_relations
-    }
-    if finding.relation_id is None or finding.relation_id not in governed_relation_ids:
-        raise ValueError("HVC-A finding relation is not governed by the focus")
-    if finding.uncertainty_basis is None:
-        raise ValueError("HVC-A requires structured upstream finding roles")
-    if finding.claim_part_id is not None:
-        raise ValueError(
-            "HVC-A V0 has no authorized upstream claim-part provider"
-        )
-
-    fingerprint = governed_evidence_support_finding_fingerprint(
-        relation_id=finding.relation_id,
-        classification=finding.classification,
-        statement=finding.statement,
-        rationale=finding.rationale,
-        supporting_repository_refs=finding.supporting_repository_refs,
-        supporting_knowledge_refs=finding.supporting_knowledge_refs,
-        limiting_or_counterevidence_refs=finding.limiting_or_counterevidence_refs,
-        uncertainty_basis=finding.uncertainty_basis,
-    )
-    _require_sha256(fingerprint, "HVC-A finding_fingerprint")
-
-    _require_bounded_text(
-        evidence_ref,
-        "HVC-A evidence_ref",
-        _SUPPORT_ROUTING_MAX_ID_BYTES,
-    )
-    if evidence_ref not in finding.evidence_refs:
-        raise ValueError("HVC-A evidence_ref is not bound to the finding")
-
-    by_ref = _hvc_a_bound_evidence_by_ref_v0(evidence_bundle)
-    item = by_ref.get(evidence_ref)
-    if item is None:
-        raise ValueError("HVC-A evidence_ref is absent from bound evidence")
-    material = item["line"]
-    assert isinstance(material, str)
-
-    return _HvcABoundSemanticObservationCaseV0(
+    bound_case = _HvcABoundSemanticObservationCaseV0(
         case_id=case_id,
         evidence_focus=evidence_focus,
         evidence_bundle=evidence_bundle,
         finding=finding,
         evidence_ref=evidence_ref,
     )
+    _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case)
+    return bound_case
 
 
 def _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case):
