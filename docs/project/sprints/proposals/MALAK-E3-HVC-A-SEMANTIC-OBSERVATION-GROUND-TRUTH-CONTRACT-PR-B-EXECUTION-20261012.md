@@ -10,7 +10,7 @@ trigger_issue: 282
 risk_class: 3_HIGH
 critical_contract: true
 authority_effect: none
-correction_round: 3
+correction_round: 4
 ---
 
 # HVC-A PR-B — Execution / RED→GREEN Ledger
@@ -258,3 +258,68 @@ Ground Truth labels and visible semantic cases were not changed by this correcti
 
 The corrected candidate requires full affected revalidation, fresh independent
 FULL 4R, and a fresh blind Ground-Truth review bound to the new candidate.
+
+## 13. Independent Fix Validator FAIL_OPEN / Bounded Correction round 4
+
+Issue #292 independently validated round-3 candidate and returned:
+
+```text
+candidate       fbaa76c3e722e11aab9166fcdecde5e1ace68d8f
+tree            94afc6b89a6c130d3a5e50c98c1039823a2cd534
+F03_result      FAIL_OPEN
+bypass_remaining YES
+probes          13 adversarial families + valid control
+new_identity    NO
+authority_expansion NO
+```
+
+Root cause after reconciliation:
+
+```text
+round 3
+recomputed internal consistency
+!=
+exact upstream binding expectation
+```
+
+A caller could still construct a new internally self-consistent focused bundle/finding
+and thereby self-certify new digests/fingerprints because HVC-A had no required
+reference to the routing result that preceded the inferential residual.
+
+Bounded Correction round 4 reuses the existing `GovernedSupportEvidenceRoutingV0`
+surface as the upstream binding expectation. No new evidence identity is introduced.
+
+New binder precondition:
+
+```text
+upstream_route
+  policy_version == e3-governed-support-routing/v0
+  route_kind == INFERENTIAL
+  reason_code == INFERENTIAL_RESIDUAL
+  authority_effect == none
+
+and exact equality:
+  baseline_commit
+  focus_id
+  evidence_set_digest
+  relation_id
+  finding_fingerprint
+```
+
+The bundle digest and finding fingerprint are still recomputed from exact material.
+Mutation + coordinated recomputation is valid only when accompanied by a correspondingly
+new upstream route identity; reuse of a prior route fails closed.
+
+Round-4 tests add:
+
+- changed claim + prior route -> reject;
+- changed evidence + recomputed digest + prior route -> reject;
+- baseline/focus/evidence digest/relation/fingerprint route drift -> reject;
+- non-INFERENTIAL_RESIDUAL route -> reject;
+- missing upstream route -> reject;
+- coordinated new identity + matching new route -> distinct identity, allowed.
+
+Ground Truth and visible semantic cases remain unchanged.
+
+Any new candidate supersedes #899 and all independent review packets bound to
+`fbaa76c3e722e11aab9166fcdecde5e1ace68d8f`.
