@@ -10,7 +10,7 @@ trigger_issue: 282
 risk_class: 3_HIGH
 critical_contract: true
 authority_effect: none
-correction_round: 2
+correction_round: 3
 ---
 
 # HVC-A PR-B — Execution / RED→GREEN Ledger
@@ -195,3 +195,66 @@ Corrección:
 - no new semantics, component, authority or dependency.
 
 Any review/evidence bound to candidate d3b6309646d3c672f9818d9f63be37b59bdc4a67 is superseded.
+
+## 12. Independent FULL 4R FAIL / Bounded Correction round 3
+
+Independent issue #288 reviewed candidate:
+
+```text
+candidate       0eb173d9b5cb1ae83ff119cdf54afee9f1cd1c64
+tree            89c3ddd67100ce3c36a870bd53909c5a74a4f2f6
+Risk            FAIL
+Readability     PASS
+Reliability     FAIL
+Resilience      FAIL
+FULL_4R_RESULT  FAIL
+```
+
+Blocking finding:
+
+```text
+HVC-A-PRB-4R-R2-F03
+type        provenance / binding
+severity    HIGH
+blocking    YES
+problem     free caller-visible material can be substituted while inherited
+            evidence/finding identities remain unchanged
+```
+
+Bounded Correction round 3 remains inside the existing PR-B file/component budget.
+
+Selected correction:
+
+```text
+caller dict provenance              REJECT
+existing focused evidence identity  REUSE + RECOMPUTE
+existing finding fingerprint        REUSE + RECOMPUTE
+selected evidence_ref               RESOLVE from exact focused bundle
+claim                               DERIVE from exact structured finding
+claim_part_id                       FAIL CLOSED until an authorized upstream
+                                    provider exists
+new evidence identity               NO
+new component/service/manager       NO
+```
+
+`project_hvc_a_visible_semantic_observation_case_v0` no longer accepts a free
+mapping. A bound case must first be derived from the existing
+`GovernedEngineeringEvidenceFocus`, `FocusedEngineeringEvidenceBundle` and
+structured `_Finding` surfaces. The existing focused evidence digest is
+recomputed from the exact bundle/focus material before projection. The existing
+finding fingerprint is recomputed from the exact finding material.
+
+F03-specific validation covers:
+
+- free visible dict rejected as provenance;
+- changed claim cannot preserve finding fingerprint;
+- changed evidence material with old evidence_set_digest rejected;
+- coordinated changed evidence material requires a new evidence_set_digest;
+- caller-invented claim_part_id rejected because no upstream authorized provider
+  exists in this baseline;
+- projected claim/material are derived from the bound upstream objects.
+
+Ground Truth labels and visible semantic cases were not changed by this correction.
+
+The corrected candidate requires full affected revalidation, fresh independent
+FULL 4R, and a fresh blind Ground-Truth review bound to the new candidate.
