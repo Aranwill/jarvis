@@ -1171,4 +1171,3 @@ def test_u07_v03_scope_reason_requires_explicit_external_dependency() -> None:
         "SUPPORTING_REFS_INSUFFICIENT, not scope exceeded."
         in module.EXACT_SYSTEM_PROMPT
     )
-
