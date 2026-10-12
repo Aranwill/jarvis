@@ -894,3 +894,17 @@ def test_ground_truth_repair_red_gtr_r19_c17_self_certification_identity_is_expl
     assert case["finding_producer_subject_id"] == "same-subject"
     assert case["assessor_subject_id"] == "same-subject"
     assert "same subject" in item["subject"]["rationale"].lower()
+def test_u07_v03_c09_rationale_overclaim_is_not_a_compound_statement() -> None:
+    case = next(item for item in _case_set()["cases"] if item["case_id"] == "C09")
+    subject = case["inputs"][0]["subject"]
+
+    assert subject["statement"] == "Kernel owns durable persistence authority."
+    assert subject["rationale"] == (
+        "Kernel coordinates orchestration between Planner and registered "
+        "Capabilities; therefore Kernel owns durable persistence authority."
+    )
+    assert case["inputs"][0]["expected_outcome"] == "INSUFFICIENT"
+    assert case["inputs"][0]["expected_reason_codes"] == [
+        "SUPPORTING_REFS_INSUFFICIENT"
+    ]
+
