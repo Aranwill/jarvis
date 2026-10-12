@@ -48,8 +48,8 @@ Synthetic evaluation `uncertainty_basis` values are not used as oracle labels or
 
 ```text
 case_set_digest         4ec4d152af884b50d7bfa8c9d14eaaabb93b6e306ea5e7bd0361b326bb053bba
-prompt_template_digest  8a5916bba52f7c71a0e0bc0ca854f95a7e74fd222b5354d1a9b60142b7aa98dd
-example_config_digest   70bef63de4997ea4f95453e1aa0bc05235a638770d83bd86488ebe7fccc2973e
+prompt_template_digest  d33b9d310e50d475c17e935ae7bcdd55cbdf123c6e3663a0d4050b47b2edd4b4
+example_config_digest   51272bab0b799a16d28fbaad1f3f69dfd04eb5b2f853203ae4534455bec85524
 ```
 
 ## Frozen surfaces
