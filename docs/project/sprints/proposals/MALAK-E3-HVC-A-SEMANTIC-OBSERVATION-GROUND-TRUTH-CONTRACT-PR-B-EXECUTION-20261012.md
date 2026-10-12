@@ -10,7 +10,7 @@ trigger_issue: 282
 risk_class: 3_HIGH
 critical_contract: true
 authority_effect: none
-correction_round: 1
+correction_round: 2
 ---
 
 # HVC-A PR-B — Execution / RED→GREEN Ledger
@@ -172,3 +172,26 @@ Corrección:
 - no production behavior or authority is added.
 
 El corrected candidate requiere affected revalidation y un nuevo Candidate FULL 4R.
+
+## 11. Candidate pre-review / Bounded Correction round 2
+
+Se detectó un segundo finding de fidelidad contractual antes de independent review:
+
+```text
+HVC-A-PRB-F02
+type        contract fidelity / optional field
+design      claim_part_id? is optional and only present when upstream supplies it
+problem     visible projection required the key even for root-claim cases
+impact      representation was stricter than integrated G1
+disposition BOUNDED_CORRECTION
+```
+
+Corrección:
+
+- root-claim visible cases omit claim_part_id;
+- projection accepts absence and normalizes it internally to None;
+- upstream-authorized claim part remains explicit when present;
+- unknown extra keys still fail closed;
+- no new semantics, component, authority or dependency.
+
+Any review/evidence bound to candidate d3b6309646d3c672f9818d9f63be37b59bdc4a67 is superseded.
