@@ -335,3 +335,18 @@ Ground Truth and visible semantic cases remain unchanged.
 
 Any candidate produced by this correction requires fresh candidate-bound CI,
 independent Fix Validator, FULL 4R and blind Ground-Truth review.
+
+### Round-4 proportionality cleanup
+
+`bind_hvc_a_semantic_observation_case_v0` and projection initially duplicated the
+same source validation logic. Before final candidate freeze, the duplicate path
+was removed:
+
+```text
+bind -> construct source-bound object -> single resolver
+project -> same single resolver
+validate observation -> same single resolver
+```
+
+This is a readability/reliability reduction only; no contract, scope, identity
+or authority change.
