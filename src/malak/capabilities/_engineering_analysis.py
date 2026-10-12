@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from malak.capabilities._engineering_evidence import (
+    EvidenceSelectorResult,
     FocusedEngineeringEvidenceBundle,
     GovernedEngineeringEvidenceFocus,
     collect_engineering_evidence,
@@ -1408,6 +1409,38 @@ def _hvc_a_validate_structured_finding_refs_v0(
         )
 
 
+def _hvc_a_validate_required_completeness_v0(
+    evidence_bundle: FocusedEngineeringEvidenceBundle,
+) -> None:
+    selector_results = evidence_bundle.selector_results
+    if not isinstance(selector_results, tuple):
+        raise TypeError("HVC-A selector_results must be a tuple")
+    if any(
+        not isinstance(result, EvidenceSelectorResult)
+        for result in selector_results
+    ):
+        raise TypeError(
+            "HVC-A selector_results must contain EvidenceSelectorResult"
+        )
+
+    expected_complete = all(
+        result.status == "RESOLVED"
+        for result in selector_results
+    )
+    expected_context_truncated = any(
+        result.status == "TRUNCATED"
+        for result in selector_results
+    )
+    if evidence_bundle.complete is not expected_complete:
+        raise ValueError(
+            "HVC-A focused evidence complete flag does not match selector_results"
+        )
+    if evidence_bundle.context_truncated is not expected_context_truncated:
+        raise ValueError(
+            "HVC-A focused evidence context_truncated flag does not match selector_results"
+        )
+
+
 def _hvc_a_bound_evidence_by_ref_v0(
     evidence_bundle: FocusedEngineeringEvidenceBundle,
 ) -> dict[str, dict[str, object]]:
@@ -1482,6 +1515,7 @@ def _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case):
         "HVC-A case_id",
         _SUPPORT_ROUTING_MAX_ID_BYTES,
     )
+    _hvc_a_validate_required_completeness_v0(evidence_bundle)
     if not evidence_bundle.complete or evidence_bundle.context_truncated:
         raise ValueError("HVC-A requires complete focused evidence")
     if evidence_bundle.authority_effect != "none":
