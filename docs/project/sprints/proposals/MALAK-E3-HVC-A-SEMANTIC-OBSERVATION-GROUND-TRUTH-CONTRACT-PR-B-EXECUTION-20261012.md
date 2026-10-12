@@ -454,3 +454,117 @@ Ground Truth and visible semantic cases remain unchanged.
 
 Any round-5 candidate requires fresh candidate-bound CI, independent Fix
 Validator, FULL 4R, and blind Ground-Truth review.
+
+
+## 15. Final bounded correction — round 6
+
+Round 5 independent public-archive validation completed with a reproducible blocker:
+
+```text
+finding_id   HVC-A-PRB-F03-R5-REQ-CORRESPONDENCE-01
+severity     HIGH
+blocking     YES
+result       FAIL_OPEN
+```
+
+Failure mode:
+
+```text
+focus declares required selectors
++
+caller supplies an incomplete/empty selector_results sequence
++
+caller recomputes a coherent evidence_set_digest
++
+complete = true
+→ HVC-A previously admitted bind → project → validate
+```
+
+The defect is local to the HVC-A admission boundary. The collector already emits one
+`EvidenceSelectorResult` per required selector in deterministic order, but HVC-A did
+not verify that the supplied results exactly corresponded to the required selectors
+declared by the bound `GovernedEngineeringEvidenceFocus`.
+
+### Final Correction Budget
+
+```yaml
+correction_round: 6
+max_fix_rounds: 1
+finding_id: HVC-A-PRB-F03-R5-REQ-CORRESPONDENCE-01
+allowed_production_files:
+  - src/malak/capabilities/_engineering_analysis.py
+allowed_test_files:
+  - tests/test_e3_hvc_a_semantic_observation_v0.py
+allowed_ledger_files:
+  - docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-PR-B-EXECUTION-20261012.md
+new_dependencies: 0
+new_identity: 0
+architecture_changes: 0
+exhaustion_action: STOP_PR_B_AND_REOPEN_DESIGN
+authority_effect: none
+```
+
+No round 7 is authorized.
+
+### Round-6 correction
+
+HVC-A now validates, before completeness derivation, that
+`evidence_bundle.selector_results` exactly matches the focus-required selector
+sequence:
+
+```text
+repository_required_selectors in declared order
+then
+knowledge_required_selectors in declared order
+```
+
+For every result, the following identity tuple must match exactly:
+
+```text
+(source_kind, selector_kind, selector_value)
+```
+
+Therefore omissions, extra results, duplicates that alter cardinality/order,
+reordering, source-kind substitution, selector-kind substitution and selector-value
+substitution fail closed before `complete` / `context_truncated` are trusted.
+
+The boundary also rejects non-canonical selector-result representations observed by
+the round-5 validator:
+
+- `matched_paths` must be a tuple of non-empty strings;
+- `match_count` must be a non-negative integer and not bool;
+- `selected_count` must be a non-negative integer, not bool, and cannot exceed
+  `match_count`;
+- `MISSING` cannot carry matched paths or non-zero counts.
+
+This does not modify the collector, evidence-set digest algorithm, finding
+fingerprint, Kernel, Planner, routing, aggregation, settlement, support_sufficient,
+Protected Finalization or U08.
+
+### Round-6 focused tests
+
+New tests cover:
+
+1. omitted required selector;
+2. empty selector_results with non-empty required focus;
+3. reordered required results;
+4. source-kind mismatch;
+5. list-valued matched_paths;
+6. negative match_count;
+7. bool selected_count;
+8. valid required-selector control.
+
+Expected disposition:
+
+```text
+fresh candidate-bound CI
+→ fresh independent Fix Validator
+→ fresh Candidate FULL 4R
+
+any new material blocker
+→ Correction Budget exhausted
+→ STOP PR-B
+→ reopen G0/G1 / Design Amendment
+```
+
+authority_effect = none
