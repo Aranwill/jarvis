@@ -462,7 +462,7 @@
             "evidence_set_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "relation_id": "U01.KERNEL_RESPONSIBILITY",
             "classification": "ALIGNED",
-            "statement": "Kernel coordinates orchestration and owns durable persistence authority.",
+            "statement": "Kernel owns durable persistence authority.",
             "rationale": "Kernel coordinates orchestration between Planner and registered Capabilities; therefore Kernel owns durable persistence authority.",
             "supporting_repository_refs": [
               "R1"
