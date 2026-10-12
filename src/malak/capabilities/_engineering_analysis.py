@@ -1410,6 +1410,8 @@ def _hvc_a_validate_structured_finding_refs_v0(
 
 
 def _hvc_a_validate_required_completeness_v0(
+    *,
+    evidence_focus: GovernedEngineeringEvidenceFocus,
     evidence_bundle: FocusedEngineeringEvidenceBundle,
 ) -> None:
     selector_results = evidence_bundle.selector_results
@@ -1422,6 +1424,63 @@ def _hvc_a_validate_required_completeness_v0(
         raise TypeError(
             "HVC-A selector_results must contain EvidenceSelectorResult"
         )
+
+    expected_selectors = (
+        tuple(
+            ("repository", selector.kind, selector.value)
+            for selector in evidence_focus.repository_required_selectors
+        )
+        + tuple(
+            ("knowledge", selector.kind, selector.value)
+            for selector in evidence_focus.knowledge_required_selectors
+        )
+    )
+    actual_selectors = tuple(
+        (
+            result.source_kind,
+            result.selector_kind,
+            result.selector_value,
+        )
+        for result in selector_results
+    )
+    if actual_selectors != expected_selectors:
+        raise ValueError(
+            "HVC-A selector_results must exactly correspond to focus required selectors"
+        )
+
+    for result in selector_results:
+        if not isinstance(result.matched_paths, tuple) or any(
+            not isinstance(path, str) or not path
+            for path in result.matched_paths
+        ):
+            raise TypeError(
+                "HVC-A selector result matched_paths must be a tuple of non-empty strings"
+            )
+        if (
+            not isinstance(result.match_count, int)
+            or isinstance(result.match_count, bool)
+            or result.match_count < 0
+        ):
+            raise ValueError(
+                "HVC-A selector result match_count must be a non-negative integer"
+            )
+        if (
+            not isinstance(result.selected_count, int)
+            or isinstance(result.selected_count, bool)
+            or result.selected_count < 0
+            or result.selected_count > result.match_count
+        ):
+            raise ValueError(
+                "HVC-A selector result selected_count must be a bounded non-negative integer"
+            )
+        if result.status == "MISSING" and (
+            result.matched_paths
+            or result.match_count != 0
+            or result.selected_count != 0
+        ):
+            raise ValueError(
+                "HVC-A MISSING selector result must not carry matches"
+            )
 
     expected_complete = all(
         result.status == "RESOLVED"
@@ -1515,7 +1574,10 @@ def _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case):
         "HVC-A case_id",
         _SUPPORT_ROUTING_MAX_ID_BYTES,
     )
-    _hvc_a_validate_required_completeness_v0(evidence_bundle)
+    _hvc_a_validate_required_completeness_v0(
+        evidence_focus=evidence_focus,
+        evidence_bundle=evidence_bundle,
+    )
     if not evidence_bundle.complete or evidence_bundle.context_truncated:
         raise ValueError("HVC-A requires complete focused evidence")
     if evidence_bundle.authority_effect != "none":
