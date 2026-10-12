@@ -36,7 +36,7 @@ EXPECTED_CASE_SET_DIGEST = (
 
 EXACT_BASE_URL = "http://127.0.0.1:11434"
 EXPECTED_PROMPT_TEMPLATE_DIGEST = (
-    "d33b9d310e50d475c17e935ae7bcdd55cbdf123c6e3663a0d4050b47b2edd4b4"
+    "5af5cc933925031c5e84ce4bca00cdc4df872f91fa710a7b8f97ae8ce7c3bff5"
 )
 EXPECTED_RUNTIME_SETTINGS_VECTOR_DIGEST = (
     "77233dead8e55c6776fb37ff15bf993b8cb356e62b3b37b79da1da357fd4e4be"
@@ -45,7 +45,7 @@ EXPECTED_EXECUTION_PROFILE_DIGEST = (
     "2408de43b52e35a0072da3cf235ebc65b0debaee0066583ff15ea39490519c4f"
 )
 EXPECTED_CONFIG_VECTOR_DIGEST = (
-    "51272bab0b799a16d28fbaad1f3f69dfd04eb5b2f853203ae4534455bec85524"
+    "94ab5a6b1bb6dd60097f2233834617daca0963a2443eec26e11387cc50b678c9"
 )
 
 MODEL_REASON_CODES = {
@@ -452,9 +452,10 @@ def test_red_r18_r19_exact_prompt_bundle_and_digest() -> None:
         "Allowed reason_codes: MATERIAL_SUPPORT_CONFIRMED, SUPPORTING_REFS_IRRELEVANT, SUPPORTING_REFS_INSUFFICIENT, COMPOUND_CLAIM_NOT_FULLY_SUPPORTED, MATERIAL_COUNTEREVIDENCE_UNRESOLVED, ASSESSMENT_SCOPE_EXCEEDED.",
         "Reason semantics and required outcome pairing:",
         "MATERIAL_SUPPORT_CONFIRMED -> SUPPORTED: all material parts of the statement are supported by the supplied evidence.",
-        "SUPPORTING_REFS_IRRELEVANT -> INSUFFICIENT: the supplied supporting references do not materially address the statement.",
-        "SUPPORTING_REFS_INSUFFICIENT -> INSUFFICIENT: the supplied supporting references materially address the statement but do not establish it.",
+        "SUPPORTING_REFS_IRRELEVANT -> INSUFFICIENT: use only when none of the supplied supporting references materially bear on the statement or its evidentiary sufficiency.",
+        "SUPPORTING_REFS_INSUFFICIENT -> INSUFFICIENT: use when at least one supplied supporting reference materially bears on the statement, including by directly describing a limitation or non-establishment, but the packet does not establish it.",
         "COMPOUND_CLAIM_NOT_FULLY_SUPPORTED -> INCONCLUSIVE: a compound statement has material support for at least one part but not for every material part.",
+        "If any supplied supporting reference materially bears on the statement, do not use SUPPORTING_REFS_IRRELEVANT.",
         "MATERIAL_COUNTEREVIDENCE_UNRESOLVED -> INCONCLUSIVE: material support and counterevidence conflict and the bounded packet cannot resolve the conflict.",
         "ASSESSMENT_SCOPE_EXCEEDED -> INCONCLUSIVE: use only when the packet explicitly identifies a named evidence dependency outside the bounded packet or stated scope; ordinary relevant-but-insufficient support is SUPPORTING_REFS_INSUFFICIENT, not scope exceeded.",
         "If COMPOUND_CLAIM_NOT_FULLY_SUPPORTED, MATERIAL_COUNTEREVIDENCE_UNRESOLVED, or ASSESSMENT_SCOPE_EXCEEDED applies, use that specific reason instead of SUPPORTING_REFS_INSUFFICIENT.",
