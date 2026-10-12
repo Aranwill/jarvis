@@ -1345,6 +1345,69 @@ def _hvc_a_validate_canonical_evidence_refs_v0(
             raise ValueError("HVC-A evidence ref assignment is not canonical")
 
 
+def _hvc_a_validate_structured_finding_refs_v0(
+    *,
+    finding,
+    evidence_bundle: FocusedEngineeringEvidenceBundle,
+) -> None:
+    role_fields = (
+        finding.supporting_repository_refs,
+        finding.supporting_knowledge_refs,
+        finding.limiting_or_counterevidence_refs,
+    )
+    if any(not isinstance(refs, tuple) for refs in role_fields):
+        raise TypeError("HVC-A finding role refs must be tuples")
+    if any(len(set(refs)) != len(refs) for refs in role_fields):
+        raise ValueError("HVC-A finding role refs cannot contain duplicates")
+
+    role_bound_refs = (
+        finding.supporting_repository_refs
+        + finding.supporting_knowledge_refs
+        + finding.limiting_or_counterevidence_refs
+    )
+    if finding.evidence_refs != role_bound_refs:
+        raise ValueError(
+            "HVC-A finding evidence_refs must equal structured role-bound refs"
+        )
+    if len(role_bound_refs) > _BLIND_PROJECTION_MAX_REFS:
+        raise ValueError("HVC-A finding role-bound refs exceed hard limit")
+
+    repository_refs = {
+        str(item.get("ref")) for item in evidence_bundle.repository_evidence
+    }
+    knowledge_refs = {
+        str(item.get("ref")) for item in evidence_bundle.knowledge_evidence
+    }
+    if any(
+        ref not in repository_refs for ref in finding.supporting_repository_refs
+    ):
+        raise ValueError(
+            "HVC-A supporting_repository_refs must resolve to repository evidence"
+        )
+    if any(
+        ref not in knowledge_refs for ref in finding.supporting_knowledge_refs
+    ):
+        raise ValueError(
+            "HVC-A supporting_knowledge_refs must resolve to knowledge evidence"
+        )
+    if any(
+        ref not in repository_refs and ref not in knowledge_refs
+        for ref in finding.limiting_or_counterevidence_refs
+    ):
+        raise ValueError(
+            "HVC-A limiting/counterevidence refs must resolve to bound evidence"
+        )
+
+    supporting = set(finding.supporting_repository_refs) | set(
+        finding.supporting_knowledge_refs
+    )
+    limiting = set(finding.limiting_or_counterevidence_refs)
+    if supporting & limiting:
+        raise ValueError(
+            "HVC-A supporting and limiting/counterevidence refs cannot overlap"
+        )
+
+
 def _hvc_a_bound_evidence_by_ref_v0(
     evidence_bundle: FocusedEngineeringEvidenceBundle,
 ) -> dict[str, dict[str, object]]:
@@ -1449,6 +1512,10 @@ def _resolve_hvc_a_bound_semantic_observation_case_v0(bound_case):
         raise ValueError(
             "HVC-A V0 has no authorized upstream claim-part provider"
         )
+    _hvc_a_validate_structured_finding_refs_v0(
+        finding=finding,
+        evidence_bundle=evidence_bundle,
+    )
 
     fingerprint = governed_evidence_support_finding_fingerprint(
         relation_id=finding.relation_id,
