@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from malak.capabilities._engineering_evidence import (
+    EvidenceSelector,
     EvidenceSelectorResult,
     FocusedEngineeringEvidenceBundle,
     GovernedEngineeringEvidenceFocus,
@@ -1012,3 +1013,300 @@ def test_hvc_a_f03_r5_04_resolved_selector_control_remains_valid() -> None:
         observation,
         bound,
     ) is observation
+
+
+def _r6_focus_with_two_required_selectors(
+    visible: dict,
+) -> GovernedEngineeringEvidenceFocus:
+    base = _focus(visible)
+    return replace(
+        base,
+        repository_required_selectors=(
+            EvidenceSelector(
+                kind="EXACT_PATH",
+                value="tests/hvc_a_fixture.md",
+                terms=("support",),
+                max_matches=8,
+            ),
+            EvidenceSelector(
+                kind="EXACT_PATH",
+                value="tests/missing.md",
+                terms=("missing",),
+                max_matches=8,
+            ),
+        ),
+    )
+
+
+def _r6_repository_evidence(visible: dict) -> tuple[dict[str, object], ...]:
+    return (
+        {
+            "ref": "R1",
+            "path": "tests/hvc_a_fixture.md",
+            "blob_sha": "b" * 40,
+            "line_number": 1,
+            "line": visible["evidence_material_by_ref"]["R1"],
+            "line_truncated": False,
+            "required": True,
+        },
+    )
+
+
+def _r6_result(
+    *,
+    value: str,
+    status: str,
+    matched_paths: object,
+    match_count: object,
+    selected_count: object,
+    source_kind: str = "repository",
+    selector_kind: str = "EXACT_PATH",
+) -> EvidenceSelectorResult:
+    return EvidenceSelectorResult(
+        source_kind=source_kind,
+        selector_kind=selector_kind,
+        selector_value=value,
+        status=status,
+        matched_paths=matched_paths,
+        match_count=match_count,
+        selected_count=selected_count,
+    )
+
+
+def _r6_bundle(
+    *,
+    visible: dict,
+    focus: GovernedEngineeringEvidenceFocus,
+    selector_results: tuple[EvidenceSelectorResult, ...],
+    complete: bool,
+    context_truncated: bool = False,
+) -> FocusedEngineeringEvidenceBundle:
+    repository_evidence = _r6_repository_evidence(visible)
+    digest = _focused_digest(
+        visible=visible,
+        focus=focus,
+        repository_evidence=repository_evidence,
+        selector_results=selector_results,
+    )
+    return FocusedEngineeringEvidenceBundle(
+        baseline_commit=visible["baseline_commit"],
+        focus_id=focus.focus_id,
+        subject=focus.subject,
+        repository_evidence=repository_evidence,
+        knowledge_evidence=(),
+        selector_results=selector_results,
+        repository_match_count=1,
+        knowledge_match_count=0,
+        repository_skipped_unreadable=0,
+        context_truncated=context_truncated,
+        supplemental_truncated=False,
+        complete=complete,
+        evidence_set_digest=digest,
+        authority_effect="none",
+    )
+
+
+def test_hvc_a_f03_r6_01_omitted_required_selector_is_rejected() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus = _r6_focus_with_two_required_selectors(visible)
+    only_resolved = (
+        _r6_result(
+            value="tests/hvc_a_fixture.md",
+            status="RESOLVED",
+            matched_paths=("tests/hvc_a_fixture.md",),
+            match_count=1,
+            selected_count=1,
+        ),
+    )
+    bundle = _r6_bundle(
+        visible=visible,
+        focus=focus,
+        selector_results=only_resolved,
+        complete=True,
+    )
+    with pytest.raises(ValueError, match="exactly correspond"):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=bundle,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+
+def test_hvc_a_f03_r6_02_empty_results_cannot_self_certify_required_focus() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus = _r6_focus_with_two_required_selectors(visible)
+    bundle = _r6_bundle(
+        visible=visible,
+        focus=focus,
+        selector_results=(),
+        complete=True,
+    )
+    with pytest.raises(ValueError, match="exactly correspond"):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=bundle,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+
+@pytest.mark.parametrize(
+    "selector_results",
+    [
+        (
+            _r6_result(
+                value="tests/missing.md",
+                status="MISSING",
+                matched_paths=(),
+                match_count=0,
+                selected_count=0,
+            ),
+            _r6_result(
+                value="tests/hvc_a_fixture.md",
+                status="RESOLVED",
+                matched_paths=("tests/hvc_a_fixture.md",),
+                match_count=1,
+                selected_count=1,
+            ),
+        ),
+        (
+            _r6_result(
+                value="tests/hvc_a_fixture.md",
+                status="RESOLVED",
+                matched_paths=("tests/hvc_a_fixture.md",),
+                match_count=1,
+                selected_count=1,
+                source_kind="knowledge",
+            ),
+            _r6_result(
+                value="tests/missing.md",
+                status="MISSING",
+                matched_paths=(),
+                match_count=0,
+                selected_count=0,
+            ),
+        ),
+    ],
+)
+def test_hvc_a_f03_r6_03_required_selector_order_and_source_must_match_focus(
+    selector_results: tuple[EvidenceSelectorResult, ...],
+) -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus = _r6_focus_with_two_required_selectors(visible)
+    bundle = _r6_bundle(
+        visible=visible,
+        focus=focus,
+        selector_results=selector_results,
+        complete=False,
+    )
+    with pytest.raises(ValueError, match="exactly correspond"):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=bundle,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+
+@pytest.mark.parametrize(
+    "result",
+    [
+        _r6_result(
+            value="tests/hvc_a_fixture.md",
+            status="RESOLVED",
+            matched_paths=["tests/hvc_a_fixture.md"],
+            match_count=1,
+            selected_count=1,
+        ),
+        _r6_result(
+            value="tests/hvc_a_fixture.md",
+            status="RESOLVED",
+            matched_paths=("tests/hvc_a_fixture.md",),
+            match_count=-1,
+            selected_count=0,
+        ),
+        _r6_result(
+            value="tests/hvc_a_fixture.md",
+            status="RESOLVED",
+            matched_paths=("tests/hvc_a_fixture.md",),
+            match_count=1,
+            selected_count=True,
+        ),
+    ],
+)
+def test_hvc_a_f03_r6_04_noncanonical_selector_result_representation_is_rejected(
+    result: EvidenceSelectorResult,
+) -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus = replace(
+        _focus(visible),
+        repository_required_selectors=(
+            EvidenceSelector(
+                kind="EXACT_PATH",
+                value="tests/hvc_a_fixture.md",
+                terms=("support",),
+                max_matches=8,
+            ),
+        ),
+    )
+    bundle = _r6_bundle(
+        visible=visible,
+        focus=focus,
+        selector_results=(result,),
+        complete=True,
+    )
+    with pytest.raises((TypeError, ValueError)):
+        module.bind_hvc_a_semantic_observation_case_v0(
+            case_id=visible["case_id"],
+            evidence_focus=focus,
+            evidence_bundle=bundle,
+            finding=_r5_finding(module, visible),
+            evidence_ref="R1",
+        )
+
+
+def test_hvc_a_f03_r6_05_valid_required_selector_sequence_preserves_control() -> None:
+    module = _api()
+    visible, hidden = _case("HVC-A-C01")
+    focus = replace(
+        _focus(visible),
+        repository_required_selectors=(
+            EvidenceSelector(
+                kind="EXACT_PATH",
+                value="tests/hvc_a_fixture.md",
+                terms=("support",),
+                max_matches=8,
+            ),
+        ),
+    )
+    result = _r6_result(
+        value="tests/hvc_a_fixture.md",
+        status="RESOLVED",
+        matched_paths=("tests/hvc_a_fixture.md",),
+        match_count=1,
+        selected_count=1,
+    )
+    bundle = _r6_bundle(
+        visible=visible,
+        focus=focus,
+        selector_results=(result,),
+        complete=True,
+    )
+    bound = module.bind_hvc_a_semantic_observation_case_v0(
+        case_id=visible["case_id"],
+        evidence_focus=focus,
+        evidence_bundle=bundle,
+        finding=_r5_finding(module, visible),
+        evidence_ref="R1",
+    )
+    projected = module.project_hvc_a_visible_semantic_observation_case_v0(bound)
+    observation = _observation(module, projected, hidden)
+    assert module.validate_hvc_a_semantic_observation_v0(observation, bound) is observation
