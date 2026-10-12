@@ -733,3 +733,90 @@ def test_hvc_a_f03_r4_06_noncanonical_evidence_order_is_rejected() -> None:
             finding=finding,
             evidence_ref="R1",
         )
+
+
+def test_hvc_a_f03_r4_07_replaced_evidence_refs_cannot_escape_fingerprinted_roles() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    focus = _focus(visible)
+    evidence = (
+        {
+            "ref": "R1",
+            "path": "tests/a_hvc_a_fixture.md",
+            "blob_sha": "a" * 40,
+            "line_number": 1,
+            "line": "fingerprinted material",
+            "line_truncated": False,
+        },
+        {
+            "ref": "R2",
+            "path": "tests/b_hvc_a_fixture.md",
+            "blob_sha": "b" * 40,
+            "line_number": 1,
+            "line": "unfingerprinted alternate material",
+            "line_truncated": False,
+        },
+    )
+    digest = _focused_digest(
+        visible=visible,
+        focus=focus,
+        repository_evidence=evidence,
+    )
+    bundle = FocusedEngineeringEvidenceBundle(
+        baseline_commit=visible["baseline_commit"],
+        focus_id=focus.focus_id,
+        subject=focus.subject,
+        repository_evidence=evidence,
+        knowledge_evidence=(),
+        selector_results=(),
+        repository_match_count=2,
+        knowledge_match_count=0,
+        repository_skipped_unreadable=0,
+        context_truncated=False,
+        supplemental_truncated=False,
+        complete=True,
+        evidence_set_digest=digest,
+        authority_effect="none",
+    )
+    finding = module._Finding(
+        classification="UNRESOLVED",
+        statement=visible["claim"],
+        rationale="bounded upstream finding",
+        evidence_refs=("R1",),
+        relation_id=visible["relation_id"],
+        supporting_repository_refs=("R1",),
+        supporting_knowledge_refs=(),
+        limiting_or_counterevidence_refs=(),
+        uncertainty_basis="INSUFFICIENT_SUPPLIED_EVIDENCE",
+    )
+    bound = module.bind_hvc_a_semantic_observation_case_v0(
+        case_id=visible["case_id"],
+        evidence_focus=focus,
+        evidence_bundle=bundle,
+        finding=finding,
+        evidence_ref="R1",
+    )
+    tampered = replace(
+        bound,
+        finding=replace(bound.finding, evidence_refs=("R1", "R2")),
+        evidence_ref="R2",
+    )
+    with pytest.raises(
+        ValueError,
+        match="evidence_refs must equal structured role-bound refs",
+    ):
+        module.project_hvc_a_visible_semantic_observation_case_v0(tampered)
+
+
+def test_hvc_a_f03_r4_08_role_overlap_is_rejected_after_replace() -> None:
+    module = _api()
+    visible, _ = _case("HVC-A-C01")
+    bound = _bound_fixture(module, visible)
+    tampered_finding = replace(
+        bound.finding,
+        evidence_refs=("R1", "R1"),
+        limiting_or_counterevidence_refs=("R1",),
+    )
+    tampered = replace(bound, finding=tampered_finding)
+    with pytest.raises(ValueError):
+        module.project_hvc_a_visible_semantic_observation_case_v0(tampered)
