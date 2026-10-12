@@ -10,6 +10,7 @@ trigger_issue: 282
 risk_class: 3_HIGH
 critical_contract: true
 authority_effect: none
+correction_round: 1
 ---
 
 # HVC-A PR-B — Execution / RED→GREEN Ledger
@@ -136,3 +137,38 @@ RDD Stage 1 Candidate Conformance and
 `MALAK-RDD-VALIDATION-RECEIPT/v1` before human Ready.
 
 Receipt != Ready != Merge != Authority.
+
+## 10. Candidate FULL 4R — preliminary review / Bounded Correction round 1
+
+GREEN inicial:
+
+```text
+candidate       03c446cdfdeafb2a120fc0ba5998c9c2150acbb0
+tree            0ed15f001351b4ecf817c6a4e4f456e5429fce0a
+Ubuntu tests    2052 / 2052 PASS
+compileall      PASS
+diff validation PASS
+```
+
+FULL 4R preliminar encontró un finding bloqueante acotado:
+
+```text
+HVC-A-PRB-F01
+type        evaluation-pack completeness
+runtime     unaffected
+problem     matrix items 6/7/9/10 existed as tests but were not frozen as
+            explicit contract adversarial vectors in Ground Truth
+disposition BOUNDED_CORRECTION
+```
+
+Corrección:
+
+- freeze MISSING_EVIDENCE_MATERIAL_VS_SEMANTIC_UNKNOWN;
+- freeze EXACT_BINDING_VS_BINDING_DRIFT;
+- freeze ONE_VALID_OBSERVATION_VS_DUPLICATE_SET;
+- freeze VALID_ABSTAINING_OBSERVATION_VS_UNKNOWN_ENUM;
+- preserve all four as deterministic INVALID contract adversarials;
+- no semantic labels are changed;
+- no production behavior or authority is added.
+
+El corrected candidate requiere affected revalidation y un nuevo Candidate FULL 4R.
