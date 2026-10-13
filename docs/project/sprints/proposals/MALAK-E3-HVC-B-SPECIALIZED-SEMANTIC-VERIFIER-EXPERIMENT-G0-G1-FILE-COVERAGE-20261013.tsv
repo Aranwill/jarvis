@@ -3,36 +3,36 @@ path	repository	artifact_type	authority_class	review_relevance	review_depth	disp
 .github/PULL_REQUEST_TEMPLATE.md	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 .github/workflows/validation.yml	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 .gitignore	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-AGENTS.md	Aranwill/jarvis	other	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+AGENTS.md	Aranwill/jarvis	other	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 CHANGELOG.md	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 PROJECT.md	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 README.md	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 ROADMAP.md	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-SECURITY.md	Aranwill/jarvis	other	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+SECURITY.md	Aranwill/jarvis	other	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 configs/models.yaml	Aranwill/jarvis	other	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/architecture/adr/ADR-001-identity-migration-jarvis-to-malak.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/architecture/adr/ADR-002-policy-enforcement-boundary.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/architecture/adr/ADR-003-directional-communication-and-authority-flow.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
-docs/architecture/adr/ADR-004-specification-and-verification-first.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
-docs/architecture/adr/ADR-005-evidence-bound-final-response-transition.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
-docs/architecture/adr/ADR-006-protected-durable-reliance-preconditions.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/architecture/adr/ADR-003-directional-communication-and-authority-flow.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
+docs/architecture/adr/ADR-004-specification-and-verification-first.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
+docs/architecture/adr/ADR-005-evidence-bound-final-response-transition.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
+docs/architecture/adr/ADR-006-protected-durable-reliance-preconditions.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/architecture/adr/ADR-TEMPLATE.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/architecture/architecture_quality_gates.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
-docs/architecture/blueprint.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/architecture/architecture_quality_gates.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
+docs/architecture/blueprint.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/architecture/decisions/decision-index.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/architecture/documentation_architecture.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/architecture/kernel.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/architecture/kernel.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/architecture/knowledge_model.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/architecture/schemas/knowledge_schema.yaml	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/development/development_checklist.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/development/development_checklist.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/development/development_environment.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/development/engineering_method.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/development/engineering_method.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/development/evidence_manifest.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/development/malak_construction_preflight.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
-docs/development/malak_construction_protocol.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/development/malak_construction_preflight.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
+docs/development/malak_construction_protocol.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/development/rdd_validation_receipt.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/governance/cognitive_constitution.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
-docs/governance/governance_constitution.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/governance/cognitive_constitution.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
+docs/governance/governance_constitution.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/knowledge/architecture/DOC-AKS-001_architecture_knowledge_system.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/knowledge/architecture/DOC-AKS-002_engineering_knowledge_library.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/knowledge/architecture/DOC-AKS-003_artifact_taxonomy.md	Aranwill/jarvis	document	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
@@ -126,7 +126,7 @@ docs/project/sprints/proposals/MALAK-E3-GOVERNED-EVIDENCE-SUPPORT-ASSESSOR-QUALI
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-EVIDENCE-SUPPORT-ASSESSOR-QUALIFICATION-V0-G0-G1-ADMISSION-20260930.md	Aranwill/jarvis	document	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-EVIDENCE-SUPPORT-ASSESSOR-QUALIFICATION-V0-PRE-RED-CONTRACT-HARDENING-20260930.md	Aranwill/jarvis	document	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-EVIDENCE-SUPPORT-ASSESSOR-QUALIFICATION-V0-PRE-RED-FILE-COVERAGE.tsv	Aranwill/jarvis	coverage_ledger	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/project/sprints/proposals/MALAK-E3-GOVERNED-HYBRID-VERIFICATION-COMPOSITION-V0-G0-G1-DESIGN-20261012.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/project/sprints/proposals/MALAK-E3-GOVERNED-HYBRID-VERIFICATION-COMPOSITION-V0-G0-G1-DESIGN-20261012.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-HYBRID-VERIFICATION-COMPOSITION-V0-G0-G1-FILE-COVERAGE-20261012.tsv	Aranwill/jarvis	coverage_ledger	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-LOCAL-OLLAMA-ASSESSOR-EXPERIMENT-V0-G0-G1-DESIGN-20261008.md	Aranwill/jarvis	document	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-LOCAL-OLLAMA-ASSESSOR-EXPERIMENT-V0-G0-G1-FILE-COVERAGE-20261008.tsv	Aranwill/jarvis	coverage_ledger	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
@@ -138,9 +138,9 @@ docs/project/sprints/proposals/MALAK-E3-GOVERNED-SUPPORT-EVIDENCE-ROUTING-V0-G0-
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-SUPPORT-EVIDENCE-ROUTING-V0-PRE-RED-CONTRACT-HARDENING-20260930.md	Aranwill/jarvis	document	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-GOVERNED-SUPPORT-EVIDENCE-ROUTING-V0-PRE-RED-FILE-COVERAGE.tsv	Aranwill/jarvis	coverage_ledger	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-GROUND-TRUTH-DISCRIMINABILITY-V0.3-U07-CORRECTION-20261012.md	Aranwill/jarvis	document	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-G0-G1-DESIGN-20261012.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-G0-G1-DESIGN-20261012.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-G0-G1-FILE-COVERAGE-20261012.tsv	Aranwill/jarvis	coverage_ledger	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-PR-B-EXECUTION-20261012.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	FULL_READ	FULL_READ	-	NO_CHANGE
+docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-PR-B-EXECUTION-20261012.md	Aranwill/jarvis	document	governing_or_method	B1 governing invariant / process source	TARGETED_READ	TARGETED_READ	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-HVC-A-SEMANTIC-OBSERVATION-GROUND-TRUTH-CONTRACT-PR-B-FILE-COVERAGE-20261012.tsv	Aranwill/jarvis	coverage_ledger	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-POSITIVE-QUALIFICATION-CONSUMPTION-TRUST-BOUNDARY-V0-G0-G1-DESIGN-20261003.md	Aranwill/jarvis	document	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 docs/project/sprints/proposals/MALAK-E3-POSITIVE-QUALIFICATION-CONSUMPTION-TRUST-BOUNDARY-V0-G0-G1-FILE-COVERAGE-20261003.tsv	Aranwill/jarvis	coverage_ledger	execution_or_design_record	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
@@ -395,5 +395,5 @@ tests/test_security_context_renewer.py	Aranwill/jarvis	test	supporting	baseline 
 tests/test_security_context_validator.py	Aranwill/jarvis	test	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 tests/test_self_review_evidence_packet_v0.py	Aranwill/jarvis	test	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
 tests/test_trace_view_v0.py	Aranwill/jarvis	test	supporting	baseline inventory; no direct HVC-B design mutation	PATH_INVENTORY_ONLY	NOT_APPLICABLE_WITH_REASON	-	NO_CHANGE
-docs/project/sprints/proposals/MALAK-E3-HVC-B-SPECIALIZED-SEMANTIC-VERIFIER-EXPERIMENT-G0-G1-DESIGN-20261013.md	Aranwill/jarvis	document	design_evidence_non_normative	PR-A direct design evidence	FULL_READ	FULL_READ	B1-DESIGN	PR_A_ALLOWED
-docs/project/sprints/proposals/MALAK-E3-HVC-B-SPECIALIZED-SEMANTIC-VERIFIER-EXPERIMENT-G0-G1-FILE-COVERAGE-20261013.tsv	Aranwill/jarvis	coverage_ledger	design_evidence_non_normative	PR-A direct design evidence	FULL_READ	FULL_READ	B1-DESIGN	PR_A_ALLOWED
+docs/project/sprints/proposals/MALAK-E3-HVC-B-SPECIALIZED-SEMANTIC-VERIFIER-EXPERIMENT-G0-G1-DESIGN-20261013.md	Aranwill/jarvis	document	design_evidence_non_normative	PR-A direct design evidence	TARGETED_READ	TARGETED_READ	B1-DESIGN	PR_A_ALLOWED
+docs/project/sprints/proposals/MALAK-E3-HVC-B-SPECIALIZED-SEMANTIC-VERIFIER-EXPERIMENT-G0-G1-FILE-COVERAGE-20261013.tsv	Aranwill/jarvis	coverage_ledger	design_evidence_non_normative	PR-A direct design evidence	TARGETED_READ	TARGETED_READ	B1-DESIGN	PR_A_ALLOWED
