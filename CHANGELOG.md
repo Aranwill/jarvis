@@ -382,13 +382,3 @@ Estado reconciliado al baseline `main@7b1fe7621b1dad48cc8508390e2ad78faa3e3004`:
 - Sprint 7.12 permanece `NOT AUTHORIZED`.
 
 Esta reconciliación es derivada y no autoriza una nueva implementación.
-
-
-### Reconciliación de estado post-PR #285 — 2026-10-13
-
-- PR #267 adoptó RDD Stage 2 de manera separada y proporcional; los registros antiguos que lo describen como `NOT AUTHORIZED` son snapshots históricos.
-- Los diseños de descomposición G0/G1 y HVC-A precedieron a la implementación HVC-A PR #285; el contrato HVC-A quedó integrado sin elevar autoridad.
-- La Validation #918 post-merge de PR #285 concluyó con `success` en Ubuntu y Windows, sobre `main@37fdb3904916a4fce7e1a95112e8fcfb45ce785e` (tree `84f94100ab35fccf172bbf73c4663f9af94f6f49`).
-- Los ciclos de validación HVC-A culminaron con los registros #301–#305. Este cierre de candidate no equivale a una nueva autorización de producto o runtime.
-- G-01 V0.4 continúa `NOT PASSED`; U08/U09 bloqueados, U10 diferido y U11/#271 abiertos. `support_sufficient` y Protected Finalization siguen sin autorización.
-- Esta entrada es reconciliación documental derivada, no nueva arquitectura ni cambio de versión nominal; `authority_effect=none`.
