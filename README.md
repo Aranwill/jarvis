@@ -714,3 +714,36 @@ Receipt validator PASS != Ready != Merge != Authority
 ```
 
 Esta reconciliación es derivada y no normativa.
+
+
+---
+
+## Reconciliación CURRENT — post-HVC-A PR #285 — 2026-10-13
+
+> **Estado derivado de seguimiento.** Esta sección reemplaza únicamente el punto de lectura CURRENT de los bloques anteriores, sin reescribir sus snapshots ni elevar la autoridad de este documento. El baseline aquí indicado es el estado previo a la presente propuesta documental; no pretende identificar su futuro commit de merge.
+
+```text
+repository                        Aranwill/jarvis
+baseline main                    37fdb3904916a4fce7e1a95112e8fcfb45ce785e
+baseline main tree               84f94100ab35fccf172bbf73c4663f9af94f6f49
+HVC-A PR-B                       #285 MERGED
+HVC-A validated candidate        1155898b03b132ba2787976c828e5f6e2bb3a2b1
+HVC-A candidate tree             84f94100ab35fccf172bbf73c4663f9af94f6f49
+HVC-A post-merge Validation      #918 SUCCESS (Ubuntu / Windows)
+RDD Stage 1                      ADOPTED / ACTIVE
+RDD Stage 2                      ADOPTED / ACTIVE, proportional
+G-01 V0.4                        NOT PASSED — no productive assessor admission
+U08 E3→E4                        BLOCKED by G-01
+U09                              BLOCKED by G-01 / U08
+U10                              DEFERRED
+U11 / issue #271                 PENDING / OPEN
+support_sufficient               NOT AUTHORIZED
+Protected Finalization           NOT AUTHORIZED
+HVC-A authority_effect           none
+```
+
+Los informes independientes de HVC-A registran Fix Validator #301, FULL 4R #302, blind ground-truth review #303, RDD Stage 1 Candidate Conformance #304 y Stage 2 Receipt #305. La integración del contrato de observación semántica **no** representa una qualification PASS de G-01, ni habilita selección de modelo, producción o finalización protegida. Una revisión del código completa de todo Malāk no se infiere de estos receipts.
+
+La siguiente acción propuesta es evaluar la admisión independiente del experimento especializado HVC-B sobre una necesidad real del baseline, reutilizando las primitives existentes y aplicando Construction Preflight y gobernanza humana. Esta mención **no autoriza** G0/G1, implementación ni ampliación de alcance.
+
+La reconciliación de U11 permanece abierta hasta cerrar legítimamente el resto de las dependencias de #271. Evidence != Receipt != Validation != Decision != Authority.
