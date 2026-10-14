@@ -52,7 +52,15 @@ Do not introduce HVC, universal semantic verifiers, model self-authorization, sw
 - Deliberative Alignment: https://arxiv.org/abs/2412.16339
 - Agent Lightning: https://arxiv.org/abs/2508.03680
 - SWE-bench: https://www.swebench.com/
-- STATE-Bench: bibliographic metadata and benchmark protocol **UNCONFIRMED** in this repository review; independently verify before treating as an authoritative benchmark.
+- STATE-Bench: https://opensource.microsoft.com/blog/2026/05/19/introducing-state-bench-a-benchmark-for-ai-agent-memory/ and https://github.com/microsoft/STATE-Bench ; **VERIFIED EXISTENCE AND DOCUMENTED PROTOCOL**, not independently reproduced. 450 tasks in travel, customer support and shopping; state assertions and Agent Learning Track. Its official evaluation uses a locked simulator/judge client (documented GPT-5.4), which introduces cost/dependency and prevents claiming zero-cost local replication. Transfer only evaluation concepts, not benchmark scores.
+
+## Source verification and reproducibility limits (2026-10-14)
+
+- CRITIC: ICLR 2024 primary proceedings https://proceedings.iclr.cc/paper_files/paper/2024/hash/fef126561bbf9d4467dbb8d27334b8fe-Abstract-Conference.html ; publication verified, no Malāk replication.
+- Reflexion: NeurIPS 2023 proceedings https://proceedings.neurips.cc/paper_files/paper/2023/hash/1b44b878bb782e6954cd888628510e90-Abstract-Conference.html and implementation https://github.com/noahshinn/reflexion ; public code/logs verified, but GPT-4 cost/access caveat disclosed by authors.
+- Self-RAG: authors' repository https://github.com/AkariAsai/self-rag ; public training/inference implementation verified, no claim that trained reflection tokens are portable to Malāk.
+- STATE-Bench: Microsoft publication and official repo verified; 450 stateful enterprise tasks, Agent Learning Track; task domain and locked evaluation protocol differ materially from Malāk engineering self-review. **Benchmark suitability for Malāk remains UNTESTED**.
+- All results above are source-verified at publication/documentation level only. Reproduction, statistical validity on Malāk tasks, implementation fit and performance remain UNTESTED.
 
 ## Current decision
 
