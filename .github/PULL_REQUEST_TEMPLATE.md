@@ -208,7 +208,7 @@ post-merge validation: NOT EXECUTED until merge
 
 \- \[ ] Una PR adicional para la misma unidad tiene frontera material o excepción explícita documentada.
 
-\- \[ ] RDD Stage 2 permanece `NOT AUTHORIZED` salvo autorización normativa futura explícita.
+\- \[ \] RDD Stage 2 se aplicó conforme al riesgo y admission vigentes: risk 0/1 = `NOT_APPLICABLE`; risk 2 = `OPTIONAL` con admission explícita; risk 3/4 = `REQUIRED`. Stage 3+ permanece `NOT_AUTHORIZED`.
 
 
 
