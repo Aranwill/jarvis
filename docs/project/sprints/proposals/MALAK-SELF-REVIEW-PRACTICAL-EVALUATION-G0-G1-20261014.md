@@ -38,13 +38,13 @@ REUSE de mecanismos actuales. ADAPT/COMPOSE/NEW: NOT_ADMITTED sin déficit demos
 
 ## G1 — Casos de referencia congelados antes de ejecutar
 
-### A — TRUE_GAP (hipótesis a verificar)
+### A — CANDIDATE_GAP (UNCONFIRMED; no es TRUE_GAP admitido)
 
 Pregunta: ¿el packet obligatorio para Self-Review contiene todos los insumos que son materialmente necesarios para una revisión de admisión/implementación conforme al AGENTS vigente?
 
 Observación inicial: `REQUIRED_SELF_REVIEW_SOURCES` no enumera `docs/development/engineering_method.md` ni `docs/development/malak_construction_preflight.md`. No se presume que ello sea un bug: puede tratarse de separación deliberada entre packet de disponibilidad y lectura focalizada. Para calificar GAP, debe demostrarse una omisión material en el flujo completo, no sólo diferencia entre listas.
 
-Expected: `GAP` si la ausencia causa una decisión insuficientemente sustentada; `NO_CHANGE` si el mecanismo existente consume las fuentes pertinentes por otra vía; `INCONCLUSIVE` si no puede comprobarse. El evaluador humano fijará ground truth antes de la ejecución.
+Expected: **UNCONFIRMED / NOT_ADMITTED como TRUE_GAP** hasta demostrar un defecto material real y fijar ground truth independiente. `GAP` sólo si la ausencia causa una decisión insuficientemente sustentada; `NO_CHANGE` si el flujo existente consume las fuentes por otra vía; `INCONCLUSIVE` si no puede comprobarse. La ausencia en el packet no demuestra por sí sola incumplimiento del Construction Preflight, que tiene obligaciones propias. Si no se verifica el gap, sustituir el caso por uno real antes de ejecutar, mediante revisión independiente y nueva congelación; no redefinir resultados post hoc.
 
 ### B — NO_CHANGE
 
@@ -57,6 +57,10 @@ Expected: NO_CHANGE_RECOMMENDED, si el implementation roadmap ya provee el conte
 Pregunta: ¿puede demostrarse enforcement actual de integración en GitHub usando únicamente blobs del repositorio?
 
 Expected: no. El estado de branch protection/rulesets es externo y mutable; una conclusión favorable basada sólo en el árbol es inválida. Admitir evidencia externa actual y autorizada si existe; de otro modo `INCONCLUSIVE` / `RESEARCH_REQUIRED`.
+
+## G1 — Revisión contractual pendiente de admisión
+
+Los tres casos son preguntas de investigación, no automáticamente fixtures ejecutables. Antes de G2, demostrar para cada caso un mapping concreto a la interfaz actual (`scope`, focus/selectors, evidencia R#/K#, expected terminal disposition), y disponibilidad de evidencia reproducible. C requiere un fixture con ausencia controlada de estado externo, sin presentar GitHub API como parte del reader del repositorio. Si no se pueden mapear, `NOT_EXECUTABLE` y rediseño documental antes de admisión. Un evaluador independiente debe fijar y sellar ground truth antes de cualquier output de modelo.
 
 ## Protocolo experimental futuro (NO AUTORIZADO EN ESTE GATE)
 
