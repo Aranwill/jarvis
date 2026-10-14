@@ -62,6 +62,35 @@ Expected: no. El estado de branch protection/rulesets es externo y mutable; una 
 
 Los tres casos son preguntas de investigación, no automáticamente fixtures ejecutables. Antes de G2, demostrar para cada caso un mapping concreto a la interfaz actual (`scope`, focus/selectors, evidencia R#/K#, expected terminal disposition), y disponibilidad de evidencia reproducible. C requiere un fixture con ausencia controlada de estado externo, sin presentar GitHub API como parte del reader del repositorio. Si no se pueden mapear, `NOT_EXECUTABLE` y rediseño documental antes de admisión. Un evaluador independiente debe fijar y sellar ground truth antes de cualquier output de modelo.
 
+## G1-B — Historical isolated fixture candidate (design only; not executable yet)
+
+Provenance: closed issues #299/#301 document retired HVC-A F03 correspondence defects. Issue #291 documents blind-review contamination risk. Issue #315 and rollback #317 confirm HVC is not active. **Historical defect != present Malāk defect**.
+
+### Visible task specification (proposed, not a model input artifact yet)
+
+A required-evidence contract specifies repository selectors `A` and `B`. The observed selector-result set contains only `A`, with status `RESOLVED`. A caller-provided metadata field says `complete=true`; its digest is internally consistent with the *observed* set. The evaluator is asked whether the declared required-evidence coverage is justified, using only the visible contract and results. The historical defect's identity and issue links must NOT be included in the eventual blinded model-visible packet.
+
+Controls: both A/B present and RESOLVED (no missing-selector gap); A present/B MISSING or TRUNCATED (incomplete); caller flags contradict selector statuses (cannot rely on caller flags). No actual source code is required in the task statement.
+
+### Ground-truth candidate (REVIEWER-ONLY; not sealed)
+
+Candidate labels for independent review: missing required B => unsupported completeness / `GAP` in the isolated historical contract; both resolved => `NO_CHANGE` for selector coverage. These are **author hypotheses**. They are not blind-reviewed, sealed or suitable as a hidden oracle because this same design document contains the labels. The independent reviewer must receive separately prepared visible materials and hidden rubric, verify the case without access to evaluated outputs, and freeze exact hashes before model execution.
+
+### Current interface compatibility assessment
+
+Current `_engineering_evidence.py` has `GovernedEngineeringEvidenceFocus`, required selectors, `EvidenceSelectorResult` and `ALL_REQUIRED_SELECTORS_RESOLVED` completeness criteria. `engineering_inspect.py` fails closed for incomplete focused bundles, and `internal_interaction.py` supports `INCONCLUSIVE` and `NO_CHANGE_RECOMMENDED`. This is structural REUSE potential, **not** evidence that arbitrary synthetic selector-results can be injected into E2/E3/E4 as a model task. The current test harness may use mocked component outputs; those tests are not evidence of semantic model performance. Execution mapping is **UNCONFIRMED / NOT_EXECUTABLE UNTIL DEMONSTRATED**.
+
+### G1-B admission checklist
+
+1. Owner-approved read-only isolated fixture scope; no retired HVC imports.
+2. Visible-only packet and separately sealed reviewer-only labels, independently reviewed before model outputs; reviewer must not access model output.
+3. Exact fixture hashes, baseline SHA/tree and unambiguous scoring criteria; no expected labels or historical issue links in visible inputs.
+4. Demonstrated invocation via existing E2/E3/E4 interfaces without modifying production code or loosening evidence controls; otherwise STOP/NOT_EXECUTABLE.
+5. Negative and positive controls, abstention allowed, no claim that the historical issue proves a present defect.
+6. Independent gate review and Owner authorization before any execution.
+
+**Disposition: DESIGN_CANDIDATE / G2_NOT_ADMITTED / authority_effect=none.**
+
 ## Protocolo experimental futuro (NO AUTORIZADO EN ESTE GATE)
 
 1. Congelar SHA/tree, pregunta, alcance, fuentes relevantes, counterevidence y ground truth independiente de los outputs.
