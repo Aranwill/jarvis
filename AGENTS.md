@@ -67,6 +67,10 @@ Las fuentes principales incluyen:
 - `docs/development/malak_construction_protocol.md`
 - `docs/development/malak_construction_preflight.md`
 - `SECURITY.md`
+- `ROADMAP.md` — punto de entrada no normativo a planificación; no sustituye el roadmap derivado vigente
+- `docs/project/implementation_roadmap.md` — planificación derivada CURRENT_STATE
+- `docs/project/roadmap.md` — planificación legacy/histórica; nunca usar como roadmap vigente
+- `docs/project/status/MALAK-STATE-RECONCILIATION-20260915.md` — corrective record derivado/histórico referenciado por `ROADMAP.md`; usar para interpretar claims superseded cuando sea material, no como autoridad corriente
 
 Para revisiones de próxima implementación, seguridad, capacidades futuras o arquitectura de horizonte, deberá consultarse además de forma explícita:
 
@@ -1139,6 +1143,17 @@ El orden, número o título de un sprint en un roadmap no obliga a ejecutarlo. U
 Para evitar que documentación histórica o conceptual sea interpretada como
 estado vigente, las fuentes documentales deberán clasificarse por función.
 
+#### NAVIGATION_AND_DERIVED_STATE
+
+Estas fuentes ayudan a localizar e interpretar planificación y estado, pero no crean autoridad:
+
+- `ROADMAP.md` — entrypoint no normativo; enlaza al roadmap derivado canónico y puede señalar corrective records;
+- `docs/project/implementation_roadmap.md` — fuente derivada canónica de planificación CURRENT_STATE;
+- `docs/project/roadmap.md` — roadmap legacy/histórico; sus fases no representan estado vigente;
+- `docs/project/status/MALAK-STATE-RECONCILIATION-20260915.md` — corrective record derivado de 2026-09-15; consultar cuando un claim mutable que todavía lo referencia deba reconciliarse. Su antigüedad impide tratarlo como sustituto automático del baseline actual.
+
+Una referencia downstream desde un documento obligatorio debe recibir clasificación explícita cuando sea material para la pregunta. `referenced != authoritative` y `referenced != mandatory deep read`.
+
 #### CURRENT_STATE_CORE
 
 Estas fuentes pueden representar estado operativo o de planificación vigente:
@@ -1168,6 +1183,8 @@ No deben utilizarse como sustituto del estado arquitectónico o de planificació
 
 Incluye Constituciones, Blueprint, Kernel specification, Architecture Quality
 Gates, ADR aceptados, contratos públicos y `SECURITY.md`.
+
+Para el dominio Security, source closure no significa listar por path cada implementation/test en este archivo. La revisión deberá combinar `SECURITY.md` con ADR aceptados aplicables, specifications/contracts afectados, código Security o de autorización/provenance materialmente afectado y sus tests/evidencia. Los documentos relacionados enumerados por `SECURITY.md` conservan su propia clase documental y no heredan autoridad de la política por estar enlazados.
 
 Su metadata histórica o de certificación no debe reinterpretarse
 automáticamente como estado operativo corriente.
