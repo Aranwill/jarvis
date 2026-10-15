@@ -34,7 +34,8 @@ No se ha iniciado RED/GREEN ni una serie experimental con modelos.
 
 Baseline remoto verificado: `5612214fd820adffc8627ed6f7b51a0416729d43`.
 Tree recursivo: `2b039add0420032a563aa588a66fc0dea2a95821`, no truncado,
-394 blobs descubiertos y clasificados en el ledger adjunto; inventario no significa
+394 blobs del baseline descubiertos y clasificados en el ledger adjunto;
+el ledger incluye además los dos documentos nuevos de esta PR-A (396 filas); inventario no significa
 lectura completa del repositorio. La revisión es incremental del dominio E2/E3,
 no una auditoría integral de Malāk.
 
@@ -110,7 +111,7 @@ Una inferencia por etapa; cero reparaciones o reintentos automáticos.
 ### E2: assertions con refs tipadas
 
 Cambiar la salida del modelo de prosa con citas embebidas a un objeto estricto:
-`summary`, `assertions`, `uncertainties`. Cada assertion contiene exactamente
+`schema_id`, `summary`, `assertions`, `uncertainties`. Cada assertion contiene exactamente
 `kind`, `text`, `evidence_refs`; kind pertenece a OBSERVED, KNOWLEDGE_CONTEXT,
 INTERPRETATION o UNCERTAINTY. El schema se deriva sólo del evidence bundle
 admitido. Las refs son enums de identificadores exactos disponibles; si no hay
@@ -127,19 +128,22 @@ La asignación kind debe seguir siendo interpretación del modelo; no prueba ver
 
 Por finding conservar classification, statement, rationale, uncertainty_basis
 y relation_id. Sustituir únicamente la forma model-visible de las tres listas
-por `evidence_roles`: objeto con una propiedad requerida por cada ref disponible,
-cada valor exactamente uno de SUPPORT, LIMIT o UNUSED. additionalProperties=false.
+por `evidence_roles`: mapa disperso con propiedades permitidas exclusivamente
+para las refs disponibles, cada valor SUPPORT o LIMIT. additionalProperties=false
+y maxProperties=16; el parser impone también ese límite. Las claves son opcionales: una
+ref omitida significa no citada, nunca soporte implícito. No se agrega UNUSED al wire.
 Las refs se originan en el catálogo inmutable del bundle; no en texto del modelo.
 Los objetos con keys duplicadas se rechazan antes de construir un dict.
 
-El esquema no concede soporte por omisión: todos los roles deben estar presentes.
-UNUSED permite no usar evidencia irrelevante. Una ref no puede ocupar dos roles.
+El esquema no concede soporte por omisión. Un mapa vacío sólo puede pasar si
+el contrato canónico de la clasificación y la incertidumbre ya lo permite. Una
+ref no puede ocupar dos roles; una key JSON duplicada siempre se rechaza.
 La proyección hace exclusivamente:
 
 1. SUPPORT + fuente repository → supporting_repository_refs.
 2. SUPPORT + fuente knowledge → supporting_knowledge_refs.
 3. LIMIT → limiting_or_counterevidence_refs.
-4. UNUSED → no se incluye en las listas finales.
+4. Ref no seleccionada → no se incluye en las listas finales; el bundle original no se altera.
 
 La fuente se obtiene del bundle validado, nunca se infiere de texto libre ni se
 elige por conveniencia. Después se ejecuta el parser vigente completo sobre el
@@ -154,15 +158,61 @@ y nueva disposición explícita. Los consumidores E4 siguen recibiendo los campo
 canónicos actuales. La compatibilidad E3/E4 se debe verificar sin ejecutar E4
 del piloto original.
 
-### Límites que deben congelarse antes de RED
+### Formatos y presupuestos congelados de la propuesta V1
 
-Mantener todos los límites finales actuales. Un presupuesto para cantidad total
-de claves del schema y tamaño UTF-8 se debe derivar del máximo bundle admitido;
-si no cabe, rechazo pre-model, sin truncación silenciosa ni partición automática.
-El diseño no fija un valor arbitrario nuevo: medir el máximo de contexto/schema
-del baseline y congelar el valor en el design hardening antes de RED.
-Esta decisión pendiente mantiene G1/Hardening en INCONCLUSIVE y prohíbe RED.
-No crear un segundo camino de generación por overflow.
+Envelope model-visible E2: exactamente `schema_id`, `summary`, `assertions`,
+`uncertainties`, con schema_id constante `malak.e2.assertions.v1`.
+Envelope E3 focalizado: exactamente `schema_id`, `summary`, `findings`,
+`uncertainties`, con schema_id constante `malak.e3.ref-role-map.v1`.
+El adapter consume schema_id validado y entrega al parser canónico únicamente
+sus campos históricos. La versión se selecciona por código/configuración de
+la ruta admitida, nunca mediante autodetección de un output malformado.
+
+- Prompt: conservar 65.536 bytes UTF-8 del baseline.
+- Schema serializado: máximo 65.536 bytes UTF-8, reutilizando el mismo presupuesto
+  numérico; límite adicional explícito, no evidencia de cabida en tokens.
+- Output: conservar 65.536 bytes UTF-8. No completar JSON cortado.
+- E3: máximo 16 findings y 16 refs seleccionadas por finding, ya vigentes.
+- E2: máximo 16 assertions, 16 refs por assertion, summary de 8.192 bytes,
+  texto por assertion de 4.096 bytes, 16 uncertainties de 4.096 bytes cada una.
+  Son presupuestos candidatos reutilizados de E3 para acotar E2; no son límites
+  históricos de E2. El límite global de salida prevalece sobre su suma.
+- Limitar siempre por bytes en parser. maxLength del schema, cuando se use,
+  cuenta caracteres y no sustituye esa validación UTF-8.
+- Enums de refs vacíos: lista sólo vacía en E2; mapa sin propiedades en E3.
+  No emitir un `enum: []`. Nunca generar refs de relleno.
+- Claves/ref order: orden del bundle validado, repository y después knowledge;
+  la proyección usa ese mismo orden. JSON canónico sort_keys=True,
+  ensure_ascii=False y separators compactos para hashes y tamaño.
+- Prompt se limita antes de construir schema; schema se mide antes de invocar
+  generate. Overflow → error técnico pre-model, cero llamadas; sin truncación,
+  partición, reducción del bundle ni fallback automático.
+
+La asignación total obligatoria de la primera propuesta se descarta: hacía
+crecer el output con todo el catálogo aunque el contrato final admite sólo 16
+refs seleccionadas. El mapa disperso conserva la exclusividad sin ese coste.
+No se exige al modelo emitir valores UNUSED para cada evidencia no utilizada.
+
+E2 OBSERVED exige refs repository; KNOWLEDGE_CONTEXT exige refs knowledge;
+INTERPRETATION exige refs del bundle; UNCERTAINTY permite refs vacías. Esto no
+valida entailment. Strings y campos extra/duplicados se validan estrictamente;
+no se permiten citas reservadas R#/K#/S#/A# embebidas fuera de campos de refs.
+
+Prueba de diseño local, sin modelo ni cambios productivos: 729 asignaciones
+posibles de seis refs entre no seleccionada/SUPPORT/LIMIT; todas preservan
+la disjunción y el conjunto seleccionado. No se afirma que todas pasen los
+checks semánticos/estructurales finales. Sizing de un ejemplo de schema E3
+con una relación: 6 refs=1.107 bytes; 16=1.447; 128=5.365; 512=19.119;
+1.024=37.551. Es un ejemplo medido, no el máximo universal del serializer futuro.
+El guard exacto de 65.536 bytes se comprueba sobre cada request real.
+
+La cabida en bytes no garantiza cabida en context_window_tokens ni soporte
+perfecto del constrained decoder. El runtime actual valida los conteos
+reportados de tokens, pero eso no demuestra por sí solo ausencia de truncación.
+Antes de una nueva serie real se debe congelar/capturar el contexto efectivo,
+configuración y provenance con los controles pre-model admitidos. Si esa
+precondición es INCONCLUSIVE, no se ejecuta el experimento. No se propone
+cambiar ni el runtime ni el freeze original en esta PR-A.
 
 ## Por qué proyección no equivale a reparación
 
@@ -220,17 +270,16 @@ evalúan la propuesta, no certifican una implementación inexistente.
 
 | Lente Design 4R | Evidencia / disposición |
 |---|---|
-| Risk | Roles no conceden autoridad; rechazo final intacto. INCONCLUSIVE hasta cerrar budgets y compatibilidad de schema |
+| Risk | PASS del productor: budgets explícitos y parser final obligatorio; decoder no confiable y freeze real siguen siendo riesgos controlados |
 | Readability | Una asignación explícita por ref; nombres canónicos finales conservados. PASS como revisión del productor, no independiente |
-| Reliability | Disjunción por representación; guards finales obligatorios. INCONCLUSIVE sin implementación ni serie nueva |
-| Resilience | Sin fallback/retry; overflow y malformed fallan. INCONCLUSIVE hasta ejecutar negativos y presupuesto máximo |
+| Reliability | PASS del productor para diseño: disjunción por representación y rechazo sin repair. Mejora real NOT_MEASURED; requiere PR-B y serie nueva |
+| Resilience | PASS del productor para diseño: overflow/malformed/duplicate definidos como rechazo. Pruebas de implementación pendientes en PR-B |
 
-No se declara Design 4R PASS agregado. G1, Critical Contract Hardening y RDD
-Stage 1 Design Check permanecen INCONCLUSIVE. Candidate FULL 4R, RED, GREEN,
+Design 4R del productor: PASS documental; no es validación independiente ni FULL 4R de implementación. G1, Critical Contract Hardening y RDD
+Stage 1 Design Check requieren revisión del candidate documental actualizado. Candidate FULL 4R, RED, GREEN,
 E2E del cambio, CI de implementación, validación independiente, RDD Candidate
 Conformance y Receipt risk 3 no se han ejecutado. Ninguna etapa se sustituye
-por tests verdes del baseline. La PR sólo permite revisar el diagnóstico y
-resolver las decisiones pre-RED pendientes.
+por tests verdes del baseline. La PR permite revisar el diagnóstico y el diseño concreto; no certifica una implementación.
 
 ## Implementación futura: scope y gates
 
@@ -240,8 +289,8 @@ tests E2/E3/focus/role-binding y tooling experimental mínimo sólo si se justif
 No autoriza cambios en Kernel, ley, security foundations o readers/binding.
 Un archivo adicional requiere registrar necesidad y revalidar scope.
 
-1. G1 hardening: congelar intermediate exacto/versionado y budgets, resolver
-   compatibilidad de runtime, repetir Design 4R y RDD Design Check.
+1. G1 hardening: revisar los formatos y budgets V1 congelados y completar
+   RDD Design Check sobre el candidate documental exacto.
 2. Tras revisión/promoción humana del diseño y main reconciliado: RED con
    negativos y criterios del intermediate, SHA exacto y evidencia conservada.
 3. Tras autorización humana aplicable sobre RED: GREEN mínimo, proyección y
@@ -263,7 +312,7 @@ Tests futuros, antes de declarar mejora:
 - overlap del contrato canónico sigue rechazado; keys duplicadas del intermediate rechazadas;
 - malformed JSON, no finitos, keys extra/ausentes, tipos y límites incorrectos fallan;
 - permutaciones de refs y roles proyectan determinísticamente, sin perder binding;
-- SUPPORT/LIMIT/UNUSED no transforman clasificación ni incertidumbre;
+- SUPPORT/LIMIT y omisión no transforman clasificación ni incertidumbre;
 - duplicación/omisión de relation_id y soporte insuficiente siguen rechazados;
 - history vacío, una llamada por etapa, sin retrieval/tools adicionales;
 - prompts/contexto reconstruidos sólo con allowlist; oracle/rubric fuera del request;
@@ -366,6 +415,47 @@ authority_effect: none
 BLINDNESS_REGRESSION es INCONCLUSIVE porque no se ha construido ni capturado
 el contexto de una implementación nueva; no se ejecutó ningún caso del piloto.
 READY_FOR_OWNER_REVIEW describe esta propuesta incompleta, no aceptación técnica
-del fix. Las decisiones pendientes son concretas: forma intermedia/budgets,
-cierre de gates de diseño, revisión/promoción humana de PR-A y autorización
+del fix. Las decisiones pendientes son concretas: revisión de la forma intermedia/budgets
+ya especificados, cierre de gates de diseño, revisión/promoción humana de PR-A y autorización
 GREEN sobre el RED futuro. No se solicita relajar ninguna regla.
+
+
+## Reanudación de PR-A — 2026-10-15
+
+Construction Preflight revalidado para esta corrección documental: baseline,
+AGENTS, protocolo, preflight y checklist mantienen sus blobs; scope continúa
+limitado a los dos documentos de PR-A. El cambio adapta exclusivamente el diseño
+admitido para revisión. La comparación con normativa/seguridad mantiene las
+mismas disposiciones; no se activa ningún contrato productivo.
+
+Estado observado antes de esta actualización: run 38823273781, Ubuntu success,
+Windows in_progress en tests; candidate 4a8ba8f24cc6f9c614ffec1c9b581f4eb702f08f.
+Esos resultados son históricos para ese SHA, no certifican el nuevo candidate.
+No se rerunea un fallo ni se altera configuración de runners.
+
+Revisión de diseño por lentes: Risk considera refs desconocidas, duplicadas,
+namespace spoofing, prompt injection y autoridad; parser/freeze siguen siendo
+fronteras. Readability considera versión, claves exactas, tipos y proyección;
+se elimina el ambiguo coste de emitir UNUSED para todo el catálogo. Reliability
+considera preservación de refs/roles, incertidumbre, límites y orden; enumeración
+729/729 sólo demuestra el invariante matemático, no cognición. Resilience
+considera overflow, output cortado, falta de provenance y decoder incompatible;
+todos fallan sin retry/fallback y sin cambiar el piloto. El riesgo residual común
+es utilidad cognitiva desconocida y posibles contract rejections restantes.
+Las cuatro lentes concluyen PASS como evaluación documental del productor.
+
+RDD Stage 1 Design Check del productor: PASS para la especificación. Baseline
+exacto registrado; candidate se identifica por SHA Git de esta PR y blobs de los
+dos documentos, sin autorreferencia imposible dentro del propio commit. Un
+cambio invalida la evidencia afectada. Writer es el productor de esta PR;
+reviewer/validator independientes no se simulan; Owner conserva decisiones.
+Resultados terminales RDD PASS/FAIL/INCONCLUSIVE; correcciones futuras conservan
+findings y requieren budget y Fix Validator cuando corresponda. Para PR-B risk 3,
+Stage 1 Manifest y Stage 2 Receipt serán obligatorios según protocolo; para esta
+propuesta documental risk 2 Stage 2 no se admite por inferencia y queda N/A.
+Esto no es Candidate Conformance ni aceptación del fix.
+
+La causa raíz sigue PARTIAL y la solución NOT_IMPLEMENTED. El diseño queda
+preparado para revisión independiente pre-RED. El técnico que prepare PR-B debe
+verificar primero promoción humana de este diseño y main reconciliado; no se
+salta esa condición porque los runners del baseline terminen en verde.
