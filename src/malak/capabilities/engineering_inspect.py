@@ -3,6 +3,12 @@ from __future__ import annotations
 import json
 import re
 
+from malak.capabilities._engineering_analysis import (
+    bounded_nonempty_string,
+    reject_duplicate_keys,
+    reject_nonfinite_json,
+    require_exact_keys,
+)
 from malak.capabilities._engineering_evidence import (
     GovernedEngineeringEvidenceFocus,
     FocusedEngineeringEvidenceBundle,
@@ -43,8 +49,13 @@ Use only the supplied evidence for claims about the captured repository snapshot
 Distinguish OBSERVED facts, KNOWLEDGE CONTEXT, INTERPRETATION, and UNCERTAINTY.
 Use UNCONFIRMED when the supplied evidence is insufficient.
 
-Cite repository evidence as [R#], knowledge evidence as [K#], and structural
-syntax evidence as [S#] when making evidence-grounded claims.
+Return strict JSON matching malak.e2.assertions.v1: schema_id, summary,
+assertions, uncertainties. Each assertion has kind, text, evidence_refs.
+Use only exact refs from the evidence catalog in the supplied packet and schema.
+An absent namespace is unavailable. Do not place evidence ref tokens in text;
+the deterministic renderer inserts citations from validated evidence_refs.
+OBSERVED uses repository refs; KNOWLEDGE_CONTEXT uses knowledge refs;
+INTERPRETATION uses supplied refs; UNCERTAINTY may have no refs.
 
 Structural syntax evidence reports only observed syntax. It does not establish a
 semantic dependency, architecture assessment, permission, or authority.
@@ -194,11 +205,18 @@ class EngineeringInspectCapability(Capability):
                 f"engineering inspection prompt exceeds {_MAX_PROMPT_BYTES} UTF-8 bytes"
             )
 
+        response_json_schema = _build_inspection_response_json_schema(
+            repository_evidence, knowledge_evidence, structural_evidence,
+        )
+        if len(response_json_schema.encode("utf-8")) > _MAX_PROMPT_BYTES:
+            raise RuntimeError("engineering inspection schema exceeds hard UTF-8 byte limit")
+
         response = self._conversation_service.generate(
             ConversationRequest(
                 prompt=prompt,
                 model=self._model,
                 system_prompt=_SYSTEM_PROMPT,
+                response_json_schema=response_json_schema,
                 history=(),
                 generation_contract=self._generation_contract,
             ),
@@ -212,6 +230,10 @@ class EngineeringInspectCapability(Capability):
             raise RuntimeError(
                 "engineering inspection model response exceeds hard UTF-8 byte limit"
             )
+
+        analysis = _parse_inspection_assertions(
+            analysis, repository_evidence, knowledge_evidence, structural_evidence,
+        )
 
         (
             repository_citation_count,
@@ -241,6 +263,119 @@ class EngineeringInspectCapability(Capability):
             return _with_focus_metadata(rendered, focus_bundle)
         return rendered
 
+
+
+_E2_SCHEMA_ID = "malak.e2.assertions.v1"
+_ASSERTION_KINDS = ("OBSERVED", "KNOWLEDGE_CONTEXT", "INTERPRETATION", "UNCERTAINTY")
+_RESERVED_REF_PATTERN = r"(?<![A-Za-z0-9_])[RKSA][0-9]+(?![A-Za-z0-9_])"
+
+
+def _build_inspection_response_json_schema(
+    repository_evidence: list[dict[str, object]],
+    knowledge_evidence: list[dict[str, object]],
+    structural_evidence: list[dict[str, object]],
+) -> str:
+    refs = [str(item["ref"]) for item in (
+        *repository_evidence, *knowledge_evidence, *structural_evidence,
+    )]
+    if len(refs) != len(set(refs)):
+        raise RuntimeError("inspection evidence refs must be unique")
+    ref_array = {
+        "type": "array", "maxItems": 16 if refs else 0, "uniqueItems": True,
+        "items": {"type": "string", **({"enum": refs} if refs else {})},
+    }
+    schema = {
+        "type": "object", "additionalProperties": False,
+        "required": ["schema_id", "summary", "assertions", "uncertainties"],
+        "properties": {
+            "schema_id": {"type": "string", "const": _E2_SCHEMA_ID},
+            "summary": {"type": "string", "minLength": 1, "maxLength": 8192},
+            "assertions": {
+                "type": "array", "maxItems": 16,
+                "items": {
+                    "type": "object", "additionalProperties": False,
+                    "required": ["kind", "text", "evidence_refs"],
+                    "properties": {
+                        "kind": {"type": "string", "enum": list(_ASSERTION_KINDS)},
+                        "text": {"type": "string", "minLength": 1, "maxLength": 4096},
+                        "evidence_refs": ref_array,
+                    },
+                },
+            },
+            "uncertainties": {
+                "type": "array", "maxItems": 16,
+                "items": {"type": "string", "minLength": 1, "maxLength": 4096},
+            },
+        },
+    }
+    return json.dumps(schema, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _parse_inspection_assertions(
+    raw: str,
+    repository_evidence: list[dict[str, object]],
+    knowledge_evidence: list[dict[str, object]],
+    structural_evidence: list[dict[str, object]],
+) -> str:
+    # El schema restringe al decoder; este parser valida sin confiar en él.
+    try:
+        payload = json.loads(
+            raw,
+            object_pairs_hook=reject_duplicate_keys,
+            parse_constant=reject_nonfinite_json,
+        )
+    except (ValueError, TypeError, RecursionError) as exc:
+        raise RuntimeError("engineering inspection model response is not strict JSON") from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError("engineering inspection JSON must be an object")
+    require_exact_keys(payload, {"schema_id", "summary", "assertions", "uncertainties"}, "inspection")
+    if payload["schema_id"] != _E2_SCHEMA_ID:
+        raise RuntimeError("engineering inspection schema_id is not supported")
+
+    def text(value: object, field: str, limit: int) -> str:
+        return bounded_nonempty_string(
+            value, field=field, max_bytes=limit,
+            reserved_pattern=_RESERVED_REF_PATTERN, limit_scope="E2",
+        )
+
+    lines = [text(payload["summary"], "summary", 8192)]
+    repository_refs = {str(item["ref"]) for item in repository_evidence}
+    knowledge_refs = {str(item["ref"]) for item in knowledge_evidence}
+    allowed = repository_refs | knowledge_refs | {str(item["ref"]) for item in structural_evidence}
+    assertions = payload["assertions"]
+    if not isinstance(assertions, list) or len(assertions) > 16:
+        raise RuntimeError("inspection assertions must be a list of at most 16 items")
+    for assertion in assertions:
+        if not isinstance(assertion, dict):
+            raise RuntimeError("each inspection assertion must be an object")
+        require_exact_keys(assertion, {"kind", "text", "evidence_refs"}, "assertion")
+        kind = assertion["kind"]
+        if not isinstance(kind, str) or kind not in _ASSERTION_KINDS:
+            raise RuntimeError("inspection assertion kind is not allowed")
+        body = text(assertion["text"], "assertion text", 4096)
+        refs = assertion["evidence_refs"]
+        if not isinstance(refs, list) or len(refs) > 16:
+            raise RuntimeError("assertion evidence_refs must be a list of at most 16 refs")
+        if any(not isinstance(ref, str) for ref in refs):
+            raise RuntimeError("assertion evidence_refs must contain strings")
+        if len(set(refs)) != len(refs):
+            raise RuntimeError("assertion evidence_refs cannot contain duplicates")
+        unknown = sorted(set(refs) - allowed)
+        if unknown:
+            raise RuntimeError("engineering inspection model cited unknown evidence refs: " + ", ".join(unknown))
+        if kind != "UNCERTAINTY" and not refs:
+            raise RuntimeError("grounded assertion requires evidence refs")
+        if kind == "OBSERVED" and not set(refs) <= repository_refs:
+            raise RuntimeError("OBSERVED assertion requires repository evidence refs")
+        if kind == "KNOWLEDGE_CONTEXT" and not set(refs) <= knowledge_refs:
+            raise RuntimeError("KNOWLEDGE_CONTEXT assertion requires knowledge evidence refs")
+        citations = " ".join(f"[{ref}]" for ref in refs)
+        lines.append(f"{kind}: {body}" + (f" {citations}" if citations else ""))
+    uncertainties = payload["uncertainties"]
+    if not isinstance(uncertainties, list) or len(uncertainties) > 16:
+        raise RuntimeError("inspection uncertainties must be a list of at most 16 items")
+    lines.extend("UNCERTAINTY: " + text(value, "uncertainty", 4096) for value in uncertainties)
+    return "\n".join(lines)
 
 
 def _structural_context(

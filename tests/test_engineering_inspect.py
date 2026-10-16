@@ -92,8 +92,21 @@ def make_repo(tmp_path: Path) -> tuple[Path, str]:
     return repo, git(repo, "rev-parse", "HEAD")
 
 
+def inspection_response(*refs: str) -> str:
+    """Fixture wire V1; las citas repetidas usan assertions separadas válidas."""
+    return json.dumps({
+        "schema_id": "malak.e2.assertions.v1",
+        "summary": "Grounded inspection.",
+        "assertions": [
+            {"kind": "INTERPRETATION", "text": "Grounded evidence.", "evidence_refs": [ref]}
+            for ref in refs
+        ],
+        "uncertainties": [],
+    })
+
+
 class RecordingProvider(ConversationProvider):
-    def __init__(self, content: str = "Grounded inspection [R1] [K1]") -> None:
+    def __init__(self, content: str = inspection_response("R1", "K1")) -> None:
         self.content = content
         self.calls = 0
         self.requests: list[ConversationRequest] = []
@@ -459,7 +472,7 @@ def test_e2_red_c18_system_prompt_is_fixed_and_dynamic_data_stays_out(
 
     repository_reader = GitRepositoryReader(repo)
     knowledge_reader = GovernedKnowledgeReader(repository_reader)
-    provider = RecordingProvider("Grounded inspection [R1]")
+    provider = RecordingProvider(inspection_response("R1"))
     module = engineering_module()
     capability = module.EngineeringInspectCapability(
         repository_reader=repository_reader,
@@ -490,8 +503,8 @@ def test_e2_red_c19_system_prompt_preserves_inspect_trust_boundary(
     assert "do not propose" in system_prompt.lower()
     assert "do not authorize" in system_prompt.lower()
     assert "UNCONFIRMED" in system_prompt
-    assert "[R" in system_prompt
-    assert "[K" in system_prompt
+    assert "exact refs" in system_prompt
+    assert "supplied packet and schema" in system_prompt
 
 
 def test_e2_red_c20_inference_is_single_call_and_history_is_empty(
@@ -779,7 +792,7 @@ def test_e2_red_c34_knowledge_match_baseline_misbinding_fails_closed(
     assert provider.calls == 0
 
 
-@pytest.mark.parametrize("content", ["claim [R999]", "claim [K999]", "claim [R0] [K0]"])
+@pytest.mark.parametrize("content", [inspection_response("R999"), inspection_response("K999"), inspection_response("R0", "K0")])
 def test_e2_red_c35_model_cannot_cite_unknown_evidence_refs(
     tmp_path: Path,
     content: str,
@@ -823,7 +836,7 @@ def build_structural_e2_capability(
     ).project()
 
     actual_provider = provider or RecordingProvider(
-        "Grounded structural inspection [S1]"
+        inspection_response("S1")
     )
     capability = engineering_module().EngineeringInspectCapability(
         repository_reader=repository_reader,
@@ -923,7 +936,7 @@ def test_e2_structural_red_c04_exact_module_adds_symbols_then_imports(
 def test_e2_structural_red_c05_substring_does_not_create_structural_match(
     tmp_path: Path,
 ) -> None:
-    provider = RecordingProvider("Grounded textual inspection [R1]")
+    provider = RecordingProvider(inspection_response("R1"))
     *_, capability = build_structural_e2_capability(
         tmp_path,
         provider=provider,
@@ -976,7 +989,7 @@ def test_e2_structural_red_c08_no_r_k_or_s_remains_unconfirmed_without_model(
 def test_e2_structural_red_c09_unknown_structural_ref_is_rejected(
     tmp_path: Path,
 ) -> None:
-    provider = RecordingProvider("Forged structural citation [S999]")
+    provider = RecordingProvider(inspection_response("S999"))
     *_, capability = build_structural_e2_capability(
         tmp_path,
         provider=provider,
@@ -1034,7 +1047,7 @@ def test_e2_observability_red_c02_structural_only_reports_exact_structural_count
 def test_e2_observability_red_c03_repeated_r_k_citations_count_unique_refs(
     tmp_path: Path,
 ) -> None:
-    provider = RecordingProvider("Grounded [R1] [R1] [K1] [K1]")
+    provider = RecordingProvider(inspection_response("R1", "R1", "K1", "K1"))
     *_, capability = build_capability(tmp_path, provider=provider)
 
     result = execute(capability)
@@ -1048,7 +1061,7 @@ def test_e2_observability_red_c03_repeated_r_k_citations_count_unique_refs(
 def test_e2_observability_red_c04_repeated_s_citations_count_unique_refs(
     tmp_path: Path,
 ) -> None:
-    provider = RecordingProvider("Grounded structural [S1] [S1]")
+    provider = RecordingProvider(inspection_response("S1", "S1"))
     *_, capability = build_structural_e2_capability(
         tmp_path,
         provider=provider,

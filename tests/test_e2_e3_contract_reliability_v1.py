@@ -139,9 +139,12 @@ def test_e3_v1_limit_is_not_silently_promoted_to_support():
 
 
 def test_e3_v1_omission_does_not_add_implicit_support():
-    finding = _parse(json.dumps(_e3(classification="UNRESOLVED", evidence_roles={}, uncertainty_basis="INSUFFICIENT_SUPPLIED_EVIDENCE"))).findings[0]
-    assert finding.evidence_refs == ()
-    assert finding.supporting_repository_refs == finding.supporting_knowledge_refs == ()
+    raw = json.dumps(_e3(classification="UNRESOLVED", evidence_roles={}, uncertainty_basis="INSUFFICIENT_SUPPLIED_EVIDENCE"))
+    module = import_module("malak.capabilities.engineering_analyze")
+    projected = json.loads(module._project_role_map(raw, _repository_evidence(), _knowledge_evidence()))["findings"][0]
+    assert projected["supporting_repository_refs"] == projected["supporting_knowledge_refs"] == []
+    with pytest.raises(RuntimeError, match="at least one bound evidence ref"):
+        _parse(raw)
 
 
 def test_e3_v1_projection_uses_bundle_order_not_model_order():
@@ -214,6 +217,112 @@ def test_e3_v1_schema_overflow_fails_before_generation(tmp_path, monkeypatch):
         return json.dumps(schema, separators=(",", ":"))
     monkeypatch.setattr(module, "_build_relation_response_json_schema", oversized)
     provider, capability = _capability(tmp_path, response=json.dumps(_e3()))
-    with pytest.raises(RuntimeError, match="(?i)schema.*(byte|limit|exceed)"):
+    with pytest.raises(ValueError, match="(?i)schema.*(byte|limit|exceed)"):
         _execute(capability)
     assert provider.calls == 0
+
+
+@pytest.mark.parametrize("roles", [
+    {"R1": "UNUSED"}, {"R1": "support"}, {"R1": ["SUPPORT", "LIMIT"]},
+    {"R1": True}, {"R1": None}, [], "SUPPORT",
+])
+def test_e3_v1_invalid_role_shapes_fail_closed(roles):
+    with pytest.raises(RuntimeError):
+        _parse(json.dumps(_e3(evidence_roles=roles)))
+
+
+@pytest.mark.parametrize("field", ["statement", "rationale"])
+@pytest.mark.parametrize("ref", ["R1", "K1", "S1", "A1"])
+def test_e3_v1_text_cannot_smuggle_reserved_refs(field, ref):
+    with pytest.raises(RuntimeError, match="reserved"):
+        _parse(json.dumps(_e3(**{field: f"Texto [{ref}]"})))
+
+
+@pytest.mark.parametrize("change", [
+    {"schema_id": "malak.e3.ref-role-map.v0"}, {"extra": True},
+    {"summary": "Texto [S1]"}, {"uncertainties": ["Texto [S1]"]},
+    {"findings": []}, {"findings": _e3()["findings"] * 17},
+    {"summary": "á" * 4097}, {"uncertainties": ["á" * 2049]},
+])
+def test_e3_v1_invalid_envelopes_and_utf8_fail_closed(change):
+    payload = _e3()
+    payload.update(change)
+    with pytest.raises(RuntimeError):
+        _parse(json.dumps(payload, ensure_ascii=False))
+
+
+def test_e3_v1_ref_budget_is_not_expanded_by_projection():
+    repository = [{**_repository_evidence()[0], "ref": f"R{i}"} for i in range(1, 18)]
+    with pytest.raises(RuntimeError, match="16"):
+        _parse(json.dumps(_e3(evidence_roles={row["ref"]: "LIMIT" for row in repository})), repository=repository)
+
+
+def test_e3_v1_duplicate_relation_coverage_is_still_rejected():
+    payload = _e3()
+    payload["findings"] *= 2
+    with pytest.raises(RuntimeError, match="exactly once|duplicate"):
+        _parse(json.dumps(payload))
+
+
+def test_e3_v1_does_not_repair_the_old_overlapping_format():
+    from test_e3_structured_evidence_role_binding_v0 import _role_finding
+    finding = _role_finding(limiting_or_counterevidence_refs=["R1"])
+    raw = json.dumps({"summary": "Legacy", "findings": [finding], "uncertainties": []})
+    with pytest.raises(RuntimeError, match="schema_id"):
+        _parse(raw)
+    # La barrera canónica sigue rechazando exactamente el overlap original.
+    module = import_module("malak.capabilities.engineering_analyze")
+    with pytest.raises(RuntimeError, match="overlap"):
+        module._parse_canonical_analysis(raw, repository_evidence=_repository_evidence(),
+                                        knowledge_evidence=_knowledge_evidence(),
+                                        allowed_relation_ids=(RELATION_ID,))
+
+
+def test_e2_v1_schema_overflow_makes_zero_provider_calls(tmp_path, monkeypatch):
+    module = import_module("malak.capabilities.engineering_inspect")
+    builder = module._build_inspection_response_json_schema
+    def oversized(*args):
+        schema = json.loads(builder(*args))
+        schema["description"] = "á" * 32769
+        return json.dumps(schema, ensure_ascii=False)
+    monkeypatch.setattr(module, "_build_inspection_response_json_schema", oversized)
+    provider = RecordingProvider(json.dumps(_e2()))
+    *_, capability = build_capability(tmp_path, provider=provider)
+    with pytest.raises(RuntimeError, match="schema.*UTF-8"):
+        execute(capability)
+    assert provider.calls == 0
+
+
+def test_e2_v1_empty_catalog_does_not_generate_empty_enums():
+    module = import_module("malak.capabilities.engineering_inspect")
+    schema = json.loads(module._build_inspection_response_json_schema([], [], []))
+    refs = schema["properties"]["assertions"]["items"]["properties"]["evidence_refs"]
+    assert refs["maxItems"] == 0
+    assert '"enum": []' not in json.dumps(schema)
+
+
+def test_e2_v1_uncertainty_without_refs_is_preserved(tmp_path):
+    provider = RecordingProvider(json.dumps(_e2(assertions=[{"kind": "UNCERTAINTY", "text": "Sin evidencia suficiente.", "evidence_refs": []}])))
+    *_, capability = build_capability(tmp_path, provider=provider)
+    assert "UNCERTAINTY: Sin evidencia suficiente." in execute(capability)
+    assert provider.calls == 1
+
+
+def test_e3_v1_exhaustive_projection_preserves_selected_set_without_overlap():
+    import itertools
+    module = import_module("malak.capabilities.engineering_analyze")
+    repository = [{**_repository_evidence()[0], "ref": f"R{i}"} for i in range(1, 4)]
+    knowledge = [{**_knowledge_evidence()[0], "ref": f"K{i}"} for i in range(1, 4)]
+    refs = [item["ref"] for item in repository + knowledge]
+    original_catalog = json.dumps([repository, knowledge], sort_keys=True)
+    for choices in itertools.product((None, "SUPPORT", "LIMIT"), repeat=len(refs)):
+        roles = {ref: role for ref, role in zip(refs, choices) if role is not None}
+        raw = json.dumps(_e3(evidence_roles=roles))
+        projected = json.loads(module._project_role_map(raw, repository, knowledge))["findings"][0]
+        support = projected["supporting_repository_refs"] + projected["supporting_knowledge_refs"]
+        limits = projected["limiting_or_counterevidence_refs"]
+        assert not set(support) & set(limits)
+        assert set(support + limits) == set(roles)
+        assert all(roles[ref] == "SUPPORT" for ref in support)
+        assert all(roles[ref] == "LIMIT" for ref in limits)
+    assert json.dumps([repository, knowledge], sort_keys=True) == original_catalog
