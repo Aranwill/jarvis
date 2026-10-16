@@ -134,13 +134,23 @@ def _role_finding(
 
 
 def _role_response(**finding_overrides: object) -> str:
-    return json.dumps(
-        {
-            "summary": "Governed relation evaluated with explicit evidence roles.",
-            "findings": [_role_finding(**finding_overrides)],
-            "uncertainties": [],
-        }
-    )
+    finding = _role_finding(**finding_overrides)
+    # Sólo fixture de integración válida. Los negativos canónicos se ejercitan
+    # directamente contra el parser final en _parse_role_finding.
+    roles = {}
+    for field, role in (("supporting_repository_refs", "SUPPORT"),
+                        ("supporting_knowledge_refs", "SUPPORT"),
+                        ("limiting_or_counterevidence_refs", "LIMIT")):
+        for ref in finding.pop(field):
+            if ref in roles:
+                raise ValueError("fixture cannot overwrite an evidence role")
+            roles[ref] = role
+    finding["evidence_roles"] = roles
+    return json.dumps({
+        "schema_id": "malak.e3.ref-role-map.v1",
+        "summary": "Governed relation evaluated with explicit evidence roles.",
+        "findings": [finding], "uncertainties": [],
+    })
 
 
 def _legacy_response(*, relation_id: str | None = None) -> str:
@@ -240,7 +250,7 @@ def _parse_role_finding(
     knowledge_evidence: list[dict[str, object]] | None = None,
 ):
     analyze = import_module("malak.capabilities.engineering_analyze")
-    return analyze._parse_analysis(
+    return analyze._parse_canonical_analysis(
         json.dumps(
             {
                 "summary": "Role-bound analysis.",
@@ -280,14 +290,13 @@ def test_e3_role_binding_red_r01_relation_schema_requires_exact_role_fields(
         "classification",
         "statement",
         "rationale",
-        "supporting_repository_refs",
-        "supporting_knowledge_refs",
-        "limiting_or_counterevidence_refs",
+        "evidence_roles",
         "uncertainty_basis",
     }
     assert "evidence_refs" not in properties
-    assert properties["supporting_repository_refs"]["items"]["enum"] == ["R1"]
-    assert properties["supporting_knowledge_refs"]["items"]["enum"] == ["K1"]
+    assert "supporting_repository_refs" not in properties
+    assert set(properties["evidence_roles"]["properties"]) == {"R1", "K1"}
+    assert properties["evidence_roles"]["additionalProperties"] is False
 
 
 def test_e3_role_binding_red_r02_knowledge_ref_in_repository_support_fails_closed() -> None:

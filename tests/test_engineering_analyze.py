@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from test_engineering_inspect import inspection_response
+
 from malak.capabilities.engineering_inspect import EngineeringInspectCapability
 from malak.core.conversation import ConversationProvider, ConversationRequest, ConversationResponse
 from malak.core.conversation_registry import ConversationProviderRegistry
@@ -230,7 +232,7 @@ def test_e3_red_c08_e2_e3_evidence_is_identical(tmp_path: Path) -> None:
     repository_reader = GitRepositoryReader(repo)
     knowledge_reader = GovernedKnowledgeReader(repository_reader)
 
-    inspect_provider = RecordingProvider("inspection [R1] [K1]")
+    inspect_provider = RecordingProvider(inspection_response("R1", "K1"))
     inspect = EngineeringInspectCapability(
         repository_reader=repository_reader,
         knowledge_reader=knowledge_reader,

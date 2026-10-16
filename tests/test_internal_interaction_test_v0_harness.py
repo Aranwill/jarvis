@@ -616,7 +616,11 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
         self.calls += 1
 
         if self.calls == 1:
-            content = "Grounded inspection [R1] [K1]"
+            content = json.dumps({
+                "schema_id": "malak.e2.assertions.v1", "summary": "Grounded inspection.",
+                "assertions": [{"kind": "INTERPRETATION", "text": "Grounded evidence.", "evidence_refs": ["R1", "K1"]}],
+                "uncertainties": [],
+            })
         elif self.calls in (2, 3):
             finding = {
                 "classification": "GAP",
@@ -629,7 +633,7 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
                 schema = json.loads(request.response_json_schema)
                 finding_schema = schema["properties"]["findings"]["items"]
                 required = finding_schema["required"]
-                if "supporting_repository_refs" in required:
+                if "evidence_roles" in required:
                     relation_ids = finding_schema["properties"]["relation_id"][
                         "enum"
                     ]
@@ -639,9 +643,7 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
                         "rationale": (
                             "Repository and governed knowledge support it."
                         ),
-                        "supporting_repository_refs": ["R1"],
-                        "supporting_knowledge_refs": ["K1"],
-                        "limiting_or_counterevidence_refs": [],
+                        "evidence_roles": {"R1": "SUPPORT", "K1": "SUPPORT"},
                         "uncertainty_basis": "NONE",
                     }
                     findings = [
@@ -650,6 +652,7 @@ class _DeterministicOllamaRuntime(OllamaRuntime):
                     ]
             content = json.dumps(
                 {
+                    **({"schema_id": "malak.e3.ref-role-map.v1"} if "evidence_roles" in findings[0] else {}),
                     "summary": "Grounded bootstrap analysis.",
                     "findings": findings,
                     "uncertainties": [],

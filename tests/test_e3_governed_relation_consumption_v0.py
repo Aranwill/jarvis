@@ -97,6 +97,7 @@ def _focus(*, relation_id: str = RELATION_ID) -> GovernedEngineeringEvidenceFocu
 def _response(*, relation_id: str = RELATION_ID) -> str:
     return json.dumps(
         {
+            "schema_id": "malak.e3.ref-role-map.v1",
             "summary": "Governed relation evaluated.",
             "findings": [
                 {
@@ -104,9 +105,7 @@ def _response(*, relation_id: str = RELATION_ID) -> str:
                     "classification": "ALIGNED",
                     "statement": "Observed implementation relates to governed knowledge.",
                     "rationale": "Repository and governed knowledge support the finding.",
-                    "supporting_repository_refs": ["R1"],
-                    "supporting_knowledge_refs": ["K1"],
-                    "limiting_or_counterevidence_refs": [],
+                    "evidence_roles": {"R1": "SUPPORT", "K1": "SUPPORT"},
                     "uncertainty_basis": "NONE",
                 }
             ],

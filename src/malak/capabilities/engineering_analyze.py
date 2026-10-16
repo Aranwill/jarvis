@@ -45,6 +45,17 @@ _RELATIONAL_CLASSES = {"ALIGNED", "PARTIAL", "GAP", "CONTRADICTION"}
 _ALLOWED_CLASSES = _RELATIONAL_CLASSES | {"UNRESOLVED"}
 
 _SYSTEM_PROMPT = ANALYZE_SYSTEM_PROMPT
+_FOCUSED_SYSTEM_PROMPT = ANALYZE_SYSTEM_PROMPT.replace(
+    "summary, findings, uncertainties.", "schema_id, summary, findings, uncertainties.",
+) + """
+Use schema_id malak.e3.ref-role-map.v1. For each governed relation, select only
+needed refs in evidence_roles, with exactly one SUPPORT or LIMIT role per ref.
+Omitted refs are not cited and never imply support. Use only the supplied catalog;
+never duplicate a JSON key. Do not emit the canonical supporting/limiting lists.
+Do not place reserved evidence ref tokens in summary, statement, rationale or
+uncertainties. The deterministic adapter projects validated roles to those lists;
+all canonical evidence and uncertainty requirements remain enforced.
+"""
 
 
 class EngineeringAnalyzeCapability(Capability):
@@ -116,7 +127,9 @@ class EngineeringAnalyzeCapability(Capability):
             provider_name=self._provider_name,
             model=self._model,
             subject=subject,
-            system_prompt=_SYSTEM_PROMPT,
+            system_prompt=(
+                _FOCUSED_SYSTEM_PROMPT if governed_relation_ids else _SYSTEM_PROMPT
+            ),
             max_repository_files=_MAX_REPOSITORY_FILES,
             max_repository_bytes=_MAX_REPOSITORY_BYTES,
             max_repository_matches=_MAX_REPOSITORY_MATCHES,
@@ -200,45 +213,23 @@ def _build_relation_response_json_schema(
 
     schema = json.loads(ANALYZE_RESPONSE_JSON_SCHEMA)
     finding = schema["properties"]["findings"]["items"]
+    schema["required"] = ["schema_id", "summary", "findings", "uncertainties"]
+    schema["properties"]["schema_id"] = {
+        "type": "string", "const": "malak.e3.ref-role-map.v1",
+    }
     finding["required"] = [
-        "relation_id",
-        "classification",
-        "statement",
-        "rationale",
-        "supporting_repository_refs",
-        "supporting_knowledge_refs",
-        "limiting_or_counterevidence_refs",
-        "uncertainty_basis",
+        "relation_id", "classification", "statement", "rationale",
+        "evidence_roles", "uncertainty_basis",
     ]
     finding["properties"].pop("evidence_refs")
     finding["properties"]["relation_id"] = {
-        "type": "string",
-        "enum": list(allowed_relation_ids),
+        "type": "string", "enum": list(allowed_relation_ids),
     }
-    ref_array = {
-        "type": "array",
-        "maxItems": _MAX_EVIDENCE_REFS_PER_FINDING,
-        "uniqueItems": True,
-    }
-    finding["properties"]["supporting_repository_refs"] = {
-        **ref_array,
-        "items": {
-            "type": "string",
-            "enum": repository_refs,
-        },
-    }
-    finding["properties"]["supporting_knowledge_refs"] = {
-        **ref_array,
-        "items": {
-            "type": "string",
-            "enum": knowledge_refs,
-        },
-    }
-    finding["properties"]["limiting_or_counterevidence_refs"] = {
-        **ref_array,
-        "items": {
-            "type": "string",
-            "enum": all_refs,
+    finding["properties"]["evidence_roles"] = {
+        "type": "object", "additionalProperties": False, "maxProperties": 16,
+        "properties": {
+            ref: {"type": "string", "enum": ["SUPPORT", "LIMIT"]}
+            for ref in all_refs
         },
     }
     finding["properties"]["uncertainty_basis"] = {
@@ -261,6 +252,99 @@ def _build_relation_response_json_schema(
 
 
 def _parse_analysis(
+    raw: str,
+    *,
+    repository_evidence: list[dict[str, object]],
+    knowledge_evidence: list[dict[str, object]],
+    allowed_relation_ids: tuple[str, ...] = (),
+) -> _Analysis:
+    if allowed_relation_ids:
+        raw = _project_role_map(raw, repository_evidence, knowledge_evidence)
+    return _parse_canonical_analysis(
+        raw, repository_evidence=repository_evidence,
+        knowledge_evidence=knowledge_evidence, allowed_relation_ids=allowed_relation_ids,
+    )
+
+
+def _project_role_map(
+    raw: str,
+    repository_evidence: list[dict[str, object]],
+    knowledge_evidence: list[dict[str, object]],
+) -> str:
+    # No autodetección ni reparación del formato anterior.
+    if not isinstance(raw, str) or len(raw.encode("utf-8")) > _MAX_MODEL_OUTPUT_BYTES:
+        raise RuntimeError("engineering analysis model response exceeds hard UTF-8 byte limit")
+    try:
+        payload = json.loads(
+            raw,
+            object_pairs_hook=_reject_duplicate_keys,
+            parse_constant=_reject_nonfinite_json,
+        )
+    except (ValueError, TypeError, RecursionError) as exc:
+        raise RuntimeError("engineering analysis model response is not strict JSON") from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError("engineering analysis JSON must be an object")
+    _require_exact_keys(payload, {"schema_id", "summary", "findings", "uncertainties"}, "analysis V1")
+    if payload["schema_id"] != "malak.e3.ref-role-map.v1":
+        raise RuntimeError("engineering analysis schema_id is not supported")
+    repository_refs = [str(item["ref"]) for item in repository_evidence]
+    knowledge_refs = [str(item["ref"]) for item in knowledge_evidence]
+    all_refs = repository_refs + knowledge_refs
+    if len(all_refs) != len(set(all_refs)):
+        raise RuntimeError("focused evidence refs must be unique")
+    findings = payload["findings"]
+    if not isinstance(findings, list) or not 1 <= len(findings) <= _MAX_FINDINGS:
+        raise RuntimeError("finding count exceeds hard E3 limit or is empty")
+
+    def wire_text(value: object, field: str, limit: int) -> None:
+        _shared_bounded_nonempty_string(
+            value, field=field, max_bytes=limit,
+            reserved_pattern=r"(?<![A-Za-z0-9_])[RKSA][0-9]+(?![A-Za-z0-9_])",
+            limit_scope="E3",
+        )
+
+    wire_text(payload["summary"], "summary", _MAX_SUMMARY_BYTES)
+    uncertainties = payload["uncertainties"]
+    if not isinstance(uncertainties, list) or len(uncertainties) > _MAX_UNCERTAINTIES:
+        raise RuntimeError("uncertainties must be a list of at most 16 items")
+    for uncertainty in uncertainties:
+        wire_text(uncertainty, "uncertainty", _MAX_UNCERTAINTY_BYTES)
+
+    projected = []
+    for finding in findings:
+        if not isinstance(finding, dict):
+            raise RuntimeError("each finding must be an object")
+        _require_exact_keys(finding, {
+            "relation_id", "classification", "statement", "rationale",
+            "evidence_roles", "uncertainty_basis",
+        }, "finding V1")
+        wire_text(finding["statement"], "finding statement", _MAX_STATEMENT_BYTES)
+        wire_text(finding["rationale"], "finding rationale", _MAX_RATIONALE_BYTES)
+        roles = finding["evidence_roles"]
+        if not isinstance(roles, dict) or len(roles) > _MAX_EVIDENCE_REFS_PER_FINDING:
+            raise RuntimeError("evidence_roles must be an object of at most 16 refs")
+        unknown = sorted(set(roles) - set(all_refs))
+        if unknown:
+            raise RuntimeError("evidence_roles contains unknown evidence refs: " + ", ".join(unknown))
+        if any(not isinstance(role, str) or role not in {"SUPPORT", "LIMIT"} for role in roles.values()):
+            raise RuntimeError("evidence role must be SUPPORT or LIMIT")
+        canonical = {key: value for key, value in finding.items() if key != "evidence_roles"}
+        canonical["supporting_repository_refs"] = [
+            ref for ref in repository_refs if roles.get(ref) == "SUPPORT"
+        ]
+        canonical["supporting_knowledge_refs"] = [
+            ref for ref in knowledge_refs if roles.get(ref) == "SUPPORT"
+        ]
+        canonical["limiting_or_counterevidence_refs"] = [
+            ref for ref in all_refs if roles.get(ref) == "LIMIT"
+        ]
+        projected.append(canonical)
+    return json.dumps({"summary": payload["summary"], "findings": projected,
+                       "uncertainties": payload["uncertainties"]},
+                      ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _parse_canonical_analysis(
     raw: str,
     *,
     repository_evidence: list[dict[str, object]],

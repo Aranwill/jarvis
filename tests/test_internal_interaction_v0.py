@@ -803,7 +803,12 @@ class _RealEngineeringProvider(ConversationProvider):
         self.calls += 1
 
         if self.calls == 1:
-            content = "Grounded inspection [R1] [K1]"
+            content = json.dumps({
+                "schema_id": "malak.e2.assertions.v1",
+                "summary": "Grounded inspection.",
+                "assertions": [{"kind": "INTERPRETATION", "text": "Grounded evidence.", "evidence_refs": ["R1", "K1"]}],
+                "uncertainties": [],
+            })
         elif self.calls in (2, 3):
             content = json.dumps(
                 {

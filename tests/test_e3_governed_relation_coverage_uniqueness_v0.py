@@ -137,9 +137,7 @@ def _finding(relation_id: str | None) -> dict[str, object]:
         finding.update(
             {
                 "relation_id": relation_id,
-                "supporting_repository_refs": ["R1"],
-                "supporting_knowledge_refs": ["K1"],
-                "limiting_or_counterevidence_refs": [],
+                "evidence_roles": {"R1": "SUPPORT", "K1": "SUPPORT"},
                 "uncertainty_basis": "NONE",
             }
         )
@@ -149,6 +147,7 @@ def _finding(relation_id: str | None) -> dict[str, object]:
 def _response(*relation_ids: str | None) -> str:
     return json.dumps(
         {
+            **({"schema_id": "malak.e3.ref-role-map.v1"} if any(relation_ids) else {}),
             "summary": "Governed relations evaluated.",
             "findings": [_finding(relation_id) for relation_id in relation_ids],
             "uncertainties": [],

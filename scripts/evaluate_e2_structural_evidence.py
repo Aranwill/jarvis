@@ -32,9 +32,9 @@ from malak.services.conversation_service import ConversationService
 
 CASE_SET = ROOT / "evaluations" / "e2_structural_evidence_v0" / "cases.json"
 RUNNER_VERSION = "E2-STRUCTURAL-EVIDENCE-EVALUATION-RUNNER/v0"
-PROVIDER_POLICY_VERSION = "E2-STRUCTURAL-EVIDENCE-DETERMINISTIC-PROVIDER/v0"
+PROVIDER_POLICY_VERSION = "E2-STRUCTURAL-EVIDENCE-DETERMINISTIC-PROVIDER/v1"
 PROVIDER_POLICY = (
-    b"cite-first-valid-evidence-ref-in-R-K-S-order; "
+    b"assertions-v1; cite-first-valid-evidence-ref-in-R-K-S-order; "
     b"no semantic scoring; no external state; no network"
 )
 
@@ -91,10 +91,15 @@ class DeterministicEvaluationProvider(ConversationProvider):
             evidence = packet.get(key, [])
             if evidence:
                 refs.append(str(evidence[0]["ref"]))
-        citations = " ".join(f"[{ref}]" for ref in refs)
-        content = "Deterministic evaluation observation"
-        if citations:
-            content += f" {citations}"
+        content = json.dumps({
+            "schema_id": "malak.e2.assertions.v1",
+            "summary": "Deterministic evaluation observation",
+            "assertions": [{
+                "kind": "INTERPRETATION", "text": "Deterministic evaluation observation",
+                "evidence_refs": refs,
+            }],
+            "uncertainties": [],
+        })
         return ConversationResponse(
             content=content,
             model=request.model,
