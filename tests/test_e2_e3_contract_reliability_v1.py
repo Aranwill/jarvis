@@ -1,7 +1,9 @@
 """Contrato V1 de PR #328: checkpoint RED, sin modelos ni casos del piloto."""
 from __future__ import annotations
 
+import hashlib
 import json
+import traceback
 from importlib import import_module
 
 import pytest
@@ -326,3 +328,256 @@ def test_e3_v1_exhaustive_projection_preserves_selected_set_without_overlap():
         assert all(roles[ref] == "SUPPORT" for ref in support)
         assert all(roles[ref] == "LIMIT" for ref in limits)
     assert json.dumps([repository, knowledge], sort_keys=True) == original_catalog
+
+
+# ---------------------------------------------------------------------------
+# #330 / PR-B RED — E2 output contract alignment after C01 Attempt 1
+# No models, no pilot cases, no retries. These tests freeze the accepted
+# PR-A design against the post-merge baseline before GREEN.
+# ---------------------------------------------------------------------------
+
+def _focused_e2_capability(tmp_path, provider):
+    from test_engineering_inspect import build_service
+    from test_governed_engineering_evidence_focus_v0 import _focus, _make_repo
+
+    _, reader, knowledge = _make_repo(tmp_path)
+    module = import_module("malak.capabilities.engineering_inspect")
+    capability = module.EngineeringInspectCapability(
+        repository_reader=reader,
+        knowledge_reader=knowledge,
+        conversation_service=build_service(provider),
+        provider_name="recording",
+        model="test-model",
+        evidence_focus=_focus(),
+    )
+    return capability
+
+
+def _canonical_json(value) -> str:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _assert_safe_e2_rejection(tmp_path, raw: str, forbidden_fragments):
+    provider = RecordingProvider(raw)
+    capability = _focused_e2_capability(tmp_path, provider)
+
+    with pytest.raises(RuntimeError) as caught:
+        execute(capability, "Kernel")
+
+    exc = caught.value
+    public = str(exc)
+    metadata = json.loads(public)
+
+    assert metadata == {
+        "authority_effect": "none",
+        "output_bytes": len(raw.encode("utf-8")),
+        "output_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+        "reason_code": "E2_OUTPUT_CONTRACT_REJECTED",
+        "validator_code": "DETERMINISTIC_VALIDATION_REJECTED",
+        "validator_detail": "E2 output rejected by deterministic contract validation.",
+    }
+
+    # The registrable/public error boundary must not expose rejected content
+    # through args, cause/context or the formatted traceback.
+    assert exc.__cause__ is None
+    assert exc.__context__ is None
+    exposed = "\n".join(
+        (
+            public,
+            repr(exc.args),
+            "".join(traceback.format_exception(exc)),
+        )
+    )
+    for fragment in forbidden_fragments:
+        assert fragment not in exposed
+
+    assert provider.calls == 1
+
+
+def test_e2_contract_alignment_red_focused_prompt_mirrors_one_canonical_schema(
+    tmp_path,
+):
+    provider = RecordingProvider(json.dumps(_e2(), ensure_ascii=False))
+    capability = _focused_e2_capability(tmp_path, provider)
+
+    execute(capability, "Kernel")
+
+    assert provider.calls == 1
+    request = provider.requests[0]
+    prompt = json.loads(request.prompt)
+    schema = json.loads(request.response_json_schema)
+
+    assert set(prompt) == {"response_contract", "evidence_packet"}
+    assert _canonical_json(prompt["response_contract"]) == request.response_json_schema
+
+    evidence = prompt["evidence_packet"]
+    assert "repository_evidence" in evidence
+    assert "knowledge_evidence" in evidence
+    assert "focus" in evidence
+    assert "repository_evidence" not in prompt
+    assert "knowledge_evidence" not in prompt
+
+    summary = schema["properties"]["summary"]
+    assertion_text = schema["properties"]["assertions"]["items"]["properties"]["text"]
+    uncertainty = schema["properties"]["uncertainties"]["items"]
+
+    for field in (summary, assertion_text, uncertainty):
+        description = field.get("description", "")
+        assert "evidence_refs" in description
+        assert "R1" in description
+        assert "K2" in description
+        assert "S3" in description
+        assert "A1" in description
+
+
+def test_e2_contract_alignment_red_nonfocused_prompt_keeps_existing_packet_shape(
+    tmp_path,
+):
+    provider = RecordingProvider(json.dumps(_e2(), ensure_ascii=False))
+    *_, capability = build_capability(tmp_path, provider=provider)
+
+    execute(capability)
+
+    assert provider.calls == 1
+    prompt = json.loads(provider.requests[0].prompt)
+    assert "response_contract" not in prompt
+    assert "evidence_packet" not in prompt
+    assert "repository_evidence" in prompt
+    assert "knowledge_evidence" in prompt
+
+
+def test_e2_contract_alignment_red_combined_focused_prompt_overflow_is_pre_provider(
+    tmp_path,
+    monkeypatch,
+):
+    module = import_module("malak.capabilities.engineering_inspect")
+    original = module._build_inspection_response_json_schema
+
+    def large_but_individually_valid_schema(*args):
+        schema = json.loads(original(*args))
+        schema["description"] = "x" * 63500
+        encoded = _canonical_json(schema)
+        assert len(encoded.encode("utf-8")) < 64 * 1024
+        return encoded
+
+    monkeypatch.setattr(
+        module,
+        "_build_inspection_response_json_schema",
+        large_but_individually_valid_schema,
+    )
+
+    provider = RecordingProvider(json.dumps(_e2(), ensure_ascii=False))
+    capability = _focused_e2_capability(tmp_path, provider)
+
+    with pytest.raises(RuntimeError, match="prompt.*UTF-8"):
+        execute(capability, "Kernel")
+
+    assert provider.calls == 0
+
+
+def test_e2_contract_alignment_red_unknown_ref_cannot_escape_in_metadata(tmp_path):
+    marker = "SYNTHETIC_REJECTED_CONTENT_DO_NOT_PERSIST\nFORGED_METADATA=YES"
+    raw = json.dumps(
+        _e2(
+            assertions=[
+                {
+                    "kind": "OBSERVED",
+                    "text": "Hecho observado.",
+                    "evidence_refs": [marker],
+                }
+            ]
+        ),
+        ensure_ascii=False,
+    )
+
+    _assert_safe_e2_rejection(
+        tmp_path,
+        raw,
+        (marker, "FORGED_METADATA=YES"),
+    )
+
+
+def test_e2_contract_alignment_red_long_multibyte_unknown_ref_is_not_disclosed(
+    tmp_path,
+):
+    marker = ("Ω" * 2000) + "\nFORGED_MULTIBYTE=YES"
+    raw = json.dumps(
+        _e2(
+            assertions=[
+                {
+                    "kind": "OBSERVED",
+                    "text": "Hecho observado.",
+                    "evidence_refs": [marker],
+                }
+            ]
+        ),
+        ensure_ascii=False,
+    )
+
+    _assert_safe_e2_rejection(
+        tmp_path,
+        raw,
+        ("FORGED_MULTIBYTE=YES", "Ω" * 32),
+    )
+
+
+def test_e2_contract_alignment_red_reserved_ref_rejection_uses_safe_metadata(
+    tmp_path,
+):
+    raw = json.dumps(
+        _e2(
+            assertions=[
+                {
+                    "kind": "OBSERVED",
+                    "text": "No citar [R1] aquí.",
+                    "evidence_refs": ["R1"],
+                }
+            ]
+        ),
+        ensure_ascii=False,
+    )
+
+    _assert_safe_e2_rejection(tmp_path, raw, ("No citar [R1] aquí.",))
+
+
+def test_e2_contract_alignment_red_invalid_json_rejection_uses_safe_metadata(
+    tmp_path,
+):
+    marker = "FORGED_INVALID_JSON=YES"
+    raw = (
+        '{"schema_id":"malak.e2.assertions.v1",'
+        '"summary":"' + marker + '",'
+        '"assertions":['
+    )
+
+    _assert_safe_e2_rejection(tmp_path, raw, (marker,))
+
+
+def test_e2_contract_alignment_red_duplicate_key_rejection_uses_safe_metadata(
+    tmp_path,
+):
+    marker = "FORGED_DUPLICATE_KEY\nYES"
+    quoted = json.dumps(marker)
+    raw = (
+        '{"schema_id":"malak.e2.assertions.v1",'
+        '"summary":"ok",'
+        '"assertions":[{'
+        '"kind":"OBSERVED",'
+        '"text":"Hecho",'
+        '"evidence_refs":["R1"],'
+        + quoted + ':1,'
+        + quoted + ':2'
+        '}],'
+        '"uncertainties":[]}'
+    )
+
+    _assert_safe_e2_rejection(
+        tmp_path,
+        raw,
+        (marker, "FORGED_DUPLICATE_KEY"),
+    )
