@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 
@@ -194,8 +195,38 @@ class EngineeringInspectCapability(Capability):
                 "supplemental_truncated": focus_bundle.supplemental_truncated,
             }
 
+        response_json_schema = _build_inspection_response_json_schema(
+            repository_evidence, knowledge_evidence, structural_evidence,
+        )
+        if self._evidence_focus is not None:
+            response_json_schema = _with_inspection_contract_descriptions(
+                response_json_schema
+            )
+        if len(response_json_schema.encode("utf-8")) > _MAX_PROMPT_BYTES:
+            raise RuntimeError("engineering inspection schema exceeds hard UTF-8 byte limit")
+
+        prompt_packet: dict[str, object] = packet
+        if self._evidence_focus is not None:
+            response_contract = json.loads(response_json_schema)
+            if (
+                json.dumps(
+                    response_contract,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                != response_json_schema
+            ):
+                raise RuntimeError(
+                    "engineering inspection response contract is not canonical"
+                )
+            prompt_packet = {
+                "response_contract": response_contract,
+                "evidence_packet": packet,
+            }
+
         prompt = json.dumps(
-            packet,
+            prompt_packet,
             ensure_ascii=False,
             sort_keys=True,
             separators=(",", ":"),
@@ -204,12 +235,6 @@ class EngineeringInspectCapability(Capability):
             raise RuntimeError(
                 f"engineering inspection prompt exceeds {_MAX_PROMPT_BYTES} UTF-8 bytes"
             )
-
-        response_json_schema = _build_inspection_response_json_schema(
-            repository_evidence, knowledge_evidence, structural_evidence,
-        )
-        if len(response_json_schema.encode("utf-8")) > _MAX_PROMPT_BYTES:
-            raise RuntimeError("engineering inspection schema exceeds hard UTF-8 byte limit")
 
         response = self._conversation_service.generate(
             ConversationRequest(
@@ -223,28 +248,27 @@ class EngineeringInspectCapability(Capability):
             provider=self._provider_name,
         )
 
-        analysis = response.content
-        if not isinstance(analysis, str) or not analysis.strip():
+        raw_analysis = response.content
+        if not isinstance(raw_analysis, str) or not raw_analysis.strip():
             raise RuntimeError("engineering inspection model response is empty")
-        if len(analysis.encode("utf-8")) > _MAX_MODEL_OUTPUT_BYTES:
-            raise RuntimeError(
-                "engineering inspection model response exceeds hard UTF-8 byte limit"
-            )
+        if len(raw_analysis.encode("utf-8")) > _MAX_MODEL_OUTPUT_BYTES:
+            raise _safe_inspection_rejection(raw_analysis)
 
-        analysis = _parse_inspection_assertions(
-            analysis, repository_evidence, knowledge_evidence, structural_evidence,
-        )
-
-        (
-            repository_citation_count,
-            knowledge_citation_count,
-            structural_citation_count,
-        ) = _validate_model_evidence_refs(
-            analysis,
+        validated = _try_parse_and_validate_inspection_output(
+            raw_analysis,
             repository_evidence=repository_evidence,
             knowledge_evidence=knowledge_evidence,
             structural_evidence=structural_evidence,
         )
+        if validated is None:
+            raise _safe_inspection_rejection(raw_analysis)
+
+        (
+            analysis,
+            repository_citation_count,
+            knowledge_citation_count,
+            structural_citation_count,
+        ) = validated
 
         rendered = _render_grounded(
             baseline_commit=self._baseline_commit,
@@ -268,6 +292,13 @@ class EngineeringInspectCapability(Capability):
 _E2_SCHEMA_ID = "malak.e2.assertions.v1"
 _ASSERTION_KINDS = ("OBSERVED", "KNOWLEDGE_CONTEXT", "INTERPRETATION", "UNCERTAINTY")
 _RESERVED_REF_PATTERN = r"(?<![A-Za-z0-9_])[RKSA][0-9]+(?![A-Za-z0-9_])"
+_FREE_TEXT_CONTRACT_DESCRIPTION = (
+    "Free text only. Do not include reserved evidence ref tokens such as "
+    "R1, K2, S3, or A1. Put citations only in assertions[].evidence_refs."
+)
+_E2_REJECTION_REASON_CODE = "E2_OUTPUT_CONTRACT_REJECTED"
+_E2_REJECTION_VALIDATOR_CODE = "DETERMINISTIC_VALIDATION_REJECTED"
+_E2_REJECTION_DETAIL = "E2 output rejected by deterministic contract validation."
 
 
 def _build_inspection_response_json_schema(
@@ -309,6 +340,79 @@ def _build_inspection_response_json_schema(
         },
     }
     return json.dumps(schema, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _with_inspection_contract_descriptions(response_json_schema: str) -> str:
+    schema = json.loads(response_json_schema)
+    properties = schema["properties"]
+    properties["summary"]["description"] = _FREE_TEXT_CONTRACT_DESCRIPTION
+    properties["assertions"]["items"]["properties"]["text"][
+        "description"
+    ] = _FREE_TEXT_CONTRACT_DESCRIPTION
+    properties["uncertainties"]["items"][
+        "description"
+    ] = _FREE_TEXT_CONTRACT_DESCRIPTION
+    return json.dumps(
+        schema,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _safe_inspection_rejection(raw: str) -> RuntimeError:
+    raw_bytes = raw.encode("utf-8")
+    metadata = {
+        "authority_effect": "none",
+        "output_bytes": len(raw_bytes),
+        "output_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+        "reason_code": _E2_REJECTION_REASON_CODE,
+        "validator_code": _E2_REJECTION_VALIDATOR_CODE,
+        "validator_detail": _E2_REJECTION_DETAIL,
+    }
+    return RuntimeError(
+        json.dumps(
+            metadata,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    )
+
+
+def _try_parse_and_validate_inspection_output(
+    raw: str,
+    *,
+    repository_evidence: list[dict[str, object]],
+    knowledge_evidence: list[dict[str, object]],
+    structural_evidence: list[dict[str, object]],
+) -> tuple[str, int, int, int] | None:
+    try:
+        analysis = _parse_inspection_assertions(
+            raw,
+            repository_evidence,
+            knowledge_evidence,
+            structural_evidence,
+        )
+        (
+            repository_citation_count,
+            knowledge_citation_count,
+            structural_citation_count,
+        ) = _validate_model_evidence_refs(
+            analysis,
+            repository_evidence=repository_evidence,
+            knowledge_evidence=knowledge_evidence,
+            structural_evidence=structural_evidence,
+        )
+    except (RuntimeError, UnicodeEncodeError):
+        return None
+
+    return (
+        analysis,
+        repository_citation_count,
+        knowledge_citation_count,
+        structural_citation_count,
+    )
 
 
 def _parse_inspection_assertions(
