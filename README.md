@@ -714,3 +714,43 @@ Receipt validator PASS != Ready != Merge != Authority
 ```
 
 Esta reconciliación es derivada y no normativa.
+
+
+## Reconciliación CURRENT — E2/E3 Contract Reliability + E2 Output Contract Alignment — 2026-10-17
+
+El baseline integrado incorpora la cadena de corrección de contract reliability
+de self-review y el E2 Output Contract Alignment:
+
+```text
+PR #329 merge          8c401b2bed1c114efadba3777c7662f45e56e8c6
+PR #331 design merge   8f45e34f2e48fc72210d4d272372bf3be098e535
+PR #332 merge / main   961a5a78450c5cd3c2854a3d404e124f97530cda
+candidate/tree #332    fef90dd5d6374bc8227fbc31fb508326a5907df1
+                       9967ca9682abcea7ecd23b0071c1cca7f9c4dd6b
+```
+
+El merge tree de #332 coincide exactamente con el tree del candidate validado.
+La validación candidate-bound final cerró F01 y F02, con full suite local
+`2097 passed, 1 skipped`, E2E `147 passed` y Validation
+`38997285237` attempt 3 en PASS para Ubuntu y Windows.
+
+La ruta E2 focused conserva el parser determinista como enforcement final,
+agrega el schema canónico como `response_contract` model-visible y mantiene
+separado el `evidence_packet` no confiable. El rechazo posterior a generación
+no persiste ni expone raw output; publica únicamente metadata local acotada más
+digest/byte count. No se agregaron retries, repair ni fallback.
+
+```text
+C01_ATTEMPT                 CONSUMED
+C01_RETRY                   FORBIDDEN
+C02                         HOLD
+C03                         HOLD
+MODEL_EXECUTION_AUTHORIZED  NO
+```
+
+El PRE-MODEL freeze y Owner G2 anteriores no son reutilizables después del cambio
+de contexto model-visible. Antes de cualquier nueva ejecución se requiere un
+nuevo freeze y una nueva decisión Owner G2.
+
+Esta sección supersede, sólo para el estado CURRENT de esta línea, referencias
+anteriores de baseline conservadas en el README como historial.
