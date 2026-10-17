@@ -404,7 +404,7 @@ def _try_parse_and_validate_inspection_output(
             knowledge_evidence=knowledge_evidence,
             structural_evidence=structural_evidence,
         )
-    except RuntimeError:
+    except (RuntimeError, UnicodeEncodeError):
         return None
 
     return (
