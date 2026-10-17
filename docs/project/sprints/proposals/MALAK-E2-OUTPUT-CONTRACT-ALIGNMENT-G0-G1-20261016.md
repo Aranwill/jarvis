@@ -351,8 +351,8 @@ No se mueve esta garantía al provider. Se refleja semánticamente en la
 Esto cierra:
 
 ```text
-hidden parser-only obligation
-→ explicit model-visible obligation + same deterministic guard
+existing prompt-level obligation not reflected in schema metadata
+→ reinforced focused model-visible contract + same deterministic guard
 ```
 
 sin afirmar equivalencia entre constrained decoding y validación Malāk.
@@ -543,7 +543,6 @@ Después de merge humano del design y nueva autorización explícita:
 8. no-focused E2 no recibe duplicación de schema en prompt;
 9. provider calls = 1 para output rechazado; no retry;
 10. rechazo posterior a generación expone sólo códigos/detail locales fijos + digest/bytes; tests adversariales prueban que refs/values/keys/excerpts, saltos de línea, multibyte, JSON inválido y duplicate keys no aparecen en mensaje/args/cause/context/metadata registrable;
-
 11. E3/E4/runtime/conversation permanecen sin delta;
 12. overflow del prompt combinado falla antes de provider call.
 
@@ -610,7 +609,9 @@ CRITICAL_CONTRACT_HARDENING: PASS_PRODUCER
 LAW_QUESTIONS: PASS_PRODUCER
 DESIGN_4R: PASS_PRODUCER
 RDD_STAGE1_DESIGN_CHECK: PASS_PRODUCER
-INDEPENDENT_DESIGN_VALIDATION: PENDING
+PREVIOUS_INDEPENDENT_DESIGN_VALIDATION: FAIL_ON_c1bf6d90835d6673a75ba157e6e170e0ae1acaef
+BOUNDED_CORRECTION_F01_F02_N01_N02: APPLIED_PRODUCER
+INDEPENDENT_FIX_VALIDATION: PENDING
 SOLUTION_IMPLEMENTED: NO
 C01_RETRY: FORBIDDEN
 C02: HOLD
