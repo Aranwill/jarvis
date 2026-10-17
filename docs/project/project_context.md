@@ -2,14 +2,19 @@
 title: Contexto del proyecto Malāk
 status: derived
 authority: non-normative
-as_of_date: 2026-10-10
-as_of_commit: 02daf578012c662f0686357aa48b25722897c82a
+as_of_date: 2026-10-17
+as_of_commit: 961a5a78450c5cd3c2854a3d404e124f97530cda
 branch: main
 certification_branch: null
 candidate_commit: null
 certification_status: sprint_7_11_completed
 baseline: v0.6.0-alpha
 ---
+
+> **CURRENT_STATE — actualización 2026-10-17.**
+> La reconciliación más reciente de la línea E2/E3 y self-review está registrada
+> en la sección `Reconciliación CURRENT — E2/E3 Contract Reliability + E2 Output Contract Alignment — 2026-10-17`.
+> Los bloques CURRENT anteriores se conservan como snapshots cronológicos y quedan superseded cuando entren en conflicto con esa sección.
 
 # Contexto del proyecto Malāk
 
@@ -2119,3 +2124,81 @@ risk 3/4 → REQUIRED
 Los bloques CURRENT anteriores que contienen `RDD Stage 2 = NOT AUTHORIZED`
 se conservan como trazabilidad del estado que describían en su momento; esta
 sección los supersede para interpretar el estado presente.
+
+## Reconciliación CURRENT — E2/E3 Contract Reliability + E2 Output Contract Alignment — 2026-10-17
+
+Esta sección reconcilia el estado integrado de la cadena que cerró el gap de
+contract reliability observado por el piloto gobernado de self-review. Es
+derivada y no normativa; no concede autoridad.
+
+Identidad integrada:
+
+```text
+PR #329 merge          8c401b2bed1c114efadba3777c7662f45e56e8c6
+PR #331 design merge   8f45e34f2e48fc72210d4d272372bf3be098e535
+PR #332 candidate      fef90dd5d6374bc8227fbc31fb508326a5907df1
+PR #332 candidate tree 9967ca9682abcea7ecd23b0071c1cca7f9c4dd6b
+PR #332 merge / main   961a5a78450c5cd3c2854a3d404e124f97530cda
+PR #332 merge tree     9967ca9682abcea7ecd23b0071c1cca7f9c4dd6b
+authority_effect       none
+```
+
+El merge de PR #332 conserva exactamente el tree del candidate validado. La
+comparación candidate → merge no modifica archivos.
+
+Estado de la unidad #330:
+
+- E2 focused expone el mismo JSON Schema canónico como `response_contract` y
+  mantiene el `evidence_packet` separado como DATA no confiable.
+- Las reglas de reserved refs se hacen model-visible sin sustituir el parser
+  determinista, que continúa siendo la frontera final de aceptación.
+- El prompt focused completo se controla contra el límite de bytes antes de la
+  llamada al provider.
+- El rechazo E2 registrable queda acotado a metadata fija local más
+  `output_sha256` y `output_bytes`; el raw output rechazado no se expone ni se
+  reinyecta.
+- No se introdujeron retry, repair, fallback, normalization ni partial
+  acceptance.
+- Runtime, E3, E4, Kernel, Planner, dependencies y model configuration no fueron
+  modificados por PR #332.
+
+Evidencia candidate-bound del candidate de PR #332:
+
+```text
+F01 Independent Fix Validation     PASS / CLOSED
+affected targeted                  75 passed
+affected regression                361 passed
+full suite                         2097 passed, 1 platform/environment skip
+compileall                         PASS
+Candidate FULL 4R                  PASS_PRODUCER
+E2E / integration                  147 passed
+Validation run 38997285237 attempt 3
+Ubuntu                             PASS
+Windows                            PASS
+F02 / CI                           CLOSED
+candidate drift                    NO
+```
+
+El único skip local documentado corresponde al guard histórico de creación de
+symlink en `tests/test_malak_rdd_receipt.py`, fuera del diff de PR #332.
+
+Estado experimental y de autoridad:
+
+```text
+C01_ATTEMPT                 CONSUMED
+C01_RETRY                   FORBIDDEN
+C02                         HOLD
+C03                         HOLD
+MODEL_EXECUTION_AUTHORIZED  NO
+authority_effect            none
+```
+
+La modificación del contexto model-visible de E2 invalida la reutilización del
+freeze PRE-MODEL y del Owner G2 anteriores. Cualquier ejecución futura requiere
+un **nuevo PRE-MODEL freeze** sobre el baseline reconciliado y un **nuevo Owner
+G2**. La evidencia, los manifests o receipts de ingeniería no sustituyen esa
+decisión humana.
+
+Esta reconciliación no reescribe los artefactos históricos de PR #329/#331 ni
+sus estados originales; preserva su provenance y registra únicamente el estado
+CURRENT posterior a la integración de PR #332.
