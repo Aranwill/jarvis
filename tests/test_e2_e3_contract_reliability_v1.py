@@ -581,3 +581,37 @@ def test_e2_contract_alignment_red_duplicate_key_rejection_uses_safe_metadata(
         raw,
         (marker, "FORGED_DUPLICATE_KEY"),
     )
+
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("summary", "assertion_text", "uncertainty"),
+)
+def test_e2_contract_alignment_surrogate_rejection_uses_safe_metadata(
+    tmp_path,
+    field,
+):
+    marker = "SYNTHETIC_REJECTED_SURROGATE"
+    rejected = marker + chr(0xD800)
+    payload = _e2()
+
+    if field == "summary":
+        payload["summary"] = rejected
+    elif field == "assertion_text":
+        payload["assertions"] = [
+            {
+                "kind": "OBSERVED",
+                "text": rejected,
+                "evidence_refs": ["R1"],
+            }
+        ]
+    else:
+        payload["uncertainties"] = [rejected]
+
+    raw = json.dumps(payload)
+    _assert_safe_e2_rejection(
+        tmp_path,
+        raw,
+        (marker,),
+    )
