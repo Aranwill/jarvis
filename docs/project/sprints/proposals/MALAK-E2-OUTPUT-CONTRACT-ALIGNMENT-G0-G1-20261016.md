@@ -1,6 +1,6 @@
 ---
 title: "Malāk — E2 Output Contract Alignment después de C01 Attempt 1"
-status: proposed_for_owner_review
+status: bounded_correction_pending_independent_fix_validation
 authority: non_normative_proposal
 language: es
 date: 2026-10-16
@@ -67,6 +67,41 @@ El JSON bruto rechazado de C01 no fue persistido por el path vigente y no se
 reconstruye ni se inventa. Sólo es evidencia soportada que algún
 `assertion.text` contenía un token reservado según el parser.
 
+### 2.1 Bounded correction record
+
+El candidate documental anterior:
+
+```text
+candidate_sha=c1bf6d90835d6673a75ba157e6e170e0ae1acaef
+candidate_tree=63b18fcb23ffd0309b1771c1b85c4fe1bce8bd98
+```
+
+recibió:
+
+```text
+FAIL_DESIGN_CONTRACT_VALIDATION
+RED_READY_FOR_OWNER_DECISION=NO
+BLOCKING_FINDINGS=F01,F02
+NON_BLOCKING_FINDINGS=N01,N02
+authority_effect=none
+```
+
+Informe independiente suministrado por el Owner:
+
+```text
+MALAK-PR331-INDEPENDENT-CRITICAL-CONTRACT-DESIGN-VALIDATION.md
+sha256=9be4c25ce4157ff8cd7f4fc896c9743f9c3346e74fb4b5558616c9750ab2b540
+```
+
+Esta corrección está limitada documentalmente a:
+
+- F01: cerrar el origen de rejection metadata;
+- F02: incorporar Malāk Alignment Matrix;
+- N01: corregir el diagnóstico causal;
+- N02: usar `REJECTED_DO_NOT_READ`.
+
+No se agrega implementación ni se modifica el resultado histórico de C01.
+
 ## 3. Construction Preflight
 
 El baseline remoto `main` fue revalidado antes de abrir esta unidad y sigue en
@@ -112,8 +147,11 @@ texto libre. Sin embargo, el schema de `summary`, `assertion.text` y
 `uncertainties[]` sólo expresa string + límites de longitud. El parser aplica
 además la regla de token reservado.
 
-El incidente C01 demuestra que prompt-only guidance no es suficiente para afirmar
-reliability en la ruta real.
+La obligación ya era visible a nivel de system prompt, pero no estaba reflejada en la
+metadata del schema ni reforzada por el contrato focused completo. El incidente C01
+demuestra que esa exposición parcial no fue suficiente para evitar el rechazo en la
+ruta real; no permite atribuir causalidad a un token concreto ni afirmar una mejora
+futura sin nueva evidencia.
 
 ## 5. Investigación externa — Ollama 0.34.4 / Structured Outputs
 
@@ -175,6 +213,53 @@ NEW_SUBSYSTEM: NO
 AUTHORITY_EXPANSION: NO
 MODEL_EXECUTION: NOT_AUTHORIZED
 authority_effect: none
+```
+
+### 6.1 Malāk Alignment Matrix — bounded correction F02
+
+La matriz aplica `docs/development/malak_construction_protocol.md §4.6`. No crea
+autoridad nueva ni autorización de implementación.
+
+| source | source_authority_class | applicable_invariant_or_intent | baseline_evidence | alignment_disposition | implementation_effect | deferred_or_rejected_effect | rationale | traceability_reference |
+|---|---|---|---|---|---|---|---|---|
+| Cognitive Constitution | normativa | generated output remains candidate; evidence/uncertainty explicit; no self-authority | E2 output is parsed/validated deterministically after generation | ADOPT | preserve strict parser as final acceptance boundary | auto-accept/repair/retry REJECTED | closes gap without delegating truth to model/provider | `docs/governance/cognitive_constitution.md`; §7 |
+| Governance Constitution | normativa | Human in Control; no authority escalation; side effects explicit | current E2 inspection has `authority_effect=none` and no write authority | ADOPT | keep correction authority-free; future execution separately gated | Ready/Merge/G2/model execution from this design REJECTED | design evidence is information, not permission | `docs/governance/governance_constitution.md`; §§8–13 |
+| Blueprint | normative architecture | Capability First; Runtime Independence; bounded responsibility | E2 semantics live in Capability; Runtime transports generic schema | ADAPT | expected PR-B delta remains inside `engineering_inspect.py` + tests | Runtime/Kernel/Planner/E3/E4 delta REJECTED absent new evidence | smallest boundary already owns the contract | `docs/architecture/blueprint.md`; §7.6 |
+| SECURITY.md | protected security policy | model/evidence content is untrusted DATA; disclosure bounded | parser receives untrusted generated strings; baseline exceptions may interpolate unknown refs | ADAPT | expose only fixed local rejection metadata + exact digest/byte count | raw response, excerpts, values, keys, refs, repr, dynamic exception text REJECTED | closes F01 and prevents rejected content becoming registrable metadata | `SECURITY.md`; §7.5 |
+| Architecture Quality Gates | accepted architecture | minimality, explicit failure modes, testability, no hidden coupling | one production file expected; no new service/store/module | ADOPT | fail pre-model on mismatch/overflow; fail post-model on invalid output | new subsystem/provider-specific correctness boundary REJECTED | preserves bounded architecture | `docs/architecture/architecture_quality_gates.md`; §§7–14 |
+| ADR-003 | accepted decision | information may flow upward; authority/control may not | rejection result is informational, `authority_effect=none` | ADOPT | return bounded local diagnostic only | error-derived authority or upstream command REJECTED | preserves directional authority flow | `docs/architecture/adr/ADR-003-directional-communication-and-authority-flow.md` |
+| ADR-004 | accepted decision | specification/verification before implementation | PR-A precedes RED/GREEN | ADOPT | freeze design first, then independent fix validation | implementation-before-spec REJECTED | candidate remains documentation-only | `docs/architecture/adr/ADR-004-specification-and-verification-first.md` |
+| Construction Protocol §4.6 | operational process | material G0/G1 requires explicit alignment traceability | previous candidate omitted equivalent matrix (F02) | ADOPT | this matrix becomes the traceable admission record | implicit inheritance from #329 REJECTED | new `response_contract`/rejection metadata need own alignment | `docs/development/malak_construction_protocol.md §4.6` |
+| implementation roadmap | operational/derived | E2 remains governed engineering capability; progressive evidence path | E2 capability and strict parser already exist | OBSERVE | no direct implementation authority | broader roadmap work DEFERRED | confirms scope direction only | `docs/project/implementation_roadmap.md` |
+| ideas.md | conceptual non-normative | determinism/evidence-bound improvement without bypassing governance | current incident is concrete evidence; concept snapshot is not baseline | OBSERVE | none | unrelated/historical ideas DEFERRED | concept informs horizon, not candidate authority | `documents/projects/jarvis/ideas.md` |
+| MALAK_RESEARCH_HORIZON_MAP | conceptual non-normative | investigate reliability/determinism with evidence | no normative permission derived from horizon | OBSERVE | none | research-only paths DEFERRED | preserves separation research != implementation | `docs/project/concepts/MALAK_RESEARCH_HORIZON_MAP.md` |
+| relevant `concepts/**` | conceptual non-normative | evidence-bound self-review, governed execution, no silent authority gain | #319/#327 flow already binds execution to freeze + Owner decision | ADAPT | preserve new-freeze/new-G2 requirement after model-visible change | autonomous reuse of prior freeze/G2 REJECTED | reuse intent only where compatible with higher sources | `docs/project/concepts/**`; §§12–13 |
+| baseline E2 code/tests | implementation evidence | actual schema/parser/renderer behavior is the implementation truth for this unit | schema metadata omits reserved-ref rule; parser enforces it; unknown-ref error may include model values | ADAPT | mirror canonical schema in focused prompt; fixed local reject metadata; add RED/regression tests later | parser relaxation, raw-output logging, retry REJECTED | directly addresses demonstrated contract/disclosure gaps | `src/malak/capabilities/engineering_inspect.py`; `src/malak/capabilities/_engineering_analysis.py`; E2 tests |
+| C01 incident + independent PR #331 validation | derived evidence, no authority | preserve historical attempt; findings remain candidate-bound | C01 consumed; F01/F02 blocking, N01/N02 non-blocking on prior candidate | ADAPT | bounded documentation correction only | C01 replay, C02/C03 execution, inferred raw output REJECTED | evidence narrows correction; does not authorize execution | #327 incident record; #330; independent report SHA-256 above |
+
+```text
+TO_IMPLEMENT (future PR-B, only after later authorization):
+- focused E2 response-contract exposure from the canonical schema;
+- fixed local-only rejection metadata;
+- regression tests proving no rejected-content disclosure.
+
+NOT_IMPLEMENTED:
+- all production behavior described above.
+
+DEFERRED:
+- sampling/model changes;
+- provider-specific schema keyword hardening;
+- broader observability/reliability work.
+
+REJECTED:
+- parser relaxation;
+- retries/repair/fallback;
+- raw rejected-output persistence;
+- dynamic exception text as registrable validator detail;
+- Runtime/Kernel/Planner/E3/E4 scope expansion without new evidence.
+
+WHY:
+- close the demonstrated contract/disclosure gap with the smallest existing Capability boundary.
 ```
 
 ## 7. G1 — diseño candidato
@@ -272,35 +357,67 @@ hidden parser-only obligation
 
 sin afirmar equivalencia entre constrained decoding y validación Malāk.
 
-### 7.5 Evidencia segura de output rechazado
+### 7.5 Evidencia segura de output rechazado — bounded correction F01
 
-No persistir raw model output.
+No persistir raw model output ni fragmentos derivados de él.
 
-Dentro de `engineering_inspect.py`, cuando una respuesta no vacía fue generada
-pero el parser/validator E2 la rechaza, la capability debe poder elevar un error
-acotado que preserve como máximo:
+Cuando una respuesta no vacía fue generada pero el parser/validator E2 la rechaza,
+la superficie **registrable** de la capability debe contener exclusivamente
+metadata local, fija y acotada:
 
 ```text
 reason_code=E2_OUTPUT_CONTRACT_REJECTED
-validator_detail=<bounded deterministic validation message>
+validator_code=DETERMINISTIC_VALIDATION_REJECTED
+validator_detail=E2 output rejected by deterministic contract validation.
 output_sha256=<sha256 of exact UTF-8 response>
 output_bytes=<integer>
 authority_effect=none
 ```
 
-Reglas:
+En este slice no se necesita distinguir públicamente el subtipo exacto de rechazo.
+El detalle fijo es deliberadamente menos expresivo para impedir que valores no
+confiables se conviertan en metadata registrable.
 
-- `validator_detail` máximo 512 bytes UTF-8;
-- nunca incluir raw response;
+Reglas obligatorias:
+
+- `reason_code`, `validator_code` y `validator_detail` provienen sólo de
+  constantes locales del código;
+- ninguno puede derivarse de valores, keys, refs, excerpts, `repr`,
+  `Exception.args` o mensajes dinámicos controlados por el output;
+- el error registrable no serializa `__cause__`, `__context__`, traceback ni
+  una excepción subyacente cuyo mensaje pueda contener contenido rechazado;
+- si se captura internamente una excepción de parser, la traducción pública usa
+  un error local fijo y suprime chaining observable (`raise ... from None` o
+  mecanismo equivalente probado);
+- `output_sha256` se calcula sobre los bytes UTF-8 exactos de
+  `response.content`, sin normalización;
+- `output_bytes` es la longitud de esos mismos bytes UTF-8;
+- el digest y el byte count identifican el intento, no certifican verdad,
+  evidencia semántica ni autoridad;
+- nunca incluir raw response, substring, offending token/ref/key/value o
+  chain-of-thought;
 - nunca reinyectar el output;
-- nunca guardar chain-of-thought;
-- no retry;
-- no convertir el digest en evidence de verdad;
+- no retry, repair ni fallback;
 - el error sigue siendo error y STOP.
 
-No se crea módulo, store, service o nueva persistencia. Los harnesses existentes
-pueden registrar `str(exc)` como ya hacen; la producción sólo aporta metadata
-segura suficiente para identificar el intento rechazado.
+No se crea módulo, store, service o nueva persistencia. Un harness puede registrar
+el error público fijo y los campos seguros anteriores. Cualquier diagnóstico más
+detallado que requiera contenido rechazado queda fuera de este slice y requiere
+nuevo diseño/gate.
+
+Criterios de no exposición para RED futuro:
+
+1. unknown ref con marcador arbitrario y salto de línea;
+2. value largo y multibyte;
+3. reserved ref en free text;
+4. JSON inválido;
+5. duplicate key;
+6. cualquier rejection path existente que construya hoy mensajes dinámicos.
+
+En todos los casos, el contenido sintético rechazado debe estar ausente de:
+mensaje público, metadata serializable, args públicos, cause/context observable y
+cualquier artefacto registrable. Sólo digest/bytes pueden depender del response
+exacto.
 
 ### 7.6 Change scope futuro esperado
 
@@ -333,6 +450,7 @@ Ambigüedades materiales cerradas en diseño:
 - no `pattern` provider-dependent;
 - no repair/retry;
 - no raw-output persistence;
+- rejection metadata deriva sólo de constantes locales y nunca de contenido rechazado;
 - no broaden E3/E4;
 - no model/sampling change;
 - no reejecución histórica de C01;
@@ -342,7 +460,7 @@ Ambigüedades materiales cerradas en diseño:
 Unknown/missing/duplicate handling permanece en el parser vigente.
 
 ```yaml
-KNOWN_MATERIAL_AMBIGUITY_UNRESOLVED: 0
+KNOWN_MATERIAL_AMBIGUITY_UNRESOLVED: 0  # producer claim after bounded correction; independent fix validation pending
 RED_ADMISSIBLE_FROM_DESIGN_ALONE: NO
 ```
 
@@ -363,8 +481,10 @@ No se inventa evidencia y el rechazo sigue explícito.
 
 ### Governance Constitution
 
-PASS. No hay permission, side effect, learning, persistence, self-modification,
-Ready o Merge automático.
+PASS del productor después de bounded correction. No hay permission, side effect,
+learning, persistence, self-modification, Ready o Merge automático. La metadata de
+rechazo registrable queda limitada a constantes locales + digest/bytes y no puede
+transportar contenido rechazado.
 
 ### Kernel complexity
 
@@ -376,10 +496,10 @@ Estas disposiciones no certifican una implementación inexistente.
 
 | Lente | Disposición del productor |
 |---|---|
-| Risk | PASS — no relaxation, no retry, no raw persistence; freeze previo se invalida ante prompt/schema change |
+| Risk | PASS — no relaxation/retry/raw persistence; rejection metadata no deriva de output; freeze previo se invalida ante prompt/schema change |
 | Readability | PASS — un schema canónico, no segundo DSL; contract/evidence separados |
-| Reliability | PASS — la obligación parser-only pasa a ser explícita model-visible; enforcement final queda igual |
-| Resilience | PASS — provider/schema/prompt overflow o output inválido terminan en STOP; sin fallback |
+| Reliability | PASS — la obligación ya visible en prompt se refleja/refuerza en schema metadata + focused contract; enforcement final queda igual |
+| Resilience | PASS — overflow/output inválido terminan en STOP; error registrable usa sólo metadata local fija + digest/bytes; sin fallback |
 
 Riesgo residual: un LLM aún puede producir output rechazable aunque el contrato
 sea más explícito. Esta unidad busca reducir contract rejection; no garantiza
@@ -402,7 +522,9 @@ RDD Stage 2 on PR-B              REQUIRED
 
 ```yaml
 RDD_STAGE1_DESIGN_CHECK_PRODUCER: PASS
-INDEPENDENT_DESIGN_VALIDATION: PENDING
+PREVIOUS_INDEPENDENT_DESIGN_VALIDATION: FAIL_ON_c1bf6d90835d6673a75ba157e6e170e0ae1acaef
+BOUNDED_CORRECTION_F01_F02_N01_N02: APPLIED_PRODUCER
+INDEPENDENT_FIX_VALIDATION: PENDING
 RED_AUTHORIZED: NO
 GREEN_AUTHORIZED: NO
 ```
@@ -420,8 +542,8 @@ Después de merge humano del design y nueva autorización explícita:
 7. duplicate refs/keys siguen rechazadas;
 8. no-focused E2 no recibe duplicación de schema en prompt;
 9. provider calls = 1 para output rechazado; no retry;
-10. rechazo posterior a generación expone sólo digest/bytes/detail bounded,
-    nunca raw response;
+10. rechazo posterior a generación expone sólo códigos/detail locales fijos + digest/bytes; tests adversariales prueban que refs/values/keys/excerpts, saltos de línea, multibyte, JSON inválido y duplicate keys no aparecen en mensaje/args/cause/context/metadata registrable;
+
 11. E3/E4/runtime/conversation permanecen sin delta;
 12. overflow del prompt combinado falla antes de provider call.
 
@@ -496,7 +618,8 @@ C03: HOLD
 RED_AUTHORIZED: NO
 GREEN_AUTHORIZED: NO
 MODEL_EXECUTION_AUTHORIZED: NO
-READY_FOR_OWNER_REVIEW: YES
+RED_READY_FOR_OWNER_DECISION: NO
+READY_FOR_OWNER_REVIEW: NO
 MERGE_AUTHORIZED: NO
 authority_effect: none
 ```
