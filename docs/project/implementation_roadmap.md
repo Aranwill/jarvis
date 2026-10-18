@@ -2565,3 +2565,52 @@ automatic promotion                       FORBIDDEN
 
 Esta actualización no crea un sprint nuevo, no promociona una idea y no
 autoriza model execution.
+
+
+## CURRENT — recuperación técnica E2 post-PR #335 (2026-10-18)
+
+Esta sección supersede únicamente el estado CURRENT de esta línea descrito
+arriba. Los snapshots y resultados anteriores se conservan como historia.
+
+Integrado validado: `99698bbeab6d38241a9206756e69fd4ca71f6221`, tree
+`f9dbf0d9a7bdd3c852440379e8a3b30f4b0e385f`. #334 fue reformulada por el Owner
+como hardening prospectivo: diagnóstico E2 con subcausa/campo locales cerrados
+y schema focused con variantes completas por kind/ref. El parser conserva
+rechazo fail-closed; sin retries, repair, aceptación parcial ni persistencia nueva.
+
+La causa histórica de C02 permanece **INCONCLUSIVE**: el output rechazado no
+fue conservado. Esta implementación no demuestra qué regla falló en ese intento
+ni califica el decoder real de Ollama. Su compatibilidad efectiva queda como
+residual a resolver/disponer en el nuevo contexto PRE-MODEL antes de ejecución.
+
+El merge de #335 ocurrió con gates pendientes; la integración/CI inicial también
+precedió al Independent Fix Validator. F335-V01/V02 conservan **FAIL histórico**.
+El Owner eligió recuperar el integrado y preservar esos incumplimientos. La
+validación independiente posterior aprobó provenance, Fix Validator F334-01,
+Gate C, contrato/regresión y FULL 4R actuales. No se retrocertifica el proceso.
+
+Evidencia de recuperación sobre el integrado: afectados 193 PASS, integración
+202 PASS, diferencial sintético 704 casos y CI Ubuntu/Windows 2153 PASS por
+plataforma. [Validación independiente final](https://github.com/Aranwill/jarvis/pull/335#issuecomment-6254764581)
+y [RDD Candidate Conformance actual](https://github.com/Aranwill/jarvis/pull/335#issuecomment-6254769371)
+son evidencia sin autoridad. RDD Stage 1/2 nuevo corresponde al merge exacto;
+los manifests/receipts premerge siguen históricos e INCONCLUSIVE.
+
+```text
+C01_ATTEMPT                 CONSUMED
+C01_RETRY                   FORBIDDEN
+C02_ATTEMPT                 CONSUMED
+C02_RETRY                   FORBIDDEN
+C03_ATTEMPT                 NOT_STARTED
+C03                         HOLD
+E3_C02                      NOT_ATTEMPTED
+E4                          NOT_AUTHORIZED
+MODEL_EXECUTION_AUTHORIZED  NO
+PROCESS_CONFORMANCE_HISTORICAL FAIL
+authority_effect            none
+```
+
+No se reutilizan el freeze PRE-MODEL ni Owner G2 anteriores. La próxima frontera
+es reconciliación post-merge de esta actualización y después **NEW PRE-MODEL
+freeze → independent freeze validation → NEW Owner G2**. Ningún receipt ni cierre
+de ingeniería admite por sí solo modelos, piloto, siguiente sprint o ejecución.
