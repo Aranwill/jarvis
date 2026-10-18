@@ -86,6 +86,7 @@ def _error(tmp_path, raw, *, focused=True):
     ('[]', "ROOT_TYPE", "output"),
     (_wire(secret_unknown_key=True), "EXACT_KEYS", "output"),
     (_wire(schema_id="secret_schema"), "SCHEMA_ID", "schema_id"),
+    (_wire(summary=None), "TEXT_TYPE", "summary"),
     (_wire(summary=" "), "TEXT_EMPTY", "summary"),
     (_wire(summary="line\nsecret_payload"), "TEXT_CONTROL", "summary"),
     (_wire(summary="secret\u200bpayload"), "TEXT_CONTROL", "summary"),
@@ -93,10 +94,13 @@ def _error(tmp_path, raw, *, focused=True):
     (_wire(summary="á" * 4097), "TEXT_UTF8_BYTES", "summary"),
     (_wire(summary="\ud800"), "TEXT_INVALID_UNICODE", "summary"),
     (_wire(assertions=[{}] * 17), "ASSERTIONS_LIMIT", "assertions"),
+    (_wire(assertions={}), "ASSERTIONS_TYPE", "assertions"),
     (_wire(assertions=[1]), "ASSERTION_TYPE", "assertions"),
     (_wire(assertions=_assertion(secret_unknown_key=True)), "EXACT_KEYS", "assertions"),
     (_wire(assertions=_assertion(kind="secret_kind")), "ASSERTION_KIND", "assertions[].kind"),
     (_wire(assertions=_assertion(text=" ")), "TEXT_EMPTY", "assertions[].text"),
+    (_wire(assertions=_assertion(text=False)), "TEXT_TYPE", "assertions[].text"),
+    (_wire(assertions=_assertion(evidence_refs="R1")), "REFS_TYPE", "assertions[].evidence_refs"),
     (_wire(assertions=_assertion(evidence_refs=["R1"] * 17)), "REFS_LIMIT", "assertions[].evidence_refs"),
     (_wire(assertions=_assertion(evidence_refs=[False])), "REF_TYPE", "assertions[].evidence_refs"),
     (_wire(assertions=_assertion(evidence_refs=["R1", "R1"])), "DUPLICATE_REFS", "assertions[].evidence_refs"),
@@ -105,6 +109,8 @@ def _error(tmp_path, raw, *, focused=True):
     (_wire(assertions=_assertion(evidence_refs=["K1"])), "REF_ROLE", "assertions[].evidence_refs"),
     (_wire(assertions=_assertion(kind="KNOWLEDGE_CONTEXT", evidence_refs=["R1"])), "REF_ROLE", "assertions[].evidence_refs"),
     (_wire(uncertainties=["x"] * 17), "UNCERTAINTIES_LIMIT", "uncertainties"),
+    (_wire(uncertainties="secret_payload"), "UNCERTAINTIES_TYPE", "uncertainties"),
+    (_wire(uncertainties=[None]), "TEXT_TYPE", "uncertainties[]"),
     (_wire(uncertainties=["\ud800"]), "TEXT_INVALID_UNICODE", "uncertainties[]"),
 ]])
 def test_rejections_are_distinguishable_without_rejected_content(tmp_path, raw, subcode, field):
@@ -129,6 +135,22 @@ def test_nonfocused_rejection_uses_the_same_safe_taxonomy(tmp_path):
     assert (metadata["validator_subcode"], metadata["validator_field"]) == ("TEXT_RESERVED_REF", "summary")
 
 
+@pytest.mark.parametrize("function,expected", [
+    ("_parse_inspection_assertions", "UNCLASSIFIED"),
+    ("_validate_model_evidence_refs", "RENDER_REF"),
+])
+def test_unclassified_and_renderer_failures_do_not_leak(tmp_path, monkeypatch, function, expected):
+    module = import_module("malak.capabilities.engineering_inspect")
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("secret_payload")
+
+    monkeypatch.setattr(module, function, fail)
+    metadata, error = _error(tmp_path, _wire())
+    assert (metadata["validator_subcode"], metadata["validator_field"]) == (expected, "output")
+    assert "secret_payload" not in "".join(traceback.format_exception(error))
+
+
 def _schema(repository, knowledge, structural):
     module = import_module("malak.capabilities.engineering_inspect")
     return json.loads(module._build_inspection_response_json_schema(
@@ -149,7 +171,11 @@ def test_focused_schema_excludes_missing_and_wrong_role_refs_by_kind():
     assert set(branches) == set(expected)
     for kind, (refs, minimum) in expected.items():
         branch = branches[kind]
-        assert set(branch["required"]) >= {"kind", "evidence_refs"}
+        # Cada alternativa conserva el envelope completo por sí misma.
+        assert branch["type"] == "object"
+        assert branch["additionalProperties"] is False
+        assert set(branch["required"]) == {"kind", "text", "evidence_refs"}
+        assert branch["properties"]["text"] == items["properties"]["text"]
         ref_schema = branch["properties"]["evidence_refs"]
         assert ref_schema["type"] == "array"
         assert ref_schema["minItems"] == minimum

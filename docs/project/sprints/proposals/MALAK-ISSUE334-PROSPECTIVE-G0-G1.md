@@ -221,3 +221,46 @@ authority_effect=none
 Soporte externo informativo: documentación oficial JSON Schema sobre annotations;
 Ollama structured outputs y release v0.34.4 (actualiza sus backends; no garantiza
 un subset exacto). No son autoridad del proceso ni prueba del runtime del Owner.
+
+## Registro GREEN — 2026-10-18
+
+El Owner autorizó GREEN explícitamente después del RED publicado
+`34a7d8a28274f8970c6d358c4f143933a81b8b66`; autorización registrada en
+PR #335, comment 6250855094. Esto sustituye GREEN_AUTHORIZED=NO únicamente para
+el avance de implementación; no autoriza Ready, merge ni modelos.
+
+Refinamientos dentro del scope y anteriores al cierre del candidate GREEN:
+
+- Cada rama anyOf conserva type/object, additionalProperties=false, los tres
+  campos requeridos y el schema de text. Así no se depende exclusivamente de la
+  interpretación de constraints hermanos para conservar el envelope. Sigue sin
+  afirmarse calificación del decoder real. Descriptions presentes en todas las
+  ocurrencias de free-text del schema focused.
+- La taxonomy inicial se completa con TEXT_TYPE, ASSERTIONS_TYPE, REFS_TYPE y
+  UNCERTAINTIES_TYPE. Evita clasificar un tipo incorrecto como exceso de tamaño.
+  Son constantes locales del mismo contrato de diagnóstico; no cambia acceptance.
+- El fixture de overflow combinado calcula su padding sobre el tamaño del nuevo
+  contrato descrito. Conserva el schema individual bajo el límite y fuerza el
+  overflow del prompt combinado; no modifica ningún límite de producción.
+
+Validación focalizada actual: 192 PASS. Comparación determinista contra el parser
+del baseline exacto: 704 casos, 56 aceptados y 648 rechazados, igualdad completa
+de acceptance y texto renderizado. Schema nonfocused byte-identical en cuatro
+catálogos. Sin modelos ni material del piloto.
+
+Revalidación afectada de Design 4R del productor: Risk PASS (sólo nuevos enums
+cerrados); Readability PASS (builder único, variantes completas por composición);
+Reliability PASS (704 comparaciones y tipos/cardinalidad distinguidos); Resilience
+PASS (envelope preservado por rama y guard combinado efectivo). No sustituye
+Candidate FULL 4R ni validación independiente posterior.
+
+```text
+GREEN_AUTHORIZED=YES
+GREEN_IMPLEMENTED=YES
+CURRENT_PREMODEL_FREEZE_REUSE=FORBIDDEN
+CURRENT_OWNER_G2_REUSE=FORBIDDEN
+C02_HISTORICAL_ROOT_CAUSE=INCONCLUSIVE
+MODEL_CALLS=0
+API_CHAT_CALLS=0
+authority_effect=none
+```

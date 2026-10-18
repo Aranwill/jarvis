@@ -335,3 +335,34 @@ resultado `success`. Ese PASS no certifica un fix ni este nuevo commit.
 No se reejecutaron los 137 tests porque no cambió código ni apareció un fallo de
 producto nuevo; las verificaciones nuevas fueron integridad y coherencia de
 artefactos offline. Model calls y /api/chat permanecen en cero.
+
+## Estado de implementación prospectiva — GREEN autorizado
+
+Esta actualización sustituye SOLUTION_IMPLEMENTED=NO para el objetivo
+prospectivo aprobado; no cambia la causa histórica de C02. El Owner autorizó
+GREEN después del RED 34a7d8a..., registrado en PR #335 comment 6250855094.
+
+Implementado: subcódigos/campos locales cerrados, diagnóstico sin raw/context,
+UTF-8 exacto o digest/bytes null para string no codificable; schema focused con
+ramas completas kind/ref y descriptions de todas las leyes de free-text.
+Se mantienen parser fail-closed, no retry/repair y nonfocused schema sin cambios.
+No hay nuevas dependencias, servicios, persistencia ni cambios Kernel/Planner.
+
+Targeted: 192 passed in 17.45s. Comparación de 704 entradas contra el parser de
+main@23de7f1: acceptance y render idénticos (56 aceptadas/648 rechazadas);
+nonfocused schema idéntico en cuatro catálogos. La prueba antigua de overflow
+combinado se adaptó al tamaño real del contrato, conservando su condición.
+
+FULL 4R del candidate, E2E, full suite, CI, independent validation y RDD terminal
+siguen sujetos a evidencia del candidate final. Este texto no fabrica sus PASS.
+Cada rechazo histórico se conserva. C01/C02 CONSUMED, retries FORBIDDEN; C03 HOLD.
+
+```text
+SOLUTION_IMPLEMENTED=YES_PROSPECTIVE_SCOPE
+C02_HISTORICAL_ROOT_CAUSE=INCONCLUSIVE
+CURRENT_PREMODEL_FREEZE_REUSE=FORBIDDEN
+CURRENT_OWNER_G2_REUSE=FORBIDDEN
+MODEL_CALLS=0
+API_CHAT_CALLS=0
+authority_effect=none
+```
