@@ -60,7 +60,11 @@ def _error(tmp_path, raw, *, focused=True):
     assert metadata["authority_effect"] == "none"
     assert metadata["reason_code"] == "E2_OUTPUT_CONTRACT_REJECTED"
     assert metadata["validator_code"] == "DETERMINISTIC_VALIDATION_REJECTED"
-    assert metadata["validator_detail"] == "E2 output rejected by deterministic contract validation."
+    expected_detail = (
+        "engineering inspection model response is empty"
+        if not raw.strip() else "E2 output rejected by deterministic contract validation."
+    )
+    assert metadata["validator_detail"] == expected_detail
     try:
         encoded = raw.encode("utf-8")
     except UnicodeEncodeError:

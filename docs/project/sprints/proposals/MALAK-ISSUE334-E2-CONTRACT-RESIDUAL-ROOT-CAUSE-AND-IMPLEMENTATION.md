@@ -366,3 +366,26 @@ MODEL_CALLS=0
 API_CHAT_CALLS=0
 authority_effect=none
 ```
+
+## Bounded Correction Round 1 — F334-01
+
+El candidate GREEN inicial bf8b82a4c80bec74171fd1b3f267b937b24f67ab / tree
+78b199ec62987c7171e7e1be91954dbcab949eec recibió full suite local: 1 failed,
+2152 passed in 60.38s. El test histórico de generation contract exigía la frase
+local de error de respuesta vacía; se había sustituido por detail genérico.
+Se preserva este fallo como evidencia, no se reescribe su resultado.
+
+Corrección dentro del scope y presupuesto de una ronda: OUTPUT_EMPTY utiliza
+validator_detail fijo `engineering inspection model response is empty`. El resto
+de rechazos conserva el detail #330. Todos mantienen reason/code originales,
+subcode/campo cerrados, bytes/digest exactos y ausencia de raw/cause/context.
+La validación de runtime histórica queda intacta; se actualiza sólo el test nuevo
+que congelaba la metadata. No se relaja aceptación, no hay retry ni repair.
+
+El detalle genérico constante del diseño inicial queda especializado sólo para
+OUTPUT_EMPTY por compatibilidad demostrada. No se usa texto del output como
+detail. El PASS 4R anterior es histórico; el candidate corregido requiere nueva
+evidencia. Fix Validator independiente: PENDING; no se simula independencia.
+
+CURRENT_PREMODEL_FREEZE_REUSE=FORBIDDEN; CURRENT_OWNER_G2_REUSE=FORBIDDEN.
+C02_HISTORICAL_ROOT_CAUSE=INCONCLUSIVE. authority_effect=none.

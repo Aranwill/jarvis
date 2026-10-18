@@ -313,6 +313,7 @@ _FREE_TEXT_CONTRACT_DESCRIPTION = (
 _E2_REJECTION_REASON_CODE = "E2_OUTPUT_CONTRACT_REJECTED"
 _E2_REJECTION_VALIDATOR_CODE = "DETERMINISTIC_VALIDATION_REJECTED"
 _E2_REJECTION_DETAIL = "E2 output rejected by deterministic contract validation."
+_E2_EMPTY_REJECTION_DETAIL = "engineering inspection model response is empty"
 
 _E2_VALIDATOR_SUBCODES = frozenset(
     "OUTPUT_EMPTY OUTPUT_LIMIT OUTPUT_INVALID_UNICODE JSON_SYNTAX JSON_DUPLICATE_KEYS "
@@ -450,7 +451,10 @@ def _safe_inspection_rejection(
         "output_encoding": output_encoding,
         "reason_code": _E2_REJECTION_REASON_CODE,
         "validator_code": _E2_REJECTION_VALIDATOR_CODE,
-        "validator_detail": _E2_REJECTION_DETAIL,
+        "validator_detail": (
+            _E2_EMPTY_REJECTION_DETAIL if subcode == "OUTPUT_EMPTY"
+            else _E2_REJECTION_DETAIL
+        ),
         "validator_subcode": subcode,
         "validator_field": field,
     }
