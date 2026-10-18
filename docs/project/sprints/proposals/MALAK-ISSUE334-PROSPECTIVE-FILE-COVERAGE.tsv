@@ -403,3 +403,4 @@ tests/test_security_context_renewer.py	Aranwill/jarvis	.py	implementation_or_tes
 tests/test_security_context_validator.py	Aranwill/jarvis	.py	implementation_or_test	sin relación material identificada con schema/parser/diagnóstico E2 en esta unidad acotada	PATH_CLASSIFICATION_ONLY	NOT_APPLICABLE_WITH_REASON		NO_MODIFICATION
 tests/test_self_review_evidence_packet_v0.py	Aranwill/jarvis	.py	implementation_or_test	sin relación material identificada con schema/parser/diagnóstico E2 en esta unidad acotada	PATH_CLASSIFICATION_ONLY	NOT_APPLICABLE_WITH_REASON		NO_MODIFICATION
 tests/test_trace_view_v0.py	Aranwill/jarvis	.py	implementation_or_test	sin relación material identificada con schema/parser/diagnóstico E2 en esta unidad acotada	PATH_CLASSIFICATION_ONLY	NOT_APPLICABLE_WITH_REASON		NO_MODIFICATION
+tests/test_e2_contract_diagnostics_v2.py	Aranwill/jarvis	.py	implementation_or_test	RED sintético de taxonomy/schema y aceptación vigente	FULL_READ	FULL_READ	#334	ALLOWED
