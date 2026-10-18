@@ -197,6 +197,7 @@ class EngineeringInspectCapability(Capability):
 
         response_json_schema = _build_inspection_response_json_schema(
             repository_evidence, knowledge_evidence, structural_evidence,
+            self._evidence_focus is not None,
         )
         if self._evidence_focus is not None:
             response_json_schema = _with_inspection_contract_descriptions(
@@ -249,10 +250,19 @@ class EngineeringInspectCapability(Capability):
         )
 
         raw_analysis = response.content
-        if not isinstance(raw_analysis, str) or not raw_analysis.strip():
+        if not isinstance(raw_analysis, str):
             raise RuntimeError("engineering inspection model response is empty")
-        if len(raw_analysis.encode("utf-8")) > _MAX_MODEL_OUTPUT_BYTES:
-            raise _safe_inspection_rejection(raw_analysis)
+        if not raw_analysis.strip():
+            raise _safe_inspection_rejection(raw_analysis, "OUTPUT_EMPTY", "output")
+        output_bytes = None
+        try:
+            output_bytes = len(raw_analysis.encode("utf-8"))
+        except UnicodeEncodeError:
+            pass
+        if output_bytes is None:
+            raise _safe_inspection_rejection(raw_analysis, "OUTPUT_INVALID_UNICODE", "output")
+        if output_bytes > _MAX_MODEL_OUTPUT_BYTES:
+            raise _safe_inspection_rejection(raw_analysis, "OUTPUT_LIMIT", "output")
 
         validated = _try_parse_and_validate_inspection_output(
             raw_analysis,
@@ -260,8 +270,8 @@ class EngineeringInspectCapability(Capability):
             knowledge_evidence=knowledge_evidence,
             structural_evidence=structural_evidence,
         )
-        if validated is None:
-            raise _safe_inspection_rejection(raw_analysis)
+        if isinstance(validated, RuntimeError):
+            raise validated
 
         (
             analysis,
@@ -294,17 +304,44 @@ _ASSERTION_KINDS = ("OBSERVED", "KNOWLEDGE_CONTEXT", "INTERPRETATION", "UNCERTAI
 _RESERVED_REF_PATTERN = r"(?<![A-Za-z0-9_])[RKSA][0-9]+(?![A-Za-z0-9_])"
 _FREE_TEXT_CONTRACT_DESCRIPTION = (
     "Free text only. Do not include reserved evidence ref tokens such as "
-    "R1, K2, S3, or A1. Put citations only in assertions[].evidence_refs."
+    "R1, K2, S3, or A1. Put citations only in assertions[].evidence_refs. "
+    "Must not be whitespace-only or contain Unicode control or format characters, "
+    "line/paragraph separators, or unpaired surrogate code points. "
+    "UTF-8 byte limits: summary 8192; assertion text and each uncertainty 4096. "
+    "Character length alone does not satisfy these byte limits."
 )
 _E2_REJECTION_REASON_CODE = "E2_OUTPUT_CONTRACT_REJECTED"
 _E2_REJECTION_VALIDATOR_CODE = "DETERMINISTIC_VALIDATION_REJECTED"
 _E2_REJECTION_DETAIL = "E2 output rejected by deterministic contract validation."
+_E2_EMPTY_REJECTION_DETAIL = "engineering inspection model response is empty"
+
+_E2_VALIDATOR_SUBCODES = frozenset(
+    "OUTPUT_EMPTY OUTPUT_LIMIT OUTPUT_INVALID_UNICODE JSON_SYNTAX JSON_DUPLICATE_KEYS "
+    "JSON_NONFINITE ROOT_TYPE EXACT_KEYS SCHEMA_ID TEXT_TYPE TEXT_EMPTY TEXT_CONTROL "
+    "TEXT_RESERVED_REF TEXT_UTF8_BYTES TEXT_INVALID_UNICODE ASSERTIONS_TYPE ASSERTIONS_LIMIT "
+    "ASSERTION_TYPE ASSERTION_KIND REFS_TYPE REFS_LIMIT REF_TYPE DUPLICATE_REFS UNKNOWN_REF "
+    "MISSING_REFS REF_ROLE UNCERTAINTIES_TYPE UNCERTAINTIES_LIMIT RENDER_REF UNCLASSIFIED".split()
+)
+_E2_VALIDATOR_FIELDS = frozenset((
+    "output", "schema_id", "summary", "assertions", "assertions[].kind",
+    "assertions[].text", "assertions[].evidence_refs", "uncertainties", "uncertainties[]",
+))
+
+
+class _InspectionContractError(RuntimeError):
+    """Clasificación interna local; nunca transporta contenido rechazado."""
+
+    def __init__(self, subcode: str, field: str) -> None:
+        super().__init__(_E2_REJECTION_DETAIL)
+        self.subcode = subcode
+        self.field = field
 
 
 def _build_inspection_response_json_schema(
     repository_evidence: list[dict[str, object]],
     knowledge_evidence: list[dict[str, object]],
     structural_evidence: list[dict[str, object]],
+    focused: bool = False,
 ) -> str:
     refs = [str(item["ref"]) for item in (
         *repository_evidence, *knowledge_evidence, *structural_evidence,
@@ -339,19 +376,51 @@ def _build_inspection_response_json_schema(
             },
         },
     }
+    if focused:
+        assertion_schema = schema["properties"]["assertions"]["items"]
+        repository_refs = [str(item["ref"]) for item in repository_evidence]
+        knowledge_refs = [str(item["ref"]) for item in knowledge_evidence]
+        branches = []
+        for kind, available, minimum in (
+            ("OBSERVED", repository_refs, 1),
+            ("KNOWLEDGE_CONTEXT", knowledge_refs, 1),
+            ("INTERPRETATION", refs, 1),
+            ("UNCERTAINTY", refs, 0),
+        ):
+            if minimum and not available:
+                continue
+            branches.append({
+                "type": "object", "additionalProperties": False,
+                "required": list(assertion_schema["required"]),
+                "properties": {
+                    **assertion_schema["properties"],
+                    "kind": {"type": "string", "const": kind},
+                    "evidence_refs": {
+                        "type": "array", "minItems": minimum,
+                        "maxItems": 16 if available else 0, "uniqueItems": True,
+                        "items": {"type": "string", **({"enum": available} if available else {})},
+                    },
+                },
+            })
+        assertion_schema["anyOf"] = branches
     return json.dumps(schema, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def _with_inspection_contract_descriptions(response_json_schema: str) -> str:
     schema = json.loads(response_json_schema)
     properties = schema["properties"]
-    properties["summary"]["description"] = _FREE_TEXT_CONTRACT_DESCRIPTION
-    properties["assertions"]["items"]["properties"]["text"][
-        "description"
-    ] = _FREE_TEXT_CONTRACT_DESCRIPTION
-    properties["uncertainties"]["items"][
-        "description"
-    ] = _FREE_TEXT_CONTRACT_DESCRIPTION
+    assertion_schema = properties["assertions"]["items"]
+    text_fields = [
+        properties["summary"],
+        assertion_schema["properties"]["text"],
+        properties["uncertainties"]["items"],
+    ]
+    text_fields.extend(
+        branch["properties"]["text"]
+        for branch in assertion_schema.get("anyOf", [])
+    )
+    for field in text_fields:
+        field["description"] = _FREE_TEXT_CONTRACT_DESCRIPTION
     return json.dumps(
         schema,
         ensure_ascii=False,
@@ -360,24 +429,38 @@ def _with_inspection_contract_descriptions(response_json_schema: str) -> str:
     )
 
 
-def _safe_inspection_rejection(raw: str) -> RuntimeError:
-    raw_bytes = raw.encode("utf-8")
+def _safe_inspection_rejection(
+    raw: str, subcode: str = "UNCLASSIFIED", field: str = "output",
+) -> RuntimeError:
+    if subcode not in _E2_VALIDATOR_SUBCODES or field not in _E2_VALIDATOR_FIELDS:
+        subcode, field = "UNCLASSIFIED", "output"
+    output_bytes = output_sha256 = None
+    output_encoding = "INVALID_UTF8"
+    try:
+        raw_bytes = raw.encode("utf-8")
+    except UnicodeEncodeError:
+        pass
+    else:
+        output_bytes = len(raw_bytes)
+        output_sha256 = hashlib.sha256(raw_bytes).hexdigest()
+        output_encoding = "UTF8"
     metadata = {
         "authority_effect": "none",
-        "output_bytes": len(raw_bytes),
-        "output_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+        "output_bytes": output_bytes,
+        "output_sha256": output_sha256,
+        "output_encoding": output_encoding,
         "reason_code": _E2_REJECTION_REASON_CODE,
         "validator_code": _E2_REJECTION_VALIDATOR_CODE,
-        "validator_detail": _E2_REJECTION_DETAIL,
+        "validator_detail": (
+            _E2_EMPTY_REJECTION_DETAIL if subcode == "OUTPUT_EMPTY"
+            else _E2_REJECTION_DETAIL
+        ),
+        "validator_subcode": subcode,
+        "validator_field": field,
     }
-    return RuntimeError(
-        json.dumps(
-            metadata,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        )
-    )
+    return RuntimeError(json.dumps(
+        metadata, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+    ))
 
 
 def _try_parse_and_validate_inspection_output(
@@ -386,33 +469,25 @@ def _try_parse_and_validate_inspection_output(
     repository_evidence: list[dict[str, object]],
     knowledge_evidence: list[dict[str, object]],
     structural_evidence: list[dict[str, object]],
-) -> tuple[str, int, int, int] | None:
+) -> tuple[str, int, int, int] | RuntimeError:
     try:
         analysis = _parse_inspection_assertions(
-            raw,
-            repository_evidence,
-            knowledge_evidence,
-            structural_evidence,
+            raw, repository_evidence, knowledge_evidence, structural_evidence,
         )
-        (
-            repository_citation_count,
-            knowledge_citation_count,
-            structural_citation_count,
-        ) = _validate_model_evidence_refs(
-            analysis,
-            repository_evidence=repository_evidence,
-            knowledge_evidence=knowledge_evidence,
-            structural_evidence=structural_evidence,
-        )
+        try:
+            counts = _validate_model_evidence_refs(
+                analysis,
+                repository_evidence=repository_evidence,
+                knowledge_evidence=knowledge_evidence,
+                structural_evidence=structural_evidence,
+            )
+        except RuntimeError:
+            raise _InspectionContractError("RENDER_REF", "output") from None
+    except _InspectionContractError as exc:
+        return _safe_inspection_rejection(raw, exc.subcode, exc.field)
     except (RuntimeError, UnicodeEncodeError):
-        return None
-
-    return (
-        analysis,
-        repository_citation_count,
-        knowledge_citation_count,
-        structural_citation_count,
-    )
+        return _safe_inspection_rejection(raw)
+    return (analysis, *counts)
 
 
 def _parse_inspection_assertions(
@@ -421,64 +496,96 @@ def _parse_inspection_assertions(
     knowledge_evidence: list[dict[str, object]],
     structural_evidence: list[dict[str, object]],
 ) -> str:
-    # El schema restringe al decoder; este parser valida sin confiar en él.
+    # El schema orienta/constriñe la generación; el parser no confía en el decoder.
+    def pairs(values):
+        try:
+            return reject_duplicate_keys(values)
+        except ValueError:
+            raise _InspectionContractError("JSON_DUPLICATE_KEYS", "output") from None
+
+    def nonfinite(value):
+        try:
+            return reject_nonfinite_json(value)
+        except ValueError:
+            raise _InspectionContractError("JSON_NONFINITE", "output") from None
+
     try:
-        payload = json.loads(
-            raw,
-            object_pairs_hook=reject_duplicate_keys,
-            parse_constant=reject_nonfinite_json,
-        )
-    except (ValueError, TypeError, RecursionError) as exc:
-        raise RuntimeError("engineering inspection model response is not strict JSON") from exc
+        payload = json.loads(raw, object_pairs_hook=pairs, parse_constant=nonfinite)
+    except (ValueError, TypeError, RecursionError):
+        raise _InspectionContractError("JSON_SYNTAX", "output") from None
     if not isinstance(payload, dict):
-        raise RuntimeError("engineering inspection JSON must be an object")
-    require_exact_keys(payload, {"schema_id", "summary", "assertions", "uncertainties"}, "inspection")
+        raise _InspectionContractError("ROOT_TYPE", "output")
+
+    def exact(value, expected, field):
+        try:
+            require_exact_keys(value, expected, "inspection")
+        except RuntimeError:
+            raise _InspectionContractError("EXACT_KEYS", field) from None
+
+    exact(payload, {"schema_id", "summary", "assertions", "uncertainties"}, "output")
     if payload["schema_id"] != _E2_SCHEMA_ID:
-        raise RuntimeError("engineering inspection schema_id is not supported")
+        raise _InspectionContractError("SCHEMA_ID", "schema_id")
 
-    def text(value: object, field: str, limit: int) -> str:
-        return bounded_nonempty_string(
-            value, field=field, max_bytes=limit,
-            reserved_pattern=_RESERVED_REF_PATTERN, limit_scope="E2",
-        )
+    def text(value: object, field: str, limit: int, diagnostic_field: str) -> str:
+        try:
+            return bounded_nonempty_string(
+                value, field=field, max_bytes=limit,
+                reserved_pattern=_RESERVED_REF_PATTERN, limit_scope="E2",
+            )
+        except UnicodeEncodeError:
+            raise _InspectionContractError("TEXT_INVALID_UNICODE", diagnostic_field) from None
+        except RuntimeError as exc:
+            # Igualdad contra mensajes locales completos; nunca se copia el mensaje.
+            codes = {
+                f"{field} must be a non-empty string": "TEXT_EMPTY" if isinstance(value, str) else "TEXT_TYPE",
+                f"{field} contains forbidden control or format characters": "TEXT_CONTROL",
+                f"{field} contains reserved evidence or analysis ref token": "TEXT_RESERVED_REF",
+                f"{field} exceeds hard E2 UTF-8 byte limit": "TEXT_UTF8_BYTES",
+            }
+            raise _InspectionContractError(codes.get(str(exc), "UNCLASSIFIED"), diagnostic_field) from None
 
-    lines = [text(payload["summary"], "summary", 8192)]
+    lines = [text(payload["summary"], "summary", 8192, "summary")]
     repository_refs = {str(item["ref"]) for item in repository_evidence}
     knowledge_refs = {str(item["ref"]) for item in knowledge_evidence}
     allowed = repository_refs | knowledge_refs | {str(item["ref"]) for item in structural_evidence}
     assertions = payload["assertions"]
-    if not isinstance(assertions, list) or len(assertions) > 16:
-        raise RuntimeError("inspection assertions must be a list of at most 16 items")
+    if not isinstance(assertions, list):
+        raise _InspectionContractError("ASSERTIONS_TYPE", "assertions")
+    if len(assertions) > 16:
+        raise _InspectionContractError("ASSERTIONS_LIMIT", "assertions")
     for assertion in assertions:
         if not isinstance(assertion, dict):
-            raise RuntimeError("each inspection assertion must be an object")
-        require_exact_keys(assertion, {"kind", "text", "evidence_refs"}, "assertion")
+            raise _InspectionContractError("ASSERTION_TYPE", "assertions")
+        exact(assertion, {"kind", "text", "evidence_refs"}, "assertions")
         kind = assertion["kind"]
         if not isinstance(kind, str) or kind not in _ASSERTION_KINDS:
-            raise RuntimeError("inspection assertion kind is not allowed")
-        body = text(assertion["text"], "assertion text", 4096)
+            raise _InspectionContractError("ASSERTION_KIND", "assertions[].kind")
+        body = text(assertion["text"], "assertion text", 4096, "assertions[].text")
         refs = assertion["evidence_refs"]
-        if not isinstance(refs, list) or len(refs) > 16:
-            raise RuntimeError("assertion evidence_refs must be a list of at most 16 refs")
+        if not isinstance(refs, list):
+            raise _InspectionContractError("REFS_TYPE", "assertions[].evidence_refs")
+        if len(refs) > 16:
+            raise _InspectionContractError("REFS_LIMIT", "assertions[].evidence_refs")
         if any(not isinstance(ref, str) for ref in refs):
-            raise RuntimeError("assertion evidence_refs must contain strings")
+            raise _InspectionContractError("REF_TYPE", "assertions[].evidence_refs")
         if len(set(refs)) != len(refs):
-            raise RuntimeError("assertion evidence_refs cannot contain duplicates")
-        unknown = sorted(set(refs) - allowed)
-        if unknown:
-            raise RuntimeError("engineering inspection model cited unknown evidence refs: " + ", ".join(unknown))
+            raise _InspectionContractError("DUPLICATE_REFS", "assertions[].evidence_refs")
+        if set(refs) - allowed:
+            raise _InspectionContractError("UNKNOWN_REF", "assertions[].evidence_refs")
         if kind != "UNCERTAINTY" and not refs:
-            raise RuntimeError("grounded assertion requires evidence refs")
+            raise _InspectionContractError("MISSING_REFS", "assertions[].evidence_refs")
         if kind == "OBSERVED" and not set(refs) <= repository_refs:
-            raise RuntimeError("OBSERVED assertion requires repository evidence refs")
+            raise _InspectionContractError("REF_ROLE", "assertions[].evidence_refs")
         if kind == "KNOWLEDGE_CONTEXT" and not set(refs) <= knowledge_refs:
-            raise RuntimeError("KNOWLEDGE_CONTEXT assertion requires knowledge evidence refs")
+            raise _InspectionContractError("REF_ROLE", "assertions[].evidence_refs")
         citations = " ".join(f"[{ref}]" for ref in refs)
         lines.append(f"{kind}: {body}" + (f" {citations}" if citations else ""))
     uncertainties = payload["uncertainties"]
-    if not isinstance(uncertainties, list) or len(uncertainties) > 16:
-        raise RuntimeError("inspection uncertainties must be a list of at most 16 items")
-    lines.extend("UNCERTAINTY: " + text(value, "uncertainty", 4096) for value in uncertainties)
+    if not isinstance(uncertainties, list):
+        raise _InspectionContractError("UNCERTAINTIES_TYPE", "uncertainties")
+    if len(uncertainties) > 16:
+        raise _InspectionContractError("UNCERTAINTIES_LIMIT", "uncertainties")
+    lines.extend("UNCERTAINTY: " + text(value, "uncertainty", 4096, "uncertainties[]") for value in uncertainties)
     return "\n".join(lines)
 
 

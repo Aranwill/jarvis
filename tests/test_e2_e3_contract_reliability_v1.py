@@ -373,7 +373,14 @@ def _assert_safe_e2_rejection(tmp_path, raw: str, forbidden_fragments):
     public = str(exc)
     metadata = json.loads(public)
 
-    assert metadata == {
+    assert set(metadata) == {
+        "authority_effect", "output_bytes", "output_sha256", "output_encoding",
+        "reason_code", "validator_code", "validator_detail", "validator_subcode", "validator_field",
+    }
+    assert metadata["output_encoding"] == "UTF8"
+    assert {key: value for key, value in metadata.items() if key not in {
+        "output_encoding", "validator_subcode", "validator_field",
+    }} == {
         "authority_effect": "none",
         "output_bytes": len(raw.encode("utf-8")),
         "output_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
@@ -460,9 +467,18 @@ def test_e2_contract_alignment_red_combined_focused_prompt_overflow_is_pre_provi
 
     def large_but_individually_valid_schema(*args):
         schema = json.loads(original(*args))
-        schema["description"] = "x" * 63500
+        schema["description"] = ""
+        described = module._with_inspection_contract_descriptions(
+            _canonical_json(schema)
+        )
+        # Mantener el caso de overflow combinado aunque crezca el contrato.
+        # El schema final deja sólo 256 bytes libres para un packet mayor.
+        schema["description"] = "x" * (
+            64 * 1024 - 256 - len(described.encode("utf-8"))
+        )
         encoded = _canonical_json(schema)
         assert len(encoded.encode("utf-8")) < 64 * 1024
+        assert len(module._with_inspection_contract_descriptions(encoded).encode("utf-8")) == 64 * 1024 - 256
         return encoded
 
     monkeypatch.setattr(
