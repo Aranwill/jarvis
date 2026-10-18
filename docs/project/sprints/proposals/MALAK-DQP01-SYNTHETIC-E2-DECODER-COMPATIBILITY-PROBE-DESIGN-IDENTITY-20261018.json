@@ -1,0 +1,17 @@
+{
+  "schema": "MALAK-DQP01-DESIGN-IDENTITY/v1",
+  "repository": "Aranwill/jarvis",
+  "baseline_commit": "b054f7cb10a0cbc5818ffc5ae5ca7503efc2d209",
+  "baseline_tree": "0cb2f1c2f097c7a6abd2535011129211e9d6b4bb",
+  "baseline_blobs": 405,
+  "schema_sha256": "4e264b311badcbce771f4f74ef35690703571dc0585869a77373aba252b7109e",
+  "request_sha256": "e6c833f775d7e87e50d7c9434c763007d0ece0700d7fc1a920d6c459b012d754",
+  "system_prompt_sha256": "c2d382f0a1dba803fcab4ec6d7fafac04d231c02f4b916d9c22536658785b7cd",
+  "prompt_sha256": "f2829621a5f15f77ec8eed7c3577e1280a9e1a1c6265c776390951c4620b8ef8",
+  "synthetic_request_bytes": 14544,
+  "external_design_review_result": "PASS",
+  "model_calls": 0,
+  "inference_authorized": false,
+  "c03_authorized": false,
+  "authority_effect": "none"
+}
