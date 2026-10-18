@@ -13,5 +13,13 @@
   "model_calls": 0,
   "inference_authorized": false,
   "c03_authorized": false,
-  "authority_effect": "none"
+  "authority_effect": "none",
+  "rdd_stage_2_pr_a": "REQUIRED",
+  "rdd_stage_2_future_executor": "REQUIRED",
+  "bounded_design_correction_round": 1,
+  "previous_candidate": "ab9a842ea5532a2ab345854f5867c6028154b391",
+  "preserved_findings": [
+    "DQP01-F01",
+    "DQP01-F02"
+  ]
 }

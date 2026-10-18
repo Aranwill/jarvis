@@ -14,6 +14,7 @@ red_authorized: false
 green_authorized: false
 model_execution_authorized: false
 c03_authorized: false
+rdd_stage_2_pr_a_required: true
 rdd_stage_2_required_for_future_executor: true
 authority_effect: none
 ---
@@ -158,7 +159,8 @@ critical_contract              YES
 Design 4R                      REQUIRED
 Candidate FULL 4R              REQUIRED for future executor
 RDD Stage 1                    REQUIRED
-RDD Stage 2                    REQUIRED for future executor
+RDD Stage 2 PR-A               REQUIRED
+RDD Stage 2 future executor     REQUIRED
 independent validation         REQUIRED
 ~~~
 
@@ -423,6 +425,7 @@ candidate drift invalidates evidence    PASS
 bounded correction                      REQUIRED if findings
 Fix Validator                           REQUIRED when applicable
 authority_effect                        none
+RDD Stage 2 PR-A                        REQUIRED
 RDD Stage 2 future executor             REQUIRED
 ~~~
 
@@ -433,7 +436,7 @@ RDD Stage 1 Design Check writer candidate = PASS.
 Sólo después de:
 1. CI candidate-bound de PR-A;
 2. Independent Design Review PASS del candidate exacto;
-3. RDD candidate-bound evidence aplicable a PR-A;
+3. RDD Stage 1 Candidate Conformance + RDD Stage 2 Receipt REQUIRED para esta PR-A risk-3;
 4. revisión humana;
 5. Owner Ready/Merge;
 6. post-merge reconciliation;
@@ -508,7 +511,57 @@ La revisión externa es input de diseño, no certificación de este candidate.
 | concepts / ideas | conceptual | evidence-bound learning | OBSERVE | no subsystem |
 | external DQP01 review | independent evidence | single sample useful but non-universal | ADAPT | preserve residual |
 
-## 15. File Coverage
+## 15. Bounded Design Correction — Round 1
+
+Trigger independiente: la revisión de PR #337 sobre el candidate
+`ab9a842ea5532a2ab345854f5867c6028154b391` devolvió `INCONCLUSIVE` sin defecto técnico bloqueante del
+experimento y abrió F337-ID01, F337-COV01 y F337-RDD01.
+
+Esta corrección está estrictamente limitada a:
+
+~~~text
+F337-ID01
+candidate tree independently re-read from Git object
+actual = expected = 6adc78489dc2a94860b3d576ca03ae563bf7ae63
+writer-side status = EVIDENCE AVAILABLE FOR FIX VALIDATOR
+
+F337-COV01
+baseline recursive Git tree = non-truncated
+Git blobs = 405
+ledger baseline rows = 405
+missing = 0
+extra = 0
+duplicated = 0
+writer-side status = EVIDENCE AVAILABLE FOR FIX VALIDATOR
+
+F337-RDD01
+RDD Stage 2 PR-A = REQUIRED
+RDD Stage 2 future PR-B = REQUIRED
+writer-side status = TEXT CORRECTED / EVIDENCE STILL REQUIRED BEFORE READY
+
+CI #969
+tests = PASS
+compileall = PASS
+git diff --check = FAIL
+cause = empty final related_findings field encoded as trailing tab on 405 baseline TSV rows
+correction = encode explicit NONE in those 405 cells
+~~~
+
+No finding se auto-cierra por declaración del writer. El nuevo candidate invalida
+la disposición terminal sobre el SHA anterior y requiere affected independent
+Fix/Design Validation.
+
+Preservación epistemológica obligatoria:
+
+~~~text
+DQP01-F01 — SINGLE_SAMPLE_DOES_NOT_PROVE_ANYOF_ENFORCEMENT
+OPEN / MUST_BE_PRESERVED
+~~~
+
+No se modifica budget, schema, request, runtime contract, C03 HOLD, autoridad ni
+scope de producto.
+
+## 16. File Coverage
 
 ~~~text
 baseline tracked blobs discovered = 405
@@ -517,7 +570,7 @@ baseline silently omitted files   = 0
 candidate-only PR-A artifacts     = 3
 ~~~
 
-## 16. Rollback
+## 17. Rollback
 
 PR-A es docs-only.
 
@@ -528,13 +581,13 @@ revert candidate commit
 → no DQP01 attempt consumed
 ~~~
 
-## 17. Next lawful transition
+## 18. Next lawful transition
 
 ~~~text
 PR-A candidate-bound CI
 → Independent Design Review on exact candidate
 → affected Design 4R / RDD Design disposition
-→ RDD evidence / Stage 2 as applicable to risk-3 PR-A
+→ RDD Stage 1 Candidate Conformance + RDD Stage 2 Receipt REQUIRED para PR-A
 → human review
 → Owner Ready / Merge
 → post-merge reconciliation
