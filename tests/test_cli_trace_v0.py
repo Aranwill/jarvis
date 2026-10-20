@@ -434,3 +434,39 @@ def test_cli_trace_red_obs03_summary_reports_only_recorded_timings(
     assert "engineering_propose.duration_ms: NOT_OBSERVED" in rendered
     assert "authority_effect: none" in rendered
     assert runtime.requests == []
+
+
+@pytest.mark.parametrize(
+    "run_id",
+    ("../escape", "a/b", "a\\b", "..", "missing-run"),
+)
+def test_cli_trace_obs03_summary_unsafe_or_missing_run_never_calls_model(
+    tmp_path: Path,
+    run_id: str,
+) -> None:
+    outputs: list[str] = []
+    runtime = _RecordingRuntime()
+
+    run_cli(
+        service=build_conversation_service(runtime=runtime),
+        repository_root=tmp_path,
+        input_fn=_make_input([f"/trace summary {run_id}", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert any("Error controlado Trace:" in value for value in outputs)
+    assert runtime.requests == []
+
+
+def test_cli_trace_obs03_summary_help_shows_read_only_command() -> None:
+    outputs: list[str] = []
+    runtime = _RecordingRuntime()
+
+    run_cli(
+        service=build_conversation_service(runtime=runtime),
+        input_fn=_make_input(["/trace help", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "/trace summary <run_id>" in "\n".join(outputs)
+    assert runtime.requests == []
