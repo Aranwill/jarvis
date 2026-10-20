@@ -168,6 +168,37 @@ def render_trace_node(
     return rendered
 
 
+
+def render_trace_summary(projection: ExecutionTraceProjection) -> str:
+    """Display only facts already represented in a validated trace projection."""
+    if not isinstance(projection, ExecutionTraceProjection):
+        raise TypeError("projection must be an ExecutionTraceProjection")
+
+    run = projection.node("run")
+    lines = [
+        "Malāk [trace/summary]",
+        f"run_id: {projection.run_id or 'NOT_OBSERVED'}",
+        f"baseline_commit: {projection.baseline_commit or 'NOT_OBSERVED'}",
+        f"trace_closed: {str(projection.stopped).lower()}",
+        f"run_duration_ms: {_observed_duration(run.duration_ms)}",
+    ]
+    for node in projection.nodes:
+        lines.append(f"{node.node_id}.status: {node.status}")
+        lines.append(
+            f"{node.node_id}.duration_ms: "
+            f"{_observed_duration(node.duration_ms)}"
+        )
+        if node.reason_code is not None:
+            lines.append(f"{node.node_id}.reason_code: {node.reason_code}")
+
+    lines.extend(("source: trace.jsonl", "authority_effect: none"))
+    return "\n".join(lines)
+
+
+def _observed_duration(value: int | None) -> str:
+    return str(value) if value is not None else "NOT_OBSERVED"
+
+
 class LiveTraceTextView:
     def __init__(
         self,
