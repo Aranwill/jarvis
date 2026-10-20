@@ -19,6 +19,7 @@ from malak.app.trace_view import (
     load_trace_projection,
     render_trace_node,
     render_trace_projection,
+    render_trace_summary,
 )
 from malak.core.conversation_registry import ConversationProviderRegistry
 from malak.core.llm_runtime import LLMRuntime
@@ -72,6 +73,7 @@ TRACE_HELP_MESSAGE = """
 Comandos Trace:
   /trace replay <run_id>
   /trace inspect <run_id> <node_id>
+  /trace summary <run_id>
 """.strip()
 
 SELF_REVIEW_HELP_MESSAGE = """
@@ -303,8 +305,8 @@ def _trace_command(
     if len(parts) == 2 and parts[1].lower() == "help":
         return "help", None, None
 
-    if len(parts) == 3 and parts[1].lower() == "replay":
-        return "replay", parts[2], None
+    if len(parts) == 3 and parts[1].lower() in {"replay", "summary"}:
+        return parts[1].lower(), parts[2], None
 
     if len(parts) == 4 and parts[1].lower() == "inspect":
         return "inspect", parts[2], parts[3]
@@ -652,7 +654,7 @@ def run_cli(
                 output_fn(TRACE_HELP_MESSAGE)
                 continue
 
-            if action not in {"replay", "inspect"} or run_id is None:
+            if action not in {"replay", "inspect", "summary"} or run_id is None:
                 output_fn(
                     "Comando Trace inválido. "
                     "Usa /trace help."
@@ -680,6 +682,8 @@ def run_cli(
                 )
                 if action == "replay":
                     output_fn(render_trace_projection(projection))
+                elif action == "summary":
+                    output_fn(render_trace_summary(projection))
                 else:
                     output_fn(
                         render_trace_node(
