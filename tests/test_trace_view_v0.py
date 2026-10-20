@@ -638,3 +638,70 @@ def test_safe_diagnostic_green_b13_failed_node_exposes_diagnostic_ref() -> None:
 
     assert "reason_code: component_error" in rendered
     assert "output_refs: diagnostic:D0001" in rendered
+
+
+def test_obs03_summary_reports_real_fixture_durations_without_summing_nodes() -> None:
+    projection = _projection_module().fold_execution_trace(_events())
+
+    first = _view_module().render_trace_summary(projection)
+    second = _view_module().render_trace_summary(projection)
+
+    assert first == second
+    assert "trace_closed: true" in first
+    assert "run_duration_ms: 11000" in first
+    assert "engineering_inspect.duration_ms: 2000" in first
+    assert "engineering_analyze.status: SKIPPED" in first
+    assert "engineering_analyze.duration_ms: NOT_OBSERVED" in first
+    assert "engineering_analyze.reason_code: not_required_by_workflow" in first
+    assert "source: trace.jsonl" in first
+    assert "authority_effect: none" in first
+    assert "tokens" not in first.lower()
+    assert "model_cost" not in first.lower()
+
+
+def test_obs03_summary_preserves_partial_and_failed_trace_states() -> None:
+    partial = _projection_module().fold_execution_trace(
+        (_event(1, "RUN_STARTED"),)
+    )
+    partial_text = _view_module().render_trace_summary(partial)
+
+    assert "trace_closed: false" in partial_text
+    assert "run_duration_ms: NOT_OBSERVED" in partial_text
+    assert "engineering_inspect.status: NOT_OBSERVED" in partial_text
+    assert "engineering_inspect.duration_ms: NOT_OBSERVED" in partial_text
+    assert "WAITING" not in partial_text
+
+    failed = _projection_module().fold_execution_trace(
+        (
+            _event(1, "RUN_STARTED"),
+            _event(
+                2,
+                "COMPONENT_STARTED",
+                component="engineering_inspect",
+                phase="engineering",
+                seconds=1,
+            ),
+            _event(
+                3,
+                "COMPONENT_FAILED",
+                component="engineering_inspect",
+                phase="engineering",
+                outcome="FAILED",
+                reason_code="component_error",
+                seconds=3,
+            ),
+        )
+    )
+    failed_text = _view_module().render_trace_summary(failed)
+
+    assert "trace_closed: false" in failed_text
+    assert "run_duration_ms: NOT_OBSERVED" in failed_text
+    assert "engineering_inspect.status: FAILED" in failed_text
+    assert "engineering_inspect.duration_ms: 2000" in failed_text
+    assert "engineering_inspect.reason_code: component_error" in failed_text
+    assert "authority_effect: none" in failed_text
+
+
+def test_obs03_summary_rejects_nonprojection_inputs() -> None:
+    with pytest.raises(TypeError, match="ExecutionTraceProjection"):
+        _view_module().render_trace_summary(object())
