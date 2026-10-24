@@ -232,6 +232,7 @@ El contrato es request-scoped y no altera el comportamiento conversacional ordin
 help
 ayuda
 status
+info
 doctor
 new
 
@@ -260,6 +261,8 @@ exit
 quit
 salir
 ```
+
+El comando `info` muestra la identidad Malāk y la versión de la distribución Python instalada mediante metadatos locales del paquete `malak`. Si esa lectura falla, indica `Versión instalada: NOT_CHECKED (metadatos no disponibles)` sin revelar detalles internos. No invoca el modelo, no certifica integridad, seguridad ni salud global y no altera la sesión.
 
 El comando `status` también informa `Intercambios retenidos: N` para la sesión activa. El valor sólo cuenta intercambios completos que siguen en el contexto efímero (máximo seis por defecto); no muestra mensajes, no consulta otras sesiones ni persiste datos. Después de `new`, el recuento vuelve a cero. Ante una lectura local fallida, `status` informa `Intercambios retenidos: NOT_CHECKED (consulta local fallida)` sin divulgar la excepción interna, mantiene los estados Engineering/Explorer y permite continuar la sesión. La siguiente consulta vuelve a intentar la lectura ordinaria; no se inventa un valor ni se modifica el historial.
 
