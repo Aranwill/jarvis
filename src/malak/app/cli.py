@@ -546,10 +546,15 @@ def run_cli(
                 f"Estado: operativo | Provider: {provider_name} | "
                 f"Runtime: {runtime_name}"
             )
-            output_fn(
-                f"Intercambios retenidos: "
-                f"{conversation_service.retained_exchange_count(session_id)}"
-            )
+            try:
+                count = conversation_service.retained_exchange_count(session_id)
+            except Exception:
+                output_fn(
+                    "Intercambios retenidos: NOT_CHECKED "
+                    "(consulta local fallida)"
+                )
+            else:
+                output_fn(f"Intercambios retenidos: {count}")
             if engineering is None:
                 output_fn("Engineering: unavailable")
                 output_fn("Explorer: unavailable")
