@@ -260,6 +260,8 @@ quit
 salir
 ```
 
+El comando `status` también informa `Intercambios retenidos: N` para la sesión activa. El valor sólo cuenta intercambios completos que siguen en el contexto efímero (máximo seis por defecto); no muestra mensajes, no consulta otras sesiones ni persiste datos. Después de `new`, el recuento vuelve a cero.
+
 La CLI también controla:
 
 - entradas vacías;
