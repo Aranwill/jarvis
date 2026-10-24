@@ -60,6 +60,27 @@ def test_conversation_service_delegates_to_registered_provider():
     assert response.provider == "runtime"
 
 
+def test_is_provider_registered_normalizes_name_without_generation() -> None:
+    registry = ConversationProviderRegistry()
+    provider = RecordingConversationProvider()
+    registry.register("mock", provider)
+    service = ConversationService(registry)
+
+    assert service.is_provider_registered(" MoCk ") is True
+    assert provider.last_request is None
+
+
+def test_is_provider_registered_returns_false_for_unknown_or_empty() -> None:
+    registry = ConversationProviderRegistry()
+    provider = RecordingConversationProvider()
+    registry.register("mock", provider)
+    service = ConversationService(registry)
+
+    assert service.is_provider_registered("unknown") is False
+    assert service.is_provider_registered("   ") is False
+    assert provider.last_request is None
+
+
 def test_conversation_service_preserves_model():
     registry = ConversationProviderRegistry()
     registry.register(
