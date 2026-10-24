@@ -536,6 +536,50 @@ def test_run_cli_displays_status() -> None:
     ) in outputs
 
 
+
+def test_run_cli_status_reports_active_session_exchange_count() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    run_cli(
+        service=service,
+        input_fn=make_input(
+            ["status", "Pregunta privada", "status", "Otra pregunta",
+             "status", "new", "status", "exit"]
+        ),
+        output_fn=outputs.append,
+    )
+
+    session_lines = [
+        line for line in outputs
+        if line.startswith("Intercambios retenidos: ")
+    ]
+    assert session_lines == [
+        "Intercambios retenidos: 0",
+        "Intercambios retenidos: 1",
+        "Intercambios retenidos: 2",
+        "Intercambios retenidos: 0",
+    ]
+    assert all("Pregunta privada" not in line for line in session_lines)
+
+
+def test_run_cli_status_reports_bounded_retained_window() -> None:
+    outputs: list[str] = []
+    service = build_conversation_service(runtime=RecordingRuntime())
+    prompts = [f"Intercambio {i}" for i in range(8)]
+
+    run_cli(
+        service=service,
+        input_fn=make_input([*prompts, "status", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert [
+        line for line in outputs
+        if line.startswith("Intercambios retenidos: ")
+    ] == ["Intercambios retenidos: 6"]
+
 def test_run_cli_handles_keyboard_interrupt() -> None:
     outputs: list[str] = []
 
