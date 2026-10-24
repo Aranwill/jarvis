@@ -4,7 +4,10 @@ from malak.core.conversation import (
     ConversationRequest,
     ConversationResponse,
 )
-from malak.core.conversation_registry import ConversationProviderRegistry
+from malak.core.conversation_registry import (
+    ConversationProviderNotFoundError,
+    ConversationProviderRegistry,
+)
 from malak.services.conversation_context import InMemoryConversationContext
 
 
@@ -59,6 +62,14 @@ class ConversationService:
         )
 
         return response
+
+    def is_provider_registered(self, provider_name: str) -> bool:
+        """Check local registration without executing the provider."""
+        try:
+            self._registry.get(provider_name)
+        except (ConversationProviderNotFoundError, ValueError):
+            return False
+        return True
 
     def retained_exchange_count(self, session_id: str | None = None) -> int:
         """Return only the number of completed exchanges for one session."""

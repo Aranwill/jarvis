@@ -263,7 +263,7 @@ salir
 
 El comando `status` también informa `Intercambios retenidos: N` para la sesión activa. El valor sólo cuenta intercambios completos que siguen en el contexto efímero (máximo seis por defecto); no muestra mensajes, no consulta otras sesiones ni persiste datos. Después de `new`, el recuento vuelve a cero.
 
-El comando `doctor` muestra únicamente diagnóstico local read-only. `CLI: VERIFIED` indica que se ejecutó el comando; `Contexto: VERIFIED` sólo confirma una lectura del contador efímero de la sesión activa. `CONFIGURED` indica una composición seleccionada, no un componente saludable. El comando nunca consulta modelos o endpoints, no prueba PDP/PEP y siempre termina con `Salud global: NOT_CERTIFIED`; no modifica el historial ni autoriza operaciones.
+El comando `doctor` muestra únicamente diagnóstico local read-only. `CLI: VERIFIED` indica que se ejecutó el comando; `Contexto: VERIFIED` sólo confirma una lectura del contador efímero de la sesión activa. `CONFIGURED` indica una composición seleccionada, no un componente saludable. El comando comprueba adicionalmente si el provider seleccionado está presente en el registro local de `ConversationService`, informando `Provider: REGISTERED (registro local)` o `Provider: NOT_REGISTERED (registro local)` sin ejecutar al provider ni divulgar su nombre. Esta comprobación no acredita salud, disponibilidad ni autorización. El comando nunca consulta modelos o endpoints, no prueba PDP/PEP y siempre termina con `Salud global: NOT_CERTIFIED`; no modifica el historial ni autoriza operaciones.
 
 La CLI también controla:
 

@@ -568,7 +568,14 @@ def run_cli(
             output_fn("Malāk Doctor V0 — diagnóstico local")
             output_fn("CLI: VERIFIED")
             output_fn("Kernel: CONFIGURED (sin ejecutar)")
-            output_fn("Provider: CONFIGURED (registro no comprobado)")
+            provider_registered = conversation_service.is_provider_registered(
+                provider_name
+            )
+            output_fn(
+                "Provider: REGISTERED (registro local)"
+                if provider_registered
+                else "Provider: NOT_REGISTERED (registro local)"
+            )
             output_fn("Runtime: CONFIGURED (no ejecutado)")
             count = conversation_service.retained_exchange_count(session_id)
             output_fn(

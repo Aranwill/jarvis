@@ -596,7 +596,7 @@ def test_run_cli_doctor_reports_only_bounded_local_diagnostics() -> None:
     assert "Malāk Doctor V0 — diagnóstico local" in outputs
     assert "CLI: VERIFIED" in outputs
     assert "Kernel: CONFIGURED (sin ejecutar)" in outputs
-    assert "Provider: CONFIGURED (registro no comprobado)" in outputs
+    assert "Provider: REGISTERED (registro local)" in outputs
     assert "Runtime: CONFIGURED (no ejecutado)" in outputs
     assert "Contexto: VERIFIED (intercambios retenidos: 0)" in outputs
     assert "Engineering: NOT_CONFIGURED" in outputs
@@ -646,6 +646,44 @@ def test_run_cli_doctor_does_not_execute_engineering_kernels() -> None:
     assert "Salud global: NOT_CERTIFIED" in outputs
     assert runtime.last_request is None
     assert all(not kernel.requests for kernel in engineering.kernels.values())
+
+
+def test_run_cli_doctor_reports_unregistered_provider_without_executing() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime, provider_name="mock")
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        provider_name="not-registered",
+        input_fn=make_input(["doctor", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Provider: NOT_REGISTERED (registro local)" in outputs
+    assert "Runtime: CONFIGURED (no ejecutado)" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert runtime.last_request is None
+    assert "not-registered" not in "\n".join(outputs)
+
+
+def test_run_cli_doctor_provider_registration_normalizes_name() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime, provider_name="mock")
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        provider_name="  MoCk  ",
+        input_fn=make_input(["doctor", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Provider: REGISTERED (registro local)" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert runtime.last_request is None
 
 
 def test_run_cli_handles_keyboard_interrupt() -> None:
