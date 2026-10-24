@@ -23,6 +23,8 @@
 
 **Topología elegida:** `ONE_PR / DESIGN_PLUS_IMPLEMENTATION` · **fundamento material:** `...` · **Owner aprueba apertura:** `...`.
 
+**A-04 — Interpretación PRE-RED greenfield (orientativa, sin nuevo gate):** cuando TDD aplique, el RED debe ejecutar una aserción conductual sobre una frontera observable real con fixture válido; registrar expected/actual, fallo causal, comando y candidate exacto. Error de importación/setup, test omitido o fallo provocado sólo por un doble no acredita RED. Si la frontera no existe, declarar `RED_NOT_DEMONSTRATED / INCONCLUSIVE` (descripción, no resultado terminal nuevo), resolver la precondición en un scope autorizado y **no anticipar GREEN**. Esta nota interpreta Engineering Method §5.1; no modifica §5.5, las excepciones §5.4 ni la autoridad humana.
+
 **Contrato de ejecución:** RED/GREEN separados por evidencia y autorización del Owner cuando aplique; candidato corregido implica revalidación afectada; 4R, E2E, CI, RDD Stage 1/2 y revisión independiente se disponen según riesgo y contrato, no por inercia. `INCONCLUSIVE != PASS`; `gate != PR`; `reviewer != PR`; `Evidence != Authority`; Ready y Merge sólo del Owner.
 
 **Uso:** esta ficha resume decisiones y apunta a evidencia fuente; **no sustituye** el Construction Preflight, la Alignment Matrix obligatoria cuando aplique, receipts, manifests ni validación sobre el candidate exacto. Las filas pueden enlazar evidencias existentes en vez de duplicarlas.
