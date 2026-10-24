@@ -5,10 +5,10 @@
 | Admisión / campo | Registro breve y evidencia enlazada |
 | --- | --- |
 | **P0 — Identidad** | `repository`, `baseline SHA/tree`, `work_unit`, `work_type`, `owner_instruction`; checkpoint previo cuando aplique. |
-| **P1 — Fuentes** | CURRENT_STATE y fuentes aplicables por autoridad; ADR, contratos y documentos de ley; histórico/conceptual separado. |
+| **P1 — Fuentes (A-13)** | CURRENT_STATE y fuentes aplicables por autoridad. Etiquetar cada afirmación relevante con fuente: `NORMATIVE_INVARIANT` (obligación vigente), `TARGET_FUTURE` (objetivo no integrado) o `CURRENT_IMPLEMENTED` (código/tests verificables). Las etiquetas no son excluyentes ni cambian autoridad o vigencia. Históricos y conceptos separados. |
 | **P2/P3 — Invariantes y autoridad** | Blueprint/Constituciones/Kernel/SECURITY/ADR-003: compatible o conflicto; flujo de control, `authority_effect: none`; Ready/Merge Owner. |
 | **P4 — Necesidad/reutilización** | Problema observable del baseline; REUSE/ADAPT/COMPOSE/NEW; coste, alternativa mínima y justificación. |
-| **P5 — Riesgo (A-03)** | `risk_class: 0..4` por el **delta real** en contratos, side effects y trust boundaries, no por el nombre del componente; `critical_contract: YES/NO` fundado en §5.2; 4R, RDD, G0/G1 y reviewer aplicables. |
+| **P5 — Riesgo (A-03/A-12)** | `operation_level: 0..4/N/A` para la **operación del producto** (Governance Constitution §1.3), distinto de `change_risk_class: 0..4` para el **delta de software** (campo normativo `risk_class`, Engineering Method §7). Declarar ambos sin equipararlos. Evaluar contratos, side effects y trust boundaries; `critical_contract: YES/NO` según §5.2; 4R, RDD, G0/G1 y reviewer aplicables. |
 | **P6 — Scope** | Resultado verificable, archivos/componentes permitidos y prohibidos, contratos invariantes, candidate identity, STOP y rollback. |
 | **P7 — Disposición** | `PASS/FAIL/INCONCLUSIVE` con razón y evidencia; distinguir hallazgos actuales e históricos y no inferir PASS de tests o antecedentes. |
 
