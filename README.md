@@ -232,6 +232,7 @@ El contrato es request-scoped y no altera el comportamiento conversacional ordin
 help
 ayuda
 status
+doctor
 new
 
 /engineering help
@@ -261,6 +262,8 @@ salir
 ```
 
 El comando `status` también informa `Intercambios retenidos: N` para la sesión activa. El valor sólo cuenta intercambios completos que siguen en el contexto efímero (máximo seis por defecto); no muestra mensajes, no consulta otras sesiones ni persiste datos. Después de `new`, el recuento vuelve a cero.
+
+El comando `doctor` muestra únicamente diagnóstico local read-only. `CLI: VERIFIED` indica que se ejecutó el comando; `Contexto: VERIFIED` sólo confirma una lectura del contador efímero de la sesión activa. `CONFIGURED` indica una composición seleccionada, no un componente saludable. El comando nunca consulta modelos o endpoints, no prueba PDP/PEP y siempre termina con `Salud global: NOT_CERTIFIED`; no modifica el historial ni autoriza operaciones.
 
 La CLI también controla:
 
