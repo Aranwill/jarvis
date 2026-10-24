@@ -118,6 +118,8 @@ Describa brevemente el objetivo de este Pull Request.
 
 Identifique el rol de este PR dentro del Construction Protocol.
 
+Para preparar la unidad antes de crear la rama, puede utilizar la [ficha compacta A-01/A-02](https://github.com/Aranwill/jarvis/blob/main/docs/development/unit_design_envelope_template.md) como portada de decisión. Es una ayuda **no normativa**: no reemplaza Preflight, gates aplicables ni este ledger.
+
 
 
 \- \[ ] Design / Documentation PR
