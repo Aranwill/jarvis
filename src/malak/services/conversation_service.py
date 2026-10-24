@@ -60,6 +60,16 @@ class ConversationService:
 
         return response
 
+    def retained_exchange_count(self, session_id: str | None = None) -> int:
+        """Return only the number of completed exchanges for one session."""
+        if self._context is None:
+            return 0
+        if session_id is None:
+            raise ValueError(
+                "session_id is required when conversation context is enabled"
+            )
+        return len(self._context.snapshot(session_id)) // 2
+
     def reset_context(
         self,
         session_id: str | None = None,

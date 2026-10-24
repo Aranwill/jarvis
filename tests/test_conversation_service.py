@@ -324,6 +324,44 @@ def test_conversation_service_reset_without_context_is_safe():
 
 
 
+
+def test_retained_exchange_count_is_bounded_isolated_and_read_only() -> None:
+    context = InMemoryConversationContext(max_exchanges=2)
+    service = ConversationService(ConversationProviderRegistry(), context)
+
+    for index in range(3):
+        context.record_exchange("session-A", f"Pregunta {index}", "Respuesta")
+    context.record_exchange("session-B", "Pregunta secreta", "Respuesta")
+
+    before_a = context.snapshot("session-A")
+    before_b = context.snapshot("session-B")
+    assert service.retained_exchange_count("session-A") == 2
+    assert service.retained_exchange_count("session-B") == 1
+    assert service.retained_exchange_count("no-existe") == 0
+    assert context.snapshot("session-A") == before_a
+    assert context.snapshot("session-B") == before_b
+
+    service.reset_context("session-A")
+    assert service.retained_exchange_count("session-A") == 0
+    assert service.retained_exchange_count("session-B") == 1
+
+
+def test_retained_exchange_count_requires_session_with_context() -> None:
+    service = ConversationService(
+        ConversationProviderRegistry(),
+        context=InMemoryConversationContext(),
+    )
+
+    with pytest.raises(ValueError, match="session_id is required"):
+        service.retained_exchange_count()
+
+
+def test_retained_exchange_count_without_context_is_zero() -> None:
+    service = ConversationService(ConversationProviderRegistry())
+
+    assert service.retained_exchange_count() == 0
+
+
 def test_analyze_structured_output_green_g04_context_replace_preserves_schema():
     registry = ConversationProviderRegistry()
     provider = RecordingConversationProvider()
