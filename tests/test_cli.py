@@ -580,6 +580,74 @@ def test_run_cli_status_reports_bounded_retained_window() -> None:
         if line.startswith("Intercambios retenidos: ")
     ] == ["Intercambios retenidos: 6"]
 
+
+def test_run_cli_doctor_reports_only_bounded_local_diagnostics() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["doctor", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Malāk Doctor V0 — diagnóstico local" in outputs
+    assert "CLI: VERIFIED" in outputs
+    assert "Kernel: CONFIGURED (sin ejecutar)" in outputs
+    assert "Provider: CONFIGURED (registro no comprobado)" in outputs
+    assert "Runtime: CONFIGURED (no ejecutado)" in outputs
+    assert "Contexto: VERIFIED (intercambios retenidos: 0)" in outputs
+    assert "Engineering: NOT_CONFIGURED" in outputs
+    assert "Modelo y endpoint: NOT_CHECKED" in outputs
+    assert "Seguridad/PDP/PEP: NOT_CHECKED" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert runtime.last_request is None
+
+
+def test_run_cli_doctor_does_not_change_conversation_history() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["Pregunta privada", "doctor", "status", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Contexto: VERIFIED (intercambios retenidos: 1)" in outputs
+    assert "Intercambios retenidos: 1" in outputs
+    assert runtime.last_request is not None
+    assert runtime.last_request.prompt == "Pregunta privada"
+    assert all(
+        "Pregunta privada" not in line
+        for line in outputs
+        if line.startswith(("Contexto:", "Kernel:", "Provider:", "Runtime:"))
+    )
+
+
+def test_run_cli_doctor_does_not_execute_engineering_kernels() -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    engineering = EngineeringKernelSetStub()
+
+    run_cli(
+        service=build_conversation_service(runtime=runtime),
+        runtime=runtime,
+        engineering=engineering,
+        input_fn=make_input(["doctor", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Engineering: CONFIGURED (sin ejecutar)" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert runtime.last_request is None
+    assert all(not kernel.requests for kernel in engineering.kernels.values())
+
+
 def test_run_cli_handles_keyboard_interrupt() -> None:
     outputs: list[str] = []
 
