@@ -8,9 +8,9 @@
 | **P1 — Fuentes** | CURRENT_STATE y fuentes aplicables por autoridad; ADR, contratos y documentos de ley; histórico/conceptual separado. |
 | **P2/P3 — Invariantes y autoridad** | Blueprint/Constituciones/Kernel/SECURITY/ADR-003: compatible o conflicto; flujo de control, `authority_effect: none`; Ready/Merge Owner. |
 | **P4 — Necesidad/reutilización** | Problema observable del baseline; REUSE/ADAPT/COMPOSE/NEW; coste, alternativa mínima y justificación. |
-| **P5 — Riesgo** | `risk_class: 0..4` y razón en el **delta**, `critical_contract: YES/NO` contrastado con §5.2; 4R, RDD, G0/G1 y reviewer según aplicabilidad. |
+| **P5 — Riesgo (A-03)** | `risk_class: 0..4` por el **delta real** en contratos, side effects y trust boundaries, no por el nombre del componente; `critical_contract: YES/NO` fundado en §5.2; 4R, RDD, G0/G1 y reviewer aplicables. |
 | **P6 — Scope** | Resultado verificable, archivos/componentes permitidos y prohibidos, contratos invariantes, candidate identity, STOP y rollback. |
-| **P7 — Disposición** | `PASS/FAIL/INCONCLUSIVE` con razón, findings vinculados materialmente y evidencia; sin inferir PASS de tests o antecedentes. |
+| **P7 — Disposición** | `PASS/FAIL/INCONCLUSIVE` con razón y evidencia; distinguir hallazgos actuales e históricos y no inferir PASS de tests o antecedentes. |
 
 ## Decisión de topología — **antes de la rama**
 
@@ -19,7 +19,7 @@
 | ¿La unidad **material** requiere especificación formal G0/G1 y **posterior implementación**? | **Sí:** topología predeterminada **PR-A Design/Documentation → Owner Merge → PR-B Implementation**, conforme a §5.1.1. |
 | ¿Es documentación autónoma, microcambio aprobado o unidad sin diseño formal previo aplicable? | **Sí, con fundamento registrado:** **una PR proporcional**. No inventar una Design PR artificial. |
 | ¿Afecta un contrato crítico (§5.2), aunque el delta sea pequeño? | Preservar **íntegramente** §5.5, hardening, Design 4R pre-RED, FULL 4R post-GREEN, RDD/CI y validaciones aplicables. La plantilla no habilita omisiones. |
-| ¿Hay finding histórico `INCONCLUSIVE/FAIL`? | Vincular y tratar como bloqueo sólo cuando exista **relación material con el scope actual** o una norma activa lo exija; conservar provenance y no reabrir issues automáticamente. |
+| ¿Hay finding histórico `INCONCLUSIVE/FAIL`? | Registrar referencia, invariante/gate afectado, vínculo con este scope y evidencia de vigencia. Sin vínculo material, justificar no aplicabilidad; conservar el hallazgo sin reabrir issues. Un bloqueo actual o drift material bajo §10.3 mantiene STOP. |
 
 **Topología elegida:** `ONE_PR / DESIGN_PLUS_IMPLEMENTATION` · **fundamento material:** `...` · **Owner aprueba apertura:** `...`.
 
