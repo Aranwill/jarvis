@@ -40,6 +40,7 @@ HELP_MESSAGE = """
 Comandos disponibles:
   help    Muestra esta ayuda.
   status  Muestra el estado básico de la CLI.
+  doctor  Diagnóstico local informativo, sin ejecutar modelos ni componentes.
   new     Inicia una nueva conversación.
   /engineering help
           Muestra los comandos Engineering disponibles.
@@ -561,6 +562,26 @@ def run_cli(
                 output_fn(
                     f"Explorer baseline: {engineering.baseline_commit}"
                 )
+            continue
+
+        if command == "doctor":
+            output_fn("Malāk Doctor V0 — diagnóstico local")
+            output_fn("CLI: VERIFIED")
+            output_fn("Kernel: CONFIGURED (sin ejecutar)")
+            output_fn("Provider: CONFIGURED (registro no comprobado)")
+            output_fn("Runtime: CONFIGURED (no ejecutado)")
+            count = conversation_service.retained_exchange_count(session_id)
+            output_fn(
+                f"Contexto: VERIFIED (intercambios retenidos: {count})"
+            )
+            output_fn(
+                "Engineering: NOT_CONFIGURED"
+                if engineering is None
+                else "Engineering: CONFIGURED (sin ejecutar)"
+            )
+            output_fn("Modelo y endpoint: NOT_CHECKED")
+            output_fn("Seguridad/PDP/PEP: NOT_CHECKED")
+            output_fn("Salud global: NOT_CERTIFIED")
             continue
 
         if command == "new":
