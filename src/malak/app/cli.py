@@ -568,19 +568,27 @@ def run_cli(
             output_fn("Malāk Doctor V0 — diagnóstico local")
             output_fn("CLI: VERIFIED")
             output_fn("Kernel: CONFIGURED (sin ejecutar)")
-            provider_registered = conversation_service.is_provider_registered(
-                provider_name
-            )
-            output_fn(
-                "Provider: REGISTERED (registro local)"
-                if provider_registered
-                else "Provider: NOT_REGISTERED (registro local)"
-            )
+            try:
+                provider_registered = conversation_service.is_provider_registered(
+                    provider_name
+                )
+            except Exception:
+                output_fn("Provider: NOT_CHECKED (consulta local fallida)")
+            else:
+                output_fn(
+                    "Provider: REGISTERED (registro local)"
+                    if provider_registered
+                    else "Provider: NOT_REGISTERED (registro local)"
+                )
             output_fn("Runtime: CONFIGURED (no ejecutado)")
-            count = conversation_service.retained_exchange_count(session_id)
-            output_fn(
-                f"Contexto: VERIFIED (intercambios retenidos: {count})"
-            )
+            try:
+                count = conversation_service.retained_exchange_count(session_id)
+            except Exception:
+                output_fn("Contexto: NOT_CHECKED (consulta local fallida)")
+            else:
+                output_fn(
+                    f"Contexto: VERIFIED (intercambios retenidos: {count})"
+                )
             output_fn(
                 "Engineering: NOT_CONFIGURED"
                 if engineering is None

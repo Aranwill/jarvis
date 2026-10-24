@@ -686,6 +686,55 @@ def test_run_cli_doctor_provider_registration_normalizes_name() -> None:
     assert runtime.last_request is None
 
 
+def test_doctor_continues_after_provider_inspection_error(monkeypatch) -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    def failing_probe(_: str) -> bool:
+        raise RuntimeError("internal token must not be exposed")
+
+    monkeypatch.setattr(service, "is_provider_registered", failing_probe)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["doctor", "help", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Provider: NOT_CHECKED (consulta local fallida)" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert HELP_MESSAGE in outputs
+    assert "internal token must not be exposed" not in "\n".join(outputs)
+    assert runtime.last_request is None
+
+
+def test_doctor_continues_after_context_count_error(monkeypatch) -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    def failing_count(_: str) -> int:
+        raise RuntimeError("private session data must not be exposed")
+
+    monkeypatch.setattr(service, "retained_exchange_count", failing_count)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["doctor", "help", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Provider: REGISTERED (registro local)" in outputs
+    assert "Contexto: NOT_CHECKED (consulta local fallida)" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert HELP_MESSAGE in outputs
+    assert "private session data must not be exposed" not in "\n".join(outputs)
+    assert runtime.last_request is None
+
+
 def test_run_cli_handles_keyboard_interrupt() -> None:
     outputs: list[str] = []
 
