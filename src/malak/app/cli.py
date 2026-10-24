@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+import importlib.metadata
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -40,6 +41,7 @@ HELP_MESSAGE = """
 Comandos disponibles:
   help    Muestra esta ayuda.
   status  Muestra el estado básico de la CLI.
+  info    Muestra la información local de Malāk.
   doctor  Diagnóstico local informativo, sin ejecutar modelos ni componentes.
   new     Inicia una nueva conversación.
   /engineering help
@@ -539,6 +541,24 @@ def run_cli(
 
         if command in {"help", "ayuda"}:
             output_fn(HELP_MESSAGE)
+            continue
+
+        if command == "info":
+            output_fn("Malāk Info V0 — información local")
+            output_fn("Identidad: Malāk")
+            try:
+                installed_version = importlib.metadata.version("malak")
+            except Exception:
+                output_fn(
+                    "Versión instalada: NOT_CHECKED "
+                    "(metadatos no disponibles)"
+                )
+            else:
+                output_fn(
+                    f"Versión instalada: {installed_version} "
+                    "(metadatos del paquete)"
+                )
+            output_fn("Salud global: NOT_CERTIFIED")
             continue
 
         if command == "status":
