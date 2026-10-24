@@ -3,8 +3,8 @@ title: Hoja de ruta de implementación de Malāk
 status: activo
 authority: no normativa
 document_role: canonical_derived_implementation_roadmap
-as_of_date: 2026-10-17
-as_of_commit: 961a5a78450c5cd3c2854a3d404e124f97530cda
+as_of_date: 2026-10-23
+as_of_commit: fef8adfc42e4371d32781d07c91ba47888cad714
 branch: main
 baseline: v0.6.0-alpha
 certification_branch: null
@@ -14,6 +14,21 @@ legacy_planning_source:
   - docs/project/roadmap.md
 language: es
 ---
+
+> **CURRENT_STATE — corte operacional por dominio (2026-10-23).** Fotografía derivada de `Aranwill/jarvis/main@fef8adfc42e4371d32781d07c91ba47888cad714` (tree `4346beea326ff82be94563d82fafe795e71bcc0c`), verificada antes de esta corrección documental. El SHA identifica el **baseline de código**, no un HEAD dinámico después del merge.
+
+| Dominio | Integrado en este baseline | Frontera vigente |
+| --- | --- | --- |
+| Kernel y conversación | Kernel mínimo, Planner, Capability Registry, contexto conversacional efímero por sesión; `MockLLMRuntime` y adapter `OllamaRuntime`. | Sin memoria conversacional persistente ni ejecución de herramientas por esta ruta. |
+| Engineering y Explorer | E0/E1 read-only, E2 Inspect, E3 Analyze, E4 Propose, E5-A CLI y E5-B1 Explorer. | Contratos de validación delimitados; E5-B2/B3 aún diferidos. |
+| Seguridad y autoridad | Contratos `SecurityContext`, PDP/PEP, emisión/validación de contextos y auditoría, con tests. | No implica que todos los flujos futuros ya estén integrados con enforcement ni autoriza acciones externas. |
+| Memoria y assurance | Admisión/provenance/identidad/readiness episódicas; `ProtectedFinalization` y `AssuranceSignalProjection` implementadas en aislamiento. | No hay memoria episódica persistente ni G2B conversacional activado. |
+| Observabilidad | Eventos, métricas, trazas y comandos `/trace replay`, `/trace inspect`, `/trace summary`; OBS03 integrado. | Los resultados sólo describen hechos observados; `authority_effect: none`. |
+| Método de construcción | RDD Stage 1 activo; Stage 2 activo y proporcional (riesgo 0/1: no aplicable; 2: opcional por admisión; 3/4: requerido). | Evidencia y receipts no sustituyen Owner Ready/Merge. |
+| Validación | `main`: 2163 tests PASS en Ubuntu y 2163 en Windows ([Validation 39517475139](https://github.com/Aranwill/jarvis/actions/runs/39517475139)). | CI no acredita ejecución live de Ollama, C03 ni G2. |
+
+**Vigencia y precedencia:** esta fotografía prevalece para consultas de `CURRENT_STATE` sobre claims antiguos incompatibles de este mismo documento. Se conservan íntegros los bloques históricos siguientes, con sus SHAs, hallazgos y fechas originales. Cualquier corte futuro debe revalidar `main`; `authority_effect: none`.
+
 
 > **CURRENT_STATE — actualización 2026-10-17.**
 > La reconciliación más reciente de la línea E2/E3 y self-review está registrada
