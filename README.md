@@ -250,6 +250,7 @@ new
 /trace help
 /trace replay <run_id>
 /trace inspect <run_id> <node_id>
+/trace summary <run_id>
 
 /self-review help
 /self-review test-v0 <run_id> <validation_ref> [<validation_ref> ...]
@@ -267,6 +268,8 @@ La CLI también controla:
 - interrupciones mediante `Ctrl + C`;
 - finalización mediante EOF;
 - errores del runtime presentados como errores controlados.
+
+`/trace summary <run_id>` muestra un resumen read-only de la traza observada (`trace.jsonl`): estado y duración registrada por nodo, y códigos de causa disponibles, sin conferir autoridad (`authority_effect: none`).
 
 Los comandos propios de la CLI permanecen en la frontera de aplicación y no se convierten artificialmente en capabilities.
 
