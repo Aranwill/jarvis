@@ -581,6 +581,66 @@ def test_run_cli_status_reports_bounded_retained_window() -> None:
     ] == ["Intercambios retenidos: 6"]
 
 
+def test_status_continues_when_context_count_fails(monkeypatch) -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    def unavailable_count(_: str) -> int:
+        raise RuntimeError("private session content must remain hidden")
+
+    monkeypatch.setattr(service, "retained_exchange_count", unavailable_count)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["status", "help", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Intercambios retenidos: NOT_CHECKED (consulta local fallida)" in outputs
+    assert "Engineering: unavailable" in outputs
+    assert "Explorer: unavailable" in outputs
+    assert HELP_MESSAGE in outputs
+    assert "private session content must remain hidden" not in "\n".join(outputs)
+    assert runtime.last_request is None
+
+
+def test_status_recovers_counter_after_transient_failure(monkeypatch) -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+    original_count = service.retained_exchange_count
+    attempt_count = 0
+
+    def count_with_one_failure(session_id: str | None = None) -> int:
+        nonlocal attempt_count
+        attempt_count += 1
+        if attempt_count == 1:
+            raise RuntimeError("transient internal error")
+        return original_count(session_id)
+
+    monkeypatch.setattr(service, "retained_exchange_count", count_with_one_failure)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["status", "status", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert [
+        line for line in outputs
+        if line.startswith("Intercambios retenidos: ")
+    ] == [
+        "Intercambios retenidos: NOT_CHECKED (consulta local fallida)",
+        "Intercambios retenidos: 0",
+    ]
+    assert attempt_count == 2
+    assert "transient internal error" not in "\n".join(outputs)
+    assert runtime.last_request is None
+
+
 def test_run_cli_doctor_reports_only_bounded_local_diagnostics() -> None:
     outputs: list[str] = []
     runtime = RecordingRuntime()
