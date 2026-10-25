@@ -21,9 +21,24 @@ SECURITY_FORBIDDEN = (
     "malak.core.llm_runtime",
 )
 
+# Caracteriza la frontera vigente: un adapter downstream no depende de
+# los orquestadores upstream. No prueba ausencia de control dinámico.
+RUNTIME_UPSTREAM_IMPORTS = (
+    "malak.app",
+    "malak.kernel",
+    "malak.capabilities",
+    "malak.services",
+)
+
 
 def _invariant_name(forbidden: tuple[str, ...]) -> str:
-    return "CA-I1" if forbidden == KERNEL_FORBIDDEN else "CA-I2"
+    if forbidden == KERNEL_FORBIDDEN:
+        return "CA-I1"
+    if forbidden == SECURITY_FORBIDDEN:
+        return "CA-I2"
+    if forbidden == RUNTIME_UPSTREAM_IMPORTS:
+        return "RUNTIME-UPSTREAM-IMPORTS"
+    raise ValueError("unrecognized architecture test boundary")
 
 
 def _boundary_for(target: str, forbidden: tuple[str, ...]) -> str | None:
@@ -154,3 +169,55 @@ def test_current_tree_satisfies_static_import_invariant(
     forbidden: tuple[str, ...],
 ) -> None:
     assert _scan_tree(SRC / relative_root, forbidden) == []
+
+
+@pytest.mark.parametrize(
+    ("source", "package", "expected_boundary"),
+    [
+        (
+            "from malak.kernel.registry import CapabilityRegistry\n",
+            "malak.runtime",
+            "malak.kernel",
+        ),
+        (
+            "from ..app.composition import build_conversation_kernel\n",
+            "malak.providers",
+            "malak.app",
+        ),
+        (
+            "import malak.capabilities.conversation\n",
+            "malak.runtime",
+            "malak.capabilities",
+        ),
+        (
+            "from malak.services.conversation_service import ConversationService\n",
+            "malak.providers",
+            "malak.services",
+        ),
+    ],
+)
+def test_upstream_import_detection_is_effective(
+    source: str, package: str, expected_boundary: str
+) -> None:
+    """A forbidden dependency must be observable in a synthetic fixture."""
+    violations = _find_violations(
+        source, package=package, forbidden=RUNTIME_UPSTREAM_IMPORTS
+    )
+    assert violations
+    assert {item["forbidden_boundary"] for item in violations} == {
+        expected_boundary
+    }
+    assert {item["invariant"] for item in violations} == {
+        "RUNTIME-UPSTREAM-IMPORTS"
+    }
+
+
+@pytest.mark.parametrize(
+    "relative_root",
+    [Path("malak/runtime"), Path("malak/providers")],
+)
+def test_runtime_adapters_preserve_observed_upstream_import_boundary(
+    relative_root: Path,
+) -> None:
+    """Characterize current static imports, not every ADR-003 authority path."""
+    assert _scan_tree(SRC / relative_root, RUNTIME_UPSTREAM_IMPORTS) == []
