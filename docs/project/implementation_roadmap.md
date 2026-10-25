@@ -21,13 +21,14 @@ language: es
 | --- | --- | --- |
 | H01 — invariantes de arquitectura | [PR #352](https://github.com/Aranwill/jarvis/pull/352), merge `770c76f9821f67afabc2508678fc04fc568a35f8`; tests estáticos contra imports ascendentes de Runtime/Provider. | Pruebas de topología de imports, **no** certificación global de ADR-003 ni del control dinámico. |
 | D5 — entrada instalable | [PR #353](https://github.com/Aranwill/jarvis/pull/353), merge `a1c7ece28286a43379f1d5322f1b2093475c9bda`; `pyproject.toml` expone `malak = "malak.app.cli:main"`; smoke de ejecutable editable en ambos SO. | Conserva `python -m malak.app.cli`; no cambia Kernel, modelo, Runtime ni permisos. |
-| H03 — perfil CI | [PR #354](https://github.com/Aranwill/jarvis/pull/354), merge `${base}`; `pytest -q --durations=20` en Windows y Ubuntu. | Diagnóstico de tiempos, no benchmark causal, optimización del pipeline ni autoridad para reducir cobertura. |
+| H03 — perfil CI | [PR #354](https://github.com/Aranwill/jarvis/pull/354), merge `337252e4eb1520442712d53f837ebcf3ca8b2877`; `pytest -q --durations=20` en Windows y Ubuntu. | Diagnóstico de tiempos, no benchmark causal, optimización del pipeline ni autoridad para reducir cobertura. |
 | Validación post-merge | [GitHub Actions #40210650382](https://github.com/Aranwill/jarvis/actions/runs/40210650382): **2.189 PASS Ubuntu** (40,07 s) y **2.189 PASS Windows** (592,20 s), compilación y `git diff --check` exitosos sobre SHA exacto. | La discrepancia de tiempos Windows/Ubuntu no tiene causa raíz demostrada; CI no acredita ejecución live de modelos, Memory persistente ni G2B conversacional. |
 | Planificación y autoridad | RDD Stage 1 activo; RDD Stage 2 proporcional por riesgo, conforme al Construction Protocol vigente. H02 fue evaluación focal *read-only*, sin componente nuevo en `main`. | RDD Stage 3 sigue **NOT AUTHORIZED**; evidencia/CI no equivalen a Owner Ready/Merge; no se promueve un nuevo sprint ni se alteran constituciones o Blueprint. |
 
 **Precedencia temporal:** este corte incremental es el más reciente **solo para las materias verificadas en la tabla**; la fotografía por dominios del 23-10-2026 y el resto de snapshots históricos se conservan íntegros. Las áreas no alcanzadas por las PR citadas permanecen sujetas a su evidencia normativa y de código actual; este registro no certifica el sistema completo. `authority_effect: none`.
 
 ---
+
 > **CURRENT_STATE — corte operacional por dominio (2026-10-23).** Fotografía derivada de `Aranwill/jarvis/main@fef8adfc42e4371d32781d07c91ba47888cad714` (tree `4346beea326ff82be94563d82fafe795e71bcc0c`), verificada antes de esta corrección documental. El SHA identifica el **baseline de código**, no un HEAD dinámico después del merge.
 
 | Dominio | Integrado en este baseline | Frontera vigente |
