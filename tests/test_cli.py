@@ -522,6 +522,58 @@ def test_run_cli_displays_help() -> None:
     assert HELP_MESSAGE in outputs
     assert "new     Inicia una nueva conversación." in HELP_MESSAGE
 
+def test_run_cli_info_shows_local_package_version_without_runtime(monkeypatch) -> None:
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    def known_version(package: str) -> str:
+        assert package == "malak"
+        return "0.6.0a0"
+
+    monkeypatch.setattr("importlib.metadata.version", known_version)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["info", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Malāk Info V0 — información local" in outputs
+    assert "Identidad: Malāk" in outputs
+    assert "Versión instalada: 0.6.0a0 (metadatos del paquete)" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert "  info    Muestra la información local de Malāk." in HELP_MESSAGE
+    assert runtime.last_request is None
+
+
+def test_run_cli_info_handles_missing_metadata_without_runtime(monkeypatch) -> None:
+    from importlib.metadata import PackageNotFoundError
+
+    outputs: list[str] = []
+    runtime = RecordingRuntime()
+    service = build_conversation_service(runtime=runtime)
+
+    def missing_version(package: str) -> str:
+        raise PackageNotFoundError(package)
+
+    monkeypatch.setattr("importlib.metadata.version", missing_version)
+
+    run_cli(
+        service=service,
+        runtime=runtime,
+        input_fn=make_input(["info", "help", "exit"]),
+        output_fn=outputs.append,
+    )
+
+    assert "Malāk Info V0 — información local" in outputs
+    assert "Versión instalada: NOT_CHECKED (metadatos no disponibles)" in outputs
+    assert "Salud global: NOT_CERTIFIED" in outputs
+    assert HELP_MESSAGE in outputs
+    assert runtime.last_request is None
+
+
 def test_run_cli_displays_status() -> None:
     outputs: list[str] = []
 
