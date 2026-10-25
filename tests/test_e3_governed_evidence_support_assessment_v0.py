@@ -342,3 +342,31 @@ def test_red_r20_e4_remains_relationless() -> None:
 def test_red_r21_no_kernel_planner_registry_contract_is_required() -> None:
     module = _api()
     assert module.__name__ == "malak.capabilities._engineering_analysis"
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "SUPPORTING_REFS_IRRELEVANT",
+        "SUPPORTING_REFS_INSUFFICIENT",
+    ],
+)
+def test_e3_red_inconclusive_cannot_use_insufficient_reason(
+    reason: str,
+) -> None:
+    """A model-owned reason for INSUFFICIENT must fail closed under INCONCLUSIVE."""
+    module = _api()
+    result = module.assess_governed_evidence_support_v0(
+        **_subject(),
+        assessor_subject_id="independent-test-assessor",
+        finding_producer_subject_id="e3-test-producer",
+        assessor=lambda _material: {
+            "outcome": "INCONCLUSIVE",
+            "reason_codes": [reason],
+        },
+    )
+
+    assert result.outcome.value == "INCONCLUSIVE"
+    assert [item.value for item in result.reason_codes] == [
+        "ASSESSOR_OUTPUT_INVALID"
+    ]

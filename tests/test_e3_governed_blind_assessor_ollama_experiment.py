@@ -1194,3 +1194,52 @@ def test_u07_v04_irrelevant_vs_insufficient_uses_material_bearing() -> None:
         "do not use SUPPORTING_REFS_IRRELEVANT."
         in module.EXACT_SYSTEM_PROMPT
     )
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "SUPPORTING_REFS_IRRELEVANT",
+        "SUPPORTING_REFS_INSUFFICIENT",
+    ],
+)
+def test_e3_red_local_assessor_inconclusive_reason_pair_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    reason: str,
+) -> None:
+    """Crossed taxonomy must yield safe diagnostic and non-positive observations."""
+    module = _adapter_module()
+    assert module._model_output_pair_is_valid_v0({
+        "outcome": "INCONCLUSIVE",
+        "reason_codes": [reason],
+    }) is False
+
+    runtime = InvalidContentRuntime(
+        json.dumps({
+            "outcome": "INCONCLUSIVE",
+            "reason_codes": [reason],
+        }, sort_keys=True, separators=(",", ":"))
+    )
+    _install_runtime(monkeypatch, module, runtime)
+    diagnostics: list[str] = []
+    artifact = module.run_governed_local_ollama_assessor_experiment_v0(
+        model="example:model",
+        output_dir=tmp_path / "crossed-reason-contract",
+        diagnostic_sink=diagnostics.append,
+    )
+
+    assert len(runtime.generate_calls) == 13
+    assert diagnostics == ["OUTCOME_REASON_CONTRACT_INVALID"] * 13
+    observations = [
+        item
+        for case in artifact["case_results"]
+        for item in case["observations"]
+        if item["input_id"] not in ZERO_GENERATION_INPUTS
+    ]
+    assert len(observations) == 13
+    assert all(
+        item["outcome"] == "INCONCLUSIVE"
+        and item["reason_codes"] == ["ASSESSOR_OUTPUT_INVALID"]
+        for item in observations
+    )

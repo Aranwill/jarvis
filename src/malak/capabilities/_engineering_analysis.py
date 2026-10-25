@@ -380,7 +380,14 @@ def assess_governed_evidence_support_v0(
     ) or (
         outcome is GovernedEvidenceSupportOutcome.INCONCLUSIVE
         and bool(reasons)
-        and GovernedEvidenceSupportReason.MATERIAL_SUPPORT_CONFIRMED not in reasons
+        and all(
+            reason in {
+                GovernedEvidenceSupportReason.COMPOUND_CLAIM_NOT_FULLY_SUPPORTED,
+                GovernedEvidenceSupportReason.MATERIAL_COUNTEREVIDENCE_UNRESOLVED,
+                GovernedEvidenceSupportReason.ASSESSMENT_SCOPE_EXCEEDED,
+            }
+            for reason in reasons
+        )
     )
     if not valid:
         return _inconclusive(

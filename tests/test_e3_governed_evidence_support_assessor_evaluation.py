@@ -872,3 +872,26 @@ def test_fix_validator_additional_known_property_is_not_silently_forbidden(
     completed, payload = _run_payload(tmp_path, case_set=case_set)
     assert completed.returncode == 0
     assert payload["qualification_result"] == "PASS"
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        "SUPPORTING_REFS_IRRELEVANT",
+        "SUPPORTING_REFS_INSUFFICIENT",
+    ],
+)
+def test_e3_red_qualification_rejects_incoherent_reason_pair(
+    tmp_path: Path,
+    reason: str,
+) -> None:
+    """Invalid assessor envelopes are INPUT_INVALID, not a semantic model FAIL."""
+    def mutate(artifact: dict) -> None:
+        observation = _artifact_observation(artifact, "C01.I01")
+        observation["outcome"] = "INCONCLUSIVE"
+        observation["reason_codes"] = [reason]
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode == 2
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+    assert any("reason" in item for item in payload["qualification_reasons"])
