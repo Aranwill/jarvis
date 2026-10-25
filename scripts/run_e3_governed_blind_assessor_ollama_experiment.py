@@ -257,7 +257,15 @@ def _model_output_pair_is_valid_v0(value: dict[str, object]) -> bool:
             }
             for reason in reasons
         )
-    return "MATERIAL_SUPPORT_CONFIRMED" not in reasons
+    return all(
+        reason
+        in {
+            "COMPOUND_CLAIM_NOT_FULLY_SUPPORTED",
+            "MATERIAL_COUNTEREVIDENCE_UNRESOLVED",
+            "ASSESSMENT_SCOPE_EXCEEDED",
+        }
+        for reason in reasons
+    )
 
 
 def _emit_safe_diagnostic_v0(
