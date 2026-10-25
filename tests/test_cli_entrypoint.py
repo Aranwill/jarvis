@@ -25,7 +25,7 @@ def test_console_script_resolves_to_existing_cli_main() -> None:
     project = tomllib.loads(
         (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     )["project"]
-    entrypoint = project["scripts"]["malak"]
+    entrypoint = project.get("scripts", {}).get("malak")
     assert entrypoint == EXPECTED_ENTRYPOINT
     module_name, attribute = entrypoint.split(":", maxsplit=1)
     assert callable(getattr(import_module(module_name), attribute))
