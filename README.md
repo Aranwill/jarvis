@@ -117,6 +117,15 @@ La instalación editable permite utilizar el paquete `malak` desde el layout `sr
 `MockLLMRuntime` es el runtime predeterminado y no requiere servicios externos.
 
 ```powershell
+malak
+```
+
+El ejecutable `malak` se registra durante `python -m pip install -e .`
+y reutiliza exactamente la función `malak.app.cli:main` (sin nuevo runtime,
+modelo ni permisos). Se conserva la invocación anterior como alternativa
+compatible:
+
+```powershell
 python -m malak.app.cli
 ```
 
