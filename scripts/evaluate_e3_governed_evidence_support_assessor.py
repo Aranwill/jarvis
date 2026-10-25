@@ -308,6 +308,21 @@ def _validate_reason_coherence(
         }
         if any(reason not in allowed for reason in reasons):
             raise QualificationInputError(f"{label}_insufficient_reason")
+        return
+
+    # INCONCLUSIVE can carry model-owned uncertainty or deterministic envelope
+    # errors, but never model-owned reasons reserved for INSUFFICIENT.
+    allowed = {
+        "COMPOUND_CLAIM_NOT_FULLY_SUPPORTED",
+        "MATERIAL_COUNTEREVIDENCE_UNRESOLVED",
+        "ASSESSMENT_SCOPE_EXCEEDED",
+        "SUBJECT_BINDING_MISMATCH",
+        "EVIDENCE_MATERIAL_INCOMPLETE",
+        "ASSESSOR_UNAVAILABLE",
+        "ASSESSOR_OUTPUT_INVALID",
+    }
+    if any(reason not in allowed for reason in reasons):
+        raise QualificationInputError(f"{label}_inconclusive_reason")
 
 
 def _subject_fingerprint(subject: dict[str, Any]) -> str:
