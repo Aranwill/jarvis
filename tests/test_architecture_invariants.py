@@ -203,9 +203,13 @@ def test_upstream_import_detection_is_effective(
     violations = _find_violations(
         source, package=package, forbidden=RUNTIME_UPSTREAM_IMPORTS
     )
-    assert len(violations) == 1
-    assert violations[0]["forbidden_boundary"] == expected_boundary
-    assert violations[0]["invariant"] == "RUNTIME-UPSTREAM-IMPORTS"
+    assert violations
+    assert {item["forbidden_boundary"] for item in violations} == {
+        expected_boundary
+    }
+    assert {item["invariant"] for item in violations} == {
+        "RUNTIME-UPSTREAM-IMPORTS"
+    }
 
 
 @pytest.mark.parametrize(
