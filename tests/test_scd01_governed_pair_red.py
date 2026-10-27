@@ -1,15 +1,19 @@
 """SCD-01 provenance pair behavioral RED on real OllamaRuntime.
 
 No live model calls: capture_provenance and urlopen are intercepted on the
-genuine runtime instance. Only the missing governed coordination must fail.
+genuine runtime instance. The original RED found zero snapshots and dispatches; after GREEN it must pass.
 """
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 import importlib.util
 import json
 from pathlib import Path
+from urllib.error import URLError
 from unittest.mock import patch
+
+import pytest
 
 from malak.runtime.ollama_runtime import OllamaRuntime
 from malak.runtime.runtime_provenance import (
@@ -119,7 +123,7 @@ def test_scd01_provenance_red_setup_authentic_frozen_inputs():
 
 
 def test_scd01_provenance_bound_pair_uses_real_runtime_without_live_http():
-    """Expected RED: 6 provenance captures and 2 HTTP calls; observed 0/0."""
+    """GREEN requires six provenance captures and two intercepted HTTP calls."""
     pair = _genuine_pair()
     provenance = _provenance(pair)
     runtime = _runtime()
@@ -158,3 +162,163 @@ def test_scd01_provenance_bound_pair_uses_real_runtime_without_live_http():
     assert all(item["authority_effect"] == "none" for item in result)
     assert all(item["status"] == "MODEL_OBSERVATION_ONLY" for item in result)
     assert all(item["parsed"]["outcome"] == "INSUFFICIENT" for item in result)
+
+
+
+def _coordinator():
+    return _load(COORDINATOR, "scd01_governed_pair_negative")
+
+
+def test_scd01_provenance_unready_baseline_blocks_all_dispatch():
+    pair = _genuine_pair()
+    runtime = _runtime()
+    unready = replace(
+        _provenance(pair),
+        model_identity_strength="TAG_ONLY",
+        provenance_status="PARTIAL",
+        model_digest=None,
+    )
+    with patch.object(
+        runtime, "capture_provenance", return_value=unready
+    ) as captures, patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=AssertionError("no HTTP may occur"),
+    ) as transport:
+        with pytest.raises(RuntimeError, match="READY/TAG_DIGEST_BOUND"):
+            _coordinator().run_scd01_governed_pair_v1(runtime=runtime, pair=pair)
+    assert captures.call_count == 1
+    transport.assert_not_called()
+
+
+def test_scd01_invalid_pair_blocks_provenance_and_transport():
+    pair = _genuine_pair()
+    runtime = _runtime()
+    bad_pair = (pair[0], replace(pair[1], model="different:model"))
+    with patch.object(
+        runtime, "capture_provenance",
+        side_effect=AssertionError("no introspection may occur"),
+    ) as captures, patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=AssertionError("no HTTP may occur"),
+    ) as transport:
+        with pytest.raises(ValueError, match="requires comparable"):
+            _coordinator().run_scd01_governed_pair_v1(
+                runtime=runtime, pair=bad_pair
+            )
+    captures.assert_not_called()
+    transport.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "drift_capture,expected_http",
+    ((2, 0), (3, 1), (4, 1), (5, 2), (6, 2)),
+)
+def test_scd01_provenance_drift_stops_without_exposing_pair(
+    drift_capture: int, expected_http: int,
+):
+    """Before/after each arm and final drift must fail closed, no retry."""
+    pair = _genuine_pair()
+    runtime = _runtime()
+    good = _provenance(pair)
+    drift = replace(good, model_digest="sha256:" + "b" * 64)
+    snapshots_seen = []
+    sends = []
+
+    def capture(model, *, generation_contract):
+        snapshots_seen.append((model, generation_contract))
+        return drift if len(snapshots_seen) == drift_capture else good
+
+    def transport(request, timeout):
+        sends.append(request)
+        return _SyntheticHTTP(request)
+
+    with patch.object(
+        runtime, "capture_provenance", side_effect=capture
+    ), patch(
+        "malak.runtime.ollama_runtime.urlopen", side_effect=transport
+    ):
+        with pytest.raises(RuntimeError, match="provenance drift detected"):
+            _coordinator().run_scd01_governed_pair_v1(runtime=runtime, pair=pair)
+    assert len(snapshots_seen) == drift_capture
+    assert len(sends) == expected_http
+
+
+@pytest.mark.parametrize(
+    "failed_arm,expected_snapshots",
+    ((1, 3), (2, 5)),
+)
+def test_scd01_transport_error_stops_pair_without_retry(
+    failed_arm: int, expected_snapshots: int,
+):
+    """Even on generation failure, temporal provenance is checked once more."""
+    pair = _genuine_pair()
+    runtime = _runtime()
+    provenance = _provenance(pair)
+    sends = []
+
+    def transport(request, timeout):
+        sends.append(request)
+        if len(sends) == failed_arm:
+            raise URLError("synthetic transport error")
+        return _SyntheticHTTP(request)
+
+    with patch.object(
+        runtime, "capture_provenance", return_value=provenance
+    ) as captures, patch(
+        "malak.runtime.ollama_runtime.urlopen", side_effect=transport
+    ):
+        with pytest.raises(RuntimeError, match="Unable to connect to Ollama"):
+            _coordinator().run_scd01_governed_pair_v1(runtime=runtime, pair=pair)
+    assert captures.call_count == expected_snapshots
+    assert len(sends) == failed_arm
+
+
+@pytest.mark.parametrize(
+    "failed_arm,invalid_content",
+    (
+        (1, '{"outcome":"INSUFFICIENT"'),
+        (2, '{"outcome":"INSUFFICIENT"'),
+        (1, '{"outcome":"SUPPORTED","reason_codes":["SUPPORTING_REFS_INSUFFICIENT"]}'),
+        (2, '{"outcome":"SUPPORTED","reason_codes":["SUPPORTING_REFS_INSUFFICIENT"]}'),
+    ),
+)
+def test_scd01_e3_output_contract_invalid_blocks_successful_pair(
+    failed_arm: int, invalid_content: str,
+):
+    """Use E3's actual strict parser and outcome/reason pairing, never a fake."""
+    pair = _genuine_pair()
+    runtime = _runtime()
+    provenance = _provenance(pair)
+    sends = []
+
+    class InvalidOutput(_SyntheticHTTP):
+        def read(self, _limit):
+            return json.dumps({
+                "model": "qwen3.5:9b",
+                "message": {
+                    "role": "assistant",
+                    "content": invalid_content,
+                },
+                "done": True,
+                "done_reason": "stop",
+                "prompt_eval_count": 12,
+                "eval_count": 18,
+            }).encode("utf-8")
+
+    def transport(request, timeout):
+        sends.append(request)
+        if len(sends) == failed_arm:
+            return InvalidOutput(request)
+        return _SyntheticHTTP(request)
+
+    with patch.object(
+        runtime, "capture_provenance", return_value=provenance
+    ), patch(
+        "malak.runtime.ollama_runtime.urlopen", side_effect=transport
+    ):
+        with pytest.raises(
+            RuntimeError,
+            match="invalid JSON|outcome/reason pairing invalid",
+        ):
+            _coordinator().run_scd01_governed_pair_v1(runtime=runtime, pair=pair)
+    assert len(sends) == failed_arm
