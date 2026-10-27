@@ -10,12 +10,12 @@ from malak.core.conversation import ConversationRequest, ConversationResponse
 from malak.runtime.ollama_runtime import OllamaRuntime
 
 
-def dispatch_scd01_pair_v1(
+def validate_scd01_pair_v1(
     *,
     runtime: OllamaRuntime,
     pair: tuple[ConversationRequest, ConversationRequest],
-) -> tuple[ConversationResponse, ...]:
-    """Dispatch A then B through the authentic runtime with no retries."""
+) -> None:
+    """Pure pre-dispatch validation, shared with the governed coordinator."""
     if not isinstance(runtime, OllamaRuntime):
         raise TypeError("runtime must be the existing OllamaRuntime")
     if (
@@ -48,7 +48,17 @@ def dispatch_scd01_pair_v1(
             "system-prompt difference and empty history"
         )
 
+
+def dispatch_scd01_pair_v1(
+    *,
+    runtime: OllamaRuntime,
+    pair: tuple[ConversationRequest, ConversationRequest],
+) -> tuple[ConversationResponse, ...]:
+    """Dispatch A then B through the authentic runtime with no retries."""
+    validate_scd01_pair_v1(runtime=runtime, pair=pair)
+
     # No try/retry: any runtime error aborts the pair and propagates.
     # The caller remains responsible for provenance, parsing, evidence,
     # safe run accounting and independent scoring.
+    a, b = pair
     return (runtime.generate(a), runtime.generate(b))
