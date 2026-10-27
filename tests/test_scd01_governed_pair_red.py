@@ -322,3 +322,36 @@ def test_scd01_e3_output_contract_invalid_blocks_successful_pair(
         ):
             _coordinator().run_scd01_governed_pair_v1(runtime=runtime, pair=pair)
     assert len(sends) == failed_arm
+
+
+
+def test_scd01_runtime_class_drift_rejected_even_when_tuple_equal():
+    """Full E3 baseline admission is rerun after every temporal snapshot.
+
+    E3's legacy stability tuple omits runtime_class; a changed class must
+    still fail closed before the first model dispatch.
+    """
+    pair = _genuine_pair()
+    runtime = _runtime()
+    baseline = _provenance(pair)
+    altered_class = replace(baseline, runtime_class="DifferentRuntime")
+    captures = []
+
+    def capture(model, *, generation_contract):
+        captures.append(model)
+        return baseline if len(captures) == 1 else altered_class
+
+    with patch.object(
+        runtime, "capture_provenance", side_effect=capture
+    ), patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=AssertionError("unexpected HTTP"),
+    ) as transport:
+        with pytest.raises(
+            RuntimeError, match="baseline provenance runtime class is invalid"
+        ):
+            _coordinator().run_scd01_governed_pair_v1(
+                runtime=runtime, pair=pair
+            )
+    assert len(captures) == 2
+    transport.assert_not_called()
