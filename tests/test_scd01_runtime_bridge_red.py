@@ -6,13 +6,17 @@ No live Ollama, model, network or evaluator/scorer may be invoked.
 """
 from __future__ import annotations
 
+from dataclasses import replace
+from urllib.error import URLError
 import hashlib
 import importlib.util
 import json
 from pathlib import Path
 from unittest.mock import patch
 
-from malak.core.conversation import ConversationRequest
+import pytest
+
+from malak.core.conversation import ConversationMessage, ConversationRequest
 from malak.runtime.ollama_runtime import OllamaRuntime
 from malak.runtime.runtime_generation_contract import RuntimeGenerationContract
 
@@ -120,7 +124,7 @@ def test_scd01_frozen_pair_preconditions_pass_without_model():
 
 
 def test_scd01_pair_dispatches_through_real_ollama_runtime_transport():
-    """Expected RED on disconnected adapter: expected 2, observed 0 HTTP calls.
+    """Original RED was disconnected; after GREEN exactly two calls are required.
 
     This tests the real OllamaRuntime.generate() transport path, not a fake
     runtime. Only its urlopen transport is intercepted; no actual HTTP is sent.
@@ -169,7 +173,7 @@ def test_scd01_pair_dispatches_through_real_ollama_runtime_transport():
     with patch("malak.runtime.ollama_runtime.urlopen", side_effect=transport):
         responses = bridge.dispatch_scd01_pair_v1(runtime=runtime, pair=pair)
 
-    # First and ONLY expected RED failure when setup is valid.
+    # RED-to-GREEN invariant: exactly two genuine intercepted HTTP calls.
     assert len(captured) == 2, (
         "SCD01_CONSUMER_NOT_CONNECTED: expected 2 real-runtime dispatches, "
         f"observed {len(captured)}"
@@ -192,3 +196,158 @@ def test_scd01_pair_dispatches_through_real_ollama_runtime_transport():
         assert payload["format"] == json.loads(expected.response_json_schema)
     assert len(responses) == 2
     assert all(x.model == MODEL and x.provider == "ollama" for x in responses)
+
+
+def _test_runtime() -> OllamaRuntime:
+    return OllamaRuntime(
+        base_url="http://127.0.0.1:11434",
+        timeout_seconds=300,
+        keep_alive=0,
+        max_request_bytes=1048576,
+        max_response_bytes=65536,
+    )
+
+
+class _TransportSuccess:
+    """Synthetic Ollama HTTP success for the real runtime's transport seam."""
+
+    def __init__(self, request, *, response_model: str = MODEL):
+        self.url = request.full_url
+        self.response_model = response_model
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return False
+
+    def geturl(self):
+        return self.url
+
+    def read(self, _limit):
+        return json.dumps({
+            "model": self.response_model,
+            "message": {
+                "role": "assistant",
+                "content": '{"outcome":"INSUFFICIENT","reason_codes":["SUPPORTING_REFS_INSUFFICIENT"]}',
+            },
+            "done": True,
+            "done_reason": "stop",
+            "prompt_eval_count": 15,
+            "eval_count": 25,
+        }).encode("utf-8")
+
+
+@pytest.mark.parametrize(
+    "change",
+    (
+        "model",
+        "prompt",
+        "system_prompt",
+        "response_json_schema",
+        "generation_contract",
+        "history",
+        "missing_system_prompt",
+    ),
+)
+def test_scd01_rejects_non_comparable_pair_before_transport(change: str):
+    """No side effects before complete A/B comparability admission."""
+    bridge = _load(BRIDGE, "scd01_bridge_negative_compare")
+    a, b = _frozen_pair()
+
+    replacement = {
+        "model": {"model": "other:model"},
+        "prompt": {"prompt": PREFIX + "{}"},
+        "system_prompt": {"system_prompt": a.system_prompt},
+        "response_json_schema": {
+            "response_json_schema": '{"type":"object"}',
+        },
+        "generation_contract": {
+            "generation_contract": RuntimeGenerationContract(
+                context_window_tokens=8192,
+                max_output_tokens=128,
+                thinking_enabled=False,
+            ),
+        },
+        "history": {
+            "history": (ConversationMessage(role="user", content="forbidden"),),
+        },
+        "missing_system_prompt": {"system_prompt": None},
+    }[change]
+    modified_pair = (a, replace(b, **replacement))
+    with patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=AssertionError("unexpected HTTP dispatch"),
+    ) as transport:
+        with pytest.raises(ValueError, match="SCD-01 requires comparable"):
+            bridge.dispatch_scd01_pair_v1(
+                runtime=_test_runtime(),
+                pair=modified_pair,
+            )
+    transport.assert_not_called()
+
+
+def test_scd01_rejects_non_runtime_or_non_pair_before_transport():
+    bridge = _load(BRIDGE, "scd01_bridge_negative_shape")
+    pair = _frozen_pair()
+    with patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=AssertionError("unexpected HTTP dispatch"),
+    ) as transport:
+        with pytest.raises(TypeError, match="existing OllamaRuntime"):
+            bridge.dispatch_scd01_pair_v1(runtime=object(), pair=pair)
+        with pytest.raises(TypeError, match="exactly two"):
+            bridge.dispatch_scd01_pair_v1(runtime=_test_runtime(), pair=(pair[0],))
+        with pytest.raises(TypeError, match="exactly two"):
+            bridge.dispatch_scd01_pair_v1(runtime=_test_runtime(), pair=[*pair])
+    transport.assert_not_called()
+
+
+def test_scd01_first_transport_failure_propagates_without_retry():
+    """First failure must abort: no second arm, no automatic retry."""
+    bridge = _load(BRIDGE, "scd01_bridge_negative_first_http")
+    pair = _frozen_pair()
+    with patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=URLError("synthetic transport failure"),
+    ) as transport:
+        with pytest.raises(RuntimeError, match="Unable to connect to Ollama"):
+            bridge.dispatch_scd01_pair_v1(runtime=_test_runtime(), pair=pair)
+    assert transport.call_count == 1
+
+
+def test_scd01_second_transport_failure_propagates_without_retry():
+    """A succeeds, B fails, no successful pair is returned and no retry."""
+    bridge = _load(BRIDGE, "scd01_bridge_negative_second_http")
+    pair = _frozen_pair()
+    calls = []
+
+    def transport(request, timeout):
+        calls.append((request.full_url, timeout))
+        if len(calls) == 1:
+            return _TransportSuccess(request)
+        raise URLError("synthetic second-arm transport failure")
+
+    with patch("malak.runtime.ollama_runtime.urlopen", side_effect=transport):
+        with pytest.raises(RuntimeError, match="Unable to connect to Ollama"):
+            bridge.dispatch_scd01_pair_v1(runtime=_test_runtime(), pair=pair)
+    assert [url for url, _ in calls] == [
+        "http://127.0.0.1:11434/api/chat",
+        "http://127.0.0.1:11434/api/chat",
+    ]
+
+
+def test_scd01_first_response_model_mismatch_stops_pair_without_retry():
+    """Existing runtime's strict model identity check must gate arm B."""
+    bridge = _load(BRIDGE, "scd01_bridge_negative_model")
+    pair = _frozen_pair()
+    with patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=lambda request, timeout: _TransportSuccess(
+            request,
+            response_model="unexpected:model",
+        ),
+    ) as transport:
+        with pytest.raises(RuntimeError, match="does not match requested model"):
+            bridge.dispatch_scd01_pair_v1(runtime=_test_runtime(), pair=pair)
+    assert transport.call_count == 1
