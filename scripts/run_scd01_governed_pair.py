@@ -72,14 +72,20 @@ def run_scd01_governed_pair_v1(
     drift_state = {"invalid": False}
     candidates: list[dict[str, object]] = []
 
-    for arm, request in (("A", a), ("B", b)):
-        e3._capture_stable(
+    def checked_capture() -> None:
+        # E3's stable tuple deliberately omits runtime_class. Re-admit each
+        # snapshot using E3's complete validator to reject class drift too.
+        snapshot = e3._capture_stable(
             runtime,
             model=a.model,
             contract=contract,
             baseline_tuple=baseline_tuple,
             drift_state=drift_state,
         )
+        e3._validate_baseline_provenance(snapshot, model=a.model)
+
+    for arm, request in (("A", a), ("B", b)):
+        checked_capture()
         generation_error: Exception | None = None
         response = None
         try:
@@ -89,13 +95,7 @@ def run_scd01_governed_pair_v1(
 
         # Check temporal identity even when the generation itself failed.
         # A drift error takes precedence over returning partial results.
-        e3._capture_stable(
-            runtime,
-            model=a.model,
-            contract=contract,
-            baseline_tuple=baseline_tuple,
-            drift_state=drift_state,
-        )
+        checked_capture()
         if generation_error is not None:
             raise generation_error
         assert response is not None
@@ -118,11 +118,5 @@ def run_scd01_governed_pair_v1(
         )
 
     # A successful pair cannot be exposed before the final stability check.
-    e3._capture_stable(
-        runtime,
-        model=a.model,
-        contract=contract,
-        baseline_tuple=baseline_tuple,
-        drift_state=drift_state,
-    )
+    checked_capture()
     return tuple(candidates)
