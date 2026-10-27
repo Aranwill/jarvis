@@ -195,3 +195,47 @@ Los cuatro resultados se refieren **al diseño acotado**, no a integración impl
 **Próximo acto permitido:** crear solo la interfaz mínima RED no conectada y su prueba de integración focalizada; usar un fixture auténtico `P-06ABAC84A1`, que es ambiguo pero **no se puntúa** en RED; validar bytes, schema, request y transporte interceptado. Registrar `RED_VERIFIED` solo tras una ejecución real de la aserción conductual sobre checkout exacto con precondición PASS, expected=2 y actual=0. No ejecutable de modelo, no GREEN.
 
 **Owner hardening admission: PASS_SCOPED_FOR_OFFLINE_RED.** `E3`, los hashes del corpus y los cuatro casos ambiguos son invariantes intocables. `authority_effect=none`.
+
+---
+
+## 9. SCD-01 provenance-bound pair — continuación acotada (2026-10-27)
+
+**Nueva instrucción del Owner:** «revisa y avancemos jarvis». Aplicabilidad: continuar el diseño SCD-01 aprobado en G0/G1 para **integración offline**, sin ampliar aún a 16 pares/32 inferencias, sin ejecución de modelo, sin GREEN implícito, sin READY ni merge. El RED/GREEN anterior queda cerrado a nivel de transporte: `RED@89fe6e8088c7b882aec5264a5bd6a28f546aa388`; `GREEN@ec01a45f8ecdfde39aa5734f66411531c4d13fe8`; `negative-tests@6d7a9b49a82a4632d8aa9814f55a7abc5b6cc64c` con **2208 tests PASS Windows y Ubuntu**.
+
+### Envelope P0–P7 para subunidad de integración
+
+| Preflight | Evaluación específica |
+| --- | --- |
+| **P0 Identity** | Repo `Aranwill/jarvis`; baseline `main@4d90dec45516ad4fbf8b762b59ab856c6aecf82f`; rama única `research/scd01-runtime-bridge-red-20261027`. Subunidad `SCD01-PROVPAIR/RED/v1` como desarrollo de la estrategia de provenance y fail-closed ya contenida en G1. |
+| **P1 Authority** | `AGENTS.md`, `malak_construction_preflight.md`, `malak_construction_protocol.md`, `engineering_method.md`, Blueprint, ambas Constituciones, `SECURITY.md`, E3 `scripts/run_e3_governed_blind_assessor_ollama_experiment.py` y `src/malak/runtime/runtime_provenance.py` recuperados desde GitHub. Las revisiones anteriores no certifican un candidato nuevo. |
+| **P2 Invariants** | No tocar E3, Kernel, runtime, constituciones, oracles, corpus ni prompts A/B; no modificar semántica E3, ni permitir salida de modelo como autoridad. |
+| **P3 Authority flow** | Caller experimental → validation gate → `OllamaRuntime.capture_provenance` → `OllamaRuntime.generate` con transporte totalmente interceptado → parser E3 existente → candidato sin autoridad. En RED, la compuerta está desconectada y no puede invocar el modelo. |
+| **P4 Reuse** | `ADAPT/COMPOSE` del mismo runtime y contratos; funciones deterministas E3 existentes `_validate_baseline_provenance`, `_provenance_tuple`, `_capture_stable`, `parse_model_assessor_output_v0`. No runtime, scorer, policy engine o parser nuevos. |
+| **P5 Risk** | `risk_class=3`, `critical_contract=YES` (provenance/evidence); `operation_level=0` para RED sin I/O real. Evaluación de diseño y hardening scoped abajo, sin autodeclaración de aprobación independiente. |
+| **P6 Scope** | Solo nuevo `scripts/run_scd01_governed_pair.py`, nuevo `tests/test_scd01_governed_pair_red.py` y este registro; no cambiar siquiera el bridge de transporte verde en esta fase. Test de un par **auténtico** `P-06ABAC84A1`; no scores de oracle. |
+| **P7 Disposition** | `PASS_SCOPED_FOR_BEHAVIORAL_OFFLINE_RED` como admisión del diseño para comprobar el límite que falta; se conserva `INCONCLUSIVE` para piloto total y Candidate Conformance. La transición de este RED a GREEN requiere autorización humana posterior distinta. |
+
+### G0/G1, hardening (§5.2) y riesgo conocido
+
+La subunidad se limita al subflujo de provenance ya previsto expresamente en la revisión G1 independiente del piloto; no agrega un outcome, reason code, modelo, schedule u oracle. Hallazgo actual y observable: el adaptador `dispatch_scd01_pair_v1` procesa dos generaciones pero, **por diseño**, no verifica provenance temporal. El nuevo consumidor se distingue del adaptador de transporte; llamarlo directamente nunca debe autorizar 32 solicitudes. Una validación insuficiente o drift no debe reinterpretarse como un resultado semántico.
+
+Hardening pre-RED: la identidad exacta de modelo debe ser `TAG_DIGEST_BOUND/READY`, con contrato `RuntimeGenerationContract(8192,256,False)`, ajustes E3 `300s/keep_alive=0/1MiB/65536B`, y comparación de tuple de provenance estable sin incluir timestamps volátiles. Un error/deriva en baseline, antes o después de cualquier brazo debe abortar antes de permitir nuevas generaciones. Queda prohibido reducir la protección mediante bypass, skips, mocks de runtime desconectados, retry, excepciones absorbidas o respuestas catalogadas como certificación.
+
+Las cuatro preguntas de ley: **Blueprint PASS de diseño** (ruta downstream, sin cambiar Kernel); **Cognitive Constitution PASS** (respuesta candidata, evidencia ≠ autoridad); **Governance Constitution PASS** (sin privilegios/side effects no admitidos); **Kernel complexity PASS** (sin cambios de Kernel).
+
+### Design 4R pre-RED — lentes separadas
+
+- **Risk — PASS de diseño:** identidad y drift son gates previos a aceptar resultados; fallo detiene el par, no normaliza evidencia incompleta ni compromete oracles.
+- **Readability — PASS de diseño:** una función de coordinación para un par, reutilizando E3 y el bridge; ningún segundo parser/contract ni framework nuevo.
+- **Reliability — PASS de diseño:** test RED real con `OllamaRuntime` construido, transporte HTTP interceptado y `capture_provenance` interceptado para devolver instancias auténticas `RuntimeModelProvenance`; precondición A/B congelada debe PASS. RED conductual: esperado `6` snapshots (baseline, antes/después A, antes/después B, final) y `2` generaciones; observado `0` por consumidor no conectado. No se acepta error de importación ni problema de fixture como RED.
+- **Resilience — PASS de diseño:** drift antes de A o antes/después de B, errores de transporte y parser abortan fail-closed; se exige test negativo separado después de GREEN.
+
+### RDD Stage 1 Design Check — PASS de diseño, sin certificación de candidato
+
+Baseline fijo; cada RED/GREEN tendrá commit exacto distinto; test completo de provenance y evidence referida a SHA; Writer/Reviewer/Validator/Authority separados por rol (no se afirma independencia por autoconfirmación); terminal `PASS|FAIL|INCONCLUSIVE`; cambio de candidate invalida evidencia afectada; Correction Budget una ronda; `risk_class=3` conserva Stage 2 obligatorio post-conformance, **no ejecutado**. `authority_effect=none`.
+
+**Resultado previo a RED:** `PASS` del diseño circunscrito. **Resultado sobre el piloto global:** `INCONCLUSIVE`. No modifica las 16 etiquetas/casos, las 32 filas, E3 ni ninguna garantía previa. Se conservan dos subcandidatos distintos y el checkpoint human GREEN.
+
+### RED previsto
+
+`python -m pytest -q tests/test_scd01_governed_pair_red.py -vv` en checkout real sobre el commit que incluya stub + tests; precondición de material congelado PASS y error conductual exacto `SCD01_PROVENANCE_PAIR_NOT_CONNECTED: expected 6 snapshots, observed 0`. No requests de red: `OllamaRuntime` real, `capture_provenance` instrumentado y `urlopen` reemplazado exclusivamente en pytest. Validar Windows y Ubuntu. Si setup falla, `RED=INCONCLUSIVE`, no GREEN.
