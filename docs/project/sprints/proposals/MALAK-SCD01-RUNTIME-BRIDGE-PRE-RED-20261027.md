@@ -129,3 +129,69 @@ La revisión ciega externa del 27-10, sellada antes de los datos técnicos, pres
 - `operation_level=0` durante preparación/RED sin invocación de modelo ni cambios externos; `risk_class=3` del cambio de contrato experimental. En cualquier run real deberán reevaluarse nivel operativo y permisos.
 
 **Estado terminal de esta reconciliación:** H-01 resuelto a nivel técnico y F-HARD-02 acotado mediante interpretación explícita; H-02/H-05/H-06 preparación offline comprobada; H-04/H-03 ejecución posterior pendiente. El antiguo `INCONCLUSIVE` no puede transformarse silenciosamente en `PASS`. Antes de RED se requiere disposición formal compatible con §5.2/§5.5 de la autoridad humana sobre el hardening revisado, más registro admitido de Design 4R y RDD Design Check. No se abren nuevos gates, ramas, PRs ni rondas de reviewer solo para transportar estas evidencias.
+
+---
+
+## 8. Owner hardening admission y verificaciones de diseño — 2026-10-27
+
+**Owner instruction:** el Owner respondió expresamente «aprobado» a la propuesta de admitir la **disposición acotada de Critical Contract Hardening** para avanzar hacia el RED offline, conservando E3, cuatro casos ambiguos, prohibición de inferencias y separación de GREEN. No se extendió la autorización a `/api/chat`, A/B live, C03, G2, Ready o merge.
+
+**Interpretación admitida por el Owner:** `PASS` **únicamente para hardening del diseño del adaptador RED observacional, sin red**; el informe independiente de 26-10 sigue históricamente `INCONCLUSIVE/STOP` como revisión de la aptitud **global** del experimento, especialmente de su validez para demostrar reparación compound-parcial. Esta disposición de alcance menor **no sustituye** esa revisión, no adjudica oracles y no sirve para iniciar 32 solicitudes.
+
+### 8.1 Critical Contract Hardening (§5.2) — `PASS` del alcance RED offline exclusivamente
+
+| Control | Disposición para RED | Condición preservada |
+| --- | --- | --- |
+| Interpretaciones materiales | `PASS_SCOPED` | El piloto mide integridad de despacho/forma, nunca certifica C03 ni claim de mejora semántica. |
+| Interpretación adversarial | `PASS_SCOPED` | Rechazar prompt injection dentro de `evidence`; contenido es DATA; no se inyecta oracle ni metadata del caso. |
+| Fail-open / fail-closed | `PASS_SCOPED` | Ninguna prueba ejecuta live model; `INFRA_ERROR`, `NOT_EXECUTED` e `INVALID_OBSERVATION` no equivalen a clasificación. |
+| Autoridad | `PASS_SCOPED` | `authority_effect=none`; no promoción, GREEN ni cambios de contratos. |
+| Input/schema strictness | `PASS_SCOPED` | A/B, prefix, schema, caso y SHA congelados; parser y E3 inmutables. |
+| Identity/binding | `PASS_SCOPED` | baseline `4d90dec4...`; candidato RED será commit posterior auditable. |
+| Unknown/duplicate | `PASS_SCOPED` | Pruebas offline existentes cubren duplicados; RED de transporte no debe reinterpretar contenido. |
+| Bypass/skip | `PASS_SCOPED` | No autoproclamar resultado válido por JSON sin validación, no saltar provenance en un futuro run. |
+| Side effects/recursos | `PASS_SCOPED` | `unittest.mock.patch` interceptará `malak.runtime.ollama_runtime.urlopen`; `OllamaRuntime` real en memoria sin HTTP real. |
+| Rollback/invalidation | `PASS_SCOPED` | Git candidate inmutable; `main` intacto, cambio inesperado implica STOP y nuevo preflight. |
+
+**Condiciones expresamente pendientes para ejecución del A/B real:** oracle admission ex ante (`H-03`), provenance live/model tag/digest (`H-04`), validación del transporte y del parser sobre la implementación, 4R candidato, E2E/CI y autorización del Owner para la fase correspondiente. `H-03/H-04` no se convierten en `N/A` para el run: siguen **PENDING**.
+
+### 8.2 Cuatro preguntas de ley (§5.3) — comprobación de diseño
+
+- **Blueprint — PASS:** adapter acotado a `scripts/`, interacción con `OllamaRuntime` mediante contrato público, sin modificar el Kernel, rutas ascendentes ni Capability Registry. ADR-003 preservado.
+- **Constitución Cognitiva — PASS:** ninguna salida de modelo del RED existe; no se crea finalización ni se promueve inferencia a autoridad; cuatro ambiguos conservan su estado.
+- **Constitución de Gobernanza — PASS:** operación RED de solo lectura local (`operation_level=0`), HTTP interceptado, sin recursos privilegiados ni cambio del repositorio remoto salvo commits autorizados de la rama.
+- **Complejidad Kernel — PASS:** `src/malak/**` fuera de alcance. Ningún nuevo Kernel, runtime o provider.
+
+Los cuatro resultados se refieren **al diseño acotado**, no a integración implementada.
+
+### 8.3 Design 4R pre-RED (§5.3, Engineering Method §6–7), `risk_class=3`
+
+| Lente | Resultado de diseño | Evidencia / mitigación / STOP |
+| --- | --- | --- |
+| **Risk** | **PASS** | Supresión de side effects reales por interceptación exacta de `urlopen`; contrato crítico, modelo y 32 requests explícitamente prohibidos; STOP ante cualquier llamada de red no interceptada, uso de oracle o cambio de hash. |
+| **Readability** | **PASS** | Un punto de entrada experimental, un único test focalizado y un caso congelado; no se crea otro runtime o parser; desarrollo incremental RED→GREEN con autorización separada. |
+| **Reliability** | **PASS del diseño, NO del runtime** | Primero pasa la precondición estática sobre caso y prompts (A 2512, B 3760, delta 1247); luego debe fallar una aserción conductual `expected_http_calls=2, observed=0`, utilizando `ConversationRequest` y `OllamaRuntime` reales. Un fallo de import/configuración **invalida RED**, no lo acredita. |
+| **Resilience** | **PASS** | Transporte totalmente interceptado; después de GREEN, probar desvíos de runtime/provenance, fail-closed y ausencia de retries. Fail-close ahora: ausencia de implementación → `NOT_CONNECTED`, no fake PASS. |
+
+**Profundidad:** cuatro lentes examinadas con evidencia distinta. Estos resultados son un **Design 4R de alcance RED** registrado por el asistente de ingeniería, **sin afirmar reviewer independiente**. La separación de roles para revisiones independientes posteriores permanece obligatoria cuando corresponda; esto no es Candidate FULL 4R.
+
+### 8.4 RDD Stage 1 Design Check pre-RED (§5.4) — `PASS` de conformidad de diseño
+
+- **Candidate identity strategy — PASS:** baseline Git SHA `4d90dec45516ad4fbf8b762b59ab856c6aecf82f`; RED candidate se identificará con su propio SHA/tree y evidencia de salida, no con un nombre de rama.
+- **Binding baseline/candidate — PASS:** GitHub compare exacto `main...branch`; diffs permitidos para RED: `scripts/run_scd01_runtime_bridge.py`, `tests/test_scd01_runtime_bridge_red.py` y este registro. No modificar frozen corpus, fuente E3 ni contratos normativos.
+- **Evidence provenance — PASS:** corpus/prompts/schedule SHA y código E3 firmado; tests offline reproducidos; evidencia de ejecución RED deberá incluir comando, status, entorno, `pytest_exit_code`, nombre de aserción, expected/actual y candidate SHA.
+- **Role separation — PASS de diseño:** Owner autoriza; Writer implementa; un Reviewer/Validator **distinto**, cuando sea requerido, revisa el candidate; ninguna prueba ni writer concede Ready/Merge. La actual evaluación no se presenta como revisión independiente.
+- **Terminal enum — PASS:** solo `PASS|FAIL|INCONCLUSIVE`; el test RED fallará intencionadamente, lo que no equivale a `FAIL` del gate pre-RED.
+- **Invalidación/correction budget — PASS:** cambio de código/hash exige revalidación de evidencia afectada; presupuesto inicial `1` corrección acotada, agotamiento → STOP/Owner, no nuevos frentes implícitos.
+- **RDD Stage 2 — PASS de aplicabilidad:** `risk_class=3` → Stage 2 receipt obligatorio en fase candidata apropiada; `NOT_EXECUTED` antes de GREEN, ninguna autoridad.
+- **Authority effect — PASS:** `none`.
+
+`RDD Stage 1 Design Check: PASS` **solo para preparar el RED offline**, no equivale a Candidate Conformance ni Stage 2 receipt ni revisión externa. El diseño y estos resultados no conceden nuevas autorizaciones.
+
+### 8.5 Decisión de topología y checkpoint de implementación
+
+**Topología:** **una rama, sin PR adicional por gate**, conforme a la instrucción explícita del Owner de recuperar un flujo incremental único y a la excepción documentada de §5.1.1. Esto **no** se interpreta como waiver de etapas: diseño aprobado para RED offline, candidate GREEN separado y aún no autorizado.
+
+**Próximo acto permitido:** crear solo la interfaz mínima RED no conectada y su prueba de integración focalizada; usar un fixture auténtico `P-06ABAC84A1`, que es ambiguo pero **no se puntúa** en RED; validar bytes, schema, request y transporte interceptado. Registrar `RED_VERIFIED` solo tras una ejecución real de la aserción conductual sobre checkout exacto con precondición PASS, expected=2 y actual=0. No ejecutable de modelo, no GREEN.
+
+**Owner hardening admission: PASS_SCOPED_FOR_OFFLINE_RED.** `E3`, los hashes del corpus y los cuatro casos ambiguos son invariantes intocables. `authority_effect=none`.
