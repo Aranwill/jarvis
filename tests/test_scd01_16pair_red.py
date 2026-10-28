@@ -1,12 +1,12 @@
-"""Behavioral RED for authentic frozen 16-pair/32-request SCD-01 coordination.
+"""GREEN verification of authentic frozen 16-pair/32-request SCD-01.
 
-Only the real existing OllamaRuntime class is used. Every I/O interaction is
-intercepted. Frozen corpus/schedule files MUST pass hash and binding checks
-before the single expected behavioral RED may be admitted.
+Real OllamaRuntime code and E3 parser/provenance are used with all HTTP
+intercepted. No live model inference, authority, oracle or E3 changes.
 """
 from __future__ import annotations
 
 from dataclasses import replace
+from urllib.error import URLError
 import hashlib
 import importlib.util
 import json
@@ -17,6 +17,8 @@ import pytest
 
 from scripts.run_scd01_16pair import (
     SCD01ScheduledRequest,
+    SCD0116PairAborted,
+    _validate_frozen_plan,
     run_scd01_16pair_v1,
 )
 
@@ -155,17 +157,18 @@ def test_red_preconditions_original_frozen_16pair_material():
     scheduled = _frozen_schedule()
     existing = _load_module(PAIR_TEST, "scd01_existing_pair_runtime_fixture")
     runtime = existing._runtime()
-    # The RED boundary itself validates 32 positions and 16 complete pairs.
+    # Pure preflight remains side-effect free after GREEN.
     with patch.object(
         runtime, "capture_provenance", side_effect=AssertionError("unexpected provenance")
     ), patch(
         "malak.runtime.ollama_runtime.urlopen",
         side_effect=AssertionError("unexpected HTTP")
     ):
-        result = run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
-    assert len(result) == 32
-    assert all(row["status"] == "NOT_EXECUTED" for row in result)
-    assert all(row["authority_effect"] == "none" for row in result)
+        _validate_frozen_plan(runtime=runtime, scheduled=scheduled)
+        with pytest.raises(PermissionError, match="LIVE_INFERENCE_NOT_AUTHORIZED"):
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    assert len(scheduled) == 32
+    assert len({entry.case_id for entry in scheduled}) == 16
 
 
 def test_red_invalid_ordinal_rejected_without_side_effects():
@@ -184,23 +187,23 @@ def test_red_invalid_ordinal_rejected_without_side_effects():
 
 
 def test_scd01_16pair_behavioral_red_authentic_runtime_requires_32_dispatches():
-    """Expected RED: prepared inputs pass; real runtime sees zero of 32 calls."""
+    """Same RED acceptance contract becomes GREEN: 32 sends, 96 captures."""
     scheduled = _frozen_schedule()
     existing = _load_module(PAIR_TEST, "scd01_existing_pair_behavior_fixture")
     runtime = existing._runtime()
     provenance = existing._provenance(existing._genuine_pair())
-    captured: list[str] = []
+    captured: list[tuple[str, str]] = []
 
     def transport(request, timeout):
-        captured.append(request.full_url)
+        captured.append((request.full_url, json.loads(request.data)["model"]))
         return existing._SyntheticHTTP(request)
 
     with patch.object(
         runtime, "capture_provenance", return_value=provenance
-    ) as snapshots, patch(
-        "malak.runtime.ollama_runtime.urlopen", side_effect=transport
-    ):
-        result = run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    ) as snapshots:
+        result = run_scd01_16pair_v1(
+            runtime=runtime, scheduled=scheduled, offline_transport=transport
+        )
 
     assert len(captured) == 32, (
         "SCD01_16PAIR_NOT_CONNECTED: expected 32 authentic runtime dispatches, "
@@ -210,6 +213,87 @@ def test_scd01_16pair_behavioral_red_authentic_runtime_requires_32_dispatches():
         "SCD01_16PAIR_PROVENANCE_NOT_CONNECTED: expected 96 snapshots, "
         f"observed {snapshots.call_count}"
     )
+    assert all(url == "http://127.0.0.1:11434/api/chat" for url, _ in captured)
+    assert all(model == "qwen3.5:9b" for _, model in captured)
     assert len(result) == 32
+    assert [(r["ordinal"], r["case_id"], r["arm"]) for r in result] == [
+        (i.ordinal, i.case_id, i.arm) for i in scheduled
+    ]
     assert all(row["status"] == "MODEL_OBSERVATION_ONLY" for row in result)
     assert all(row["authority_effect"] == "none" for row in result)
+    assert all(row["parsed"]["outcome"] == "INSUFFICIENT" for row in result)
+
+
+def test_green_rejects_payload_mutation_before_any_transport():
+    """Changing both arms preserves comparability but violates frozen identity."""
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_tamper_fixture")
+    runtime = existing._runtime()
+    victim = scheduled[0].case_id
+    mutated = tuple(
+        replace(item, request=replace(item.request, prompt=item.request.prompt + " "))
+        if item.case_id == victim else item
+        for item in scheduled
+    )
+    with patch.object(runtime, "capture_provenance", side_effect=AssertionError("no calls")) as captures:
+        with pytest.raises(ValueError, match="model-visible prompt mismatch"):
+            run_scd01_16pair_v1(
+                runtime=runtime, scheduled=mutated,
+                offline_transport=lambda *_: (_ for _ in ()).throw(AssertionError("no HTTP")),
+            )
+    captures.assert_not_called()
+
+
+def test_green_transport_failure_aborts_all_32_without_retry():
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_error_fixture")
+    runtime = existing._runtime()
+    provenance = existing._provenance(existing._genuine_pair())
+    calls = []
+
+    def failing_transport(request, timeout):
+        calls.append(request.full_url)
+        raise URLError("synthetic transport failure")
+
+    with patch.object(runtime, "capture_provenance", return_value=provenance) as captures:
+        with pytest.raises(SCD0116PairAborted) as caught:
+            run_scd01_16pair_v1(
+                runtime=runtime, scheduled=scheduled,
+                offline_transport=failing_transport,
+            )
+    assert len(calls) == 1
+    assert captures.call_count == 3
+    assert len(caught.value.rows) == 32
+    assert sum(r["status"] == "INCONCLUSIVE" for r in caught.value.rows) == 1
+    assert sum(r["status"] == "NOT_EXECUTED" for r in caught.value.rows) == 31
+    assert all("parsed" not in r for r in caught.value.rows)
+    assert caught.value.authority_effect == "none"
+
+
+def test_green_temporal_drift_aborts_after_first_dispatch():
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_drift_fixture")
+    runtime = existing._runtime()
+    provenance = existing._provenance(existing._genuine_pair())
+    drifted = replace(provenance, model_digest="sha256:" + "b" * 64)
+    captures = []
+    requests = []
+
+    def capture(*args, **kwargs):
+        captures.append(1)
+        return drifted if len(captures) == 3 else provenance
+
+    def transport(request, timeout):
+        requests.append(request.full_url)
+        return existing._SyntheticHTTP(request)
+
+    with patch.object(runtime, "capture_provenance", side_effect=capture):
+        with pytest.raises(SCD0116PairAborted) as caught:
+            run_scd01_16pair_v1(
+                runtime=runtime, scheduled=scheduled, offline_transport=transport
+            )
+    assert len(requests) == 1
+    assert len(captures) == 3
+    assert len(caught.value.rows) == 32
+    assert all("parsed" not in row for row in caught.value.rows)
+    assert caught.value.status == "INCONCLUSIVE"
