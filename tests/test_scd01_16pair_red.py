@@ -6,7 +6,6 @@ intercepted. No live model inference, authority, oracle or E3 changes.
 from __future__ import annotations
 
 from dataclasses import replace
-from urllib.error import URLError
 import hashlib
 import importlib.util
 import json
@@ -20,6 +19,8 @@ from scripts.run_scd01_16pair import (
     SCD0116PairAborted,
     _validate_frozen_plan,
     run_scd01_16pair_v1,
+    _scd01_test_only_fixture,
+    _scd01_test_only_urlopen,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -192,19 +193,16 @@ def test_scd01_16pair_behavioral_red_authentic_runtime_requires_32_dispatches():
     existing = _load_module(PAIR_TEST, "scd01_existing_pair_behavior_fixture")
     runtime = existing._runtime()
     provenance = existing._provenance(existing._genuine_pair())
-    captured: list[tuple[str, str]] = []
-
-    def transport(request, timeout):
-        captured.append((request.full_url, json.loads(request.data)["model"]))
-        return existing._SyntheticHTTP(request)
-
     with patch.object(
         runtime, "capture_provenance", return_value=provenance
-    ) as snapshots:
-        result = run_scd01_16pair_v1(
-            runtime=runtime, scheduled=scheduled, offline_transport=transport
-        )
+    ) as snapshots, _scd01_test_only_fixture() as scenario, patch(
+        "malak.runtime.ollama_runtime.urlopen", _scd01_test_only_urlopen
+    ), patch(
+        "socket.socket.connect", side_effect=AssertionError("network forbidden")
+    ):
+        result = run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
 
+    captured = scenario.captured
     assert len(captured) == 32, (
         "SCD01_16PAIR_NOT_CONNECTED: expected 32 authentic runtime dispatches, "
         f"observed {len(captured)}"
@@ -214,7 +212,7 @@ def test_scd01_16pair_behavioral_red_authentic_runtime_requires_32_dispatches():
         f"observed {snapshots.call_count}"
     )
     assert all(url == "http://127.0.0.1:11434/api/chat" for url, _ in captured)
-    assert all(model == "qwen3.5:9b" for _, model in captured)
+    assert all(payload["model"] == "qwen3.5:9b" for _, payload in captured)
     assert len(result) == 32
     assert [(r["ordinal"], r["case_id"], r["arm"]) for r in result] == [
         (i.ordinal, i.case_id, i.arm) for i in scheduled
@@ -239,7 +237,6 @@ def test_green_rejects_payload_mutation_before_any_transport():
         with pytest.raises(ValueError, match="model-visible prompt mismatch"):
             run_scd01_16pair_v1(
                 runtime=runtime, scheduled=mutated,
-                offline_transport=lambda *_: (_ for _ in ()).throw(AssertionError("no HTTP")),
             )
     captures.assert_not_called()
 
@@ -249,18 +246,16 @@ def test_green_transport_failure_aborts_all_32_without_retry():
     existing = _load_module(PAIR_TEST, "scd01_existing_pair_error_fixture")
     runtime = existing._runtime()
     provenance = existing._provenance(existing._genuine_pair())
-    calls = []
-
-    def failing_transport(request, timeout):
-        calls.append(request.full_url)
-        raise URLError("synthetic transport failure")
-
-    with patch.object(runtime, "capture_provenance", return_value=provenance) as captures:
+    with patch.object(
+        runtime, "capture_provenance", return_value=provenance
+    ) as captures, _scd01_test_only_fixture(
+        fault="transport_error", fault_at=1
+    ) as scenario, patch(
+        "malak.runtime.ollama_runtime.urlopen", _scd01_test_only_urlopen
+    ):
         with pytest.raises(SCD0116PairAborted) as caught:
-            run_scd01_16pair_v1(
-                runtime=runtime, scheduled=scheduled,
-                offline_transport=failing_transport,
-            )
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    calls = scenario.captured
     assert len(calls) == 1
     assert captures.call_count == 3
     assert len(caught.value.rows) == 32
@@ -277,23 +272,145 @@ def test_green_temporal_drift_aborts_after_first_dispatch():
     provenance = existing._provenance(existing._genuine_pair())
     drifted = replace(provenance, model_digest="sha256:" + "b" * 64)
     captures = []
-    requests = []
-
     def capture(*args, **kwargs):
         captures.append(1)
         return drifted if len(captures) == 3 else provenance
 
-    def transport(request, timeout):
-        requests.append(request.full_url)
-        return existing._SyntheticHTTP(request)
-
-    with patch.object(runtime, "capture_provenance", side_effect=capture):
+    with patch.object(
+        runtime, "capture_provenance", side_effect=capture
+    ), _scd01_test_only_fixture() as scenario, patch(
+        "malak.runtime.ollama_runtime.urlopen", _scd01_test_only_urlopen
+    ):
         with pytest.raises(SCD0116PairAborted) as caught:
-            run_scd01_16pair_v1(
-                runtime=runtime, scheduled=scheduled, offline_transport=transport
-            )
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    requests = scenario.captured
     assert len(requests) == 1
     assert len(captures) == 3
     assert len(caught.value.rows) == 32
     assert all("parsed" not in row for row in caught.value.rows)
     assert caught.value.status == "INCONCLUSIVE"
+
+
+def test_fix_denies_arbitrary_transport_patch_without_any_introspection():
+    """A caller cannot replace urlopen with arbitrary code or dispatch live."""
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_no_external_transport")
+    runtime = existing._runtime()
+    with patch.object(
+        runtime, "capture_provenance", side_effect=AssertionError("no provenance")
+    ) as captures, patch(
+        "malak.runtime.ollama_runtime.urlopen",
+        side_effect=AssertionError("no HTTP"),
+    ) as transport:
+        with pytest.raises(PermissionError, match="LIVE_INFERENCE_NOT_AUTHORIZED"):
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    captures.assert_not_called()
+    transport.assert_not_called()
+
+
+def test_fix_denies_trusted_transport_without_explicit_fixture():
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_missing_test_fixture")
+    runtime = existing._runtime()
+    with patch.object(
+        runtime, "capture_provenance", side_effect=AssertionError("no provenance")
+    ) as captures, patch(
+        "malak.runtime.ollama_runtime.urlopen", _scd01_test_only_urlopen
+    ):
+        with pytest.raises(PermissionError, match="LIVE_INFERENCE_NOT_AUTHORIZED"):
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    captures.assert_not_called()
+
+
+def test_fix_late_provenance_drift_withholds_all_32_observations():
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_late_drift")
+    runtime = existing._runtime()
+    provenance = existing._provenance(existing._genuine_pair())
+    late = replace(provenance, model_digest="sha256:" + "b" * 64)
+    checks = []
+
+    def snapshot(*_args, **_kwargs):
+        checks.append(1)
+        return late if len(checks) == 96 else provenance
+
+    with patch.object(
+        runtime, "capture_provenance", side_effect=snapshot
+    ), _scd01_test_only_fixture() as scenario, patch(
+        "malak.runtime.ollama_runtime.urlopen", _scd01_test_only_urlopen
+    ):
+        with pytest.raises(SCD0116PairAborted) as caught:
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    assert len(checks) == 96
+    assert len(scenario.captured) == 32
+    assert len(caught.value.rows) == 32
+    assert all("parsed" not in row for row in caught.value.rows)
+    assert sum(r["status"] == "INCONCLUSIVE" for r in caught.value.rows) == 1
+    assert sum(r["status"] == "OBSERVATION_WITHHELD" for r in caught.value.rows) == 31
+
+
+@pytest.mark.parametrize("fault", [
+    "transport_error", "invalid_json", "invalid_reason", "model_mismatch",
+])
+def test_fix_late_fault_never_retries_or_returns_partial_success(fault):
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_late_" + fault)
+    runtime = existing._runtime()
+    provenance = existing._provenance(existing._genuine_pair())
+    with patch.object(
+        runtime, "capture_provenance", return_value=provenance
+    ) as captures, _scd01_test_only_fixture(
+        fault=fault, fault_at=32
+    ) as scenario, patch(
+        "malak.runtime.ollama_runtime.urlopen", _scd01_test_only_urlopen
+    ):
+        with pytest.raises(SCD0116PairAborted) as caught:
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    assert len(scenario.captured) == 32
+    assert captures.call_count == 95
+    assert len(caught.value.rows) == 32
+    assert sum(row["status"] == "INCONCLUSIVE" for row in caught.value.rows) == 1
+    assert sum(row["status"] == "OBSERVATION_WITHHELD" for row in caught.value.rows) == 31
+    assert all("parsed" not in row for row in caught.value.rows)
+    assert caught.value.authority_effect == "none"
+
+
+def test_fix_rejects_unrecognized_fault_scenario():
+    with pytest.raises(ValueError, match="UNSUPPORTED_FAULT"):
+        with _scd01_test_only_fixture(fault="run_python"):
+            pass
+
+
+def test_fix_mid_run_transport_seam_change_aborts_before_second_dispatch():
+    """After a trusted first response, replacing the seam cannot cause live I/O."""
+    import malak.runtime.ollama_runtime as runtime_module
+    scheduled = _frozen_schedule()
+    existing = _load_module(PAIR_TEST, "scd01_existing_pair_seam_swap")
+    runtime = existing._runtime()
+    provenance = existing._provenance(existing._genuine_pair())
+    captures = []
+    untrusted = []
+
+    def unexpected_http(*_args, **_kwargs):
+        untrusted.append(1)
+        raise AssertionError("UNTRUSTED TRANSPORT MUST NOT BE CALLED")
+
+    def snapshot(*_args, **_kwargs):
+        captures.append(1)
+        # After the first response and its temporal capture, simulate an
+        # unexpected patch change. The coordinator must deny later dispatch.
+        if len(captures) == 3:
+            runtime_module.urlopen = unexpected_http
+        return provenance
+
+    with patch.object(
+        runtime, "capture_provenance", side_effect=snapshot
+    ), _scd01_test_only_fixture() as scenario, patch(
+        "malak.runtime.ollama_runtime.urlopen", _scd01_test_only_urlopen
+    ):
+        with pytest.raises(SCD0116PairAborted) as caught:
+            run_scd01_16pair_v1(runtime=runtime, scheduled=scheduled)
+    assert len(scenario.captured) == 1
+    assert not untrusted
+    assert len(caught.value.rows) == 32
+    assert all("parsed" not in row for row in caught.value.rows)

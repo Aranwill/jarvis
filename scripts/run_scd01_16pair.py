@@ -1,17 +1,21 @@
-"""SCD01-16PAIR/v1 — offline, provenance-bound scheduled observation runner.
+"""SCD01-16PAIR/v1 — scheduled candidate observations, TEST-ONLY offline.
 
-Experiment only. This is NOT a live model execution entrypoint, an oracle,
-scorer, authority transition, or final-response component. Every HTTP call
-must be intercepted through the required offline_transport argument.
+Never an authorized live inference entry point. The only accepted transport
+seam is the built-in deterministic no-network fixture, installed by pytest.
+An unguarded direct call must fail closed before provenance or generation.
+No oracles, authority, scoring or E3 contract changes.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass, field
 import hashlib
 import json
 from pathlib import Path
-from typing import Callable
-from unittest.mock import patch
+from urllib.error import URLError
+
+import malak.runtime.ollama_runtime as ollama_runtime_module
 
 from malak.core.conversation import ConversationRequest
 from malak.runtime.ollama_runtime import OllamaRuntime
@@ -51,6 +55,122 @@ class SCD0116PairAborted(RuntimeError):
         self.authority_effect = "none"
         super().__init__("SCD01_16PAIR_ABORTED: no experiment result admitted")
 
+
+
+
+# This is a fixed, test-only transport fixture. There is no callback that can
+# be supplied to the coordinator. Only literal fault modes can be selected.
+# The fixture intentionally knows nothing about oracles or correct answers.
+_TEST_FAULTS = frozenset({
+    "none", "transport_error", "invalid_json", "invalid_reason", "model_mismatch",
+})
+
+
+@dataclass(slots=True)
+class _SCD01TestOnlyScenario:
+    fault: str = "none"
+    fault_at: int | None = None
+    captured: list[tuple[str, dict[str, object]]] = field(default_factory=list)
+
+
+_TEST_ONLY_ACTIVE: ContextVar[_SCD01TestOnlyScenario | None] = ContextVar(
+    "scd01_explicit_test_only_synthetic_transport", default=None
+)
+
+
+@contextmanager
+def _scd01_test_only_fixture(*, fault: str = "none", fault_at: int | None = None):
+    """For isolated pytest only; deterministic data, never an I/O callback."""
+    if fault not in _TEST_FAULTS:
+        raise ValueError("SCD01_TEST_ONLY_UNSUPPORTED_FAULT")
+    if fault == "none" and fault_at is not None:
+        raise ValueError("SCD01_TEST_ONLY_UNUSED_FAULT_AT")
+    if fault != "none" and (type(fault_at) is not int or not 1 <= fault_at <= 32):
+        raise ValueError("SCD01_TEST_ONLY_INVALID_FAULT_AT")
+    if _TEST_ONLY_ACTIVE.get() is not None:
+        raise RuntimeError("SCD01_TEST_ONLY_NESTED_FIXTURE_DENIED")
+    scenario = _SCD01TestOnlyScenario(fault=fault, fault_at=fault_at)
+    token = _TEST_ONLY_ACTIVE.set(scenario)
+    try:
+        yield scenario
+    finally:
+        _TEST_ONLY_ACTIVE.reset(token)
+
+
+class _SCD01TestOnlyHttpResponse:
+    def __init__(self, request: object, body: bytes) -> None:
+        self._url = request.full_url
+        self._body = body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def geturl(self) -> str:
+        return self._url
+
+    def read(self, _limit: int) -> bytes:
+        return self._body
+
+
+def _scd01_test_only_urlopen(request: object, timeout: object):
+    """A closed, in-memory Ollama-format responder. Never uses any socket."""
+    scenario = _TEST_ONLY_ACTIVE.get()
+    if scenario is None:
+        raise PermissionError("SCD01_LIVE_INFERENCE_NOT_AUTHORIZED")
+    if (
+        request.full_url != "http://127.0.0.1:11434/api/chat"
+        or request.get_method() != "POST"
+        or type(timeout) not in (int, float)
+        or timeout != 300
+    ):
+        raise PermissionError("SCD01_TEST_ONLY_UNEXPECTED_HTTP_TARGET")
+    payload = json.loads(request.data)
+    if (
+        type(payload) is not dict
+        or payload.get("model") != "qwen3.5:9b"
+        or payload.get("stream") is not False
+    ):
+        raise PermissionError("SCD01_TEST_ONLY_UNEXPECTED_REQUEST")
+    scenario.captured.append((request.full_url, payload))
+    ordinal = len(scenario.captured)
+    fault_here = scenario.fault_at == ordinal
+    if fault_here and scenario.fault == "transport_error":
+        raise URLError("SCD01 test-only synthetic transport error")
+
+    content = json.dumps({
+        "outcome": "INSUFFICIENT",
+        "reason_codes": ["SUPPORTING_REFS_INSUFFICIENT"],
+    })
+    if fault_here and scenario.fault == "invalid_json":
+        content = "not-valid-json"
+    if fault_here and scenario.fault == "invalid_reason":
+        content = json.dumps({
+            "outcome": "INSUFFICIENT",
+            "reason_codes": ["COMPOUND_CLAIM_NOT_FULLY_SUPPORTED"],
+        })
+    model = "unexpected:model" if fault_here and scenario.fault == "model_mismatch" else "qwen3.5:9b"
+    body = json.dumps({
+        "model": model,
+        "message": {"role": "assistant", "content": content},
+        "done": True,
+        "done_reason": "stop",
+        "prompt_eval_count": 12,
+        "eval_count": 18,
+    }).encode("utf-8")
+    return _SCD01TestOnlyHttpResponse(request, body)
+
+
+def _require_test_only_seam(runtime: OllamaRuntime) -> None:
+    """Direct or arbitrarily monkeypatched entry points cannot dispatch."""
+    if (
+        type(runtime) is not OllamaRuntime
+        or ollama_runtime_module.urlopen is not _scd01_test_only_urlopen
+        or _TEST_ONLY_ACTIVE.get() is None
+    ):
+        raise PermissionError("SCD01_LIVE_INFERENCE_NOT_AUTHORIZED")
 
 def _reject_duplicate_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
     result: dict[str, object] = {}
@@ -217,17 +337,14 @@ def run_scd01_16pair_v1(
     *,
     runtime: OllamaRuntime,
     scheduled: tuple[SCD01ScheduledRequest, ...],
-    offline_transport: Callable[..., object] | None = None,
 ) -> tuple[dict[str, object], ...]:
-    """Execute the exact frozen schedule offline, in ordinal order.
+    """Execute 32 frozen positions only with the fixed pytest synthetic seam.
 
-    The offline transport is mandatory. No scores, oracle, persistence, retry,
-    or live-model path. On failure, raises SCD0116PairAborted with exactly 32
-    sanitized positions; no partial observations are returned to the caller.
+    A direct call or arbitrary transport patch is denied before side effects.
+    On failure expose only 32 sanitized positions; never partial model outputs.
     """
     _validate_frozen_plan(runtime=runtime, scheduled=scheduled)
-    if not callable(offline_transport):
-        raise PermissionError("SCD01_LIVE_INFERENCE_NOT_AUTHORIZED")
+    _require_test_only_seam(runtime)
 
     e3 = _load_existing_script("run_e3_governed_blind_assessor_ollama_experiment")
     model = scheduled[0].request.model
@@ -264,48 +381,48 @@ def run_scd01_16pair_v1(
             raise TypeError("SCD01 provenance type mismatch")
         e3._validate_baseline_provenance(snapshot, model=model)
 
-    # Defense-in-depth: even accidental direct calls cannot access a live
-    # network through OllamaRuntime.urlopen without the injected test seam.
-    with patch("malak.runtime.ollama_runtime.urlopen", side_effect=offline_transport):
-        for item in scheduled:
-            key = (item.case_id, item.arm)
+    # Test harness patches the exact OllamaRuntime.urlopen seam externally.
+    # This coordinator never installs arbitrary callbacks or patches globals.
+    for item in scheduled:
+        key = (item.case_id, item.arm)
+        try:
+            if item.case_id not in first_seen:
+                capture_initial()
+                first_seen.add(item.case_id)
+            capture_stable()  # before this scheduled request
+            _require_test_only_seam(runtime)  # protect every dispatch, not just entry
+            response = None
+            generation_error: Exception | None = None
             try:
-                if item.case_id not in first_seen:
-                    capture_initial()
-                    first_seen.add(item.case_id)
-                capture_stable()  # before this scheduled request
-                response = None
-                generation_error: Exception | None = None
-                try:
-                    response = runtime.generate(item.request)
-                except Exception as exc:
-                    generation_error = exc
-                # Preserve E3 temporal checks even after transport failure.
-                # If provenance drifted, that takes precedence over the HTTP error.
-                capture_stable()  # after this scheduled request, success or error
-                if generation_error is not None:
-                    raise generation_error
-                if response is None:
-                    raise RuntimeError("SCD01 runtime returned no response")
-                if response.model != model or response.provider != "ollama":
-                    raise ValueError("SCD01 Ollama response identity mismatch")
-                parsed = e3.parse_model_assessor_output_v0(response.content)
-                if not e3._model_output_pair_is_valid_v0(parsed):
-                    raise ValueError("SCD01 E3 outcome/reason pairing invalid")
-                observed[key] = {
-                    "ordinal": item.ordinal,
-                    "case_id": item.case_id,
-                    "arm": item.arm,
-                    "status": "MODEL_OBSERVATION_ONLY",
-                    "parsed": parsed,
-                    "authority_effect": "none",
-                }
-                if sum(x[0] == item.case_id for x in observed) == 2:
-                    capture_stable()  # final, after both arms
+                response = runtime.generate(item.request)
             except Exception as exc:
-                raise SCD0116PairAborted(
-                    rows=_abort_rows(scheduled, observed, key)
-                ) from exc
+                generation_error = exc
+            # Preserve E3 temporal checks even after transport failure.
+            # If provenance drifted, that takes precedence over the HTTP error.
+            capture_stable()  # after this scheduled request, success or error
+            if generation_error is not None:
+                raise generation_error
+            if response is None:
+                raise RuntimeError("SCD01 runtime returned no response")
+            if response.model != model or response.provider != "ollama":
+                raise ValueError("SCD01 Ollama response identity mismatch")
+            parsed = e3.parse_model_assessor_output_v0(response.content)
+            if not e3._model_output_pair_is_valid_v0(parsed):
+                raise ValueError("SCD01 E3 outcome/reason pairing invalid")
+            observed[key] = {
+                "ordinal": item.ordinal,
+                "case_id": item.case_id,
+                "arm": item.arm,
+                "status": "MODEL_OBSERVATION_ONLY",
+                "parsed": parsed,
+                "authority_effect": "none",
+            }
+            if sum(x[0] == item.case_id for x in observed) == 2:
+                capture_stable()  # final, after both arms
+        except Exception as exc:
+            raise SCD0116PairAborted(
+                rows=_abort_rows(scheduled, observed, key)
+            ) from exc
 
     if len(observed) != 32 or len(first_seen) != 16 or drift_state["invalid"]:
         # This check does not reinterpret incomplete evidence as success.
