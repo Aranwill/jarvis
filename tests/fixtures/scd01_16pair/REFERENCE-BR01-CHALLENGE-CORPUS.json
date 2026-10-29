@@ -1,0 +1,231 @@
+{
+  "schema": "MALAK-SCD01-BLIND-CORPUS/v1",
+  "status": "RESEARCH_ONLY",
+  "authority_effect": "none",
+  "cases": [
+    {
+      "id": "P-4C3EF31D21",
+      "statement": "Operator owns the complete lifecycle of every task in the defined queue.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Task T-17 entered the defined queue at 09:00 under Operator observation."
+        },
+        {
+          "ref": "R2",
+          "material": "Task T-17 was assigned to a registered handler at 09:01."
+        }
+      ]
+    },
+    {
+      "id": "P-E9501C41A2",
+      "statement": "Registry manages the complete lifecycle of every credential in its workspace.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Registry created credential c-14 for registered user u-02 at 09:12."
+        },
+        {
+          "ref": "R2",
+          "material": "Registry created credential c-15 for registered user u-04 at 09:16."
+        }
+      ]
+    },
+    {
+      "id": "P-2FD1D8DCDD",
+      "statement": "System enforces replay protection for all messages in the monitored channel.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Replay attempt for monitored-channel message m-19 was rejected at 11:02."
+        },
+        {
+          "ref": "R2",
+          "material": "Inspection record sampled message m-19 on that channel."
+        }
+      ]
+    },
+    {
+      "id": "P-F3080D9666",
+      "statement": "Vault records checksums for audit entries and authorizes retention deletion.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Vault stored checksum 8a4f for audit entry a-17."
+        },
+        {
+          "ref": "R2",
+          "material": "Vault stored checksum b62d for audit entry a-18."
+        }
+      ]
+    },
+    {
+      "id": "P-49963D32A7",
+      "statement": "Vault records the checksum and timestamp together as one audit tuple.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Vault records each audit tuple containing both checksum and timestamp in one stored record."
+        }
+      ]
+    },
+    {
+      "id": "P-C9C7D266E0",
+      "statement": "System enforces replay protection for all messages in the monitored channel.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Naming convention for monitored channels is lower_snake_case."
+        },
+        {
+          "ref": "R2",
+          "material": "A maintenance note documents preferred channel label length."
+        }
+      ]
+    },
+    {
+      "id": "P-FAC74A5099",
+      "statement": "Registry issues credentials to registered users and manages the complete lifecycle of every credential in its workspace.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Registry accepted credential issuance request cr-17 and recorded status RECEIVED."
+        },
+        {
+          "ref": "R2",
+          "material": "Workspace inventory lists 24 credentials."
+        }
+      ]
+    },
+    {
+      "id": "P-0CE3461E2B",
+      "statement": "Relay routes approved messages to subscribed endpoints and authorizes durable deletion of stored messages.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Relay routes approved messages to subscribed endpoints."
+        },
+        {
+          "ref": "R2",
+          "material": "Relay authorizes durable deletion of stored messages."
+        }
+      ]
+    },
+    {
+      "id": "P-34FFE4C6B5",
+      "statement": "Registry issues credentials to registered users and manages the complete lifecycle of every credential in its workspace.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Registry issued credential c-17 to registered user u-04 at 11:00."
+        },
+        {
+          "ref": "R2",
+          "material": "Credential c-17 was entered into the issuance register at 11:00."
+        }
+      ]
+    },
+    {
+      "id": "P-06ABAC84A1",
+      "statement": "Sensor checks every device in the declared pool.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "The entire declared device pool is {A, B, C}."
+        },
+        {
+          "ref": "R2",
+          "material": "Sensor check log records A:PASS and B:PASS."
+        },
+        {
+          "ref": "R3",
+          "material": "The displayed check-log excerpt was collected at 14:00."
+        }
+      ]
+    },
+    {
+      "id": "P-FACEEC2609",
+      "statement": "Relay routes approved messages to subscribed endpoints and authorizes durable deletion of stored messages.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Relay accepted message m-7 at ingress with status RECEIVED."
+        },
+        {
+          "ref": "R2",
+          "material": "Relay parsed message m-7 and recorded syntax status VALID."
+        }
+      ]
+    },
+    {
+      "id": "P-1131534361",
+      "statement": "Bridge verifies every transfer in its declared channel.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Bridge recorded PRELIMINARY stamp for transfer t-21 in the declared channel."
+        },
+        {
+          "ref": "R2",
+          "material": "The declared channel lists transfers t-21 and t-22."
+        }
+      ]
+    },
+    {
+      "id": "P-21A35D8E52",
+      "statement": "Bridge verifies every transfer in its declared channel.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Bridge recorded PRELIMINARY stamp for transfer t-21 in the declared channel."
+        },
+        {
+          "ref": "R2",
+          "material": "Final verification results for the declared channel are located in external ledger AUX-77, which is outside this packet and must be inspected."
+        }
+      ]
+    },
+    {
+      "id": "P-938319F1C3",
+      "statement": "Relay routes approved messages to subscribed endpoints and authorizes durable deletion of stored messages.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Routing log: Relay delivered approved message m-21 to subscribed endpoint sub-3."
+        },
+        {
+          "ref": "R2",
+          "material": "Delivery receipt for m-21 records endpoint response 201."
+        }
+      ]
+    },
+    {
+      "id": "P-D43EC63CAE",
+      "statement": "Operator owns the complete lifecycle of every task in the defined queue.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "Operator owns task lifecycle from submission to termination for every task in the queue."
+        },
+        {
+          "ref": "R2",
+          "material": "Operator does not own task lifecycle through termination for every task in that queue."
+        }
+      ]
+    },
+    {
+      "id": "P-7EB7158451",
+      "statement": "Sensor checks every device in the declared pool.",
+      "evidence": [
+        {
+          "ref": "R1",
+          "material": "The complete declared device pool is {A, B}."
+        },
+        {
+          "ref": "R2",
+          "material": "Sensor checks device A and device B."
+        }
+      ]
+    }
+  ]
+}
