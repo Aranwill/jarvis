@@ -749,6 +749,14 @@ def test_g01_red_false_support_fails_both_dimensions(tmp_path: Path) -> None:
 def test_g01_red_exact_match_passes_both_dimensions(tmp_path: Path) -> None:
     completed, payload = _run_payload(tmp_path)
     assert completed.returncode == 0
+    assert (
+        payload["schema_version"]
+        == "MALAK-E3-SUPPORT-ASSESSOR-QUALIFICATION-OUTPUT/v0.2"
+    )
+    assert (
+        payload["qualification_runner_version"]
+        == "e3-support-assessor-qualification/v0.2"
+    )
     assert payload["qualification_result"] == "PASS"
     assert payload["diagnostic_exact_match_result"] == "PASS"
     assert payload["safety_floor_result"] == "PASS"
