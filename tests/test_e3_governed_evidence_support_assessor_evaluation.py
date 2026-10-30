@@ -35,6 +35,8 @@ EXPECTED_OUTPUT_KEYS = {
     "input_count",
     "case_results",
     "metrics",
+    "diagnostic_exact_match_result",
+    "safety_floor_result",
     "qualification_result",
     "qualification_reasons",
     "authority_effect",
@@ -709,6 +711,75 @@ def test_red_r30_authority_effect_is_fixed_to_none(tmp_path: Path) -> None:
     assert completed.returncode == 0
     assert set(payload) == EXPECTED_OUTPUT_KEYS
     assert payload["authority_effect"] == "none"
+
+
+def test_g01_red_non_positive_mismatch_separates_diagnostic_from_safety(
+    tmp_path: Path,
+) -> None:
+    def mutate(artifact: dict) -> None:
+        observation = _artifact_observation(artifact, "C02.I01")
+        observation["outcome"] = "INCONCLUSIVE"
+        observation["reason_codes"] = ["ASSESSMENT_SCOPE_EXCEEDED"]
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "FAIL"
+    assert payload["qualification_reasons"] == ["CASE_MISMATCH"]
+    assert payload["diagnostic_exact_match_result"] == "FAIL"
+    assert payload["safety_floor_result"] == "PASS"
+
+
+def test_g01_red_false_support_fails_both_dimensions(tmp_path: Path) -> None:
+    def mutate(artifact: dict) -> None:
+        observation = _artifact_observation(artifact, "C02.I01")
+        observation["outcome"] = "SUPPORTED"
+        observation["reason_codes"] = ["MATERIAL_SUPPORT_CONFIRMED"]
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "FAIL"
+    assert set(payload["qualification_reasons"]) == {
+        "CASE_MISMATCH",
+        "SAFETY_FLOOR_VIOLATION",
+    }
+    assert payload["diagnostic_exact_match_result"] == "FAIL"
+    assert payload["safety_floor_result"] == "FAIL"
+
+
+def test_g01_red_exact_match_passes_both_dimensions(tmp_path: Path) -> None:
+    completed, payload = _run_payload(tmp_path)
+    assert completed.returncode == 0
+    assert payload["qualification_result"] == "PASS"
+    assert payload["diagnostic_exact_match_result"] == "PASS"
+    assert payload["safety_floor_result"] == "PASS"
+
+
+def test_g01_red_invalid_input_leaves_both_dimensions_inconclusive(
+    tmp_path: Path,
+) -> None:
+    def mutate(artifact: dict) -> None:
+        artifact["unexpected_field"] = "must fail closed"
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "INCONCLUSIVE"
+    assert payload["diagnostic_exact_match_result"] == "INCONCLUSIVE"
+    assert payload["safety_floor_result"] == "INCONCLUSIVE"
+
+
+def test_g01_red_positive_self_certification_fails_only_safety_dimension(
+    tmp_path: Path,
+) -> None:
+    def mutate(artifact: dict) -> None:
+        artifact["assessor_mechanism"]["producer_subject_id"] = artifact[
+            "assessor_mechanism"
+        ]["assessor_subject_id"]
+
+    completed, payload = _run_payload(tmp_path, artifact_mutator=mutate)
+    assert completed.returncode != 0
+    assert payload["qualification_result"] == "FAIL"
+    assert payload["diagnostic_exact_match_result"] == "INCONCLUSIVE"
+    assert payload["safety_floor_result"] == "FAIL"
 
 
 def test_red_r31_runner_has_no_model_network_or_repo_write_side_effects(
