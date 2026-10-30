@@ -285,14 +285,56 @@ Critical Contract Hardening         PASS writer
 Four law questions                  PASS writer
 Design 4R                           PASS writer
 RDD Stage 1 Design Check            PASS writer
-RED                                  AUTHORIZED by Owner mission / pending execution
-GREEN                                AUTHORIZED by Owner mission after causal RED
-Candidate FULL 4R                   REQUIRED after GREEN
-independent validation              REQUIRED
-RDD Candidate Conformance           REQUIRED before human Ready
-Ready / Merge                       Owner only
+RED                                  PASS writer (5/5 causal failures)
+GREEN                                PASS writer (5/5 focal; 67/67 evaluator)
+Candidate FULL 4R                   PASS writer
+independent validation              PENDING
+RDD Candidate Conformance           INCONCLUSIVE pending independent validation
+Ready / Merge                       PENDING / Owner only
 semantic_assurance                  NOT_VERIFIED
 authority_effect                    none
 ```
 
 Rollback: revertir los commits de esta branch; `main` permanece intacto.
+
+## 13. Evidencia de implementación y Candidate 4R
+
+Commits de construcción:
+
+- diseño: `311ddd5`;
+- RED: `ed591d8`;
+- GREEN: `b3637ee`.
+
+RED produjo cinco fallos causales por ausencia de
+`diagnostic_exact_match_result` y `safety_floor_result`. GREEN produjo `5
+passed` para el foco y `67 passed` para el archivo completo del evaluador.
+`compileall` y `git diff --check` pasaron.
+
+La suite integral produjo `2242 passed, 1 skipped, 1 failed`; el único fallo
+fue `test_installed_console_script_starts_mock_cli` porque el proceso invocó el
+Python del virtualenv sin el ejecutable `malak` en `PATH`. Repetido con el
+virtualenv activado produjo `2 passed`. No corresponde al contrato E3 ni a los
+archivos modificados.
+
+Replays offline, sin nueva inferencia y sobre el corpus exacto
+`4ec4d152af884b50d7bfa8c9d14eaaabb93b6e306ea5e7bd0361b326bb053bba`:
+
+| artifact existente | mismatch | exact-match | safety floor | aggregate |
+|---|---|---|---|---|
+| Qwen `qwen3.5:9b` | C03 | FAIL | PASS | FAIL |
+| Gemma `gemma4:12b` | C18 | FAIL | PASS | FAIL |
+
+Candidate 4R del writer:
+
+- `Requested`: PASS; los dos campos v0.2 están presentes y el agregado sigue
+  requiriendo ambos en PASS.
+- `Regression`: PASS del writer; no cambian corpus, fórmulas, thresholds,
+  reason codes, prompt ni selección de casos.
+- `Risk`: PASS del writer; input inválido conserva ambas dimensiones en
+  INCONCLUSIVE, false support falla ambas y self-certification positiva falla
+  safety sin fabricar exactitud diagnóstica.
+- `Refine`: PASS; no se justifica componente, inferencia, consumer runtime ni
+  migración adicional.
+
+Este 4R no sustituye validación independiente, RDD Candidate Conformance ni la
+decisión humana Ready/Merge.
