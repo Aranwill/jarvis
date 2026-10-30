@@ -93,7 +93,7 @@ semántica/taxonómica; no se demostró error de parsing ni projection.
 | P2 | PASS writer: Human in Control, Evidence != Authority, no-bypass, Runtime Independence y Kernel First preservados. |
 | P3 | N/A con razón: output offline de evaluation tooling; no crea control ascendente, permisos ni operación protegida. |
 | P4 | `ADAPT`: reutilizar `_evaluate`, métricas, case results y output existentes; cero componente, runtime, Kernel o governance nuevos. |
-| P5 | risk 3, critical contract YES, FULL 4R requerida; RDD Stage 1 Design/Candidate aplicable; Stage 2 requerido sólo si el candidate alcanza cierre material. |
+| P5 | risk 3, critical contract YES, FULL 4R requerida; RDD Stage 1 Design/Candidate aplicable; Stage 2 REQUIRED para admisibilidad técnica de human Ready. |
 | P6 | FROZEN: dos archivos de implementación/test más este Design y su ledger. Candidate identity por commits RED/GREEN exactos. |
 | P7 | PASS writer para entrar a la secuencia crítica; `authority_effect=none`. No equivale a review independiente, Ready o Merge. |
 
@@ -258,7 +258,7 @@ implementation files  1
 test files            1
 new dependencies      0
 new components        0
-fix rounds            1
+fix rounds            1 (consumida por la corrección acotada de evidencia)
 ```
 
 STOP si la corrección exige modificar formula, threshold, ground truth, prompt,
@@ -288,8 +288,11 @@ RDD Stage 1 Design Check            PASS writer
 RED                                  PASS writer (5/5 causal failures)
 GREEN                                PASS writer (5/5 focal; 67/67 evaluator)
 Candidate FULL 4R                   PASS writer
-independent validation              PENDING
-RDD Candidate Conformance           INCONCLUSIVE pending independent validation
+E2E / integration                   PASS local; CI candidate-bound PENDING
+independent validation              INCONCLUSIVE para Ready/Merge
+RDD Stage 1 Candidate Conformance   INCONCLUSIVE
+Evidence Manifest v1                REQUIRED external candidate-bound artifact
+RDD Stage 2 Receipt                 REQUIRED; no habilita Ready con conformance INCONCLUSIVE
 Ready / Merge                       PENDING / Owner only
 semantic_assurance                  NOT_VERIFIED
 authority_effect                    none
@@ -297,7 +300,95 @@ authority_effect                    none
 
 Rollback: revertir los commits de esta branch; `main` permanece intacto.
 
-## 13. Evidencia de implementación y Candidate 4R
+## 13. Candidate FULL 4R post-GREEN
+
+Este checkpoint revisa el candidate material; no reutiliza ni sustituye el
+`Design 4R` de la sección 7. La revisión externa READ-ONLY detectó el finding
+`G01-EXT-4R-01`: se habían usado las etiquetas no canónicas `Requested`,
+`Regression`, `Risk` y `Refine`. Esa evidencia se conserva como FAIL de forma y
+se corrige en `correction_round=1`. No se reinterpreta retrospectivamente como
+FULL 4R válido.
+
+### Risk
+
+```text
+status: PASS writer
+questions_evaluated:
+  - ¿Puede la separación producir un false PASS o debilitar el safety floor?
+  - ¿Cambia authority, governance, corpus, prompt, oracle o runtime?
+  - ¿Puede reinterpretar artifacts históricos o semantic_assurance?
+findings:
+  - G01-EXT-4R-01 (forma 4R no canónica), RESOLVED en correction_round=1
+evidence:
+  - aggregate PASS sólo cuando exact-match y safety son PASS
+  - invalid input y self-certification positiva permanecen fail-closed
+  - authority_effect=none; semantic_assurance=NOT_VERIFIED
+residual_risk:
+  - CI e independent validation del candidate corregido permanecen pendientes
+```
+
+### Readability
+
+```text
+status: PASS writer
+questions_evaluated:
+  - ¿Los nombres distinguen sin ambigüedad exactitud diagnóstica y safety?
+  - ¿El delta es menor y más mantenible que un segundo evaluator/componente?
+  - ¿La evidencia separa Design 4R de Candidate FULL 4R?
+findings:
+  - G01-EXT-4R-01 expuso terminología incorrecta en la evidencia post-GREEN
+evidence:
+  - schema/runner v0.2 y dos keys explícitas
+  - un evaluator adaptado; cero componente, helper o dependencia nueva
+  - secciones 7 y 13 conservan checkpoints 4R distintos
+residual_risk:
+  - un consumer futuro deberá seleccionar conscientemente dimensión o aggregate
+```
+
+### Reliability
+
+```text
+status: PASS writer
+questions_evaluated:
+  - ¿Cada dimensión deriva determinísticamente de observaciones validadas?
+  - ¿El agregado preserva el contrato estricto y sus exit codes?
+  - ¿Las pruebas cubren PASS, mismatch no positivo, safety failure e input inválido?
+  - ¿La evidencia de suite distingue el fallo ambiental del rerun corregido?
+findings:
+  - G01-ENV-01: suite original no tuvo malak en PATH; resultado preservado
+evidence:
+  - RED 5/5 causal; GREEN 5/5 focal; evaluator 67/67
+  - suite original 2242 passed, 1 skipped, 1 failed
+  - test ambiental repetido con virtualenv activado: 2 passed
+  - replay offline Qwen/Gemma conserva aggregate FAIL
+residual_risk:
+  - el rerun integral con entorno corregido debe quedar ligado al candidate final
+```
+
+### Resilience
+
+```text
+status: PASS writer
+questions_evaluated:
+  - ¿Qué ocurre ante schema, identity o binding inválidos?
+  - ¿Qué ocurre ante self-certification y false support?
+  - ¿Existe rollback y se invalida evidencia cuando cambia el candidate?
+findings:
+  - ninguno bloqueante demostrado en el evaluador v0.2
+evidence:
+  - invalid input => dimensiones y aggregate INCONCLUSIVE
+  - false support => exact-match FAIL, safety FAIL, aggregate FAIL
+  - self-certification positiva => diagnostic INCONCLUSIVE, safety/aggregate FAIL
+  - rollback por revert de los commits de branch; main intacto
+residual_risk:
+  - CI/independent validation ausentes impiden afirmar resiliencia certificada
+```
+
+Resultado agregado del writer: `PASS`. Este resultado no es independent
+validation, RDD Stage 1 Candidate Conformance, Receipt válido para Ready ni
+autoridad. El manifest externo debe ligar estas cuatro lentes al SHA final.
+
+## 14. Evidencia de implementación y reconciliación ambiental
 
 Commits de construcción:
 
@@ -310,11 +401,14 @@ RED produjo cinco fallos causales por ausencia de
 passed` para el foco y `67 passed` para el archivo completo del evaluador.
 `compileall` y `git diff --check` pasaron.
 
-La suite integral produjo `2242 passed, 1 skipped, 1 failed`; el único fallo
+La ejecución integral original produjo `2242 passed, 1 skipped, 1 failed`; el único fallo
 fue `test_installed_console_script_starts_mock_cli` porque el proceso invocó el
 Python del virtualenv sin el ejecutable `malak` en `PATH`. Repetido con el
 virtualenv activado produjo `2 passed`. No corresponde al contrato E3 ni a los
-archivos modificados.
+archivos modificados. El resultado original permanece `FAIL` y no se reescribe
+como FULL PASS. Un rerun integral separado, con el virtualenv activado y ligado
+al candidate corregido, constituye evidencia nueva; no corrige el registro
+histórico.
 
 Replays offline, sin nueva inferencia y sobre el corpus exacto
 `4ec4d152af884b50d7bfa8c9d14eaaabb93b6e306ea5e7bd0361b326bb053bba`:
@@ -324,17 +418,42 @@ Replays offline, sin nueva inferencia y sobre el corpus exacto
 | Qwen `qwen3.5:9b` | C03 | FAIL | PASS | FAIL |
 | Gemma `gemma4:12b` | C18 | FAIL | PASS | FAIL |
 
-Candidate 4R del writer:
+## 15. Candidate-bound traceability, Manifest y RDD
 
-- `Requested`: PASS; los dos campos v0.2 están presentes y el agregado sigue
-  requiriendo ambos en PASS.
-- `Regression`: PASS del writer; no cambian corpus, fórmulas, thresholds,
-  reason codes, prompt ni selección de casos.
-- `Risk`: PASS del writer; input inválido conserva ambas dimensiones en
-  INCONCLUSIVE, false support falla ambas y self-certification positiva falla
-  safety sin fabricar exactitud diagnóstica.
-- `Refine`: PASS; no se justifica componente, inferencia, consumer runtime ni
-  migración adicional.
+| Elemento | Binding / disposición |
+|---|---|
+| baseline | `6bde76edf6b9953beb5019e48cfbf486ca785790` |
+| implementation GREEN | `b3637ee` |
+| candidate revisado externamente | `311e95e82cabcfc658ab556208dc01ae1d6be998` |
+| resultado externo | `INCONCLUSIVE` para Ready/Merge; sin safety failure demostrado |
+| finding | `G01-EXT-4R-01`, evidencia FULL 4R no canónica |
+| correction | una Bounded Correction documental; `correction_round=1` |
+| corrected candidate | commit exacto que contiene esta corrección; ligado fuera del worktree |
+| scope/spec | este design y su File Coverage Ledger |
+| producer | writer de la rama; no se afirma independencia |
+| authority | Owner únicamente; `authority_effect=none` |
 
-Este 4R no sustituye validación independiente, RDD Candidate Conformance ni la
-decisión humana Ready/Merge.
+Por la regla anti-recursión, el `MALAK-EVIDENCE-MANIFEST/v1` activo y el
+`MALAK-RDD-VALIDATION-RECEIPT/v1` deben residir fuera del candidate worktree. El
+Manifest debe registrar el SHA final, baseline ancestor, FULL 4R oficial,
+`finding_refs=[G01-EXT-4R-01,G01-ENV-01]`, `correction_round=1`, resultados de
+validación candidate-bound y los pendientes como `INCONCLUSIVE`.
+
+Precondiciones RDD Stage 1 Candidate Conformance:
+
+| Precondición | Estado |
+|---|---|
+| targeted validation | PASS local; requiere binding al SHA final |
+| Candidate FULL 4R | PASS writer; requiere binding al SHA final |
+| blocking findings resolved | PASS writer para G01-EXT-4R-01 |
+| bounded correction validated | PASS writer; independent validation pendiente |
+| affected evidence revalidated | PENDING sobre candidate final |
+| E2E / integration | PASS local |
+| CI candidate-bound | PENDING |
+| independent validation | INCONCLUSIVE / pendiente sobre candidate corregido |
+
+Resultado: `RDD Stage 1 Candidate Conformance = INCONCLUSIVE`. Para
+`risk_class=3`, Stage 2 es `REQUIRED`; puede preservar ese terminal
+`INCONCLUSIVE`, pero sólo `candidate_conformance_result=PASS` podría satisfacer
+la precondición técnica de human Ready. Un Receipt estructuralmente válido no
+convierte ese resultado en PASS y no concede Ready/Merge.
