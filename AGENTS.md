@@ -118,6 +118,12 @@ no tratar tests verdes como cierre integral
 no usar fuentes externas de soporte como autoridad del proceso
 ```
 
+Para declarar una implementación integrada o terminada, se exige la evidencia
+concreta de consumidor y cadena de integración definida en
+`docs/development/malak_construction_protocol.md` §5.1, además de la validación
+correspondiente de §5.5 si el contrato es crítico. Un Mock no acredita por sí
+mismo integración con el runtime real. Esta referencia no crea un gate adicional.
+
 Si el actor no puede completar el Construction Preflight o consultar y
 reconciliar el Construction Protocol aplicable:
 

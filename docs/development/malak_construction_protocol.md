@@ -520,6 +520,32 @@ No basta con mencionar RDD, 4R o E2E en una ficha o PR. Debe existir evidencia v
 
 El E2E no puede omitirse silenciosamente. Cuando no exista un runtime E2E aplicable, el cierre debe registrar la razón y ejecutar la validación end-to-end equivalente de la cadena realmente afectada —por ejemplo coherencia entre documentos, contratos, estados o artefactos— en lugar de declarar simplemente `N/A` sin evidencia.
 
+**Evidencia explícita de consumidor e integración (dentro de los controles existentes).**
+Para cualquier componente con consumidor previsto, el diseño/preflight debe identificar
+el consumidor real o previsto, la interfaz pública invocada y el punto de entrada
+que conectará productor → consumidor. `PREPARATORY / RESEARCH_ONLY` puede avanzar
+sin consumidor conectado, pero la ausencia debe quedar explícita; no equivale a
+implementación integrada ni runtime listo.
+
+Antes de afirmar integración o cierre técnico, el checkpoint E2E/integration
+existente debe registrar, vinculado al candidate exacto:
+
+- `producer_component`, `consumer_component` y `invocation_path` (rutas reales,
+  o `NOT_CONNECTED` con motivo explícito);
+- `input_contract` y `output_contract`, y quién es dueño de cada validación;
+- `evidence_ref`, `test_name`, `execution_environment`, `result`, más al menos
+  una trayectoria de éxito y una de fallo cuando sean aplicables;
+- `verification_level` inequívoco: `UNIT_ONLY`, `MOCK_INTEGRATION`,
+  `REAL_RUNTIME_INTEGRATION` o `E2E`; `NOT_EXECUTED` cuando no exista prueba;
+- limitaciones, dependencias y autorización pendiente, sin convertirlas en PASS.
+
+`UNIT_ONLY` o `MOCK_INTEGRATION` nunca justifican declarar
+`REAL_RUNTIME_INTEGRATION` ni `E2E` PASS. Si no existe consumidor real,
+la integración permanece pendiente, aunque todos los tests aislados pasen.
+No se exige runtime real antes de una fase que autorice solo investigación offline;
+se exige **describir el estado real sin sobreafirmarlo**. Este registro no añade
+un gate nuevo, no modifica la secuencia §5.5 y no concede autoridad.
+
 ### 5.1.1 Topología canónica de Pull Requests
 
 Para una unidad material que requiera una especificación formal G0/G1 y una
