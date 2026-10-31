@@ -274,6 +274,8 @@ Validar:
 - [ ] Los tests cubren los criterios de aceptación relevantes definidos por la especificación cuando corresponda.
 - [ ] Los cambios de seguridad incluyen casos negativos y fail-closed cuando corresponda.
 - [ ] Los flujos integrados modificados poseen pruebas de integración o E2E proporcionales al riesgo cuando corresponda.
+- [ ] Se identificaron productor, consumidor, interfaz y punto de invocación; cualquier `NOT_CONNECTED` permanece pendiente y no se informa como integración completa.
+- [ ] La evidencia de integración está ligada al candidate exacto e indica entorno, nivel (`UNIT_ONLY` / `MOCK_INTEGRATION` / `REAL_RUNTIME_INTEGRATION` / `E2E`), resultado y pruebas concretas, sin promover un nivel por similitud.
 - [ ] Todos los tests pasan correctamente.
 - [ ] No existen tests desactualizados.
 - [ ] No existen referencias al namespace anterior.
