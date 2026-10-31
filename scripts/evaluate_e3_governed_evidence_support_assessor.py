@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import Any
 
 
-RUNNER_VERSION = "e3-support-assessor-qualification/v0.2"
+RUNNER_VERSION = "e3-support-assessor-qualification/v0.1"
 CASE_SET_SCHEMA = "MALAK-E3-SUPPORT-ASSESSOR-CASESET/v0.1"
 RESULTS_SCHEMA = "MALAK-E3-SUPPORT-ASSESSOR-RESULTS/v0.1"
-OUTPUT_SCHEMA = "MALAK-E3-SUPPORT-ASSESSOR-QUALIFICATION-OUTPUT/v0.2"
+OUTPUT_SCHEMA = "MALAK-E3-SUPPORT-ASSESSOR-QUALIFICATION-OUTPUT/v0.1"
 SUPPORT_POLICY_VERSION = "e3-governed-evidence-support/v0"
 
 MAX_CASE_SET_BYTES = 1024 * 1024
@@ -185,8 +185,6 @@ OUTPUT_KEYS = {
     "input_count",
     "case_results",
     "metrics",
-    "diagnostic_exact_match_result",
-    "safety_floor_result",
     "qualification_result",
     "qualification_reasons",
     "authority_effect",
@@ -1088,8 +1086,6 @@ def _evaluate(
     list[dict[str, Any]],
     dict[str, float],
     str,
-    str,
-    str,
     list[str],
 ]:
     case_results: list[dict[str, Any]] = []
@@ -1295,21 +1291,10 @@ def _evaluate(
     if not safety_ok:
         reasons.append("SAFETY_FLOOR_VIOLATION")
 
-    diagnostic_exact_match_result = "FAIL" if any_case_fail else "PASS"
-    safety_floor_result = "PASS" if safety_ok else "FAIL"
-    qualification_result = (
-        "PASS"
-        if diagnostic_exact_match_result == "PASS"
-        and safety_floor_result == "PASS"
-        else "FAIL"
-    )
-
     return (
         case_results,
         metrics,
-        diagnostic_exact_match_result,
-        safety_floor_result,
-        qualification_result,
+        "FAIL" if reasons else "PASS",
         reasons,
     )
 
@@ -1350,8 +1335,6 @@ def _base_output(
         "input_count": 19,
         "case_results": [],
         "metrics": _empty_metrics(),
-        "diagnostic_exact_match_result": "INCONCLUSIVE",
-        "safety_floor_result": "INCONCLUSIVE",
         "qualification_result": "INCONCLUSIVE",
         "qualification_reasons": ["INPUT_NOT_VALIDATED"],
         "authority_effect": "none",
@@ -1467,22 +1450,11 @@ def main(argv: list[str] | None = None) -> int:
             output["qualification_result"] = (
                 "FAIL" if any_positive else "INCONCLUSIVE"
             )
-            output["diagnostic_exact_match_result"] = "INCONCLUSIVE"
-            output["safety_floor_result"] = (
-                "FAIL" if any_positive else "INCONCLUSIVE"
-            )
             output["qualification_reasons"] = ["SELF_CERTIFICATION"]
             _write_output(output)
             return 1 if any_positive else 2
 
-        (
-            case_results,
-            metrics,
-            diagnostic_result,
-            safety_result,
-            result,
-            reasons,
-        ) = _evaluate(
+        case_results, metrics, result, reasons = _evaluate(
             cases,
             observed_by_case,
         )
@@ -1496,8 +1468,6 @@ def main(argv: list[str] | None = None) -> int:
         )
         output["case_results"] = case_results
         output["metrics"] = metrics
-        output["diagnostic_exact_match_result"] = diagnostic_result
-        output["safety_floor_result"] = safety_result
         output["qualification_result"] = result
         output["qualification_reasons"] = reasons
         _write_output(output)
